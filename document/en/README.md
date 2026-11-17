@@ -4,6 +4,16 @@
 
 Run the trusted bootstrap with Python 3.11 or newer. The commit argument is the full 40-character Git object ID. Use the same bootstrap with later SDK commits that implement the installation contract. The default source is the official public SDK repository. A trusted local Git repository works offline.
 
+
+On a new machine, fetch the initial bootstrap as a single file. Set `REV` to the full commit you want to install. The bootstrap itself also works outside a checkout.
+
+```sh
+curl --fail --silent --show-error --output bootstrap.py \
+  https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/cf09b4b30e3801deb73c012957b9f1c5f1196289/install/bootstrap.py
+printf '%s  %s\n' e93d8e7c2fe733d8c33ca09c5dfee38d5047b0c11ba0524b5b2d8fecb36f1f29 bootstrap.py | sha256sum --check -
+python3 bootstrap.py revision-help --commit "$REV" --language cpp --platform unitree
+```
+
 ```sh
 python3 install/bootstrap.py plan --commit "$REV" --language cpp --platform unitree
 python3 install/bootstrap.py install --commit "$REV" --language cpp --platform unitree --prefix "$SDK_HOME"
@@ -15,6 +25,16 @@ The bootstrap requests the selected revision's small Python hook and package man
 The stable operations are `plan`, `install` and `revision-help`. Pass revision-specific options after `--`. Select `--component protocol` for the language-neutral contract and platform source references, or `--component compiler-source` for the C/C++ compiler and sysroot build inputs. The latter includes pinned source archives and patches. The ordinary development selection excludes those archives. The minimum Python version also applies to the preinstalled bootstrap.
 
 For an existing compiler integration, pass `-- --component bindings` to install only the selected raw declarations, the licence, and the selected language and platform metadata. C and C++ share a header. This revision also publishes Rust and AssemblyScript declarations. This component fetches no compiler, compiler sources or full ABI catalogue. The original bootstrap can discover it with `revision-help` at this commit.
+
+### Revision hook and package format
+
+At the selected commit the fixed entry is `install/revision.py`. The bootstrap invokes it with Python's isolated mode, positional platform and language identifiers, and the arguments following `--`. For `revision-help` it appends `--revision-help` and reads a JSON object containing a `help` string. A successful selection prints one JSON object, for example:
+
+```json
+{"variant":"bindings","packages":["platforms/unitree","metadata/cpp","license","bindings/c"]}
+```
+
+Each package name resolves to `install/packages/<name>.json` at that same commit. The `files` array lists repository-relative paths with their `bytes`, lowercase SHA-256 and decimal POSIX `mode` (420 or 493). A path present in two packages must have identical metadata. The bootstrap accepts up to 64 packages, 8,192 unique files, 128 MiB per file and 1 GiB of payload per selection. It places the installation under `<prefix>/<commit>/<platform>/<language>/<variant>` and returns this path as `directory`. Revision authors must keep the base CLI and this hook contract usable by the initial bootstrap. The installer matrix in `tests/install_protocol_matrix.py` checks the actual payload set for every registered language and platform using Git objects from a specified commit.
 
 ## C and C++ applications
 
