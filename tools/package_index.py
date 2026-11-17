@@ -17,6 +17,9 @@ def package(name, paths):
 
 def main():
     registry=json.loads((root/"share/targets.json").read_text())
+    package("license", ["LICENSE"])
+    for language, path in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs", "as": "language/assemblyscript/scene.ts"}.items():
+        package("bindings/" + language, [path])
     package("protocol",["share/abi/ros.json","LICENSE"])
     for platform in registry["platforms"]:
         package("platforms/"+platform,["platform/"+platform+"/sources.json"])

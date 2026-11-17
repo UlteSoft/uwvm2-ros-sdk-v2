@@ -14,6 +14,8 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 
 `--component protocol` 安装通用协议及指定平台的来源记录。`--component compiler-source` 安装 C/C++ 编译器及 sysroot 的固定源码和补丁。常规开发安装只取对应开发文件。
 
+已有编译环境时，可使用 `-- --component bindings` 单独安装所选语言的原始声明、许可证以及所选语言和平台的元数据。C 和 C++ 共用头文件，本修订还提供 Rust 和 AssemblyScript 的声明。此模式仅请求这些文件。首个 commit 的安装入口也可通过 `revision-help` 发现新选项。
+
 ## 编译程序
 
 `wrc` 用于 C，`wrcc` 用于 C++。PRODUCER 指向支持 WasmMTE 的专用编译器目录，RECEIPT 指向与这个编译器摘要匹配的 sysroot 构建记录。编译器和基础库的源码构建入口位于 `tools/wasm/memtag`。

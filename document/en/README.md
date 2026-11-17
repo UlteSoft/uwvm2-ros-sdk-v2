@@ -14,6 +14,8 @@ The bootstrap requests the selected revision's small Python hook and package man
 
 The stable operations are `plan`, `install` and `revision-help`. Pass revision-specific options after `--`. Select `--component protocol` for the language-neutral contract and platform source references, or `--component compiler-source` for the C/C++ compiler and sysroot build inputs. The latter includes pinned source archives and patches. The ordinary development selection excludes those archives. The minimum Python version also applies to the preinstalled bootstrap.
 
+For an existing compiler integration, pass `-- --component bindings` to install only the selected raw declarations, the licence, and the selected language and platform metadata. C and C++ share a header. This revision also publishes Rust and AssemblyScript declarations. This component fetches no compiler, compiler sources or full ABI catalogue. The original bootstrap can discover it with `revision-help` at this commit.
+
 ## C and C++ applications
 
 `wrc` compiles C and `wrcc` compiles C++. Supply a Wasm-only MTE-capable toolchain prefix and the matching build receipt. The build recipes are in `tools/wasm/memtag`. Each closure binds its compiler digest, headers, libraries, target width, core features, MTE mode, thread mode and C++ exception ABI.
