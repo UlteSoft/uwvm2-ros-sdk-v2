@@ -28,7 +28,7 @@ def main():
         write(meta,{"id":language,"development_package":language in ("c","cpp","rs","as")})
         package("metadata/"+language,[meta])
     package("languages/c",["bin/wrc","include/wros/scene.h"])
-    package("languages/cpp",["bin/wrcc","include/wros/scene.h"])
+    package("languages/cpp",["bin/wrc","bin/wrcc","include/wros/scene.h"])
     package("languages/rs",["language/rust/scene.rs"])
     package("languages/as",["language/assemblyscript/scene.ts"])
     package("frontend",["bin/wrar"]+["install/"+filename for filename in ["frontend.py","imports.py","guest_profile.py","compiler.py","artifacts.py","archiver.py"]])

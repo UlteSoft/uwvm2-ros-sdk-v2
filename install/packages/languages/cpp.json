@@ -1,6 +1,12 @@
 {
   "files": [
     {
+      "path": "bin/wrc",
+      "bytes": 183,
+      "mode": 493,
+      "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
+    },
+    {
       "path": "bin/wrcc",
       "bytes": 185,
       "mode": 493,

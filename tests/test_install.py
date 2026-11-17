@@ -30,4 +30,11 @@ class Installer(unittest.TestCase):
             install(Source(self.commit,root),"unitree","java",self.prefix,[])
     def test_no_mutable_refs(self):
         with self.assertRaises(ValueError):Source("main",root)
+    def test_cpp_selection_builds_c_dependencies(self):
+        source=Source(self.commit,root)
+        result=install(source,"unitree","cpp",self.prefix,[])
+        installed=Path(result["directory"])
+        for name in ("wrc","wrcc","wrar"):
+            self.assertTrue((installed/"bin"/name).is_file())
+        self.assertFalse(any("third-parties" in p or "platform/franka" in p for p in source.requested))
 if __name__=="__main__":unittest.main()
