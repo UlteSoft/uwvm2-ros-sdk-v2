@@ -1,0 +1,15 @@
+{
+  "platform": "dobot",
+  "sources": [
+    {
+      "repository": "https://github.com/Dobot-Arm/DOBOT_6Axis_ROS2_V4",
+      "revision": "ec201c40d5db63185a3593ec9c39f80fe25aa527"
+    },
+    {
+      "repository": "https://github.com/Dobot-Arm/TCP-IP-ROS-6AXis",
+      "revision": "0924e785f1827b7125ba4ba2bc3325811ed21c18"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

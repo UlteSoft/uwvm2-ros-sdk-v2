@@ -1,0 +1,63 @@
+{
+  "platform": "doosan",
+  "sources": [
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "19d520d7df599dc9751f3e8a41337c399c418a47"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "1d14369e6bd52617b5d75e5aa9382a392833053c"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "28b6a17692eec60c27ad89f6fba82239276b750b"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "2c12e859aed34c492706fa053af5b3304ce33c86"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "5a21f1c52b4d6e48ba3f95c6bc1dd774932ec922"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "5f87fe520f966ef22a50d456627e802fd2d0b7ce"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "60f17b3060136f96b8c6260e1b2dda6ab238e570"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "9c4ecd726d075bc1a8de3fdf639cc4d557d4b9cb"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot",
+      "revision": "cd0226d777d92422cd8250fe35c18946bc7d24cc"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot2",
+      "revision": "6c5f3ba622bfa9d6f9cffebf21fa44f57db55b48"
+    },
+    {
+      "repository": "https://github.com/DoosanRobotics/doosan-robot2",
+      "revision": "e5e2d7f4fe11865b9ddf4ad658362bc8e73296e0"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

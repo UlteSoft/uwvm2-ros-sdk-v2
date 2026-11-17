@@ -1,0 +1,35 @@
+{
+  "platform": "agilex",
+  "sources": [
+    {
+      "repository": "https://github.com/agilexrobotics/scout_ros",
+      "revision": "01e07881cdc566c3a657e288c59a75577992d13e"
+    },
+    {
+      "repository": "https://github.com/agilexrobotics/scout_ros2",
+      "revision": "bf0110ff44cc70cdda2931d69f0e2669a3e26b9d"
+    },
+    {
+      "repository": "https://github.com/agilexrobotics/ugv_sdk",
+      "revision": "f2704eacdc90357078cd93ec60aae08bb4baab35"
+    },
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "82776fc9068d1e0cd4af11c2e2700195994b2eb1"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

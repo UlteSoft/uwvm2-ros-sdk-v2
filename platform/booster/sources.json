@@ -1,0 +1,15 @@
+{
+  "platform": "booster",
+  "sources": [
+    {
+      "repository": "https://github.com/BoosterRobotics/booster_robotics_sdk",
+      "revision": "87a9a26d06a94ddd50968e7576f1170f6fa5a80f"
+    },
+    {
+      "repository": "https://github.com/BoosterRobotics/robocup_demo",
+      "revision": "fa4f31ccb4428a9e60e90b4f54eb80499caeb0ca"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

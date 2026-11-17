@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "path": "bin/wrcc",
+      "bytes": 185,
+      "mode": 493,
+      "sha256": "0705fff5e24d24cd248ad8701df16ac7a5737c50c881f4770849480572c91c96"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    }
+  ]
+}

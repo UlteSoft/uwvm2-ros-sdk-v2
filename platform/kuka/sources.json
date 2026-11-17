@@ -1,0 +1,23 @@
+{
+  "platform": "kuka",
+  "sources": [
+    {
+      "repository": "https://github.com/kuka-ros/kuka_drivers",
+      "revision": "15fbb6941356390c38bbd135a0676dfd96a050c0"
+    },
+    {
+      "repository": "https://github.com/ros-controls/control_msgs",
+      "revision": "2eaaa5440d6dc2291601ea445b83015a663f5f88"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

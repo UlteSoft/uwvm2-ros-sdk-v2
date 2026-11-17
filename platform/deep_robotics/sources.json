@@ -1,0 +1,11 @@
+{
+  "platform": "deep_robotics",
+  "sources": [
+    {
+      "repository": "https://github.com/DeepRoboticsLab/sdk_deploy",
+      "revision": "9ea6ee94bfe90c9a36f5799d39f8dc1d821128db"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

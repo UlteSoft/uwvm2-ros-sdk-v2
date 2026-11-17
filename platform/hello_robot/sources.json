@@ -1,0 +1,15 @@
+{
+  "platform": "hello_robot",
+  "sources": [
+    {
+      "repository": "https://github.com/hello-robot/stretch_body",
+      "revision": "92c9db0cc9ade6535f822e83bbf10cbd0c68136a"
+    },
+    {
+      "repository": "https://github.com/hello-robot/stretch_ros2",
+      "revision": "751e701b87d6f34dd26df1c4abc39229d68e60ff"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

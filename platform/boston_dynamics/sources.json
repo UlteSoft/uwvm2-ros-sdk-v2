@@ -1,0 +1,11 @@
+{
+  "platform": "boston_dynamics",
+  "sources": [
+    {
+      "repository": "https://github.com/boston-dynamics/spot-sdk",
+      "revision": "16a98aae3b818082288504c6e53b59a67666aaeb"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

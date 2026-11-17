@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "share/language/zig.json",
+      "bytes": 50,
+      "mode": 420,
+      "sha256": "ec42644904a49bfb7f29168740e963713ef0d2220f0aff3af3a1a513769ebaa2"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "platform": "flexiv",
+  "sources": [
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros",
+      "revision": "959774b0adb2d87ae6ca0cfac3e10b4ba18304cf"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "5188d2a4473e556a88ee0cfbe858e84ddd6979b8"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "56a7927159b866a00eafc3d7fc972479bdb305ba"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "783e1ab1379458e7dd4979d67f88f054d326f7d3"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "a165e88a2b41cb7e09b46aa1bfb842718ee783b1"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "b62e8d1750d84edc1e8de3ca7d2822ee616ee0c9"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "c090c8189179a2ef73a5f7f040701f0e9ba3c3df"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "ce7ed0a0288cf93d0d2fac8eb94e094c1f06b817"
+    },
+    {
+      "repository": "https://github.com/flexivrobotics/flexiv_ros2",
+      "revision": "f212b63b2dd707eea76badee72665a0695304ab0"
+    },
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "4dd1c9340e8038b3f892057cf49899dcc38079b0"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "6356bc82f3a034f5d2c61c6760df0007a6cadfb0"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "82776fc9068d1e0cd4af11c2e2700195994b2eb1"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "b90e36e4adf5ed878efa2f365a84798f782618cd"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

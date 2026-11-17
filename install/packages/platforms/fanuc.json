@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/fanuc/sources.json",
+      "bytes": 681,
+      "mode": 420,
+      "sha256": "61ea1fd7d006d6587e34e95887d47f9086dd7ff62ccead6bf607f01e89f4c3dd"
+    }
+  ]
+}

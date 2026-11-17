@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "install/compiler.py",
+      "bytes": 7530,
+      "mode": 420,
+      "sha256": "d37e8af4ad28152b3970bf93be6d4f35d09357034cd97cc1912c5e210d622270"
+    },
+    {
+      "path": "install/frontend.py",
+      "bytes": 3544,
+      "mode": 420,
+      "sha256": "e14bf7f64b8f8cad1d7dc7ce3ab37370214dbf6cb1410e86ea89a5f791a5409d"
+    },
+    {
+      "path": "install/guest_profile.py",
+      "bytes": 4627,
+      "mode": 420,
+      "sha256": "e1974bb036d49b8a25916b55b427fec3708a1ca257b240a0990ff163bd963023"
+    },
+    {
+      "path": "install/imports.py",
+      "bytes": 7561,
+      "mode": 420,
+      "sha256": "ddcf6e2dc2b54acd3b53e8bef77031570666f80e019c325c534d94ae9118522e"
+    }
+  ]
+}

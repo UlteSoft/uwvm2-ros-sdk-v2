@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "share/language/wat.json",
+      "bytes": 50,
+      "mode": 420,
+      "sha256": "40a99b01dd4d272969f1a35ed3eeee0d0a6a03a29e1a4b6116df3fb83d913fec"
+    }
+  ]
+}

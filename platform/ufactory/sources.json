@@ -1,0 +1,103 @@
+{
+  "platform": "ufactory",
+  "sources": [
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb"
+    },
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "cb1dc920803679800de84d35edd70a86754fffbb"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "f3554d4182c057f7b9c9ddb1911629126148ae7e"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "56be9f336d3ed54d18b3821d3b2b183123ec17d8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "6356bc82f3a034f5d2c61c6760df0007a6cadfb0"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "969a56b0b59f7f70b5c4561185ea34aaa2b74e1d"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "614f3c4942e1a67a568546cb805ff3e0ff7777f5"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "82776fc9068d1e0cd4af11c2e2700195994b2eb1"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "c5d0a20150533a6cb93d5dcbd6e27cea9300aa6e"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "ee04e046132be9d9fdcdaeff8dd54a5d0d9aa022"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros",
+      "revision": "3bc6c4da51769d90ce2a6d1419a0b65446d177e3"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros",
+      "revision": "7319ef78abc309d30102bee1de3fe9ece56023b3"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros",
+      "revision": "aad7e1611c9c46eb719045414394bfdd42dcb0f8"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros2",
+      "revision": "01c145407e563aacb4b8edab309b23fbaeb25b87"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros2",
+      "revision": "3654ba7bb2a0e502088251728d07263ea399d4a4"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros2",
+      "revision": "3dc2b5e8294758d96b54b15fa5920d581b7cbb3d"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros2",
+      "revision": "5e126d492e04beb887f8bfee3a30c2c93d9f4d19"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros2",
+      "revision": "62936f7ea1846a85f7350de2c4c18f39e6d19715"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros2",
+      "revision": "8f1ee67368bb4c89dccb37f72c836e6e466b0a6f"
+    },
+    {
+      "repository": "https://github.com/xArm-Developer/xarm_ros2",
+      "revision": "c7d0cc84a79909d5e782484db5c79505fcffe414"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

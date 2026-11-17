@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "third-parties/sources/llvm-23.1.5.tar.xz/part-000",
+      "bytes": 33554432,
+      "mode": 420,
+      "sha256": "a041f0cfa6869ea06a9eba7bbbe10b3b4d0411be7a2e875d5c9c9c6d2e28a678"
+    },
+    {
+      "path": "third-parties/sources/llvm-23.1.5.tar.xz/part-001",
+      "bytes": 33554432,
+      "mode": 420,
+      "sha256": "5ae0a890d4abbd3edf7f9feab14a8930cfb344af374e189219186d16b4231a28"
+    },
+    {
+      "path": "third-parties/sources/llvm-23.1.5.tar.xz/part-002",
+      "bytes": 33554432,
+      "mode": 420,
+      "sha256": "20a1eb642deb920e91ecae600a4c09b82342414e0d55a139f3f01e69f585485b"
+    },
+    {
+      "path": "third-parties/sources/llvm-23.1.5.tar.xz/part-003",
+      "bytes": 33554432,
+      "mode": 420,
+      "sha256": "ca36548f383607c0c8f586837b5f185cf3eac9c9df4b3b48192dedb0ddef6573"
+    },
+    {
+      "path": "third-parties/sources/llvm-23.1.5.tar.xz/part-004",
+      "bytes": 33554432,
+      "mode": 420,
+      "sha256": "96fc48d95064f8eff46181039edfe07c6b35186dd23664ade3859ffa87a8314d"
+    },
+    {
+      "path": "third-parties/sources/llvm-23.1.5.tar.xz/part-005",
+      "bytes": 11443268,
+      "mode": 420,
+      "sha256": "21738fe16f546185db998d67964055381cdfcb6e51f5836c7bac8a93e80c25d6"
+    },
+    {
+      "path": "third-parties/sources/wasi-libc-sdk34.tar.xz/part-000",
+      "bytes": 1529152,
+      "mode": 420,
+      "sha256": "73bce1b215282a82557421b80733d69b858a163a6334ecf42bab9664f2a508f8"
+    },
+    {
+      "path": "tools/wasm/memtag/README.md",
+      "bytes": 4914,
+      "mode": 420,
+      "sha256": "6f58927012cff346daf939c8376ab187d8f9906c1e30fd68232c86e14d6a81e9"
+    },
+    {
+      "path": "tools/wasm/memtag/build_producer.py",
+      "bytes": 8999,
+      "mode": 420,
+      "sha256": "db7ec438dd009c6d53b189845308740e6cff072a2f8ea2bfc16a1f852c3c1a6c"
+    },
+    {
+      "path": "tools/wasm/memtag/build_sysroots.py",
+      "bytes": 14653,
+      "mode": 420,
+      "sha256": "735e1b6d20a64f252561151b0c34e3be28fd47ca4789ccd8cd5d776a4a8873cf"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/llvm-23.1.5-memtag.patch",
+      "bytes": 154674,
+      "mode": 420,
+      "sha256": "542df0cc6fea73152c9dda2ad9b720496d17681e468ac2927d6c518be36f2d21"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/wasi-libc-sdk34-memory64.patch",
+      "bytes": 42949,
+      "mode": 420,
+      "sha256": "c440d4f750d532fd2999e7305de3072be397d40c205bc194a62c430f03cdce3e"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/wasi-libc-sdk34-memtag.patch",
+      "bytes": 31119,
+      "mode": 420,
+      "sha256": "e05b3405fa9f068a579fa41e53274d8beb7667e8d274dac1d9034e06c375fc6a"
+    },
+    {
+      "path": "tools/wasm/memtag/source-lock.json",
+      "bytes": 3190,
+      "mode": 420,
+      "sha256": "f1173a7dee94b67c5db9098471fc1ad99dcb50322db3faa4541926d9bf268552"
+    }
+  ]
+}

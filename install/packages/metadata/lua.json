@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "share/language/lua.json",
+      "bytes": 50,
+      "mode": 420,
+      "sha256": "f0afa5d8f999ffa19c287cc85e22a4c233f15e99ae6cc84bc397d729d0648dd6"
+    }
+  ]
+}

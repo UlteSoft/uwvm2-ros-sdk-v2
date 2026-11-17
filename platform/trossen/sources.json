@@ -1,0 +1,39 @@
+{
+  "platform": "trossen",
+  "sources": [
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_core",
+      "revision": "172841ffa93f7556fff9c7455ad0e77688fa156e"
+    },
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_core",
+      "revision": "41ca7357935bb06b3f21f518ad5b0a88529ba395"
+    },
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_core",
+      "revision": "af18d4fe24ba08e09a0f1e92afaca1863e3205de"
+    },
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_core",
+      "revision": "dcaae578db7b41b5d02e0c7548cfc4951cea15bc"
+    },
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_core",
+      "revision": "e77575dae762c312f7b2410db9402209fdf41609"
+    },
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators",
+      "revision": "0bb2b0e6d0e619bff02cf74dbd5af5681dcf80c9"
+    },
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators",
+      "revision": "120c32a0e557fb1e2142051787b47edeea57d99a"
+    },
+    {
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators",
+      "revision": "f26f5eb73d6bb6f0f6af873afa8c86258a70524c"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

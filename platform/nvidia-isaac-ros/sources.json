@@ -1,0 +1,11 @@
+{
+  "platform": "nvidia-isaac-ros",
+  "sources": [
+    {
+      "repository": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common",
+      "revision": "7bec6ae5dbb2faa11617f40226e8932a4a94e6e4"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

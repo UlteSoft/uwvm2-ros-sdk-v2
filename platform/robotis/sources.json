@@ -1,0 +1,75 @@
+{
+  "platform": "robotis",
+  "sources": [
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3",
+      "revision": "0c0be84e3f5c3194fb2adea8426a58a96060eab5"
+    },
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3",
+      "revision": "4ae959ea6a52415c90bf752d2b76e3e28f8a87e2"
+    },
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3",
+      "revision": "90a68bd2e3c61c12966779da89d8eeaec82730e9"
+    },
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3",
+      "revision": "fc817ce3073af1d6032397c64504134882af5e9a"
+    },
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3_msgs",
+      "revision": "76e78b0a34e07cf1dd16dafdc54c44f35c5b83eb"
+    },
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3_msgs",
+      "revision": "9209e01b4708cf3ca5610b01dfc9586d3c7889d8"
+    },
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3_msgs",
+      "revision": "b60833d0224ca9a9136a8581d6b5f18122edef9b"
+    },
+    {
+      "repository": "https://github.com/ROBOTIS-GIT/turtlebot3_msgs",
+      "revision": "cdee60f7618b9ed2f85f65259c0f96e3f02b1c55"
+    },
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb"
+    },
+    {
+      "repository": "https://github.com/ros/ros_comm_msgs",
+      "revision": "cdfe7c1761c42126e738d3b26722ff2a4a739d6a"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "56be9f336d3ed54d18b3821d3b2b183123ec17d8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "614f3c4942e1a67a568546cb805ff3e0ff7777f5"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "82776fc9068d1e0cd4af11c2e2700195994b2eb1"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

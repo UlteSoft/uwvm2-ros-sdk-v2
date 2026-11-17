@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/abb/sources.json",
+      "bytes": 1234,
+      "mode": 420,
+      "sha256": "637cd9973139ea452d842fe4a2e16112971f5537f0bbb9a7aa685624c167d4d0"
+    }
+  ]
+}

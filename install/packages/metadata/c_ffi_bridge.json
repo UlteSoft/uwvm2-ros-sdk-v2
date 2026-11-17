@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "share/language/c_ffi_bridge.json",
+      "bytes": 59,
+      "mode": 420,
+      "sha256": "e3bb9c863420e5cc0754f7f6287ab505c9d5b66a561c5c944fd120f457302bc8"
+    }
+  ]
+}

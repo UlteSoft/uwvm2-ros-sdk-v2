@@ -1,0 +1,19 @@
+{
+  "platform": "kinova",
+  "sources": [
+    {
+      "repository": "https://github.com/ros-controls/control_msgs",
+      "revision": "4418bbf3efda12828795e4bb011742133c67a6e2"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "82776fc9068d1e0cd4af11c2e2700195994b2eb1"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

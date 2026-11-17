@@ -1,0 +1,11 @@
+{
+  "platform": "limx",
+  "sources": [
+    {
+      "repository": "https://github.com/limxdynamics/limxsdk-lowlevel",
+      "revision": "61624b58663b47928717069ff0eab2f1c85ec733"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

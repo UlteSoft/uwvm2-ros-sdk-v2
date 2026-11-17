@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/franka/sources.json",
+      "bytes": 807,
+      "mode": 420,
+      "sha256": "5f77ac1c91e96db1a04f83ceddbc2fdc34246d282bf3d8a47b1615556d4023a5"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "platform": "elephant",
+  "sources": [
+    {
+      "repository": "https://github.com/elephantrobotics/mycobot_ros",
+      "revision": "3a0357d2afec2706c299f6d51ac46b6b128067f8"
+    },
+    {
+      "repository": "https://github.com/elephantrobotics/mycobot_ros",
+      "revision": "9ec3e2ec29024a55150e7f3893b3d6e344f1caff"
+    },
+    {
+      "repository": "https://github.com/elephantrobotics/mycobot_ros",
+      "revision": "c0d6fbe8f7d9b18b46a9fcb0b041e5bc2d66196b"
+    },
+    {
+      "repository": "https://github.com/elephantrobotics/mycobot_ros2",
+      "revision": "83d4d10db552edf8940e4d79bec186aeaa880b4a"
+    },
+    {
+      "repository": "https://github.com/elephantrobotics/mycobot_ros2",
+      "revision": "98f77f4827dcdd082a3c5037a71aa15698181b34"
+    },
+    {
+      "repository": "https://github.com/elephantrobotics/mycobot_ros2",
+      "revision": "d42ff61a78122c79246623391540d75738b03b23"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

@@ -1,0 +1,11 @@
+{
+  "platform": "fourier",
+  "sources": [
+    {
+      "repository": "https://github.com/FFTAI/fourier_aurora_sdk",
+      "revision": "b434869719ae256d02d8285e88ea2b22c1515602"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

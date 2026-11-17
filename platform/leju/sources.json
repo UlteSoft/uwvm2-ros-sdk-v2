@@ -1,0 +1,15 @@
+{
+  "platform": "leju",
+  "sources": [
+    {
+      "repository": "https://github.com/LejuRobotics/kuavo-ros-opensource",
+      "revision": "2634d9fa891bb9b4987cddc7977599922342a316"
+    },
+    {
+      "repository": "https://github.com/LejuRobotics/kuavo-ros-opensource",
+      "revision": "757cac6a12f67f2925c7afb05f1c0513677f209c"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

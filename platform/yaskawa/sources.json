@@ -1,0 +1,31 @@
+{
+  "platform": "yaskawa",
+  "sources": [
+    {
+      "repository": "https://github.com/Yaskawa-Global/motoros2_interfaces",
+      "revision": "24a63cf8a7a582c9fa6744507d605415462c9c17"
+    },
+    {
+      "repository": "https://github.com/ros-controls/control_msgs",
+      "revision": "2eaaa5440d6dc2291601ea445b83015a663f5f88"
+    },
+    {
+      "repository": "https://github.com/ros-industrial/industrial_core",
+      "revision": "d547cdcfdaf3bc0d46325215b8219b0a190c8e6c"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    },
+    {
+      "repository": "https://github.com/ros2/geometry2",
+      "revision": "f702874b1c8535d6a038230ab2cda0ba5d521ebd"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

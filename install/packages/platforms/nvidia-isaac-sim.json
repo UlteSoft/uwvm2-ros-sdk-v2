@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/nvidia-isaac-sim/sources.json",
+      "bytes": 263,
+      "mode": 420,
+      "sha256": "a7ed8143f41634167cf0afa3606fca36d14150bad5062596e1c36d9a5c1ea583"
+    }
+  ]
+}

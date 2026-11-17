@@ -1,0 +1,27 @@
+{
+  "platform": "agibot",
+  "sources": [
+    {
+      "repository": "https://x2-aimdk.agibot.com/downloads/aimdk-sdk-v0_8_1-lx2501_3-v0.8.1.6.zip",
+      "revision": "7c566e093703dd549b9a370618564539221d29ca1c8f6e8d72f5a76734c7ae78"
+    },
+    {
+      "repository": "https://x2-aimdk.agibot.com/downloads/aimdk-sdk-v0_8_2-lx2501_3-v0.8.2.4-p1.1.zip",
+      "revision": "fe602e0845516cf5dcbb184d3e797d56bc6c3b12a68dc8aa1465bf4c17012883"
+    },
+    {
+      "repository": "https://x2-aimdk.agibot.com/downloads/aimdk-sdk-v0_9_0-lx2501_3-v0.9.0.4.zip",
+      "revision": "2b02d6e08e552b26f3f67a6fc7091d06d61e6ab0f47a495665b8962ff537f78f"
+    },
+    {
+      "repository": "https://x2-aimdk.agibot.com/downloads/aimdk-sdk-v1_0_0-aimdk-aarch64-a424add7-artifacts.zip",
+      "revision": "5bbcf724d54fb28f153db0d272f9acb7906bb1d2cac7dd7ccdc699a5c7eeab35"
+    },
+    {
+      "repository": "https://x2-aimdk.agibot.com/downloads/aimdk-sdk-v1_1_0-aimdk-aarch64-faf4c945-artifacts.zip",
+      "revision": "dc80fe5d2907881ed77beb230680867efac6bd28b458f83d2ff4e9479abe3615"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

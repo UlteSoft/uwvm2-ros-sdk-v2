@@ -1,0 +1,11 @@
+{
+  "platform": "nvidia-isaac-sim",
+  "sources": [
+    {
+      "repository": "https://github.com/isaac-sim/IsaacSim",
+      "revision": "87c95274f50836068b44eeb030bf62aa2108bdf8"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

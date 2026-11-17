@@ -1,0 +1,27 @@
+{
+  "platform": "franka",
+  "sources": [
+    {
+      "repository": "https://github.com/frankarobotics/franka_ros",
+      "revision": "35e1f654426e04bc9f83b73af4ab68a3fb145c84"
+    },
+    {
+      "repository": "https://github.com/frankarobotics/franka_ros2",
+      "revision": "4acc05c01ebfcdf916ee6b3df966df0ad7b2f9ec"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

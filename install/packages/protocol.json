@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 1082,
+      "mode": 420,
+      "sha256": "b177692769e0a35000a582c5e1f38657ff1816fcc96ef682c47bfd2f5899545e"
+    },
+    {
+      "path": "share/abi/ros.json",
+      "bytes": 223565,
+      "mode": 420,
+      "sha256": "85dfd1042dd8dd0bd22860efa27971d4a9ea3af76dbb8768291485c00d3b2f42"
+    }
+  ]
+}

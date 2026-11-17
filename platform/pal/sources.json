@@ -1,0 +1,19 @@
+{
+  "platform": "pal",
+  "sources": [
+    {
+      "repository": "https://github.com/pal-robotics/pal_msgs",
+      "revision": "a9b3d52908626e0cf1f230b4dc4a962299d232f3"
+    },
+    {
+      "repository": "https://github.com/pal-robotics/pal_msgs",
+      "revision": "c2ab0e78edac96413bff73fdf735293e683435c5"
+    },
+    {
+      "repository": "https://github.com/pal-robotics/pal_msgs",
+      "revision": "eb4efdcc80789dc74dfc7a09d1b5c3345e510933"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

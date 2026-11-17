@@ -1,0 +1,75 @@
+{
+  "platform": "clearpath",
+  "sources": [
+    {
+      "repository": "https://github.com/clearpathrobotics/clearpath_msgs",
+      "revision": "11aa5eb22a84bd38443c180b1218b5c35486ba19"
+    },
+    {
+      "repository": "https://github.com/clearpathrobotics/clearpath_msgs",
+      "revision": "37d701812e9980b4722664d4ada2f484bd36af93"
+    },
+    {
+      "repository": "https://github.com/clearpathrobotics/clearpath_msgs",
+      "revision": "b1300765c4a11e257ac427e9b7623da921f2d833"
+    },
+    {
+      "repository": "https://github.com/clearpathrobotics/clearpath_msgs",
+      "revision": "c17b52e7ba7061310493b43d5b1cd4ffd33cc9b6"
+    },
+    {
+      "repository": "https://github.com/clearpathrobotics/clearpath_robot",
+      "revision": "18906e74507ed98e778d4b44b59326a063708db0"
+    },
+    {
+      "repository": "https://github.com/clearpathrobotics/clearpath_robot",
+      "revision": "1f73b9416bc2c1426424d2cd5b641a53c916da45"
+    },
+    {
+      "repository": "https://github.com/clearpathrobotics/clearpath_robot",
+      "revision": "baf3aa4ef81f5614b1c1898d5a58c11e9e28d7a5"
+    },
+    {
+      "repository": "https://github.com/husky/husky",
+      "revision": "41e15d283a8d955938204e79554a875264417bb9"
+    },
+    {
+      "repository": "https://github.com/jackal/jackal",
+      "revision": "4ddf9b578bb7abce1115c8dc59d8b7f86aa9268c"
+    },
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "56be9f336d3ed54d18b3821d3b2b183123ec17d8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "614f3c4942e1a67a568546cb805ff3e0ff7777f5"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "82776fc9068d1e0cd4af11c2e2700195994b2eb1"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

@@ -1,0 +1,11 @@
+{
+  "platform": "ubtech",
+  "sources": [
+    {
+      "repository": "https://github.com/UBTECH-Robot/tk_sdk_demo",
+      "revision": "3df9f9dc7689203fb673a21d8205bb597ed4fafe"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

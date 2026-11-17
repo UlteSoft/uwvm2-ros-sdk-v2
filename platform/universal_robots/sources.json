@@ -1,0 +1,51 @@
+{
+  "platform": "universal_robots",
+  "sources": [
+    {
+      "repository": "https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver",
+      "revision": "262330ed9b5467a17c8ceae09567991e22d13944"
+    },
+    {
+      "repository": "https://github.com/UniversalRobots/Universal_Robots_ROS_Driver",
+      "revision": "bd14b5c533135886f4f85ef0cabd097a5e1b8d0f"
+    },
+    {
+      "repository": "https://github.com/UniversalRobots/urinterfaces",
+      "revision": "e88cebb16503bcbe6e7385251e1f83b1fa54e9c8"
+    },
+    {
+      "repository": "https://github.com/ros-controls/control_msgs",
+      "revision": "36e2e30551e3f2bfd9e55fca553f1ef019f4e4b1"
+    },
+    {
+      "repository": "https://github.com/ros-controls/control_msgs",
+      "revision": "4418bbf3efda12828795e4bb011742133c67a6e2"
+    },
+    {
+      "repository": "https://github.com/ros-industrial/ur_msgs",
+      "revision": "3c584014d9b228e0b2da819db0ca1d887c373e1d"
+    },
+    {
+      "repository": "https://github.com/ros-industrial/ur_msgs",
+      "revision": "6c6dc66c63bd551e3985281739add762bfaa3aa9"
+    },
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/rcl_interfaces",
+      "revision": "82776fc9068d1e0cd4af11c2e2700195994b2eb1"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}

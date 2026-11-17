@@ -1,0 +1,47 @@
+{
+  "platform": "realman",
+  "sources": [
+    {
+      "repository": "https://github.com/RealManRobot/rm_robot",
+      "revision": "3d7063025786c4c5ed2db2ebc09f68d89d589539"
+    },
+    {
+      "repository": "https://github.com/RealManRobot/rm_robot",
+      "revision": "a7e6d446cdced8bbb9778a5be4d8a14317ba585e"
+    },
+    {
+      "repository": "https://github.com/RealManRobot/ros2_rm_robot",
+      "revision": "5fc226e93358e73c165b2af54b583389f813049e"
+    },
+    {
+      "repository": "https://github.com/RealManRobot/ros2_rm_robot",
+      "revision": "61db3c367e8f5743ee68cee52c5574ec1ac645ca"
+    },
+    {
+      "repository": "https://github.com/RealManRobot/ros2_rm_robot",
+      "revision": "68119369176d77c9d0c07bdba5193e71095d8d3a"
+    },
+    {
+      "repository": "https://github.com/ros/common_msgs",
+      "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb"
+    },
+    {
+      "repository": "https://github.com/ros/std_msgs",
+      "revision": "34198520757d1aab358118a0ef294fe2609fde33"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "08434490d3e4abd37ccc5462cdde69b88853b5b8"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "6356bc82f3a034f5d2c61c6760df0007a6cadfb0"
+    },
+    {
+      "repository": "https://github.com/ros2/common_interfaces",
+      "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4"
+    }
+  ],
+  "admission": "generic-driver",
+  "qualification": "source-inventory"
+}
