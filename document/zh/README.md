@@ -46,6 +46,28 @@ bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" --reactor --export _start
 
 默认 wasm32、Core 3.0、MTE、标准 Wasm EH，线程默认关闭。使用 `-pthread`、`--target wasm64`、`--no-mte`、`--no-eh`、`--core mvp` 选择对应配置。依赖 pthread 的构建须传递线程选项。地址宽度、线程、MTE 和异常模式各自决定可使用的 sysroot。链接后检查实际导入名和签名，拒绝通用 POSIX 套接字。允许有限的 WASIp1 环境变量和退出操作。运行权限另由 VM 控制。
 
+### 分文件编译与静态库
+
+用 `-c` 编译一个翻译单元，以 `wrar` 建立静态库，再链接目标文件和库。各步骤必须选择相同编译器与 guest 配置；C 和 C++ 可以使用同一配置。`-I` / `--include-dir` 指定头文件目录，`-D` / `--define` 定义对象式宏，`--std` 指定语言标准。前端只提供已说明的 Wasm 选项，不转发任意 native 编译或链接参数。
+
+```sh
+bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" -O3 -g \
+  --std c++20 -I include -DROBOT_AXES=6 -c control.cpp -o control.o
+bin/wrar --toolchain "$PRODUCER" -o libcontrol.a control.o
+bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" -O3 -g \
+  --reactor --export _start main.cpp libcontrol.a -o robot.wasm
+```
+
+`wrar` 调用指定工具链的 `llvm-ar`，产生可复现、带符号索引的普通 GNU 静态库，不执行 guest，也不安装 native 库。目标文件中的 `wros.sdk.object` 自定义段记录文件摘要、编译器摘要、位宽、Core、MTE、线程和 EH 配置。配置混合、文件变化、无记录目标文件、ELF、LLVM bitcode 和 thin archive 均拒绝。这个记录仅检查构建一致性，不是签名；有权修改构建输入的人也能制造记录。应使用受信编译器和已签名部署文件，运行安全边界仍由 VM 实施。
+
+链接前检查库中所有成员，包括未引用成员；复制已验证的目标字节到私有目录，重建符号索引后再链接。最多接收 1,024 个目标成员，单个目标文件或库上限 128 MiB，合计上限 256 MiB，最终文件上限 128 MiB。失败保留原输出。最终 Wasm 删除构建记录后仍独立检查实际导入，配置匹配不代表允许文件或套接字能力。
+
+wasm64 环境变量接口采用对应 UWVM sysroot 的 `environ_get_wasm64`、`environ_sizes_get_wasm64`（i64 指针）和 `proc_exit_wasm64`。这是 UWVM 对 Preview1 的扩展，不是标准 Preview1 memory64 ABI，不能混用 wasm32 名称。缺少 memory64 线程启动支持时明确拒绝。
+
+sysroot 使用上游 libc++abi 的 bare-metal 配置、静默 terminate，以及摘要锁定的内部诊断补丁。补丁保留断言检查和致命错误的 Wasm trap，移除内部 stderr 输出及由环境变量开启的 unwinder 追踪，开启断言的构建也遵循这一规则。异常传播仍保留，不关闭应用自身日志，也不授予外部操作权限。应用诊断应走已授权的 ROSv2 操作。基础库保留优化和完整调试信息，前端编译前检查所选头文件及库的摘要。
+
+`tests/separate_compilation.py` 实际构建 wasm32/wasm64 目标与静态库，在 VM 两个执行引擎中验证跨文件异常、配置混合拒绝、环境变量权限。须经 VM 仓库 cgroup 入口运行。单项测试通过不等于全部标准库、ROS 包或厂商硬件完成验收。
+
 C/C++ 使用 `<wros/scene.h>`，Rust 和 AssemblyScript 的底层声明位于 `language/`。底层声明对应本次 VM 登记的 163 项操作。29 个旧语言标识、32 个平台标识及其来源属于迁移清单。其他编译器、高层绑定、各厂商实机和旧 ROS 源码兼容层的验收需有各自的构建与执行记录。
 
 ## 厂商接入

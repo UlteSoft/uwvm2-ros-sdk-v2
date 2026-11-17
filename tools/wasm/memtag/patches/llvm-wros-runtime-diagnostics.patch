@@ -1,0 +1,60 @@
+--- a/libcxxabi/src/abort_message.cpp
++++ b/libcxxabi/src/abort_message.cpp
+@@ -26,7 +26,7 @@
+     // Write message to stderr. We do this before formatting into a
+     // variable-size buffer so that we still get some information if
+     // formatting into the variable-sized buffer fails.
+-#if !defined(NDEBUG) || !defined(LIBCXXABI_BAREMETAL)
++#if !defined(__WROS_NO_HOST_DIAGNOSTICS) && (!defined(NDEBUG) || !defined(LIBCXXABI_BAREMETAL))
+     {
+         fprintf(stderr, "libc++abi: ");
+         va_list list;
+--- a/libcxx/src/verbose_abort.cpp
++++ b/libcxx/src/verbose_abort.cpp
+@@ -25,6 +25,7 @@
+ _LIBCPP_BEGIN_EXPLICIT_ABI_ANNOTATIONS
+ 
+ [[gnu::weak]] void __libcpp_verbose_abort(char const* format, ...) noexcept {
++#if !defined(__WROS_NO_HOST_DIAGNOSTICS)
+   // Write message to stderr. We do this before formatting into a
+   // buffer so that we still get some information out if that fails.
+   {
+@@ -60,6 +61,7 @@
+ #endif
+   va_end(list);
+ 
++#endif
+   std::abort();
+ }
+ 
+--- a/libunwind/src/config.h
++++ b/libunwind/src/config.h
+@@ -155,7 +155,7 @@
+ #define _LIBUNWIND_REMEMBER_CLEANUP_NEEDED
+ #endif
+ 
+-#if defined(NDEBUG) && defined(_LIBUNWIND_IS_BAREMETAL)
++#if defined(__WROS_NO_HOST_DIAGNOSTICS) || (defined(NDEBUG) && defined(_LIBUNWIND_IS_BAREMETAL))
+ #define _LIBUNWIND_ABORT(msg)                                                  \
+   do {                                                                         \
+     abort();                                                                   \
+@@ -169,7 +169,7 @@
+   } while (0)
+ #endif
+ 
+-#if defined(NDEBUG) && defined(_LIBUNWIND_IS_BAREMETAL)
++#if defined(__WROS_NO_HOST_DIAGNOSTICS) || (defined(NDEBUG) && defined(_LIBUNWIND_IS_BAREMETAL))
+ #define _LIBUNWIND_LOG0(msg)
+ #define _LIBUNWIND_LOG(msg, ...)
+ #else
+@@ -194,8 +194,9 @@
+     } while (0)
+ #endif
+ 
++// WROS keeps assertions but never acquires host I/O or environment tracing.
+ // Macros that define away in non-Debug builds
+-#ifdef NDEBUG
++#if defined(NDEBUG) || defined(__WROS_NO_HOST_DIAGNOSTICS)
+   #define _LIBUNWIND_DEBUG_LOG(msg, ...)
+   #define _LIBUNWIND_TRACE_API(msg, ...)
+   #define _LIBUNWIND_TRACING_UNWINDING (0)

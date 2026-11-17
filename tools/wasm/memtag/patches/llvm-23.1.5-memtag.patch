@@ -3781,3 +3781,51 @@ index 0000000000..eb9208a756
 +# DIS: memtag.status 4294967295
 +  drop
 +  end_function
+diff --git a/llvm/lib/CodeGen/WasmEHPrepare.cpp b/llvm/lib/CodeGen/WasmEHPrepare.cpp
+--- a/llvm/lib/CodeGen/WasmEHPrepare.cpp
++++ b/llvm/lib/CodeGen/WasmEHPrepare.cpp
+@@ -357,15 +357,33 @@
+   // Pseudocode: wasm.landingpad.index(Index);
+   IRB.CreateCall(LPadIndexF, {FPI, IRB.getInt32(Index)});
+ 
++  // EH preparation runs after global tagging. Materialize the current
++  // allocation tag for this compiler-generated access as well: the matching
++  // instrumented libunwind definition is tagged, including its per-thread TLS
++  // instance. Keep the global protected instead of exempting its symbol name.
++  Value *IndexAddress = LPadIndexField;
++  Value *LSDAAddress = LSDAField;
++  Value *SelectorAddress = SelectorField;
++  if (BB->getParent()->hasFnAttribute(Attribute::SanitizeMemTag)) {
++    Function *MemtagLoad = Intrinsic::getOrInsertDeclaration(
++        BB->getModule(), Intrinsic::wasm_memtag_load);
++    Value *Context = IRB.CreateCall(
++        MemtagLoad, {IRB.getInt32(0), LPadContextGV},
++        OperandBundleDef("funclet", FPI), "memtag.eh.context");
++    IndexAddress = Context;
++    LSDAAddress = IRB.CreateConstInBoundsGEP2_32(LPadContextTy, Context, 0, 1);
++    SelectorAddress = IRB.CreateConstInBoundsGEP2_32(LPadContextTy, Context, 0, 2);
++  }
++
+   // Pseudocode: __wasm_lpad_context.lpad_index = index;
+-  IRB.CreateStore(IRB.getInt32(Index), LPadIndexField);
++  IRB.CreateStore(IRB.getInt32(Index), IndexAddress);
+ 
+   auto *CPI = cast<CatchPadInst>(FPI);
+   // TODO Sometimes storing the LSDA address every time is not necessary, in
+   // case it is already set in a dominating EH pad and there is no function call
+   // between from that EH pad to here. Consider optimizing those cases.
+   // Pseudocode: __wasm_lpad_context.lsda = wasm.lsda();
+-  IRB.CreateStore(IRB.CreateCall(LSDAF), LSDAField);
++  IRB.CreateStore(IRB.CreateCall(LSDAF), LSDAAddress);
+ 
+   // Pseudocode: _Unwind_CallPersonality(exn);
+   CallInst *PersCI = IRB.CreateCall(CallPersonalityF, CatchCI,
+@@ -374,7 +392,7 @@
+ 
+   // Pseudocode: int selector = __wasm_lpad_context.selector;
+   Instruction *Selector =
+-      IRB.CreateLoad(IRB.getInt32Ty(), SelectorField, "selector");
++      IRB.CreateLoad(IRB.getInt32Ty(), SelectorAddress, "selector");
+ 
+   // Replace the return value from wasm.get.ehselector() with the selector value
+   // loaded from __wasm_lpad_context.selector.

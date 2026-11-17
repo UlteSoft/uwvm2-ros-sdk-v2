@@ -31,7 +31,7 @@ def main():
     package("languages/cpp",["bin/wrcc","include/wros/scene.h"])
     package("languages/rs",["language/rust/scene.rs"])
     package("languages/as",["language/assemblyscript/scene.ts"])
-    package("frontend",["install/"+filename for filename in ["frontend.py","imports.py","guest_profile.py","compiler.py"]])
+    package("frontend",["bin/wrar"]+["install/"+filename for filename in ["frontend.py","imports.py","guest_profile.py","compiler.py","artifacts.py","archiver.py"]])
     package("compiler-source",[p.relative_to(root).as_posix() for top in ("tools/wasm/memtag","third-parties/sources")
                                for p in (root/top).rglob("*") if p.is_file() and "__pycache__" not in p.parts])
 

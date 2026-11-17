@@ -65,9 +65,19 @@ because the replacement output has the same filename or ABI.
 
 - `build_producer.py --work <new-work> --bootstrap <existing-native-prefix>`
 - `build_sysroots.py --work <new-work> --toolchain <producer-prefix>`
-- `tools/language/js/build.py`, `tools/language/lua/build.py`, and
-  `tools/language/python/build.py` accept the exact source-built sysroot receipt,
-  independent guest profile options, and fresh output/cache directories.
+
+Language runtime build scripts from the previous SDK still need migration into
+this repository; their paths are not installed development entry points here.
+
+The sysroot recipe builds optimized libraries with full debug information.
+Locked diagnostic patches are applied in a private source overlay, leaving the
+producer's verified LLVM tree unchanged. The overlay copies only patch targets
+and their ancestor directories; other paths reference the verified tree. Its
+file/link inventory is checked before reuse. libc, libc++abi, libc++ and unwind
+assertions remain fatal, while their internal diagnostics do not implicitly
+import descriptor I/O or environment-driven tracing. The patches and effective
+flags are part of each build receipt and its cache identity. This does not
+authorize application filesystem, socket, or logging operations.
 
 The sysroot builder currently admits wasm32 single-thread, wasm32 WASI threads,
 and wasm64 single-thread profiles. Memory64 threads require further VM and

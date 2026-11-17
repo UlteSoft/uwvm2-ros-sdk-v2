@@ -46,6 +46,28 @@ bin/wrc --toolchain "$PRODUCER" --sysroots "$RECEIPT" --reactor --export _start 
 
 Defaults are wasm32, Core 3.0, WasmMTE, standard Wasm exceptions and single-threaded output. Select `--target wasm64`, `--no-mte`, `--no-eh`, `--core mvp` or `-pthread` explicitly. A pthread-dependent build must propagate the thread option. Missing matching sysroot inputs stop the build. C++ EH and no-EH use distinct library closures. After link, the driver checks binary import signatures before replacing the output. It admits the ROSv2 contract, limited WASIp1 environment/exit operations, and the selected thread import. The VM independently enforces deployed permissions.
 
+### Separate compilation and static libraries
+
+Compile one translation unit with `-c`, create an indexed archive with `wrar`, then link the objects and archives. All invocations must select the same guest profile and compiler. C and C++ objects can share that profile. `-I` / `--include-dir`, `-D` / `--define` and `--std` support project headers, object-like definitions and the language standard. Link flags are limited to the documented Wasm frontend options; arbitrary native compiler or linker options are not forwarded.
+
+```sh
+bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" -O3 -g \
+  --std c++20 -I include -DROBOT_AXES=6 -c control.cpp -o control.o
+bin/wrar --toolchain "$PRODUCER" -o libcontrol.a control.o
+bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" -O3 -g \
+  --reactor --export _start main.cpp libcontrol.a -o robot.wasm
+```
+
+`wrar` creates a deterministic ordinary GNU archive using the selected prefix's `llvm-ar`; it never executes a guest or installs a native library. Objects contain a `wros.sdk.object` custom section binding their bytes to the exact compiler digest, pointer width, Core version, MTE, thread and EH settings. A mismatch, changed object, unmarked object, native ELF file, LLVM bitcode input or thin archive fails before linking. These build notes are not signatures: a user able to replace build inputs can also manufacture a note. Select a trusted compiler prefix and signed deployment artifacts. The VM remains the security boundary.
+
+The linker frontend validates every archive member, including unused members, snapshots the object bytes in a private directory, and regenerates the symbol index before invoking the linker. It admits at most 1,024 objects, 128 MiB per object/archive and 256 MiB total object/archive input. Final output has a 128 MiB limit. Failed validation or compilation preserves the previous output. Build notes are removed from the final Wasm and its actual imports are checked independently; an allowed object profile never authorizes filesystem or socket imports.
+
+For wasm64, the narrow environment allowance uses UWVM's explicit `environ_get_wasm64` and `environ_sizes_get_wasm64` signatures with i64 pointers, plus `proc_exit_wasm64`. These are the matching sysroot's extension to Preview1, not a standardized Preview1 memory64 ABI. wasm32 spellings are not interchangeable. Missing memory64 thread startup support refuses explicitly.
+
+The SDK sysroot recipe selects libc++abi's upstream bare-metal configuration and silent terminate handler, together with digest-locked runtime diagnostic patches. The patches keep assertion checks and fatal Wasm traps while removing internal stderr output and unwinder environment-controlled tracing, including assertion-enabled builds. Exception propagation remains intact. They do not suppress application logging or grant permission to an external operation. Application diagnostics should use an authorized ROSv2 operation. The sysroot is compiled with optimization and full debug information; every selected header and library is hash-checked before frontend compilation.
+
+`tests/separate_compilation.py` exercises real wasm32/wasm64 objects, archives, cross-file exceptions, denied mixtures and environment permission behavior in both VM engines. Run it under the VM repository's cgroup gate. A successful scoped receipt is not certification of every standard library operation, a whole ROS package, or a manufacturer's hardware.
+
 Include `<wros/scene.h>` for the raw ABI. Rust and AssemblyScript declarations live under `language/`. These declarations cover the 163 registered operations in the captured VM catalogue. Their existence alone does not qualify a language frontend, a migrated ROS package or a device.
 
 ## Platforms and migration

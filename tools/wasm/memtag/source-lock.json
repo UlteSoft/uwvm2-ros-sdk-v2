@@ -25,7 +25,7 @@
       "patches": [
         {
           "path": "tools/wasm/memtag/patches/llvm-23.1.5-memtag.patch",
-          "sha256": "542df0cc6fea73152c9dda2ad9b720496d17681e468ac2927d6c518be36f2d21"
+          "sha256": "cc4bac62f879db904500ff38a7682dff76f9197766d76b22b35f808426c0d0f4"
         }
       ],
       "status": "awaiting-stable-build-qualification",
@@ -74,6 +74,16 @@
       "archive_bytes": 1529152,
       "abi": "uwvm-preview1-memory64-extension",
       "threads": false
+    }
+  },
+  "runtime_diagnostics": {
+    "llvm": {
+      "path": "tools/wasm/memtag/patches/llvm-wros-runtime-diagnostics.patch",
+      "sha256": "12afd461df8823a2b8048af9efcab0411bb7d33c1578e55db4ab366bb93088bd"
+    },
+    "libc": {
+      "path": "tools/wasm/memtag/patches/libc-wros-runtime-diagnostics.patch",
+      "sha256": "130b6a43b9e70bb9c1e1e0aa84b7c058a689c08f21460d9a8fc4b4fb05e7118e"
     }
   }
 }

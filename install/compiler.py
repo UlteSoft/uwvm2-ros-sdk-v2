@@ -37,9 +37,14 @@ def confined(root, relative):
 
 
 def expand_responses(arguments, cwd=None):
-    """Expand Clang's Linux response syntax, rejecting cycles, without a shell."""
+    """Expand Clang's Linux response syntax within fixed byte/depth/work limits.
+
+    No shell evaluation occurs. Repeated acyclic includes count again against
+    the limits, so an exponentially expanding response graph also refuses.
+    """
     cwd = Path.cwd() if cwd is None else cwd
     result, active = [], set()
+    consumed, visited = 0, 0
     stack = [(iter(arguments), None)]
     while stack:
         iterator, path = stack[-1]
@@ -50,12 +55,22 @@ def expand_responses(arguments, cwd=None):
             if path is not None:
                 active.remove(path)
             continue
+        visited += 1
+        if visited > 65536:
+            raise ValueError("compiler response expansion exceeds argument bound")
         if item.startswith("@"):
             path = (cwd / item[1:]).resolve()
             if path in active:
                 raise ValueError("cyclic compiler response file: " + str(path))
+            if len(stack) >= 16:
+                raise ValueError("compiler response nesting exceeds depth bound")
+            with path.open("rb") as stream:
+                data = stream.read(8 * 1024 * 1024 - consumed + 1)
+            consumed += len(data)
+            if consumed > 8 * 1024 * 1024:
+                raise ValueError("compiler response expansion exceeds byte bound")
             active.add(path)
-            stack.append((iter(shlex.split(path.read_text(), comments=False, posix=True)), path))
+            stack.append((iter(shlex.split(data.decode("utf-8"), comments=False, posix=True)), path))
         else:
             result.append(item)
     return result

@@ -1,16 +1,34 @@
 {
   "files": [
     {
-      "path": "install/compiler.py",
-      "bytes": 7530,
+      "path": "bin/wrar",
+      "bytes": 223,
+      "mode": 493,
+      "sha256": "e4bad02ced4a04ac71b90c94dbf4a23e9efc09f51fe3ca1914cd78746a4709a9"
+    },
+    {
+      "path": "install/archiver.py",
+      "bytes": 1932,
       "mode": 420,
-      "sha256": "d37e8af4ad28152b3970bf93be6d4f35d09357034cd97cc1912c5e210d622270"
+      "sha256": "a4e34d75751b7f02e861e1146c55d29c1caee18983d45965e30cfcff189ef76f"
+    },
+    {
+      "path": "install/artifacts.py",
+      "bytes": 9203,
+      "mode": 420,
+      "sha256": "5e914be660a8824493e3539b6f1c466433eeb208a3b378735df9f641d3489add"
+    },
+    {
+      "path": "install/compiler.py",
+      "bytes": 8241,
+      "mode": 420,
+      "sha256": "cff1a1fb039ee338f320bc0663b019061a7582d4fcb0a6862cbbd1f928e111aa"
     },
     {
       "path": "install/frontend.py",
-      "bytes": 3544,
+      "bytes": 6175,
       "mode": 420,
-      "sha256": "e14bf7f64b8f8cad1d7dc7ce3ab37370214dbf6cb1410e86ea89a5f791a5409d"
+      "sha256": "2216a739768e4c8a0efd64a075230ec13b88a52d6f75a803b5e6dbdc813b6fc3"
     },
     {
       "path": "install/guest_profile.py",

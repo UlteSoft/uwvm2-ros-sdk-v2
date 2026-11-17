@@ -44,9 +44,9 @@
     },
     {
       "path": "tools/wasm/memtag/README.md",
-      "bytes": 4914,
+      "bytes": 5536,
       "mode": 420,
-      "sha256": "6f58927012cff346daf939c8376ab187d8f9906c1e30fd68232c86e14d6a81e9"
+      "sha256": "66d642e786108a23bd3f9c9bec5054323161cbc01c2f7888ef0ebbfa3fc4a269"
     },
     {
       "path": "tools/wasm/memtag/build_producer.py",
@@ -56,15 +56,27 @@
     },
     {
       "path": "tools/wasm/memtag/build_sysroots.py",
-      "bytes": 14653,
+      "bytes": 18099,
       "mode": 420,
-      "sha256": "735e1b6d20a64f252561151b0c34e3be28fd47ca4789ccd8cd5d776a4a8873cf"
+      "sha256": "86b7c90690028a73d601d682dd02cc5d8f8b7257413be33074606efe097b9359"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/libc-wros-runtime-diagnostics.patch",
+      "bytes": 425,
+      "mode": 420,
+      "sha256": "130b6a43b9e70bb9c1e1e0aa84b7c058a689c08f21460d9a8fc4b4fb05e7118e"
     },
     {
       "path": "tools/wasm/memtag/patches/llvm-23.1.5-memtag.patch",
-      "bytes": 154674,
+      "bytes": 157058,
       "mode": 420,
-      "sha256": "542df0cc6fea73152c9dda2ad9b720496d17681e468ac2927d6c518be36f2d21"
+      "sha256": "cc4bac62f879db904500ff38a7682dff76f9197766d76b22b35f808426c0d0f4"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/llvm-wros-runtime-diagnostics.patch",
+      "bytes": 2161,
+      "mode": 420,
+      "sha256": "12afd461df8823a2b8048af9efcab0411bb7d33c1578e55db4ab366bb93088bd"
     },
     {
       "path": "tools/wasm/memtag/patches/wasi-libc-sdk34-memory64.patch",
@@ -80,9 +92,9 @@
     },
     {
       "path": "tools/wasm/memtag/source-lock.json",
-      "bytes": 3190,
+      "bytes": 3587,
       "mode": 420,
-      "sha256": "f1173a7dee94b67c5db9098471fc1ad99dcb50322db3faa4541926d9bf268552"
+      "sha256": "9d2e1b0d11e9eec1915a473e0ff967085c27f4897399ce52a7d3a9be9696a9f0"
     }
   ]
 }

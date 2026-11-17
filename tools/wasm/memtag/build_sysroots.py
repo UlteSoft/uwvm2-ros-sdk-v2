@@ -13,7 +13,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
-from build_producer import SDK, HERE, digest, prepare, checked
+from build_producer import SDK, HERE, digest, prepare, checked, inventory
 
 sys.path.insert(0, str(SDK / "install"))
 from guest_profile import Profile
@@ -37,6 +37,59 @@ def source_tree(entry, supplied, work, cache):
     if extra.strip():
         raise ValueError("unrecorded files in source checkout: " + extra)
     return source
+
+
+def diagnostics_overlay(source, entry, work):
+    """Apply locked runtime-only changes without changing the producer tree.
+
+    Only ancestors and files named by the patch are copied. Other source paths
+    point to the already verified private source tree. An inventory detects
+    changes to either overlay files or link destinations before reuse.
+    """
+    patch = SDK / entry["path"]
+    if digest(patch) != entry["sha256"]:
+        raise ValueError("runtime diagnostics patch digest mismatch")
+    changed = []
+    for line in patch.read_text().splitlines():
+        if line.startswith("+++ b/"):
+            path = Path(line[6:])
+            if path.is_absolute() or ".." in path.parts or not (source / path).is_file():
+                raise ValueError("runtime patch has an unsafe/missing source path")
+            changed.append(path)
+    if not changed:
+        raise ValueError("runtime patch changes no source files")
+    identity = hashlib.sha256((str(source) + entry["sha256"]).encode()).hexdigest()
+    container = work / "diagnostics" / identity
+    root = container / "source"
+    record = container / "inventory.json"
+    if record.is_file():
+        if inventory(root) != json.loads(record.read_text()):
+            raise ValueError("runtime diagnostics overlay changed")
+        return root
+    if container.exists():
+        raise ValueError("incomplete runtime overlay; use a fresh work directory")
+    root.mkdir(parents=True)
+
+    def copy_directory(relative):
+        for item in (source / relative).iterdir():
+            if item.name == ".git":
+                continue
+            path = relative / item.name
+            destination = root / path
+            if path in changed:
+                shutil.copyfile(item, destination)
+            elif any(path in other.parents for other in changed):
+                destination.mkdir()
+                copy_directory(path)
+            else:
+                destination.symlink_to(item.resolve(), target_is_directory=item.is_dir())
+
+    copy_directory(Path())
+    checked(["git", "-c", "core.hooksPath=/dev/null", "init", "--quiet"], container / "patch.log", root)
+    checked(["git", "apply", "--check", str(patch)], container / "patch.log", root)
+    checked(["git", "apply", str(patch)], container / "patch.log", root)
+    record.write_text(json.dumps(inventory(root), sort_keys=True) + "\n")
+    return root
 
 
 def build(args):
@@ -67,6 +120,8 @@ def build(args):
     lock = json.loads((HERE / "source-lock.json").read_text())
     llvm = source_tree(lock["sources"]["llvm-23.1.5"], args.llvm_source, work, args.source_cache)
     libc = source_tree(lock["sources"]["wasi-libc-sdk34"], args.libc_source, work, args.source_cache)
+    runtimes = diagnostics_overlay(llvm, lock["runtime_diagnostics"]["llvm"], work)
+    libc = diagnostics_overlay(libc, lock["runtime_diagnostics"]["libc"], work)
     original_resource = Path(subprocess.check_output([str(compiler), "-print-resource-dir"], text=True).strip())
     if not (original_resource / "include/stddef.h").is_file():
         raise ValueError("compiler resource headers are missing")
@@ -76,6 +131,7 @@ def build(args):
     record = {"schema": "uwvm-memtag-sysroot-build-v1", "qualified": False, "status": "building",
               "compiler_version": version, "compiler_sha256": digest(compiler), "sources": lock["sources"],
               "mte": args.mte, "wasm_version": args.wasm_version,
+              "runtime_diagnostics": lock["runtime_diagnostics"],
               "targets": [], "commands": []}
     # Ninja does not treat the compiler executable as an object dependency.
     # Replacing clang at the same pathname must never reuse objects from the
@@ -83,7 +139,8 @@ def build(args):
     identity = {"recipe": "stable-sysroots-v3", "compiler": record["compiler_sha256"],
                 "recipe_sha256": digest(Path(__file__)),
                 "profile_recipe_sha256": digest(SDK / "install/guest_profile.py"),
-                "sources": lock["sources"], "mte": args.mte, "wasm_version": args.wasm_version,
+                "sources": lock["sources"], "runtime_diagnostics": lock["runtime_diagnostics"],
+                "mte": args.mte, "wasm_version": args.wasm_version,
                 "archiver": digest(toolchain / "bin/llvm-ar"),
                 "ranlib": digest(toolchain / "bin/llvm-ranlib")}
     build_identity = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
@@ -119,14 +176,18 @@ def build(args):
             raise ValueError("no stable closure for " + target + "; memory64 threads still require VM/bootstrap support")
         memory64 = target.startswith("wasm64-")
         target_libc = prepare(lock["sources"]["wasi-libc-sdk34-memory64"], work, args.source_cache) if memory64 else libc
+        if memory64:
+            target_libc = diagnostics_overlay(target_libc, lock["runtime_diagnostics"]["libc"], work)
         threads = target.endswith("-threads")
         resource = work / "output" / "clang" / "23"
         shutil.copytree(original_resource / "include", resource / "include", dirs_exist_ok=True)
         feature_flags = profiles[target, args.profiles[0]].llvm_feature_flags()
-        flags = "-gline-tables-only -ffile-prefix-map=" + str(work) + "=/usr/src/uwvm-sysroot"
+        flags = "-g -ffile-prefix-map=" + str(work) + "=/usr/src/uwvm-sysroot"
         flags += " -ffile-prefix-map=" + str(llvm) + "=/usr/src/llvm-23.1.5"
+        flags += " -ffile-prefix-map=" + str(runtimes) + "=/usr/src/llvm-23.1.5"
         flags += " -ffile-prefix-map=" + str(target_libc) + "=/usr/src/wasi-libc-sdk34"
         flags += " " + " ".join(feature_flags)
+        flags += " -D__WROS_NO_HOST_DIAGNOSTICS"
         if args.mte:
             flags += " -fsanitize=memtag"
         if threads:
@@ -165,7 +226,7 @@ def build(args):
             runtime_flags = flags + " -resource-dir=" + str(resource)
             if profile == "eh":
                 runtime_flags += " -fwasm-exceptions -mllvm -wasm-use-legacy-eh=false"
-            component("cxx-" + profile + "-" + target, llvm / "runtimes", prefix,
+            component("cxx-" + profile + "-" + target, runtimes / "runtimes", prefix,
                       {**common_target, "CMAKE_SYSROOT": str(prefix),
                        # The complete libc and compiler-rt closure now exists.
                        # Library probes must link: archiving an unresolved symbol
@@ -184,6 +245,13 @@ def build(args):
                        "LIBCXX_ENABLE_FILESYSTEM": "ON", "LIBCXX_ENABLE_ABI_LINKER_SCRIPT": "OFF",
                        "LIBCXX_CXX_ABI": "libcxxabi", "LIBCXX_ABI_VERSION": "2",
                        "LIBCXXABI_ENABLE_SHARED": "OFF", "LIBCXXABI_ENABLE_STATIC": "ON",
+                       # Silent terminate alone does not remove __abort_message's
+                       # stderr path. The upstream baremetal Wasm configuration
+                       # traps on ABI corruption without importing descriptor
+                       # I/O, its stdio locks, or their WASIp1 clock dependency.
+                       # ARM-specific baremetal unwind changes do not apply to
+                       # the WebAssembly-only producer.
+                       "LIBCXXABI_BAREMETAL": "ON",
                        "LIBCXXABI_SILENT_TERMINATE": "ON", "LIBCXXABI_USE_LLVM_UNWINDER": enabled,
                        "LIBUNWIND_ENABLE_SHARED": "OFF", "LIBUNWIND_ENABLE_THREADS": "ON" if threads else "OFF",
                        "LIBUNWIND_HIDE_SYMBOLS": "ON", "LIBUNWIND_USE_COMPILER_RT": "ON",
