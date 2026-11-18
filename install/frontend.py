@@ -10,6 +10,7 @@ from guest_profile import Profile
 from imports import inspect
 import artifacts
 import qualification
+import local_release
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -42,17 +43,17 @@ def main(language):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("sources", nargs="+", type=Path)
     parser.add_argument("-o", "--output", required=True, type=Path)
-    parser.add_argument("--toolchain", required=True, type=Path)
-    parser.add_argument("--sysroots", required=True, action="append", type=Path)
-    parser.add_argument("--target", choices=("wasm32","wasm64"), default="wasm32")
-    parser.add_argument("--core", choices=("mvp","3.0"), default="3.0")
+    parser.add_argument("--toolchain", type=Path)
+    parser.add_argument("--sysroots", action="append", type=Path)
+    parser.add_argument("--target", choices=("wasm32","wasm64"))
+    parser.add_argument("--core", choices=("mvp","3.0"))
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=None)
     qualification.arguments(parser)
-    parser.add_argument("-pthread","--threads", action="store_true")
+    parser.add_argument("-pthread","--threads", action="store_true", default=None)
     parser.add_argument("--reactor", action="store_true")
     parser.add_argument("--export", action="append", default=[])
-    parser.add_argument("-O", choices=list("0123sz"), default="2")
-    parser.add_argument("-g", action="store_true")
+    parser.add_argument("-O", choices=list("0123sz"))
+    parser.add_argument("-g", action="store_true", default=None)
     parser.add_argument("-c", "--compile-only", action="store_true")
     parser.add_argument("-I", "--include-dir", action="append", default=[], type=Path)
     parser.add_argument("-D", "--define", action="append", default=[])
@@ -60,8 +61,26 @@ def main(language):
                         ("c++17", "c++20", "c++23"))
     a = parser.parse_args()
     try:
-        profile = Profile(int(a.target[4:]), "1.0" if a.core=="mvp" else "3.0", a.threads, a.mte,
-                          "eh" if (a.eh if a.eh is not None else a.core!="mvp") else "noeh")
+        site = local_release.site_config(ROOT)
+        defaults = dict(target="wasm32", core="3.0", threads=False, O="2", g=False)
+        if site is not None and (a.toolchain is None or a.sysroots is None):
+            if not a.mte or a.legacy_mte:
+                raise ValueError("site defaults require strict MTE; provide explicit tools for another mode")
+            row = qualification.site_release(site, language)
+            a.toolchain = a.toolchain or Path(site["toolchain"])
+            a.sysroots = a.sysroots or list(map(Path, site["sysroots"]))
+            preset = row["profile"]
+            defaults.update(target="wasm" + str(preset["address_bits"]), core=preset["wasm_version"],
+                            eh=preset["exceptions"] == "eh", threads=preset["threads"],
+                            O=row["settings"]["optimization"], g=row["settings"]["debug"])
+        if a.toolchain is None or not a.sysroots:
+            parser.error("--toolchain and --sysroots are required without an installed site profile")
+        for key, value in defaults.items():
+            if getattr(a, key) is None:
+                setattr(a, key, value)
+        core = "1.0" if a.core == "mvp" else a.core
+        eh = a.eh if a.eh is not None else core == "3.0"
+        profile = Profile(int(a.target[4:]), core, a.threads, a.mte, "eh" if eh else "noeh")
         admission = qualification.admit(language, a, profile)
         if any(not re.fullmatch(r"[a-zA-Z_]\w*", n,re.ASCII) for n in a.export):
             raise ValueError("invalid Wasm export name")

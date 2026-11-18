@@ -50,9 +50,9 @@
     },
     {
       "path": "install/frontend.py",
-      "bytes": 6941,
+      "bytes": 8076,
       "mode": 420,
-      "sha256": "0bf39b4d5a95075c2d7791f6f3c69ab5195f41e8b6465faf4f982292b725d095"
+      "sha256": "28e3e75243b29f0df89840be8c1dd15c08607c8fee09afbaa2bdb79a256f6105"
     },
     {
       "path": "install/guest_profile.py",
@@ -68,15 +68,15 @@
     },
     {
       "path": "install/local_release.py",
-      "bytes": 4674,
+      "bytes": 5747,
       "mode": 420,
-      "sha256": "fe90deb15e2b79ed0a5b77a140fe1b49f24fa1c5cad556d812715cc2a8ec84e7"
+      "sha256": "75cb5c714d376622a362ed0720a5c56717b4bf593718f0b738c6d5417095c167"
     },
     {
       "path": "install/qualification.py",
-      "bytes": 15228,
+      "bytes": 16282,
       "mode": 420,
-      "sha256": "d8e63099cec5bf1af4b3cee32a11300288a641999600374800da5666fae45cd4"
+      "sha256": "4492feab8865423d8d929fe1ca7a7be46b03ecd28afb331f470fcd8d63e477de"
     },
     {
       "path": "share/qualification/memory-neighbors.json",

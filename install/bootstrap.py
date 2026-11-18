@@ -91,11 +91,45 @@ def selection(source,platform,language,options):
         if len(result.stdout)>MAX_METADATA:raise ValueError("oversized revision response")
         return json.loads(result.stdout)
 
-def install(source,platform,language,prefix,options,plan=False):
+def configure_site(directory, language, data):
+    config = directory / "share/qualification/site-profile.json"
+    if (config.parent / "local-trust.json").exists():
+        raise ValueError("existing operator trust configuration differs; select a fresh prefix")
+    check = ("import sys; from pathlib import Path; root=Path(sys.argv[1]); "
+             "sys.path.insert(0,str(root/'install')); from qualification import check_site; "
+             "print(check_site(sys.stdin.buffer.read(),root,sys.argv[2]))")
+    result = subprocess.run([sys.executable, "-I", "-B", "-c", check, str(directory), language],
+                            input=data, capture_output=True, timeout=120)
+    if result.returncode:
+        details = result.stderr.decode(errors="replace").strip().splitlines()
+        raise ValueError("site verification failed: " + (details[-1] if details else str(result.returncode)))
+    # Publish a complete file only if the selection has no prior site profile.
+    with tempfile.NamedTemporaryFile(dir=config.parent) as staged:
+        staged.write(data)
+        staged.flush()
+        try:
+            os.link(staged.name, config)
+        except FileExistsError:
+            if config.is_symlink() or not config.is_file() or config.stat().st_size != len(data) or config.read_bytes() != data:
+                raise ValueError("existing site profile differs; select a fresh prefix")
+    return result.stdout.decode().strip()
+
+
+def install(source,platform,language,prefix,options,plan=False,site_profile=None):
     platform,language=name(platform),name(language)
     selected=selection(source,platform,language,options)
     if "help" in selected:return selected
     variant=name(selected["variant"])
+    site_data = None
+    if site_profile is not None:
+        if plan or variant != "development" or language not in ("c", "cpp"):
+            raise ValueError("--site-profile requires a C or C++ development installation")
+        if not site_profile.is_file():
+            raise ValueError("site profile must be an explicit local file")
+        with site_profile.open("rb") as stream:
+            site_data = stream.read(32769)
+        if len(site_data) > 32768:
+            raise ValueError("site profile exceeds 32 KiB")
     packages=selected["packages"]
     if not isinstance(packages,list) or not 0<len(packages)<=64:raise ValueError("invalid package selection")
     files={}; total=0
@@ -124,6 +158,8 @@ def install(source,platform,language,prefix,options,plan=False):
         return all(verify(dest/path,row) and (dest/path).stat().st_mode&0o777==row["mode"] for path,row in files.items())
     if dest.exists():
         if not installed():raise ValueError("existing selection differs: "+str(dest))
+        if site_data is not None:
+            result["site_release_sha256"] = configure_site(dest, language, site_data)
         return {**result,"directory":str(dest),"reused":True}
     with tempfile.TemporaryDirectory(dir=dest.parent) as scratch:
         tree=Path(scratch)/"tree";tree.mkdir()
@@ -139,9 +175,13 @@ def install(source,platform,language,prefix,options,plan=False):
             target=tree/path;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(obj,target)
             if not verify(target,row):raise ValueError("staging verification failed: "+path)
             target.chmod(row["mode"])
+        if site_data is not None:
+            result["site_release_sha256"] = configure_site(tree, language, site_data)
         try:tree.rename(dest)
         except OSError:
             if not dest.exists() or not installed():raise
+            if site_data is not None:
+                result["site_release_sha256"] = configure_site(dest, language, site_data)
     return {**result,"directory":str(dest),"reused":False}
 
 def main():
@@ -152,14 +192,17 @@ def main():
     p.add_argument("--language",required=True)
     p.add_argument("--prefix",type=Path,default=Path.home()/".local/share/wros-sdk")
     p.add_argument("--local-repository",type=Path,help="read exact Git objects from this trusted local repository")
+    p.add_argument("--site-profile", type=Path, help="use an explicitly trusted local development site profile")
     args,extra=sys.argv[1:],[]
     if "--" in args:
         pos=args.index("--");args,extra=args[:pos],args[pos+1:]
     a=p.parse_args(args)
     try:
+        if a.site_profile is not None and a.action != "install":
+            raise ValueError("--site-profile is an install option")
         source=Source(a.commit,a.local_repository)
         if a.action=="revision-help":print(selection(source,name(a.platform),name(a.language),["--revision-help"])["help"]);return
-        result=install(source,a.platform,a.language,a.prefix,extra,a.action=="plan")
+        result=install(source,a.platform,a.language,a.prefix,extra,a.action=="plan",a.site_profile)
         print(json.dumps({**result,"requested_paths":source.requested},indent=2))
     except (ValueError,OSError,KeyError,subprocess.SubprocessError) as exc:p.exit(1,f"installation failed: {exc}\n")
 

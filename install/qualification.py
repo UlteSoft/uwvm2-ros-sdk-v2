@@ -173,6 +173,27 @@ def measure_inputs(language, options, profile, extra=None, sdk=ROOT, candidates=
     return inputs
 
 
+def site_release(site, language):
+    """Select exactly one externally signed row for this development language."""
+    rows = [row for row in local_release.verified_releases(site["trust"])
+            if row.get("language") == language and complete_release(row)
+            and ("release_sha256" not in site or canonical(row) == site["release_sha256"])]
+    if len(rows) != 1:
+        raise ValueError("site profile must select one signed release for " + language)
+    return rows[0]
+
+
+def check_site(data, sdk, language):
+    from guest_profile import Profile
+    site = local_release.parse_site(data)
+    row = site_release(site, language)
+    options = argparse.Namespace(toolchain=Path(site["toolchain"]), sysroots=list(map(Path, site["sysroots"])))
+    profile = Profile(**{key: row["profile"][key] for key in Profile.__dataclass_fields__})
+    if measure_inputs(language, options, profile, sdk=sdk, candidates=[row]) != row["inputs"]:
+        raise ValueError("site inputs differ from the signed release for this SDK")
+    return canonical(row)
+
+
 def admit(language, options, profile, extra=None, sdk=ROOT):
     mode = switch(options)
     settings = {"optimization": str(getattr(options, "O", "3")),

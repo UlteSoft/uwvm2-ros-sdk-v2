@@ -80,6 +80,39 @@ sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
 "$sdk/bin/wrf" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g "$sdk/examples/fortran/body.f90" -o robot.wasm
 ```
 
+### Install C or C++ with a site-provisioned toolchain
+
+When your operator has provisioned the LLVM toolchain, sysroot and signed release for your selected SDK revision, use the site profile they supply. For example, in Bash with a trusted full commit ID in `REV`, run this single installation command:
+
+```sh
+set -o pipefail
+curl --fail --silent --show-error "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | python3 -I -B - install --commit "$REV" --platform unitree --language c --site-profile /etc/wros/c-site.json
+```
+
+Build a C program using the installed compiler. The qualified row sets the default address width, threading, exception mode, optimization and debug symbols.
+
+```sh
+"$HOME/.local/share/wros-sdk/$REV/unitree/c/development/bin/wrc" main.c -o app.wasm
+```
+
+The operator supplies a local JSON file with these fields. Replace the example paths and digest placeholders with the reviewed values.
+
+```json
+{
+  "toolchain": "/opt/wros/llvm",
+  "sysroots": ["/opt/wros/wasm32-eh/sysroots.json"],
+  "trust": {
+    "verifier": "/opt/wros/bin/cosign",
+    "verifier_sha256": "<approved verifier SHA-256>",
+    "policy": "/etc/wros/release.policy",
+    "statement": "/etc/wros/release.wasm",
+    "statement_sha256": "<approved signed statement SHA-256>"
+  }
+}
+```
+
+The statement must contain one qualifying row for the selected language. If it contains several, add `release_sha256` with the canonical row digest from the qualification tool. Installation checks the signature, compiler, sysroot files and selected SDK, and prints `site_release_sha256`. Each strict build checks its own inputs and signed qualification again. The host tools and signed statement remain at their operator-managed paths. Reinstalling the same profile rechecks it. Select a fresh prefix when changing profiles. For C++, select `--language cpp` and use `bin/wrcc` with a C++ release.
+
 ### Revision hook and package format
 
 At the selected commit the fixed entry is `install/revision.py`. The bootstrap invokes it with Python's isolated mode, positional platform and language identifiers, and the arguments following `--`. For `revision-help` it appends `--revision-help` and reads a JSON object containing a `help` string. A successful selection prints one JSON object, for example:

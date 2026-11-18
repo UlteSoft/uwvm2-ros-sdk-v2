@@ -12,6 +12,7 @@ from artifacts import MAGIC, sections, uleb, unique_object
 
 SECTION = "wros.sdk.memory.release"
 CONFIG = Path("share/qualification/local-trust.json")
+SITE = Path("share/qualification/site-profile.json")
 LIMIT = 1024 * 1024
 
 
@@ -52,13 +53,42 @@ def decode(module):
     return bundle["routes"]
 
 
+def parse_site(data):
+    site = json.loads(data, object_pairs_hook=unique_object)
+    required = {"toolchain", "sysroots", "trust"}
+    if not isinstance(site, dict) or set(site) not in (required, required | {"release_sha256"}):
+        raise ValueError("invalid SDK site profile")
+    def absolute(value):
+        return isinstance(value, str) and Path(value).is_absolute()
+    if not absolute(site["toolchain"]) or not isinstance(site["sysroots"], list) or not 1 <= len(site["sysroots"]) <= 16:
+        raise ValueError("site profile requires a toolchain and 1 to 16 sysroot receipts")
+    if not all(absolute(path) for path in site["sysroots"]):
+        raise ValueError("site sysroot receipts need absolute paths")
+    return site
+
+
+def site_config(sdk):
+    try:
+        data = read_file(sdk / SITE, 32768)
+    except FileNotFoundError:
+        return None
+    if (sdk / CONFIG).exists():
+        raise ValueError("installation contains two operator trust configurations")
+    return parse_site(data)
+
+
 def releases(sdk):
-    # The installed SDK and its local trust configuration are provisioned by the
-    # operator. No project path, environment override or incoming signing key.
+    site = site_config(sdk)
+    if site is not None:
+        return verified_releases(site["trust"])
     try:
         config = json.loads(read_file(sdk / CONFIG, 32768), object_pairs_hook=unique_object)
     except FileNotFoundError:
         return []
+    return verified_releases(config)
+
+
+def verified_releases(config):
     if not isinstance(config, dict) or set(config) != {"verifier", "verifier_sha256", "policy", "statement", "statement_sha256"}:
         raise ValueError("invalid operator WSEA configuration")
     if not all(isinstance(config[key], str) and Path(config[key]).is_absolute() for key in ("verifier", "policy", "statement")):

@@ -34,6 +34,22 @@ class Installer(unittest.TestCase):
                         source.read("install/revision.py", 8)
                 self.assertEqual(opened.call_count, attempts)
 
+    def test_explicit_site_refusal_is_atomic(self):
+        profile = self.prefix / "site.json"
+        profile.write_text("{}")
+        source = Source(self.commit, root)
+        with self.assertRaisesRegex(ValueError, "site verification failed"):
+            install(source, "unitree", "c", self.prefix, [], site_profile=profile)
+        destination = self.prefix / self.commit / "unitree/c/development"
+        self.assertFalse(destination.exists())
+        install(source, "unitree", "c", self.prefix, [])
+        with self.assertRaisesRegex(ValueError, "site verification failed"):
+            install(source, "unitree", "c", self.prefix, [], site_profile=profile)
+        self.assertFalse((destination / "share/qualification/site-profile.json").exists())
+        self.assertTrue(install(source, "unitree", "c", self.prefix, [])["reused"])
+        with self.assertRaisesRegex(ValueError, "development installation"):
+            install(source, "unitree", "c", self.prefix, ["--component", "protocol"], site_profile=profile)
+
     def test_public_executable_names(self):
         from revision import COMPILER_COMMANDS
 

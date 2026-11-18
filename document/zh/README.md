@@ -79,6 +79,39 @@ sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
 "$sdk/bin/wrf" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g "$sdk/examples/fortran/body.f90" -o robot.wasm
 ```
 
+### 使用站点预置的工具链安装 C 或 C++
+
+若运营方已准备 LLVM 工具链、sysroot 和与所选 SDK 修订对应的签名资格声明，可在安装时指定其提供的站点配置。在 Bash 中将 `REV` 设置为可信的完整提交 ID 后，执行一条安装命令。
+
+```sh
+set -o pipefail
+curl --fail --silent --show-error "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | python3 -I -B - install --commit "$REV" --platform unitree --language c --site-profile /etc/wros/c-site.json
+```
+
+使用安装后的编译器构建 C 程序。资格记录决定默认地址宽度、线程、异常模式、优化级别与调试符号。
+
+```sh
+"$HOME/.local/share/wros-sdk/$REV/unitree/c/development/bin/wrc" main.c -o app.wasm
+```
+
+运营方提供的本地 JSON 包含下列字段。示例路径与摘要占位符需替换为经过审核的值。
+
+```json
+{
+  "toolchain": "/opt/wros/llvm",
+  "sysroots": ["/opt/wros/wasm32-eh/sysroots.json"],
+  "trust": {
+    "verifier": "/opt/wros/bin/cosign",
+    "verifier_sha256": "<已审核的验证程序 SHA-256>",
+    "policy": "/etc/wros/release.policy",
+    "statement": "/etc/wros/release.wasm",
+    "statement_sha256": "<已审核的签名声明 SHA-256>"
+  }
+}
+```
+
+签名声明应包含一条适用于所选语言的资格记录。如有多条，增加 `release_sha256` 字段，指定资格工具生成的记录规范化摘要。安装时核验签名、编译器、sysroot 文件及所选 SDK，并输出 `site_release_sha256`。每次严格构建都会重新校验实际输入与签名资格。宿主工具和资格声明继续使用运营方管理的路径。以同一配置重复安装会重新校验，切换配置可使用新前缀。C++ 使用 `--language cpp`、`bin/wrcc` 和 C++ 对应的资格记录。
+
 ### 修订脚本和文件清单格式
 
 固定入口为所选提交中的 `install/revision.py`。安装器通过 Python 隔离模式执行该脚本，依次传入平台名、语言名以及分隔符 `--` 后的扩展参数。`revision-help` 传入 `--revision-help`，读取含 `help` 字符串的 JSON 对象。正常选择时，脚本向标准输出写入一个 JSON 对象，例如
