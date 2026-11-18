@@ -38,7 +38,8 @@ def main():
         cmd = candidate_command(argv, args.candidate_mte)
         with (out / (name + ".log")).open("wb") as stream:
             proc = subprocess.run(cmd, cwd=out, env=env, stdout=stream, stderr=subprocess.STDOUT, timeout=420)
-        report["cases"].append(dict(name=name, exit=proc.returncode, command=cmd, expected_error=expected_error))
+        report["cases"].append(dict(name=name, exit=proc.returncode, command=cmd,
+                                    expected_success=expected_error is None, expected_error=expected_error))
         save()
         if expected_error is None:
             proc.check_returncode()
