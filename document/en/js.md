@@ -20,3 +20,16 @@ Repeat `--ros-operation NAME` for each operation. Selecting `abi` exposes `wros.
 The default script entry runs synchronously. Imports of other JS modules, shell APIs and an event loop are unavailable. A successful build receipt identifies the C compiler that built the interpreter. The accompanying JavaScript receipt also records the script, interpreter sources, selected operations and final artifact digest. Platform-specific permissions and external isolated driver grants are configured by the deployment owner.
 
 The signed C linker exports the application memory as `memory` alongside `_start`. Keep the VM module-link policy closed to imports of this memory. The JS API itself exposes only guest objects and bounded copies. Removing the memory export changes the artifact digest and requires a new verified producer or packaging receipt.
+
+## Install on a development workstation
+
+The following Bash command installs the tested Unitree JavaScript selection from GitHub into an empty prefix. Set `WROS_SITE_PROFILE` to the operator-provided signed C toolchain profile for this SDK. Its reviewed compiler and sysroot must already exist on the workstation. The install receipt reports the selected directory. On the verified public revision, the installer requested 63 paths and installed 55 files (3,344,797 bytes). Xmake compiled the installed example, and the interpreter and AOT each exercised its hidden, ungranted and granted guard operation.
+
+```bash
+REV=d2fb81f8a9e587485a2b494ca15b1ea3c8a7cb99
+set -o pipefail
+curl --fail --silent --show-error \
+  "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | \
+  python3 -I -B - install --commit "$REV" --platform unitree --language js \
+    --site-profile "${WROS_SITE_PROFILE:?}" --prefix "$HOME/.local/share/wros-sdk"
+```

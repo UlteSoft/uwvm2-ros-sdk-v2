@@ -17,3 +17,16 @@ python3 install/bootstrap.py install --commit "$REV" --platform unitree --langua
 构建回执记录生成解释器的 C 后端。独立的 JavaScript 回执绑定脚本、解释器源码、选用接口和最终 Wasm 摘要。平台及外置驱动权限由部署方配置。
 
 当前签署的 C 链接器同时导出 `_start` 和名为 `memory` 的应用内存。部署策略应禁止其他模块导入此内存。JS 接口向脚本提供的是对象和有界副本。删去 Wasm 内存导出会改变最终摘要，须经新的生产者或打包签审。
+
+## 在开发机上安装
+
+下面的 Bash 命令可以从 GitHub 将已实测的 Unitree JavaScript 开发包安装到空目录。先将 `WROS_SITE_PROFILE` 指向部署方提供的签署站点配置。本机需已具备该配置锁定的 C 编译器和 sysroot。命令输出中包含开发包的实际安装路径。这个公开提交的空缓存安装共请求 63 个路径，安装 55 个文件（3,344,797 字节）。Xmake 编译安装包内的示例后，解释器和 AOT 分别验证了接口隐藏、资源未授权和已授权三种结果。
+
+```bash
+REV=d2fb81f8a9e587485a2b494ca15b1ea3c8a7cb99
+set -o pipefail
+curl --fail --silent --show-error \
+  "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | \
+  python3 -I -B - install --commit "$REV" --platform unitree --language js \
+    --site-profile "${WROS_SITE_PROFILE:?}" --prefix "$HOME/.local/share/wros-sdk"
+```
