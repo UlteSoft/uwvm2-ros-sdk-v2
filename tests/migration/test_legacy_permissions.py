@@ -91,6 +91,15 @@ class Policy(unittest.TestCase):
         self.assertNotIn("grants", json.loads(result.stdout))
         self.assertEqual(module.review([])["findings"], [])
 
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "FIFO test requires POSIX")
+    def test_nonregular_input(self):
+        with tempfile.TemporaryDirectory(dir=os.environ["TMPDIR"]) as name:
+            path = Path(name) / "input"
+            os.mkfifo(path)
+            result = subprocess.run([sys.executable, "-I", "-B", REVIEWER, path], capture_output=True, timeout=3)
+            self.assertEqual(result.returncode, 3)
+            self.assertFalse(result.stdout)
+
     def test_refusal(self):
         for raw in [b"{}", b"not-json", b"\xff", b" " * (1024*1024+1), b'["--not-a-ros-option"]',
                     b'["--ros1-global-set","a","service-source-alias","b"]',

@@ -7,8 +7,10 @@ manual migration. An empty list of findings authorizes no operation.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import stat
 import sys
 
 OPTION = re.compile(r"--(ros[12])-(global|single|group)-(grant|set|enable|disable|create|add-module)\Z")
@@ -130,7 +132,11 @@ def main():
     parser.add_argument("argv", type=Path, help="JSON array of legacy policy arguments in original order")
     args = parser.parse_args()
     try:
-        with args.argv.open("rb") as stream:
+        flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NONBLOCK", 0)
+        with os.fdopen(os.open(args.argv, flags), "rb") as stream:
+            info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_INPUT:
+                raise ValueError("expected a regular policy file of at most 1 MiB")
             data = stream.read(MAX_INPUT + 1)
         if len(data) > MAX_INPUT:
             raise ValueError("policy review input exceeds 1 MiB")
