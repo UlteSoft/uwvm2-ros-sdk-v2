@@ -8,9 +8,9 @@
     },
     {
       "path": "document/en/xmake.md",
-      "bytes": 9529,
+      "bytes": 9890,
       "mode": 420,
-      "sha256": "d9cb3c0c7cc49d0611bf58b06cb8cda59196425431279e46ab95753330ddf59e"
+      "sha256": "e0ced81655e6107264b819fd2de15955374693abe6cb8b6b55101c85ff734adb"
     },
     {
       "path": "document/zh/xmake-api-index.md",
@@ -20,9 +20,9 @@
     },
     {
       "path": "document/zh/xmake.md",
-      "bytes": 8770,
+      "bytes": 9094,
       "mode": 420,
-      "sha256": "39396e121eeec71ab8724bcdeb9a99f438622ae59f09ef540eeee07092595d1f"
+      "sha256": "60ae4495f3fe0dfe436a2509559021bb32f6ef3c355195e76f75558d305a98f4"
     },
     {
       "path": "tools/xmake/dispatch.lua",

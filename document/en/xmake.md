@@ -41,7 +41,7 @@ target_end()
 | Declaration | Arguments and behavior |
 | --- | --- |
 | `set_language(id)` | Select the language identifier for the current target. The SDK checks the installed directory, language adapter and frontend. |
-| `set_ros_platform(id)` | Select the exact installed vendor or platform. The platform adapter must list the requested language. A platform's source inventory does not grant a driver connection. |
+| `set_ros_platform(id)` | Select the exact installed vendor or platform. Every published guest development package is available on each registered platform. Driver access requires a separate deployment grant. |
 | `set_wros_sdk(directory)` | Override the default SDK selection for one target. Supply an installed `development` or `compiler-source` directory from the same commit as the shared declarations. This supports multiple language and platform selections in one project. |
 | `set_wros_profile(table)` | Set one or more target-local fields from the table below. An unknown field fails configuration. |
 | `add_wros_exports(name, ...)` | For a C or C++ binary, export additional named Wasm functions alongside `_start`. Each name must match the frontend's C identifier syntax. |
@@ -55,6 +55,8 @@ target_end()
 | `std` | Optional string | C accepts `c11`, `c17`, `c23`. C++ accepts `c++17`, `c++20`, `c++23`. |
 | `lua_abi` | Boolean, false | Include `wros.abi()` in a Lua application. Local VM execution also requires the operator to expose the ABI query. |
 | `lua_seed` | Optional unsigned 32-bit integer | Build Lua with `--guest-seed` and no host clock import. |
+
+For example, a Nim program can use the generic ROSv2 ABI on Booster. Install with `--platform booster --language nim` and select `set_ros_platform("booster")` and `set_language("nim")` in Xmake. A device session requires an external driver and a deployment grant. Vendor-specific operations require independent implementation and qualification.
 
 ### Xmake target controls
 

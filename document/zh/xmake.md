@@ -41,7 +41,7 @@ target_end()
 | 函数 | 参数、范围及行为 |
 | --- | --- |
 | `set_language(id)` | 为当前目标选择语言标识。配置时检查安装位置、适配器和前端程序。 |
-| `set_ros_platform(id)` | 为目标选择具体厂商或平台。平台适配器必须登记该语言。设备权限由部署时的策略决定。 |
+| `set_ros_platform(id)` | 为目标选择具体厂商或平台。每个登记平台都能使用已发布的通用 Wasm 语言开发包。设备访问需要部署者另外授权。 |
 | `set_wros_sdk(directory)` | 为单个目标指定另一次安装返回的 `development` 或 `compiler-source` 目录，提交必须与公共入口一致。一个项目可包含不同语言、不同平台的目标。 |
 | `set_wros_profile(table)` | 设置下面列出的一个或多个字段，作用域是当前目标。未知字段在配置阶段报错。 |
 | `add_wros_exports(name, ...)` | 在 C/C++ 应用的 `_start` 之外额外导出 Wasm 函数。名称须满足编译前端的 C 标识符规则。 |
@@ -55,6 +55,8 @@ target_end()
 | `std` | 可选字符串 | C 支持 `c11`、`c17`、`c23`。C++ 支持 `c++17`、`c++20`、`c++23`。 |
 | `lua_abi` | 布尔，默认 false | 在 Lua 中提供 `wros.abi()`。部署或运行时仍须显式开放该查询。 |
 | `lua_seed` | 可选的 32 位无符号整数 | 使用 `--guest-seed` 编译 Lua，移除宿主时钟导入。 |
+
+例如，Nim 程序可以在 Booster 上调用通用 ROSv2。安装时指定 `--platform booster --language nim`，在 Xmake 中填写 `set_ros_platform("booster")` 和 `set_language("nim")`。连接设备还需要外置驱动和部署授权，厂商专有操作需独立实现和验证。
 
 ### xmake 内置构建接口
 
