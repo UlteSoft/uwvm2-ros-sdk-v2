@@ -8,9 +8,9 @@
     },
     {
       "path": "share/abi/ros.json",
-      "bytes": 223565,
+      "bytes": 223886,
       "mode": 420,
-      "sha256": "85dfd1042dd8dd0bd22860efa27971d4a9ea3af76dbb8768291485c00d3b2f42"
+      "sha256": "60e6068ae70b58217b812c417b7e4acdfd87927a50fae7161b9416cd9d9b1851"
     }
   ]
 }

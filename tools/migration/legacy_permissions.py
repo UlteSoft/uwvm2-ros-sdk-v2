@@ -119,6 +119,8 @@ def review(arguments):
                         reasons.append("missing-or-invalid-ordered-event-kinds")
                     elif set(events) - {"resource-error", "resource-closed", PAYLOAD.get(source["action"])}:
                         reasons.append("event-payload-exceeds-source-operation")
+            if field == "service-source-alias":
+                reasons.append("review-service-observer-client-binding-and-native-wait")
             reasons.append("independent-service-query-and-call-authority-required" if field == "service-source-alias"
                            else "independent-event-observer-and-source-authority-required")
             findings.append(dict(argument=grant["index"], backend=backend, scope=scope, target=target,

@@ -2,21 +2,21 @@
   "files": [
     {
       "path": "document/en/legacy-permissions.md",
-      "bytes": 1607,
+      "bytes": 2344,
       "mode": 420,
-      "sha256": "36540d8adc963afbc0260722de73e97bbf7455ad02481bab9385f1c429b43963"
+      "sha256": "e5c83d0b65f58be12772254adb95fa87b00544a893a25e05deedc648ccca1e27"
     },
     {
       "path": "document/zh/legacy-permissions.md",
-      "bytes": 1307,
+      "bytes": 1950,
       "mode": 420,
-      "sha256": "202cc5c3349461f3bcc41e149f8963d0747f033562b74fe88dd14aa7090de19e"
+      "sha256": "b34b037ec860a24a5dae414f09d7fd9f8b46685627ea9eaf7bc10234507ab0a9"
     },
     {
       "path": "tools/migration/legacy_permissions.py",
-      "bytes": 8077,
+      "bytes": 8214,
       "mode": 420,
-      "sha256": "9ca33f5eebb56ab24a96397732aa1f25383b547866a7513d8e03e849e94105e1"
+      "sha256": "d8784e53bfb3ed3e83a1379557fb55416702ff4643e0325694ad73252be8a4b0"
     }
   ]
 }

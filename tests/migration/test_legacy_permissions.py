@@ -63,7 +63,10 @@ class Policy(unittest.TestCase):
                         row, = json.loads(self.run_cli(json.dumps(args).encode(), 2).stdout)["findings"]
                         self.assertEqual((row["backend"], row["scope"], row["field"], row["source"]),
                                          (backend, target, module.PAIRS[op], "call"))
-                        self.assertEqual(len(row["reasons"]), 1)
+                        expected = (["review-service-observer-client-binding-and-native-wait",
+                                     "independent-service-query-and-call-authority-required"] if op == "service.available"
+                                    else ["independent-event-observer-and-source-authority-required"])
+                        self.assertEqual(row["reasons"], expected)
 
     def test_no_cross_target_binding(self):
         for prefix in ("--ros2-group-grant", "--ros1-single-grant", "--ros1-group-grant"):
