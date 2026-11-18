@@ -5,10 +5,8 @@
 用完整的提交号安装所选平台和语言的开发包。安装命令返回的 `directory` 是这个选择的根目录。下面用 Unitree 平台的 C 示例生成一个调用 `uwvm_ros_v2.abi` 的模块。
 
 ```sh
-python3 install/bootstrap.py install --commit "$REV" --platform unitree --language c --prefix "$PREFIX"
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language c --prefix "$PREFIX" --site-profile "$SITE"
 export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/c/development"
-export WROS_TOOLCHAIN="/绝对路径/wasm-toolchain"
-export WROS_SYSROOTS="/绝对路径/sysroots.json"
 cp -R "$UWVM_ROS_SDK_ROOT/examples/c" ./robot-project
 cd robot-project
 xmake f -p wasm-wasip1 -a wasm32
@@ -20,6 +18,8 @@ xmake -v robot
 ```sh
 WROS_RUN_QUERIES=abi WROS_VM=/绝对路径/uwvm2-ros xmake run robot
 ```
+
+将 `SITE` 指向操作员提供的站点配置。C、C++、Fortran 和 Lua 的开发安装可在 xmake 构建时直接使用配置中经过验签的编译器和 sysroot。使用站点配置时，应同时取消设置 `WROS_TOOLCHAIN` 和 `WROS_SYSROOTS`。项目显式指定的目标参数须与已验证发行记录匹配。另行配置工具链时，须同时指定这两个变量。
 
 ## 项目脚本
 

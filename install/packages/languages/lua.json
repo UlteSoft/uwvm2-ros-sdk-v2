@@ -56,9 +56,9 @@
     },
     {
       "path": "language/lua/xmake/adapter.lua",
-      "bytes": 1496,
+      "bytes": 1334,
       "mode": 420,
-      "sha256": "089a0959194cabde5f78ccde7387b6b0cd6ef6a2e1d2757cda87544fbbc73dc9"
+      "sha256": "8706638e42b64b1dfb1c85c53629173d4766684cf43ea03df89931a0a3d4bc4b"
     },
     {
       "path": "third-parties/lua/LICENSE",

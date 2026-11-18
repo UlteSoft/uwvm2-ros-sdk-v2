@@ -5,10 +5,8 @@
 Install one development selection using a full commit ID. The installer returns its absolute `directory`. The shared declarations live in `tools/xmake/ros.lua`. An application loads them once. Every target specifies its language and vendor. The source file in this example calls `uwvm_ros_v2.abi` through the SDK header.
 
 ```sh
-python3 install/bootstrap.py install --commit "$REV" --platform unitree --language c --prefix "$PREFIX"
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language c --prefix "$PREFIX" --site-profile "$SITE"
 export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/c/development"
-export WROS_TOOLCHAIN="/absolute/path/to/wasm-toolchain"
-export WROS_SYSROOTS="/absolute/path/to/sysroots.json"
 cp -R "$UWVM_ROS_SDK_ROOT/examples/c" ./robot-project
 cd robot-project
 xmake f -p wasm-wasip1 -a wasm32
@@ -20,6 +18,8 @@ The default release output for the example is `build/wasm-wasip1/wasm32/release/
 ```sh
 WROS_RUN_QUERIES=abi WROS_VM=/absolute/path/to/uwvm2-ros xmake run robot
 ```
+
+Set `SITE` to the operator-provided site configuration. The C, C++, Fortran and Lua development selections use its verified compiler and sysroots during an xmake build. Leave both `WROS_TOOLCHAIN` and `WROS_SYSROOTS` unset to use the site selection. An explicit build profile must match a qualified release. For a separately provisioned toolchain, set both variables.
 
 ## Project file
 

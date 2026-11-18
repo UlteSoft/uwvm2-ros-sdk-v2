@@ -14,9 +14,7 @@ end
 
 function build(target, req, sources)
     assert(#sources == 1 and #target:orderdeps() == 0, "Lua expects one application script")
-    local args = {sources[1], "--target", req.arch, req.mte_flag,
-                  "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN"),
-                  "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to a matching receipt")}
+    local args = table.join({sources[1], "--target", req.arch, req.mte_flag}, req.tool_args)
     if req.lua_seed then table.insert(args, "--guest-seed"); table.insert(args, req.lua_seed) end
     if req.lua_abi then table.insert(args, "--ros-abi") end
     for _, name in ipairs(req.lua_operations) do

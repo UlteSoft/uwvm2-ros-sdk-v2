@@ -116,9 +116,9 @@
     },
     {
       "path": "language/fortran/xmake/adapter.lua",
-      "bytes": 2030,
+      "bytes": 1967,
       "mode": 420,
-      "sha256": "90a7064dc91aa358356ffe5415b73f373f3f8ebd7bc41b88eef802e317af737d"
+      "sha256": "085d2bb8c442b48dce8fd63072f8770541f2ff29a6a1cd48321deed685986322"
     },
     {
       "path": "third-parties/fortran/LICENSE.TXT",

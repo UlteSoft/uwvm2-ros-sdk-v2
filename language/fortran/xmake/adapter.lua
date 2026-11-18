@@ -10,11 +10,12 @@ function validate(target, req)
 end
 
 function build(target, req, sources)
-    local args = {"--target", req.arch, "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN"),
-        "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to a matching receipt"),
-        req.mte_flag, req.eh and "--eh" or "--no-eh"}
+    local args = table.join({"--target", req.arch, req.mte_flag, req.eh and "--eh" or "--no-eh"}, req.tool_args)
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3", smallest = "s"}
-    table.insert(args, "-O" .. assert(levels[target:get("optimize") or "fastest"], "Unsupported optimization"))
+    local optimize = target:get("optimize")
+    if optimize or not req.site then
+        table.insert(args, "-O" .. assert(levels[optimize or "fastest"], "Unsupported optimization"))
+    end
     for _, symbol in ipairs(table.wrap(target:get("symbols"))) do
         assert(symbol == "debug", "Fortran supports debug symbols")
         table.insert(args, "-g")

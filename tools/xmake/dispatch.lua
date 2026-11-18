@@ -118,23 +118,23 @@ local function qualified_inputs(target, request)
 end
 
 local function compiler_args(target, request)
-    local toolchain = assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN to the Wasm compiler prefix")
-    local sysroots = assert(request.sysroots, "Set WROS_SYSROOTS to its matching sysroots.json")
-    local args = {"--target", request.arch, "--toolchain", toolchain, "--sysroots", sysroots}
+    local args = table.join({"--target", request.arch}, request.tool_args)
     local optimize = target:get("optimize")
     local symbols = table.wrap(target:get("symbols"))
     table.join2(args, {"--core", request.core, request.eh and "--eh" or "--no-eh", request.mte_flag})
     if request.threads then table.insert(args, "-pthread") end
     if request.std then table.join2(args, {"--std", request.std}) end
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3", smallest = "s"}
-    table.insert(args, "-O" .. assert(levels[optimize or "faster"], "Unsupported guest optimization"))
+    if optimize or not request.site then
+        table.insert(args, "-O" .. assert(levels[optimize or "faster"], "Unsupported guest optimization"))
+    end
     for _, value in ipairs(symbols) do
         assert(value == "debug", "Unsupported guest symbols setting: " .. value)
         table.insert(args, "-g")
     end
     for _, dir in ipairs(table.wrap(target:get("includedirs"))) do table.join2(args, {"-I", dir}) end
     for _, define in ipairs(table.wrap(target:get("defines"))) do table.join2(args, {"-D", define}) end
-    return args, toolchain
+    return args
 end
 
 function build(target)
@@ -142,11 +142,23 @@ function build(target)
     local sources = qualified_inputs(target, request)
     local output = target:targetfile()
     os.mkdir(path.directory(output))
+    if request.adapter.family == "c" or request.adapter.id == "fortran" or request.adapter.id == "lua" then
+        local toolchain = os.getenv("WROS_TOOLCHAIN")
+        request.site = request.adapter.id ~= "objectc" and not toolchain and not request.sysroots and
+                       os.isfile(path.join(request.root, "share/qualification/site-profile.json"))
+        if request.site then
+            assert(request.mte_flag == "--mte", "Provide explicit matching tools and sysroots for another MTE mode")
+            request.tool_args = {}
+        else
+            assert(toolchain and request.sysroots, "Provide a site installation or both WROS_TOOLCHAIN and WROS_SYSROOTS")
+            request.tool_args = {"--toolchain", toolchain, "--sysroots", request.sysroots}
+        end
+    end
     if request.implementation.build then
         request.implementation.build(target, request, sources)
         return
     end
-    local args, toolchain = compiler_args(target, request)
+    local args = compiler_args(target, request)
     if request.kind == "static" then
         assert(#request.exports == 0 and #target:orderdeps() == 0, "A static producer accepts sources only")
         local objects = {}
@@ -157,7 +169,12 @@ function build(target)
             os.vrunv(request.program, table.join(args, {"-c", file, "-o", object}))
             table.insert(objects, object)
         end
-        os.vrunv(path.join(request.root, "bin/wrar"), table.join({"--toolchain", toolchain, "-o", output}, objects))
+        if request.site then
+            os.vrunv("python3", table.join({"-I", "-B", path.join(request.root, "tools/xmake/site_archive.py"),
+                                          request.adapter.id, "-o", output}, objects))
+        else
+            os.vrunv(path.join(request.root, "bin/wrar"), table.join({"--toolchain", os.getenv("WROS_TOOLCHAIN"), "-o", output}, objects))
+        end
         return
     end
     if request.build_receipt then table.insert(args, "--build-receipt") end
