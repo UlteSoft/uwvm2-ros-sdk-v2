@@ -213,6 +213,10 @@ def run_case(options, googletest, result, folder, unit, files):
     if list(observed) != names or any(count == 0 for count, trace in observed.values()):
         raise ValueError("empty or missing upstream assertion trace")
     result["observed_assertions"] = observed
+    run_guest(options, result, folder, unit, cases, observed)
+
+
+def run_guest(options, result, folder, unit, cases, observed):
     guest = case_run(folder, unit, cases, observed)
     module = folder / "tests.wasm"
     compiler = [sys.executable, options.sdk / "bin/wrcc", "--toolchain", options.toolchain,

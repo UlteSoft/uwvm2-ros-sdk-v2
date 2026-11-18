@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-from upstream_cpp import sha
+from upstream_cpp import inspect, sha
 
 
 def read(path):
@@ -21,6 +21,8 @@ def require(condition, message):
 def generate(receipt):
     data = read(receipt)
     require(data["complete"], "incomplete inventory traversal")
+    require(int(data["cgroup"]["memory_max"]) == 68719476736 and int(data["cgroup"]["swap_max"]) == 0,
+            "incorrect qualification cgroup limits")
     by_package = defaultdict(Counter)
     sources = {}
     instance_count = Counter()
@@ -47,6 +49,7 @@ def generate(receipt):
     profiles = set()
     tools = {}
     failed = []
+    artifacts = {}
     for key, row in rows.items():
         folder = receipt.parent / key
         stats = by_package[row["package"]]
@@ -59,7 +62,8 @@ def generate(receipt):
         build = read(folder / "tests.wasm.wros-build.json")
         require(build["artifact_sha256"] == row["guest_sha256"] == sha(folder / "tests.wasm"), "guest hash " + key)
         require(build["settings"] == {"optimization": "3", "debug": True}, "unexpected compiler options")
-        require(build["profile"]["mte"] and row["imports"] == [], "MTE or import policy " + key)
+        require(build["profile"]["mte"] and row["imports"] == inspect((folder / "tests.wasm").read_bytes()) == [],
+                "MTE or import policy " + key)
         require(row["int"] and row["aot"] and row["native_googletest"], "missing run " + key)
         mode = "legacy" if data["legacy_mte"] else "strict"
         require(mode == build["mode"], "incorrect evidence mode " + key)
@@ -81,11 +85,15 @@ def generate(receipt):
         actual = [c.get("classname") + "." + c.get("name") for c in xml_cases]
         require(sorted(actual) == sorted(cases) and all(c.get("status") == "run" and c.find("failure") is None
                                                         for c in xml_cases), "native GoogleTest results " + key)
+        artifacts[key] = dict(package=row["package"], unit=row["unit"], archive_instances=instance_count[key],
+                              native_google_test_sha256=sha(folder / "oracle"),
+                              native_trace_sha256=sha(folder / "native-trace"), guest_sha256=sha(folder / "tests.wasm"))
         change = row.get("test_only_adaptation")
         label = "adapted" if change else "unmodified"
         stats[label + "_distinct_units"] += 1
         stats[label + "_unit_instances"] += instance_count[key]
         for path, upstream_hash in sources[key].items():
+            require(not Path(path).is_absolute() and ".." not in Path(path).parts, "external source path")
             wanted = change["sha256"] if change and path == row["unit"] else upstream_hash
             require(sha(folder / path) == wanted, "source mismatch " + str(folder / path))
         changed_name = None
@@ -109,6 +117,7 @@ def generate(receipt):
             stats[form + "_assertions_per_engine"] += count
     return dict(receipt_sha256=sha(receipt), archive_snapshots=len(data["variants"]),
                 distinct_source_closures=len(rows), profiles=sorted(profiles), tool_sha256=tools,
+                native_google_test_object_sha256=sha(receipt.parent / "native-googletest/gtest.o"), artifacts=artifacts,
                 per_package={p: dict(s) for p, s in sorted(by_package.items())},
                 totals=dict(sum(by_package.values(), Counter())), corrections=list(corrections.values()),
                 failed=failed, all_present_suites_passed=not failed,
