@@ -21,6 +21,8 @@ def main():
         parser.add_argument("--"+name,type=Path,required=True)
     parser.add_argument("--commit",required=True)
     opts=parser.parse_args()
+    for key in ("repository","toolchain","sysroots","bundle","vm","xmake","output"):
+        setattr(opts,key,getattr(opts,key).resolve())
     cgroup=cgroup_record()
     assert int(cgroup["memory_max"])==68719476736 and int(cgroup["swap_max"])==0
     out=opts.output.resolve(); out.mkdir(parents=True,exist_ok=False)
