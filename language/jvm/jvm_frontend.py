@@ -57,7 +57,7 @@ def compile_guest(opts, language, work):
     run("host-translator", javac + ["-cp", cp, "-d", work/"host", s/"Translate.java", s/"Admit.java",
         vendor/"java/org/teavm/backend/c/CTarget.java", vendor/"java/org/teavm/backend/c/generate/ClassGenerator.java"])
     run("guest-runtime", javac + ["-cp",cp,"-d",work/"runtime",vendor/"java/org/teavm/runtime/GC.java",
-        vendor/"java/org/teavm/runtime/Allocator.java",s/"java/wros/scene/Guard.java", s/"java/wros/scene/Scene.java"])
+        vendor/"java/org/teavm/runtime/Allocator.java",s/"java/wros/scene/Driver.java",s/"java/wros/scene/Guard.java", s/"java/wros/scene/Scene.java"])
     app_cp = str(work/"runtime") + ":" + cp
     if language == "java":
         run("application", javac + ["--source","21","--target","21","-cp",app_cp,"-d",work/"app",*sources])
@@ -80,7 +80,7 @@ def compile_guest(opts, language, work):
     run("wasm",argv, dict(compiler_environment(toolchain),TMPDIR=str(work/"tmp")))
     guest = result.read_bytes()
     audit(guest,Profile())
-    supported = {("uwvm_ros_v2", n) for n in ("abi", "capability.open", "capability.close", "guard.create", "guard.trigger", "guard.take")}
+    supported = {("uwvm_ros_v2", n) for n in ("abi", "capability.open", "capability.close", "guard.create", "guard.trigger", "guard.take", "driver.connect", "driver.submit", "driver.result", "driver.describe", "driver.disconnect")}
     supported.add(("wasi_snapshot_preview1", "clock_time_get"))
     if any((i["module"], i["name"]) not in supported for i in inspect(guest)):
         raise ValueError("unexpected host import for the synchronous JVM profile")

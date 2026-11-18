@@ -15,12 +15,15 @@ public final class Admit {
         "java/lang/AssertionError.<init>()V", "java/lang/IllegalStateException.<init>(Ljava/lang/String;)V",
         "java/lang/System.gc()V", "java/lang/System.nanoTime()J", "java/lang/System.currentTimeMillis()J",
         "kotlin/jvm/internal/Intrinsics.checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V",
+        "wros/scene/Driver.<init>()V", "wros/scene/Driver.open([BII)I", "wros/scene/Driver.connect()I",
+        "wros/scene/Driver.submit(JJ[B)I", "wros/scene/Driver.result(J[B[J)I",
+        "wros/scene/Driver.describe([J)I", "wros/scene/Driver.disconnect()I", "wros/scene/Driver.close()I",
         "wros/scene/Scene.abi()I", "wros/scene/Guard.<init>()V", "wros/scene/Guard.open([B)I",
         "wros/scene/Guard.create()I", "wros/scene/Guard.trigger()I",
         "wros/scene/Guard.take([J)I", "wros/scene/Guard.close()I"
     );
     private static final Set<String> BUILTINS = Set.of("java/lang/Object", "java/lang/String", "java/lang/Class",
-        "java/lang/AssertionError", "java/lang/IllegalStateException", "wros/scene/Guard", "wros/scene/Scene");
+        "java/lang/AssertionError", "java/lang/IllegalStateException", "wros/scene/Guard", "wros/scene/Scene", "wros/scene/Driver");
     private static void refuse(String reason) { throw new IllegalArgumentException("unsupported synchronous JVM feature: " + reason); }
     private static void annotation(String type) { if (type.startsWith("Lorg/teavm/")) refuse(type); }
     private static final String ENTRY = "main([Ljava/lang/String;)V";

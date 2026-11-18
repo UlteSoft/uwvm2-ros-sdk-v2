@@ -30,3 +30,11 @@ Java 使用 `wrjava`、`.java`；Kotlin 可用 `@file:JvmName("Main")` 指定 JV
 应用可使用受支持的局部类、基本运算、数组、显式回收和文档中的宿主操作。应用字节码中的其他外部调用、原生方法、动态调用、监视器和异常捕获在编译阶段被拒绝；未处理的异常终止 guest。完整反射、完整类库、直接缓冲区、JNI、文件和网络 I/O、线程及工业安全部署资格均尚未提供。
 
 固定版本的宿主 JVM 使用解释执行并关闭 core dump。生成的客体始终经过带优化的 Wasm AOT 编译器。
+
+### 隔离驱动会话
+
+`wros.scene.Driver` 通过部署器预置的别名连接驱动。`open(byte[] alias, int requestLimit, int responseLimit)` 的两个长度上限均为 0 至 65,536 字节。响应上限应至少覆盖部署登记的响应容量。先执行 `connect()`，再调用 `submit(long sequence, long deadline, byte[] payload)` 提交该注册协议规定的载荷与单调时钟的绝对截止时间。部署须分别授权相应的接口和资源。
+
+`result(long sequence, byte[] payload, long[] outcome)` 需要至少覆盖所选响应上限的字节数组，以及两个结果字。成功时写入驱动状态、实际字节数和响应内容。拒绝时保留调用方数组内容。方法本身返回 VM 操作状态。`describe(long[4])` 提供阶段、序号、状态、效果未知位。`disconnect()` 断开传输，`close()` 释放本地能力。部署器持有驱动生命周期和 TLS 身份，包装层每次使用后清零自己的消息暂存区。
+
+运行 `tests/jvm_mujoco.py --language java` 或 `--language kotlin` 并提供 VM 源码、运行时、TLS 库、官方 MuJoCo 3.4.0、编译器、sysroot 清单、构建宿主包和全新的输出位置。夹具从真正的 JVM 语言程序构建闭环控制器，对照原生物理步进，还检查越界指令拒绝和接收端崩溃状态。

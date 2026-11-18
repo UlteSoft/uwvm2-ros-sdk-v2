@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/jvm.md",
-      "bytes": 4560,
+      "bytes": 6163,
       "mode": 420,
-      "sha256": "9a0d04e63af84f51d911ae94abba50cb1d203c3f00b155e9470a1d211081362c"
+      "sha256": "41ac7017399eb5c138bc55ba37c61c0886920982316ca1c7441aa9012b56941b"
     },
     {
       "path": "document/zh/jvm.md",
-      "bytes": 3680,
+      "bytes": 5010,
       "mode": 420,
-      "sha256": "62c834e880a5bd2d11a7933a110422f9ef3524623bad1b283470aee57d11eb31"
+      "sha256": "458abb9ac5523276abed5a4b91bb9f4bafb7860a5c2dace4f627114d2fe9376e"
     },
     {
       "path": "include/wros/scene.h",
@@ -20,9 +20,9 @@
     },
     {
       "path": "language/jvm/Admit.java",
-      "bytes": 8822,
+      "bytes": 9134,
       "mode": 420,
-      "sha256": "cf3ea5d218b9c69681248ef7691569beb0a7ba7aaf8578387d72ab9b4e569826"
+      "sha256": "c3445cc9e6558571a9f4690abc9609e93d225a8c7bbec8d1dff69d38c099a3b5"
     },
     {
       "path": "language/jvm/Translate.java",
@@ -32,15 +32,21 @@
     },
     {
       "path": "language/jvm/contracts.h",
-      "bytes": 342,
+      "bytes": 550,
       "mode": 420,
-      "sha256": "f4ba43ceb57d3a6509e3966dc62fca070d90802285af6d53cdaeb1fff818b280"
+      "sha256": "8ab1fd1bc5382a8a2d3ddc134e2a465c95eb3012ac3030cae0d158c8017b9c17"
     },
     {
       "path": "language/jvm/guest.c",
       "bytes": 320,
       "mode": 420,
       "sha256": "a155cba67595214b32ff78180d0df7ae8c54e0f39f9e1fbaa003748d18ed8df6"
+    },
+    {
+      "path": "language/jvm/java/wros/scene/Driver.java",
+      "bytes": 5850,
+      "mode": 420,
+      "sha256": "fba961e4f79486a9ea07d40bf986f1c9f191dc7a58dd95500b2cfd9bfc91558c"
     },
     {
       "path": "language/jvm/java/wros/scene/Guard.java",
@@ -56,9 +62,9 @@
     },
     {
       "path": "language/jvm/jvm_frontend.py",
-      "bytes": 7372,
+      "bytes": 7496,
       "mode": 420,
-      "sha256": "346dbfd4cd2422cd1d8d81cf2011ae415575b7ca1ca68a887257eae947c0ec70"
+      "sha256": "5c302ff72c9ec7ffbfe3ebc1a1fcc83cf446b8ddbd30bae09644f04322a9ac25"
     },
     {
       "path": "language/jvm/prepare_host.py",

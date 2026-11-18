@@ -30,3 +30,11 @@ The included samples use `wros.scene.Scene.abi()` and the explicitly granted gua
 The accepted application bytecode covers local classes, primitive arithmetic and arrays, explicit GC, scene ABI and guard calls, and the clock methods. The verifier rejects other external calls, native methods, dynamic call sites, monitors and catch handlers; unhandled exceptions end the guest. Reflection, arbitrary class libraries, direct buffers, JNI, file/network I/O and threads require additional implementation. This scoped component supplies neither safety certification nor a deployable signed release.
 
 The pinned build-host JVM runs interpreted with core dumps disabled. The guest always goes through the optimized Wasm AOT compiler.
+
+### Isolated driver sessions
+
+`wros.scene.Driver` attaches to a deployment-provisioned alias. `open(byte[] alias, int requestLimit, int responseLimit)` takes limits between zero and 65,536 bytes. Set the response limit at least as high as the deployment's registered maximum. Call `connect()`, then `submit(long sequence, long deadline, byte[] payload)` with the canonical payload for the registered schema and an absolute monotonic deadline. Modules receive each operation and the matching resource grant from the VM.
+
+`result(long sequence, byte[] payload, long[] outcome)` requires a destination at least as large as the selected response limit and two outcome words. A successful call stores the driver status, the number of bytes received, and that many payload bytes. A rejected call preserves the caller's arrays. The method returns the VM operation status independently from the driver's status. `describe(long[4])` returns phase, sequence, status and the unknown-effect bit. Call `disconnect()` to detach the transport and `close()` to release the local capability. Provider lifetime and TLS identity belong to the deployment. The wrapper clears its own message staging buffers after use.
+
+Run `tests/jvm_mujoco.py --language java` or `--language kotlin` with the VM source, runtime, TLS library, official MuJoCo 3.4.0, compiler prefix, sysroot manifest, build host bundle and an empty output location. The fixture builds a closed-loop controller from actual JVM language source, compares native motion with the Wasm controller and checks the receiver's range rejection and crash diagnostics.
