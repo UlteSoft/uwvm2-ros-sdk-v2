@@ -2,6 +2,15 @@
 function check(condition) { if (!condition) throw Error("unexpected driver result"); }
 const joint = wros.open("joint");
 check(typeof joint === "object");
+const steady = wros.open("steady");
+check(typeof steady === "object");
+const clock = wros["clock.create"](steady, new ArrayBuffer(8), 8);
+check(clock.status === 0 && clock.written === 8n);
+function deadline() {
+    const sample = wros["clock.read"](steady, clock.data, 32);
+    check(sample.status === 0 && sample.written === 32n);
+    return new DataView(sample.data).getBigUint64(0, true) + 5_000_000_000n;
+}
 const empty = new ArrayBuffer(0);
 function poll(op, request) {
     for (let i = 0; i < 100000; ++i) {
@@ -17,6 +26,9 @@ for (let i = 1; i <= steps; ++i) {
     const message = new DataView(new Uint8Array(template).buffer);
     message.setBigUint64(0, BigInt(i), true);
     message.setBigUint64(32, BigInt(i), true);
+    const until = deadline();
+    message.setBigUint64(8, until, true);
+    message.setBigUint64(message.byteLength - 8, until, true);
     if (mode === "success") message.setFloat64(targetOffset, i % 2 ? 0.5 : -0.5, true);
     check(poll("driver.submit", message.buffer).status === 0);
     let reply = poll("driver.result", word.buffer);

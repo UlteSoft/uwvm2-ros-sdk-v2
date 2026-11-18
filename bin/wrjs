@@ -81,7 +81,7 @@ def main():
         (stage / "application.inc").write_text("static const char application[] =\n" + literal + ";\n")
         (stage / "operations.inc").write_text(methods)
         wasm = stage / "body.wasm"
-        cmd = [ROOT / "bin/wrc", "--target", "wasm32", "--core", "3.0", "--eh", "-O3", "-g",
+        cmd = [sys.executable, ROOT / "bin/wrc", "--target", "wasm32", "--core", "3.0", "--eh", "-O3", "-g",
                "--mte" if args.mte else "--no-mte", "--reactor", "--export", "_start", "--build-receipt",
                "-I", stage, "-D", 'CONFIG_VERSION="2026-06-04"', "-D", "_GNU_SOURCE"]
         if args.toolchain:

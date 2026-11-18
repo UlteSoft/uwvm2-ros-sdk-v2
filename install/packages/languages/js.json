@@ -8,9 +8,9 @@
     },
     {
       "path": "bin/wrjs",
-      "bytes": 5943,
+      "bytes": 5959,
       "mode": 493,
-      "sha256": "e3853534517ee93b5b608ea9d38b980c6249f636da25dfa75f7325d3b4a684b5"
+      "sha256": "82f835be6a556e31fad068ca73316807867bea7ca00764533f313a0d5637f4ef"
     },
     {
       "path": "document/en/js.md",

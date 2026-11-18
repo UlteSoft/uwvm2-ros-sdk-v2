@@ -107,7 +107,7 @@ def main():
             lib = a.objc_runtime32 if width == 32 else a.objc_runtime64
             options += ["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", lib.resolve()]
         if a.language == "js":
-            operations = ("capability.open", "driver.connect", "driver.submit", "driver.result",
+            operations = ("capability.open", "clock.create", "clock.read", "driver.connect", "driver.submit", "driver.result",
                           "driver.describe", "driver.disconnect")
             options = [arg for op in operations for arg in ("--ros-operation", op)]
             app.write_text("const template = " + json.dumps(list(request)) + ";\n" +
@@ -179,7 +179,8 @@ def main():
                           ROOT / "tools/wasm/tag_ir.cpp"))
     if a.language == "js":
         producers.extend((compiler_root / "language/js/entry.c", compiler_root / "third-parties/quickjs/quickjs.c"))
-    suite.main(args, compile_guest=compile_guest, guest_name=a.language, guest_widths=widths,
+    suite.main(args, **({"guest_steady_deadlines": True} if a.language == "js" else {}),
+               compile_guest=compile_guest, guest_name=a.language, guest_widths=widths,
                guest_inputs=(source, Path(__file__), compiler, *producers, *sysroots.values(), *objc_inputs,
                              *([compiler_root / "language/lua/scene.hpp", compiler_root / "language/lua/entry.cpp", compiler_root / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),
                              *[tc/"bin"/tool for tc in {toolchains[w] for w in widths} for tool in ("clang","wasm-ld")], compiler_root / "include/wros/scene.h"))
