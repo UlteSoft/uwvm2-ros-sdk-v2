@@ -4,24 +4,17 @@ This component regression compiles two managed methods that need no CLR state.
 The managed-array control checks the actual unresolved CLR dependency.
 """
 import argparse
-import hashlib
 import json
 import os
 from pathlib import Path
 import resource
 import shlex
-import shutil
 import subprocess
 import sys
 
 
-REF_PACK = "9.0.0-preview.6.24327.7"
-SDK_VERSION = "9.0.100-preview.6.24328.19"
-
-
-def sha(path):
-    with path.open("rb") as source:
-        return hashlib.file_digest(source, "sha256").hexdigest()
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "language/csharp"))
+from host import environment, LOCK, REF_PACK, SDK_VERSION, sha, stage
 
 
 def main():
@@ -45,40 +38,20 @@ def main():
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     tool = args.toolchain.resolve() / "bin"
     fixtures = Path(__file__).with_name("csharp")
-    lock = fixtures / "inputs.sha256"
-    source_roots = {"dotnet": args.dotnet.resolve(), "compiler": args.mono_compiler.resolve()}
-    verified = {}
-    # Limit Roslyn and the CLR host search paths to the precise tool files
-    # exercised by this regression, even when given a larger developer SDK.
+    lock = LOCK
     staging = work / "inputs"
-    for line in lock.read_text().splitlines():
-        expected, name = line.split("  ", 1)
-        relative = Path(name)
-        if relative.is_absolute() or ".." in relative.parts:
-            raise ValueError("unexpected input path " + name)
-        base, *tail = relative.parts
-        source = source_roots[base].joinpath(*tail)
-        if sha(source) != expected:
-            raise ValueError("managed compiler input differs: " + name)
-        destination = staging / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        if name == "dotnet/dotnet":
-            shutil.copy2(source, destination)
-        else:
-            destination.symlink_to(source)
-        verified[name] = expected
+    verified = stage(work, args.dotnet.resolve(), args.mono_compiler.resolve())
     host = staging / "dotnet"
     compiler = staging / "compiler"
     aot = compiler / "bin/mono-aot-cross"
     roslyn = host / "sdk" / SDK_VERSION / "Roslyn/bincore/csc.dll"
     refs = host / "packs/Microsoft.NETCore.App.Ref" / REF_PACK / "ref/net9.0"
-    mono_runtime = host / "packs/Microsoft.NETCore.App.Runtime.Mono.wasi-wasm" / REF_PACK / "runtimes/wasi-wasm"
     runtime = args.runtime.resolve()
     extract = args.extract.resolve()
     src = fixtures / "Body.cs"
     check = fixtures / "check.c"
     marker = sdk / "tools/wasm/tag_ir.cpp"
-    inputs = [Path(__file__), src, check, marker, tool / "llvm-config", tool / "clang",
+    inputs = [Path(__file__), sdk / "language/csharp/host.py", src, check, marker, tool / "llvm-config", tool / "clang",
               tool / "wasm-ld", tool / "llvm-objdump", aot, roslyn, extract,
               runtime, lock, tool / "opt", args.host_cxx.resolve()]
     report = dict(complete=False, cgroup=group, scope="freestanding C# methods",
@@ -86,11 +59,8 @@ def main():
     def save():
         (work / "results.json").write_text(json.dumps(report, indent=2) + "\n")
 
-    env = dict(PATH=str(tool) + ":/usr/bin:/bin", LC_ALL="C", TMPDIR=str(work), HOME=str(work),
-               DOTNET_ROOT=str(host), DOTNET_CLI_HOME=str(work), DOTNET_CLI_TELEMETRY_OPTOUT="1",
-               DOTNET_MULTILEVEL_LOOKUP="0", DOTNET_SKIP_FIRST_TIME_EXPERIENCE="1",
-               COMPlus_EnableDiagnostics="0", DOTNET_SYSTEM_GLOBALIZATION_INVARIANT="1",
-               MONO_PATH=os.pathsep.join(str(mono_runtime / x) for x in ("native", "lib/net9.0")))
+    env = environment(work, tool)
+
     def run(label, argv, expected_failure=None):
         cmd = list(map(str, argv))
         environment = env

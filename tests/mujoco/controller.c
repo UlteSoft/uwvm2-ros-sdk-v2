@@ -4,6 +4,10 @@
 #include <wros/scene.h>
 #include "simulation.h"
 
+#ifdef WROS_CSHARP_CONTROL
+extern int evaluate(int sequence);
+#endif
+
 static uint64_t handle, used;
 static uint64_t response[64];
 
@@ -50,7 +54,13 @@ void _start(void) {
         memcpy(request, &sequence, sizeof(sequence));
         memcpy(request + 32, &sequence, sizeof(sequence));
         if (SUCCESS) {
+#ifdef WROS_CSHARP_CONTROL
+            int direction = evaluate((int)sequence);
+            check(direction == 1 || direction == -1);
+            double target = 0.5 * direction;
+#else
             double target = sequence % 2 ? 0.5 : -0.5;
+#endif
             memcpy(request + TARGET_OFFSET, &target, sizeof(target));
         }
         check(poll(wr_driver_submit, request, sizeof(request)) == 0);

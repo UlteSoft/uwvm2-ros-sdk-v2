@@ -1,5 +1,8 @@
 {
   "id": "csharp",
   "development_package": false,
-  "command_name": "wrcs"
+  "command_name": "wrcs",
+  "optional_components": [
+    "numeric-aot"
+  ]
 }

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/csharp.json",
-      "bytes": 79,
+      "bytes": 129,
       "mode": 420,
-      "sha256": "20a2b823884b3681e87e63aec78541529c059bda733b8e815b5198657d42e8bb"
+      "sha256": "37936fb818deccd05aa6f08e21fcd4db2494f501484c9f5bad47930ec48ef97c"
     }
   ]
 }

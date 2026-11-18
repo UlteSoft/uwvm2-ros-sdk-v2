@@ -1,0 +1,82 @@
+{
+  "files": [
+    {
+      "path": "bin/wrcs",
+      "bytes": 192,
+      "mode": 493,
+      "sha256": "f9c6a917db220affdc1737ff2a5a4e81a9c115bebc33c0793c112750799316a8"
+    },
+    {
+      "path": "document/en/csharp.md",
+      "bytes": 7540,
+      "mode": 420,
+      "sha256": "ef42b5d021fce852612eac2c011c6dfa7389a17b2f601603a18bf50412056583"
+    },
+    {
+      "path": "document/zh/csharp.md",
+      "bytes": 8212,
+      "mode": 420,
+      "sha256": "28f7a34843c5c48c9612a3c0a76d92c8d9907770c2d15f6a84a8beebc361ba4b"
+    },
+    {
+      "path": "examples/csharp/numeric-aot/Filter.cs",
+      "bytes": 127,
+      "mode": 420,
+      "sha256": "d9191e670675bdf36775214a65f0ed785acec4552d8e528526357a730f06eb00"
+    },
+    {
+      "path": "examples/csharp/numeric-aot/xmake.lua",
+      "bytes": 402,
+      "mode": 420,
+      "sha256": "e18c15ac09a3e8fa7caafad6b9f6afa9148f3ef68a1967a9e0b00d2a24e3b5fe"
+    },
+    {
+      "path": "install/private_exports.py",
+      "bytes": 2459,
+      "mode": 420,
+      "sha256": "ec4e946a29cbfa55647f366c6a9b06c27b6b63ec4fc3d6fbd2e6bb8f2a0d5b71"
+    },
+    {
+      "path": "language/csharp/Admit.cs",
+      "bytes": 7006,
+      "mode": 420,
+      "sha256": "caeb4d127efb0e51a6ceb6a9cefa576b70f323b9949578d8538018951b57b79e"
+    },
+    {
+      "path": "language/csharp/host.py",
+      "bytes": 1913,
+      "mode": 420,
+      "sha256": "7f8c0e2f3e4ab4954ee29c1715bb53a678d54862a1760ad651f59a428831e4ec"
+    },
+    {
+      "path": "language/csharp/inputs.sha256",
+      "bytes": 66552,
+      "mode": 420,
+      "sha256": "9fa42c68b6245eb5373459e4617d18b5d508ec493ec37dc7f8f8f7ef9e3bdf73"
+    },
+    {
+      "path": "language/csharp/leaf.cpp",
+      "bytes": 5195,
+      "mode": 420,
+      "sha256": "644da6620586d13d12528ee04ff49132409cfed2736848a1558dde9e782b1547"
+    },
+    {
+      "path": "language/csharp/numeric.py",
+      "bytes": 7927,
+      "mode": 420,
+      "sha256": "ba48597677fe87023a5d531911c77514f47b6ee71cc7fd0841c0c7c199471580"
+    },
+    {
+      "path": "language/csharp/xmake/adapter.lua",
+      "bytes": 2091,
+      "mode": 420,
+      "sha256": "fa3b3a3f375749215ad046b55032432b48e3bcda0e956caf738549611c294b8a"
+    },
+    {
+      "path": "tests/csharp/README.md",
+      "bytes": 3161,
+      "mode": 420,
+      "sha256": "a3896c7439472fb7e944924223a08e12761d2fc6cd8b3b2a2b0300cd831474af"
+    }
+  ]
+}

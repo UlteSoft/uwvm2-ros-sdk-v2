@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
 from bootstrap import Source, install
 from imports import inspect
+from private_exports import keep_private_memory
 from guest_profile import Profile
 
 def main():
@@ -75,6 +76,7 @@ def main():
         guest=next(project.glob("build/*/wasm32/*/robot.wasm"))
         assert {(x["module"],x["name"]) for x in inspect(guest.read_bytes())}=={("uwvm_ros_v2","abi")}
         prior=guest.read_bytes()
+        assert keep_private_memory(prior,{"_start"},max_pages=4096)==prior
         base=[sdk/"bin"/command[lang],"--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),"--bundle",host,
               "--main-class","example.Main","-o",guest]
         for mode in ([],["--mte"],["--no-mte"]):
@@ -106,6 +108,7 @@ def main():
                            "--bundle",host,"--main-class","example.GuardApplication","-o",guard,entry])
         ops=("capability.open","capability.close","guard.create","guard.trigger","guard.take")
         assert {(x["module"],x["name"]) for x in inspect(guard.read_bytes())}=={("uwvm_ros_v2",n) for n in ops}
+        assert keep_private_memory(guard.read_bytes(),{"_start"},max_pages=4096)==guard.read_bytes()
         report["guests"][lang]=hashlib.sha256(guard.read_bytes()).hexdigest()
         for engine in ("int","aot"):
             args=[opts.vm,*Profile().uwvm_feature_flags(),"--debug-fault-action","exit","--runtime-"+engine,"--runtime-compile-threads","0",

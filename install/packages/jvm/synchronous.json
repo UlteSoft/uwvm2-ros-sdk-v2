@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/jvm.md",
-      "bytes": 6163,
+      "bytes": 10479,
       "mode": 420,
-      "sha256": "41ac7017399eb5c138bc55ba37c61c0886920982316ca1c7441aa9012b56941b"
+      "sha256": "b01359cf9149cdb76759f3b6bf46b72318550fc1814b29be2b2e3457ea6ea834"
     },
     {
       "path": "document/zh/jvm.md",
-      "bytes": 5010,
+      "bytes": 8644,
       "mode": 420,
-      "sha256": "458abb9ac5523276abed5a4b91bb9f4bafb7860a5c2dace4f627114d2fe9376e"
+      "sha256": "47f64dce1024b5bdc72a2cf29fa6b07277ac72e4f823760c412a1bd7ffc45694"
     },
     {
       "path": "include/wros/scene.h",
@@ -19,10 +19,16 @@
       "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
     },
     {
-      "path": "language/jvm/Admit.java",
-      "bytes": 9134,
+      "path": "install/private_exports.py",
+      "bytes": 2459,
       "mode": 420,
-      "sha256": "c3445cc9e6558571a9f4690abc9609e93d225a8c7bbec8d1dff69d38c099a3b5"
+      "sha256": "ec4e946a29cbfa55647f366c6a9b06c27b6b63ec4fc3d6fbd2e6bb8f2a0d5b71"
+    },
+    {
+      "path": "language/jvm/Admit.java",
+      "bytes": 9229,
+      "mode": 420,
+      "sha256": "498cbd15054a8cd4e136c08b8fd7551962ca3d0b9b962cfe458a802592db79de"
     },
     {
       "path": "language/jvm/Translate.java",
@@ -43,6 +49,12 @@
       "sha256": "a155cba67595214b32ff78180d0df7ae8c54e0f39f9e1fbaa003748d18ed8df6"
     },
     {
+      "path": "language/jvm/java/wros/scene/CapabilityCursor.java",
+      "bytes": 1779,
+      "mode": 420,
+      "sha256": "14f9c76e16323e4df40bb839dc4baaf46e9297eaed055bc48112e99ecee338e5"
+    },
+    {
       "path": "language/jvm/java/wros/scene/Driver.java",
       "bytes": 5850,
       "mode": 420,
@@ -55,6 +67,12 @@
       "sha256": "ebb8f8e94a7b50a68332d2726c4baaaed0926b596d282f6c7aa44222d9dfca30"
     },
     {
+      "path": "language/jvm/java/wros/scene/MessageFrame.java",
+      "bytes": 2489,
+      "mode": 420,
+      "sha256": "d8a3e35a0eeb12bd8a1956c2f09ab834a43e07007ae9a142dde45359c7dc79b4"
+    },
+    {
       "path": "language/jvm/java/wros/scene/Scene.java",
       "bytes": 226,
       "mode": 420,
@@ -62,15 +80,27 @@
     },
     {
       "path": "language/jvm/jvm_frontend.py",
-      "bytes": 7496,
+      "bytes": 8158,
       "mode": 420,
-      "sha256": "5c302ff72c9ec7ffbfe3ebc1a1fcc83cf446b8ddbd30bae09644f04322a9ac25"
+      "sha256": "1224a13bef05554450282f9a5e596044c0ce6e10cd013426c83944a4a9669169"
+    },
+    {
+      "path": "language/jvm/operations.py",
+      "bytes": 5765,
+      "mode": 420,
+      "sha256": "120c4b964e497b5b4f374eec600d82985a016e846d65f358f9399bf01c975664"
     },
     {
       "path": "language/jvm/prepare_host.py",
       "bytes": 4087,
       "mode": 420,
       "sha256": "a1d5149fe582c22d2a95783fb27c1e40cebb1449f73138a1ce362d346664cda8"
+    },
+    {
+      "path": "language/jvm/references.py",
+      "bytes": 2007,
+      "mode": 420,
+      "sha256": "09501348ef3cb5b80572260979009ce480bfeb36c085052c097ef60afbbfb8d1"
     },
     {
       "path": "third-parties/jvm/LICENSE",

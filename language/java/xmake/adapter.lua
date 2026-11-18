@@ -17,6 +17,10 @@ end
 function build(target, request, sources)
     local args = {request.mte_flag, "--main-class", target:values("wros.jvm_main"), "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
                   "--sysroots", assert(request.sysroots), "--bundle", assert(os.getenv("WROS_JVM_BUNDLE")), "-o", target:targetfile()}
+    for _, operation in ipairs(request.operations) do
+        table.insert(args, "--ros-operation")
+        table.insert(args, operation)
+    end
     table.join2(args, sources)
     os.vrunv(request.program, args)
 end

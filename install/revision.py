@@ -29,7 +29,7 @@ def main():
     parser.add_argument("platform")
     parser.add_argument("language")
     parser.add_argument("--revision-help", action="store_true")
-    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot"),
+    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot", "numeric-aot"),
                         default="development")
     args = parser.parse_args()
     if args.revision_help:
@@ -44,7 +44,11 @@ def main():
     if args.language not in LANGUAGES:
         parser.error("unknown language: " + args.language)
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
-    if args.component == "synchronous-aot":
+    if args.component == "numeric-aot":
+        if args.language != "csharp":
+            parser.error("the numeric-aot component requires csharp")
+        packages.extend(("protocol", "frontend", "csharp/numeric", "xmake/common", "xmake/platforms/" + args.platform))
+    elif args.component == "synchronous-aot":
         if args.language not in ("java", "kotlin"):
             parser.error("the synchronous-aot component requires java or kotlin")
         packages.extend(("protocol", "frontend", "jvm/synchronous", "jvm/" + args.language,
