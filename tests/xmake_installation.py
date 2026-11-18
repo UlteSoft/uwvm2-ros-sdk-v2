@@ -32,7 +32,7 @@ def configure(xmake, destination, project, platform, language):
     (project / name).write_text("")
     env = dict(os.environ, UWVM_ROS_SDK_ROOT=str(destination),
                XMAKE_GLOBALDIR=str(project.parent / "settings"))
-    command = [str(xmake), "f", "-c", "-y"]
+    command = [str(xmake), "f", "-P", str(project), "-c", "-y"]
     proc = subprocess.run(command, cwd=project, env=env, capture_output=True, timeout=40)
     if proc.returncode:
         raise RuntimeError(f"configure {platform}/{language}: " +

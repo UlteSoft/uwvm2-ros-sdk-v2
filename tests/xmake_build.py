@@ -70,8 +70,8 @@ def main():
     demo_script.write_text(demo_script.read_text().replace("target_end()", "set_wros_profile({build_receipt=true})\ntarget_end()"))
     select_candidate(demo)
     for arch in ("wasm32", "wasm64"):
-        run("configure-" + arch, demo, [xmake, "f", "-c", "-y", "-a", arch])
-        run("build-" + arch, demo, [xmake, "-j1", "robot"])
+        run("configure-" + arch, demo, [xmake, "f", "-P", str(demo), "-c", "-y", "-a", arch])
+        run("build-" + arch, demo, [xmake, "-P", str(demo), "-j1", "robot"])
         module = next(demo.glob("build/*/" + arch + "/*/robot.wasm"))
         receipt = json.loads(Path(str(module) + ".wros-build.json").read_bytes())
         if receipt["artifact_sha256"] != sha(module) or receipt["mode"] != ("legacy" if args.candidate_mte else "strict"):
@@ -80,9 +80,9 @@ def main():
         if [(r["module"], r["name"]) for r in rows] != [("uwvm_ros_v2", "abi")]:
             raise AssertionError(rows)
         record["modules"][arch] = dict(path=str(module), sha256=sha(module), imports=rows)
-        run("run-zero-" + arch, demo, [xmake, "run", "robot"], "ROS scene interface is hidden")
-        run("run-granted-" + arch, demo, [xmake, "run", "robot"], WROS_RUN_QUERIES="abi")
-    run("reject-local-query", demo, [xmake, "run", "robot"], "WROS_RUN_QUERIES accepts",
+        run("run-zero-" + arch, demo, [xmake, "run", "-P", str(demo), "robot"], "ROS scene interface is hidden")
+        run("run-granted-" + arch, demo, [xmake, "run", "-P", str(demo), "robot"], WROS_RUN_QUERIES="abi")
+    run("reject-local-query", demo, [xmake, "run", "-P", str(demo), "robot"], "WROS_RUN_QUERIES accepts",
         WROS_RUN_QUERIES="unregistered")
 
     for label, edit, error in (
@@ -95,17 +95,17 @@ def main():
         shutil.copytree(Path(env["SELECTION_C"]) / "examples/c", directory)
         script = directory / "xmake.lua"
         script.write_text(script.read_text().replace("target_end()", edit + "\ntarget_end()"))
-        run(label, directory, [xmake, "f", "-c", "-y"], error)
+        run(label, directory, [xmake, "f", "-P", str(directory), "-c", "-y"], error)
 
     explicit_off = work / "explicit-off"
     shutil.copytree(Path(env["SELECTION_C"]) / "examples/c", explicit_off)
     project = explicit_off / "xmake.lua"
     project.write_text(project.read_text().replace("target_end()", "set_wros_profile({mte=false})\ntarget_end()"))
-    run("configure-off", explicit_off, [xmake, "f", "-c", "-y"])
-    run("missing-off-closure", explicit_off, [xmake, "-j1", "robot"], "no sysroot built by this compiler",
+    run("configure-off", explicit_off, [xmake, "f", "-P", str(explicit_off), "-c", "-y"])
+    run("missing-off-closure", explicit_off, [xmake, "-P", str(explicit_off), "-j1", "robot"], "no sysroot built by this compiler",
         WROS_SYSROOTS_NO_MTE=str(args.sysroots.resolve()))
-    run("build-off", explicit_off, [xmake, "-j1", "robot"])
-    run("run-off", explicit_off, [xmake, "run", "robot"], WROS_RUN_QUERIES="abi")
+    run("build-off", explicit_off, [xmake, "-P", str(explicit_off), "-j1", "robot"])
+    run("run-off", explicit_off, [xmake, "run", "-P", str(explicit_off), "robot"], WROS_RUN_QUERIES="abi")
     multi = work / "multi"
     multi.mkdir()
     (multi / "measure.c").write_text("int measure(int x){return x+DELTA;}\n")
@@ -131,9 +131,9 @@ target("body")
 target_end()
 ''')
     select_candidate(multi)
-    run("two-selection-configure", multi, [xmake, "f", "-c", "-y"])
-    run("two-selection-build", multi, [xmake, "-j1", "body"])
-    run("two-selection-run", multi, [xmake, "run", "body"], WROS_RUN_QUERIES="abi")
+    run("two-selection-configure", multi, [xmake, "f", "-P", str(multi), "-c", "-y"])
+    run("two-selection-build", multi, [xmake, "-P", str(multi), "-j1", "body"])
+    run("two-selection-run", multi, [xmake, "run", "-P", str(multi), "body"], WROS_RUN_QUERIES="abi")
 
     lua = work / "lua"
     lua.mkdir()
@@ -150,9 +150,9 @@ target("script")
 target_end()
 ''')
     select_candidate(lua)
-    run("lua-configure", lua, [xmake, "f", "-c", "-y"])
-    run("lua-build", lua, [xmake, "-j1", "script"])
-    run("lua-run", lua, [xmake, "run", "script"], WROS_RUN_QUERIES="abi,realtime-clock")
+    run("lua-configure", lua, [xmake, "f", "-P", str(lua), "-c", "-y"])
+    run("lua-build", lua, [xmake, "-P", str(lua), "-j1", "script"])
+    run("lua-run", lua, [xmake, "run", "-P", str(lua), "script"], WROS_RUN_QUERIES="abi,realtime-clock")
     for language, inputs in (("fortran", (args.flang, args.flang_mte_tool)), ("tinygo", (args.goroot, args.tinygoroot)), ("rs", (args.rustroot,))):
         if not any(inputs):
             continue
@@ -188,19 +188,19 @@ target_end()
                 + 'set_symbols("debug")\nset_optimize("fastest")\nadd_files("' + source + '")\ntarget_end()\n')
             if mte:
                 select_candidate(project)
-            run(label + "-configure", project, [xmake, "f", "-c", "-y"], **settings)
-            run(label + "-build", project, [xmake, "-j1", "robot"], **settings)
+            run(label + "-configure", project, [xmake, "f", "-P", str(project), "-c", "-y"], **settings)
+            run(label + "-build", project, [xmake, "-P", str(project), "-j1", "robot"], **settings)
             module = next(project.glob("build/*/wasm32/*/robot.wasm"))
             rows = inspect(module.read_bytes())
             if [(r["module"], r["name"]) for r in rows] != [("uwvm_ros_v2", "abi")]:
                 raise AssertionError(rows)
             record["modules"][label] = dict(sha256=sha(module), imports=rows)
-            run(label + "-denied", project, [xmake, "run", "robot"], "ROS scene interface is hidden", **settings)
-            run(label + "-run", project, [xmake, "run", "robot"], WROS_RUN_QUERIES="abi", **settings)
+            run(label + "-denied", project, [xmake, "run", "-P", str(project), "robot"], "ROS scene interface is hidden", **settings)
+            run(label + "-run", project, [xmake, "run", "-P", str(project), "robot"], WROS_RUN_QUERIES="abi", **settings)
             if language == "rs" and mte:
                 script = project / "xmake.lua"
                 script.write_text(script.read_text().replace("target_end()", 'add_ldflags("--extra", {force=true})\ntarget_end()'))
-                run("rs-link-flag-refused", project, [xmake, "f", "-c", "-y"], "Unsupported guest target setting: ldflags", **settings)
+                run("rs-link-flag-refused", project, [xmake, "f", "-P", str(project), "-c", "-y"], "Unsupported guest target setting: ldflags", **settings)
     record["complete"] = True
     save()
 

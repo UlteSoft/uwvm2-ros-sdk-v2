@@ -57,8 +57,8 @@ def main():
         script = project / "xmake.lua"
         setting = '"legacy"' if args.candidate_mte else "true"
         script.write_text(script.read_text().replace("mte = true", "mte = " + (setting if mode == "on" else "false")))
-        run(mode + "-configure", project, ["f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm"+str(args.address_width)])
-        run(mode + "-build", project, ["-j1", "robot"])
+        run(mode + "-configure", project, ["f", "-P", str(project), "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm"+str(args.address_width)])
+        run(mode + "-build", project, ["-P", str(project), "-j1", "robot"])
         modules = list((project / "build").rglob("robot.wasm"))
         if len(modules) != 1:
             raise AssertionError("expected one Wasm program")
@@ -66,8 +66,8 @@ def main():
         if [(row["module"], row["name"]) for row in rows] != [("uwvm_ros_v2", "abi")]:
             raise AssertionError(rows)
         record["modules"][mode] = dict(sha256=sha(modules[0]), imports=rows)
-        run(mode + "-denied", project, ["run", "robot"], expected="ROS scene interface is hidden")
-        run(mode + "-granted", project, ["run", "robot"], WROS_RUN_QUERIES="abi")
+        run(mode + "-denied", project, ["run", "-P", str(project), "robot"], expected="ROS scene interface is hidden")
+        run(mode + "-granted", project, ["run", "-P", str(project), "robot"], WROS_RUN_QUERIES="abi")
     record["complete"] = True
     save()
 

@@ -80,13 +80,13 @@ def main():
             print(name, stage.returncode, ok, flush=True)
             if not ok:
                 raise RuntimeError(data[-2500:].decode(errors="replace"))
-        run("configure", ["f", "-c", "-y", "-a", options.target], True)
-        run("build", ["-j1", "robot_status"], True)
+        run("configure", ["f", "-P", str(demo), "-c", "-y", "-a", options.target], True)
+        run("build", ["-P", str(demo), "-j1", "robot_status"], True)
         guest = next(demo.glob("build/*/"+options.target+"/*/robot_status.wasm"))
         assert guest.read_bytes()[:8] == bytes.fromhex("0061736d01000000")
         report["guest"] = digest(guest)
-        run("deny", ["run", "robot_status"], False, "realtime-clock")
-        run("allow", ["run", "robot_status"], True, "abi,realtime-clock")
+        run("deny", ["run", "-P", str(demo), "robot_status"], False, "realtime-clock")
+        run("allow", ["run", "-P", str(demo), "robot_status"], True, "abi,realtime-clock")
         report["complete"] = True
     finally:
         (out/"results.json").write_text(json.dumps(report, indent=2)+"\n")
