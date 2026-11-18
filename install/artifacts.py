@@ -10,7 +10,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from imports import Reader
+from imports import Reader, require_core, inspect
 
 MAGIC = b"\0asm\1\0\0\0"
 NOTE = "wros.sdk.object"
@@ -34,8 +34,7 @@ def sections(data):
     if len(data) > MAX_BYTES:
         raise ValueError("build artifact exceeds 128 MiB")
     reader = Reader(data)
-    if bytes(reader.take(8)) != MAGIC:
-        raise ValueError("expected a core Wasm object/module")
+    require_core(reader)
     count = 0
     while reader.position < len(data):
         count += 1
@@ -85,6 +84,7 @@ def seal_object(data, profile, compiler_sha256, closure_sha256):
         raise ValueError("invalid compiler digest")
     if not re.fullmatch(r"[0-9a-f]{64}", closure_sha256):
         raise ValueError("invalid sysroot closure digest")
+    inspect(data)
     linking = 0
     for _, _, name, body in sections(data):
         if name == NOTE:
@@ -116,6 +116,7 @@ def unique_object(pairs):
 
 def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None):
     """Check the entire object against its final note and optional expected ABI."""
+    inspect(data)
     notes, linking = [], 0
     for start, end, name, body in sections(data):
         if name == "linking":

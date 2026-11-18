@@ -1,4 +1,10 @@
 """Inspect final Wasm imports without instantiating a guest. Derived from the UlteSoft SDK binary reader."""
+import re
+
+
+# Legacy WIT lowering uses package:interface/name with an optional version.
+WIT_INTERFACE = re.compile(r"^(?:\[export\])?[a-z][a-z0-9-]*:[a-z][a-z0-9-]*/[a-z][a-z0-9-]*(?:[@#/]|$)")
+
 HEAPS={0x69:'exn',0x6a:'array',0x6b:'struct',0x6c:'i31',0x6d:'eq',0x6e:'any',
        0x6f:'extern',0x70:'func',0x71:'none',0x72:'noextern',0x73:'nofunc',0x74:'noexn'}
 VALUES={0x7f:'i32',0x7e:'i64',0x7d:'f32',0x7c:'f64',0x7b:'v128',0x70:'funcref',0x6f:'externref'}
@@ -128,22 +134,55 @@ class Reader:
         if self.position!=len(self.data):raise ValueError('trailing bytes in parsed Wasm section')
 
 
+CORE_HEADER = b'\0asm\1\0\0\0'
+
+
+def require_core(reader):
+    header = bytes(reader.take(8))
+    if header != CORE_HEADER:
+        if header[:4] == b'\0asm' and header[6:8] == b'\1\0':
+            raise ValueError("WebAssembly Component Model binaries are prohibited by the SDK")
+        raise ValueError("expected a WebAssembly core binary")
+
+
+def reject_component_name(name):
+    # Reserve structural interface names only. Ordinary data and debug strings
+    # can contain arbitrary text without changing a core module's ABI.
+    if (name.startswith(("wasi:", "cm32p2", "cm32p3", "cabi_", "canonical_abi"))
+            or name.startswith(("[resource-new]", "[resource-drop]", "[resource-rep]", "[async-lower]", "[async-lift]"))
+            or WIT_INTERFACE.match(name)
+            or name in ("wasip2", "wasip3", "wasi_snapshot_preview2", "wasi_snapshot_preview3")):
+        raise ValueError("WASI P2/P3 and Component Model interfaces are prohibited: " + name)
+
+
 def inspect(data):
     """Return function imports and their actual type-section signatures."""
     source=Reader(data)
-    if bytes(source.take(8))!=b'\0asm\1\0\0\0':raise ValueError('expected a core Wasm v1 binary')
+    require_core(source)
     types=[];imports=[];seen=set()
     while source.position<len(source.data):
         section=source.byte();body=Reader(source.take(source.uint()))
-        if section in (1,2):
-            if section in seen:raise ValueError('duplicate type/import section')
+        if section in (1,2,7):
+            if section in seen:raise ValueError('duplicate type/import/export section')
             seen.add(section)
-        if section==1:
+        if section==0:
+            custom = body.name()
+            if custom.startswith("component-type") or custom == "component-name":
+                raise ValueError("Component Model custom sections are prohibited: " + custom)
+        elif section==7:
+            for _ in range(body.count()):
+                reject_component_name(body.name())
+                body.byte()
+                body.uint()
+            body.end()
+        elif section==1:
             types=body.types()
             body.end()
         elif section==2:
             for _ in range(body.count()):
                 module,name,kind=body.name(),body.name(),body.byte()
+                reject_component_name(module)
+                reject_component_name(name)
                 row={'module':module,'name':name,'kind':kind}
                 if kind==0:
                     index=body.uint()

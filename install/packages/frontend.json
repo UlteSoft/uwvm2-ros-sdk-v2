@@ -26,9 +26,9 @@
     },
     {
       "path": "install/artifacts.py",
-      "bytes": 9766,
+      "bytes": 9748,
       "mode": 420,
-      "sha256": "5b1d97a9bc9f6174668fbf0eb3fe74a92e53d513fde031a967d2fa423a5d69c8"
+      "sha256": "52880cbd8590daefc12c3a2ad1ff71029bd89d49419e72e70a579b9919191af7"
     },
     {
       "path": "install/compiler.py",
@@ -50,9 +50,9 @@
     },
     {
       "path": "install/imports.py",
-      "bytes": 7561,
+      "bytes": 9179,
       "mode": 420,
-      "sha256": "ddcf6e2dc2b54acd3b53e8bef77031570666f80e019c325c534d94ae9118522e"
+      "sha256": "764e649dd56b5754fc9b0a9091393a0f6d1b08078b960e2aa1cca07b57d4ba4b"
     }
   ]
 }

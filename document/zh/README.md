@@ -87,3 +87,7 @@ SDK 的登记范围可扩展到国内和国际厂商。纯算法留在 Wasm，�
 发布的每个语言编译器都必须支持 WasmMTE，默认启用。可用 `--no-mte` 关闭整个目标的插桩，并使用对应的 sysroot。C/C++ 可以通过 `no_sanitize("memtag")` 等源码属性局部改变插桩。源码作者的显式选择和编译器经边界、生命周期分析后自动省略标签，是两种独立机制。
 
 [TinyGo](tinygo.md) · [Fortran](fortran.md) · [Rust](rust.md)
+
+### 支持的 Wasm 格式
+
+SDK 构建和运行 WebAssembly **核心模块**，可按项目选择 Core 功能级别。SDK 拒绝 WASI Preview 2、Preview 3 目标、Component Model 二进制、组件类型元数据和组件 ABI 的导入与导出。单独编译的对象及静态库的每个成员都遵守同一规则。应用通过 ROSv2 核心模块接口访问宿主，使用 Preview 1 的时钟或环境变量仍需 VM 单独授权。选择 Core 3.0 只控制 Wasm 功能级别。

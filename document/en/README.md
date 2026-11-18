@@ -90,3 +90,7 @@ Industrial builds bind each object to the compiler digest, the selected guest pr
 Every published language compiler must support WasmMTE. Tagging is enabled by default. Select `--no-mte` for the whole target and provide the corresponding sysroot. C/C++ declarations can change instrumentation locally through Clang source attributes such as `no_sanitize("memtag")`. This is an author decision. Automatic tag elision requires compiler analysis of the object and all its uses.
 
 [TinyGo](tinygo.md) · [Fortran](fortran.md) · [Rust](rust.md)
+
+### Supported Wasm format
+
+The SDK builds and runs WebAssembly **core modules** at the selected core feature level. It rejects WASI Preview 2 and Preview 3 targets, Component Model binaries, component-type metadata, and component ABI imports and exports. The same rule applies to separately compiled objects and every member of a guest static archive. SDK programs use the ROSv2 core imports. A selected Preview 1 clock or environment import still requires its own VM permission. A Core 3.0 feature selection does not select a WASI version.

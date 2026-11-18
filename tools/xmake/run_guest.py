@@ -6,6 +6,10 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "install"))
 from guest_profile import Profile
+from artifacts import read_bounded
+from frontend import audit
+import subprocess
+import tempfile
 
 
 def main():
@@ -40,8 +44,18 @@ def main():
                 argv += ["--wasip1-single-interface", "main", name + suffix, "allow"]
             for q in clocks:
                 argv += ["--wasip1-single-grant", "main", q]
-    os.execv(vm, [*argv, "--run", str(args.module.resolve(strict=True))])
+    try:
+        content = read_bounded(args.module)
+        audit(content, profile)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    # The file can be replaced after validation. Give the VM the exact audited bytes.
+    with tempfile.TemporaryDirectory(prefix="wros-core-") as directory:
+        snapshot = Path(directory) / "guest.wasm"
+        snapshot.write_bytes(content)
+        status = subprocess.run([*argv, "--run", str(snapshot)]).returncode
+    return status if status >= 0 else 128 - status
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
