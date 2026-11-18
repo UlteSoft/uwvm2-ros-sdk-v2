@@ -15,6 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
 from guest_profile import Profile
 from imports import inspect
+from artifacts import read_bounded, strip_notes
+from compiler import compiler_environment, make_command
+from frontend import audit
 import qualification
 
 ARCHIVE = ROOT / "third-parties/lua/lua-5.4.9.tar.gz"
@@ -134,17 +137,24 @@ def main():
         literal = "\n".join('"' + "".join("\\%03o" % b for b in data[i:i+128]) + '"'
                             for i in range(0, len(data), 128)) or '""'
         (directory / "chunk.inc").write_text("static const char script[] = " + literal + ";\n")
-        cmd = [sys.executable, ROOT / "bin/wrcc", "--toolchain", args.toolchain, "--sysroots",
-               args.sysroots, "--target", args.target, qualification.switch(args), "--reactor", "--export", "_start",
-               "-O3", "-g", "-Dl_signalT=int", "-DLUA_USE_JUMPTABLE=0", "-I", directory]
+        # The signed Lua release covers these fixed-language sources and the
+        # verified C++ backend. Admit the Lua artifact once at the public entry.
+        flags = ["-nostartfiles", "-Wl,--no-entry", "-Wl,--export=_start", "-O3", "-g",
+                 "-Dl_signalT=int", "-DLUA_USE_JUMPTABLE=0", "-I" + str(ROOT / "include"), "-I" + str(directory)]
         if args.guest_seed is not None:
-            cmd += ["-D", "WROS_LUA_GUEST_CLOCKLESS"]
+            flags.append("-DWROS_LUA_GUEST_CLOCKLESS")
         if methods:
             (directory / "scene_methods.inc").write_text("\n".join(methods) + "\n")
-            cmd += ["-D", "WROS_LUA_SCENE"]
+            flags.append("-DWROS_LUA_SCENE")
         staged = directory / "guest.wasm"
-        subprocess.run([*cmd, ROOT / "language/lua/entry.cpp", *units, "-o", staged], check=True)
-        imports = {(entry["module"], entry["name"]) for entry in inspect(staged.read_bytes())}
+        flags.extend(map(str, [ROOT / "language/lua/entry.cpp", *units]))
+        flags.extend(["-o", str(staged), "-lc-printscan-long-double"])
+        command, _ = make_command(args.toolchain, [args.sysroots], profile, "cpp", flags, verify=True)
+        subprocess.run(command, env=compiler_environment(args.toolchain), check=True)
+        content = strip_notes(read_bounded(staged))
+        audit(content, profile)
+        imports = {(entry["module"], entry["name"]) for entry in inspect(content)}
+        staged.write_bytes(content)
         expected = {("uwvm_ros_v2", name) for name in operations}
         if args.guest_seed is None:
             clock = "clock_time_get_wasm64" if args.target == "wasm64" else "clock_time_get"
