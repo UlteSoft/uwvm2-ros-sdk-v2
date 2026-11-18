@@ -8,6 +8,23 @@ class Installer(unittest.TestCase):
         tmp=root/".tmp";tmp.mkdir(exist_ok=True);self.tmp=tempfile.TemporaryDirectory(dir=tmp)
         self.prefix=Path(self.tmp.name); self.commit=subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip()
     def tearDown(self):self.tmp.cleanup()
+    def test_public_executable_names(self):
+        from revision import COMPILER_COMMANDS
+
+        names = set(COMPILER_COMMANDS.values())
+        self.assertNotIn("wrar", names)
+        for name in names:
+            self.assertRegex(name, r"\Awr[a-z][a-z0-9]*\Z")
+        tree = subprocess.check_output(
+            ["git", "-C", str(root), "ls-tree", "-z", self.commit + ":bin"]
+        )
+        for entry in tree.rstrip(b"\0").split(b"\0"):
+            attributes, path = entry.split(b"\t", 1)
+            with self.subTest(path=path):
+                mode, kind, _ = attributes.split()
+                self.assertEqual((mode, kind), (b"100755", b"blob"))
+                self.assertIn(path.decode("ascii"), names | {"wrar"})
+
     def test_installed_compiler_command_names(self):
         from revision import COMPILER_COMMANDS, DEVELOPMENT, LANGUAGES
 
