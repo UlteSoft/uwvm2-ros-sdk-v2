@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--threads", action="store_true", help="validate the available wasm32 shared-memory profile")
     parser.add_argument("--address-width", type=int, choices=(32, 64), help="exercise only the selected width")
     parser.add_argument("--exception-model", choices=("eh", "noeh"), help="exercise only the selected ABI")
+    parser.add_argument("--no-debug", action="store_true", help="exercise the default release without source debug information")
     candidate_arguments(parser)
     opt = parser.parse_args()
     tc, fc, marker, vm, work = (p.resolve() for p in
@@ -32,7 +33,7 @@ def main():
     receipts = [p.resolve() for p in opt.sysroots]
     available_profiles = [target["guest_profile"] for path in receipts
                           for target in json.loads(path.read_bytes())["targets"]]
-    state = dict(complete=False, cgroup=cgroup_record(), address_widths=widths, exception_models=models, cases=[], modules={})
+    state = dict(complete=False, debug=not opt.no_debug, cgroup=cgroup_record(), address_widths=widths, exception_models=models, cases=[], modules={})
     work.mkdir(parents=True, exist_ok=False)
     (work / "tmp").mkdir()
     os.environ["TMPDIR"] = str(work / "tmp")
@@ -76,7 +77,7 @@ def main():
             name = f"wasm{bits}-{eh}"
             profile = Profile(bits, exceptions=eh, mte=not opt.no_mte, threads=opt.threads)
             flags = ["--toolchain", tc, *(arg for receipt in receipts for arg in ("--sysroots", receipt)), "--target", f"wasm{bits}",
-                     "--eh" if eh == "eh" else "--no-eh", "-O3", "-g"]
+                     "--eh" if eh == "eh" else "--no-eh", "-O3", *([] if opt.no_debug else ["-g"])]
             if opt.threads:
                 flags.append("--threads")
             if opt.no_mte:

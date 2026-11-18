@@ -74,22 +74,60 @@ def lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source,
     return obj
 
 
-def needs_descriptor_runtime(inputs):
-    """Select compute libraries from unresolved Fortran imports in guest objects."""
+# Flang generates one external entry point per operation and operand kind.
+# These families are implemented by separate upstream translation units.
+TRANSFORMATIONS = frozenset("Cshift CshiftVector Eoshift EoshiftVector Pack Reshape ShallowCopy "
+                            "ShallowCopyDirect Spread Transpose Unpack".split())
+LOGICAL_REDUCTIONS = frozenset("All AllDim Any AnyDim Count CountDim Parity ParityDim".split())
+
+
+def array_intrinsic_unit(name):
+    """Choose the upstream guest implementation for an unresolved Flang entry point."""
+    if name in TRANSFORMATIONS:
+        return "transformational"
+    if name in LOGICAL_REDUCTIONS or re.fullmatch(r"I(?:All|Any|Parity)(?:1|2|4|8|16|Dim)", name):
+        return "reduction"
+    if name == "SumDim" or re.fullmatch(r"Sum(?:(?:Integer|Unsigned)(?:1|2|4|8|16)|Real(?:4|8))", name):
+        return "sum"
+    if name == "DotProductLogical" or re.fullmatch(r"DotProductReal[48]", name):
+        return "dot-product-real"
+    if re.fullmatch(r"DotProduct(?:Integer|Unsigned)(?:1|2|4|8|16)", name):
+        return "dot-product-integer"
+    pair = re.fullmatch(r"Matmul(?:Direct)?(Integer|Logical|Real|Unsigned)[1248](Integer|Logical|Real|Unsigned)[1248]", name)
+    if pair:
+        kinds = set(pair.groups())
+        if kinds in ({"Integer"}, {"Logical"}):
+            return "matmul-integer"
+        if "Real" in kinds and kinds <= {"Real", "Integer", "Unsigned"}:
+            return "matmul-real"
+    return None
+
+
+def runtime_requirements(inputs):
+    """Inspect unresolved guest symbols once, including sealed static archive members."""
     prefixes = ("_FortranAAllocatable", "_FortranAAssign", "_FortranACopyInAssign",
                 "_FortranACopyOutAssign", "_FortranAMoveAlloc", "_FortranAPointer", "CFI_")
+    descriptors = False
+    intrinsics = set()
     for path in inputs:
         data = read_bounded(path)
         members = archive_members(data) if path.suffix == ".a" else (data,)
         for member in members:
-            if any(item["module"] == "env" and item["name"].startswith(prefixes)
-                   for item in inspect(member)):
-                return True
-    return False
+            for item in inspect(member):
+                if item["module"] != "env":
+                    continue
+                name = item["name"]
+                if name.startswith(prefixes):
+                    descriptors = True
+                if name.startswith("_FortranA"):
+                    unit = array_intrinsic_unit(name.removeprefix("_FortranA"))
+                    if unit:
+                        intrinsics.add(unit)
+    return descriptors or bool(intrinsics), sorted(intrinsics)
 
 
-def guest_runtime(command, env, work, toolchain, descriptors):
-    """Compile the numerical library and any selected compute procedures for this profile."""
+def guest_runtime(command, env, work, toolchain, descriptors, intrinsics):
+    """Compile the target's numerical and selected descriptor/array runtime procedures."""
     includes = [VENDOR / "flang/include", VENDOR / "flang-rt/include"]
     runtime = VENDOR / "flang-rt/lib/runtime"
     sources = [runtime / (unit + ".cpp") for unit in ("numeric", "complex-powi")]
@@ -101,7 +139,7 @@ def guest_runtime(command, env, work, toolchain, descriptors):
         units = ("ISO_Fortran_binding", "allocatable", "allocator-registry", "assign",
                  "copy", "derived", "descriptor", "memory", "pointer", "stat", "tools",
                  "type-code", "type-info", "work-queue")
-        sources.extend(runtime / (unit + ".cpp") for unit in units)
+        sources.extend(runtime / (unit + ".cpp") for unit in (*units, *intrinsics))
         sources.append(ROOT / "language/fortran/compute_platform.cpp")
     flags = ["--std", "c++17", *options, *(arg for p in includes for arg in ("-I", p))]
     objects = []
@@ -111,7 +149,7 @@ def guest_runtime(command, env, work, toolchain, descriptors):
                        check=True, env=env, cwd=work)
         objects.append(obj)
     archive = work / "libflang-compute.a"
-    subprocess.run([sys.executable, ROOT / "bin/wrar", "--toolchain", toolchain, *objects, "-o", archive],
+    subprocess.run([sys.executable, "-B", ROOT / "bin/wrar", "--toolchain", toolchain, *objects, "-o", archive],
                    check=True, env=env, cwd=work)
     return archive
 
@@ -178,10 +216,10 @@ def main():
                 flags.append("--threads")
             if opts.g:
                 flags.append("-g")
-            descriptors = needs_descriptor_runtime([*units, *objects])
-            cc = [sys.executable, ROOT / "bin/wrc", *flags]
-            cxx = [sys.executable, ROOT / "bin/wrcc", *flags]
-            runtime = guest_runtime(cxx, env, work, toolchain, descriptors)
+            descriptors, intrinsics = runtime_requirements([*units, *objects])
+            cc = [sys.executable, "-B", ROOT / "bin/wrc", *flags]
+            cxx = [sys.executable, "-B", ROOT / "bin/wrcc", *flags]
+            runtime = guest_runtime(cxx, env, work, toolchain, descriptors, intrinsics)
             stubs = []
             for source in (work / "wros_imports.c", ROOT / "language/fortran/entry.c"):
                 obj = work / (source.stem + ".o")

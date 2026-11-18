@@ -107,10 +107,10 @@ def main():
     if a.language == "fortran":
         flang = a.toolchain / "bin/flang"
         marker = a.toolchain / "bin/wros-flang-mte"
-        if (a.O != "3" or not a.g or not a.eh or not flang.is_file() or not marker.is_file() or
+        if (a.O != "3" or not a.eh or not flang.is_file() or not marker.is_file() or
                 qualification.digest(flang) != a.approved_flang_sha256 or
                 qualification.digest(marker) != a.approved_marker_sha256):
-            p.error("Fortran qualification requires -O3 -g, EH, the approved Flang and its matching marker")
+            p.error("Fortran qualification requires -O3, EH, the approved Flang and its matching marker")
         external.update(flang=flang, marker=marker)
     vm_digest = qualification.digest(a.runtime)
     names = ("clang", "wasm-ld", "llc", "llvm-objdump", "llvm-ar", "FileCheck")
@@ -158,7 +158,8 @@ def main():
                                                 "--mode", "candidate", "--eh" if a.eh else "--no-eh",
                                                 "--output", a.output / "objectc"]))
     if a.language == "fortran":
-        language_flags = [*base, "--flang", flang, "--address-width", str(bits), "--sysroots", a.sysroots, "--candidate-mte"]
+        language_flags = [*base, "--flang", flang, "--address-width", str(bits), "--sysroots", a.sysroots,
+                          "--candidate-mte", *([] if a.g else ["--no-debug"])]
         tests.append(("fortran-compiler", "fortran_compiler.py", ["--flang", flang, "--approved-sha256", a.approved_flang_sha256,
                                                                  "--output", a.output / "fortran-compiler"]))
         tests.append(("fortran-abi", "fortran_aot.py", [*language_flags, "--mte-tool", marker, "--exception-model", "eh",
@@ -168,6 +169,8 @@ def main():
                                                                "--output", a.output / name]))
         tests.append(("fortran-descriptors", "fortran_descriptors.py",
                       [*language_flags, "--output", a.output / "fortran-descriptors"]))
+        tests.append(("fortran-intrinsics", "fortran_intrinsics.py",
+                      [*language_flags, "--output", a.output / "fortran-intrinsics"]))
     for label, script, arguments in tests:
         proc = subprocess.run([sys.executable, "-I", "-B", "-c",
                                "import runpy,sys; p=sys.argv.pop(1); sys.path.insert(0,p);"

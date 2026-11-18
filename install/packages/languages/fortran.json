@@ -14,21 +14,21 @@
     },
     {
       "path": "bin/wrf",
-      "bytes": 202,
+      "bytes": 233,
       "mode": 493,
-      "sha256": "8f122dc20f53f0b5a5949c604f906e9c8625871401ad3b4b45d4ee9d0ddc30dd"
+      "sha256": "e5153c73e997f15983b774641bbf0c5164ebdf9a40073340d147e027442627b9"
     },
     {
       "path": "document/en/fortran.md",
-      "bytes": 11366,
+      "bytes": 12487,
       "mode": 420,
-      "sha256": "844438ef4194eb98768691d38d63e8fd57768da346537c1a9d9f558bcdb47ebc"
+      "sha256": "84bef0b1cff9c0e8199c03476c1ec35ebadd152422a595173467afdb9a337665"
     },
     {
       "path": "document/zh/fortran.md",
-      "bytes": 10137,
+      "bytes": 11084,
       "mode": 420,
-      "sha256": "71c76f9bdf12b986005672d4794cbb1de9bd02dfbdb5f54c4a2fc57799eb4cc4"
+      "sha256": "82b2aca40787f57a70580906dec416518ac40e8dcdfe6e9e221bad8398f753f1"
     },
     {
       "path": "examples/fortran/body.f90",
@@ -74,9 +74,9 @@
     },
     {
       "path": "language/fortran/frontend_fortran.py",
-      "bytes": 11487,
+      "bytes": 13397,
       "mode": 420,
-      "sha256": "3b5057962196f371046fa51d7a114383b0ce19b5df104e43687e77daf10c8723"
+      "sha256": "70b0aefbf220b0b060e221d999dca27fa425bf6befc3da4d585a506a7493f524"
     },
     {
       "path": "language/fortran/mark_mte.cpp",
@@ -104,9 +104,9 @@
     },
     {
       "path": "third-parties/fortran/README.md",
-      "bytes": 2038,
+      "bytes": 2358,
       "mode": 420,
-      "sha256": "770ffbc81cbed1c060175be71b41d6f7ccb948fa19b3205990d13a6243904977"
+      "sha256": "595df815f48f05d6c1c7161eef93c20a43f3cd4e270552ef57da55d8abc268b2"
     },
     {
       "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/allocator-registry.h",
@@ -173,6 +173,12 @@
       "bytes": 12341,
       "mode": 420,
       "sha256": "fc2fc97b0d0b0c3e661f01bd5c3449ed9229cf98945cb8c12d055e6b81050996"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/reduction-templates.h",
+      "bytes": 16113,
+      "mode": 420,
+      "sha256": "5222d59debeaddbfd9c3f783d8ce7993b4ca6d0274eb35a7c3eb161f4701ba8f"
     },
     {
       "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/stat.h",
@@ -277,6 +283,24 @@
       "sha256": "a561fcab8b4ee756b5c25ddc46aa31aab401ec888d3c567eb2fb71e9c32e0654"
     },
     {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/dot-product-integer.cpp",
+      "bytes": 2799,
+      "mode": 420,
+      "sha256": "c31cfd0da587c8a355470bb853d5794d6d2bc2c9ca626160c4b2b627fb485b41"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/dot-product-real.cpp",
+      "bytes": 1644,
+      "mode": 420,
+      "sha256": "feeba8ea513aa577e4b171e3b7d131e3f8e5f62cc79a2a4995573d5b025ea23b"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/dot-product.h",
+      "bytes": 6550,
+      "mode": 420,
+      "sha256": "5502d64301f71742e22cd05bb585f4122d2a936811d463700e5f8639bc4accab"
+    },
+    {
       "path": "third-parties/fortran/flang-rt/lib/runtime/iso_c_binding.f90",
       "bytes": 5233,
       "mode": 420,
@@ -293,6 +317,24 @@
       "bytes": 7123,
       "mode": 420,
       "sha256": "28666c060c47eca73e0b9e2e9607b06b9a8738019a24d786a65176b1ec42a97d"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/matmul-integer.cpp",
+      "bytes": 1947,
+      "mode": 420,
+      "sha256": "bcaa2e738712083ffc6592cf237f2dbe6f78f562427e5c9c121420d174444eb1"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/matmul-real.cpp",
+      "bytes": 1880,
+      "mode": 420,
+      "sha256": "7deb8af17ef1f25701b0600748e0e97fed7c30a9890f488c0f060898fa31b59b"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/matmul.h",
+      "bytes": 18849,
+      "mode": 420,
+      "sha256": "1588152a192d193c96c714cf29106b1e73105a63d7b2066d1d92f9c64af3dc0a"
     },
     {
       "path": "third-parties/fortran/flang-rt/lib/runtime/memory.cpp",
@@ -313,6 +355,12 @@
       "sha256": "4ada414c1ddbec63517f422a511a6f2ee8b49f846de6f30d4422f3e7b383f238"
     },
     {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/reduction.cpp",
+      "bytes": 16029,
+      "mode": 420,
+      "sha256": "a1ea81c08d3861d094cc64b112c3adb468a714873ed0506530bb6401bfd8f131"
+    },
+    {
       "path": "third-parties/fortran/flang-rt/lib/runtime/stack.h",
       "bytes": 4060,
       "mode": 420,
@@ -325,10 +373,22 @@
       "sha256": "6cfc6d80a41c927507179f2d4bf66710951984862fce576ee9a34a68ea4b45de"
     },
     {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/sum.cpp",
+      "bytes": 9514,
+      "mode": 420,
+      "sha256": "81a80b0f5a1e2b55845e1d83eb2ce71cafc476e4684bfcae552ab32bb72eefdc"
+    },
+    {
       "path": "third-parties/fortran/flang-rt/lib/runtime/tools.cpp",
       "bytes": 13228,
       "mode": 420,
       "sha256": "2d0a4145bf494a9c2adee943d23339bb1e688b3fd9c99245c8e80f96b208e201"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/transformational.cpp",
+      "bytes": 37341,
+      "mode": 420,
+      "sha256": "baab678026b01e29c9014480e7cdc2beb17ae8ab967a95ee72c5d05fb830e4e7"
     },
     {
       "path": "third-parties/fortran/flang-rt/lib/runtime/type-code.cpp",
@@ -547,10 +607,22 @@
       "sha256": "1cf92f84ee92c739b58dfbd827d9b29b891939fe7e19d95a9ee57a98a447b478"
     },
     {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/reduction.h",
+      "bytes": 27765,
+      "mode": 420,
+      "sha256": "58c3a77484af60323c6d3926f7614e79ac865fb637470034addd15a175270a3b"
+    },
+    {
       "path": "third-parties/fortran/flang/include/flang/Runtime/stop.h",
       "bytes": 1866,
       "mode": 420,
       "sha256": "2f6d3cba19d233fccdb7a07d0b28591b3489973d441617aae542fc9702561f09"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/transformational.h",
+      "bytes": 7698,
+      "mode": 420,
+      "sha256": "88af09e3f1723b836bde18ed53329b5ea42437ad5c9ac9d78d2284006e62edf1"
     },
     {
       "path": "third-parties/fortran/llvm23-wasm-abi.patch",

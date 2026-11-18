@@ -101,6 +101,12 @@ target_end()
 
 ## 验收本地编译器发布
 
-默认 MTE 模式要求可信本地机构签发与目标配置匹配的发布凭据。在干净的 SDK 源码检出目录中，运行共享验收脚本并指定 `--language fortran --target wasm32 --eh -O3 -g`。若有实际完成验证的 wasm64 sysroot，也可选择 wasm64。除已批准的 SDK 提交、后端、VM 和 sysroot 摘要外，分别用 `--approved-flang-sha256` 和 `--approved-marker-sha256` 指定 `TOOLCHAIN/bin/flang` 与 `TOOLCHAIN/bin/wros-flang-mte` 的摘要。脚本会运行双引擎和 Fortran 存储操作，并检查 Flang 能生成两种位宽的 Wasm 对象且拒绝生成原生对象。仅用于显式开发验证的 Flang 不满足发布验收条件。
+默认 MTE 模式要求可信本地机构签发与目标配置匹配的发布凭据。在干净的 SDK 源码检出目录中，运行共享验收脚本并指定 `--language fortran --target wasm32 --eh -O3 -g`。若有实际完成验证的 wasm64 sysroot，也可选择 wasm64。除已批准的 SDK 提交、后端、VM 和 sysroot 摘要外，分别用 `--approved-flang-sha256` 和 `--approved-marker-sha256` 指定 `TOOLCHAIN/bin/flang` 与 `TOOLCHAIN/bin/wros-flang-mte` 的摘要。省略 `-g` 可以验收前端的普通默认配置；有无调试符号各需一份独立的发布凭据。脚本会运行双引擎和 Fortran 存储操作，并检查 Flang 能生成两种位宽的 Wasm 对象且拒绝生成原生对象。仅用于显式开发验证的 Flang 不满足发布验收条件。
 
 Fortran 前端使用 C 和 C++ 前端构建语言运行库与 ROS 导入适配器。应为同一 VM、编译器、sysroot、`-O3 -g` 及 EH 配置生成 C、C++ 两份凭据，与 Fortran 凭据一同打包并由本地发布机构签名。生产开发环境必须配置该签名包及信任策略。[共享发布流程](../../tools/wasm/memtag/README.md) · [验收脚本](../../tools/wasm/memtag/qualify_local_c.py) · [签名安装测试](../../tests/local_release_wsea.py)
+
+## 数组内在过程
+
+前端检查程序、已封装目标文件和静态归档中的待解析符号。程序调用数组内在过程时，前端按选定的指针位宽、异常 ABI 和内存标签模式编译对应的 Flang 来宾运行库。包括实数和整数点积，实数、整数及逻辑矩阵乘法，带掩码或按维的求和，逻辑归约与数组重塑。仅执行标量运算的程序不编译这些源文件。
+
+回归用例执行实数、整数矩阵乘法，验证列和、掩码和与逻辑矩阵乘积。测试核对最终链接的 Fortran 函数名，在两种 VM 引擎中运行，并检查唯一宿主导入 `uwvm_ros_v2.abi`。复数矩阵乘法及外部 Fortran I/O 仍需其他运行库组件。[Fortran 示例](../../tests/fortran/array_intrinsics.f90) · [回归测试](../../tests/fortran_intrinsics.py)

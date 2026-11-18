@@ -20,6 +20,7 @@ def main():
                         help="select the supplied sysroot exception ABI")
     parser.add_argument("--storage", choices=("stack", "static-and-heap"), default="stack",
                         help="select local arrays or module variables and allocatable arrays")
+    parser.add_argument("--no-debug", action="store_true", help="exercise the default release without source debug information")
     candidate_arguments(parser)
     args = parser.parse_args()
     fixture = Path(__file__).with_name("fortran")
@@ -31,7 +32,7 @@ def main():
               ROOT / "language/fortran/frontend_fortran.py", llvm / "clang", llvm / "llvm-objdump",
               llvm / "wasm-ld", llvm / "wros-flang-mte", args.flang, args.runtime, *args.sysroots]
     widths = [args.address_width] if args.address_width else [32, 64]
-    record = dict(complete=False, cgroup=cgroup_record(), address_widths=widths, storage=args.storage,
+    record = dict(complete=False, debug=not args.no_debug, cgroup=cgroup_record(), address_widths=widths, storage=args.storage,
                   exception_model=args.exception_model, cases=[], modules={},
                   inputs={str(p): sha(p) for p in inputs})
     out = args.output
@@ -53,7 +54,7 @@ def main():
 
     for width in widths:
         flags = ["--target", f"wasm{width}", "--eh" if args.exception_model == "eh" else "--no-eh",
-                 "-O3", "-g", "--toolchain", args.toolchain]
+                 "-O3", *([] if args.no_debug else ["-g"]), "--toolchain", args.toolchain]
         for manifest in args.sysroots:
             flags.extend(["--sysroots", manifest])
         obj = out / f"inspection{width}.o"

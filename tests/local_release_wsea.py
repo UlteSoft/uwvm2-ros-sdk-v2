@@ -25,7 +25,11 @@ def main():
     parser.add_argument("--address-bits", type=int, choices=(32, 64), default=32)
     parser.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran"), default="c")
     parser.add_argument("--eh", action="store_true", help="use the default EH-enabled frontend configuration")
+    parser.add_argument("--fortran-default", action="store_true",
+                        help="exercise the Fortran frontend's default optimization, symbols and exception ABI")
     a = parser.parse_args()
+    if a.fortran_default and a.language != "fortran":
+        parser.error("--fortran-default is specific to the Fortran installation test")
     if (a.producer is not None) != (a.language == "nim"):
         parser.error("--producer is required for Nim")
     if a.language in ("nim", "lua", "fortran") and not a.eh:
@@ -120,7 +124,8 @@ def main():
         build.extend(["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", a.objc_runtime.resolve(),
                       "--eh" if a.eh else "--no-eh", "--reactor", "--export", "_start", "-O3", "-g"])
     elif a.language == "fortran":
-        build.extend(["--eh", "-O3", "-g"])
+        if not a.fortran_default:
+            build.extend(["--eh", "-O3", "-g"])
     elif a.language != "lua":
         build.extend(([] if a.eh else ["--no-eh"]) + ["--reactor", "--export", "_start"])
     build += ["--build-receipt", app, "-o", wasm]
@@ -202,7 +207,10 @@ def main():
     if a.xmake and a.language == "fortran":
         env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
                    WROS_VM=str(a.runtime), WROS_RUN_QUERIES="abi", XMAKE_GLOBALDIR=str(a.output / "xmake-global"))
-        (a.output / "xmake.lua").write_text((sdk / "examples/fortran/xmake.lua").read_text())
+        project = (sdk / "examples/fortran/xmake.lua").read_text()
+        if a.fortran_default:
+            project = project.replace('    set_symbols("debug")\n', "")
+        (a.output / "xmake.lua").write_text(project)
         (a.output / "body.f90").write_text((sdk / "examples/fortran/body.f90").read_text())
         run("xmake-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm"+str(a.address_bits)])
         run("xmake-build", [a.xmake.absolute(), "-j1", "robot"])

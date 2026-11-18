@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--sysroots", action="append", required=True, type=lambda p: Path(p).resolve())
     parser.add_argument("--address-width", choices=(32, 64), type=int, required=True)
     parser.add_argument("--no-mte", action="store_true")
+    parser.add_argument("--no-debug", action="store_true", help="exercise the default release without source debug information")
     candidate_arguments(parser)
     args = parser.parse_args()
     out = args.output
@@ -24,7 +25,7 @@ def main():
     os.environ["TMPDIR"] = str(out)
     profile = Profile(args.address_width, mte=not args.no_mte, exceptions="eh")
     sources = Path(__file__).with_name("fortran")
-    record = dict(complete=False, cgroup=cgroup_record(), profile=profile.to_dict(), cases=[],
+    record = dict(complete=False, debug=not args.no_debug, cgroup=cgroup_record(), profile=profile.to_dict(), cases=[],
                   inputs={str(path): sha(path) for path in
                           [Path(__file__), sources/"descriptor_status.f90", sources/"descriptor_status.c",
                            ROOT/"language/fortran/frontend_fortran.py", ROOT/"language/fortran/compute_platform.cpp",
@@ -47,7 +48,7 @@ def main():
         save()
         result.check_returncode()
 
-    flags = ["--toolchain", args.toolchain, "--target", f"wasm{args.address_width}", "--eh", "-O3", "-g"]
+    flags = ["--toolchain", args.toolchain, "--target", f"wasm{args.address_width}", "--eh", "-O3", *([] if args.no_debug else ["-g"])]
     if args.no_mte:
         flags.append("--no-mte")
     for path in args.sysroots:
