@@ -13,17 +13,27 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output", "toolchain", "sysroots32", "sysroots64"):
         p.add_argument("--" + field, required=True, type=Path)
-    p.add_argument("--language", choices=("c", "cpp", "nim"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "nim", "objectc"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
+    p.add_argument("--toolchain64", type=Path, help="base compiler prefix for a distinct wasm64 sysroot")
+    p.add_argument("--objc-clang", type=Path)
+    p.add_argument("--objc-runtime32", type=Path)
+    p.add_argument("--objc-runtime64", type=Path)
     a = p.parse_args()
+    if a.language == "objectc" and not all((a.objc_clang, a.objc_runtime32, a.objc_runtime64)):
+        p.error("supply the Objective-C frontend and both runtime directories")
     if (a.producer is not None) != (a.language == "nim"):
         p.error("--producer is required for Nim")
     sys.path.insert(0, str(a.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
     source = ROOT / ("tests/mujoco/controller.nim" if a.language == "nim" else "tests/mujoco/controller.c")
-    compiler = ROOT / "bin" / {"c": "wrc", "cpp": "wrcc", "nim": "wrnim"}[a.language]
+    compiler = ROOT / "bin" / {"c": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc"}[a.language]
     sysroots = {32: a.sysroots32.resolve(), 64: a.sysroots64.resolve()}
+
+    toolchains = {32: a.toolchain.resolve(), 64: (a.toolchain64 or a.toolchain).resolve()}
+    objc_inputs = ([a.objc_clang.resolve(), *[lib.resolve()/name for lib in (a.objc_runtime32,a.objc_runtime64)
+                    for name in ("runtime.json", "libobjc.a")]] if a.language == "objectc" else [])
 
     def compile_guest(wasm, width, deadline, mode, count, run):
         prefix = b"".join(suite.u64(1) for _ in range(6))
@@ -34,7 +44,7 @@ def main():
         request = suite.u64(1) + suite.u64(deadline) + suite.blob(payload)
         directory = wasm.parent / (wasm.stem + "-source")
         directory.mkdir()
-        app = directory / ("controller." + a.language)
+        app = directory / ("controller.m" if a.language == "objectc" else "controller." + a.language)
         app.write_bytes(source.read_bytes())
         options = ["--reactor", "--export", "_start"]
         if a.language == "nim":
@@ -43,22 +53,30 @@ def main():
                 f"const steps* = {count}\nconst targetOffset* = {24+len(prefix)+8}\n"
                 f"const success* = {str(mode=='success').lower()}\nconst crash* = {str(mode=='crash').lower()}\n"
                 + "var request* = [" + ",".join(str(b) + "'u8" for b in request) + "]\n")
+        if a.language == "objectc":
+            lib = a.objc_runtime32 if width == 32 else a.objc_runtime64
+            options += ["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", lib.resolve()]
         header = directory / "simulation.h"
         header.write_text(f"#define STEPS {count}\n#define TARGET_OFFSET {24+len(prefix)+8}\n"
                           f"#define SUCCESS {int(mode=='success')}\n#define CRASH {int(mode=='crash')}\n"
                           + "static unsigned char request[] = {" + ",".join(map(str, request)) + "};\n")
-        run(wasm.stem + "-compile", [sys.executable, compiler, "--target", f"wasm{width}", "--toolchain", a.toolchain,
+        run(wasm.stem + "-compile", [sys.executable, compiler, "--target", f"wasm{width}", "--toolchain", toolchains[width],
                                     "--sysroots", sysroots[width], *(["--legacy-mte"] if a.candidate_mte else []),
                                     "-O3", "-g", *options, app, "-o", wasm])
-        return Profile(width).uwvm_feature_flags()
+        controls = Profile(width).uwvm_feature_flags()
+        if a.language == "objectc":
+            controls += ["--wasip1-single-create", "main", "--wasip1-single-enable", "main",
+                         "--wasip1-single-interface", "main", "clock_time_get_wasm64" if width == 64 else "clock_time_get", "allow",
+                         "--wasip1-single-grant", "main", "realtime-clock"]
+        return controls
 
     args = []
     for key, value in (("source-root", a.vm_source), ("runtime", a.runtime), ("openssl-root", a.openssl_root),
                        ("mujoco", a.mujoco), ("output", a.output)):
         args += ["--" + key, str(value.resolve())]
     suite.main(args, compile_guest=compile_guest, guest_name=a.language,
-               guest_inputs=(source, Path(__file__), compiler, *([a.producer] if a.producer else []), *sysroots.values(), a.toolchain / "bin/clang",
-                             a.toolchain / "bin/wasm-ld", ROOT / "include/wros/scene.h"))
+               guest_inputs=(source, Path(__file__), compiler, *([a.producer] if a.producer else []), *sysroots.values(), *objc_inputs,
+                             *[tc/"bin"/tool for tc in set(toolchains.values()) for tool in ("clang","wasm-ld")], ROOT / "include/wros/scene.h"))
 
 
 if __name__ == "__main__":
