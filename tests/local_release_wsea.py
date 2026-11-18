@@ -17,18 +17,22 @@ def main():
     for key in ("unsigned", "toolchain", "sysroots", "runtime", "cosign", "vm-source", "output", "authority-work"):
         parser.add_argument("--" + key, type=lambda path: Path(path).resolve(), required=True)
     parser.add_argument("--xmake", type=Path, help="exercise the seeded Lua build using this operator-provided Xmake")
+    parser.add_argument("--objc-clang", type=Path)
+    parser.add_argument("--objc-runtime", type=Path)
     parser.add_argument("--producer", type=Path, help="WROS Nim lowering binary")
     parser.add_argument("--repository", type=Path, default=ROOT)
     parser.add_argument("--sdk-commit", required=True)
     parser.add_argument("--address-bits", type=int, choices=(32, 64), default=32)
-    parser.add_argument("--language", choices=("c", "cpp", "lua", "nim"), default="c")
+    parser.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc"), default="c")
     parser.add_argument("--eh", action="store_true", help="use the default EH-enabled frontend configuration")
     a = parser.parse_args()
     if (a.producer is not None) != (a.language == "nim"):
         parser.error("--producer is required for Nim")
     if a.language in ("nim", "lua") and not a.eh:
         parser.error("the embedded Lua interpreter uses native Wasm EH")
-    if a.xmake and a.language not in ("lua", "nim"):
+    if a.language == "objectc" and (not a.objc_clang or not a.objc_runtime):
+        parser.error("supply --objc-clang and --objc-runtime for Objective-C")
+    if a.xmake and a.language not in ("lua", "nim", "objectc"):
         parser.error("--xmake exercises the seeded Lua path")
     if not a.output.is_relative_to(ROOT / ".tmp"):
         parser.error("use a new SDK .tmp directory")
@@ -38,6 +42,8 @@ def main():
     a.output.mkdir(mode=0o700, parents=True, exist_ok=False)
     a.authority_work.mkdir(mode=0o700, parents=True, exist_ok=False)
     important = [a.unsigned, a.runtime, a.cosign, a.sysroots, Path(__file__)]
+    if a.language == "objectc":
+        important.extend([a.objc_clang, a.objc_runtime / "runtime.json", a.objc_runtime / "libobjc.a"])
     report = dict(complete=False, cgroup=cgroup_record(), inputs={str(p): sha(p) for p in important}, cases=[])
     env = {**os.environ, "TMPDIR": str(a.output), "PYTHONDONTWRITEBYTECODE": "1"}
 
@@ -83,9 +89,13 @@ def main():
                  "--certificate", ca["certificate"], "--crl", ca["crl"], "--module-id", module_id, "--module-version", "1",
                  "--algorithm", "Ed25519", "--not-before", stamp(-60), "--not-after", stamp(3600), "--output", signed])
     wasm = a.output / "app.wasm"
-    front = sdk / "bin" / {"c": "wrc", "cpp": "wrcc", "lua": "wrlua", "nim": "wrnim"}[a.language]
-    app = a.output / ("app." + a.language)
+    front = sdk / "bin" / {"c": "wrc", "cpp": "wrcc", "lua": "wrlua", "nim": "wrnim", "objectc": "wrobjc"}[a.language]
+    app = a.output / ("app.m" if a.language == "objectc" else "app." + a.language)
     def application(value):
+        if a.language == "objectc":
+            return ('__attribute__((objc_root_class)) @interface Sample { Class isa; } + (unsigned)value; @end\n'
+                    f'@implementation Sample + (unsigned)value {{ return {value}; }} @end\n'
+                    f'void _start(void) {{ if ([Sample value] != {value}) __builtin_trap(); }}\n')
         if a.language == "nim":
             return f"let sample = new(int)\nsample[] = {value}\ndoAssert sample[] == {value}\n"
         if a.language == "lua":
@@ -98,6 +108,9 @@ def main():
         build += ["--target", "wasm64"]
     if a.language == "nim":
         build.extend(["--producer", a.producer.resolve(), "-O3", "-g"])
+    elif a.language == "objectc":
+        build.extend(["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", a.objc_runtime.resolve(),
+                      "--eh" if a.eh else "--no-eh", "--reactor", "--export", "_start", "-O3", "-g"])
     elif a.language != "lua":
         build.extend(([] if a.eh else ["--no-eh"]) + ["--reactor", "--export", "_start"])
     build += ["--build-receipt", app, "-o", wasm]
@@ -132,14 +145,15 @@ def main():
     for engine in ("int", "aot"):
         vm = [a.runtime, *Profile(a.address_bits).uwvm_feature_flags(), "--runtime-" + engine, "--runtime-compile-threads", "0",
               "--runtime-llvm-jit-cache-path", "disable"]
-        if a.language == "lua":
+        if a.language in ("lua", "objectc"):
             vm += ["--wasm-set-main-module-name", "main", "--wasip1-single-create", "main", "--wasip1-single-enable",
                    "main", "--wasip1-single-interface", "main", "clock_time_get_wasm64" if a.address_bits == 64 else "clock_time_get", "allow",
                    "--wasip1-single-grant", "main", "realtime-clock"]
         run("changed-application-" + engine, [*vm, "--run", wasm])
     if a.language != "lua":
-        if inspect(wasm.read_bytes()):
-            raise ValueError("standalone C or C++ imported a host interface")
+        expected_imports = {("wasi_snapshot_preview1", "clock_time_get_wasm64" if a.address_bits == 64 else "clock_time_get")} if a.language == "objectc" else set()
+        if {(v["module"], v["name"]) for v in inspect(wasm.read_bytes())} != expected_imports:
+            raise ValueError("standalone language fixture has unexpected imports")
         linkage = 'extern "C" ' if a.language == "cpp" else ""
         if a.language == "nim":
             app.write_text("import wros_scene\ndoAssert wr_abi()==2\n")
@@ -147,11 +161,17 @@ def main():
             app.write_text('#include <wros/scene.h>\n' + linkage +
                            'void _start(void){if(wr_abi()!=2) __builtin_trap();}\n')
         run("ros-only-build", build)
-        if [(v["module"], v["name"]) for v in inspect(wasm.read_bytes())] != [("uwvm_ros_v2", "abi")]:
+        ros_imports = {(v["module"], v["name"]) for v in inspect(wasm.read_bytes())}
+        required = {("uwvm_ros_v2", "abi")}
+        if ros_imports not in (required, required | expected_imports):
             raise ValueError("unexpected imports in ROS-only application")
         for engine in ("int", "aot"):
             vm = [a.runtime, *Profile(a.address_bits).uwvm_feature_flags(), "--runtime-" + engine, "--runtime-compile-threads", "0",
                   "--runtime-llvm-jit-cache-path", "disable", "--wasm-set-main-module-name", "main"]
+            if a.language == "objectc" and ros_imports != required:
+                vm += ["--wasip1-single-create", "main", "--wasip1-single-enable", "main",
+                       "--wasip1-single-interface", "main", next(iter(expected_imports))[1], "allow",
+                       "--wasip1-single-grant", "main", "realtime-clock"]
             name = "ros-only-denied-" + engine
             run(name, [*vm, "--run", wasm], False)
             if b"ROS scene interface is hidden" not in (a.output / (name + ".log")).read_bytes():
@@ -167,7 +187,16 @@ def main():
                                        "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable", "--run", wasm])
     else:
         run("unapproved-optimization", [*build, "-O0"], False)
-    if a.xmake and a.language == "nim":
+    if a.xmake and a.language == "objectc":
+        env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
+                   WROS_OBJC_CLANG=str(a.objc_clang.resolve()), WROS_OBJC_RUNTIME=str(a.objc_runtime.resolve()),
+                   WROS_VM=str(a.runtime), WROS_RUN_QUERIES="abi,realtime-clock", XMAKE_GLOBALDIR=str(a.output / "xmake-global"))
+        (a.output/"xmake.lua").write_text((sdk/"examples/objectc/xmake.lua").read_text())
+        (a.output/"body.m").write_text((sdk/"examples/objectc/body.m").read_text())
+        run("xmake-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm"+str(a.address_bits)])
+        run("xmake-build", [a.xmake.absolute(), "-j1", "robot_status"])
+        run("xmake-run", [a.xmake.absolute(), "run", "robot_status"])
+    elif a.xmake and a.language == "nim":
         env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
                    WROS_NIM_PRODUCER=str(a.producer.resolve()), WROS_VM=str(a.runtime), WROS_RUN_QUERIES="abi",
                    XMAKE_GLOBALDIR=str(a.output / "xmake-global"))

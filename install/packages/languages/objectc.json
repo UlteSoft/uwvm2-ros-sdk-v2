@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/objectc.md",
-      "bytes": 4547,
+      "bytes": 5537,
       "mode": 420,
-      "sha256": "6034b1bc3aafd5cbc2176f14afcdde4c301a5b7bc0363d3ccbe38fd8fa5a4f7a"
+      "sha256": "6da6b5798610c155a7471a0c1f2c3025b26aa63e0a87175a508426e72cc6de8c"
     },
     {
       "path": "document/zh/objectc.md",
-      "bytes": 3825,
+      "bytes": 4645,
       "mode": 420,
-      "sha256": "28575570e45a4a31ce6a89329cc6370d906f0a41edc706ac22aff4be504bc4be"
+      "sha256": "e557cd8d13f3ceca7e6e664349b5103b3abb1b7b58f41afc36f7e0c9acc945e3"
     },
     {
       "path": "examples/objectc/body.m",
@@ -86,9 +86,9 @@
     },
     {
       "path": "third-parties/objectc/README.md",
-      "bytes": 989,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "510559e7f3b4c38e7e78dcfe2f1c0c021624b6c7eefffc0c9715c681cdf0f7e1"
+      "sha256": "47122f2362dc2ce8a8f904e668dbd08f40c9a2b0a4a2e0df4e53bd1796a304a7"
     },
     {
       "path": "third-parties/objectc/libobjc2-a21ae931.tar.gz",
@@ -98,9 +98,9 @@
     },
     {
       "path": "third-parties/objectc/libobjc2-wasm.patch",
-      "bytes": 17323,
+      "bytes": 19071,
       "mode": 420,
-      "sha256": "4d0a4d294b2842caf2384d8596e070a7d938a61d2d226e35e0eb4d2d8dfb79ee"
+      "sha256": "fd83707326d0f95cf99bcc51127de8199bed8534e93689f5b94667efc0548f1e"
     },
     {
       "path": "third-parties/objectc/objc-CGObjCGNU.cpp.patch",

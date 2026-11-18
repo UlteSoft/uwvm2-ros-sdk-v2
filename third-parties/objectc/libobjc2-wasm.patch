@@ -548,3 +548,62 @@ diff --git a/spinlock.h b/spinlock.h
  	}
  
  	public:
+diff --git a/gc_none.c b/gc_none.c
+--- a/gc_none.c
++++ b/gc_none.c
+@@ -33,7 +33,12 @@
+ 
+ static id allocate_class(Class cls, size_t extraBytes)
+ {
+-	size_t size = cls->instance_size + extraBytes + sizeof(intptr_t);
++	size_t size;
++	if (__builtin_add_overflow((size_t)cls->instance_size, extraBytes, &size) ||
++	    __builtin_add_overflow(size, sizeof(intptr_t), &size))
++	{
++		return nil;
++	}
+ 	intptr_t *addr;
+ #ifdef _WIN32
+ 	addr = _aligned_malloc(size, OBJC_ALLOC_ALIGN);
+@@ -57,7 +62,7 @@
+ 		addr = calloc(1, size);
+ 	}
+ #endif
+-	return (id)(addr + 1);
++	return addr ? (id)(addr + 1) : nil;
+ }
+ 
+ static void free_object(id obj)
+diff --git a/runtime.c b/runtime.c
+--- a/runtime.c
++++ b/runtime.c
+@@ -357,8 +357,9 @@
+ 	if (Nil == cls)	{ return nil; }
+ 	// Don't try to allocate an object of size 0, because there's no space for
+ 	// its isa pointer!
+-	if (cls->instance_size < sizeof(Class)) { return nil; }
++	if (cls->instance_size < (long)sizeof(Class)) { return nil; }
+ 	id obj = gc->allocate_class(cls, extraBytes);
++	if (obj == nil) { return nil; }
+ 	obj->isa = cls;
+ 	checkARCAccessorsSlow(cls);
+ 	call_cxx_construct(obj);
+@@ -368,13 +369,17 @@
+ id object_copy(id obj, size_t size)
+ {
+ 	Class cls = object_getClass(obj);
+-	id cpy = class_createInstance(cls, size - class_getInstanceSize(cls));
++	size_t instance_size = class_getInstanceSize(cls);
++	if (!cls || size < instance_size || size < sizeof(id)) { return nil; }
++	id cpy = class_createInstance(cls, size - instance_size);
++	if (cpy == nil) { return nil; }
+ 	memcpy(((char*)cpy + sizeof(id)), ((char*)obj + sizeof(id)), size - sizeof(id));
+ 	return cpy;
+ }
+ 
+ id object_dispose(id obj)
+ {
++	if (!obj) { return nil; }
+ 	call_cxx_destruct(obj);
+ 	gc->free_object(obj);
+ 	return nil;

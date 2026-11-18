@@ -32,6 +32,9 @@ void _start(void) {
     if (__builtin_wasm_memtag_status(0) && !__builtin_wasm_memtag_extract(0, instance))
         __builtin_trap();
 #endif
+    Class cls = object_getClass(instance);
+    if (class_createInstance(cls, SIZE_MAX) != nil || object_dispose(nil) != nil)
+        __builtin_trap();
     object_dispose(instance);
     char key[] = "signal";
     uint64_t cap = 0;

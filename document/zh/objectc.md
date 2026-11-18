@@ -34,3 +34,8 @@ python3 "$SDK/language/objectc/build_runtime.py" \
 在 `.m` 中包含 `<wros/scene.h>` 即可使用通用 ROSv2 接口。Objective-C 方法可按部署时的别名申请能力句柄，再显式关闭。VM 对各操作独立检查权限。xmake 的平台选择使用所安装的平台描述文件。平台权限约束通用驱动调用；使用具体设备仍需父环境授权和外置驱动会话。语言运行库在 guest 内执行。
 
 示例通过 `set_language("objectc")` 选择语言。将 `WROS_TOOLCHAIN`、`WROS_SYSROOTS`、`WROS_OBJC_RUNTIME` 指向配套构建产物。关闭 MTE 时需单独指定 `WROS_SYSROOTS_NO_MTE` 及其配套语言运行库。`tests/objectc.py` 用真实 VM 解释器及 AOT 执行继承、super、nil 消息、对象分配、权限拒绝和授权。`tests/objectc_platform.py` 对各个声明支持 Objective-C 的平台执行三组检查，覆盖允许连接、平台拒绝和父权限拒绝。外部测试进程只处理注册和断连，经过本地认证套接字和固定双方身份的 TLS 1.3 会话。测试记录 VM、外部进程、SDK 和模块的摘要。厂商设备协议及真实硬件需要单独验证。
+
+
+## 验证默认的 MTE 配置
+
+按照[本地签署指南](memory-qualification.md)，在固定提交的 compiler-source 工作树中使用源验证命令。选择 `--language objectc --target wasm32 -O3 -g --eh`，传入 `--objc-clang`、`--objc-runtime` 与 `--approved-objc-inputs-sha256`。最后一项是三个输入摘要组成的规范 JSON 对象的 SHA-256：`objc_frontend` 为专用编译器，`objc_runtime` 为 runtime.json，`objc_archive` 为 libobjc.a。应分别核验这些文件及底层工具链和 sysroot。语言测试在两种 VM 引擎中创建对象、传递标量消息、回收对象并检查权限。测试使用多种实例大小和相近的实际堆分配，按固定 GNUstep 版本的引用计数头核对分配范围。部署者审阅并签署输出，再按本地信任策略安装。

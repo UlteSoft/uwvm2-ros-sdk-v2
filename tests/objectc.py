@@ -36,7 +36,7 @@ def main():
     def sha(path):
         with path.open('rb') as f: return hashlib.file_digest(f,"sha256").hexdigest()
     source=ROOT/"tests/objectc/dispatch.m";guest=out/'app.wasm';vm=args.runtime.resolve()
-    inputs=[source,args.objc_clang,args.objc_runtime/"runtime.json",args.objc_runtime/"libobjc.a",
+    inputs=[source, ROOT/"tests/objectc/neighbors.m", Path(__file__), args.objc_clang,args.objc_runtime/"runtime.json",args.objc_runtime/"libobjc.a",
             args.toolchain/"bin/clang",args.toolchain/"bin/wasm-ld",vm,args.sysroots]
     report={"complete":False,"cgroup":group,"inputs":{str(p):sha(p) for p in inputs},"cases":[]}
     def save(): (out/"results.json").write_text(json.dumps(report,indent=2)+"\n")
@@ -44,7 +44,7 @@ def main():
         cmd=list(map(str,argv));p=subprocess.run(cmd,cwd=out,capture_output=True,timeout=120)
         log=p.stdout+p.stderr;(out/(label+".log")).write_bytes(log)
         ok=(p.returncode==0 if not denied else (p.returncode!=0 and err.encode() in log))
-        report["cases"].append({"case":label,"argv":cmd,"exit":p.returncode,"passed":ok});save()
+        report["cases"].append({"case":label,"argv":cmd,"exit":p.returncode,"expected_success":not denied,"passed":ok});save()
         print(label,p.returncode,ok,flush=True)
         if not ok: raise RuntimeError(log.decode(errors="replace")[-2000:])
     bits=int(args.target[4:]);profile=Profile(bits,mte=args.mode!="off", exceptions="eh" if args.eh else "noeh")
@@ -59,6 +59,10 @@ def main():
     needs={("uwvm_ros_v2",n) for n in ("abi","capability.open","capability.close")}
     clock="clock_time_get"+("_wasm64" if bits==64 else "")
     assert {(i["module"],i["name"]) for i in imports}==needs|{("wasi_snapshot_preview1",clock)}
+    neighbors=out/"neighbors.wasm"
+    if profile.mte:
+        run("compile-neighbors", [*common, "--reactor", "--export", "_start", ROOT/"tests/objectc/neighbors.m", "-o", neighbors])
+        report["neighbors_sha256"]=sha(neighbors)
     for engine in ("int","aot"):
         flags=[vm,*profile.uwvm_feature_flags(),"--debug-fault-action","exit","--runtime-"+engine,"--runtime-compile-threads","0",
                "--runtime-llvm-jit-cache-path","disable","--wasm-set-main-module-name","main",
@@ -67,6 +71,8 @@ def main():
         for op in ("abi","capability.open","capability.close"):flags+=["--ros-scene-interface","robot",op,"allow"]
         for active in (True,False) if profile.mte else (False,):
             controls=[] if active else ["--runtime-disable-memtag"]
+            if profile.mte:
+                run(engine+f"-{active}-neighbors",[*flags,*controls,"--run",neighbors])
             run(engine+f"-{active}-denied",[*flags,*controls,"--run",guest],True,"unreachable")
             run(engine+f"-{active}-allowed",[*flags,*controls,"--ros-scene-grant","robot","signal","guard","signal","local","guard.create","--run",guest])
     # A new host import outside the WROS ABI must be rejected without replacing the last valid output.
