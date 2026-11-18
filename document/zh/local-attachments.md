@@ -36,6 +36,8 @@ Linux 来宾中的测试部署脚本，不代表全部厂商兼容，也不构�
 交付固定启动记录。这些对象仅由宿主和隔离适配器使用，没有新增 Wasm 导入、WASIp1
 套接字授权或 SDK 平台内置原生驱动。原厂可执行程序或共享库仍需经过准入的外置适配器；
 它们不会自动实现 WROS 加密传输。目前的接收端只是无害参数查询测试程序，不是厂商驱动。
+VM 仓库另提供宿主侧 `provider_bootstrap_receiver.h`，统一验证并限时接收交付对象。
+SDK 的 Wasm 应用不会收到这些原生描述符或部署器身份凭据。
 
 宿主详细约定见 VM 的[驱动接入文档](https://github.com/UlteSoft/uwvm2-ros/blob/main/documents/runtime/ros-driver-attachment.md)
 和[模型接入文档](https://github.com/UlteSoft/uwvm2-ros/blob/main/documents/runtime/ros-model-attachment.md)。
