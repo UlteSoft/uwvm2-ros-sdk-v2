@@ -65,7 +65,12 @@ int main(int argc, char **argv) {
         if (global.getName().starts_with("llvm.")) continue;
         llvm::GlobalValue::SanitizerMetadata meta{};
         if (global.hasSanitizerMetadata()) meta = global.getSanitizerMetadata();
-        if (enabled && !global.hasSanitizerMetadata()) {
+        // LLVM's setNoSanitizeMetadata() sets both exclusion bits. ASan's
+        // dynamic-initializer flag or a single address-sanitizer exclusion
+        // on a mutable definition says nothing about its WasmMTE policy.
+        const bool addToMutable = !global.isConstant() && !global.isDeclaration()
+            && !meta.Memtag && !(meta.NoAddress && meta.NoHWAddress);
+        if (enabled && (!global.hasSanitizerMetadata() || addToMutable)) {
             meta.Memtag = true;
             global.setSanitizerMetadata(meta);
         }

@@ -48,7 +48,9 @@ def main():
         with tempfile.TemporaryDirectory(dir=marker.parent) as scratch:
             tmp = Path(scratch)
             binary = tmp / marker.name
-            subprocess.run([args.host_cxx.resolve(strict=True), *settings("--cxxflags"), "-O3", "-g",
+            # clang and clang++ can share one executable. The invoked name
+            # selects the driver and its default C++ runtime libraries.
+            subprocess.run([args.host_cxx.absolute(), *settings("--cxxflags"), "-O3", "-g",
                             SOURCE, *settings("--ldflags", "--libs", "core", "irreader", "bitwriter", "--system-libs"),
                             "-o", binary], check=True, env=env)
             record = receipt_path(binary)

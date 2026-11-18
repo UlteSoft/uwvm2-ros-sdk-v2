@@ -10,7 +10,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 VENDOR = ROOT / "third-parties/fortran"
 sys.path.insert(0, str(ROOT / "install"))
-from artifacts import read_bounded, seal_object
+from artifacts import archive_members, read_bounded, seal_object
+from imports import inspect
 from compiler import compiler_environment, make_command
 from prepare import require_marker
 from flang_identity import require_compiler
@@ -24,7 +25,15 @@ def write_bindings(work):
     """Generate matching ISO integer kind declarations and signed Wasm imports."""
     schema = json.loads((ROOT / "share/abi/ros.json").read_text())
     declarations = ["module wros_scene", "  implicit none", "  interface"]
-    header = ["#include <stdint.h>"]
+    # The ABI transports addresses as i64 for both guest pointer widths.
+    # uintptr_t preserves tag bits and zero-extends wasm32 addresses.
+    declarations.extend(["    function wr_address(pointer) result(bits) bind(c)",
+                         "      use iso_c_binding, only: c_ptr, c_int64_t",
+                         "      type(c_ptr), value :: pointer",
+                         "      integer(c_int64_t) :: bits", "    end function"])
+    header = ["#include <stdint.h>", "int64_t wr_address(const void *pointer) {",
+              "  uint64_t bits = (uintptr_t)pointer;", "  int64_t result;",
+              "  __builtin_memcpy(&result, &bits, sizeof result);", "  return result;", "}"]
     for operation in schema["operations"]:
         name = operation["name"]
         symbol = "wr_" + name.replace(".", "_").replace("-", "_")
@@ -65,17 +74,43 @@ def lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source,
     return obj
 
 
-def numerical_runtime(command, env, work, toolchain):
-    """Compile the admitted upstream Flang runtime sources in the same guest profile."""
+def needs_descriptor_runtime(inputs):
+    """Select compute libraries from unresolved Fortran imports in guest objects."""
+    prefixes = ("_FortranAAllocatable", "_FortranAAssign", "_FortranACopyInAssign",
+                "_FortranACopyOutAssign", "_FortranAMoveAlloc", "_FortranAPointer", "CFI_")
+    for path in inputs:
+        data = read_bounded(path)
+        members = archive_members(data) if path.suffix == ".a" else (data,)
+        for member in members:
+            if any(item["module"] == "env" and item["name"].startswith(prefixes)
+                   for item in inspect(member)):
+                return True
+    return False
+
+
+def guest_runtime(command, env, work, toolchain, descriptors):
+    """Compile the numerical library and any selected compute procedures for this profile."""
     includes = [VENDOR / "flang/include", VENDOR / "flang-rt/include"]
+    runtime = VENDOR / "flang-rt/lib/runtime"
+    sources = [runtime / (unit + ".cpp") for unit in ("numeric", "complex-powi")]
+    options = []
+    if descriptors:
+        # Flang's compute work queue omits external I/O tickets under this option.
+        options.append("-DRT_CUDA_THIN_IO=1")
+        includes.append(runtime)
+        units = ("ISO_Fortran_binding", "allocatable", "allocator-registry", "assign",
+                 "copy", "derived", "descriptor", "memory", "pointer", "stat", "tools",
+                 "type-code", "type-info", "work-queue")
+        sources.extend(runtime / (unit + ".cpp") for unit in units)
+        sources.append(ROOT / "language/fortran/compute_platform.cpp")
+    flags = ["--std", "c++17", *options, *(arg for p in includes for arg in ("-I", p))]
     objects = []
-    for unit in ("numeric", "complex-powi"):
-        source = VENDOR / "flang-rt/lib/runtime" / (unit + ".cpp")
-        obj = work / (unit + ".o")
-        subprocess.run([*command, "--std", "c++17", *(arg for p in includes for arg in ("-I", p)),
-                        "-c", source, "-o", obj], check=True, env=env, cwd=work)
+    for source in sources:
+        obj = work / (source.stem + ".o")
+        subprocess.run([*command, *flags, "-c", source, "-o", obj],
+                       check=True, env=env, cwd=work)
         objects.append(obj)
-    archive = work / "libflang-numerical.a"
+    archive = work / "libflang-compute.a"
     subprocess.run([sys.executable, ROOT / "bin/wrar", "--toolchain", toolchain, *objects, "-o", archive],
                    check=True, env=env, cwd=work)
     return archive
@@ -143,10 +178,19 @@ def main():
                 flags.append("--threads")
             if opts.g:
                 flags.append("-g")
-            runtime = numerical_runtime([sys.executable, ROOT / "bin/wrcc", *flags], env, work, toolchain)
+            descriptors = needs_descriptor_runtime([*units, *objects])
+            cc = [sys.executable, ROOT / "bin/wrc", *flags]
+            cxx = [sys.executable, ROOT / "bin/wrcc", *flags]
+            runtime = guest_runtime(cxx, env, work, toolchain, descriptors)
+            stubs = []
+            for source in (work / "wros_imports.c", ROOT / "language/fortran/entry.c"):
+                obj = work / (source.stem + ".o")
+                subprocess.run([*cc, "-c", source, "-o", obj], check=True, cwd=work, env=env)
+                stubs.append(obj)
+            # The upstream descriptor work queue uses libc++'s std::variant.
+            linker = cxx if descriptors else cc
             staged = work / "guest.wasm"
-            subprocess.run([sys.executable, ROOT / "bin/wrc", *flags, "--reactor", "--export", "_start",
-                            *units, work / "wros_imports.c", ROOT / "language/fortran/entry.c",
+            subprocess.run([*linker, "--reactor", "--export", "_start", *units, *stubs,
                             *objects, runtime, "-o", staged], check=True, cwd=work, env=env)
             qualification.finish(admission, opts, staged, output)
         return 0
