@@ -1,5 +1,6 @@
 """Verify selective retrieval and atomic publication using only committed Git objects."""
 import io,json,hashlib,sys,subprocess,tempfile,unittest
+import ssl
 import urllib.error
 from unittest.mock import patch
 from pathlib import Path
@@ -11,16 +12,21 @@ class Installer(unittest.TestCase):
         self.prefix=Path(self.tmp.name); self.commit=subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip()
     def tearDown(self):self.tmp.cleanup()
     def test_http_retry_keeps_the_pinned_selection(self):
-        source = Source(self.commit)
         path = "install/revision.py"
-        with patch.object(source.http, "open", side_effect=[TimeoutError(), io.BytesIO(b"abc")]) as opened, \
-             patch("bootstrap.time.sleep"):
-            self.assertEqual(source.read(path, 3), b"abc")
-        self.assertEqual(source.requested, [path, path])
-        self.assertEqual(opened.call_args_list[0], opened.call_args_list[1])
+        for failure in (TimeoutError(), urllib.error.URLError(ssl.SSLEOFError())):
+            with self.subTest(error=repr(failure)):
+                source = Source(self.commit)
+                with patch.object(source.http, "open", side_effect=[failure, io.BytesIO(b"abc")]) as opened, \
+                     patch("bootstrap.time.sleep"):
+                    self.assertEqual(source.read(path, 3), b"abc")
+                self.assertEqual(source.requested, [path, path])
+                self.assertEqual(opened.call_args_list[0], opened.call_args_list[1])
 
     def test_http_refusals_and_retry_bound(self):
-        for failure, attempts in [(TimeoutError(), 3), (urllib.error.HTTPError("", 403, "Forbidden", {}, None), 1)]:
+        failures = [(TimeoutError(), 3),
+                    (urllib.error.HTTPError("", 403, "Forbidden", {}, None), 1),
+                    (urllib.error.URLError(ssl.SSLCertVerificationError()), 1)]
+        for failure, attempts in failures:
             with self.subTest(error=type(failure).__name__):
                 source = Source(self.commit)
                 with patch.object(source.http, "open", side_effect=failure) as opened, patch("bootstrap.time.sleep"):

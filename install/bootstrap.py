@@ -8,6 +8,7 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import shutil
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -67,7 +68,7 @@ class Source:
                     break
                 except (OSError, http.client.IncompleteRead) as error:
                     cause = error.reason if isinstance(error, urllib.error.URLError) else error
-                    transient = isinstance(cause, (TimeoutError, ConnectionError, http.client.IncompleteRead))
+                    transient = isinstance(cause, (TimeoutError, ConnectionError, http.client.IncompleteRead, ssl.SSLEOFError))
                     if isinstance(error, urllib.error.HTTPError):
                         transient = error.code in (408, 429, 500, 502, 503, 504)
                         error.close()
