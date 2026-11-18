@@ -12,6 +12,9 @@ ts=["// Generated AssemblyScript external function declarations."]
 nim = ["## Fixed-width Wasm imports supplied by the ROSv2 VM.",
        "## Address arguments select a guest linear memory. Retain all pointer bits.",
        "template wrAddress*(p: pointer): uint64 = uint64(cast[uint](p))", ""]
+d = ["/// Generated fixed-width D imports, linked through the SDK's Wasm C bindings.",
+     "module wros_scene;", "extern(C) nothrow @nogc:", ""]
+d_shim = ["/* Generated D-to-Wasm ABI adapters. */", "#include <wros/scene.h>"]
 for op in abi["operations"]:
     name=op["name"]
     label="wr_"+name.replace(".","_").replace("-","_")
@@ -20,13 +23,19 @@ for op in abi["operations"]:
     cn=", ".join("uint"+t[1:]+"_t arg"+str(i) for i,t in enumerate(params)) or "void"
     c += [f'__attribute__((import_module("{module}"), import_name("{name}")))',
           f"uint32_t {label}({cn});"]
+    dname = "wros_" + label[3:]
+    dargs = ", ".join(("uint" if t == "i32" else "ulong") + f" a{i}" for i, t in enumerate(params))
+    d.append(f"uint {dname}({dargs});")
+    actual = ", ".join(f"arg{i}" for i in range(len(params)))
+    d_shim.append(f"uint32_t {dname}({cn}) {{ return {label}({actual}); }}")
     rn=", ".join(f"arg{i}: u{t[1:]}" for i,t in enumerate(params))
     rs += [f'    #[link_name = "{name}"]', f"    pub fn {label}({rn}) -> u32;"]
     nn = ", ".join(f"a{i}: uint{t[1:]}" for i, t in enumerate(params))
     nim += [f"proc {label}*({nn}): uint32", f'  {{.importc: "{label}", header: "wros/scene.h".}}', ""]
     ts += [f'@external("{module}", "{name}")',f"export declare function {label}({rn}): u32;"]
 for path, contents in [("include/wros/scene.h",c+["#ifdef __cplusplus","}","#endif"]),
-                       ("language/nim/wros_scene.nim",nim), ("language/rust/scene.rs",rs+["}"]),("language/assemblyscript/scene.ts",ts)]:
+                       ("language/d/wros_scene.d",d), ("language/d/imports.c",d_shim),
+                       ("language/nim/wros_scene.nim",nim[:-1]), ("language/rust/scene.rs",rs+["}"]),("language/assemblyscript/scene.ts",ts)]:
     dest=root/path
     dest.parent.mkdir(parents=True,exist_ok=True)
     dest.write_text("\n".join(contents)+"\n")

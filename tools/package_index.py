@@ -87,6 +87,7 @@ def main():
     for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",
                         "as": "language/assemblyscript/scene.ts"}.items():
         package("bindings/" + key, [source])
+    package("bindings/d", ["language/d/wros_scene.d", "language/d/imports.c", "include/wros/scene.h"])
     package("bindings/nim", ["language/nim/wros_scene.nim", "include/wros/scene.h"])
     package("nim-producer-source", ["third-parties/nim/nim-2.2.4.tar.xz"])
     package("protocol", ["share/abi/ros.json", "LICENSE"])

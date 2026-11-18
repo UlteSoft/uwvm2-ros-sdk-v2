@@ -60,6 +60,8 @@ The stable operations are `plan`, `install` and `revision-help`. Pass revision-s
 For an existing compiler integration, pass `-- --component bindings` to install only the selected raw declarations, the licence, and the selected language and platform metadata. C and C++ share a header. This revision also publishes Rust and AssemblyScript declarations. This component fetches no compiler, compiler sources or full ABI catalogue. The original bootstrap can discover it with `revision-help` at this commit.
 
 
+For D, select `--language d -- --component bindings`. The installation includes `language/d/wros_scene.d`, its C import adapters and the ROSv2 header. A D module can use `import wros_scene : wros_abi;` and call `wros_abi()`. Each i32 and i64 operand maps to D uint and ulong respectively. The raw component supplies declarations for all 163 common operations. The [BetterC qualification fixture](../../tests/d_bindings/qualify.py) runs a wasm32 application against the VM with and without its ABI grant. D runtime libraries, garbage collection and a site-qualified development compiler have separate release requirements.
+
 ### Build a Nim Wasm application from a public installation
 
 This example pins the public SDK revision exercised by the clean-install test. Supply the signed Nim site profile distributed by your operator. It identifies the approved host compiler, target sysroot and release for the selected VM. Python 3.11 or later is required.

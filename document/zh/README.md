@@ -59,6 +59,8 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 已有编译环境时，可使用 `-- --component bindings` 单独安装所选语言的原始声明、许可证以及所选语言和平台的元数据。C 和 C++ 共用头文件，本修订还提供 Rust 和 AssemblyScript 的声明。此模式仅请求这些文件。首个 commit 的安装入口也可通过 `revision-help` 发现新选项。
 
 
+D 可选择 `--language d -- --component bindings`。安装内容包括 `language/d/wros_scene.d`、对应的 C 导入适配代码和 ROSv2 头文件。D 模块可用 `import wros_scene : wros_abi;` 导入并调用 `wros_abi()`。i32 和 i64 操作数分别使用 D 的 uint 和 ulong。这个组件提供通用层全部 163 个操作的原始声明。[BetterC 验收程序](../../tests/d_bindings/qualify.py)用 wasm32 应用测试 VM 授权和拒绝 ABI 查询。D 运行时、垃圾回收和经站点签署的开发编译器仍须独立验收。
+
 ### 从公开安装编译第一个 Nim Wasm 应用
 
 这个示例固定到已通过空缓存安装测试的 SDK 提交。请使用部署方签发的 Nim 站点配置，其中指定了已审核的宿主编译器、目标 sysroot 和与 VM 对应的发行资格。需要 Python 3.11 或更新版本。

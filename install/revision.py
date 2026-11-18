@@ -3,7 +3,7 @@ import argparse
 import json
 
 
-BINDINGS = {"c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
+BINDINGS = {"d": "d", "c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
 DEVELOPMENT = ("c", "cpp", "fortran", "lua", "objectc", "rs", "tinygo", "nim")
 
 # Command spellings are part of the per-commit SDK contract. A command name

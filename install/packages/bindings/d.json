@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/d/imports.c",
+      "bytes": 33398,
+      "mode": 420,
+      "sha256": "4e4c253c7f809153c8d38fa563f80904d4448c5d0265301aa1ce2135320893f3"
+    },
+    {
+      "path": "language/d/wros_scene.d",
+      "bytes": 15495,
+      "mode": 420,
+      "sha256": "dcd64e2d9978562a5703823caf39f29124577d205182da5f166960213701132c"
+    }
+  ]
+}
