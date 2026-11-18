@@ -14,7 +14,7 @@ import artifacts
 ROOT = Path(__file__).resolve().parents[1]
 
 def audit(data, profile):
-    """Allow exact ROS signatures and the selected pointer-width environment ABI.
+    """Allow exact ROS signatures and the selected pointer-width Preview1 ABI.
 
     Preview1 does not standardize memory64: the matching UWVM sysroot uses
     explicit *_wasm64 imports. Neither spelling grants runtime permission.
@@ -26,6 +26,8 @@ def audit(data, profile):
     pointer = "i" + str(profile.address_bits)
     for name in ("environ_get", "environ_sizes_get"):
         approved["wasi_snapshot_preview1", name + suffix] = ([pointer, pointer], ["i32"])
+    approved["wasi_snapshot_preview1", "clock_res_get" + suffix] = (["i32", pointer], ["i32"])
+    approved["wasi_snapshot_preview1", "clock_time_get" + suffix] = (["i32", "i64", pointer], ["i32"])
     approved["wasi_snapshot_preview1", "proc_exit" + suffix] = (["i32"], [])
     if profile.threads and profile.address_bits != 32:
         raise ValueError("no qualified memory64 thread startup ABI is available")

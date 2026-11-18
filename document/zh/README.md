@@ -46,7 +46,7 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" --reactor --export _start -O3 -g -o body.wasm body.cpp
 ```
 
-默认 wasm32、Core 3.0、MTE、标准 Wasm EH，线程默认关闭。使用 `-pthread`、`--target wasm64`、`--no-mte`、`--no-eh`、`--core mvp` 选择对应配置。依赖 pthread 的构建须传递线程选项。地址宽度、线程、MTE 和异常模式各自决定可使用的 sysroot。链接后检查实际导入名和签名，拒绝通用 POSIX 套接字。允许有限的 WASIp1 环境变量和退出操作。运行权限另由 VM 控制。
+默认 wasm32、Core 3.0、MTE、标准 Wasm EH，线程默认关闭。使用 `-pthread`、`--target wasm64`、`--no-mte`、`--no-eh`、`--core mvp` 选择对应配置。依赖 pthread 的构建须传递线程选项。地址宽度、线程、MTE 和异常模式各自决定可使用的 sysroot。链接后检查实际导入名和签名，拒绝通用 POSIX 套接字。允许 WASIp1 环境变量查询、时钟读取、时钟分辨率查询和进程退出。运行权限另由 VM 控制。
 
 ### 分文件编译与静态库
 
@@ -63,6 +63,8 @@ bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" -O3 -g \
 `wrar` 调用指定工具链的 `llvm-ar`，产生可复现、带符号索引的普通 GNU 静态库，不执行 guest，也不安装 native 库。目标文件中的 `wros.sdk.object` 自定义段记录文件摘要、编译器摘要、位宽、Core、MTE、线程和 EH 配置。配置混合、文件变化、无记录目标文件、ELF、LLVM bitcode 和 thin archive 均拒绝。这个记录仅检查构建一致性，不是签名；有权修改构建输入的人也能制造记录。应使用受信编译器和已签名部署文件，运行安全边界仍由 VM 实施。
 
 链接前检查库中所有成员，包括未引用成员；复制已验证的目标字节到私有目录，重建符号索引后再链接。最多接收 1,024 个目标成员，单个目标文件或库上限 128 MiB，合计上限 256 MiB，最终文件上限 128 MiB。失败保留原输出。最终 Wasm 删除构建记录后仍独立检查实际导入，配置匹配不代表允许文件或套接字能力。
+
+时钟接口为 `clock_time_get` 和 `clock_res_get`。wasm64 使用同名的 `_wasm64` 形式。两种宽度的时钟 ID 都是 i32，精度参数都是 i64，结果缓冲区地址随目标宽度变化。部署时可以分别授予单调时钟或实时时钟的读数与分辨率查询权限。
 
 wasm64 环境变量接口采用对应 UWVM sysroot 的 `environ_get_wasm64`、`environ_sizes_get_wasm64`（i64 指针）和 `proc_exit_wasm64`。这是 UWVM 对 Preview1 的扩展，不是标准 Preview1 memory64 ABI，不能混用 wasm32 名称。缺少 memory64 线程启动支持时明确拒绝。
 

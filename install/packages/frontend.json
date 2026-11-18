@@ -26,9 +26,9 @@
     },
     {
       "path": "install/frontend.py",
-      "bytes": 6175,
+      "bytes": 6370,
       "mode": 420,
-      "sha256": "2216a739768e4c8a0efd64a075230ec13b88a52d6f75a803b5e6dbdc813b6fc3"
+      "sha256": "2c5e1cbb316fe125321da9b0cf6e2ebf6d9fea1c6d2a1b527fdf8860b6b6e090"
     },
     {
       "path": "install/guest_profile.py",

@@ -47,7 +47,7 @@ Each package name resolves to `install/packages/<name>.json` at that same commit
 bin/wrc --toolchain "$PRODUCER" --sysroots "$RECEIPT" --reactor --export _start -O3 -g -o robot.wasm robot.c
 ```
 
-Defaults are wasm32, Core 3.0, WasmMTE, standard Wasm exceptions and single-threaded output. Select `--target wasm64`, `--no-mte`, `--no-eh`, `--core mvp` or `-pthread` explicitly. A pthread-dependent build must propagate the thread option. Missing matching sysroot inputs stop the build. C++ EH and no-EH use distinct library closures. After link, the driver checks binary import signatures before replacing the output. It admits the ROSv2 contract, limited WASIp1 environment/exit operations, and the selected thread import. The VM independently enforces deployed permissions.
+Defaults are wasm32, Core 3.0, WasmMTE, standard Wasm exceptions and single-threaded output. Select `--target wasm64`, `--no-mte`, `--no-eh`, `--core mvp` or `-pthread` explicitly. A pthread-dependent build must propagate the thread option. Missing matching sysroot inputs stop the build. C++ EH and no-EH use distinct library closures. After link, the driver checks binary import signatures before replacing the output. It admits the ROSv2 contract, WASIp1 environment queries, clock reads, clock resolution queries and process exit, and the selected thread import. The VM independently enforces deployed permissions.
 
 ### Separate compilation and static libraries
 
@@ -64,6 +64,8 @@ bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" -O3 -g \
 `wrar` creates a deterministic ordinary GNU archive using the selected prefix's `llvm-ar`; it never executes a guest or installs a native library. Objects contain a `wros.sdk.object` custom section binding their bytes to the exact compiler digest, pointer width, Core version, MTE, thread and EH settings. A mismatch, changed object, unmarked object, native ELF file, LLVM bitcode input or thin archive fails before linking. These build notes are not signatures: a user able to replace build inputs can also manufacture a note. Select a trusted compiler prefix and signed deployment artifacts. The VM remains the security boundary.
 
 The linker frontend validates every archive member, including unused members, snapshots the object bytes in a private directory, and regenerates the symbol index before invoking the linker. It admits at most 1,024 objects, 128 MiB per object/archive and 256 MiB total object/archive input. Final output has a 128 MiB limit. Failed validation or compilation preserves the previous output. Build notes are removed from the final Wasm and its actual imports are checked independently; an allowed object profile never authorizes filesystem or socket imports.
+
+The SDK accepts `clock_time_get` and `clock_res_get`. For wasm64, append `_wasm64` to each import name. Both widths use i32 clock IDs and i64 precision. Only the output pointer width changes. At deployment, realtime and monotonic clocks each have independent time and resolution grants.
 
 For wasm64, the narrow environment allowance uses UWVM's explicit `environ_get_wasm64` and `environ_sizes_get_wasm64` signatures with i64 pointers, plus `proc_exit_wasm64`. These are the matching sysroot's extension to Preview1, not a standardized Preview1 memory64 ABI. wasm32 spellings are not interchangeable. Missing memory64 thread startup support refuses explicitly.
 
