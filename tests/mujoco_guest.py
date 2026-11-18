@@ -26,6 +26,10 @@ def main():
     for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output", "toolchain", "sysroots32"):
         p.add_argument("--" + field, required=True, type=Path)
     p.add_argument("--sysroots64", type=Path, help="matching wasm64 sysroot for dual-width toolchains")
+    p.add_argument("--address-bits", type=int, choices=(32, 64),
+                   help="exercise one address width from the selected language toolchain")
+    p.add_argument("--vendor-model", type=Path, help="a pinned platform MJCF manifest from the VM fixtures")
+    p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
     p.add_argument("--language", choices=("c", "cpp", "nim", "objectc", "lua", "rs", "tinygo", "fortran", "csharp"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
     p.add_argument("--installed-sdk", type=Path, help="compile the controller using a trusted installed SDK")
@@ -41,6 +45,12 @@ def main():
     p.add_argument("--dotnet", type=Path, help="pinned host .NET SDK for the C# numeric component")
     p.add_argument("--mono-compiler", type=Path, help="pinned host Mono LLVMOnly compiler")
     a = p.parse_args()
+    if bool(a.vendor_model) != bool(a.vendor_assets):
+        p.error("supply both the vendor model and its asset directory")
+    if a.vendor_model and a.installed_sdk:
+        platform = json.loads(a.vendor_model.read_bytes())["platform"]
+        if a.installed_sdk.resolve(strict=True).parents[1].name != platform:
+            p.error("the model platform differs from the installed SDK selection")
     if a.installed_sdk and a.candidate_mte:
         p.error("the installed SDK simulation requires a qualified compiler")
     compiler_root = a.installed_sdk.resolve(strict=True) if a.installed_sdk else ROOT
@@ -53,6 +63,10 @@ def main():
     if any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
         p.error("--goroot and --tinygoroot are required for TinyGo")
     widths = (32,) if a.language in ("rs", "tinygo", "csharp") else (32, 64)
+    if a.address_bits:
+        if a.address_bits not in widths:
+            p.error("the requested address width is unavailable for this language")
+        widths = (a.address_bits,)
     if 64 in widths and not a.sysroots64:
         p.error("a matching --sysroots64 is required for this language")
     if a.language == "objectc" and not all((a.objc_clang, a.objc_runtime32, a.objc_runtime64)):
@@ -144,6 +158,9 @@ def main():
     for key, value in (("source-root", a.vm_source), ("runtime", a.runtime), ("openssl-root", a.openssl_root),
                        ("mujoco", a.mujoco), ("output", a.output)):
         args += ["--" + key, str(value.resolve())]
+    if a.vendor_model:
+        args.extend(["--vendor-model",str(a.vendor_model.resolve()),"--vendor-assets",str(a.vendor_assets.resolve()),
+                     "--platform-targets",str(ROOT/"share/targets.json"),"--audit-calls"])
     producers = [path for path in (a.flang, a.producer) if path]
     if a.language == "csharp":
         producers.extend((compiler_root / "bin/wrcs", ROOT / "tests/mujoco/controller.cs",
@@ -155,8 +172,8 @@ def main():
                           ROOT / "tools/wasm/tag_ir.cpp"))
     suite.main(args, compile_guest=compile_guest, guest_name=a.language, guest_widths=widths,
                guest_inputs=(source, Path(__file__), compiler, *producers, *sysroots.values(), *objc_inputs,
-                             *([ROOT / "language/lua/scene.hpp", ROOT / "language/lua/entry.cpp", ROOT / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),
-                             *[tc/"bin"/tool for tc in {toolchains[w] for w in widths} for tool in ("clang","wasm-ld")], ROOT / "include/wros/scene.h"))
+                             *([compiler_root / "language/lua/scene.hpp", compiler_root / "language/lua/entry.cpp", compiler_root / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),
+                             *[tc/"bin"/tool for tc in {toolchains[w] for w in widths} for tool in ("clang","wasm-ld")], compiler_root / "include/wros/scene.h"))
 
 
 if __name__ == "__main__":
