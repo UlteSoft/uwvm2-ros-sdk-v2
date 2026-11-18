@@ -15,12 +15,13 @@ bin/wrlua examples/lua/body.lua --ros-abi \
 | --- | --- |
 | `SCRIPT` | One Lua text chunk, up to 1 MiB. NUL bytes and binary chunks are rejected. |
 | `-o FILE`, `--output FILE` | Destination for the linked Wasm module. The output directory must exist. |
+| `--mte`, `--no-mte` | Enable memory tagging (default) or explicitly disable it for the interpreter and its runtime. Select the matching sysroot. |
 | `--toolchain DIR` | Prefix containing the SDK's WasmMTE-capable Clang and linker. |
 | `--sysroots FILE` | Build receipt for matching target headers and libraries. |
 | `--target wasm32` or `--target wasm64` | Guest pointer width. The default is wasm32. |
 | `--ros-abi` | Register `wros.abi()` in Lua and link its ROSv2 import. |
 
-This interpreter build uses Wasm Core 3.0, C++ exceptions for Lua protected calls, WasmMTE and a single guest thread. Optimization and debug symbols are enabled together. Each call of `_start` creates a fresh Lua state with a 16 MiB limit on live Lua heap allocations. Set the overall Wasm memory and execution limits in the VM. Embedded chunk text is part of the compiled module and can be read from the artifact.
+This interpreter build uses Wasm Core 3.0, C++ exceptions for Lua protected calls, WasmMTE by default and a single guest thread. Optimization and debug symbols are enabled together. Each call of `_start` creates a fresh Lua state with a 16 MiB limit on live Lua heap allocations. Set the overall Wasm memory and execution limits in the VM. Embedded chunk text is part of the compiled module and can be read from the artifact.
 
 ## Libraries and host permissions
 

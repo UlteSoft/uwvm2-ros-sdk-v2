@@ -52,7 +52,7 @@ function configure(target, entry)
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
     local eh = boolean(target, "eh", core ~= "mvp")
     local mte = boolean(target, "mte", true)
-    assert(mte, "Industrial guest compilation requires WasmMTE")
+    local sysroots = (not mte and os.getenv("WROS_SYSROOTS_NO_MTE")) or os.getenv("WROS_SYSROOTS")
     local arch = target:arch()
     local plat = target:plat()
     assert(plat == "wasm-wasip1" or plat == "wasm-wasip1-threads", "Unsupported Wasm target platform")
@@ -73,7 +73,7 @@ function configure(target, entry)
     assert(path.extension(name) == extension, "Target filename must end in " .. extension)
     target:set("filename", name)
     local request = {root = root, adapter = adapter, program = program, kind = kind, arch = arch,
-        core = core, eh = eh, mte = mte, threads = threads, exports = exports, lua_abi = lua_abi, std = std, implementation = implementation}
+        core = core, eh = eh, mte = mte, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, std = std, implementation = implementation}
     if implementation.validate then implementation.validate(target, request) end
     target:data_set("wros.request", request)
 end
@@ -90,11 +90,11 @@ end
 
 local function compiler_args(target, request)
     local toolchain = assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN to the Wasm compiler prefix")
-    local sysroots = assert(os.getenv("WROS_SYSROOTS"), "Set WROS_SYSROOTS to its matching sysroots.json")
+    local sysroots = assert(request.sysroots, "Set WROS_SYSROOTS to its matching sysroots.json")
     local args = {"--target", request.arch, "--toolchain", toolchain, "--sysroots", sysroots}
     local optimize = target:get("optimize")
     local symbols = table.wrap(target:get("symbols"))
-    table.join2(args, {"--core", request.core, request.eh and "--eh" or "--no-eh", "--mte"})
+    table.join2(args, {"--core", request.core, request.eh and "--eh" or "--no-eh", request.mte and "--mte" or "--no-mte"})
     if request.threads then table.insert(args, "-pthread") end
     if request.std then table.join2(args, {"--std", request.std}) end
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3", smallest = "s"}

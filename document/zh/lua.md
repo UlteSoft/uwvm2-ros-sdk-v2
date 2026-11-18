@@ -15,12 +15,13 @@ bin/wrlua examples/lua/body.lua --ros-abi \
 | --- | --- |
 | `SCRIPT` | 单个 Lua 文本脚本，上限为 1 MiB。输入含 NUL 或以字节码标记开头时拒绝构建。 |
 | `-o FILE`、`--output FILE` | 输出 Wasm 文件。父目录须已存在。 |
+| `--mte`、`--no-mte` | 默认启用内存标记，可显式关闭整个解释器和运行库的插桩。需选择匹配的 sysroot。 |
 | `--toolchain DIR` | 支持 WasmMTE 的 SDK Clang 与链接器所在工具链的前缀路径。 |
 | `--sysroots FILE` | 对应目标头文件和运行库的构建记录。 |
 | `--target wasm32`、`--target wasm64` | guest 指针宽度，默认 wasm32。 |
 | `--ros-abi` | 在 Lua 中注册 `wros.abi()` 并引入对应 ROSv2 接口。 |
 
-该构建使用 Wasm Core 3.0、WasmMTE、单 guest 线程，通过 C++ 异常实现 Lua 的受保护调用，同时开启优化和调试符号。每次执行 `_start` 都会创建全新的 Lua 状态，其 Lua 堆活动分配上限为 16 MiB。VM 负责限制整个 Wasm 内存和执行时间。Lua 源码嵌在产物里，可以从该文件中读取。
+该构建使用 Wasm Core 3.0、默认启用的 WasmMTE、单 guest 线程，通过 C++ 异常实现 Lua 的受保护调用，同时开启优化和调试符号。每次执行 `_start` 都会创建全新的 Lua 状态，其 Lua 堆活动分配上限为 16 MiB。VM 负责限制整个 Wasm 内存和执行时间。Lua 源码嵌在产物里，可以从该文件中读取。
 
 ## 库和宿主权限
 

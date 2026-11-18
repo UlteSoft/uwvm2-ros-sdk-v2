@@ -32,10 +32,11 @@ def main():
     for name in ("toolchain", "sysroots", "runtime", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--frontend-root", type=Path, default=ROOT)
+    parser.add_argument("--no-mte", action="store_true", help="build and run the entire Lua interpreter without WasmMTE")
     args = parser.parse_args()
     front, tc, sr, vm, work = (path.resolve() for path in
         (args.frontend_root, args.toolchain, args.sysroots, args.runtime, args.output))
-    result = dict(complete=False, cases=[], modules={}, cgroup=cgroup_record())
+    result = dict(complete=False, mte=not args.no_mte, cases=[], modules={}, cgroup=cgroup_record())
     work.mkdir(parents=True, exist_ok=False)
     tmp = work / "tmp"
     tmp.mkdir()
@@ -66,6 +67,8 @@ def main():
         clock = "clock_time_get" + ("_wasm64" if bits == 64 else "")
         compiler = [sys.executable, front / "bin/wrlua", "--toolchain", tc, "--sysroots", sr,
                     "--target", f"wasm{bits}"]
+        if args.no_mte:
+            compiler.append("--no-mte")
         for mode in ("permitted", "standalone", "syntax-error"):
             label = f"{mode}{bits}"
             body = work / (label + ".lua")
@@ -89,6 +92,8 @@ def main():
                         "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
                         "--wasm-set-main-module-name", "main", "--wasip1-single-create", "main",
                         "--wasip1-single-enable", "main", "--wasip1-single-interface", "main", clock, "allow"]
+                if args.no_mte:
+                    base.append("--wasm-feature-disable-memtag-extension")
                 granted = [*base, "--wasip1-single-grant", "main", "realtime-clock"]
                 if mode == "permitted":
                     bound = ["--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main",

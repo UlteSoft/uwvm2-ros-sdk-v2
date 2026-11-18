@@ -63,6 +63,7 @@ def main():
     parser.add_argument("--target", default="wasm32", choices=("wasm32", "wasm64"))
     parser.add_argument("--toolchain", type=Path, required=True)
     parser.add_argument("--sysroots", type=Path, required=True)
+    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--ros-abi", action="store_true", help="expose wros.abi() inside Lua")
     args = parser.parse_args()
     if args.script.resolve() == args.output.resolve():
@@ -79,7 +80,7 @@ def main():
                             for i in range(0, len(data), 128)) or '""'
         (directory / "chunk.inc").write_text("static const char script[] = " + literal + ";\n")
         cmd = [sys.executable, ROOT / "bin/wrcc", "--toolchain", args.toolchain, "--sysroots",
-               args.sysroots, "--target", args.target, "--reactor", "--export", "_start",
+               args.sysroots, "--target", args.target, "--mte" if args.mte else "--no-mte", "--reactor", "--export", "_start",
                "-O3", "-g", "-Dl_signalT=int", "-DLUA_USE_JUMPTABLE=0", "-I", directory]
         if args.ros_abi:
             cmd += ["-D", "WROS_LUA_ABI"]

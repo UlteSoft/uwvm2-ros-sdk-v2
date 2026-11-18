@@ -12,6 +12,21 @@ must exist for the complete profile. It never substitutes a host library,
 another compiler's sysroot, memory32 for memory64, or an uninstrumented runtime.
 A completed build receipt is not deployment or memory-safety qualification.
 
+## Selecting instrumentation
+
+The SDK defaults to memory tagging. An application can select a complete
+non-MTE target profile explicitly. Within an instrumented C or C++ translation
+unit, Clang honors standard `no_sanitize("memtag")` annotations. Their scope is
+the annotated declaration. A neighboring function still receives the target's
+normal instrumentation when it needs a runtime check. Selecting a different
+profile requires matching guest libraries and separate qualification.
+
+The producer build uses Clang and FileCheck on the generated wasm32 and wasm64
+assembly for both C and C++. It checks an annotated function alongside a
+normally tagged function and repeats the check with MTE disabled for the whole
+translation unit. Guest libraries, import permissions and VM enforcement have
+separate acceptance tests.
+
 ## Proof-based tag elision
 
 The WebAssembly stack-tagging pass consumes LLVM `StackSafetyGlobalInfo`.
@@ -33,6 +48,16 @@ The maintained patch includes `memtag-proven-safe.ll` regressions for memory32
 and memory64, safe bounded operations, unknown calls, escaped pointers, and
 lifetime violations. This coverage exercises an existing optimization; adding
 these tests does not by itself represent a code-generation speed improvement.
+
+Each producer build runs the pinned stack-safety, dynamic-allocation and
+address-instruction regressions with its own `llc` and `FileCheck`. Additional
+checks cover complete adjacent zero initialization, partial or volatile
+clears, runtime lengths, nonzero values, intervening calls or loads, an
+unrelated allocation and a second lifetime. The suite inspects transformed
+IR and assembly for both address widths and checks dynamic Wasm object
+emission. Standalone reproduction uses `check_stack_tagging.py --tool-bin
+<producer-bin> --source <prepared-llvm-source> --work <evidence-directory>`.
+The prepared source must retain the inventory written by the source build.
 
 ## Rebuild order after a producer change
 

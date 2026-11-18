@@ -48,8 +48,8 @@ target_end()
 
 | 配置字段 | 类型与默认值 | 语义 |
 | --- | --- | --- |
-| `core` | 字符串，默认 `"3.0"` | 可选 `"3.0"` 或 `"mvp"`。MVP 基线使用 wasm32、单线程并关闭 EH。工业 SDK 在这个基线上保留 WasmMTE 扩展。 |
-| `mte` | 布尔，默认 true | 必须为 true。链接对象需要由同一编译器及匹配的 MTE sysroot 构建。 |
+| `core` | 字符串，默认 `"3.0"` | 可选 `"3.0"` 或 `"mvp"`。MVP 基线使用 wasm32、单线程并关闭 EH。MTE 由同一目标的 mte 字段决定。 |
+| `mte` | 布尔，默认 true | 设为 false 可显式关闭整个目标的 MTE。目标文件和静态库须匹配该编译配置及 sysroot。C/C++ 源码属性仍可改变局部插桩。 |
 | `eh` | 布尔，Core 3.0 默认 true | 选择匹配的异常运行时。MVP 默认 false。 |
 | `std` | 可选字符串 | C 支持 `c11`、`c17`、`c23`。C++ 支持 `c++17`、`c++20`、`c++23`。 |
 | `lua_abi` | 布尔，默认 false | 在 Lua 中提供 `wros.abi()`。部署或运行时仍须显式开放该查询。 |
@@ -80,10 +80,11 @@ SDK 目标拒绝透传原始编译或链接参数、宿主软件包、宿主库�
 | `UWVM_ROS_SDK_ROOT` | 含公共 xmake 入口的 SDK 安装目录。 |
 | `WROS_PLATFORM` | 随包 C 示例的目标平台，默认 `unitree`。其他项目可以直接调用 `set_ros_platform`。 |
 | `WROS_TOOLCHAIN`、`WROS_SYSROOTS` | C/C++ 与 Lua 构建所需的工具链目录和 sysroot 构建记录。缺少匹配的配置时编译失败。 |
+| `WROS_SYSROOTS_NO_MTE` | 可指定关闭 MTE 的目标使用的构建记录。省略时 WROS_SYSROOTS 必须包含该配置。 |
 | `WROS_VM` | `xmake run` 使用的可信 uwvm2-ros 绝对路径。 |
 | `WROS_RUN_QUERIES` | 逗号分隔的本地测试授权，默认空。可选 `abi`、`realtime-clock`、`monotonic-clock`、`realtime-resolution` 和 `monotonic-resolution`。完整部署策略由部署器或 VM 命令行指定。 |
 
-Lua 编译配置为 Core 3.0、单线程、WasmMTE、EH、`-O3 -g`。Go 与 TinyGo 的完整运行时 MTE 仍待实现，因此开发包暂不开放。缺少工具链、sysroot、适配器或最终导入检查失败都会终止构建。平台清单的登记本身不能用于编译。
+Lua 编译配置为 Core 3.0、单线程、可选 MTE、EH、`-O3 -g`。Go 与 TinyGo 的完整运行时 MTE 仍待实现，因此开发包暂不开放。缺少工具链、sysroot、适配器或最终导入检查失败都会终止构建。平台清单的登记本身不能用于编译。
 
 ### 按需安装和适配器目录
 

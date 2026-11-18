@@ -14,21 +14,21 @@
     },
     {
       "path": "install/artifacts.py",
-      "bytes": 9853,
+      "bytes": 9766,
       "mode": 420,
-      "sha256": "52b66b0734989e5acf9d8885d535a47470ac730d5378575cda6dd3babacb9216"
+      "sha256": "5b1d97a9bc9f6174668fbf0eb3fe74a92e53d513fde031a967d2fa423a5d69c8"
     },
     {
       "path": "install/compiler.py",
-      "bytes": 7470,
+      "bytes": 8051,
       "mode": 420,
-      "sha256": "18c0e467a033c91ca94a52c72d5b6fb853c37e89af7909bf88beac652b2202c6"
+      "sha256": "b2c85b99eb235358e48d1e474641542d528e985efa6d5f294ab7f3f7e36e928e"
     },
     {
       "path": "install/frontend.py",
-      "bytes": 6856,
+      "bytes": 6818,
       "mode": 420,
-      "sha256": "6518218b017cbb2994eff5956af0d110cf191793f96378fdb9d0f0a375893314"
+      "sha256": "88d6f5926ade6a8abc6bd8d98baecc3b09ba9e29514dd165595aa0e92455df85"
     },
     {
       "path": "install/guest_profile.py",

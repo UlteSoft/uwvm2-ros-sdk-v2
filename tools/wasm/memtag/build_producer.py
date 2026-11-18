@@ -104,6 +104,8 @@ def prepare(entry, work, archive_cache):
 
 
 def build(args):
+    from check_stack_tagging import check as check_stack_tagging
+
     lock = json.loads((HERE / "source-lock.json").read_text())
     entry = lock["sources"]["llvm-23.1.5"]
     work = args.work.resolve()
@@ -153,6 +155,7 @@ def build(args):
     if subprocess.check_output([str(compiler), "-dumpmachine"], text=True).strip() != "wasm32-unknown-wasip1-threads":
         raise ValueError("compiler default target is not wasm32-wasip1-threads")
     record.update(status="built-awaiting-qualification", version=version, targets=targets,
+                  stack_tagging_checks=check_stack_tagging(output / "bin", source, work / "stack-tagging-checks"),
                   binaries={name: digest(output / "bin" / name) for name in programs})
     receipt.write_text(json.dumps(record, indent=2) + "\n")
     print(receipt)

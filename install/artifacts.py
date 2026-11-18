@@ -73,8 +73,6 @@ def validate_profile(value):
     if not isinstance(value, dict):
         raise ValueError("invalid object profile")
     profile = Profile(**{key: value[key] for key in Profile.__dataclass_fields__})
-    if not profile.mte:
-        raise ValueError("industrial objects require WasmMTE")
     if value != profile.to_dict():
         raise ValueError("inconsistent object profile")
     return value

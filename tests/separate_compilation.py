@@ -46,6 +46,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("frontend-root", "toolchain", "sysroots", "runtime", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--no-mte-sysroots", type=Path)
     options = parser.parse_args()
     controller = cgroup_record()
     front, toolchain, receipt, runtime, work = [getattr(options, name).resolve() for name in
@@ -56,7 +57,11 @@ def main():
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     paths = [Path(__file__).resolve(), receipt, runtime, toolchain / "bin/clang", toolchain / "bin/wasm-ld",
              toolchain / "bin/llvm-ar", front / "share/abi/ros.json"]
-    paths += sorted((front / "install").glob("*.py")) + sorted((front / "bin").glob("wr*"))
+    paths.extend(front / "install" / (name + ".py") for name in
+                 ("archiver", "artifacts", "compiler", "frontend", "guest_profile", "imports"))
+    paths.extend(front / "bin" / name for name in ("wrar", "wrc", "wrcc"))
+    if options.no_mte_sysroots:
+        paths.append(options.no_mte_sysroots.resolve())
     hashes = {str(p): sha(p) for p in paths}
     result = dict(complete=False, cgroup=controller, inputs=hashes, cases=[], artifacts={})
 
@@ -142,6 +147,35 @@ def main():
     bad_archive = work / "native.a"
     bad_archive.write_bytes(b"!<thin>\n")
     run("thin-archive-refused", compile_cmd(32, "cpp", "--reactor", "--export", "_start", work / "wasm32-body.o", bad_archive, "-o", work / "bad.wasm"), False, "ordinary GNU archive")
+
+    if options.no_mte_sysroots:
+        # Check both crossing directions, including an unused static library.
+        off = options.no_mte_sysroots.resolve()
+        probe, main = work / "probe.c", work / "profile.c"
+        probe.write_text("int optional_library_value(void) { return 17; }\n")
+        main.write_text("void _start(void) { volatile int n=3; if (n!=3) __builtin_trap(); }\n")
+        for bits in (32, 64):
+            for mode in ("on", "off"):
+                flags = [] if mode == "on" else ["--sysroots", off, "--no-mte"]
+                obj, lib = [work / f"profile{bits}-{mode}.{ext}" for ext in ("o", "a")]
+                run(f"profile-{bits}-{mode}", compile_cmd(bits, "c", *flags, "-c", probe, "-o", obj))
+                run(f"archive-{bits}-{mode}", [front / "bin/wrar", "--toolchain", toolchain, "-o", lib, obj])
+            for mode, other in (("on", "off"), ("off", "on")):
+                flags = [] if mode == "on" else ["--sysroots", off, "--no-mte"]
+                foreign = work / f"profile{bits}-{other}.a"
+                module = work / f"profile{bits}-{mode}.wasm"
+                run(f"run-profile-build-{bits}-{mode}", compile_cmd(bits, "c", *flags, "--reactor", "--export", "_start", main, "-o", module))
+                before = sha(module)
+                run(f"refuse-unused-{bits}-{mode}", compile_cmd(bits, "c", *flags, "--reactor", "--export", "_start", main, foreign, "-o", module),
+                    False, "profile mismatch")
+                if sha(module) != before:
+                    raise RuntimeError("rejected mixed-profile link replaced its output")
+                for engine in ("int", "aot"):
+                    syntax = ["--wasm-feature-disable-memtag-extension"] if mode == "off" else []
+                    run(f"run-profile-{bits}-{mode}-{engine}", [*vm_cmd(bits, engine), *syntax, "--run", module])
+            run(f"refuse-mixed-archive-{bits}", [front / "bin/wrar", "--toolchain", toolchain,
+                "-o", work / f"mixed{bits}.a", work / f"profile{bits}-on.o", work / f"profile{bits}-off.o"],
+                False, "profile mismatch")
 
     # A matching build note must never authorize a dangerous final host import.
     denied_source, denied_object, denied_library = [work / name for name in ("socket.c", "socket.o", "socket.a")]

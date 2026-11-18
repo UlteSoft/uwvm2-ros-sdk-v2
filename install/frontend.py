@@ -6,7 +6,7 @@ import re
 import subprocess
 import tempfile
 from pathlib import Path
-from compiler import make_command
+from compiler import compiler_environment, make_command
 from guest_profile import Profile
 from imports import inspect
 import artifacts
@@ -60,8 +60,6 @@ def main(language):
                         ("c++17", "c++20", "c++23"))
     a = parser.parse_args()
     try:
-        if not a.mte:
-            raise ValueError("industrial guest compilation requires WasmMTE")
         profile = Profile(int(a.target[4:]), "1.0" if a.core=="mvp" else "3.0", a.threads, a.mte,
                           "eh" if (a.eh if a.eh is not None else a.core!="mvp") else "noeh")
         if any(not re.fullmatch(r"[a-zA-Z_]\w*", n,re.ASCII) for n in a.export):
@@ -103,7 +101,7 @@ def main(language):
             if "-lunwind" in command:
                 command.remove("-lunwind")
                 command.append("-lunwind")
-            subprocess.run(command,check=True)
+            subprocess.run(command, check=True, env=compiler_environment(a.toolchain))
             data = artifacts.read_bounded(staged)
             if a.compile_only:
                 data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], record["closure_sha256"])

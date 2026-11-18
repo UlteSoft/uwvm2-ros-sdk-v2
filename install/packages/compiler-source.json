@@ -44,21 +44,39 @@
     },
     {
       "path": "tools/wasm/memtag/README.md",
-      "bytes": 5536,
+      "bytes": 7029,
       "mode": 420,
-      "sha256": "66d642e786108a23bd3f9c9bec5054323161cbc01c2f7888ef0ebbfa3fc4a269"
+      "sha256": "78f8f859cdbe540959b6517d4b38454dfa440d6c77c82eb309903222a6101c4d"
     },
     {
       "path": "tools/wasm/memtag/build_producer.py",
-      "bytes": 8999,
+      "bytes": 9180,
       "mode": 420,
-      "sha256": "db7ec438dd009c6d53b189845308740e6cff072a2f8ea2bfc16a1f852c3c1a6c"
+      "sha256": "a88ee6a96d7c15b90aed1fc620ed520ed5a9d053b73332dfde2c94240e5b8f24"
     },
     {
       "path": "tools/wasm/memtag/build_sysroots.py",
-      "bytes": 18184,
+      "bytes": 19527,
       "mode": 420,
-      "sha256": "806102878e467e3c8dc3f2579275523982cbe752a3957ca783af499e8974cd4f"
+      "sha256": "0a611c36cdcd1943dabace689b30f2d783a274e804d71005c21ec66c64bbf1cc"
+    },
+    {
+      "path": "tools/wasm/memtag/check_stack_tagging.py",
+      "bytes": 5298,
+      "mode": 420,
+      "sha256": "30226848db303e673ddb2835f772f19a9655a7bd8b375e30e8a7e3cfcfae296f"
+    },
+    {
+      "path": "tools/wasm/memtag/memtag-adjacent-zero.ll",
+      "bytes": 6811,
+      "mode": 420,
+      "sha256": "3e55edbaa4671d4150a2c7944b2f9c3b2040e238ddebf176a5569980147a5364"
+    },
+    {
+      "path": "tools/wasm/memtag/memtag-source-attributes.c",
+      "bytes": 903,
+      "mode": 420,
+      "sha256": "ce3ef5036685508ca5ec0e628152c919e5b4fc9ed18256c58b1ca68d832eac5f"
     },
     {
       "path": "tools/wasm/memtag/patches/libc-wros-runtime-diagnostics.patch",

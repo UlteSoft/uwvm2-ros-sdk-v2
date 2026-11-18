@@ -48,8 +48,8 @@ target_end()
 
 | Profile field | Type and default | Meaning |
 | --- | --- | --- |
-| `core` | String, `"3.0"` | Select `"3.0"` or `"mvp"`. MVP selects the Core 1.0 baseline with wasm32, single thread, EH off. The industrial SDK retains the WasmMTE extension with this baseline. |
-| `mte` | Boolean, true | Required to be true. All linked objects must use the matching instrumented toolchain and sysroot. |
+| `core` | String, `"3.0"` | Select `"3.0"` or `"mvp"`. MVP selects the Core 1.0 baseline with wasm32, single thread, EH off. MTE follows its own target setting. |
+| `mte` | Boolean, true | Use false to compile the complete target against its non-instrumented sysroot. Object and archive profiles must match. C/C++ source attributes can change local instrumentation within the selected profile. |
 | `eh` | Boolean, true for Core 3.0 | Select the matching exception runtime. Default false on MVP. |
 | `std` | Optional string | C accepts `c11`, `c17`, `c23`. C++ accepts `c++17`, `c++20`, `c++23`. |
 | `lua_abi` | Boolean, false | Include `wros.abi()` in a Lua application. Local VM execution also requires the operator to expose the ABI query. |
@@ -80,10 +80,11 @@ Raw C/compiler/linker flags, host packages, host library directories and framewo
 | `UWVM_ROS_SDK_ROOT` | Installed SDK selection containing the common xmake entry. |
 | `WROS_PLATFORM` | Platform selected by the bundled C example (default `unitree`). Other projects can call `set_ros_platform` directly. |
 | `WROS_TOOLCHAIN`, `WROS_SYSROOTS` | C/C++ and Lua toolchain prefix and exact sysroot receipt. A missing matching profile fails the build. |
+| `WROS_SYSROOTS_NO_MTE` | Optional receipt selected for targets with mte = false. If unset, WROS_SYSROOTS must contain the requested profile. |
 | `WROS_VM` | Absolute path of the developer-selected VM for `xmake run`. |
 | `WROS_RUN_QUERIES` | Optional comma-separated local test grants. Allowed names are `abi`, `realtime-clock`, `monotonic-clock`, `realtime-resolution`, and `monotonic-resolution`. Empty by default. For a full deployment policy use the deployer or the VM CLI. |
 
-Lua builds with Core 3.0, single thread, WasmMTE, EH and `-O3 -g`. Go and TinyGo development packages remain unavailable pending whole-runtime MTE support. A missing compiler, incompatible sysroot, unavailable adapter or disallowed final import ends the build. Processor or platform inventory entries alone do not enable compilation.
+Lua builds with Core 3.0, single thread, selectable MTE, EH and `-O3 -g`. Go and TinyGo development packages remain unavailable pending whole-runtime MTE support. A missing compiler, incompatible sysroot, unavailable adapter or disallowed final import ends the build. Processor or platform inventory entries alone do not enable compilation.
 
 ### Selective installation and adapter layout
 

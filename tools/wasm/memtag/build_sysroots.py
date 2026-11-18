@@ -9,6 +9,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -17,6 +18,7 @@ from build_producer import SDK, HERE, digest, prepare, checked, inventory
 
 sys.path.insert(0, str(SDK / "install"))
 from guest_profile import Profile
+from compiler import compiler_environment
 
 
 def source_tree(entry, supplied, work, cache):
@@ -93,8 +95,6 @@ def diagnostics_overlay(source, entry, work):
 
 
 def build(args):
-    if not args.mte:
-        raise ValueError("industrial sysroots require WasmMTE")
     if args.jobs < 1:
         raise ValueError("--jobs must be positive")
     # Validate all requested axes before extracting or compiling anything.
@@ -111,7 +111,13 @@ def build(args):
     if work == SDK or work in SDK.parents:
         raise ValueError("--work must be a dedicated build directory")
     work.mkdir(parents=True, exist_ok=True)
+    previous = work / "sysroots.json"
+    if previous.is_file() and json.loads(previous.read_text()).get("mte") != args.mte:
+        raise ValueError("use a separate --work directory for each MTE mode to preserve sysroot receipts")
     toolchain = args.toolchain.resolve()
+    environment = compiler_environment(toolchain)
+    os.environ.clear()
+    os.environ.update(environment)
     compiler = toolchain / "bin/clang"
     version = subprocess.check_output([str(compiler), "--version"], text=True)
     if "clang version 23.1.5" not in version:
@@ -119,6 +125,17 @@ def build(args):
     for name in ("clang", "clang++", "llvm-ar", "llvm-ranlib", "llvm-nm", "llvm-config", "wasm-ld"):
         if not (toolchain / "bin" / name).is_file():
             raise ValueError("missing explicit compiler tool: " + name)
+    # Even the non-instrumented sysroot must come from a capable producer.
+    # An escaping local forces observable Wasm tag code at both target widths.
+    probe = "extern void observe(void *); void example(void) { char region[64]; observe(region); }"
+    capability = {}
+    for bits in sorted({profile.address_bits for profile in profiles.values()}):
+        command = [str(compiler), "--no-default-config", f"--target=wasm{bits}-wasip1",
+                   "-O3", "-g", "-x", "c", "-S", "-fsanitize=memtag", "-o", "-", "-"]
+        assembly = subprocess.run(command, input=probe, capture_output=True, text=True, check=True).stdout
+        if not re.search(r"(?m)^\s*memtag\.(random|hint)(storez?)?\b", assembly):
+            raise ValueError(f"compiler did not emit WasmMTE instructions for wasm{bits}")
+        capability[str(bits)] = hashlib.sha256(assembly.encode()).hexdigest()
     lock = json.loads((HERE / "source-lock.json").read_text())
     llvm = source_tree(lock["sources"]["llvm-23.1.5"], args.llvm_source, work, args.source_cache)
     libc = source_tree(lock["sources"]["wasi-libc-sdk34"], args.libc_source, work, args.source_cache)
@@ -127,12 +144,12 @@ def build(args):
     original_resource = Path(subprocess.check_output([str(compiler), "-print-resource-dir"], text=True).strip())
     if not (original_resource / "include/stddef.h").is_file():
         raise ValueError("compiler resource headers are missing")
-    environment = {"LC_ALL": "C", "TZ": "UTC", "SOURCE_DATE_EPOCH": "1793664000", "ZERO_AR_DATE": "1"}
+    environment = {"LC_ALL": "C", "TZ": "UTC", "SOURCE_DATE_EPOCH": "1793664000", "ZERO_AR_DATE": "1",
+                   "PYTHONDONTWRITEBYTECODE": "1"}
     os.environ.update(environment)
-    os.environ["PATH"] = str(toolchain / "bin") + os.pathsep + os.environ.get("PATH", "")
     record = {"schema": "uwvm-memtag-sysroot-build-v1", "qualified": False, "status": "building",
               "compiler_version": version, "compiler_sha256": digest(compiler), "sources": lock["sources"],
-              "mte": args.mte, "wasm_version": args.wasm_version,
+              "mte": args.mte, "wasm_version": args.wasm_version, "producer_mte_codegen": capability,
               "runtime_diagnostics": lock["runtime_diagnostics"],
               "targets": [], "commands": []}
     # Ninja does not treat the compiler executable as an object dependency.
@@ -155,6 +172,8 @@ def build(args):
         log = work / "logs" / (name + ".log")
         log.parent.mkdir(exist_ok=True)
         common = {"CMAKE_BUILD_TYPE": "Release", "CMAKE_INSTALL_PREFIX": str(prefix),
+                  "CMAKE_C_FLAGS_RELEASE": "-O3", "CMAKE_CXX_FLAGS_RELEASE": "-O3",
+                  "CMAKE_ASM_FLAGS_RELEASE": "-O3",
                   "CMAKE_C_COMPILER": str(compiler), "CMAKE_CXX_COMPILER": str(toolchain / "bin/clang++"),
                   "CMAKE_ASM_COMPILER": str(compiler), "CMAKE_AR": str(toolchain / "bin/llvm-ar"),
                   "CMAKE_RANLIB": str(toolchain / "bin/llvm-ranlib"), "CMAKE_NM": str(toolchain / "bin/llvm-nm"),
@@ -190,8 +209,7 @@ def build(args):
         flags += " -ffile-prefix-map=" + str(target_libc) + "=/usr/src/wasi-libc-sdk34"
         flags += " " + " ".join(feature_flags)
         flags += " -D__WROS_NO_HOST_DIAGNOSTICS"
-        if args.mte:
-            flags += " -fsanitize=memtag"
+        flags += " -fsanitize=memtag" if args.mte else " -fno-sanitize=memtag"
         if threads:
             flags += " -pthread -matomics -mbulk-memory"
         common_target = {"CMAKE_SYSTEM_NAME": "WASI", "CMAKE_SYSTEM_PROCESSOR": "wasm64" if memory64 else "wasm32",

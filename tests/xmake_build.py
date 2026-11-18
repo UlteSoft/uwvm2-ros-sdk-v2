@@ -17,7 +17,7 @@ from bootstrap import Source, install
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for key in ("repository", "toolchain", "sysroots", "vm", "xmake", "output"):
+    for key in ("repository", "toolchain", "sysroots", "no-mte-sysroots", "vm", "xmake", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--commit", required=True)
     args = parser.parse_args()
@@ -27,12 +27,12 @@ def main():
     tmp = work / "tmp"
     tmp.mkdir()
     env = dict(os.environ, TMPDIR=str(tmp), WROS_TOOLCHAIN=str(args.toolchain.resolve()),
-               WROS_SYSROOTS=str(args.sysroots.resolve()), WROS_VM=str(args.vm.resolve()),
+               WROS_SYSROOTS=str(args.sysroots.resolve()), WROS_SYSROOTS_NO_MTE=str(args.no_mte_sysroots.resolve()), WROS_VM=str(args.vm.resolve()),
                XMAKE_GLOBALDIR=str(work / "global"), WROS_PLATFORM="unitree", WROS_RUN_QUERIES="")
     os.environ["TMPDIR"] = str(tmp)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     xmake = str(args.xmake.resolve())
-    record["inputs"] = {str(p): sha(p) for p in (args.vm, args.sysroots, args.toolchain / "bin/clang",
+    record["inputs"] = {str(p): sha(p) for p in (args.vm, args.sysroots, args.no_mte_sysroots, args.toolchain / "bin/clang",
                         args.xmake, Path(__file__))}
     for lang, plat in (("c", "unitree"), ("cpp", "abb"), ("lua", "unitree")):
         selection = install(Source(args.commit, args.repository.resolve()), plat, lang, work / "sdk", [])
@@ -71,7 +71,6 @@ def main():
     for label, edit, error in (
         ("missing-platform", 'set_ros_platform("abb")', "Platform is not installed"),
         ("missing-language", 'set_language("java")', "Language is not installed"),
-        ("mixed-mte", 'set_wros_profile({mte=false})', "requires WasmMTE"),
         ("invalid-profile", 'set_wros_profile({budget=4})', "Unknown WROS profile field"),
         ("host-link", 'add_links("pthread")', "Unsupported guest target setting"),
     ):
@@ -81,6 +80,15 @@ def main():
         script.write_text(script.read_text().replace("target_end()", edit + "\ntarget_end()"))
         run(label, directory, [xmake, "f", "-c", "-y"], error)
 
+    explicit_off = work / "explicit-off"
+    shutil.copytree(Path(env["SELECTION_C"]) / "examples/c", explicit_off)
+    project = explicit_off / "xmake.lua"
+    project.write_text(project.read_text().replace("target_end()", "set_wros_profile({mte=false})\ntarget_end()"))
+    run("configure-off", explicit_off, [xmake, "f", "-c", "-y"])
+    run("missing-off-closure", explicit_off, [xmake, "-j1", "robot"], "no sysroot built by this compiler",
+        WROS_SYSROOTS_NO_MTE=str(args.sysroots.resolve()))
+    run("build-off", explicit_off, [xmake, "-j1", "robot"])
+    run("run-off", explicit_off, [xmake, "run", "robot"], WROS_RUN_QUERIES="abi")
     multi = work / "multi"
     multi.mkdir()
     (multi / "measure.c").write_text("int measure(int x){return x+DELTA;}\n")

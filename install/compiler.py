@@ -2,8 +2,19 @@
 from __future__ import annotations
 import hashlib
 import json
+import os
 from pathlib import Path
 import shlex
+
+
+def compiler_environment(toolchain):
+    """Run the explicit compiler without ambient driver overrides or search paths."""
+    environment = {"PATH": str(toolchain.resolve() / "bin") + os.pathsep + os.defpath,
+                   "LC_ALL": "C", "TZ": "UTC"}
+    for key in ("TMPDIR", "SOURCE_DATE_EPOCH"):
+        if key in os.environ:
+            environment[key] = os.environ[key]
+    return environment
 
 
 def digest(path):
@@ -76,6 +87,8 @@ def select_closure(receipts, profile, compiler_sha256):
             continue
         for target in value["targets"]:
             if target.get("guest_profile") == profile.to_dict():
+                if not profile.mte and not value.get("producer_mte_codegen", {}).get(str(profile.address_bits)):
+                    raise ValueError("sysroot lacks verified WasmMTE compiler capability for this width")
                 root = confined(filename.parent, target["sysroot"])
                 resource = confined(filename.parent, target["resource"])
                 if not (root / "include" / profile.triple / "stdio.h").is_file() or not (resource / "include/stddef.h").is_file():
@@ -96,8 +109,6 @@ def select_closure(receipts, profile, compiler_sha256):
 def make_command(toolchain, receipts, profile, language, arguments, verify=False):
     if language not in ("c", "cpp"):
         raise ValueError("this driver handles c/cpp; other languages need their own complete MTE runtime closure")
-    if not profile.mte:
-        raise ValueError("industrial guest compilation requires WasmMTE")
     toolchain = toolchain.resolve()
     compiler = toolchain / "bin" / ("clang++" if language == "cpp" else "clang")
     linker = toolchain / "bin/wasm-ld"
@@ -126,7 +137,7 @@ def make_command(toolchain, receipts, profile, language, arguments, verify=False
     flags = ["--no-default-config", "--target=" + profile.triple, "--sysroot=" + str(root),
              "-resource-dir=" + str(resource), "-fuse-ld=" + str(linker),
              *profile.llvm_feature_flags()]
-    flags += ["-fsanitize=memtag"]
+    flags += ["-fsanitize=memtag" if profile.mte else "-fno-sanitize=memtag"]
     if profile.exceptions == "eh":
         flags += ["-fwasm-exceptions", "-mllvm", "-wasm-use-legacy-eh=false"]
     elif language == "cpp":

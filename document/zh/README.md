@@ -48,7 +48,7 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 bin/wrcc --toolchain "$PRODUCER" --sysroots "$RECEIPT" --reactor --export _start -O3 -g -o body.wasm body.cpp
 ```
 
-默认 wasm32、Core 3.0、MTE、标准 Wasm EH，线程默认关闭。使用 `-pthread`、`--target wasm64`、`--no-eh`、`--core mvp` 选择对应配置。依赖 pthread 的构建须传递线程选项。地址宽度、线程、MTE 和异常模式各自决定可使用的 sysroot。链接后检查实际导入名和签名，拒绝通用 POSIX 套接字。允许 WASIp1 环境变量查询、时钟读取、时钟分辨率查询和进程退出。运行权限另由 VM 控制。
+默认 wasm32、Core 3.0、MTE、标准 Wasm EH，线程默认关闭。使用 `--no-mte`、`-pthread`、`--target wasm64`、`--no-eh`、`--core mvp` 选择对应配置。依赖 pthread 的构建须传递线程选项。地址宽度、线程、MTE 和异常模式各自决定可使用的 sysroot。链接后检查实际导入名和签名，拒绝通用 POSIX 套接字。允许 WASIp1 环境变量查询、时钟读取、时钟分辨率查询和进程退出。运行权限另由 VM 控制。
 
 ### 分文件编译与静态库
 
@@ -80,4 +80,6 @@ C/C++ 使用 `<wros/scene.h>`，Rust 和 AssemblyScript 的底层声明位于 `l
 
 SDK 的登记范围可扩展到国内和国际厂商。纯算法留在 Wasm，设备访问交给加密连接的隔离驱动。只有通用权限难以表达、且需要宿主执行的约束才进入 VM 平台扩展。上层拉取器按授权从厂商入口获取原厂文件，部署器只读取本地文件并验证摘要。协议来源、物理仿真和实体设备验收分别登记。
 
-工业构建把每个目标文件与编译器摘要、MTE 目标配置及所选 sysroot 清单的摘要绑定。旧目标文件须重新编译再链接。构建会校验 compiler-rt、所选头文件和库；前提是编译器、sysroot 记录和构建输入可信。编译器省略栈标签的依据是静态分析能够证明相关访问的边界和生命周期。回归通过只能验证已测路径，不能据此断言整个程序内存安全。
+工业构建把每个目标文件与编译器摘要、目标配置（含 MTE 开关）及所选 sysroot 清单的摘要绑定。旧目标文件须重新编译再链接。构建会校验 compiler-rt、所选头文件和库；前提是编译器、sysroot 记录和构建输入可信。编译器省略栈标签的依据是静态分析能够证明相关访问的边界和生命周期。回归通过只能验证已测路径，不能据此断言整个程序内存安全。
+
+发布的每个语言编译器都必须支持 WasmMTE，默认启用。可用 `--no-mte` 关闭整个目标的插桩，并使用对应的 sysroot。C/C++ 可以通过 `no_sanitize("memtag")` 等源码属性局部改变插桩。源码作者的显式选择和编译器经边界、生命周期分析后自动省略标签，是两种独立机制。

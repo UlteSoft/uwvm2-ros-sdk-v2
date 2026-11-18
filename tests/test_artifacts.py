@@ -48,8 +48,11 @@ class BuildInputTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "mismatch"): a.check_object(self.object, profile, compiler)
 
     def test_mte_and_closure_required(self):
-        with self.assertRaisesRegex(ValueError, "WasmMTE"):
-            a.seal_object(self.raw, Profile(mte=False).to_dict(), self.compiler, "c" * 64)
+        off = Profile(mte=False).to_dict()
+        off_object = a.seal_object(self.raw, off, self.compiler, "d" * 64)
+        self.assertEqual(a.check_object(off_object, off)["profile"], off)
+        with self.assertRaisesRegex(ValueError, "profile mismatch"):
+            a.check_object(off_object, self.profile)
         with self.assertRaisesRegex(ValueError, "closure mismatch"):
             a.check_object(self.object, self.profile, self.compiler, "d" * 64)
 
