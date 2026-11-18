@@ -41,7 +41,7 @@ def compile_guest(opts, language, work):
         if row["path"].startswith("compiler-jars/"):
             jars.append(str(path))
     cp = os.pathsep.join(sorted(jars))
-    java = [host / "jdk21/bin/java", "-XX:ActiveProcessorCount=1", "-Xms48m", "-Xmx768m",
+    java = [host / "jdk21/bin/java", "-Xint", "-XX:-CreateCoredumpOnCrash", "-XX:ActiveProcessorCount=1", "-Xms48m", "-Xmx768m",
             "-Djava.io.tmpdir=" + str(work/"tmp")]
     env = dict(PATH=os.defpath, HOME=str(work/"tmp"), TMPDIR=str(work/"tmp"), LC_ALL="C.UTF-8", TZ="UTC")
     s = HERE
