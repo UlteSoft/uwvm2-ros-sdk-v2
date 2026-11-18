@@ -42,7 +42,8 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     source = args.output / "probe.f90"
-    source.write_text("integer(4) function measure(i) bind(c)\ninteger(4), value :: i\nmeasure=i+1\nend function\n")
+    source.write_text("integer(4) function measure(i) bind(c)\ninteger(4), value :: i\nmeasure=i+1\nend function\n"
+                      "subroutine measure_tail(n, a)\ninteger :: n\nreal :: a(*)\nif (n>0) a(n)=a(1)+1.0\nend subroutine\n")
     receipt = args.output / "results.json"
     for triple in ("wasm32-unknown-wasip1", "wasm64-unknown-wasip1", "x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"):
         wasm = triple.startswith("wasm")
@@ -59,6 +60,20 @@ def main():
             raise RuntimeError("Flang produced an unexpected result for " + triple)
         if wasm and uses_memory64(data) != triple.startswith("wasm64"):
             raise RuntimeError("memory64 target feature mismatch")
+    for width in (32, 64):
+        # An assumed-size extent is a signed -1 in the target index type, including debug uses.
+        ir = args.output / f"assumed-extent-{width}.ll"
+        command = [args.flang, "-fc1", "-triple", f"wasm{width}-unknown-wasip1", "-emit-llvm", "-O0",
+                   "-debug-info-kind=standalone", source, "-o", ir]
+        proc = subprocess.run(command, cwd=args.output, capture_output=True, timeout=60)
+        (args.output / f"assumed-extent-{width}.log").write_bytes(proc.stderr)
+        record["cases"].append(dict(name=f"assumed-size-debug-{width}", code=proc.returncode))
+        receipt.write_text(json.dumps(record, indent=2) + "\n")
+        proc.check_returncode()
+        text = ir.read_text()
+        if (f"@llvm.fake.use(i{width} -1)" not in text or "!DISubrange(" not in text or
+                "emissionKind: FullDebug" not in text):
+            raise RuntimeError("incorrect debug index for assumed-size Fortran array")
     if sha(args.flang) != record["compiler"]:
         raise ValueError("Flang changed during qualification")
     record["complete"] = True

@@ -23,7 +23,7 @@ python3 language/fortran/prepare.py \
 
 编译配方只选择 LLVM 的 WebAssembly 后端。安装之前，它要求编译器生成两种地址宽度的 Wasm 对象，并检查生成原生 x86 对象的请求会失败。IR 辅助工具的记录绑定了源码、宿主工具和 SDK 代码生成器的摘要。这些步骤在受信任的本地构建机上执行。
 
-Flang 构建记录绑定了上游归档、按顺序应用的代码生成器补丁和两个 Flang 构建补丁。关闭预编译头构建时，源码会显式包含 LLVM 内建指令的完整类型声明。
+Flang 构建记录绑定了上游归档、按顺序应用的代码生成器补丁和 Flang 构建补丁。假定大小数组的变量调试信息会采用所选 Wasm 目标的索引宽度。关闭预编译头构建时，源码会显式包含 LLVM 内建指令的完整类型声明。
 
 ## 编译应用
 
@@ -112,3 +112,16 @@ Fortran 前端使用 C 和 C++ 前端构建语言运行库与 ROS 导入适配�
 前端检查程序、已封装目标文件和静态归档中的待解析符号。程序调用数组内在过程时，前端按选定的指针位宽、异常 ABI 和内存标签模式编译对应的 Flang 来宾运行库。包括实数和整数点积，实数、整数及逻辑矩阵乘法，带掩码或按维的求和，逻辑归约与数组重塑。仅执行标量运算的程序不编译这些源文件。
 
 回归用例执行实数、整数矩阵乘法，验证列和、掩码和与逻辑矩阵乘积。测试核对最终链接的 Fortran 函数名，在两种 VM 引擎中运行，并检查唯一宿主导入 `uwvm_ros_v2.abi`。复数矩阵乘法及外部 Fortran I/O 仍需其他运行库组件。[Fortran 示例](../../tests/fortran/array_intrinsics.f90) · [回归测试](../../tests/fortran_intrinsics.py)
+
+## 构建 Fortran 静态库
+
+使用 `wrf --static` 可以将 Fortran 过程编译成客体静态库。前端给每个 Wasm 对象记录目标配置、编译器和 sysroot 的身份。库引用的 Fortran 运行时过程由最终应用链接。静态库没有部署入口。示例使用声明了 C 绑定的过程，旧式 Fortran 外部过程也可以按同样的方式链接。使用 Fortran `USE` 相互引用的源文件，应在同一目标中按模块依赖顺序编译。
+
+```sh
+wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --static kernel.f90 -o filter.a
+wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --link-object filter.a body.f90 -o robot.wasm
+```
+
+在 Xmake 中为库目标设置 `set_kind("static")`，并在应用目标中通过 `add_deps` 添加依赖。两个目标应使用同一 SDK 提交、地址宽度、异常模型和 MTE 配置。[双目标工程](../../examples/fortran/static/xmake.lua)
+
+静态库回归也可读取 Lite3 SDK 自带的 LAPACK 范数过程和 ROS Taskflow 发行包自带的除法过程。通过 `--dlapy3` 和 `--dladiv` 传入原文件路径，测试会核对源码摘要，并在两种 VM 引擎上检查数值结果。[静态库回归](../../tests/fortran_archives.py)

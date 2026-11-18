@@ -65,9 +65,9 @@ For example, a Nim program can use the generic ROSv2 ABI on Booster. Install wit
 | --- | --- |
 | `target(name)`, `target_end()` | Define the scope for an application or library. |
 | `set_kind("binary")` | Produce a Wasm module. C and C++ entry points use the reactor link mode and export `_start`. |
-| `set_kind("static")` | Compile C or C++ sources into a deterministic archive of matching, verified Wasm objects. Static producers currently accept sources only. |
+| `set_kind("static")` | Compile C, C++ or Fortran sources into a deterministic archive of matching, verified Wasm objects. Static producers currently accept sources only. |
 | `add_files(...)` | C accepts `.c`. C++ accepts `.cpp`, `.cc`, `.cxx`, `.C`. Binary links can include SDK-validated `.o` and `.a`. A Lua target takes one `.lua` application. |
-| `add_deps(name, ...)` | Link binary C/C++ targets against SDK-built static targets. The frontend checks object profiles and compiler digests. |
+| `add_deps(name, ...)` | Link C, C++ and Fortran applications against SDK-built static targets. The frontend checks object profiles and compiler digests. |
 | `set_plat(id)`, `xmake f -p id` | `wasm-wasip1` by default. Use `wasm-wasip1-threads` for a matching threaded toolchain and sysroot. |
 | `set_arch(id)`, `xmake f -a id` | Select `wasm32` (default) or `wasm64`. In the project use `get_config("arch")` to honor the command-line selection. |
 | `add_includedirs(...)`, `add_defines(...)` | Pass include directories and object-like preprocessor definitions to the C/C++ frontend. |

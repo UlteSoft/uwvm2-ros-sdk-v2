@@ -1,0 +1,11 @@
+--- a/flang/lib/Optimizer/CodeGen/CodeGen.cpp
++++ b/flang/lib/Optimizer/CodeGen/CodeGen.cpp
+@@ -854,7 +854,7 @@
+   matchAndRewrite(fir::AssumedSizeExtentOp op, OpAdaptor,
+                   mlir::ConversionPatternRewriter &rewriter) const override {
+     mlir::Location loc = op.getLoc();
+-    mlir::Type ity = lowerTy().indexType();
++    mlir::Type ity = convertType(op.getResult().getType());
+     auto cst = fir::genConstantIndex(loc, ity, rewriter, -1);
+     rewriter.replaceOp(op, cst.getResult());
+     return mlir::success();

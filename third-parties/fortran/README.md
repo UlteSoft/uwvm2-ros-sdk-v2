@@ -13,3 +13,5 @@ For descriptor-based array operations, the SDK also retains the upstream allocat
 The array runtime includes the upstream `sum`, `reduction`, `transformational`, integer/real `dot-product` and integer/real `matmul` translation units and their shared headers. The SDK compiles the units referenced by the input objects for the selected Wasm profile. These additional files retain the upstream license.
 
 The [standalone build patch](llvm23-globals-intrinsic-header.patch) includes the complete LLVM intrinsic instruction type in the WebAssembly globals pass when precompiled headers are disabled.
+
+The [assumed-size extent patch](llvm23-flang-assumed-size-index.patch) emits the negative-one extent marker at the target index width. This keeps LLVM debug intrinsics valid for legacy assumed-size dummy arrays in wasm32 and wasm64 code.

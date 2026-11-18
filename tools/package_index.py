@@ -132,6 +132,7 @@ def main():
     ]
     language_files["fortran"] = [
         "examples/fortran/body.f90", "examples/fortran/xmake.lua",
+        "examples/fortran/static/body.f90", "examples/fortran/static/kernel.f90", "examples/fortran/static/xmake.lua",
         "bin/wrf", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
         "document/en/fortran.md", "document/zh/fortran.md",
         *["language/fortran/" + name for name in ("build_flang.py", "compute_platform.cpp", "entry.c", "flang_identity.py",

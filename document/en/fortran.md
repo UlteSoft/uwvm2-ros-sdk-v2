@@ -23,7 +23,7 @@ python3 language/fortran/prepare.py \
 
 The source recipe configures LLVM's WebAssembly backend, then checks both guest widths and verifies that the built compiler rejects native x86 object generation before installation. It writes a host-tool receipt beside the executable. The IR helper records its source, executable and SDK code-generator digests. Toolchain preparation requires a trusted local builder. Building these host tools is separate from compiling a guest.
 
-The Flang receipt binds the upstream archive, ordered code generator patches and the two Flang build patches. The standalone build includes the full LLVM intrinsic type declaration when compiling without precompiled headers.
+The Flang receipt binds the upstream archive, ordered code generator patches and the Flang build patches. Assumed-size arrays retain full variable debug information with the index width of the selected Wasm target. The standalone build includes the full LLVM intrinsic type declaration when compiling without precompiled headers.
 
 ## Compile a program
 
@@ -112,3 +112,16 @@ Generate C and C++ release rows for the same VM, compiler, sysroot, `-O3 -g` and
 The frontend inspects unresolved symbols in the program and its sealed object and archive inputs. When a program calls array intrinsics, it compiles the corresponding Flang guest procedures with the selected pointer width, exception ABI and memory-tagging mode. This includes real and integer dot products, real, integer and logical matrix products, masked and dimensioned sums, logical reductions and array reshaping. An application that needs only scalar arithmetic omits these translation units.
 
 The regression multiplies two real matrices and two integer matrices, computes column and masked reductions, and checks a logical matrix product. It checks the linked Fortran function names, runs the guest under both VM engines, and inspects its sole host import, `uwvm_ros_v2.abi`. Complex matrix multiplication and external Fortran I/O require additional runtime components. [Fortran example](../../tests/fortran/array_intrinsics.f90) · [Regression](../../tests/fortran_intrinsics.py)
+
+## Building a Fortran static library
+
+Use `wrf --static` to compile Fortran procedure definitions into a guest archive. The frontend seals each Wasm object with its target profile, compiler and sysroot identity. The final application supplies the Fortran runtime routines referenced by the library. A library has no deployment entry point. This example uses a procedure with a declared C binding. Traditional external Fortran procedures also work. Keep source units sharing a Fortran `USE` interface in the same target in module dependency order.
+
+```sh
+wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --static kernel.f90 -o filter.a
+wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --link-object filter.a body.f90 -o robot.wasm
+```
+
+In Xmake, give the library target `set_kind("static")` and add it to the executable using `add_deps`. Both targets select the same SDK commit, width, exception mode and MTE configuration. [Two-target project](../../examples/fortran/static/xmake.lua)
+
+The archive regression can also use the original LAPACK norm procedure shipped with the Lite3 SDK and the division procedure shipped with the ROS Taskflow release. Supply their paths through `--dlapy3` and `--dladiv`. The test checks the exact source digests and evaluates the numerical results in both VM engines. [Archive regression](../../tests/fortran_archives.py)

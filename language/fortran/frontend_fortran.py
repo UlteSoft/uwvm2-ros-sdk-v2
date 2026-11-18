@@ -168,6 +168,7 @@ def main():
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=None)
     qualification.arguments(parser)
     parser.add_argument("-pthread", "--threads", action="store_true")
+    parser.add_argument("--static", action="store_true", help="emit a checked Wasm archive of the Fortran source units")
     parser.add_argument("--link-object", action="append", type=Path, default=[],
                         help="WROS-sealed guest object/archive for the selected profile")
     parser.add_argument("-o", "--output", required=True, type=Path)
@@ -182,6 +183,8 @@ def main():
         if any(p.suffix not in (".o", ".a") for p in objects):
             raise ValueError("expected sealed .o/.a link inputs")
         output = opts.output.resolve()
+        if opts.static and (opts.build_receipt or objects or output.suffix != ".a"):
+            raise ValueError("a static library requires Fortran source files and a .a output without a deployment receipt")
         if output in sources or output in objects:
             raise ValueError("output aliases an input")
         toolchain = opts.toolchain.resolve(strict=True)
@@ -208,6 +211,13 @@ def main():
             subprocess.run([compiler, *fc, "-fsyntax-only", work / "wros_scene.f90"], check=True, cwd=work, env=env)
             units = [lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source, work, i, admission.get("release_sha256"))
                      for i, source in enumerate(sources)]
+            if opts.static:
+                # Runtime calls in these sealed source units resolve when an application links the archive.
+                staged = work / "guest.a"
+                subprocess.run([sys.executable, "-B", ROOT / "bin/wrar", "--toolchain", toolchain,
+                                *units, "-o", staged], check=True, cwd=work, env=env)
+                qualification.finish(admission, opts, staged, output)
+                return 0
             flags = ["--toolchain", toolchain, "--target", opts.target, "-O" + opts.O]
             for receipt in receipts:
                 flags.extend(("--sysroots", receipt))

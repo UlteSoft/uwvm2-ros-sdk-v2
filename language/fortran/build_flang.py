@@ -14,7 +14,8 @@ sys.path.insert(0, str(ROOT / "tools/wasm/memtag"))
 from build_producer import checked, prepare
 from build_sysroots import diagnostics_overlay
 
-from flang_identity import ABI_PATCH, GLOBALS_HEADER_PATCH, LLVM_RECIPE_SHA256, identity, llvm_recipe_digest
+from flang_identity import (ABI_PATCH, ASSUMED_EXTENT_PATCH, GLOBALS_HEADER_PATCH,
+                            LLVM_RECIPE_SHA256, identity, llvm_recipe_digest)
 
 
 def main():
@@ -39,8 +40,8 @@ def main():
         if llvm_recipe_digest(entry) != LLVM_RECIPE_SHA256:
             raise ValueError("Flang target patch needs requalification with the selected LLVM source")
         source = prepare(entry, args.source_work.resolve(), None)
-        source = diagnostics_overlay(source, ABI_PATCH, work)
-        source = diagnostics_overlay(source, GLOBALS_HEADER_PATCH, work)
+        for patch in (ABI_PATCH, GLOBALS_HEADER_PATCH, ASSUMED_EXTENT_PATCH):
+            source = diagnostics_overlay(source, patch, work)
         build = work / "build"
         log = work / "build.log"
         config = {"CMAKE_BUILD_TYPE": "Release", "CMAKE_CXX_COMPILER": bootstrap / "bin/clang++",

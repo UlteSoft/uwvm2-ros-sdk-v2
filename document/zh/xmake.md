@@ -65,9 +65,9 @@ target_end()
 | --- | --- |
 | `target(name)`、`target_end()` | 定义应用或库的目标范围。 |
 | `set_kind("binary")` | 生成 Wasm 模块。C/C++ 使用 reactor 链接方式并导出 `_start`。 |
-| `set_kind("static")` | 将 C/C++ 源文件编译为 SDK 校验过的 Wasm 目标文件，打包生成可复现的静态库。静态库目标目前只接受源文件。 |
+| `set_kind("static")` | 将 C、C++ 或 Fortran 源文件编译为 SDK 校验过的 Wasm 目标文件，打包生成可复现的静态库。静态库目标目前只接受源文件。 |
 | `add_files(...)` | C 接受 `.c`，C++ 接受 `.cpp`、`.cc`、`.cxx`、`.C`。链接应用时也接受经 SDK 校验的 `.o` 和 `.a`。Lua 目标接受一个 `.lua` 文件。 |
-| `add_deps(name, ...)` | C/C++ 应用链接 SDK 静态库目标，链接时检查编译器摘要和目标配置。 |
+| `add_deps(name, ...)` | C、C++ 或 Fortran 应用链接 SDK 静态库目标，链接时检查编译器摘要和目标配置。 |
 | `set_plat(id)`、`xmake f -p id` | 默认 `wasm-wasip1`。使用 `wasm-wasip1-threads` 时需要匹配的线程工具链与 sysroot。 |
 | `set_arch(id)`、`xmake f -a id` | 选择 `wasm32`（默认）或 `wasm64`。项目希望保留命令行选择时可用 `get_config("arch")`。 |
 | `add_includedirs(...)`、`add_defines(...)` | 向 C/C++ 前端传入包含目录和对象式宏定义。 |

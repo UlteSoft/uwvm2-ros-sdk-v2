@@ -25,9 +25,13 @@ def main():
     parser.add_argument("--address-bits", type=int, choices=(32, 64), default=32)
     parser.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran"), default="c")
     parser.add_argument("--eh", action="store_true", help="use the default EH-enabled frontend configuration")
+    parser.add_argument("--fortran-lapack", type=lambda path: Path(path).resolve(), nargs=2, metavar=("DLAPY3", "DLADIV"),
+                        help="check the two original corpus subprograms using the signed Fortran installation")
     parser.add_argument("--fortran-default", action="store_true",
                         help="exercise the Fortran frontend's default optimization, symbols and exception ABI")
     a = parser.parse_args()
+    if a.fortran_lapack and (a.language != "fortran" or not a.xmake):
+        parser.error("--fortran-lapack requires the Fortran installation/Xmake test")
     if a.fortran_default and a.language != "fortran":
         parser.error("--fortran-default is specific to the Fortran installation test")
     if (a.producer is not None) != (a.language == "nim"):
@@ -54,9 +58,9 @@ def main():
     def save():
         (a.output / "results.json").write_text(json.dumps(report, indent=2) + "\n")
 
-    def run(name, argv, success=True):
+    def run(name, argv, success=True, directory=None, timeout=90):
         command = list(map(str, argv))
-        proc = subprocess.run(command, cwd=a.output, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=90)
+        proc = subprocess.run(command, cwd=directory or a.output, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
         (a.output / (name + ".log")).write_bytes(proc.stdout)
         report["cases"].append(dict(name=name, code=proc.returncode, expected_success=success, argv=command))
         save()
@@ -207,14 +211,32 @@ def main():
     if a.xmake and a.language == "fortran":
         env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
                    WROS_VM=str(a.runtime), WROS_RUN_QUERIES="abi", XMAKE_GLOBALDIR=str(a.output / "xmake-global"))
-        project = (sdk / "examples/fortran/xmake.lua").read_text()
-        if a.fortran_default:
-            project = project.replace('    set_symbols("debug")\n', "")
-        (a.output / "xmake.lua").write_text(project)
-        (a.output / "body.f90").write_text((sdk / "examples/fortran/body.f90").read_text())
-        run("xmake-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm"+str(a.address_bits)])
-        run("xmake-build", [a.xmake.absolute(), "-j1", "robot"])
-        run("xmake-run", [a.xmake.absolute(), "run", "robot"])
+        examples = sdk / "examples/fortran"
+        for label, source_dir, directory in (("xmake", examples, a.output),
+                                              ("xmake-archive", examples / "static", a.output / "archive-project")):
+            directory.mkdir(exist_ok=True)
+            project = (source_dir / "xmake.lua").read_text()
+            if a.fortran_default:
+                project = project.replace('    set_symbols("debug")\n', "")
+            (directory / "xmake.lua").write_text(project)
+            for source in source_dir.glob("*.f90"):
+                (directory / source.name).write_bytes(source.read_bytes())
+            run(label + "-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1",
+                                      "-a", "wasm" + str(a.address_bits)], directory=directory)
+            run(label + "-build", [a.xmake.absolute(), "-j1", "robot"], directory=directory)
+            run(label + "-run", [a.xmake.absolute(), "run", "robot"], directory=directory)
+        archive_build = a.output / "archive-project/build"
+        archive, = archive_build.rglob("*.a")
+        app_with_library, = archive_build.rglob("robot.wasm")
+        calls = [(item["module"], item["name"]) for item in inspect(app_with_library.read_bytes())]
+        if not archive.read_bytes().startswith(b"!<arch>\n") or calls != [("uwvm_ros_v2", "abi")]:
+            raise ValueError("unexpected linked Fortran archive output or imports")
+        if a.fortran_lapack:
+            run("signed-ros-lapack", [sys.executable, "-B", ROOT / "tests/fortran_archives.py",
+                "--toolchain", a.toolchain, "--sysroots", a.sysroots, "--runtime", a.runtime, "--sdk", sdk,
+                "--address-width", a.address_bits, *(["--no-debug"] if a.fortran_default else []),
+                "--dlapy3", a.fortran_lapack[0], "--dladiv", a.fortran_lapack[1],
+                "--output", a.output / "signed-ros-lapack"], timeout=600)
     elif a.xmake and a.language == "objectc":
         env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
                    WROS_OBJC_CLANG=str(a.objc_clang.resolve()), WROS_OBJC_RUNTIME=str(a.objc_runtime.resolve()),

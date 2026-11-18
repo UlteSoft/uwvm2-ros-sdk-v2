@@ -171,6 +171,8 @@ def main():
                       [*language_flags, "--output", a.output / "fortran-descriptors"]))
         tests.append(("fortran-intrinsics", "fortran_intrinsics.py",
                       [*language_flags, "--output", a.output / "fortran-intrinsics"]))
+        tests.append(("fortran-archives", "fortran_archives.py",
+                      [*language_flags, "--output", a.output / "fortran-archives"]))
     for label, script, arguments in tests:
         proc = subprocess.run([sys.executable, "-I", "-B", "-c",
                                "import runpy,sys; p=sys.argv.pop(1); sys.path.insert(0,p);"

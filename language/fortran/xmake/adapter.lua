@@ -1,12 +1,12 @@
 function describe()
-    return {id = "fortran", program = "wrf",
+    return {id = "fortran", program = "wrf", static = true,
             extensions = {".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn"}}
 end
 
 function validate(target, req)
     assert(req.core == "3.0" and not req.threads, "The numerical Fortran route requires Core 3.0 and a single thread")
     assert(not req.std and #req.exports == 0 and not target:get("includedirs") and not target:get("defines"),
-           "The numerical Fortran frontend accepts its own standard modules and exports _start")
+           "Fortran targets use the checked intrinsic modules and SDK entry point settings")
 end
 
 function build(target, req, sources)
@@ -21,6 +21,10 @@ function build(target, req, sources)
     end
     for flag, variable in pairs({["--flang"] = "WROS_FLANG", ["--mte-tool"] = "WROS_FLANG_MTE_TOOL"}) do
         if os.getenv(variable) then table.join2(args, {flag, os.getenv(variable)}) end
+    end
+    if req.kind == "static" then
+        assert(#target:orderdeps() == 0, "Fortran archive targets accept source units only")
+        table.insert(args, "--static")
     end
     for _, dep in ipairs(target:orderdeps()) do
         local provider = dep:data("wros.request")
