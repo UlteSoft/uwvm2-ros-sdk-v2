@@ -48,3 +48,5 @@ bin/wrlua examples/lua/body.lua --ros-abi \
   --ros-scene-create robot --ros-scene-bind robot main \
   --ros-scene-interface robot abi allow --run body.wasm
 ```
+
+安装 Lua 开发包时可传入 `--site-profile`。站点配置选择已经签名的 Lua 资格声明及其匹配的工具链和 sysroot。随后直接执行 `wrlua --guest-seed 7 --ros-abi body.lua -o body.wasm --build-receipt`，即可将随包解释器与程序一起编译为一个核心 Wasm 模块。固定种子适用于可复现示例。部署时仍需显式授权 `uwvm_ros_v2.abi`。

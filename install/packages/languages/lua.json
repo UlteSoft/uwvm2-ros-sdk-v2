@@ -8,21 +8,21 @@
     },
     {
       "path": "bin/wrlua",
-      "bytes": 9328,
+      "bytes": 9450,
       "mode": 493,
-      "sha256": "d358a512556a691299a5ddece5935c0c642f9eae773c5079a942cc4a09e6fa3e"
+      "sha256": "ebdf620bf3e0abe910f9a51bf6d48a20135066d1ce0b3dbe1117b7cba9dc7cdd"
     },
     {
       "path": "document/en/lua.md",
-      "bytes": 5549,
+      "bytes": 5994,
       "mode": 420,
-      "sha256": "358766a5d130aa6e2766f0ea8672dd3180e48769d16908ef0f609d4561bdc449"
+      "sha256": "3fda1976f729f11d2b706efe43914988d6af3eedc32e8f0d1bbbe2c048fb1ff5"
     },
     {
       "path": "document/zh/lua.md",
-      "bytes": 4921,
+      "bytes": 5317,
       "mode": 420,
-      "sha256": "04bee1977f73eb1b0ecaca47e12f5da258afa186d9ec6f91ad235c0886be82f5"
+      "sha256": "d9a8f56beb9e1345319d649390262181159c242ab7fedc8bc37bc67994bd9881"
     },
     {
       "path": "examples/lua/body.lua",

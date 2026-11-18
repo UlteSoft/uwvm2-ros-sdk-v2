@@ -122,8 +122,8 @@ def install(source,platform,language,prefix,options,plan=False,site_profile=None
     variant=name(selected["variant"])
     site_data = None
     if site_profile is not None:
-        if plan or variant != "development" or language not in ("c", "cpp", "fortran"):
-            raise ValueError("--site-profile requires a C, C++ or Fortran development installation")
+        if plan or variant != "development" or language not in ("c", "cpp", "fortran", "lua"):
+            raise ValueError("--site-profile requires a C, C++, Fortran or Lua development installation")
         if not site_profile.is_file():
             raise ValueError("site profile must be an explicit local file")
         with site_profile.open("rb") as stream:

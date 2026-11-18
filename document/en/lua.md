@@ -48,3 +48,5 @@ For example, from the directory containing `body.wasm`, set `VM` to the u2ros VM
   --ros-scene-create robot --ros-scene-bind robot main \
   --ros-scene-interface robot abi allow --run body.wasm
 ```
+
+With a site-configured Lua development installation, run the installed `wrlua` directly. The site selects the signed Lua release and the matching compiler and sysroot. `wrlua --guest-seed 7 --ros-abi body.lua -o body.wasm --build-receipt` compiles the pinned interpreter and the application into the same core Wasm module. The fixed seed suits reproducible examples. The deployed program still requires an explicit grant for `uwvm_ros_v2.abi`.
