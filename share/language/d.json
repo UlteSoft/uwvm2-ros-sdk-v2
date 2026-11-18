@@ -1,5 +1,5 @@
 {
   "id": "d",
-  "development_package": false,
+  "development_package": true,
   "command_name": "wrd"
 }

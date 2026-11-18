@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "bin/wrd",
+      "bytes": 270,
+      "mode": 493,
+      "sha256": "e30a98f1e58b24965ee4ad3dbe282c76d14d498675776a5784f72b1814073f44"
+    },
+    {
+      "path": "document/en/d.md",
+      "bytes": 2160,
+      "mode": 420,
+      "sha256": "70f32d030c6b699ef903ccbe1fcea0e490ba1e6780b2875540d827aca2e6e4b3"
+    },
+    {
+      "path": "document/zh/d.md",
+      "bytes": 1840,
+      "mode": 420,
+      "sha256": "6ef266543ae8106f1cfa378528199bda3dcb75fe069b65c309d4d51671baba03"
+    },
+    {
+      "path": "examples/d/body.d",
+      "bytes": 400,
+      "mode": 420,
+      "sha256": "ce704add697f313cceaa703f144143ed594918507ac65f535c06d5eac202cc91"
+    },
+    {
+      "path": "examples/d/xmake.lua",
+      "bytes": 324,
+      "mode": 420,
+      "sha256": "b53e42a4e71e4f6eaf2aa6c4dd5c23e7c1a6f36be115d652c2506a7c41514c20"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/d/check_site.py",
+      "bytes": 327,
+      "mode": 420,
+      "sha256": "f6ffcfe7e8045a38de62f109b74e5a1aaca097d1d5c88bb9cb34bc95c9b87f60"
+    },
+    {
+      "path": "language/d/driver.py",
+      "bytes": 4803,
+      "mode": 420,
+      "sha256": "4b185f2e823ecfc8652bd1cead1f69ceff8fdd2f7d6c142acaa06471e159c5b6"
+    },
+    {
+      "path": "language/d/entry.c",
+      "bytes": 121,
+      "mode": 420,
+      "sha256": "b91a77daeea55272e823e51fd7062db6b02af52b78fc0b1570610f9f86a435ae"
+    },
+    {
+      "path": "language/d/frontend.conf",
+      "bytes": 106,
+      "mode": 420,
+      "sha256": "4b1c3b7ec3b86efc0e0f30bd8835df4336522a07cad0de905c90580b112d68ca"
+    },
+    {
+      "path": "language/d/imports.c",
+      "bytes": 33398,
+      "mode": 420,
+      "sha256": "4e4c253c7f809153c8d38fa563f80904d4448c5d0265301aa1ce2135320893f3"
+    },
+    {
+      "path": "language/d/release.py",
+      "bytes": 6218,
+      "mode": 420,
+      "sha256": "17c01817544a565ef48cfb76dd8eb24c1f83e083c3d22daeb934dd31fa17ef96"
+    },
+    {
+      "path": "language/d/wros_scene.d",
+      "bytes": 15495,
+      "mode": 420,
+      "sha256": "dcd64e2d9978562a5703823caf39f29124577d205182da5f166960213701132c"
+    },
+    {
+      "path": "language/d/xmake/adapter.lua",
+      "bytes": 1097,
+      "mode": 420,
+      "sha256": "f91b6f1325dc1864882e1c5d249d32e132bb57ff242921daa29546db883790c8"
+    }
+  ]
+}

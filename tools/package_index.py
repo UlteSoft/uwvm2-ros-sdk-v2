@@ -139,6 +139,12 @@ def main():
         "examples/js/body.js", "examples/js/xmake.lua", "document/en/js.md", "document/zh/js.md",
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/quickjs").iterdir() if p.is_file()],
     ]
+    language_files["d"] = [
+        "bin/wrd", "include/wros/scene.h", "examples/d/body.d", "examples/d/xmake.lua",
+        "document/en/d.md", "document/zh/d.md",
+        *["language/d/" + name for name in ("driver.py", "release.py", "check_site.py", "frontend.conf",
+                                             "entry.c", "imports.c", "wros_scene.d")],
+    ]
     language_files["nim"] = [
         "bin/wrnim", "bin/wrc", "include/wros/scene.h", "examples/nim/body.nim", "examples/nim/xmake.lua",
         "document/en/nim.md", "document/zh/nim.md", "third-parties/nim/LICENSE", "third-parties/nim/README.md",
