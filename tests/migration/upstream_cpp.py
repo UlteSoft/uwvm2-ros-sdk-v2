@@ -1,9 +1,10 @@
-"""Execute unmodified numerical test bodies from the pinned ROS source inventory.
+"""Execute numerical test bodies from the pinned ROS source inventory.
 
 The native oracle uses the real GoogleTest included in the ROS source snapshot.
-A second native build measures each observed assertion count and line trace. A
+A second native build measures each observed assertion count and predicate trace. A
 WASI-free guest must reproduce both for each case on each selected VM engine.
-Archive and closure identity, unselected units and every failed step are retained.
+A digest-pinned change to one upstream test is recorded separately. Archive and
+closure identity, unselected units and failed steps are retained.
 """
 import argparse
 import fcntl
@@ -221,6 +222,11 @@ def run_case(options, googletest, result, folder, unit, files):
     if options.legacy_mte:
         compiler.append("--legacy-mte")
     command(folder, "wrcc", [*compiler, guest, "-o", module])
+    if not options.legacy_mte:
+        receipt = Path(str(module) + ".wros-build.json")
+        command(folder, "strict-artifact", [sys.executable, options.sdk / "install/qualification.py",
+                "--artifact", module, "--receipt", receipt, "--vm", options.vm,
+                "--approved-receipt-sha256", sha(receipt)])
     result["guest_sha256"] = sha(module)
     result["imports"] = inspect(module.read_bytes())
     if result["imports"]:
@@ -239,6 +245,7 @@ def main():
     for name in ("corpus", "toolchain", "sysroots", "vm", "output"):
         p.add_argument("--" + name, type=lambda x: Path(x).resolve(), required=True)
     p.add_argument("--sdk", type=lambda x: Path(x).resolve(), default=SDK)
+    p.add_argument("--installation-receipt", type=Path, help="selection receipt from the SDK installer")
     p.add_argument("--legacy-mte", action="store_true")
     p.add_argument("--native-cxx", type=lambda x: Path(x).resolve(), default=Path("/usr/bin/g++"))
     p.add_argument("--yield-lock", type=Path, help="yield the inherited qualification flock between unique suites")
@@ -264,8 +271,16 @@ def main():
                    inventory_sha256=sha(inventory), vm_sha256=sha(options.vm), sysroots_sha256=sha(options.sysroots),
                    native_compiler_sha256=sha(options.native_cxx), legacy_mte=options.legacy_mte,
                    support_sha256=sha(SUPPORT / "gtest/gtest.h"), runner_sha256=sha(Path(__file__)),
-                   sdk_commit=subprocess.check_output(["git", "-C", SDK, "rev-parse", "HEAD"], text=True).strip(),
+                   compiler_sdk=str(options.sdk), frontend_sha256=sha(options.sdk / "bin/wrcc"),
+                   runner_commit=subprocess.check_output(["git", "-C", SDK, "rev-parse", "HEAD"], text=True).strip(),
                    variants=[], unique_suites={})
+    if options.installation_receipt is not None:
+        selected = json.loads(options.installation_receipt.read_bytes())
+        if (Path(selected["directory"]).resolve() != options.sdk or selected["language"] != "cpp" or
+                not re.fullmatch(r"[0-9a-f]{40}", selected["commit"])):
+            p.error("SDK installation receipt does not identify the selected C++ installation")
+        results["compiler_installation"] = dict(commit=selected["commit"], platform=selected["platform"],
+                                               variant=selected["variant"], sha256=sha(options.installation_receipt))
     record = options.output / "results.json"
     save(record, results)
     googletest = build_gtest(options, index)

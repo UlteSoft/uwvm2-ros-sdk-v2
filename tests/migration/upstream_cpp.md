@@ -19,3 +19,5 @@ Invoke from the VM repository, replacing the paths with absolute local paths. Pr
 ```
 
 The default compiler route requires an approved strict-MTE profile for wasm32 C++17, `-O3 -g`, EH and single-thread mode. The explicit `--legacy-mte` option selects the instrumented development route and records that choice in the receipt. It does not establish strict-MTE release qualification. `results.json` distinguishes completion of the inventory traversal from successful execution of every present selected suite. The per-stage command files and logs include real compiler and VM exit codes.
+
+For the per-package totals, run `tests/migration/upstream_cpp_report.py INPUT/results.json OUTPUT.json` under the same cgroup. The verifier checks package-local source hashes, executable identity, zero imports, native GoogleTest XML, native assertion traces, build profiles and both VM exits. It counts identical upstream translation units once per distinct local include closure. The velocity test with the corrected scratch array is reported separately from unchanged cases. Repeated archive snapshots and unselected test files have separate counts.
