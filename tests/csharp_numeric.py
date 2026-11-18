@@ -21,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ("repository", "dotnet", "mono-compiler", "toolchain", "vm", "xmake", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
+    parser.add_argument("--sysroots", type=Path, help="matching wasm32/EH/MTE receipt to exercise mixed C#/C Xmake linking")
     parser.add_argument("--commit", required=True)
     args = parser.parse_args()
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
@@ -84,6 +85,51 @@ def main():
     run("build-installed-example", [xmake, "-j1", "filter"])
     example, = (project / "build").rglob("filter.wasm")
     sample = project / "Filter.cs"
+    if args.sysroots:
+        # Two explicit installations from the same commit; C# never sees a driver.
+        c_sdk = Path(install(source, "unitree", "c", out / "install", [])["directory"])
+        env.update(WROS_C_BODY=str(c_sdk), WROS_SYSROOTS=str(args.sysroots.resolve()))
+        (project / "body.c").write_text("extern int evaluate(int); void _start(void) {"
+            "for (int n=-80;n<=80;++n) if (evaluate(n)!=7*n-3) __builtin_trap(); }")
+        with (project / "xmake.lua").open("a") as script:
+            script.write("""
+target("scalar")
+    set_kind("static")
+    set_language("csharp")
+    set_ros_platform("unitree")
+    set_wros_profile({mte = "legacy"})
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_wros_exports("Filter.Scale")
+    add_files("Filter.cs")
+target_end()
+target("body")
+    set_kind("binary")
+    set_language("c")
+    set_wros_sdk(os.getenv("WROS_C_BODY"))
+    set_ros_platform("unitree")
+    set_wros_profile({mte = "legacy"})
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_deps("scalar")
+    add_files("body.c")
+target_end()
+""")
+        run("mixed-configure", [xmake, "f", "-c", "-y", "-a", "wasm32"])
+        run("mixed-build", [xmake, "-j1", "body"])
+        mixed, = (project / "build").rglob("body.wasm")
+        if inspect(mixed.read_bytes()):
+            raise ValueError("mixed no-authority kernel requested a host import")
+        for engine in ("int", "aot"):
+            run("mixed-" + engine, [args.vm.resolve(), *Profile().uwvm_feature_flags(),
+                "--runtime-" + engine, "--runtime-compile-threads", "0", "--runtime-memtag-mode", "sync", "--run", mixed])
+        obj = out / "unreviewed.o"
+        run("object-needs-sysroot", [*cli, "--legacy-mte", "-c", "--entry", "Filter.Scale", sample, "-o", obj],
+            b"use -c and --sysroots together")
+        run("signed-object-denial", [*cli, "--mte", "-c", "--sysroots", args.sysroots.resolve(),
+            "--entry", "Filter.Scale", sample, "-o", obj], b"no signed strict C# release")
+        if obj.exists():
+            raise ValueError("refused build published an SDK object")
     cli_out = out / "project.wasm"
     for label, flags, refusal in (
         ("default-strict", [], b"no signed strict"), ("strict", ["--mte"], b"no signed strict"),

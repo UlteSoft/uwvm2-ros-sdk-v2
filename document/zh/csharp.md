@@ -58,3 +58,9 @@ export UWVM_ROS_SDK_ROOT="$SDK_PREFIX/$SDK_COMMIT/unitree/csharp/numeric-aot"
 Roslyn 生成 Portable PDB，并以 SHA-256 标识源文件。AOT 前端将方法第一个可见序列点的文档摘要与本次输入匹配，把 C# 方法名、源文件名和该行写入 DWARF。只有恰好包含一个可见序列点的方法才把指令定位到该条源码语句。包含多个序列点的方法保留方法级定位；隐藏或无法匹配的源码不生成行定位。调试信息省略构建机源文件的绝对路径。
 
 仓库中的 `tests/csharp_source_locations.py` 分别验证单条语句、循环以及重映射文件名。使用 `tests/csharp_numeric_performance.py --help` 查看如何将已构建的 Filter.Scale 模块与独立 native C 函数对比。测试从另一 Wasm 模块调用该入口，核对全部运算的校验和，并在核心 4 上测量两种循环长度的配对耗时斜率。VTune 对两端使用硬件 Hotspots 与 Microarchitecture Exploration，记录实际可用的采样间隔和源码、汇编定位情况。
+
+### 将数值内核链接进机器人主体
+
+若控制器与计算内核属于同一信任域，可以在编译命令中加入 `-c --sysroots "$WROS_SYSROOTS"`，指定 `.o` 输出。产物是可重定位的 core Wasm 对象，C ABI 为 `int evaluate(int)`。编译器先验证该计算可独立链接且没有宿主导入，然后将对象绑定到匹配的编译器、sysroot 与目标配置。选择 legacy MTE 时生成未签署对象。严格构建要求经过审核的对象。最后由 SDK 的 C 或 C++ 前端审核整个主体的导入。静态链接的代码共享主体的内存和权限。
+
+Xmake 中将 C# 内核声明为 `set_kind("static")`，设置 `add_wros_exports("Filter.Scale")` 和匹配的 `WROS_SYSROOTS`。C 主体用 `set_wros_sdk` 选择同一提交下另行安装的 C 包，使用 `add_deps` 链接静态库。仓库的 `tests/csharp_numeric.py --sysroots` 会在两种 VM 引擎运行产物。`tests/mujoco_guest.py --language csharp` 以 C# 标量计算选择仿真目标值，由获准连接驱动的 C 主体提交。

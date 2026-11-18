@@ -13,7 +13,8 @@ from host import environment, REF_PACK, SDK_VERSION, sha, stage
 HERE = Path(__file__).resolve().parent
 SDK = HERE.parents[1]
 sys.path.insert(0, str(SDK / "install"))
-from artifacts import read_bounded
+from artifacts import read_bounded, seal_object
+from compiler import make_command
 from private_exports import keep_private_memory
 from frontend import audit
 from guest_profile import Profile
@@ -63,10 +64,15 @@ def compile_guest(args, work):
     run("LLVM method extractor", [args.host_cxx.resolve(strict=True), "-O3", "-g", HERE / "leaf.cpp", *flags, "-o", "extract"])
     profile = Profile(mte=not args.no_mte)
     run("managed method", [work / "extract", "--mte" if profile.mte else "--no-mte", row, "kernel.bc", "leaf.bc", *debug_args])
-    run("core wasm32", [tool / "clang", "--no-default-config", "--target=" + profile.triple, *profile.llvm_feature_flags(),
-                        "-O3", "-g", "-ffreestanding", "-nostdlib", "-fwasm-exceptions", "-mllvm",
-                        "-wasm-use-legacy-eh=false", *(["-fsanitize=memtag"] if profile.mte else []),
-                        "-c", "leaf.bc", "-o", "leaf.o"])
+    codegen = ["-O3", "-g", "-ffreestanding", "-c", "leaf.bc", "-o", "leaf.o"]
+    closure = None
+    if args.compile_only:
+        command, closure = make_command(args.toolchain, [args.sysroots], profile, "c", codegen, verify=True)
+    else:
+        command = [tool / "clang", "--no-default-config", "--target=" + profile.triple, *profile.llvm_feature_flags(),
+                   "-fwasm-exceptions", "-mllvm", "-wasm-use-legacy-eh=false",
+                   *(["-fsanitize=memtag"] if profile.mte else []), *codegen]
+    run("core wasm32", command)
     run("Wasm link", [tool / "wasm-ld", "--fatal-warnings", "--no-entry", "--export=evaluate",
                       "--stack-first", "-z", "stack-size=65536", "--initial-memory=65536",
                       "--max-memory=65536", "leaf.o", "-o", "kernel.wasm"])
@@ -74,7 +80,11 @@ def compile_guest(args, work):
     audit(guest, profile)
     if inspect(guest):
         raise ValueError("numeric component must have zero imports")
-    with tempfile.NamedTemporaryFile(dir=args.output.parent, suffix=".wasm", delete=False) as out:
+    if closure is not None:
+        # The standalone link above has already checked that this exact leaf
+        # needs no host imports. The enclosing body must pass the final SDK audit.
+        guest = seal_object(read_bounded(work / "leaf.o"), profile.to_dict(), closure["compiler_sha256"], closure["closure_sha256"])
+    with tempfile.NamedTemporaryFile(dir=args.output.parent, suffix=args.output.suffix, delete=False) as out:
         pending = Path(out.name)
         try:
             out.write(guest)
@@ -96,6 +106,8 @@ def main():
     mode.add_argument("--mte", action="store_true")
     mode.add_argument("--legacy-mte", action="store_true")
     mode.add_argument("--no-mte", action="store_true")
+    parser.add_argument("-c", "--compile-only", action="store_true", help="emit a relocatable core-Wasm SDK object")
+    parser.add_argument("--sysroots", type=Path, help="exact matching sysroot receipt, required for an SDK object")
     parser.add_argument("-o", "--output", type=Path, required=True)
     parser.add_argument("sources", nargs="+", type=Path)
     args = parser.parse_args()
@@ -103,8 +115,11 @@ def main():
         parser.error("no signed strict C# release is available; select --legacy-mte or --no-mte explicitly")
     if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]{0,127}\.[A-Za-z_][A-Za-z_0-9]{0,127}", args.entry):
         parser.error("expected a global Class.Method entry")
-    if args.output.suffix != ".wasm" or not args.output.parent.is_dir():
-        parser.error("expected a .wasm output in an existing directory")
+    if args.compile_only != (args.sysroots is not None):
+        parser.error("use -c and --sysroots together for a relocatable SDK object")
+    suffix = ".o" if args.compile_only else ".wasm"
+    if args.output.suffix != suffix or not args.output.parent.is_dir():
+        parser.error("expected a " + suffix + " output in an existing directory")
     try:
         args.sources = [src.resolve(strict=True) for src in args.sources]
         if (len(args.sources) > 128 or len(set(args.sources)) != len(args.sources) or

@@ -1,5 +1,5 @@
 function describe()
-    return {id = "csharp", program = "wrcs", extensions = {".cs"}}
+    return {id = "csharp", program = "wrcs", static = true, extensions = {".cs"}}
 end
 
 function validate(target, request)
@@ -18,10 +18,22 @@ function validate(target, request)
 end
 
 function build(target, request, sources)
+    local output = target:targetfile()
+    if request.kind == "static" then
+        assert(#target:orderdeps() == 0, "The C# numeric static producer accepts source files only")
+        output = path.join(target:autogendir(), "wros", "evaluate.o")
+        os.mkdir(path.directory(output))
+    end
     local args = {"--target", request.arch, request.mte_flag, "--entry", request.exports[1],
                   "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
                   "--dotnet", assert(os.getenv("WROS_DOTNET")),
-                  "--mono-compiler", assert(os.getenv("WROS_MONO")), "-o", target:targetfile()}
+                  "--mono-compiler", assert(os.getenv("WROS_MONO")), "-o", output}
+    if request.kind == "static" then
+        table.join2(args, {"-c", "--sysroots", assert(request.sysroots, "Set WROS_SYSROOTS for a C# object")})
+    end
     table.join2(args, sources)
     os.vrunv(request.program, args)
+    if request.kind == "static" then
+        os.vrunv(path.join(request.root, "bin/wrar"), {"--toolchain", os.getenv("WROS_TOOLCHAIN"), "-o", target:targetfile(), output})
+    end
 end

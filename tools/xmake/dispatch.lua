@@ -70,7 +70,7 @@ function configure(target, entry)
     local threads = plat == "wasm-wasip1-threads"
     assert(core ~= "mvp" or (arch == "wasm32" and not eh and not threads), "MVP requires wasm32, no threads and no EH")
     local kind = target:kind()
-    assert(kind == "binary" or (kind == "static" and adapter.family == "c"), "Unsupported artifact kind: " .. tostring(kind))
+    assert(kind == "binary" or (kind == "static" and (adapter.family == "c" or adapter.static == true)), "Unsupported artifact kind: " .. tostring(kind))
     local build_receipt = boolean(target, "build_receipt", false)
     assert(not build_receipt or kind == "binary", "Deployment build receipts require a linked Wasm binary")
     local exports = table.wrap(target:values("wros.exports"))
