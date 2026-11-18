@@ -1,6 +1,8 @@
 """Generate exactly the JVM source methods selected from the trusted ROS operation catalogue."""
 import json
 import re
+from pathlib import Path
+from references import ReferenceSchemas
 
 GENERAL = (("i64", "i32", "i64", "i64", "i64", "i64", "i64"), ("i32",))
 SPECIAL = {"abi": ((), ("i32",)),
@@ -18,7 +20,10 @@ def render(catalog, requested, work):
         return [], []
     if len(set(requested)) != len(requested):
         raise ValueError("duplicate ROS operation")
-    rows={r["name"]:r for r in json.loads(catalog.read_text())["operations"]}
+    catalogue=json.loads(catalog.read_text())
+    refs=ReferenceSchemas(catalogue["schemas"])
+    rows={r["name"]:r for r in catalogue["operations"]}
+    uses_cursor=False
     methods=["wros/scene/Calls.<init>(II)V"]
     code = ['package wros.scene;', 'import org.teavm.interop.Import;',
             'public final class Calls {', 'private final MessageFrame frame;',
@@ -67,10 +72,32 @@ def render(catalog, requested, work):
                     return frame.finish(status,request.length,reply,written,{permission_report});
                 }}'''
             descriptor="([B[B[J)I"
+            fields=[(field["name"],field["type"]) for field in rows[name]["request"]]
+            if refs.uses_references(fields):
+                uses_cursor=True
+                layout=refs.walk(fields)
+                block += f'''public int {member}(byte[] request,byte[] reply,long[] written,Calls[] sources) {{
+                    if (request==null || reply==null || written==null || written.length!=1 || sources==null) return 22;
+                    if (request.length>frame.input.length || reply.length>frame.output.length) return 90;
+                    CapabilityCursor c=new CapabilityCursor(frame.input,request.length,sources);
+                    long input=frame.prepare(request);
+                    {layout}
+                    int status=c.finish();
+                    if (status!=0) return frame.abandon(status,request.length);
+                    long output=reply.length==0 ? 0 : MessageFrame.address(frame.output);
+                    status=raw_{member}(frame.token,0,input,request.length,output,reply.length,frame.lengthSlot());
+                    return frame.finish(status,request.length,reply,written,{permission_report});
+                }}'''
+                methods.append("wros/scene/Calls."+member+"([B[B[J[Lwros/scene/Calls;)I")
         methods.append("wros/scene/Calls."+member+descriptor)
         code.append(block)
     if len(methods)!=len(set(methods)):
         raise ValueError("colliding Java ROS operation names")
+    extra=[]
+    if uses_cursor:
+        code.append("long handleForBinding(){return frame.token;}")
+        code.extend(refs.helpers[name] for name in sorted(refs.helpers))
+        extra=[Path(__file__).resolve().parent/"java/wros/scene/CapabilityCursor.java"]
     code.append("}")
     source=work/"Calls.java";source.write_text("\n".join(code)+"\n")
-    return [source],methods
+    return [source,*extra],methods

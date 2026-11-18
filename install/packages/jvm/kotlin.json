@@ -25,6 +25,12 @@
       "sha256": "7baf11cf7f67d9688c331eaea097cffb27dcff3cde7f58e6929f89579f3dc5a9"
     },
     {
+      "path": "examples/kotlin/synchronous-aot/Schedule.kt",
+      "bytes": 2363,
+      "mode": 420,
+      "sha256": "b5172eef2c1804db7c930a326538ff73f82abaea6bdf78e8d719c33771956013"
+    },
+    {
       "path": "examples/kotlin/synchronous-aot/xmake.lua",
       "bytes": 418,
       "mode": 420,

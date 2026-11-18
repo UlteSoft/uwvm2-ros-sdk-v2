@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/jvm.md",
-      "bytes": 9447,
+      "bytes": 10479,
       "mode": 420,
-      "sha256": "d4641098d1f416fa559dffed5fad77f138d57510005521fd9094aac718dc697e"
+      "sha256": "b01359cf9149cdb76759f3b6bf46b72318550fc1814b29be2b2e3457ea6ea834"
     },
     {
       "path": "document/zh/jvm.md",
-      "bytes": 7794,
+      "bytes": 8644,
       "mode": 420,
-      "sha256": "0d802897bfe74b7fe35d2ad2b46118cae0a2791789b462dda2c6fa36f6d08af9"
+      "sha256": "47f64dce1024b5bdc72a2cf29fa6b07277ac72e4f823760c412a1bd7ffc45694"
     },
     {
       "path": "include/wros/scene.h",
@@ -49,6 +49,12 @@
       "sha256": "a155cba67595214b32ff78180d0df7ae8c54e0f39f9e1fbaa003748d18ed8df6"
     },
     {
+      "path": "language/jvm/java/wros/scene/CapabilityCursor.java",
+      "bytes": 1779,
+      "mode": 420,
+      "sha256": "14f9c76e16323e4df40bb839dc4baaf46e9297eaed055bc48112e99ecee338e5"
+    },
+    {
       "path": "language/jvm/java/wros/scene/Driver.java",
       "bytes": 5850,
       "mode": 420,
@@ -62,9 +68,9 @@
     },
     {
       "path": "language/jvm/java/wros/scene/MessageFrame.java",
-      "bytes": 2366,
+      "bytes": 2489,
       "mode": 420,
-      "sha256": "6fe00635563a0919bdb6e17a1987226e4102d1e2ef90c06cd714de24449d9a52"
+      "sha256": "d8a3e35a0eeb12bd8a1956c2f09ab834a43e07007ae9a142dde45359c7dc79b4"
     },
     {
       "path": "language/jvm/java/wros/scene/Scene.java",
@@ -80,15 +86,21 @@
     },
     {
       "path": "language/jvm/operations.py",
-      "bytes": 4074,
+      "bytes": 5765,
       "mode": 420,
-      "sha256": "9f053e21ddb021efbb967de814690e0bad9ea425967aeb4dd43a9708d8b175bd"
+      "sha256": "120c4b964e497b5b4f374eec600d82985a016e846d65f358f9399bf01c975664"
     },
     {
       "path": "language/jvm/prepare_host.py",
       "bytes": 4087,
       "mode": 420,
       "sha256": "a1d5149fe582c22d2a95783fb27c1e40cebb1449f73138a1ce362d346664cda8"
+    },
+    {
+      "path": "language/jvm/references.py",
+      "bytes": 2007,
+      "mode": 420,
+      "sha256": "09501348ef3cb5b80572260979009ce480bfeb36c085052c097ef60afbbfb8d1"
     },
     {
       "path": "third-parties/jvm/LICENSE",

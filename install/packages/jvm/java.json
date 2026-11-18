@@ -25,6 +25,12 @@
       "sha256": "b821c215f8b2fabe29850b805d0b1d0c7e29b390251f2300a757110d830580e9"
     },
     {
+      "path": "examples/java/synchronous-aot/Schedule.java",
+      "bytes": 2623,
+      "mode": 420,
+      "sha256": "7897eca3242198e17259f5f5c88987f333a01814e5be92ef83e4d40426faee4e"
+    },
+    {
       "path": "examples/java/synchronous-aot/xmake.lua",
       "bytes": 418,
       "mode": 420,

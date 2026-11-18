@@ -29,6 +29,11 @@ final class MessageFrame {
         return address(input);
     }
 
+    int abandon(int status, int bytes) {
+        if (bytes != 0) wipe(address(input),bytes);
+        return status;
+    }
+
     private long count() {
         long n=0;
         for (int i=0; i<8; i++) n |= ((long)count[i] & 255L) << (i*8);

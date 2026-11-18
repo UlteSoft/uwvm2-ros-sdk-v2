@@ -54,3 +54,9 @@ Each of the 160 message operations takes `(byte[] request, byte[] reply, long[] 
 The guest publishes only its `_start` function. The compiler verifies that the final module owns a single unshared wasm32 linear memory with a maximum of 4,096 pages, and removes LLD's implicit export of that memory. This keeps the GC heap, stack and temporary message buffers private. The build receipt records both the original linker output digest and the published Wasm digest.
 
 The VM's six `module.call.*` operations use an independently registered exchange memory. A receiver may have to erase an outstanding message after a later acknowledgement, cancellation or revocation. The synchronous JVM profile does not provide such a memory or a lease for a GC buffer. A registered and authorized route therefore returns status 95 for a submission from this heap. Dropping the privacy of the regular heap would invalidate that isolation contract.
+
+### Operations that require other capabilities
+
+For the 24 operation schemas containing capability references, a second method takes a fourth argument of type `Calls[]`. Supply explicitly opened instances in wire-field order, including each element of a repeated or present optional field. Put zero in each capability slot of the request. Leave resource IDs, sizes and the rest of the wire record intact. The compiler derives the field positions from the selected schema. The binding copies the request, checks its shape, writes the tokens only into its private scratch and calls the VM once. The original array retains zero in the capability slots. A missing or extra source or a nonzero placeholder returns status 22. A closed source returns status 9. The VM checks each referenced capability's purpose, resource and current grants.
+
+The Schedule example creates a simulated ROS clock and a timer using separate grants. It advances the clock and observes missed timer periods, including rejection with a guard in the clock slot.
