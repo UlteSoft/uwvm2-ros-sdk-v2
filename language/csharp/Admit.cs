@@ -23,6 +23,13 @@ static class Admit
 
     static readonly string[] LocalForms = {"ldarg", "starg", "ldloc", "ldloca", "stloc", "ldc.i4"};
 
+    static int SwitchBytes(ReadOnlySpan<byte> operand)
+    {
+        int count = BinaryPrimitives.ReadInt32LittleEndian(operand);
+        if (count < 0 || count > (operand.Length - 4) / 4) throw new Exception("invalid IL switch table");
+        return 4 + 4 * count;
+    }
+
     static void CheckCode(byte[] il)
     {
         var codes = new Dictionary<ushort, OpCode>();
@@ -45,7 +52,7 @@ static class Admit
                 OperandType.InlineVar => 2,
                 OperandType.InlineBrTarget or OperandType.InlineI => 4,
                 OperandType.InlineI8 => 8,
-                OperandType.InlineSwitch => checked(4 + 4 * BinaryPrimitives.ReadInt32LittleEndian(il.AsSpan(pos))),
+                OperandType.InlineSwitch => SwitchBytes(il.AsSpan(pos)),
                 _ => throw new Exception("unsupported numeric IL operand")
             };
             if (bytes < 0 || bytes > il.Length - pos) throw new Exception("truncated numeric IL operand");
@@ -79,6 +86,10 @@ static class Admit
                         signature.Length != 4 || signature.ReadByte() != 0 || signature.ReadByte() != 1 ||
                         signature.ReadByte() != 8 || signature.ReadByte() != 8)
                         throw new Exception("expected a single public static int method taking one int");
+                    const MethodImplAttributes hints = MethodImplAttributes.NoInlining | MethodImplAttributes.NoOptimization |
+                        MethodImplAttributes.AggressiveInlining | MethodImplAttributes.AggressiveOptimization;
+                    if ((method.ImplAttributes & ~hints) != 0)
+                        throw new Exception("managed method flags need the CLR");
                     var body = image.GetMethodBody(method.RelativeVirtualAddress);
                     if (!body.ExceptionRegions.IsEmpty) throw new Exception("managed handlers need the CLR");
                     CheckCode(body.GetILBytes());

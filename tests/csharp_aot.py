@@ -51,7 +51,7 @@ def main():
     src = fixtures / "Body.cs"
     check = fixtures / "check.c"
     marker = sdk / "tools/wasm/tag_ir.cpp"
-    inputs = [Path(__file__), src, check, marker, tool / "llvm-config", tool / "clang",
+    inputs = [Path(__file__), sdk / "language/csharp/host.py", src, check, marker, tool / "llvm-config", tool / "clang",
               tool / "wasm-ld", tool / "llvm-objdump", aot, roslyn, extract,
               runtime, lock, tool / "opt", args.host_cxx.resolve()]
     report = dict(complete=False, cgroup=group, scope="freestanding C# methods",

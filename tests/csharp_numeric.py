@@ -26,6 +26,8 @@ def main():
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
+    (out / "tmp").mkdir()
+    os.environ["TMPDIR"] = str(out / "tmp")
     report = {"complete": False, "cgroup": cgroup_record(), "commit": args.commit, "cases": [], "modules": {}}
 
     def save():
@@ -50,7 +52,8 @@ def main():
     project = out / "project"
     shutil.copytree(sdk / "examples/csharp/numeric-aot", project)
     tool = args.toolchain.resolve()
-    env = dict(os.environ, UWVM_ROS_SDK_ROOT=str(sdk), WROS_PLATFORM="unitree",
+    env = dict(os.environ, PATH="/usr/bin:/bin", PYTHONDONTWRITEBYTECODE="1",
+               UWVM_ROS_SDK_ROOT=str(sdk), WROS_PLATFORM="unitree",
                WROS_TOOLCHAIN=str(tool), WROS_DOTNET=str(args.dotnet.resolve()),
                WROS_MONO=str(args.mono_compiler.resolve()), XMAKE_GLOBALDIR=str(out / "xmake"))
     cli = [sdk / "bin/wrcs", "--toolchain", tool, "--dotnet", args.dotnet.resolve(),
@@ -70,6 +73,13 @@ def main():
             raise RuntimeError(name + ": " + raw.stdout.decode(errors="replace")[-2200:])
 
     xmake = args.xmake.resolve()
+    for language, variant, message in (("java", "numeric-aot", b"synchronous-aot component for java"),
+                                       ("csharp", "development", b"numeric-aot component for csharp")):
+        renamed = out / "renamed" / args.commit / "unitree" / language / variant
+        shutil.copytree(sdk, renamed)
+        env["UWVM_ROS_SDK_ROOT"] = str(renamed)
+        run("reject-mislabeled-" + language, [xmake, "f", "-c", "-y", "-a", "wasm32"], message)
+    env["UWVM_ROS_SDK_ROOT"] = str(sdk)
     run("configure", [xmake, "f", "-c", "-y", "-a", "wasm32"])
     run("build-installed-example", [xmake, "-j1", "filter"])
     example, = (project / "build").rglob("filter.wasm")
@@ -149,6 +159,11 @@ void _start(void) {
         run(name, [*cli, "--legacy-mte", "--entry", entry, body, "-o", cli_out], diagnostic)
     body.write_text("public static class Track { static Track() {} public static int Sum(int n) => n; }")
     run("initializer", [*cli, "--legacy-mte", "--entry", "Track.Sum", body, "-o", cli_out], b"initializer needs the CLR")
+    body.write_text("""using System.Runtime.CompilerServices;
+public static class Track {
+    [MethodImpl(MethodImplOptions.Synchronized)] public static int Sum(int n) => n + 1;
+}""")
+    run("synchronized", [*cli, "--legacy-mte", "--entry", "Track.Sum", body, "-o", cli_out], b"method flags need the CLR")
     body.write_text("""using System.Runtime.InteropServices;
 public static class Track {
     [DllImport("device")] public static extern int Native(int n);

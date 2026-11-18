@@ -31,10 +31,16 @@
       "sha256": "e18c15ac09a3e8fa7caafad6b9f6afa9148f3ef68a1967a9e0b00d2a24e3b5fe"
     },
     {
-      "path": "language/csharp/Admit.cs",
-      "bytes": 5414,
+      "path": "install/private_exports.py",
+      "bytes": 2459,
       "mode": 420,
-      "sha256": "3f0fadb7f7ac80d2e7644a2af109e46d6acd2b2d758fd262aee55571de91dce6"
+      "sha256": "ec4e946a29cbfa55647f366c6a9b06c27b6b63ec4fc3d6fbd2e6bb8f2a0d5b71"
+    },
+    {
+      "path": "language/csharp/Admit.cs",
+      "bytes": 6027,
+      "mode": 420,
+      "sha256": "1a5cb6aceeef014e94be64d7271652743fb7e4ba76d4ff4dfbe7e15b6db23d94"
     },
     {
       "path": "language/csharp/host.py",
@@ -56,9 +62,9 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 7415,
+      "bytes": 6442,
       "mode": 420,
-      "sha256": "1bea7bc85579427d0b32d21257827de632444007c8ba97b39c1bea61f6586db6"
+      "sha256": "3be2a54395087f25ff1202d56e0550be8e36c54bbaee469bdf75fc7f0b13852b"
     },
     {
       "path": "language/csharp/xmake/adapter.lua",

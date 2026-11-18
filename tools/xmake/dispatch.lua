@@ -12,12 +12,19 @@ end
 
 local function selection(root)
     local variant = path.filename(root)
-    assert(variant == "development" or variant == "compiler-source" or variant == "synchronous-aot", "Select an installed Wasm development directory")
     local langdir = path.directory(root)
+    local language = path.filename(langdir)
+    local components = {java = "synchronous-aot", kotlin = "synchronous-aot", csharp = "numeric-aot"}
+    local expected = components[language]
+    if expected then
+        assert(variant == expected, "Select the installed " .. expected .. " component for " .. language)
+    else
+        assert(variant == "development" or variant == "compiler-source", "Select an installed Wasm development directory")
+    end
     local platdir = path.directory(langdir)
     local commit = path.filename(path.directory(platdir))
     assert(#commit == 40 and commit:match("^[0-9a-f]+$"), "Select an immutable SDK installation")
-    return commit, path.filename(platdir), path.filename(langdir)
+    return commit, path.filename(platdir), language
 end
 
 local function provider(directory, name)

@@ -99,7 +99,7 @@ def main():
         package("metadata/" + language, [path])
 
     package("csharp/numeric", [
-        "bin/" + COMPILER_COMMANDS["csharp"], "language/csharp/numeric.py", "language/csharp/host.py",
+        "install/private_exports.py", "bin/" + COMPILER_COMMANDS["csharp"], "language/csharp/numeric.py", "language/csharp/host.py",
         "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
         "language/csharp/xmake/adapter.lua", "examples/csharp/numeric-aot/Filter.cs",
         "examples/csharp/numeric-aot/xmake.lua", "document/en/csharp.md", "document/zh/csharp.md",

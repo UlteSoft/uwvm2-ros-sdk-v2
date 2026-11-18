@@ -13,36 +13,11 @@ from host import environment, REF_PACK, SDK_VERSION, stage
 HERE = Path(__file__).resolve().parent
 SDK = HERE.parents[1]
 sys.path.insert(0, str(SDK / "install"))
-from artifacts import read_bounded, sections, uleb
+from artifacts import read_bounded
+from private_exports import keep_private_memory
 from frontend import audit
 from guest_profile import Profile
 from imports import inspect
-
-
-def private_memory(guest):
-    """Keep the one numeric entry. LLD may also publish its memory by default."""
-    segments = [guest[:8]]
-    exported = False
-    for start, end, _, body in sections(guest):
-        if guest[start] != 7:
-            segments.append(guest[start:end])
-            continue
-        entries = []
-        for _ in range(body.count()):
-            offset = body.position
-            name, kind, index = body.name(), body.byte(), body.uint()
-            if name == "memory" and kind == 2 and index == 0:
-                continue
-            if name != "evaluate" or kind != 0 or exported:
-                raise ValueError("unexpected linked C# export: " + name)
-            entries.append(bytes(body.data[offset:body.position]))
-            exported = True
-        body.end()
-        payload = uleb(len(entries)) + b"".join(entries)
-        segments.extend((b"\x07", uleb(len(payload)), payload))
-    if not exported:
-        raise ValueError("C# output lacks the evaluate entry")
-    return b"".join(segments)
 
 
 def compile_guest(args, work):
@@ -89,7 +64,7 @@ def compile_guest(args, work):
     run("Wasm link", [tool / "wasm-ld", "--fatal-warnings", "--no-entry", "--export=evaluate",
                       "--stack-first", "-z", "stack-size=65536", "--initial-memory=65536",
                       "--max-memory=65536", "leaf.o", "-o", "kernel.wasm"])
-    guest = private_memory(read_bounded(work / "kernel.wasm"))
+    guest = keep_private_memory(read_bounded(work / "kernel.wasm"), {"evaluate"}, max_pages=1)
     audit(guest, profile)
     if inspect(guest):
         raise ValueError("numeric component must have zero imports")
