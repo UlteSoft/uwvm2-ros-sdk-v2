@@ -66,6 +66,8 @@ function configure(target, entry)
     local build_receipt = boolean(target, "build_receipt", false)
     assert(not build_receipt or kind == "binary", "Deployment build receipts require a linked Wasm binary")
     local exports = table.wrap(target:values("wros.exports"))
+    local lua_operations = table.wrap(target:values("wros.lua_operations"))
+    assert(language == "lua" or #lua_operations == 0, "add_wros_lua_operations requires a Lua target")
     local lua_abi = boolean(target, "lua_abi", false)
     local lua_seed = target:values("wros.lua_seed")
     if lua_seed then
@@ -87,7 +89,7 @@ function configure(target, entry)
     assert(path.extension(name) == extension, "Target filename must end in " .. extension)
     target:set("filename", name)
     local request = {root = root, adapter = adapter, program = program, kind = kind, arch = arch, build_receipt = build_receipt,
-        core = core, eh = eh, mte = mte, mte_flag = mte_flag, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, lua_seed = lua_seed, std = std, implementation = implementation}
+        core = core, eh = eh, mte = mte, mte_flag = mte_flag, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, lua_seed = lua_seed, lua_operations = lua_operations, std = std, implementation = implementation}
     if implementation.validate then implementation.validate(target, request) end
     target:data_set("wros.request", request)
 end

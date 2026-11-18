@@ -22,12 +22,8 @@ extern "C" int __clock_gettime(clockid_t, struct timespec *) {
     return -1;
 }
 #endif
-#ifdef WROS_LUA_ABI
-#include <wros/scene.h>
-static int abi(lua_State *state) {
-    lua_pushinteger(state, wr_abi());
-    return 1;
-}
+#ifdef WROS_LUA_SCENE
+#include "scene.hpp"
 #endif
 
 static void *allocate(void *context, void *pointer, size_t old_size, size_t size) {
@@ -55,11 +51,8 @@ static int run(lua_State *state) {
         luaL_requiref(state, library.name, library.func, 1);
         lua_pop(state, 1);
     }
-#ifdef WROS_LUA_ABI
-    lua_newtable(state);
-    lua_pushcfunction(state, abi);
-    lua_setfield(state, -2, "abi");
-    lua_setglobal(state, "wros");
+#ifdef WROS_LUA_SCENE
+    wros_lua::install(state);
 #endif
     if (luaL_loadbufferx(state, script, sizeof(script) - 1, "=application", "t") != LUA_OK)
         return lua_error(state);

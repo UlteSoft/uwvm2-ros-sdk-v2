@@ -65,3 +65,7 @@ end
 function add_wros_exports(...)
     add_values("wros.exports", ...)
 end
+
+function add_wros_lua_operations(...)
+    add_values("wros.lua_operations", ...)
+end

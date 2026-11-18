@@ -19,6 +19,10 @@ function build(target, req, sources)
                   "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to a matching receipt")}
     if req.lua_seed then table.insert(args, "--guest-seed"); table.insert(args, req.lua_seed) end
     if req.lua_abi then table.insert(args, "--ros-abi") end
+    for _, name in ipairs(req.lua_operations) do
+        table.insert(args, "--ros-operation")
+        table.insert(args, name)
+    end
     if req.build_receipt then table.insert(args, "--build-receipt") end
     os.vrunv(req.program, table.join(args, {"-o", target:targetfile()}))
 end

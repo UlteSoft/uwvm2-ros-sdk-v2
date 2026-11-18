@@ -30,7 +30,11 @@ bin/wrlua examples/lua/body.lua --ros-abi \
 
 默认配置在种子初始化和排序枢轴选择时会读取 WASIp1 时钟。部署时需要对本模块暴露 `clock_time_get`，wasm64 则暴露 `clock_time_get_wasm64`。实时时钟和单调时钟可分别授权读取。单次读取被拒绝时，解释器仍能初始化种子或选择枢轴。显式指定 guest 种子后，单线程 C 库中按期限等待的备用路径也会在本地拒绝读取时钟。前端在输出 Wasm 前核对所选模式的全部导入。密钥应使用密码学随机源。
 
-编译参数 `--ros-abi` 会增加 `uwvm_ros_v2.abi` 导入。VM 还需要把模块绑定到 scene 并开放该接口。该 Lua 配置目前支持的 ROS 操作为 ABI 查询，传感器、模型、厂商操作仍需逐项提供和验证语言绑定。
+`--ros-abi` 提供 `wros.abi()`。重复传入 `--ros-operation 名称` 可选择需要的 ROSv2 接口，Xmake 使用 `add_wros_lua_operations(...)`。每个导入都必须由部署者暴露。
+
+`capability.open` 提供 `wros.open(alias)`，返回状态码和不透明句柄，失败时句柄为 nil。`capability.close` 提供 `wros.close(handle)`。其他消息操作以 `wros["域.操作"](handle, 请求字节串, 响应容量)` 调用，返回状态码、成功时的二进制字符串（失败为 nil）以及 VM 报告的长度。允许零令牌的接口可用 nil。按 `share/abi/ros.json` 定义的小端格式编码消息。临时收发缓冲区受 Lua 堆配额限制，调用完成后清零，响应字符串分配失败也会清零。应用自己的字符串由 Lua 管理。
+
+安装的 `examples/lua/guard.lua` 使用 `capability.open`、`capability.close`、`guard.create`、`guard.trigger`、`guard.take`。编译时逐项选择这五个导入，可用 `--guest-seed 1` 在客户模块内提供种子。部署时暴露上述接口，并给 `signal` 授予三个 guard 操作。缺少资源授权时 Lua 可以读取失败状态。
 
 在生成了 `body.wasm` 的目录中，把 `VM` 设为支持 Core 3.0 和 SDK WasmMTE 指令的 u2ros 可执行文件，然后运行示例。
 

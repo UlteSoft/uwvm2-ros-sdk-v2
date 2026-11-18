@@ -98,9 +98,9 @@ def main():
     language_files = {
         "c": ["bin/wrc", "include/wros/scene.h", "examples/c/body.c", "examples/c/xmake.lua"],
         "cpp": ["bin/wrc", "bin/wrcc", "include/wros/scene.h"],
-        "lua": ["bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp",
+        "lua": ["bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp", "language/lua/scene.hpp",
                 "third-parties/lua/lua-5.4.9.tar.gz", "third-parties/lua/LICENSE", "third-parties/lua/README.md",
-                "examples/lua/body.lua", "document/en/lua.md", "document/zh/lua.md"],
+                "examples/lua/body.lua", "examples/lua/guard.lua", "document/en/lua.md", "document/zh/lua.md"],
     }
     language_files["nim"] = [
         "bin/wrnim", "bin/wrc", "include/wros/scene.h", "examples/nim/body.nim", "examples/nim/xmake.lua",

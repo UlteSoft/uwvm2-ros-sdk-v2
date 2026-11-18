@@ -3,6 +3,8 @@
 import argparse
 import hashlib
 import io
+import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -75,6 +77,28 @@ def prepare(directory, guest_seed=None):
     return [directory / (name + ".cpp") for name in CORE]
 
 
+def selected_methods(names):
+    catalog = json.loads((ROOT / "share/abi/ros.json").read_text())
+    signatures = {op["name"]: op["wasm_signature"] for op in catalog["operations"]}
+    special = {"abi": ("abi", []), "capability.open": ("open", ["i32", "i64", "i64", "i64"]),
+               "capability.close": ("close", ["i64"])}
+    methods = []
+    for name in sorted(set(names)):
+        if name not in signatures or not re.fullmatch(r"[a-z][a-z0-9]*(?:[.][a-z][a-z0-9]*)*", name):
+            raise ValueError("unknown ROSv2 operation: " + name)
+        if name in special:
+            label, parameters = special[name]
+            function = label
+        else:
+            label = name
+            parameters = ["i64", "i32"] + ["i64"] * 5
+            function = "call<wr_" + name.replace(".", "_") + ">"
+        if signatures[name] != {"parameters": parameters, "results": ["i32"]}:
+            raise ValueError("unsupported ROSv2 signature: " + name)
+        methods.append('{' + json.dumps(label) + ', ' + function + '},')
+    return methods
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("script", type=Path)
@@ -86,7 +110,13 @@ def main():
     parser.add_argument("--ros-abi", action="store_true", help="expose wros.abi() inside Lua")
     parser.add_argument("--guest-seed", type=int, metavar="UINT32",
                         help="use an explicit non-secret seed inside the guest without importing a host clock")
+    parser.add_argument("--ros-operation", action="append", default=[], metavar="NAME",
+                        help="add one catalogued ROSv2 import; repeat for each operation")
     args = parser.parse_args()
+    operations = set(args.ros_operation)
+    if args.ros_abi:
+        operations.add("abi")
+    methods = selected_methods(operations)
     if args.guest_seed is not None and not 0 <= args.guest_seed <= 0xffffffff:
         parser.error("--guest-seed must be an unsigned 32-bit integer")
     profile = Profile(int(args.target[4:]), mte=args.mte)
@@ -109,12 +139,13 @@ def main():
                "-O3", "-g", "-Dl_signalT=int", "-DLUA_USE_JUMPTABLE=0", "-I", directory]
         if args.guest_seed is not None:
             cmd += ["-D", "WROS_LUA_GUEST_CLOCKLESS"]
-        if args.ros_abi:
-            cmd += ["-D", "WROS_LUA_ABI"]
+        if methods:
+            (directory / "scene_methods.inc").write_text("\n".join(methods) + "\n")
+            cmd += ["-D", "WROS_LUA_SCENE"]
         staged = directory / "guest.wasm"
         subprocess.run([*cmd, ROOT / "language/lua/entry.cpp", *units, "-o", staged], check=True)
         imports = {(entry["module"], entry["name"]) for entry in inspect(staged.read_bytes())}
-        expected = {("uwvm_ros_v2", "abi")} if args.ros_abi else set()
+        expected = {("uwvm_ros_v2", name) for name in operations}
         if args.guest_seed is None:
             clock = "clock_time_get_wasm64" if args.target == "wasm64" else "clock_time_get"
             expected.add(("wasi_snapshot_preview1", clock))

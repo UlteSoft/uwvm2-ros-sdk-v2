@@ -29,7 +29,7 @@ COMMON = ("install/qualification.py", "install/local_release.py", "install/artif
 SDK_INPUTS = {
     "c": ("bin/wrc", "include/wros/scene.h"),
     "cpp": ("bin/wrcc", "include/wros/scene.h"),
-    "lua": ("bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp", "third-parties/lua"),
+    "lua": ("bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp", "language/lua/scene.hpp", "third-parties/lua"),
     "fortran": ("bin/wrfortran", "bin/wrcc", "bin/wrc", "include/wros/scene.h", "language/fortran", "third-parties/fortran"),
     "rs": ("bin/wrrust", "tools/wasm/tag_ir.cpp", "language/rust", "third-parties/rust"),
     "nim": ("bin/wrnim", "bin/wrc", "language/nim", "include/wros/scene.h", "third-parties/nim/nim-2.2.4-lib.tar.xz"),

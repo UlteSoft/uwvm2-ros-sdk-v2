@@ -74,9 +74,9 @@
     },
     {
       "path": "install/qualification.py",
-      "bytes": 15041,
+      "bytes": 15067,
       "mode": 420,
-      "sha256": "886da5f3b22c4fb72270c84d262c5bb2c007133dbdd813934316681aa38b94e6"
+      "sha256": "2c35d544f84020efcb42ee0f642c785fa29ef5ed675c31ae1e4378ef11716f73"
     },
     {
       "path": "share/qualification/memory-neighbors.json",

@@ -8,27 +8,33 @@
     },
     {
       "path": "bin/wrlua",
-      "bytes": 7208,
+      "bytes": 8673,
       "mode": 493,
-      "sha256": "cbdfb22e4d4b144f64477cce242199a0ac03d7e7fc6591ce70cb9a4baecb715b"
+      "sha256": "9e6e812417ad24f2dd56aa7d92c62f95f611708d784236a105d482a0068f7415"
     },
     {
       "path": "document/en/lua.md",
-      "bytes": 4147,
+      "bytes": 5253,
       "mode": 420,
-      "sha256": "5652582f13478356c83785b97e83028ad75e864f88ebbedc22441ef88a0aae59"
+      "sha256": "e967ccc431243ac08d4bfb85c920a9f5c66a9b026f07a92c952cb8f69001b771"
     },
     {
       "path": "document/zh/lua.md",
-      "bytes": 3758,
+      "bytes": 4654,
       "mode": 420,
-      "sha256": "6abfeda45329336fedbb1fa290ad7c737b5c25b63df534e81e80c6568dff1116"
+      "sha256": "abe0afddad5a29964877a8e4f49d4bd9fd168316f8906021652029e36d8be75b"
     },
     {
       "path": "examples/lua/body.lua",
       "bytes": 224,
       "mode": 420,
       "sha256": "5889482c2c61fed94b443eb5a29cd8c18d5bcce1c707811155e48c9e2c524e1e"
+    },
+    {
+      "path": "examples/lua/guard.lua",
+      "bytes": 416,
+      "mode": 420,
+      "sha256": "c7d9ad5a0c1e6c1d780b184c19201e90cfe45837793a4ffdd8b09350ccc42c9f"
     },
     {
       "path": "include/wros/scene.h",
@@ -38,15 +44,21 @@
     },
     {
       "path": "language/lua/entry.cpp",
-      "bytes": 2617,
+      "bytes": 2429,
       "mode": 420,
-      "sha256": "a7749097d523db38cfe5593439213bd792d3988332bf7c6abf856011f54e4371"
+      "sha256": "2e2b08a6cf1deea88a9db228c4572b49f09b05b6215163234c6df5951e23446b"
+    },
+    {
+      "path": "language/lua/scene.hpp",
+      "bytes": 4658,
+      "mode": 420,
+      "sha256": "c1fe6be188adce9cd6ae600e57e7318f0213e14627d368a387c6e5457171b562"
     },
     {
       "path": "language/lua/xmake/adapter.lua",
-      "bytes": 1360,
+      "bytes": 1496,
       "mode": 420,
-      "sha256": "41ef696896685aad03e4187a20af1bb03d51a23fb53123bab0bd744b70820309"
+      "sha256": "089a0959194cabde5f78ccde7387b6b0cd6ef6a2e1d2757cda87544fbbc73dc9"
     },
     {
       "path": "third-parties/lua/LICENSE",
