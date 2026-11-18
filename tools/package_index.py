@@ -38,22 +38,17 @@ def package(name, paths):
 def render_inventory(registry):
     """The bootstrap runs revision.py alone. Embed only IDs in that small file."""
     languages = registry["languages"]
-    grouped = {}
     for platform, declared in registry["platforms"].items():
         if not set(declared) <= set(languages):
             raise ValueError("unknown language in platform " + platform)
-        grouped.setdefault(tuple(declared), []).append(platform)
     def words(values):
         if any(not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", entry) for entry in values):
             raise ValueError("invalid target identifier")
         return json.dumps(" ".join(values))
     header = "# BEGIN generated target inventory (tools/package_index.py)\n"
     footer = "# END generated target inventory"
-    block = [f"LANGUAGES = {words(languages)}.split()", "PLATFORM_LANGUAGES = {",
-             "    platform: routes.split()", "    for group, routes in ("]
-    for declared, group in grouped.items():
-        block.extend(("        (" + words(group) + ",", "         " + words(declared) + "),"))
-    block.extend(("    )", "    for platform in group.split()", "}"))
+    block = [f"LANGUAGES = {words(languages)}.split()",
+             f"PLATFORMS = {words(registry['platforms'])}.split()"]
     before, section = HOOK.read_text().split(header)
     _, after = section.split(footer)
     write(HOOK, before + header + "\n".join(block) + "\n" + footer + after)

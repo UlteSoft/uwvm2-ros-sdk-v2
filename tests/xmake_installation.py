@@ -2,6 +2,7 @@
 import argparse
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -60,14 +61,14 @@ def main():
         os.environ["TMPDIR"] = str(prefix)
         tempfile.tempdir = str(prefix)
         accepted, refused, controls = [], [], []
-        for platform, routes in registry["platforms"].items():
+        for platform in registry["platforms"]:
             for language in registry["languages"]:
                 source.requested.clear()
-                if language not in active or language not in routes:
+                if language not in active:
                     try:
                         install(source, platform, language, prefix, [])
                     except ValueError as error:
-                        if not any(s in str(error) for s in ("has not been published", "has no development route")):
+                        if "has not been published" not in str(error):
                             raise
                     else:
                         raise AssertionError(f"unexpectedly installed {platform}/{language}")
@@ -99,6 +100,7 @@ def main():
                                    platform, language)
                 accepted.append(dict(platform=platform, language=language, files=len(installed),
                                      xmake_configure_exit=result, requested=source.requested.copy()))
+                shutil.rmtree(destination)
             print(f"{platform} checked", flush=True)
 
         # A protocol-only or declarations-only installation cannot be used as
