@@ -44,9 +44,9 @@
     },
     {
       "path": "language/jvm/java/wros/scene/Guard.java",
-      "bytes": 3150,
+      "bytes": 3495,
       "mode": 420,
-      "sha256": "70fac81b22c417d02ff9ac88ab6df254b8ad3b5f8243ec52bd4a8896c6ad73d9"
+      "sha256": "ebb8f8e94a7b50a68332d2726c4baaaed0926b596d282f6c7aa44222d9dfca30"
     },
     {
       "path": "language/jvm/java/wros/scene/Scene.java",

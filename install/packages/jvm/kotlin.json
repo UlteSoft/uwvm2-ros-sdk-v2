@@ -8,9 +8,9 @@
     },
     {
       "path": "examples/kotlin/synchronous-aot/GuardApplication.kt",
-      "bytes": 430,
+      "bytes": 546,
       "mode": 420,
-      "sha256": "7b99bef87cf98fe8059059db86c321b35acdcda8aa2fa09155e9369166dcc6eb"
+      "sha256": "b6ec75fe35e2cb84c8a54c2e6638ab53f09f759068e7484f105b6477fff9b966"
     },
     {
       "path": "examples/kotlin/synchronous-aot/Main.kt",

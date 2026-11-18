@@ -3,7 +3,7 @@ package wros.scene;
 import org.teavm.interop.Address;
 import org.teavm.interop.Import;
 
-/** A scoped, synchronous ROS guard. Every operation returns the VM status unchanged. */
+/** A scoped, synchronous ROS guard. Valid operations preserve VM status; local state and framing errors use POSIX errno values. */
 public final class Guard {
     @Import(name="wr_capability_open") private static native int openRaw(int memory, long name, long size, long token);
     @Import(name="wr_capability_close") private static native int closeRaw(long token);
@@ -30,13 +30,19 @@ public final class Guard {
     }
     public int open(byte[] name) {
         if (token != 0) return 16;
+        if (name == null || name.length == 0) return 22;
         byte[] out = new byte[8];
         int status = openRaw(0, pointer(name), name.length, pointer(out));
-        if (status == 0) token = getWord(out);
+        if (status == 0) {
+            token = getWord(out);
+            if (token == 0) status = 74;
+        }
         putWord(0, out);
         return status;
     }
     public int create() {
+        if (token == 0) return 9;
+        if (resource != 0) return 16;
         byte[] out = new byte[8], written = new byte[8];
         int status = createRaw(token, 0, 0, 0, pointer(out), 8, pointer(written));
         if (status == 0) {
@@ -47,6 +53,7 @@ public final class Guard {
         return status;
     }
     public int trigger() {
+        if (resource == 0) return 9;
         byte[] in = new byte[8], written = new byte[8];
         putWord(resource, in);
         int status = triggerRaw(token, 0, pointer(in), 8, 0, 0, pointer(written));
@@ -55,6 +62,7 @@ public final class Guard {
     }
     public int take(long[] count) {
         if (count == null || count.length != 1) return 22;
+        if (resource == 0) return 9;
         byte[] in = new byte[8], out = new byte[8], written = new byte[8];
         putWord(resource, in);
         int status = takeRaw(token, 0, pointer(in), 8, pointer(out), 8, pointer(written));
@@ -66,6 +74,7 @@ public final class Guard {
         return status;
     }
     public int close() {
+        if (token == 0) return 9;
         int status = closeRaw(token);
         if (status == 0) { token=0; resource=0; }
         return status;

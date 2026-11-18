@@ -8,9 +8,9 @@
     },
     {
       "path": "examples/java/synchronous-aot/GuardApplication.java",
-      "bytes": 506,
+      "bytes": 682,
       "mode": 420,
-      "sha256": "274ba29a46379a489cc617c9d82bf7b40e5908a85d58133f32b989cc1f3ae285"
+      "sha256": "d5148963123a66ef4b6eacc5af429be369c217b51fe906f94f34a6a12d9dd41e"
     },
     {
       "path": "examples/java/synchronous-aot/Main.java",
