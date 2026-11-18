@@ -221,10 +221,10 @@ def main():
             (directory / "xmake.lua").write_text(project)
             for source in source_dir.glob("*.f90"):
                 (directory / source.name).write_bytes(source.read_bytes())
-            run(label + "-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1",
+            run(label + "-configure", [a.xmake.absolute(), "f", "-P", directory, "-c", "-y", "-p", "wasm-wasip1",
                                       "-a", "wasm" + str(a.address_bits)], directory=directory)
-            run(label + "-build", [a.xmake.absolute(), "-j1", "robot"], directory=directory)
-            run(label + "-run", [a.xmake.absolute(), "run", "robot"], directory=directory)
+            run(label + "-build", [a.xmake.absolute(), "-P", directory, "-j1", "robot"], directory=directory)
+            run(label + "-run", [a.xmake.absolute(), "run", "-P", directory, "robot"], directory=directory)
         archive_build = a.output / "archive-project/build"
         archive, = archive_build.rglob("*.a")
         app_with_library, = archive_build.rglob("robot.wasm")
