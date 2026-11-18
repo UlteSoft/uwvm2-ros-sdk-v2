@@ -1,5 +1,7 @@
 # WROS SDK developer guide
 
+[Nim application development](nim.md)
+
 [WasmMTE detection guarantees](memtag.md)
 - [Qualify and sign a local memory-tagging toolchain](memory-qualification.md)
 

@@ -84,6 +84,8 @@ def main():
     for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",
                         "as": "language/assemblyscript/scene.ts"}.items():
         package("bindings/" + key, [source])
+    package("bindings/nim", ["language/nim/wros_scene.nim", "include/wros/scene.h"])
+    package("nim-producer-source", ["third-parties/nim/nim-2.2.4.tar.xz"])
     package("protocol", ["share/abi/ros.json", "LICENSE"])
     for name, languages in registry["platforms"].items():
         platform_adapter(name, languages)
@@ -105,6 +107,13 @@ def main():
                 "third-parties/lua/lua-5.4.9.tar.gz", "third-parties/lua/LICENSE", "third-parties/lua/README.md",
                 "examples/lua/body.lua", "document/en/lua.md", "document/zh/lua.md"],
     }
+    language_files["nim"] = [
+        "bin/wrnim", "bin/wrc", "include/wros/scene.h", "examples/nim/body.nim", "examples/nim/xmake.lua",
+        "document/en/nim.md", "document/zh/nim.md", "third-parties/nim/LICENSE", "third-parties/nim/README.md",
+        "third-parties/nim/nim-2.2.4-lib.tar.xz",
+        *["language/nim/" + name for name in ("build_producer.py", "pack_library.py", "wrnim_lower.nim",
+                                              "wros_scene.nim", "panicoverride.nim", "entry.c")],
+    ]
     language_files["fortran"] = [
         "bin/wrfortran", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
         "document/en/fortran.md", "document/zh/fortran.md",

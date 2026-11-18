@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "third-parties/nim/nim-2.2.4.tar.xz",
+      "bytes": 8168916,
+      "mode": 420,
+      "sha256": "f82b419750fcce561f3f897a0486b180186845d76fb5d99f248ce166108189c7"
+    }
+  ]
+}

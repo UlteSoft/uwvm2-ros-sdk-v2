@@ -1,0 +1,106 @@
+{
+  "files": [
+    {
+      "path": "bin/wrc",
+      "bytes": 183,
+      "mode": 493,
+      "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
+    },
+    {
+      "path": "bin/wrnim",
+      "bytes": 4270,
+      "mode": 493,
+      "sha256": "b3b6af4997ae3fd453d5a8d75fbedfa7eae94eee43a04cb6e82e8c4b71a9e1bc"
+    },
+    {
+      "path": "document/en/nim.md",
+      "bytes": 1849,
+      "mode": 420,
+      "sha256": "6fb39faa0ae4b601c13b3336693115aa466675121694cec397d320a8ae604052"
+    },
+    {
+      "path": "document/zh/nim.md",
+      "bytes": 1618,
+      "mode": 420,
+      "sha256": "2aec05c8e46193445a8135cb19d1aa1add61bcfe1ad97f59ebfa26924c86b196"
+    },
+    {
+      "path": "examples/nim/body.nim",
+      "bytes": 191,
+      "mode": 420,
+      "sha256": "87bb1a8498f45e364e9c661d9e7e82c9e4b8485d45d9a65629fdcb6bd9c3b379"
+    },
+    {
+      "path": "examples/nim/xmake.lua",
+      "bytes": 374,
+      "mode": 420,
+      "sha256": "bd8a6a2fd920bc84fbcbe4cd0f09536d77d4a133a61c3695815ddcf045776a2b"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/nim/build_producer.py",
+      "bytes": 3020,
+      "mode": 420,
+      "sha256": "ee7e917d356abe8c4770385ee26478e3d2a77799ba15e483eb9dadcd7396b4fb"
+    },
+    {
+      "path": "language/nim/entry.c",
+      "bytes": 130,
+      "mode": 420,
+      "sha256": "f22994cf5c383e9d9036c027dab340948034fcf7b4d42ceac2ae475274185b8f"
+    },
+    {
+      "path": "language/nim/pack_library.py",
+      "bytes": 1115,
+      "mode": 420,
+      "sha256": "aca34437dd332d21ef5e3af66dcfd9f8914d936204faee8df8ee317643a0762d"
+    },
+    {
+      "path": "language/nim/panicoverride.nim",
+      "bytes": 162,
+      "mode": 420,
+      "sha256": "89979bce61a4725c3ce6b25f375a3047afbba1aea709ba9d6ecc1286f64a69ee"
+    },
+    {
+      "path": "language/nim/wrnim_lower.nim",
+      "bytes": 1756,
+      "mode": 420,
+      "sha256": "660316f1e9b12bcd285b9edb82c308a004842c0513a18810f07547c3da571150"
+    },
+    {
+      "path": "language/nim/wros_scene.nim",
+      "bytes": 28776,
+      "mode": 420,
+      "sha256": "9c6c2bafbdf27b04d22596567a647ad89b3e57b57a2818927f74105c1372ecfd"
+    },
+    {
+      "path": "language/nim/xmake/adapter.lua",
+      "bytes": 1391,
+      "mode": 420,
+      "sha256": "fa7abe9bf80f867c5f3b20894dad93755adcc09c89f841d6936c1d76d3c5dc47"
+    },
+    {
+      "path": "third-parties/nim/LICENSE",
+      "bytes": 1258,
+      "mode": 420,
+      "sha256": "c8179122923594d5a54231b10b9fe2ca0861dcf2f0d0f525bae8be24db1893bd"
+    },
+    {
+      "path": "third-parties/nim/README.md",
+      "bytes": 344,
+      "mode": 420,
+      "sha256": "6ad96e32c943f3b9b39906d9b77f5010299d033422a0ce1067d268eb8275dd35"
+    },
+    {
+      "path": "third-parties/nim/nim-2.2.4-lib.tar.xz",
+      "bytes": 884128,
+      "mode": 420,
+      "sha256": "ec55353f6db5332912c951095b5a7425513811ae9f760851a77d27c42e0182d0"
+    }
+  ]
+}

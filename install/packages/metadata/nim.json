@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/nim.json",
-      "bytes": 50,
+      "bytes": 49,
       "mode": 420,
-      "sha256": "f46818036a5587bd66832ea1194aab1b4d927402ee87d67fe357870e0f8b78ee"
+      "sha256": "939aea4c7e36313605d3d7aaa48212f063ff6f17c69eb5c2efc2e7b0dd175404"
     }
   ]
 }

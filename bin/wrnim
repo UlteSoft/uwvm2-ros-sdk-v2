@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+"""Compile one Nim application to a ROSv2 Wasm module using the private WROS producer."""
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path[:0] = [str(ROOT / "install"), str(ROOT / "language/nim")]
+from build_producer import unpack
+from guest_profile import Profile
+from compiler import compiler_environment, make_command
+from frontend import audit
+from artifacts import read_bounded, strip_notes
+import qualification
+
+
+def generated_sources(cache):
+    plan = json.loads((cache / "wros_entry.json").read_text())
+    sources = [Path(row[0]) for row in plan["compile"]]
+    if not sources or len(sources) != len(set(sources)) or plan["extraCmds"]:
+        raise ValueError("unsupported Nim build plan")
+    for source in sources:
+        if source.parent != cache or source.suffix != ".c" or source.is_symlink() or not source.is_file():
+            raise ValueError("external native Nim input")
+    if plan["link"] != [str(source) + ".o" for source in sources]:
+        raise ValueError("external native Nim link dependency")
+    return sources
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("source", type=Path)
+    parser.add_argument("-o", "--output", required=True, type=Path)
+    parser.add_argument("--producer", type=Path, required=True, help="wrnim-lower built with language/nim/build_producer.py")
+    parser.add_argument("--toolchain", type=Path, required=True)
+    parser.add_argument("--sysroots", type=Path, required=True, action="append")
+    parser.add_argument("--target", choices=["wasm32", "wasm64"], default="wasm32")
+    parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("-O", choices=list("0123sz"), default="2")
+    parser.add_argument("-g", action="store_true")
+    qualification.arguments(parser)
+    opt = parser.parse_args()
+    try:
+        source, producer = opt.source.resolve(strict=True), opt.producer.resolve(strict=True)
+        if source.suffix != ".nim" or source in (opt.output.resolve(), producer):
+            raise ValueError("expected a separate .nim source, producer and output")
+        if opt.output.resolve() == producer:
+            raise ValueError("output would replace the producer")
+        profile = Profile(int(opt.target[4:]), "3.0", False, opt.mte, "eh" if opt.eh else "noeh")
+        admission = qualification.admit("nim", opt, profile, {"producer": producer})
+        with tempfile.TemporaryDirectory(dir=opt.output.parent) as td:
+            work = Path(td).resolve()
+            unpack(work, only_library=True)
+            entry = work / "wros_entry.nim"
+            # A private main file provides the SDK's standalone panic handler.
+            entry.write_text("include " + json.dumps(str(source), ensure_ascii=False) + "\n")
+            shutil.copyfile(ROOT / "language/nim/panicoverride.nim", work / "panicoverride.nim")
+            cache = work / "generated"
+            cache.mkdir()
+            subprocess.run([producer, opt.target, work / "lib", ROOT / "language/nim",
+                            source.parent, cache, entry], check=True)
+            wasm = work / "guest.wasm"
+            flags = ["-nostartfiles", "-Wl,--no-entry", "-Wl,--export=_start", "-O" + opt.O,
+                     "-I" + str(ROOT / "include"), "-I" + str(work / "lib"), "-I" + str(source.parent)]
+            if opt.g:
+                flags.append("-g")
+            flags.extend(map(str, [ROOT / "language/nim/entry.c", *generated_sources(cache)]))
+            flags.extend(["-o", str(wasm), "-lc-printscan-long-double"])
+            command, _ = make_command(opt.toolchain, opt.sysroots, profile, "c", flags, verify=True)
+            subprocess.run(command, env=compiler_environment(opt.toolchain), check=True)
+            content = strip_notes(read_bounded(wasm))
+            audit(content, profile)
+            wasm.write_bytes(content)
+            qualification.finish(admission, opt, wasm, opt.output)
+    except (ValueError, OSError, KeyError, subprocess.SubprocessError) as exc:
+        parser.exit(1, f"{parser.prog}: {exc}\n")
+
+
+if __name__ == "__main__":
+    main()

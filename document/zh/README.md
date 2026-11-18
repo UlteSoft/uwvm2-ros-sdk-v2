@@ -1,5 +1,7 @@
 # WROS SDK 开发指南
 
+[Nim 应用开发](nim.md)
+
 [WasmMTE 的检测范围](memtag.md)
 - [内存标签工具链的本地验收与签署](memory-qualification.md)
 

@@ -17,15 +17,18 @@ def main():
     for key in ("unsigned", "toolchain", "sysroots", "runtime", "cosign", "vm-source", "output", "authority-work"):
         parser.add_argument("--" + key, type=lambda path: Path(path).resolve(), required=True)
     parser.add_argument("--xmake", type=Path, help="exercise the seeded Lua build using this operator-provided Xmake")
+    parser.add_argument("--producer", type=Path, help="WROS Nim lowering binary")
     parser.add_argument("--repository", type=Path, default=ROOT)
     parser.add_argument("--sdk-commit", required=True)
     parser.add_argument("--address-bits", type=int, choices=(32, 64), default=32)
-    parser.add_argument("--language", choices=("c", "cpp", "lua"), default="c")
+    parser.add_argument("--language", choices=("c", "cpp", "lua", "nim"), default="c")
     parser.add_argument("--eh", action="store_true", help="use the default EH-enabled frontend configuration")
     a = parser.parse_args()
-    if a.language == "lua" and not a.eh:
+    if (a.producer is not None) != (a.language == "nim"):
+        parser.error("--producer is required for Nim")
+    if a.language in ("nim", "lua") and not a.eh:
         parser.error("the embedded Lua interpreter uses native Wasm EH")
-    if a.xmake and a.language != "lua":
+    if a.xmake and a.language not in ("lua", "nim"):
         parser.error("--xmake exercises the seeded Lua path")
     if not a.output.is_relative_to(ROOT / ".tmp"):
         parser.error("use a new SDK .tmp directory")
@@ -80,9 +83,11 @@ def main():
                  "--certificate", ca["certificate"], "--crl", ca["crl"], "--module-id", module_id, "--module-version", "1",
                  "--algorithm", "Ed25519", "--not-before", stamp(-60), "--not-after", stamp(3600), "--output", signed])
     wasm = a.output / "app.wasm"
-    front = sdk / "bin" / {"c": "wrc", "cpp": "wrcc", "lua": "wrlua"}[a.language]
+    front = sdk / "bin" / {"c": "wrc", "cpp": "wrcc", "lua": "wrlua", "nim": "wrnim"}[a.language]
     app = a.output / ("app." + a.language)
     def application(value):
+        if a.language == "nim":
+            return f"let sample = new(int)\nsample[] = {value}\ndoAssert sample[] == {value}\n"
         if a.language == "lua":
             return "local t = {value=" + str(value) + "}; assert(t.value==" + str(value) + ")\n"
         linkage = 'extern "C" ' if a.language == "cpp" else ""
@@ -91,7 +96,9 @@ def main():
     build = [front, "--toolchain", a.toolchain, "--sysroots", a.sysroots]
     if a.address_bits == 64:
         build += ["--target", "wasm64"]
-    if a.language != "lua":
+    if a.language == "nim":
+        build.extend(["--producer", a.producer.resolve(), "-O3", "-g"])
+    elif a.language != "lua":
         build.extend(([] if a.eh else ["--no-eh"]) + ["--reactor", "--export", "_start"])
     build += ["--build-receipt", app, "-o", wasm]
     run("before-configuration", build, False)
@@ -134,8 +141,11 @@ def main():
         if inspect(wasm.read_bytes()):
             raise ValueError("standalone C or C++ imported a host interface")
         linkage = 'extern "C" ' if a.language == "cpp" else ""
-        app.write_text('#include <wros/scene.h>\n' + linkage +
-                       'void _start(void){if(wr_abi()!=2) __builtin_trap();}\n')
+        if a.language == "nim":
+            app.write_text("import wros_scene\ndoAssert wr_abi()==2\n")
+        else:
+            app.write_text('#include <wros/scene.h>\n' + linkage +
+                           'void _start(void){if(wr_abi()!=2) __builtin_trap();}\n')
         run("ros-only-build", build)
         if [(v["module"], v["name"]) for v in inspect(wasm.read_bytes())] != [("uwvm_ros_v2", "abi")]:
             raise ValueError("unexpected imports in ROS-only application")
@@ -156,8 +166,17 @@ def main():
             run("guest-only-" + engine, [a.runtime, *Profile(a.address_bits).uwvm_feature_flags(), "--runtime-" + engine,
                                        "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable", "--run", wasm])
     else:
-        run("unapproved-optimization", [build[0], "-O3", *build[1:]], False)
-    if a.xmake:
+        run("unapproved-optimization", [*build, "-O0"], False)
+    if a.xmake and a.language == "nim":
+        env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
+                   WROS_NIM_PRODUCER=str(a.producer.resolve()), WROS_VM=str(a.runtime), WROS_RUN_QUERIES="abi",
+                   XMAKE_GLOBALDIR=str(a.output / "xmake-global"))
+        project = a.output / "xmake.lua"
+        project.write_text((sdk / "examples/nim/xmake.lua").read_text().replace("body.nim", "app.nim"))
+        run("xmake-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm" + str(a.address_bits)])
+        run("xmake-build", [a.xmake.absolute(), "-j1", "robot"])
+        run("xmake-run", [a.xmake.absolute(), "run", "robot"])
+    elif a.xmake:
         env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
                    WROS_VM=str(a.runtime), XMAKE_GLOBALDIR=str(a.output / "xmake-global"), WROS_RUN_QUERIES="")
         app.write_text("local a,b=math.randomseed(); assert(a==37 and b==0)\n")

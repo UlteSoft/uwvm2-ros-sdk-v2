@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/nim/wros_scene.nim",
+      "bytes": 28776,
+      "mode": 420,
+      "sha256": "9c6c2bafbdf27b04d22596567a647ad89b3e57b57a2818927f74105c1372ecfd"
+    }
+  ]
+}

@@ -3,8 +3,8 @@ import argparse
 import json
 
 
-BINDINGS = {"c": "c", "cpp": "c", "rs": "rs", "as": "as"}
-DEVELOPMENT = ("c", "cpp", "fortran", "lua", "rs", "tinygo")
+BINDINGS = {"c": "c", "cpp": "c", "rs": "rs", "as": "as", "nim": "nim"}
+DEVELOPMENT = ("c", "cpp", "fortran", "lua", "rs", "tinygo", "nim")
 
 # BEGIN generated target inventory (tools/package_index.py)
 LANGUAGES = "as c c_ffi_bridge cpp csharp d fortran fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo typescript vbnet wat zig".split()
@@ -63,6 +63,8 @@ def main():
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
             if args.component == "compiler-source":
                 packages.append("compiler-source")
+                if args.language == "nim":
+                    packages.append("nim-producer-source")
     print(json.dumps({"variant": args.component, "packages": packages}))
 
 

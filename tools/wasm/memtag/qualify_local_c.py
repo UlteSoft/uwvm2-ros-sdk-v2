@@ -18,6 +18,8 @@ def git(*args):
 def verify_checkout(commit, language):
     """Bind executed helpers and inputs to Git blobs even with skip-worktree entries."""
     scopes = ("bin", "tests", "install", "include", "share/abi", "share/qualification", "tools/wasm/memtag")
+    if language == "nim":
+        scopes += ("language/nim", "third-parties/nim", "examples/nim")
     if language == "lua":
         scopes += ("language/lua", "third-parties/lua", "examples/lua")
     entries = subprocess.check_output(["git", "-C", ROOT, "ls-tree", "-r", "-z", commit, "--", *scopes])
@@ -48,10 +50,12 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for key in ("toolchain", "runtime", "sysroots", "output"):
         p.add_argument("--" + key, type=lambda s: Path(s).resolve(), required=True)
+    p.add_argument("--nim-producer", type=lambda s: Path(s).resolve())
+    p.add_argument("--approved-nim-producer-sha256")
     p.add_argument("--sdk-commit", required=True, help="independently approved full Git commit")
     for key in ("producer", "vm", "sysroots"):
         p.add_argument("--approved-" + key + "-sha256", required=True)
-    p.add_argument("--language", choices=("c", "cpp", "lua"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "lua", "nim"), default="c")
     p.add_argument("--target", choices=("wasm32", "wasm64"), required=True)
     p.add_argument("-O", choices=("2", "3"), default="2")
     p.add_argument("-g", action="store_true")
@@ -74,6 +78,13 @@ def main():
     import qualification
     from guest_profile import Profile
 
+    external = {}
+    if a.language == "nim":
+        if not a.nim_producer or qualification.digest(a.nim_producer) != a.approved_nim_producer_sha256:
+            p.error("Nim requires the independently approved private producer")
+        if a.O != "3" or not a.g or not a.eh:
+            p.error("Nim qualification currently exercises -O3 -g with the EH sysroot")
+        external["producer"] = a.nim_producer
     vm_digest = qualification.digest(a.runtime)
     names = ("clang", "wasm-ld", "llc", "llvm-objdump", "llvm-ar", "FileCheck")
     binaries = {name: qualification.digest(a.toolchain / "bin" / name) for name in names}
@@ -92,7 +103,7 @@ def main():
     # Threaded TLS qualification requires a separate concurrent lifecycle suite.
     bits = int(a.target[4:])
     profile = Profile(bits, mte=True, exceptions="eh" if a.eh else "noeh")
-    measured = qualification.measure_inputs(a.language, a, profile)
+    measured = qualification.measure_inputs(a.language, a, profile, external)
     a.output.mkdir(mode=0o700, parents=True, exist_ok=False)
     results = {}
     base = ["--toolchain", a.toolchain, "--runtime", a.runtime]
@@ -108,6 +119,9 @@ def main():
         ("libc", "memtag_libc_scratch.py", [*base, *exception, "--address-bits", str(bits), "--sysroots", a.sysroots,
                                             "--output", a.output / "libc"]),
     ]
+    if a.language == "nim":
+        tests.append(("nim", "nim_aot.py", [*base, "--sysroots" + str(bits), a.sysroots, "--producer", a.nim_producer,
+                                            "--candidate-mte", "--output", a.output / "nim"]))
     if a.language == "lua":
         tests.append(("lua", "lua_interpreter.py", [*base, "--sysroots", a.sysroots, "--candidate-mte",
                                                    "--address-bits", str(bits), "--output", a.output / "lua"]))
@@ -126,7 +140,7 @@ def main():
                 (step.get("code", step.get("exit")) == 0) != step.get("expected_success", True) for step in cases):
             raise ValueError("incomplete " + label + " execution evidence")
         results[label] = qualification.digest(log)
-    if (qualification.measure_inputs(a.language, a, profile) != measured or qualification.digest(a.runtime) != vm_digest or
+    if (qualification.measure_inputs(a.language, a, profile, external) != measured or qualification.digest(a.runtime) != vm_digest or
             qualification.digest(a.sysroots) != a.approved_sysroots_sha256 or
             any(qualification.digest(a.toolchain / "bin" / name) != before for name, before in binaries.items())):
         raise ValueError("qualification inputs changed")
@@ -137,7 +151,7 @@ def main():
         stages = ("compile", "disassemble", "int", "aot", "int-runtime-off", "aot-runtime-off")
         if not all(f"libcxx-{bits}-{stage}" in names for stage in stages):
             raise ValueError("missing C++ allocation execution evidence")
-    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua"}[a.language]
+    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim"}[a.language]
     row = dict(language=a.language, profile=profile.to_dict(), settings={"optimization": a.O, "debug": a.g},
                inputs=measured, vm_sha256=vm_digest, sdk_commit=a.sdk_commit,
                source_lock_sha256=qualification.digest(lock), producer_programs_sha256=qualification.canonical(binaries),

@@ -1,4 +1,4 @@
 {
   "id": "nim",
-  "development_package": false
+  "development_package": true
 }
