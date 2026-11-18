@@ -50,7 +50,7 @@ function configure(target, entry)
     assert(not target:values("wros.unknown"), "Unknown WROS profile field: " .. tostring(target:values("wros.unknown")))
     local core = target:values("wros.core") or "3.0"
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
-    local eh = boolean(target, "eh", core ~= "mvp")
+    local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs")
     local mte = boolean(target, "mte", true)
     local sysroots = (not mte and os.getenv("WROS_SYSROOTS_NO_MTE")) or os.getenv("WROS_SYSROOTS")
     local arch = target:arch()
@@ -66,7 +66,12 @@ function configure(target, entry)
     local std = target:values("wros.std")
     assert(language == "lua" or not lua_abi, "lua_abi is specific to Lua")
     for _, key in ipairs({"links", "syslinks", "linkdirs", "cxflags", "cflags", "cxxflags", "ldflags", "shflags", "frameworks", "packages"}) do
-        assert(not target:get(key), "Unsupported guest target setting: " .. key)
+        local setting = target:get(key)
+        -- Xmake's rust.build load hook adds this flag to binary targets.
+        -- wrrust selects its own crate type and never forwards these flags.
+        local rust_binary = language == "rs" and key == "ldflags" and table.wrap(setting) or {}
+        assert(not setting or (#rust_binary == 1 and rust_binary[1] == "--crate-type=bin"),
+               "Unsupported guest target setting: " .. key)
     end
     local name = target:get("filename") or (target:name() .. (kind == "binary" and ".wasm" or ".a"))
     local extension = kind == "binary" and ".wasm" or ".a"

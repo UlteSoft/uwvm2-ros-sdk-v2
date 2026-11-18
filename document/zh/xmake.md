@@ -97,3 +97,7 @@ Lua 编译配置为 Core 3.0、单线程、可选 MTE、EH、`-O3 -g`。TinyGo �
 TinyGo 主模块使用 `set_language("tinygo")` 和 `add_files("go.mod")`。通过 `WROS_GOROOT` 与 `WROS_TINYGOROOT` 指定已校验的 Go、TinyGo 发布包。可用 `WROS_HOST_CXX` 指定构建 LLVM 辅助工具所需的宿主 C++ 编译器。来宾使用 wasm32、Core 3.0、单线程和 `-O3 -g`。[TinyGo 开发指南](tinygo.md)
 
 数值 Fortran 程序使用 `set_language("fortran")` 并添加 Fortran 源文件。前端默认使用工具链内的 `bin/flang` 和 `bin/wros-flang-mte`，也可用 `WROS_FLANG` 与 `WROS_FLANG_MTE_TOOL` 显式指定已校验的工具。通过 `add_deps` 关联经过 SDK 校验的 Wasm 静态库。xmake 适配器支持 Core 3.0、两种位宽与两种 EH 模式，来宾使用单线程。每个目标使用所选的 MTE 配置。[Fortran 开发指南](fortran.md)
+
+### Rust no_std
+
+Rust 目标使用 `set_language("rs")`，并通过 `add_files("src/lib.rs")` 指定一个 crate 根文件。将 `WROS_RUSTROOT` 设为固定版本 Rust 的宿主工具链目录。默认使用 wasm32 Core 3.0、panic=abort、单线程和 MTE。关闭插桩时设置 `set_wros_profile({mte=false})`，并通过 `WROS_SYSROOTS_NO_MTE` 指定匹配的收据。支持从 none 到 fastest 的优化级别和调试符号。参见 [Rust 开发指南](rust.md)。

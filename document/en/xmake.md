@@ -97,3 +97,7 @@ Platform adapters export `describe()` with `id`, `languages`, and `admission`. L
 Use `set_language("tinygo")` and `add_files("go.mod")` for a Go main module. Set `WROS_GOROOT` and `WROS_TINYGOROOT` to the verified Go and TinyGo releases. The optional `WROS_HOST_CXX` selects the host C++ compiler used to build the LLVM helper. This guest uses wasm32, Core 3.0, a single thread and `-O3 -g`. See [TinyGo](tinygo.md).
 
 Use `set_language("fortran")` and add the Fortran sources for a numerical program. The frontend defaults to `bin/flang` and `bin/wros-flang-mte` under the toolchain. `WROS_FLANG` and `WROS_FLANG_MTE_TOOL` may select verified tools explicitly. Checked Wasm static libraries can be added with `add_deps`. The xmake adapter exposes Core 3.0, both pointer widths and both EH modes, with one guest thread. Each build uses its selected MTE mode. See [Fortran](fortran.md).
+
+### Rust no_std
+
+Rust targets use `set_language("rs")` and one crate root such as `add_files("src/lib.rs")`. Set `WROS_RUSTROOT` to the pinned Rust host prefix. The adapter defaults to Wasm32 Core 3.0, panic=abort, a single thread and MTE. Use `WROS_SYSROOTS_NO_MTE` with `set_wros_profile({mte=false})` for the matching untagged profile. Optimization levels through `fastest` and debug symbols map to the Rust driver. See the [Rust guide](rust.md).

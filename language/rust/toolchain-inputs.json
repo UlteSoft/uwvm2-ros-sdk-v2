@@ -1,0 +1,16 @@
+{
+  "rustc_release": "1.98.0",
+  "commit": "88d9e12ae178fab0fb5cc050a94da85685d449ea",
+  "host": "x86_64-unknown-linux-gnu",
+  "source": {
+    "file": "rust-src-1.98.0.tar.xz",
+    "sha256": "0e977492aed5ff137815bf9b4b796e8a85b80fb2367ed64e82d5c5839870f2bf",
+    "url": "https://static.rust-lang.org/dist/2026-08-20/rust-src-1.98.0.tar.xz"
+  },
+  "host_files": {
+    "bin/rustc": "3690cc576ede140504698405d5d8fa3826aaadbe71699c6c4ed0a565d6f493e2",
+    "lib/libLLVM-22-rust-1.98.0-stable.so": "9816014358f5ca85706c55cbdb44e4da930f33b842782f576b695ba66a48091b",
+    "lib/libLLVM.so.22.1-rust-1.98.0-stable": "b2cc5bb9aafd2c8d1fd8ad0e99fd7de09e6831ff319ac99130d737261316596e",
+    "lib/librustc_driver-28a98848f7a7c026.so": "56047570f302ba09b1abf3b2996bd1d76560c06f3c95c0fcfa7dc3decd2faa2c"
+  }
+}

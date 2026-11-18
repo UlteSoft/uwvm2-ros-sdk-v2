@@ -74,7 +74,7 @@ sysroot 使用上游 libc++abi 的 bare-metal 配置、静默 terminate，以及
 
 `tests/separate_compilation.py` 实际构建 wasm32/wasm64 目标与静态库，在 VM 两个执行引擎中验证跨文件异常、配置混合拒绝、环境变量权限。须经 VM 仓库 cgroup 入口运行。单项测试通过不等于全部标准库、ROS 包或厂商硬件完成验收。
 
-C/C++ 使用 `<wros/scene.h>`，Rust 和 AssemblyScript 的底层声明位于 `language/`。底层声明对应本次 VM 登记的 163 项操作。29 个旧语言标识、32 个平台标识及其来源属于迁移清单。C/C++ 有独立编译入口，Lua 构建内嵌的 Wasm 解释器，TinyGo 构建 wasm32 应用及垃圾收集器，数值 Fortran 可构建两种位宽的应用。其他编译器、高层绑定、各厂商实机和旧 ROS 源码兼容层需单独验收。
+C/C++ 使用 `<wros/scene.h>`，Rust 和 AssemblyScript 的底层声明位于 `language/`。底层声明对应本次 VM 登记的 163 项操作。29 个旧语言标识、32 个平台标识及其来源属于迁移清单。C/C++ 有独立编译入口，Lua 构建内嵌的 Wasm 解释器，TinyGo 构建 wasm32 应用及垃圾收集器，数值 Fortran 可构建两种位宽的应用。Rust 支持 wasm32 no_std 应用和 core 库。其他编译器、高层绑定、各厂商实机和旧 ROS 源码兼容层需单独验收。
 
 ## 厂商接入
 
@@ -84,4 +84,4 @@ SDK 的登记范围可扩展到国内和国际厂商。纯算法留在 Wasm，�
 
 发布的每个语言编译器都必须支持 WasmMTE，默认启用。可用 `--no-mte` 关闭整个目标的插桩，并使用对应的 sysroot。C/C++ 可以通过 `no_sanitize("memtag")` 等源码属性局部改变插桩。源码作者的显式选择和编译器经边界、生命周期分析后自动省略标签，是两种独立机制。
 
-[TinyGo](tinygo.md) · [Fortran](fortran.md)
+[TinyGo](tinygo.md) · [Fortran](fortran.md) · [Rust](rust.md)

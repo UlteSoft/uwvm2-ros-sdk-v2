@@ -16,7 +16,7 @@ from separate_compilation import cgroup_record, sha
 def configure(xmake, destination, project, platform, language):
     """Load the installed descriptors into a fresh Xmake project for each pair."""
     project.mkdir(parents=True)
-    name = {"c": "body.c", "cpp": "body.cpp", "lua": "body.lua", "tinygo": "go.mod", "fortran": "body.f90"}[language]
+    name = {"c": "body.c", "cpp": "body.cpp", "lua": "body.lua", "rs": "body.rs", "tinygo": "go.mod", "fortran": "body.f90"}[language]
     script = [
         'set_project("selection")',
         'includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))',
@@ -91,7 +91,8 @@ def main():
                 if any(path.startswith("platform/") and not path.startswith(f"platform/{platform}/")
                        for path in paths | installed):
                     raise AssertionError("foreign platform was requested or installed")
-                if any(path.startswith("language/") and not path.startswith(f"language/{language}/")
+                language_paths = (f"language/{language}/", "language/rust/") if language == "rs" else (f"language/{language}/",)
+                if any(path.startswith("language/") and not path.startswith(language_paths)
                        for path in paths | installed):
                     raise AssertionError("foreign language was requested or installed")
                 result = configure(xmake, destination, prefix / "projects" / f"{platform}-{language}",

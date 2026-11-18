@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--commit", required=True)
     parser.add_argument("--flang", type=Path)
     parser.add_argument("--flang-mte-tool", type=Path)
+    parser.add_argument("--rustroot", type=Path)
     parser.add_argument("--goroot", type=Path)
     parser.add_argument("--tinygoroot", type=Path)
     args = parser.parse_args()
@@ -138,7 +139,7 @@ target_end()
     run("lua-configure", lua, [xmake, "f", "-c", "-y"])
     run("lua-build", lua, [xmake, "-j1", "script"])
     run("lua-run", lua, [xmake, "run", "script"], WROS_RUN_QUERIES="abi,realtime-clock")
-    for language, inputs in (("fortran", (args.flang, args.flang_mte_tool)), ("tinygo", (args.goroot, args.tinygoroot))):
+    for language, inputs in (("fortran", (args.flang, args.flang_mte_tool)), ("tinygo", (args.goroot, args.tinygoroot)), ("rs", (args.rustroot,))):
         if not any(inputs):
             continue
         if not all(inputs):
@@ -147,6 +148,8 @@ target_end()
         settings = dict(UWVM_ROS_SDK_ROOT=str(directory))
         if language == "fortran":
             settings.update(WROS_FLANG=str(args.flang.resolve()), WROS_FLANG_MTE_TOOL=str(args.flang_mte_tool.resolve()))
+        elif language == "rs":
+            settings.update(WROS_RUSTROOT=str(args.rustroot.resolve()))
         else:
             settings.update(WROS_GOROOT=str(args.goroot.resolve()), WROS_TINYGOROOT=str(args.tinygoroot.resolve()))
         for mte in (True, False):
@@ -156,6 +159,9 @@ target_end()
             if language == "fortran":
                 source = "body.f90"
                 (project / source).write_text("program robot\nuse wros_scene\nimplicit none\ninteger :: version\nversion = wr_abi()\nend program\n")
+            elif language == "rs":
+                source = "body.rs"
+                (project / source).write_bytes((ROOT / "tests/rust/core_body.rs").read_bytes())
             else:
                 source = "go.mod"
                 (project / source).write_text("module example.local/robot\n\ngo 1.24\n\nrequire wros.local/scene v0.0.0\n"
@@ -175,6 +181,10 @@ target_end()
             record["modules"][label] = dict(sha256=sha(module), imports=rows)
             run(label + "-denied", project, [xmake, "run", "robot"], "ROS scene interface is hidden", **settings)
             run(label + "-run", project, [xmake, "run", "robot"], WROS_RUN_QUERIES="abi", **settings)
+            if language == "rs" and mte:
+                script = project / "xmake.lua"
+                script.write_text(script.read_text().replace("target_end()", 'add_ldflags("--extra", {force=true})\ntarget_end()'))
+                run("rs-link-flag-refused", project, [xmake, "f", "-c", "-y"], "Unsupported guest target setting: ldflags", **settings)
     record["complete"] = True
     save()
 

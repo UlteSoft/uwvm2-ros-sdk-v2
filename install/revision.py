@@ -4,7 +4,7 @@ import json
 
 
 BINDINGS = {"c": "c", "cpp": "c", "rs": "rs", "as": "as"}
-DEVELOPMENT = ("c", "cpp", "fortran", "lua", "tinygo")
+DEVELOPMENT = ("c", "cpp", "fortran", "lua", "rs", "tinygo")
 
 # BEGIN generated target inventory (tools/package_index.py)
 LANGUAGES = "as c c_ffi_bridge cpp csharp d fortran fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo typescript vbnet wat zig".split()

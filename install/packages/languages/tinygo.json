@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "bin/wrtinygo",
-      "bytes": 9854,
+      "bytes": 9872,
       "mode": 493,
-      "sha256": "e7b60ae6140de23a0511d614e290718cef4ad07b596fcd647be0f86a6287b7e9"
+      "sha256": "4ae87078647fe22926f73809fdad8dfbf5fb0c1aa9e42d32d831542c30c54b0e"
     },
     {
       "path": "document/en/tinygo.md",
@@ -79,12 +79,6 @@
       "sha256": "4c6b198cc24bd08c7d27e7982895642509f087d08beee7f23d7600e37221a192"
     },
     {
-      "path": "language/tinygo/tag.cpp",
-      "bytes": 4088,
-      "mode": 420,
-      "sha256": "9f459a47ff2d5a35093e779a10429be9c1ca0df383e3da448b264658fad16193"
-    },
-    {
       "path": "language/tinygo/toolchain-inputs.json",
       "bytes": 2014,
       "mode": 420,
@@ -95,6 +89,12 @@
       "bytes": 1590,
       "mode": 420,
       "sha256": "2276bf5f393daf34accb573312657f9d3270981f35a91d568a339f334c5f98f7"
+    },
+    {
+      "path": "tools/wasm/tag_ir.cpp",
+      "bytes": 5348,
+      "mode": 420,
+      "sha256": "6d90a61a93ad7dc7966fca955dc2cd3fcc460170bdc92b49253f4f4a2bdccd5c"
     }
   ]
 }

@@ -1,8 +1,9 @@
 // Apply the same function and global attributes used by Clang's WasmMTE
-// frontend to all live TinyGo program and runtime code before target lowering.
+// frontend to supported language IR before target lowering.
 #include "llvm/Bitcode/BitcodeWriter.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
@@ -11,8 +12,7 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
 
-// TinyGo carries //go:section on the LLVM definition and prevents a marked
-// function from being inlined before this stage. Consume the SDK marker here.
+// Both frontends carry the SDK's per-definition marker through IR sections.
 static bool suppressMemtag(llvm::GlobalObject& object) {
     if (object.getSection() != ".wros.no_memtag") return false;
     object.setSection("");
@@ -22,8 +22,9 @@ static bool suppressMemtag(llvm::GlobalObject& object) {
 int main(int argc, char** argv) {
     if (argc != 4) return 2;
     llvm::StringRef mode{argv[1]};
-    if (mode != "--mte" && mode != "--no-mte") return 2;
-    bool instrument = mode == "--mte";
+    bool rust = mode == "--rust-mte" || mode == "--rust-no-mte";
+    if (!rust && mode != "--mte" && mode != "--no-mte") return 2;
+    bool instrument = mode == "--mte" || mode == "--rust-mte";
     llvm::LLVMContext context;
     llvm::SMDiagnostic diagnostic;
     auto module = llvm::parseIRFile(argv[2], diagnostic, context);
@@ -33,8 +34,22 @@ int main(int argc, char** argv) {
     }
     if (module->getTargetTriple().getArch() != llvm::Triple::wasm32 ||
         !module->getModuleInlineAsm().empty()) {
-        llvm::errs() << "expected wasm32 TinyGo IR without inline assembly\n";
+        llvm::errs() << "expected wasm32 IR without module inline assembly\n";
         return 1;
+    }
+    // On wasm, rustc encodes a static's link_section as a custom section
+    // containing its initial bytes. It does not identify the LLVM global.
+    if (rust) {
+        if (auto* sections = module->getNamedMetadata("wasm.custom_sections")) {
+            for (auto* entry : sections->operands()) {
+                if (entry->getNumOperands() == 0) continue;
+                auto* name = llvm::dyn_cast_or_null<llvm::MDString>(entry->getOperand(0));
+                if (name && name->getString() == ".wros.no_memtag") {
+                    llvm::errs() << "for a Rust static use an export_name beginning __wros_no_memtag_\n";
+                    return 1;
+                }
+            }
+        }
     }
     llvm::json::Array suppressedFunctions;
     llvm::json::Array suppressedGlobals;
@@ -46,13 +61,21 @@ int main(int argc, char** argv) {
         for (auto& block : function) {
             for (auto& instruction : block) {
                 auto* call = llvm::dyn_cast<llvm::CallBase>(&instruction);
-                if (call && call->isInlineAsm()) {
-                    llvm::errs() << "inline assembly in TinyGo IR is unsupported\n";
+                if (call && call->isInlineAsm() &&
+                    (!rust || !llvm::cast<llvm::InlineAsm>(call->getCalledOperand())->getAsmString().empty())) {
+                    llvm::errs() << "inline assembly in guest IR is unsupported\n";
                     return 1;
                 }
             }
         }
         if (suppressMemtag(function) || function.hasFnAttribute(llvm::Attribute::DisableSanitizerInstrumentation)) {
+            if (rust) {
+                if (function.hasFnAttribute(llvm::Attribute::AlwaysInline)) {
+                    llvm::errs() << "an explicitly uninstrumented Rust function cannot be always_inline\n";
+                    return 1;
+                }
+                function.addFnAttr(llvm::Attribute::NoInline);
+            }
             suppressedFunctions.push_back(function.getName().str());
             function.removeFnAttr(llvm::Attribute::SanitizeMemTag);
             continue;
@@ -65,7 +88,8 @@ int main(int argc, char** argv) {
         auto metadata = global.hasSanitizerMetadata() ? global.getSanitizerMetadata()
                                                      : llvm::GlobalValue::SanitizerMetadata{};
         // setNoSanitizeMetadata records both address instrumentation exclusions.
-        if (suppressMemtag(global) || (!metadata.Memtag && metadata.NoAddress && metadata.NoHWAddress)) {
+        if (suppressMemtag(global) || (rust && global.getName().starts_with("__wros_no_memtag_")) ||
+            (!metadata.Memtag && metadata.NoAddress && metadata.NoHWAddress)) {
             suppressedGlobals.push_back(global.getName().str());
             metadata.Memtag = false;
             global.setSanitizerMetadata(metadata);

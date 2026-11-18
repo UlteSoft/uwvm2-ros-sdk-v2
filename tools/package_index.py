@@ -112,10 +112,15 @@ def main():
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/fortran").rglob("*") if p.is_file()],
     ]
     language_files["tinygo"] = [
-        "bin/wrtinygo", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
-        *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json", "tag.cpp",
+        "bin/wrtinygo", "tools/wasm/tag_ir.cpp", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
+        *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json",
             "scene/go.mod", "scene/scene_wros.go", "runtime/arch_tinygowasm.go", "runtime/gc_blocks.go",
             "runtime/runtime_tinygowasm.go", "runtime/runtime_wasip1.go", "runtime/wros_gc.go", "runtime/wros_gc.c")],
+    ]
+    language_files["rs"] = [
+        "bin/wrrust", "tools/wasm/tag_ir.cpp", "language/rust/scene.rs", "language/rust/toolchain-inputs.json",
+        "document/en/rust.md", "document/zh/rust.md",
+        *["third-parties/rust/" + name for name in ("rust-src-1.98.0.tar.xz", "COPYRIGHT", "LICENSE-APACHE", "LICENSE-MIT")],
     ]
     if set(language_files) != set(DEVELOPMENT):
         raise ValueError("developer payloads must match the revision hook")

@@ -121,7 +121,7 @@ def build(args, project, output, scratch):
     host_cxx = args.host_cxx or shutil.which("c++", path="/usr/bin:/bin")
     if not host_cxx:
         raise ValueError("host C++ compiler required to build the LLVM IR instrumenter")
-    run([Path(host_cxx).absolute(), "-O3", "-g", LANGUAGE / "tag.cpp",
+    run([Path(host_cxx).absolute(), "-O3", "-g", SDK / "tools/wasm/tag_ir.cpp",
          "-o", scratch / "instrument", *shlex.split(host_flags)])
     suppressions = json.loads(subprocess.check_output(
         [scratch / "instrument", "--mte" if args.mte else "--no-mte",
@@ -141,7 +141,7 @@ def build(args, project, output, scratch):
     if args.print_identity:
         files = {"go": go_view / "bin/go", "tinygo": tiny_view / "bin/tinygo",
                  "input_lock": LANGUAGE / "toolchain-inputs.json", "driver": Path(__file__),
-                 "instrumenter_source": LANGUAGE / "tag.cpp", "instrumenter": scratch / "instrument",
+                 "instrumenter_source": SDK / "tools/wasm/tag_ir.cpp", "instrumenter": scratch / "instrument",
                  "llvm_config": config, "linker": tool / "bin/wasm-ld", "host_cxx": Path(host_cxx),
                  "input_bitcode": scratch / "application.bc", "instrumented_bitcode": scratch / "tag.bc",
                  "guest_object": scratch / "application.o",

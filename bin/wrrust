@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""Build a Rust 2024 no_std crate as a single audited wasm32 reactor."""
+import argparse
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+
+SDK = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SDK / "install"))
+from artifacts import read_bounded
+from compiler import compiler_environment, digest, make_command
+from frontend import audit
+from guest_profile import Profile
+
+LANGUAGE = SDK / "language/rust"
+INSTRUMENTER = SDK / "tools/wasm/tag_ir.cpp"
+
+
+def rust_view(root, lock, work):
+    """Materialize only the locked rustc executable and host compiler libraries."""
+    view = work / "host"
+    for rel, expected in lock["host_files"].items():
+        original = (root / rel).resolve(strict=True)
+        if not original.is_relative_to(root):
+            raise ValueError("compiler component escapes the selected Rust prefix")
+        copied = view / rel
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(original, copied)
+        if digest(copied) != expected:
+            raise ValueError("mismatched pinned Rust compiler component: " + rel)
+        copied.chmod(0o755 if rel == "bin/rustc" else 0o644)
+    return view / "bin/rustc"
+
+
+def unpack_sources(lock, work):
+    vendor = SDK / "third-parties/rust" / lock["source"]["file"]
+    local = work / vendor.name
+    shutil.copyfile(vendor, local)
+    if digest(local) != lock["source"]["sha256"]:
+        raise ValueError("Rust source archive differs from the pinned release")
+    prefix = f"rust-src-{lock['rustc_release']}/rust-src/lib/rustlib/src/rust/library/"
+    destination = work / "library"
+    with tarfile.open(local, "r:xz") as archive:
+        for member in archive:
+            if not member.name.startswith(prefix):
+                continue
+            name = Path(member.name.removeprefix(prefix))
+            if name.is_absolute() or ".." in name.parts:
+                raise ValueError("unconfined Rust source entry")
+            if not name.parts or name.parts[0] not in ("core", "compiler-builtins", "portable-simd", "stdarch"):
+                continue
+            if member.isdir():
+                continue
+            if not member.isfile():
+                raise ValueError("unexpected Rust source entry type")
+            target = destination / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with archive.extractfile(member) as src, target.open("xb") as dst:
+                shutil.copyfileobj(src, dst)
+    return destination
+
+
+def compile_rust(options, source, output, work):
+    profile = Profile(32, mte=options.mte, exceptions="noeh")
+    tool = options.toolchain.resolve(strict=True)
+    host_cxx = options.host_cxx.resolve(strict=True)
+    receipts = [receipt.resolve(strict=True) for receipt in options.sysroots]
+    _, closure = make_command(tool, receipts, profile, "c", ["-c"], verify=True)
+    env = compiler_environment(tool)
+    env.update(HOME=str(work), TMPDIR=str(work), LC_ALL="C")
+    lock_path = LANGUAGE / "toolchain-inputs.json"
+    lock = json.loads(lock_path.read_text())
+    rustc = rust_view(options.rustroot.resolve(strict=True), lock, work)
+    library = unpack_sources(lock, work)
+    configuration = tool / "bin/llvm-config"
+    flags = subprocess.check_output([configuration, "--cxxflags", "--ldflags", "--libs", "irreader",
+                                    "bitwriter", "core", "--system-libs"], env=env, cwd=work, text=True)
+    marker = work / "instrument"
+    subprocess.run([host_cxx, "-O3", "-g", INSTRUMENTER, "-o", marker, *shlex.split(flags)],
+                   env=env, cwd=work, check=True)
+    sysroot = work / "rust-sysroot"
+    metadata = sysroot / "lib/rustlib/wasm32-wasip1/lib"
+    metadata.mkdir(parents=True)
+    # Turn off MIR inlining and LLVM's default optimization pipeline in rustc.
+    # The backend applies the selected instrumentation policy before LLVM -O.
+    common = [rustc, "--target", "wasm32-wasip1", "--edition=2024", "--crate-type=rlib", "--sysroot",
+              sysroot, "-C", "opt-level=3", "-C", "no-prepopulate-passes", "-Z", "mir-opt-level=0",
+              "-C", "panic=abort", "-C", "codegen-units=1", "-C", "debuginfo=2" if options.g else "debuginfo=0"]
+    rust_env = dict(env, RUSTC_BOOTSTRAP="1")
+    bindings = work / "wros_scene.rs"
+    bindings.write_text("#![no_std]\n" + (LANGUAGE / "scene.rs").read_text())
+    units = [
+        ("core", library / "core/src/lib.rs", []),
+        ("compiler_builtins", library / "compiler-builtins/compiler-builtins/src/lib.rs",
+         ["--cfg", 'feature="compiler-builtins"', "--cfg", 'feature="unmangled-names"']),
+        ("wros_scene", bindings, ["-Z", "allow-features="]),
+        ("wros_application", source, ["-Z", "allow-features=", "--extern", "wros_scene=" + str(metadata / "libwros_scene.rmeta")]),
+    ]
+    objects, stages = [], {}
+    for name, unit, flags in units:
+        bc = work / (name + ".bc")
+        tagged = work / (name + ".tagged.bc")
+        obj = work / (name + ".o")
+        emit = f"--emit=metadata={metadata / ('lib' + name + '.rmeta')},llvm-bc={bc}"
+        subprocess.run([*common, "--crate-name", name, *flags, emit, unit], cwd=work, env=rust_env, check=True)
+        selection = "--rust-mte" if profile.mte else "--rust-no-mte"
+        suppressed = json.loads(subprocess.check_output([marker, selection, bc, tagged], cwd=work, env=env))
+        args = ["-O" + options.O, *(["-g"] if options.g else []), "-c", str(tagged), "-o", str(obj)]
+        command, _ = make_command(tool, receipts, profile, "c", args)
+        subprocess.run(command, cwd=work, env=env, check=True)
+        objects.append(str(obj))
+        if options.print_identity:
+            stages[name] = dict(raw_ir=digest(bc), lowered_ir=digest(tagged), object_sha256=digest(obj),
+                                suppressions=suppressed)
+    module = work / "application.wasm"
+    args = ["-nostartfiles", "-Wl,--no-entry", "-Wl,--export=_start", *objects, "-o", str(module)]
+    command, _ = make_command(tool, receipts, profile, "c", args)
+    subprocess.run(command, env=env, cwd=work, check=True)
+    audit(read_bounded(module), profile)
+    if options.print_identity:
+        identity = dict(profile=profile.to_dict(), rustc_sha256=digest(rustc), runtime_source=lock["source"],
+                        runtime_commit=lock["commit"], closure_sha256=closure["closure_sha256"],
+                        compiler_sha256=closure["compiler_sha256"], host_cxx_sha256=digest(host_cxx),
+                        marker_source_sha256=digest(INSTRUMENTER), bindings_sha256=digest(bindings),
+                        stages=stages, module_sha256=digest(module))
+        print(json.dumps(identity, sort_keys=True))
+    os.replace(module, output)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("source", type=Path)
+    parser.add_argument("-o", "--output", type=Path, required=True)
+    parser.add_argument("--rustroot", type=Path, required=True)
+    parser.add_argument("--toolchain", type=Path, required=True)
+    parser.add_argument("--sysroots", action="append", type=Path, required=True)
+    parser.add_argument("--host-cxx", type=Path, default=Path("/usr/bin/c++"))
+    parser.add_argument("--target", choices=["wasm32"], default="wasm32")
+    parser.add_argument("--core", choices=["3.0"], default="3.0")
+    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("-O", choices=list("0123"), default="2")
+    parser.add_argument("-g", action="store_true")
+    parser.add_argument("--print-identity", action="store_true")
+    options = parser.parse_args()
+    try:
+        source = options.source.resolve(strict=True)
+        output = options.output.absolute()
+        if options.eh:
+            raise ValueError("wrrust currently requires panic=abort and a --no-eh sysroot")
+        if source.suffix != ".rs" or output.suffix != ".wasm" or output.resolve() == source:
+            raise ValueError("expected a Rust crate root (.rs) and a distinct .wasm output")
+        with tempfile.TemporaryDirectory(dir=output.parent) as temporary:
+            compile_rust(options, source, output, Path(temporary))
+    except (OSError, ValueError, KeyError, tarfile.TarError, subprocess.SubprocessError) as exc:
+        parser.exit(1, f"wrrust: {exc}\n")
+
+
+if __name__ == "__main__":
+    main()

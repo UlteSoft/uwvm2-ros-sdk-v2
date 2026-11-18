@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "path": "bin/wrrust",
+      "bytes": 8550,
+      "mode": 493,
+      "sha256": "6453e408f708d3028e068a076e45f4cf6a71006770f6d1b03e06fa93a5c2e02b"
+    },
+    {
+      "path": "document/en/rust.md",
+      "bytes": 3945,
+      "mode": 420,
+      "sha256": "3f8427bed9fd0bac69704b5c4301c5142561cd515e0ea2bd25686ed33c1b6b1f"
+    },
+    {
+      "path": "document/zh/rust.md",
+      "bytes": 3677,
+      "mode": 420,
+      "sha256": "3706c27090b63a9e47cb919ed2ac909b266f55d9037b318b41dcf8586b94ba48"
+    },
+    {
+      "path": "language/rs/xmake/adapter.lua",
+      "bytes": 1590,
+      "mode": 420,
+      "sha256": "09444681fa67065639f11c33d1370955011fbed7cfc277dbaca58864e9d79e88"
+    },
+    {
+      "path": "language/rust/scene.rs",
+      "bytes": 24457,
+      "mode": 420,
+      "sha256": "c2437e323084ae3980d3bff76328a0a2cbcb72ab91d7eb1901db9c2ccc6eee68"
+    },
+    {
+      "path": "language/rust/toolchain-inputs.json",
+      "bytes": 794,
+      "mode": 420,
+      "sha256": "20995e3ea3e193795f17b04bc7beeaa41cfc8b59773a36d3057c32ced71c0fcf"
+    },
+    {
+      "path": "third-parties/rust/COPYRIGHT",
+      "bytes": 1571,
+      "mode": 420,
+      "sha256": "172020dbfd5b53a226dfde77616190a48dcff519b0bc0e6deb91a8450782c4af"
+    },
+    {
+      "path": "third-parties/rust/LICENSE-APACHE",
+      "bytes": 9723,
+      "mode": 420,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "path": "third-parties/rust/LICENSE-MIT",
+      "bytes": 1068,
+      "mode": 420,
+      "sha256": "b71bd43a069ca0641a9ecfe585ca7b3c53b5cc1608f8b68321168698e28b5ea1"
+    },
+    {
+      "path": "third-parties/rust/rust-src-1.98.0.tar.xz",
+      "bytes": 5741336,
+      "mode": 420,
+      "sha256": "0e977492aed5ff137815bf9b4b796e8a85b80fb2367ed64e82d5c5839870f2bf"
+    },
+    {
+      "path": "tools/wasm/tag_ir.cpp",
+      "bytes": 5348,
+      "mode": 420,
+      "sha256": "6d90a61a93ad7dc7966fca955dc2cd3fcc460170bdc92b49253f4f4a2bdccd5c"
+    }
+  ]
+}
