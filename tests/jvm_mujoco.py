@@ -27,7 +27,7 @@ def main():
     java = args.language == "java"
     ext = "java" if java else "kt"
     controller = ROOT / "tests/mujoco/jvm" / ("Controller." + ext)
-    compiler = sdk / "bin" / ("wr" + args.language)
+    compiler = sdk / "bin" / {"java":"wrjava","kotlin":"wrkt"}[args.language]
 
     def compile_guest(wasm, width, deadline, mode, count, run):
         prefix = b"".join(suite.u64(1) for _ in range(6))
