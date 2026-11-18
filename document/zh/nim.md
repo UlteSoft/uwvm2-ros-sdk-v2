@@ -13,3 +13,5 @@ bin/wrnim app.nim --producer /absolute/build/wrnim-lower --toolchain "$WROS_TOOL
 默认使用经过审核的 MTE 配置。显式使用 `--legacy-mte` 可以测试待审核的带标签配置。`--no-mte` 需要匹配的无标签 sysroot。生成 wasm64 时同时指定 `--target wasm64` 和对应的 sysroot。使用 Xmake 时设置 `WROS_NIM_PRODUCER` 并指定一个入口文件，其他模块从入口导入。
 
 `import wros_scene` 提供通用 ROSv2 接口。参数使用固定宽度整数，通过 `wrAddress` 提交客体地址并指定线性内存索引。每项宿主操作仍由 VM 单独授权。可使用 `examples/nim/body.nim` 验证编译和 ROSv2 ABI 查询。SDK 拒绝 WASI Preview 2/3、组件模型接口，以及 Nim 构建清单中的外部原生对象和链接依赖。厂商原生驱动由部署器在 VM 进程外管理。
+
+站点管理员将已审核的 Nim 编译前端放在 `TOOLCHAIN/bin/wrnim-lower`。安装时通过 `--site-profile FILE` 指定配置。安装后执行 `bin/wrnim app.nim -o app.wasm --build-receipt` 即可使用已审核的编译器和 sysroot。xmake 项目读取同一份安装配置。

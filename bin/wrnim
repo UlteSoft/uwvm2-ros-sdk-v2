@@ -12,7 +12,6 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "install"), str(ROOT / "language/nim")]
 from build_producer import unpack
-from guest_profile import Profile
 from compiler import compiler_environment, make_command
 from frontend import audit
 from artifacts import read_bounded, strip_notes
@@ -36,23 +35,25 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("-o", "--output", required=True, type=Path)
-    parser.add_argument("--producer", type=Path, required=True, help="wrnim-lower built with language/nim/build_producer.py")
-    parser.add_argument("--toolchain", type=Path, required=True)
-    parser.add_argument("--sysroots", type=Path, required=True, action="append")
-    parser.add_argument("--target", choices=["wasm32", "wasm64"], default="wasm32")
-    parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("-O", choices=list("0123sz"), default="2")
-    parser.add_argument("-g", action="store_true")
+    parser.add_argument("--producer", type=Path, help="wrnim-lower built with language/nim/build_producer.py")
+    parser.add_argument("--toolchain", type=Path)
+    parser.add_argument("--sysroots", type=Path, action="append")
+    parser.add_argument("--target", choices=["wasm32", "wasm64"])
+    parser.add_argument("--eh", action=argparse.BooleanOptionalAction)
+    parser.add_argument("-O", choices=list("0123sz"))
+    parser.add_argument("-g", action="store_true", default=None)
     qualification.arguments(parser)
     opt = parser.parse_args()
     try:
-        source, producer = opt.source.resolve(strict=True), opt.producer.resolve(strict=True)
+        opt.core, opt.threads = "3.0", False
+        profile, selected = qualification.frontend_profile(opt, "nim")
+        source = opt.source.resolve(strict=True)
+        producer = (opt.producer or opt.toolchain / "bin/wrnim-lower").resolve(strict=True)
         if source.suffix != ".nim" or source in (opt.output.resolve(), producer):
             raise ValueError("expected a separate .nim source, producer and output")
         if opt.output.resolve() == producer:
             raise ValueError("output would replace the producer")
-        profile = Profile(int(opt.target[4:]), "3.0", False, opt.mte, "eh" if opt.eh else "noeh")
-        admission = qualification.admit("nim", opt, profile, {"producer": producer})
+        admission = qualification.admit("nim", opt, profile, {"producer": producer}, selected_release=selected)
         with tempfile.TemporaryDirectory(dir=opt.output.parent) as td:
             work = Path(td).resolve()
             unpack(work, only_library=True)

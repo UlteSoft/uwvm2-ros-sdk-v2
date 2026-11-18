@@ -8,21 +8,21 @@
     },
     {
       "path": "bin/wrnim",
-      "bytes": 4270,
+      "bytes": 4252,
       "mode": 493,
-      "sha256": "b3b6af4997ae3fd453d5a8d75fbedfa7eae94eee43a04cb6e82e8c4b71a9e1bc"
+      "sha256": "5ef86935a71e7916ed3608617b895f5681cce1579c9132e2a82ae795cf9136cf"
     },
     {
       "path": "document/en/nim.md",
-      "bytes": 1849,
+      "bytes": 2167,
       "mode": 420,
-      "sha256": "6fb39faa0ae4b601c13b3336693115aa466675121694cec397d320a8ae604052"
+      "sha256": "fbe1d1ce606e1277686b579a9ec8852041d00b2a64f6e804833f185ecf9f6fbd"
     },
     {
       "path": "document/zh/nim.md",
-      "bytes": 1618,
+      "bytes": 1910,
       "mode": 420,
-      "sha256": "2aec05c8e46193445a8135cb19d1aa1add61bcfe1ad97f59ebfa26924c86b196"
+      "sha256": "85f69b870672ff6c5b13d13a349029fc53789b31ab540e6847aca72b6580ab32"
     },
     {
       "path": "examples/nim/body.nim",
@@ -47,6 +47,12 @@
       "bytes": 3020,
       "mode": 420,
       "sha256": "ee7e917d356abe8c4770385ee26478e3d2a77799ba15e483eb9dadcd7396b4fb"
+    },
+    {
+      "path": "language/nim/check_site.py",
+      "bytes": 1101,
+      "mode": 420,
+      "sha256": "baefc75689f46174ccede65eb3dd6a4c37ca845ae7bf6d204cec3118b5052d76"
     },
     {
       "path": "language/nim/entry.c",
@@ -80,9 +86,9 @@
     },
     {
       "path": "language/nim/xmake/adapter.lua",
-      "bytes": 1391,
+      "bytes": 1466,
       "mode": 420,
-      "sha256": "fa7abe9bf80f867c5f3b20894dad93755adcc09c89f841d6936c1d76d3c5dc47"
+      "sha256": "add8fe17d97888f1737a9d02e41ba9b69bf69ff63f3f35ca05429c33e8255b5f"
     },
     {
       "path": "third-parties/nim/LICENSE",

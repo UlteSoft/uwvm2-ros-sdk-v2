@@ -11,10 +11,12 @@ end
 function build(target, request, sources)
     assert(#sources == 1, "Select one Nim application. Import its other modules in the entry file.")
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3", smallest = "s"}
-    local args = {sources[1], "--target", request.arch, "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
-                  "--sysroots", assert(request.sysroots), "--producer", assert(os.getenv("WROS_NIM_PRODUCER")),
-                  request.eh and "--eh" or "--no-eh", request.mte_flag,
-                  "-O" .. assert(levels[target:get("optimize") or "faster"])}
+    local args = table.join({sources[1], "--target", request.arch, request.eh and "--eh" or "--no-eh",
+                             request.mte_flag}, request.tool_args)
+    local producer = os.getenv("WROS_NIM_PRODUCER")
+    if producer then table.join2(args, {"--producer", producer}) end
+    local optimize = target:get("optimize")
+    if optimize or not request.site then table.insert(args, "-O" .. assert(levels[optimize or "faster"])) end
     for _, symbol in ipairs(table.wrap(target:get("symbols"))) do
         assert(symbol == "debug", "Unsupported Nim symbols mode")
         table.insert(args, "-g")

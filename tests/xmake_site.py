@@ -17,7 +17,7 @@ def main():
     sdk = args.sdk
     language = sdk.parent.name
     platform = sdk.parent.parent.name
-    if sdk.name != 'development' or language not in ('c', 'cpp', 'fortran', 'lua'):
+    if sdk.name != 'development' or language not in ('c', 'cpp', 'fortran', 'lua', 'nim'):
         parser.error('supply one installed development selection')
     out = args.output
     state = dict(complete=False, cgroup=cgroup_record(), language=language, platform=platform,
@@ -56,6 +56,10 @@ def main():
         script.append('target_end()')
         target('robot', 'binary', 'app.'+ext)
         script.extend(['add_deps("status")', 'set_wros_profile({build_receipt = true})'])
+    elif language == 'nim':
+        shutil.copyfile(sdk/'examples/nim/body.nim', out/'body.nim')
+        target('robot','binary','body.nim')
+        script.append('set_wros_profile({build_receipt = true})')
     elif language == 'fortran':
         shutil.copyfile(sdk/'examples/fortran/body.f90',out/'body.f90')
         target('robot','binary','body.f90')
