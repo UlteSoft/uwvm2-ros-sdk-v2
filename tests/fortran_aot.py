@@ -18,6 +18,7 @@ def main():
         parser.add_argument("--" + name, required=True, type=Path)
     parser.add_argument("--sysroots", required=True, action="append", type=Path)
     parser.add_argument("--no-mte", action="store_true", help="exercise the complete untagged profile")
+    parser.add_argument("--threads", action="store_true", help="validate the available wasm32 shared-memory profile")
     opt = parser.parse_args()
     tc, fc, marker, vm, work = (p.resolve() for p in
         (opt.toolchain, opt.flang, opt.mte_tool, opt.runtime, opt.output))
@@ -61,12 +62,14 @@ def main():
     decoded = run("inspect-attribute", [tc / "bin/llvm-dis", bitcode, "-o", "-"])
     if b"disable_sanitizer_instrumentation" not in decoded or b"sanitize_memtag" in decoded:
         raise RuntimeError("marker overrode an explicit LLVM sanitizer attribute")
-    for bits in (32, 64):
+    for bits in ((32,) if opt.threads else (32, 64)):
         for eh in ("eh", "noeh"):
             name = f"wasm{bits}-{eh}"
-            profile = Profile(bits, exceptions=eh, mte=not opt.no_mte)
+            profile = Profile(bits, exceptions=eh, mte=not opt.no_mte, threads=opt.threads)
             flags = ["--toolchain", tc, *(arg for receipt in receipts for arg in ("--sysroots", receipt)), "--target", f"wasm{bits}",
                      "--eh" if eh == "eh" else "--no-eh", "-O3", "-g"]
+            if opt.threads:
+                flags.append("--threads")
             if opt.no_mte:
                 flags.append("--no-mte")
             cmd = [sys.executable, ROOT / "bin/wrfortran", *flags, "--flang", fc, "--mte-tool", marker]
