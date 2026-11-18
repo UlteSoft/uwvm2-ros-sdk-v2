@@ -6,11 +6,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 from compiler import compiler_environment, make_command
-from guest_profile import Profile
 from imports import inspect
 import artifacts
 import qualification
-import local_release
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -61,31 +59,8 @@ def main(language):
                         ("c++17", "c++20", "c++23"))
     a = parser.parse_args()
     try:
-        site = local_release.site_config(ROOT)
-        selected_release = None
-        defaults = dict(target="wasm32", core="3.0", threads=False, O="2", g=False)
-        if site is not None and (a.toolchain is None or a.sysroots is None):
-            if not a.mte or a.legacy_mte:
-                raise ValueError("site defaults require strict MTE; provide explicit tools for another mode")
-            row = qualification.site_release(site, language)
-            selected_release = qualification.canonical(row)
-            a.toolchain = a.toolchain or Path(site["toolchain"])
-            a.sysroots = a.sysroots or list(map(Path, site["sysroots"]))
-            preset = row["profile"]
-            defaults.update(target="wasm" + str(preset["address_bits"]), core=preset["wasm_version"],
-                            eh=preset["exceptions"] == "eh", threads=preset["threads"],
-                            O=row["settings"]["optimization"], g=row["settings"]["debug"])
-        if a.toolchain is None or not a.sysroots:
-            parser.error("--toolchain and --sysroots are required without an installed site profile")
-        for key, value in defaults.items():
-            if getattr(a, key) is None:
-                setattr(a, key, value)
-        core = "1.0" if a.core == "mvp" else a.core
-        eh = a.eh if a.eh is not None else core == "3.0"
-        profile = Profile(int(a.target[4:]), core, a.threads, a.mte, "eh" if eh else "noeh")
-        admission = qualification.admit(language, a, profile)
-        if selected_release is not None and admission["release_sha256"] != selected_release:
-            raise ValueError("build inputs differ from the selected site release")
+        profile, selected = qualification.frontend_profile(a, language)
+        admission = qualification.admit(language, a, profile, selected_release=selected)
         if any(not re.fullmatch(r"[a-zA-Z_]\w*", n,re.ASCII) for n in a.export):
             raise ValueError("invalid Wasm export name")
         sources=[p.resolve(strict=True) for p in a.sources]

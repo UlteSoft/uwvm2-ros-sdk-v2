@@ -79,7 +79,7 @@ sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
 "$sdk/bin/wrf" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g "$sdk/examples/fortran/body.f90" -o robot.wasm
 ```
 
-### 使用站点预置的工具链安装 C 或 C++
+### 使用站点预置的工具链安装 C、C++ 或 Fortran
 
 若运营方已准备 LLVM 工具链、sysroot 和与所选 SDK 修订对应的签名资格声明，可在安装时指定其提供的站点配置。在 Bash 中将 `REV` 设置为可信的完整提交 ID 后，执行一条安装命令。
 
@@ -92,6 +92,19 @@ curl --fail --silent --show-error "https://raw.githubusercontent.com/UlteSoft/uw
 
 ```sh
 "$HOME/.local/share/wros-sdk/$REV/unitree/c/development/bin/wrc" main.c -o app.wasm
+```
+
+Fortran 的站点工具链还需提供经审核的 WebAssembly Flang 和匹配的 MTE 工具。签名声明须包含 Fortran 及其桥接层与运行库使用的 C、C++ 资格记录，三者对应相同的目标配置、构建选项和 VM。以下命令仅选择宇树平台的 Fortran 开发包。
+
+```sh
+curl --fail --silent --show-error "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | python3 -I -B - install --commit "$REV" --platform unitree --language fortran --site-profile /etc/wros/fortran-site.json
+```
+
+使用站点签署的默认选项编译已安装的示例。
+
+```sh
+sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
+"$sdk/bin/wrf" "$sdk/examples/fortran/body.f90" -o robot.wasm
 ```
 
 运营方提供的本地 JSON 包含下列字段。示例路径与摘要占位符需替换为经过审核的值。

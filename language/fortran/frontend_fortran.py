@@ -15,7 +15,6 @@ from imports import inspect
 from compiler import compiler_environment, make_command
 from prepare import require_marker
 from flang_identity import require_compiler
-from guest_profile import Profile
 import qualification
 KINDS = {"i32": ("int32_t", 4), "i64": ("int64_t", 8)}
 FORMS = {".f90", ".f95", ".f03", ".f08", ".f18"}
@@ -176,17 +175,17 @@ def guest_runtime(command, env, work, toolchain, descriptors, intrinsics):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("sources", nargs="+", type=Path, help="Fortran files in module dependency order")
-    parser.add_argument("--toolchain", required=True, type=Path)
-    parser.add_argument("--sysroots", required=True, action="append", type=Path)
+    parser.add_argument("--toolchain", type=Path)
+    parser.add_argument("--sysroots", action="append", type=Path)
     parser.add_argument("--flang", type=Path, help="WROS-patched Flang (default TOOLCHAIN/bin/flang)")
     parser.add_argument("--mte-tool", type=Path, help="prepared LLVM helper (default TOOLCHAIN/bin/wros-flang-mte)")
-    parser.add_argument("--target", choices=("wasm32", "wasm64"), default="wasm32")
-    parser.add_argument("-O", choices=list("0123sz"), default="3")
-    parser.add_argument("-g", action="store_true")
-    parser.add_argument("--core", choices=("mvp", "3.0"), default="3.0")
+    parser.add_argument("--target", choices=("wasm32", "wasm64"))
+    parser.add_argument("-O", choices=list("0123sz"))
+    parser.add_argument("-g", action="store_true", default=None)
+    parser.add_argument("--core", choices=("mvp", "3.0"))
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=None)
     qualification.arguments(parser)
-    parser.add_argument("-pthread", "--threads", action="store_true")
+    parser.add_argument("-pthread", "--threads", action="store_true", default=None)
     parser.add_argument("--static", action="store_true", help="emit a checked Wasm archive of the Fortran source units")
     parser.add_argument("--link-object", action="append", type=Path, default=[],
                         help="WROS-sealed guest object/archive for the selected profile")
@@ -206,16 +205,14 @@ def main():
             raise ValueError("a static library requires Fortran source files and a .a output without a deployment receipt")
         if output in sources or output in objects:
             raise ValueError("output aliases an input")
+        profile, selected = qualification.frontend_profile(opts, "fortran")
         toolchain = opts.toolchain.resolve(strict=True)
         receipts = [p.resolve(strict=True) for p in opts.sysroots]
         compiler = (opts.flang or toolchain / "bin/flang").resolve(strict=True)
         marker = (opts.mte_tool or toolchain / "bin/wros-flang-mte").resolve(strict=True)
         env = compiler_environment(toolchain)
-        bits = int(opts.target[4:])
-        eh = opts.core == "3.0" if opts.eh is None else opts.eh
-        profile = Profile(bits, wasm_version="1.0" if opts.core == "mvp" else "3.0",
-                          threads=opts.threads, mte=opts.mte, exceptions="eh" if eh else "noeh")
-        admission = qualification.admit("fortran", opts, profile, {"flang": compiler, "marker": marker})
+        admission = qualification.admit("fortran", opts, profile, {"flang": compiler, "marker": marker},
+                                        selected_release=selected)
         require_compiler(compiler)
         require_marker(marker, toolchain)
         with tempfile.TemporaryDirectory(dir=output.parent) as scratch:
@@ -240,7 +237,7 @@ def main():
             flags = ["--toolchain", toolchain, "--target", opts.target, "-O" + opts.O]
             for receipt in receipts:
                 flags.extend(("--sysroots", receipt))
-            flags.extend(("--core", opts.core, "--eh" if eh else "--no-eh", qualification.switch(opts)))
+            flags.extend(("--core", opts.core, "--eh" if opts.eh else "--no-eh", qualification.switch(opts)))
             if opts.threads:
                 flags.append("--threads")
             if opts.g:

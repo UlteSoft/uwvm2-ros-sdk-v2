@@ -80,7 +80,7 @@ sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
 "$sdk/bin/wrf" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g "$sdk/examples/fortran/body.f90" -o robot.wasm
 ```
 
-### Install C or C++ with a site-provisioned toolchain
+### Install C, C++ or Fortran with a site-provisioned toolchain
 
 When your operator has provisioned the LLVM toolchain, sysroot and signed release for your selected SDK revision, use the site profile they supply. For example, in Bash with a trusted full commit ID in `REV`, run this single installation command:
 
@@ -93,6 +93,19 @@ Build a C program using the installed compiler. The qualified row sets the defau
 
 ```sh
 "$HOME/.local/share/wros-sdk/$REV/unitree/c/development/bin/wrc" main.c -o app.wasm
+```
+
+For Fortran, the site toolchain also provides the reviewed WebAssembly Flang and its matching MTE helper. The signed statement must cover Fortran and the C and C++ drivers that build its bridge and runtime, all for the same profile, build settings and VM. Select only the Fortran development package for Unitree.
+
+```sh
+curl --fail --silent --show-error "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | python3 -I -B - install --commit "$REV" --platform unitree --language fortran --site-profile /etc/wros/fortran-site.json
+```
+
+Build the installed example with the signed site defaults.
+
+```sh
+sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
+"$sdk/bin/wrf" "$sdk/examples/fortran/body.f90" -o robot.wasm
 ```
 
 The operator supplies a local JSON file with these fields. Replace the example paths and digest placeholders with the reviewed values.

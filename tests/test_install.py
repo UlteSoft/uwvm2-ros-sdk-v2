@@ -40,6 +40,9 @@ class Installer(unittest.TestCase):
         source = Source(self.commit, root)
         with self.assertRaisesRegex(ValueError, "site verification failed"):
             install(source, "unitree", "c", self.prefix, [], site_profile=profile)
+        with self.assertRaisesRegex(ValueError, "site verification failed"):
+            install(source, "unitree", "fortran", self.prefix, [], site_profile=profile)
+        self.assertFalse((self.prefix / self.commit / "unitree/fortran/development").exists())
         destination = self.prefix / self.commit / "unitree/c/development"
         self.assertFalse(destination.exists())
         install(source, "unitree", "c", self.prefix, [])

@@ -173,28 +173,79 @@ def measure_inputs(language, options, profile, extra=None, sdk=ROOT, candidates=
     return inputs
 
 
-def site_release(site, language):
-    """Select exactly one externally signed row for this development language."""
-    rows = [row for row in local_release.verified_releases(site["trust"])
-            if isinstance(row, dict) and row.get("language") == language and complete_release(row)
-            and ("release_sha256" not in site or canonical(row) == site["release_sha256"])]
-    if len(rows) != 1:
+def select_site_release(rows, language, digest=None):
+    """Select exactly one externally verified row for the main language."""
+    matches = [row for row in rows if isinstance(row, dict) and row.get("language") == language
+               and complete_release(row) and (digest is None or canonical(row) == digest)]
+    if len(matches) != 1:
         raise ValueError("site profile must select one signed release for " + language)
-    return rows[0]
+    return matches[0]
 
 
 def check_site(data, sdk, language):
     from guest_profile import Profile
     site = local_release.parse_site(data)
-    row = site_release(site, language)
+    rows = local_release.verified_releases(site["trust"])
+    row = select_site_release(rows, language, site.get("release_sha256"))
     options = argparse.Namespace(toolchain=Path(site["toolchain"]), sysroots=list(map(Path, site["sysroots"])))
     profile = Profile(**{key: row["profile"][key] for key in Profile.__dataclass_fields__})
-    if measure_inputs(language, options, profile, sdk=sdk, candidates=[row]) != row["inputs"]:
+    extra = {}
+    if language == "fortran":
+        extra = {"flang": options.toolchain / "bin/flang", "marker": options.toolchain / "bin/wros-flang-mte"}
+        # Reuse wrf's source-recipe and code-generator checks on the host-side receipts.
+        sys.path.insert(0, str(sdk / "language/fortran"))
+        try:
+            from flang_identity import require_compiler
+            from prepare import require_marker
+            require_compiler(extra["flang"].resolve(strict=True))
+            require_marker(extra["marker"].resolve(strict=True), options.toolchain)
+        finally:
+            sys.path.remove(str(sdk / "language/fortran"))
+        # wrf compiles its C bridge and the upstream C++ runtime for every linked program.
+        for dependency in ("c", "cpp"):
+            candidates = [r for r in rows if isinstance(r, dict) and r.get("language") == dependency
+                          and r.get("profile") == row["profile"] and r.get("settings") == row["settings"]
+                          and complete_release(r)]
+            inputs = measure_inputs(dependency, options, profile, sdk=sdk, candidates=candidates)
+            matches = [r for r in candidates if r["inputs"] == inputs]
+            if len(matches) != 1 or matches[0]["vm_sha256"] != row["vm_sha256"]:
+                raise ValueError("site needs a matching signed " + dependency + " release for wrf")
+    if measure_inputs(language, options, profile, extra, sdk=sdk, candidates=[row]) != row["inputs"]:
         raise ValueError("site inputs differ from the signed release for this SDK")
     return canonical(row)
 
 
-def admit(language, options, profile, extra=None, sdk=ROOT):
+def frontend_profile(options, language, sdk=ROOT):
+    """Resolve explicit options and the exact signed defaults used by installed drivers."""
+    from guest_profile import Profile
+    site = local_release.site_config(sdk)
+    selected = None
+    defaults = dict(target="wasm32", core="3.0", threads=False, O="3" if language == "fortran" else "2", g=False)
+    if site is not None and (options.toolchain is None or options.sysroots is None):
+        if switch(options) != "--mte":
+            raise ValueError("site defaults require strict MTE; provide explicit tools for another mode")
+        row = select_site_release(local_release.verified_releases(site["trust"]), language, site.get("release_sha256"))
+        selected = canonical(row)
+        options.toolchain = options.toolchain or Path(site["toolchain"])
+        options.sysroots = options.sysroots or list(map(Path, site["sysroots"]))
+        preset = row["profile"]
+        defaults.update(target="wasm" + str(preset["address_bits"]),
+                        core="mvp" if preset["wasm_version"] == "1.0" else preset["wasm_version"],
+                        eh=preset["exceptions"] == "eh", threads=preset["threads"],
+                        O=row["settings"]["optimization"], g=row["settings"]["debug"])
+    if options.toolchain is None or not options.sysroots:
+        raise ValueError("--toolchain and --sysroots are required without an installed site profile")
+    for key, value in defaults.items():
+        if getattr(options, key) is None:
+            setattr(options, key, value)
+    core = "1.0" if options.core == "mvp" else options.core
+    if options.eh is None:
+        options.eh = core == "3.0"
+    profile = Profile(int(options.target[4:]), core, options.threads, options.mte, "eh" if options.eh else "noeh")
+    return profile, selected
+
+
+def admit(language, options, profile, extra=None, sdk=ROOT, selected_release=None):
     mode = switch(options)
     settings = {"optimization": str(getattr(options, "O", "3")),
                 "debug": bool(getattr(options, "g", language in ("lua", "tinygo")))}
@@ -217,6 +268,8 @@ def admit(language, options, profile, extra=None, sdk=ROOT):
     if len(matches) != 1:
         raise ValueError("missing or ambiguous qualification for the exact language runtime and VM")
     release = matches[0]
+    if selected_release is not None and canonical(release) != selected_release:
+        raise ValueError("build inputs differ from the selected site release")
     record.update(release_sha256=canonical(release), vm_sha256=release["vm_sha256"])
     return record
 

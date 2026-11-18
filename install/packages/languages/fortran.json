@@ -98,9 +98,9 @@
     },
     {
       "path": "language/fortran/frontend_fortran.py",
-      "bytes": 15184,
+      "bytes": 14968,
       "mode": 420,
-      "sha256": "7a7147f31d4fc7086fd4f1bc95a367dff0de1c2a3108d50f3a7a6be982f3ebde"
+      "sha256": "09a04fa13570fe05cb3e046185128867a237f1d376d68ec62fe8694f7a585cd3"
     },
     {
       "path": "language/fortran/mark_mte.cpp",
