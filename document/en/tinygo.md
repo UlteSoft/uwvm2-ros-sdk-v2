@@ -1,6 +1,6 @@
 # Build a TinyGo robot application
 
-`wrtinygo` compiles a local Go module into a single wasm32 command with a
+`wrtg` compiles a local Go module into a single wasm32 command with a
 conservative garbage collector. The development host is Linux x86-64. The
 guest uses Core 3.0, one linear memory and one execution thread. Its only
 public application entry point in the example below is `_start`. The VM
@@ -57,7 +57,7 @@ func main() {
 }
 EOF_GO
 
-"$SDK/bin/wrtinygo" . -o body.wasm \
+"$SDK/bin/wrtg" . -o body.wasm \
     --goroot "$GO_ROOT" --tinygoroot "$TINYGO_ROOT" \
     --toolchain "$WROS_LLVM" --sysroots "$SYSROOT_RECEIPT" \
     --host-cxx /usr/bin/c++ --print-identity

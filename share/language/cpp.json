@@ -1,4 +1,5 @@
 {
   "id": "cpp",
-  "development_package": true
+  "development_package": true,
+  "command_name": "wrcc"
 }

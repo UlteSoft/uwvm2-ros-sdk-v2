@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/ruby.json",
-      "bytes": 51,
+      "bytes": 77,
       "mode": 420,
-      "sha256": "ba1808e1b6123758b17210da255141021e94908b01199eb4f3d26a424afb1744"
+      "sha256": "21651d439bc3b6aad52016ef035faf1d5f4ffad662f346775bbd8843bb6a8d4a"
     }
   ]
 }

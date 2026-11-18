@@ -56,7 +56,7 @@ def candidate_command(command, enabled):
     args = list(map(str, command))
     if enabled and args:
         index = 1 if Path(args[0]).name.startswith("python") else 0
-        if (index < len(args) and Path(args[index]).name in {"wrc", "wrcc", "wrfortran", "wrtinygo", "wrrust", "wrlua"}
+        if (index < len(args) and Path(args[index]).name in {"wrc", "wrcc", "wrf", "wrtg", "wrrs", "wrlua"}
                 and "--no-mte" not in args and "--legacy-mte" not in args):
             if "--mte" in args:
                 args[args.index("--mte")] = "--legacy-mte"

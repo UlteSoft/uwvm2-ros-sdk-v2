@@ -41,7 +41,7 @@ def main():
         for tagged in (True, False):
             profile = Profile(bits, mte=tagged)
             app = work / (profile.identity + ".wasm")
-            build = [sys.executable, ROOT / "bin/wrfortran", "--toolchain", args.toolchain.resolve(),
+            build = [sys.executable, ROOT / "bin/wrf", "--toolchain", args.toolchain.resolve(),
                      "--sysroots", (args.sysroots if tagged else args.plain_sysroots).resolve(),
                      "--flang", args.flang.resolve(), "--mte-tool", args.mte_tool.resolve(),
                      "--target", f"wasm{bits}", "--mte" if tagged else "--no-mte", "-O3", "-g", source, "-o", app]

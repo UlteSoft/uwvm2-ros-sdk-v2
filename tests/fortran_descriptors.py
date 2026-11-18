@@ -54,7 +54,7 @@ def main():
         flags += ["--sysroots", path]
     obj, app = out/"check.o", out/"descriptor.wasm"
     run("observe", [ROOT/"bin/wrc", *flags, "-I", vendor/"flang/include", "-c", sources/"descriptor_status.c", "-o", obj])
-    run("build", [ROOT/"bin/wrfortran", *flags, *(["--flang", args.flang] if args.flang else []),
+    run("build", [ROOT/"bin/wrf", *flags, *(["--flang", args.flang] if args.flang else []),
                   "--link-object", obj, sources/"descriptor_status.f90", "-o", app])
     imports = inspect(app.read_bytes())
     if [(entry["module"], entry["name"]) for entry in imports] != [("uwvm_ros_v2", "abi")]:

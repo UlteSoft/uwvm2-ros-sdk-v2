@@ -1,4 +1,5 @@
 {
   "id": "fsharp",
-  "development_package": false
+  "development_package": false,
+  "command_name": "wrfs"
 }

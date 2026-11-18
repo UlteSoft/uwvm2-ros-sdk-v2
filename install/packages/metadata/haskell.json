@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/haskell.json",
-      "bytes": 54,
+      "bytes": 80,
       "mode": 420,
-      "sha256": "8a089ed6b4ce25ecb9ddf96667e1b4f9c1bef5708a3e4a6105ae3959d5c4692b"
+      "sha256": "a6b4c2294fbf5c1429972fef31eda2ad1d9a41cb1eeec0c526b4b23085b907b6"
     }
   ]
 }

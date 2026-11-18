@@ -40,9 +40,10 @@ def main():
         else: raise AssertionError("full language incorrectly registered")
         sdk,requested=retrieve(["--component","synchronous-aot"])
         other="java" if lang=="kotlin" else "kotlin"
-        assert "bin/wr"+lang in requested and "language/"+lang+"/xmake/adapter.lua" in requested
+        command = {"java": "wrjava", "kotlin": "wrkt"}
+        assert "bin/"+command[lang] in requested and "language/"+lang+"/xmake/adapter.lua" in requested
         assert not any(p.startswith(("platform/",)) and not p.startswith("platform/unitree/") for p in requested)
-        assert not any(p.startswith(("language/"+other+"/","examples/"+other+"/")) or p=="bin/wr"+other for p in requested)
+        assert not any(p.startswith(("language/"+other+"/","examples/"+other+"/")) or p=="bin/"+command[other] for p in requested)
         report["selections"][lang]=requested
         project=out/(lang+"-project");shutil.copytree(sdk/"examples"/lang/"synchronous-aot",project)
         env=dict(os.environ,TMPDIR=str(out/"tmp"),XMAKE_GLOBALDIR=str(out/(lang+"-xmake")),UWVM_ROS_SDK_ROOT=str(sdk),
@@ -74,7 +75,7 @@ def main():
         guest=next(project.glob("build/*/wasm32/*/robot.wasm"))
         assert {(x["module"],x["name"]) for x in inspect(guest.read_bytes())}=={("uwvm_ros_v2","abi")}
         prior=guest.read_bytes()
-        base=[sdk/"bin"/("wr"+lang),"--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),"--bundle",host,
+        base=[sdk/"bin"/command[lang],"--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),"--bundle",host,
               "--main-class","example.Main","-o",guest]
         for mode in ([],["--mte"],["--no-mte"]):
             run("unsigned-"+("-".join(mode) or "default"),[*base,*mode,project/("Main."+suffix)],False,b"no signed")
@@ -101,7 +102,7 @@ def main():
             assert guest.read_bytes()==prior
         entry=project/("GuardApplication."+suffix)
         guard=out/(lang+"-guard.wasm")
-        run("build-guard",[sdk/"bin"/("wr"+lang),"--legacy-mte","--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),
+        run("build-guard",[sdk/"bin"/command[lang],"--legacy-mte","--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),
                            "--bundle",host,"--main-class","example.GuardApplication","-o",guard,entry])
         ops=("capability.open","capability.close","guard.create","guard.trigger","guard.take")
         assert {(x["module"],x["name"]) for x in inspect(guard.read_bytes())}=={("uwvm_ros_v2",n) for n in ops}

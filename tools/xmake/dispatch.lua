@@ -80,7 +80,7 @@ function configure(target, entry)
     for _, key in ipairs({"links", "syslinks", "linkdirs", "cxflags", "cflags", "cxxflags", "ldflags", "shflags", "frameworks", "packages"}) do
         local setting = target:get(key)
         -- Xmake's rust.build load hook adds this flag to binary targets.
-        -- wrrust selects its own crate type and never forwards these flags.
+        -- wrrs selects its own crate type and never forwards these flags.
         local rust_binary = language == "rs" and key == "ldflags" and table.wrap(setting) or {}
         assert(not setting or (#rust_binary == 1 and rust_binary[1] == "--crate-type=bin"),
                "Unsupported guest target setting: " .. key)

@@ -100,7 +100,7 @@ def compile_guest(opts, language, work):
     return 0
 
 def main(language):
-    parser=argparse.ArgumentParser(prog="wr"+language,description=__doc__)
+    parser=argparse.ArgumentParser(description=__doc__)
     for name in ("toolchain","sysroots","bundle"):
         parser.add_argument("--"+name,required=True,type=Path)
     parser.add_argument("--work",type=Path,help="keep compiler logs in a new directory")

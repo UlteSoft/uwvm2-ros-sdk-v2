@@ -30,11 +30,11 @@ SDK_INPUTS = {
     "c": ("bin/wrc", "include/wros/scene.h"),
     "cpp": ("bin/wrcc", "include/wros/scene.h"),
     "lua": ("bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp", "language/lua/scene.hpp", "third-parties/lua"),
-    "fortran": ("bin/wrfortran", "bin/wrcc", "bin/wrc", "include/wros/scene.h", "language/fortran", "third-parties/fortran"),
-    "rs": ("bin/wrrust", "tools/wasm/tag_ir.cpp", "language/rust", "third-parties/rust"),
+    "fortran": ("bin/wrf", "bin/wrcc", "bin/wrc", "include/wros/scene.h", "language/fortran", "third-parties/fortran"),
+    "rs": ("bin/wrrs", "tools/wasm/tag_ir.cpp", "language/rust", "third-parties/rust"),
     "objectc": ("bin/wrobjc", "include/wros/scene.h", "language/objectc", "third-parties/objectc"),
     "nim": ("bin/wrnim", "bin/wrc", "language/nim", "include/wros/scene.h", "third-parties/nim/nim-2.2.4-lib.tar.xz"),
-    "tinygo": ("bin/wrtinygo", "tools/wasm/tag_ir.cpp", "language/tinygo"),
+    "tinygo": ("bin/wrtg", "tools/wasm/tag_ir.cpp", "language/tinygo"),
 }
 EXTERNAL = {"objectc": {"objc_frontend", "objc_runtime", "objc_archive"}, "nim": {"producer"}, "c": set(), "cpp": set(), "lua": set(), "fortran": {"flang", "marker"},
             "rs": {"rustc", "host_cxx"}, "tinygo": {"go", "tinygo", "host_cxx"}}

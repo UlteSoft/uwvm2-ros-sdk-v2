@@ -8,9 +8,9 @@
     },
     {
       "path": "document/en/memory-qualification.md",
-      "bytes": 8709,
+      "bytes": 8697,
       "mode": 420,
-      "sha256": "5d4cc2a13ab0b32ed5afdcc5183e57ed4625c25ad33c9ec0fd6b1ebc6bafd6c3"
+      "sha256": "c1013479c5b25f3196d1c445effd47cefacbd39d8aa1bb0371f0247864f8bb40"
     },
     {
       "path": "document/en/memtag.md",
@@ -20,9 +20,9 @@
     },
     {
       "path": "document/zh/memory-qualification.md",
-      "bytes": 7669,
+      "bytes": 7657,
       "mode": 420,
-      "sha256": "39ed996f029fa385aeefc7b20038dd4b6b4655d6f82f6b656ed50dcaea309fde"
+      "sha256": "d4a48da7f5a2a4904c41d9fc71a2930b6d8dfac2fee2b84c600128e236409f57"
     },
     {
       "path": "document/zh/memtag.md",
@@ -74,9 +74,9 @@
     },
     {
       "path": "install/qualification.py",
-      "bytes": 15240,
+      "bytes": 15228,
       "mode": 420,
-      "sha256": "1783ff2dfc460e91a60f8ebd66423bb7a1c570b86f18b81bb8d6f89a6004d40f"
+      "sha256": "d8e63099cec5bf1af4b3cee32a11300288a641999600374800da5666fae45cd4"
     },
     {
       "path": "share/qualification/memory-neighbors.json",

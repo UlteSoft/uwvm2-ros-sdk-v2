@@ -1,6 +1,7 @@
 {
   "id": "kotlin",
   "development_package": false,
+  "command_name": "wrkt",
   "optional_components": [
     "synchronous-aot"
   ]

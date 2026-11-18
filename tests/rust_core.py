@@ -22,7 +22,7 @@ def main():
     receipt = dict(cgroup=cgroup_record(), complete=False, cases=[], modules={})
     work.mkdir(parents=True, exist_ok=False)
     os.environ["TMPDIR"] = str(work)
-    app = sdk / "bin/wrrust"
+    app = sdk / "bin/wrrs"
     inputs = [Path(__file__), source, app, runtime, args.sysroots, args.plain_sysroots,
               rust / "bin/rustc", tool / "bin/clang", sdk / "language/rust/toolchain-inputs.json", sdk / "tools/wasm/tag_ir.cpp"]
     receipt["inputs"] = {str(p): sha(p) for p in inputs}

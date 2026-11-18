@@ -1,5 +1,5 @@
 function describe()
-    return {id = "kotlin", program = "wrkotlin", extensions = {".kt"}}
+    return {id = "kotlin", program = "wrkt", extensions = {".kt"}}
 end
 
 function validate(target, request)

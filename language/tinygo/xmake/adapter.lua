@@ -1,5 +1,5 @@
 function describe()
-    return {id = "tinygo", program = "wrtinygo", extensions = {".mod"}}
+    return {id = "tinygo", program = "wrtg", extensions = {".mod"}}
 end
 
 function validate(target, req)

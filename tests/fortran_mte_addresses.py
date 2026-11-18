@@ -66,7 +66,7 @@ def main():
             obj = work / (name + ".o")
             module = work / (name + ".wasm")
             run(name + "-c", [ROOT / "bin/wrc", *flags, "-c", fixture / "address.c", "-o", obj])
-            run(name + "-fortran", [ROOT / "bin/wrfortran", *flags, "--flang", args.flang, "--mte-tool", marker,
+            run(name + "-fortran", [ROOT / "bin/wrf", *flags, "--flang", args.flang, "--mte-tool", marker,
                                     fixture / "address.f90", "--link-object", obj, "-o", module])
             imports = inspect(module.read_bytes())
             if sorted((i["module"], i["name"]) for i in imports) != [

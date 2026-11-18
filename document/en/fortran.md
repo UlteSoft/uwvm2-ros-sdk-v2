@@ -1,6 +1,6 @@
 # Developing a Fortran Wasm application
 
-`bin/wrfortran` compiles a Fortran `PROGRAM` to a Wasm executable. It supports fixed-form and free-form input, ordered Fortran modules, ISO C interoperability and the numerical procedures linked from the vendored Flang runtime. The program starts at `_start` in its own guest memory. Its compute runtime supports allocatable arrays, pointer allocation and ISO C descriptors. General external Fortran I/O and coarray programs still require additional runtime support.
+`bin/wrf` compiles a Fortran `PROGRAM` to a Wasm executable. It supports fixed-form and free-form input, ordered Fortran modules, ISO C interoperability and the numerical procedures linked from the vendored Flang runtime. The program starts at `_start` in its own guest memory. Its compute runtime supports allocatable arrays, pointer allocation and ISO C descriptors. General external Fortran I/O and coarray programs still require additional runtime support.
 
 ## Prepare the host tools
 
@@ -28,7 +28,7 @@ end program
 ```
 
 ```sh
-bin/wrfortran --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" \
+bin/wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" \
   --target wasm32 -O3 -g application.f90 -o application.wasm
 ```
 

@@ -1,6 +1,6 @@
 # Choosing a memory-tagging profile
 
-`wrc`, `wrcc`, `wrfortran`, `wrlua`, `wrrust`, and `wrtinygo` use the same release index. The default requires a reviewed compiler, target library closure, language runtime, and matching VM for the selected profile and optimization settings. Each pair of live independent managed objects with at most 64 bytes between their extents must have different nonzero tags. A release review covers automatic storage, static storage, and the supported allocation paths. A threaded profile additionally requires per-thread storage and concurrency evidence.
+`wrc`, `wrcc`, `wrf`, `wrlua`, `wrrs`, and `wrtg` use the same release index. The default requires a reviewed compiler, target library closure, language runtime, and matching VM for the selected profile and optimization settings. Each pair of live independent managed objects with at most 64 bytes between their extents must have different nonzero tags. A release review covers automatic storage, static storage, and the supported allocation paths. A threaded profile additionally requires per-thread storage and concurrency evidence.
 
 | Compiler option | xmake field | Build behavior |
 | --- | --- | --- |

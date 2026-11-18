@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/swift.json",
-      "bytes": 52,
+      "bytes": 81,
       "mode": 420,
-      "sha256": "251774943d543a15037faf5ae7e216ccd65cd3b8f754527afbc0aae549f1dd15"
+      "sha256": "9331694ce3a4f83098221b0be6e01b3fcadf2afa8b7673c5d7997d4cc1a3883d"
     }
   ]
 }

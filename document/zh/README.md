@@ -9,6 +9,25 @@
 
 [用 xmake 构建和运行 Wasm 项目](xmake.md) · [xmake API 索引](xmake-api-index.md)
 
+## 编译器命令名
+
+公开编译命令统一为 `wr` 加语言简写。安装和 Xmake 配置使用语言 ID，实际编译时从所选安装目录的 `bin` 中调用对应命令。
+
+| 语言 | 安装 ID | 编译命令 |
+| --- | --- | --- |
+| C | `c` | `wrc` |
+| C++ | `cpp` | `wrcc` |
+| Objective-C | `objectc` | `wrobjc` |
+| Fortran | `fortran` | `wrf` |
+| Rust | `rs` | `wrrs` |
+| TinyGo | `tinygo` | `wrtg` |
+| Nim | `nim` | `wrnim` |
+| Lua | `lua` | `wrlua` |
+| Java | `java` | `wrjava` |
+| Kotlin | `kotlin` | `wrkt` |
+
+Java 和 Kotlin 可通过 `synchronous-aot` 组件安装。C# 的命令名预留为 `wrcs`。可用 `revision-help` 查询指定提交的命令名，再用 `plan` 核实该提交实际提供的组件。静态归档工具使用 `wrar`。已固定到旧提交的安装继续使用对应提交的命令。
+
 ## 按 commit 安装
 
 使用 Python 3.11 或更高版本。REV 必须是可信的 40 位小写 Git commit。固定入口可用于后来遵循同一安装协议的版本。用普通开发用户执行脚本。

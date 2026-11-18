@@ -16,7 +16,7 @@ export WROS_JVM_BUNDLE="$BUILD_DIR/java-host"
 Kotlin 用户将 `java` 换成 `kotlin`。Java 选择 29 个 JAR，Kotlin 选择 36 个。已有的开发宿主包也可以按 `--jdk`、`--system-libs`、`--jars` 三个目录提供离线输入。
 
 ```sh
-"$UWVM_ROS_SDK_ROOT/bin/wrkotlin" --legacy-mte --main-class example.Main \
+"$UWVM_ROS_SDK_ROOT/bin/wrkt" --legacy-mte --main-class example.Main \
   --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --bundle "$WROS_JVM_BUNDLE" \
   --work "$BUILD_DIR/kotlin-log" -o "$BUILD_DIR/body.wasm" Main.kt
 ```

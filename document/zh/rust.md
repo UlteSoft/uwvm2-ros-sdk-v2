@@ -1,6 +1,6 @@
 # Rust core 应用开发
 
-`wrrust` 将一个 Rust 2024 crate 根文件及其模块编译为 wasm32 reactor。当前配置使用 Wasm Core 3.0、单线程和 `panic=abort`，提供 `core`、编译器内建库和 SDK 的 ROS 原始导入。依赖 Cargo 包解析、过程宏、`alloc`、`std`、异常展开或 wasm64 的程序需要另外的运行库配置，当前安装包尚未提供。
+`wrrs` 将一个 Rust 2024 crate 根文件及其模块编译为 wasm32 reactor。当前配置使用 Wasm Core 3.0、单线程和 `panic=abort`，提供 `core`、编译器内建库和 SDK 的 ROS 原始导入。依赖 Cargo 包解析、过程宏、`alloc`、`std`、异常展开或 wasm64 的程序需要另外的运行库配置，当前安装包尚未提供。
 
 ## 安装与编译
 
@@ -9,7 +9,7 @@
 ```sh
 python3 install/bootstrap.py install --commit "$REV" --platform unitree --language rs --prefix "$PREFIX"
 SDK="$PREFIX/$REV/unitree/rs/development"
-"$SDK/bin/wrrust" app.rs --rustroot "$WROS_RUSTROOT" --toolchain "$WROS_TOOLCHAIN" \
+"$SDK/bin/wrrs" app.rs --rustroot "$WROS_RUSTROOT" --toolchain "$WROS_TOOLCHAIN" \
   --sysroots "$WROS_SYSROOTS" --no-eh -O3 -g -o robot.wasm
 ```
 

@@ -13,22 +13,22 @@
       "sha256": "0705fff5e24d24cd248ad8701df16ac7a5737c50c881f4770849480572c91c96"
     },
     {
-      "path": "bin/wrfortran",
+      "path": "bin/wrf",
       "bytes": 202,
       "mode": 493,
       "sha256": "8f122dc20f53f0b5a5949c604f906e9c8625871401ad3b4b45d4ee9d0ddc30dd"
     },
     {
       "path": "document/en/fortran.md",
-      "bytes": 9667,
+      "bytes": 9655,
       "mode": 420,
-      "sha256": "19509e967638eb015be7d25665dd490caeff4730eaf85d119af4dd3d7f342e8f"
+      "sha256": "fa2601f326d86839e11667dfb237749ee27e3bccf38a126bfc98580488650253"
     },
     {
       "path": "document/zh/fortran.md",
-      "bytes": 8558,
+      "bytes": 8546,
       "mode": 420,
-      "sha256": "a34252f6608bb8ff206d6dfd473d48cfc716bd2df9e66d8d16f5d999236910a9"
+      "sha256": "a43ce7798b5ecd17049ae378222ae57aa2e71f032a67684450192c32a7023eef"
     },
     {
       "path": "examples/fortran/body.f90",
@@ -74,15 +74,15 @@
     },
     {
       "path": "language/fortran/frontend_fortran.py",
-      "bytes": 11493,
+      "bytes": 11487,
       "mode": 420,
-      "sha256": "78dee3efd3ce29460bae2339b57ef52c3706fe27d88b20ae76e395e7dc27614f"
+      "sha256": "3b5057962196f371046fa51d7a114383b0ce19b5df104e43687e77daf10c8723"
     },
     {
       "path": "language/fortran/mark_mte.cpp",
-      "bytes": 3929,
+      "bytes": 3923,
       "mode": 420,
-      "sha256": "73dbaa5d4276c91636b0a785d466bd28dca45f7476b4d145b5827eee5dd230ab"
+      "sha256": "91c14177b4c5ca051372b43bd6574209eeb73c930cd1c498bca081da4392e0f3"
     },
     {
       "path": "language/fortran/prepare.py",
@@ -92,9 +92,9 @@
     },
     {
       "path": "language/fortran/xmake/adapter.lua",
-      "bytes": 1852,
+      "bytes": 1846,
       "mode": 420,
-      "sha256": "1f0f0a08132dc811a88206033d0628c8a9e3a2930c09164775d398e131d887fa"
+      "sha256": "32fe00e5298dd4fe870da842ab88b66a83fc37c87682642af1674365b77467f4"
     },
     {
       "path": "third-parties/fortran/LICENSE.TXT",

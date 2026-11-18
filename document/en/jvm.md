@@ -21,7 +21,7 @@ Select `kotlin` to provision the Kotlin compiler. Java requires 29 pinned JARs a
   --work "$BUILD_DIR/java-log" -o "$BUILD_DIR/body.wasm" Main.java
 ```
 
-Kotlin uses `wrkotlin` and `.kt` sources. `--main-class` selects the JVM class containing `static void main(String[])`. Kotlin can name the class with `@file:JvmName("Main")`. Optional `--work` keeps command logs, hashes and final imports in a new directory. Compilation fixes `-O3 -g`, single-thread Core 3.0, the wasm32 EH sysroot, 16 MiB of Java allocations and 256 MiB maximum linear memory. Application bytecode goes through a closed call and instruction check before TeaVM. The ELF host compiler never becomes a guest artifact.
+Kotlin uses `wrkt` and `.kt` sources. `--main-class` selects the JVM class containing `static void main(String[])`. Kotlin can name the class with `@file:JvmName("Main")`. Optional `--work` keeps command logs, hashes and final imports in a new directory. Compilation fixes `-O3 -g`, single-thread Core 3.0, the wasm32 EH sysroot, 16 MiB of Java allocations and 256 MiB maximum linear memory. Application bytecode goes through a closed call and instruction check before TeaVM. The ELF host compiler never becomes a guest artifact.
 
 Use `examples/<language>/synchronous-aot/xmake.lua` with `UWVM_ROS_SDK_ROOT` pointing at the selected install and the three build-input variables above. `set_wros_jvm_main("example.Main")` names the entry class, `set_language` selects the frontend and `add_files` selects source. The entry declaration applies to JVM applications. Xmake requires `set_optimize("fastest")`, `set_symbols("debug")`, `mte = "legacy"`, Core 3.0 and the single-thread EH profile.
 

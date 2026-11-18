@@ -1,4 +1,5 @@
 {
   "id": "fortran",
-  "development_package": true
+  "development_package": true,
+  "command_name": "wrf"
 }

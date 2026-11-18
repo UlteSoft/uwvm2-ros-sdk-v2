@@ -1,7 +1,7 @@
 {
   "files": [
     {
-      "path": "bin/wrkotlin",
+      "path": "bin/wrkt",
       "bytes": 201,
       "mode": 493,
       "sha256": "d4d90b90bd470277f545a63a252019c140691f9d42afaca5f1976361f54593e7"
@@ -32,9 +32,9 @@
     },
     {
       "path": "language/kotlin/xmake/adapter.lua",
-      "bytes": 1320,
+      "bytes": 1316,
       "mode": 420,
-      "sha256": "3ceeb869028feea71c3b4f3bdba1e4c41e48667346cc0d9eb5f26476016809c2"
+      "sha256": "c735a0193b7cafad24d1e1ae547cb4b85ce18e04185970ca0098dd8822534a28"
     }
   ]
 }

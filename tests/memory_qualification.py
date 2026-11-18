@@ -181,10 +181,10 @@ def main():
     fr = work/"test.f90"
     fr.write_text("program t\nend program\n")
     for frontend, inputs in (
-        ("wrc",[src]), ("wrcc",[src]), ("wrlua",[src]), ("wrrust",[src.with_suffix(".rs"),"--rustroot",a.rustroot]),
-        ("wrfortran",[fr,"--flang",a.flang,"--mte-tool",a.mte_tool]),
-        ("wrtinygo",[work,"--goroot",a.goroot,"--tinygoroot",a.tinygoroot])):
-        if frontend=="wrrust": src.with_suffix(".rs").write_text("// tiny empty crate\n")
+        ("wrc",[src]), ("wrcc",[src]), ("wrlua",[src]), ("wrrs",[src.with_suffix(".rs"),"--rustroot",a.rustroot]),
+        ("wrf",[fr,"--flang",a.flang,"--mte-tool",a.mte_tool]),
+        ("wrtg",[work,"--goroot",a.goroot,"--tinygoroot",a.tinygoroot])):
+        if frontend=="wrrs": src.with_suffix(".rs").write_text("// tiny empty crate\n")
         out=work/(frontend+".wasm")
         command(frontend+"-legacy-producer-default-denied",[sys.executable,ROOT/"bin"/frontend,*inputs,*common,"-o",out],
                 "reviewed strict-neighbor release")

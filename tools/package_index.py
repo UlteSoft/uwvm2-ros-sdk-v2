@@ -9,7 +9,9 @@ import textwrap
 
 ROOT = Path(__file__).resolve().parents[1]
 HOOK = ROOT / "install/revision.py"
-DEVELOPMENT = runpy.run_path(str(HOOK))["DEVELOPMENT"]
+hook = runpy.run_path(str(HOOK))
+DEVELOPMENT = hook["DEVELOPMENT"]
+COMPILER_COMMANDS = hook["COMPILER_COMMANDS"]
 
 
 def write(path, text):
@@ -87,6 +89,8 @@ def main():
     for language in registry["languages"]:
         path = "share/language/" + language + ".json"
         metadata = {"id": language, "development_package": language in DEVELOPMENT}
+        if language in COMPILER_COMMANDS:
+            metadata["command_name"] = COMPILER_COMMANDS[language]
         if language in ("java","kotlin"):
             metadata["optional_components"] = ["synchronous-aot"]
         write_json(path, metadata)
@@ -97,7 +101,7 @@ def main():
     package("jvm/synchronous", [*shared_jvm, "include/wros/scene.h", "document/en/jvm.md", "document/zh/jvm.md"])
     for language in ("java", "kotlin"):
         examples = sorted((ROOT / "examples" / language / "synchronous-aot").iterdir())
-        package("jvm/" + language, ["bin/wr" + language, f"language/{language}/xmake/adapter.lua",
+        package("jvm/" + language, ["bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",
                                    f"language/{language}/host-inputs.json", *(p.relative_to(ROOT).as_posix() for p in examples)])
     policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py", "qualification.py", "local_release.py")]
     package("frontend", [*policy, "share/qualification/memory-neighbors.json", "bin/wrar", "install/archiver.py", "document/en/memtag.md", "document/zh/memtag.md",
@@ -128,20 +132,20 @@ def main():
     ]
     language_files["fortran"] = [
         "examples/fortran/body.f90", "examples/fortran/xmake.lua",
-        "bin/wrfortran", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
+        "bin/wrf", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
         "document/en/fortran.md", "document/zh/fortran.md",
         *["language/fortran/" + name for name in ("build_flang.py", "compute_platform.cpp", "entry.c", "flang_identity.py",
                                                    "frontend_fortran.py", "mark_mte.cpp", "prepare.py")],
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/fortran").rglob("*") if p.is_file()],
     ]
     language_files["tinygo"] = [
-        "bin/wrtinygo", "tools/wasm/tag_ir.cpp", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
+        "bin/wrtg", "tools/wasm/tag_ir.cpp", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
         *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json",
             "scene/go.mod", "scene/scene_wros.go", "runtime/arch_tinygowasm.go", "runtime/gc_blocks.go",
             "runtime/runtime_tinygowasm.go", "runtime/runtime_wasip1.go", "runtime/wros_gc.go", "runtime/wros_gc.c")],
     ]
     language_files["rs"] = [
-        "bin/wrrust", "tools/wasm/tag_ir.cpp", "language/rust/scene.rs", "language/rust/toolchain-inputs.json",
+        "bin/wrrs", "tools/wasm/tag_ir.cpp", "language/rust/scene.rs", "language/rust/toolchain-inputs.json",
         "document/en/rust.md", "document/zh/rust.md",
         *["third-parties/rust/" + name for name in ("rust-src-1.98.0.tar.xz", "COPYRIGHT", "LICENSE-APACHE", "LICENSE-MIT")],
     ]

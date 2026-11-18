@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/tinygo.json",
-      "bytes": 52,
+      "bytes": 78,
       "mode": 420,
-      "sha256": "43bbd8c2c6a98b191282a12829b1a450c63ef64f576696d658e3582e375f6ea0"
+      "sha256": "82ab58d73e27e40b313b970f9e8e78d0860889e0b3ecce2d94d1d06063795abb"
     }
   ]
 }

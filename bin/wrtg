@@ -180,7 +180,7 @@ def main():
         output = args.output.absolute()
         if not (project / "go.mod").is_file() or output.suffix != ".wasm":
             raise ValueError("expected a Go module directory and a .wasm output")
-        with tempfile.TemporaryDirectory(dir=output.parent, prefix=".wrtinygo-") as name:
+        with tempfile.TemporaryDirectory(dir=output.parent, prefix=".wrtg-") as name:
             build(args, project, output, Path(name))
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         parser.exit(1, f"{parser.prog}: {error}\n")

@@ -38,7 +38,7 @@ def main():
     if args.eh:
         inputs.extend(unwind_sources)
     if args.goroot:
-        inputs.extend([go_source, ROOT / "bin/wrtinygo", ROOT / "language/tinygo/runtime/wros_gc.c"])
+        inputs.extend([go_source, ROOT / "bin/wrtg", ROOT / "language/tinygo/runtime/wros_gc.c"])
     receipt["inputs"] = {str(p): sha(p) for p in inputs}
 
     def save():
@@ -124,7 +124,7 @@ def main():
         (project / "go.mod").write_text("module wros.local/neighbors\n\ngo 1.24\n")
         (project / "main.go").write_bytes(go_source.read_bytes())
         module = work / "tinygo.wasm"
-        run("tinygo-compile", [ROOT / "bin/wrtinygo", project, "--eh" if args.eh else "--no-eh", "--sysroots", args.sysroots, "--toolchain", args.toolchain, "--goroot", args.goroot.resolve(),
+        run("tinygo-compile", [ROOT / "bin/wrtg", project, "--eh" if args.eh else "--no-eh", "--sysroots", args.sysroots, "--toolchain", args.toolchain, "--goroot", args.goroot.resolve(),
                                "--tinygoroot", args.tinygoroot.resolve(), "-o", module])
         execute("tinygo", 32, module)
     receipt["complete"] = all(sha(Path(p)) == d for p, d in receipt["inputs"].items())

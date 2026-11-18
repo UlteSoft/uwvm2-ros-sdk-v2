@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/cpp.json",
-      "bytes": 49,
+      "bytes": 75,
       "mode": 420,
-      "sha256": "6250bbdc9bc2dd3f32df1163209f790b90b31d8214630ab667139274519d8af0"
+      "sha256": "41deb301b774f3fbe26c5ee73a28f8077055b2392543471ba4eb0096b12e6ebf"
     }
   ]
 }

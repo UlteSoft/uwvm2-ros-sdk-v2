@@ -1,6 +1,7 @@
 {
   "id": "java",
   "development_package": false,
+  "command_name": "wrjava",
   "optional_components": [
     "synchronous-aot"
   ]

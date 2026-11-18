@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/moonbit.json",
-      "bytes": 54,
+      "bytes": 81,
       "mode": 420,
-      "sha256": "6551fa13f0188f241159774b74773cc379e86fab338f3ea428f56ca89702ad71"
+      "sha256": "f2cb9667724a9f5d6949b14185884ae769b0e61b7b846e7f34210f065ce0b603"
     }
   ]
 }

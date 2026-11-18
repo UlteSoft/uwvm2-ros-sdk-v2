@@ -6,6 +6,18 @@ import json
 BINDINGS = {"c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
 DEVELOPMENT = ("c", "cpp", "fortran", "lua", "objectc", "rs", "tinygo", "nim")
 
+# Command spellings are part of the per-commit SDK contract. A command name
+# can be reserved before its language has an installable compiler package.
+COMPILER_COMMANDS = {
+    "as": "wras", "c": "wrc", "cpp": "wrcc", "csharp": "wrcs",
+    "d": "wrd", "fortran": "wrf", "fsharp": "wrfs", "go": "wrgo",
+    "haskell": "wrhs", "java": "wrjava", "js": "wrjs", "kotlin": "wrkt",
+    "lua": "wrlua", "moonbit": "wrmbt", "nim": "wrnim", "objectc": "wrobjc",
+    "odin": "wrodin", "php": "wrphp", "py": "wrpy", "r": "wrr", "rs": "wrrs",
+    "ruby": "wrrb", "swift": "wrswift", "tinygo": "wrtg", "typescript": "wrts",
+    "vbnet": "wrvb", "wat": "wrwat", "zig": "wrzig",
+}
+
 # BEGIN generated target inventory (tools/package_index.py)
 LANGUAGES = "as c c_ffi_bridge cpp csharp d fortran fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo typescript vbnet wat zig".split()
 PLATFORMS = "abb agibot agilex booster boston_dynamics clearpath deep_robotics dobot doosan elephant fanuc flexiv fourier franka hello_robot kinova kuka leju limx nvidia nvidia-groot nvidia-isaac-ros nvidia-isaac-sim pal realman robotis trossen ubtech ufactory unitree universal_robots yaskawa".split()
@@ -21,7 +33,10 @@ def main():
                         default="development")
     args = parser.parse_args()
     if args.revision_help:
-        print(json.dumps({"help": parser.format_help()}))
+        help_text = parser.format_help()
+        if args.language in COMPILER_COMMANDS:
+            help_text += f"\nCompiler command name for {args.language}: {COMPILER_COMMANDS[args.language]}\n"
+        print(json.dumps({"help": help_text}))
         return
 
     if args.platform not in PLATFORMS:

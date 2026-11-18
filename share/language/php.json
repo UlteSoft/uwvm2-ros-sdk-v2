@@ -1,4 +1,5 @@
 {
   "id": "php",
-  "development_package": false
+  "development_package": false,
+  "command_name": "wrphp"
 }

@@ -27,7 +27,7 @@ def main():
     c_source = fixture / (name + ".c")
     f_source = fixture / (name + ".f90")
     llvm = args.toolchain / "bin"
-    inputs = [Path(__file__), c_source, f_source, ROOT / "bin/wrc", ROOT / "bin/wrfortran",
+    inputs = [Path(__file__), c_source, f_source, ROOT / "bin/wrc", ROOT / "bin/wrf",
               ROOT / "language/fortran/frontend_fortran.py", llvm / "clang", llvm / "llvm-objdump",
               llvm / "wasm-ld", llvm / "wros-flang-mte", args.flang, args.runtime, *args.sysroots]
     widths = [args.address_width] if args.address_width else [32, 64]
@@ -59,7 +59,7 @@ def main():
         obj = out / f"inspection{width}.o"
         app = out / f"neighbors{width}.wasm"
         run(f"c{width}", [ROOT / "bin/wrc", *flags, "-c", c_source, "-o", obj])
-        run(f"fortran{width}", [ROOT / "bin/wrfortran", *flags, "--flang", args.flang,
+        run(f"fortran{width}", [ROOT / "bin/wrf", *flags, "--flang", args.flang,
                                 "--link-object", obj, f_source, "-o", app])
         listing = run(f"disassemble{width}", [llvm / "llvm-objdump", "-d", "--mattr=+memtag", app])
         permissions = []

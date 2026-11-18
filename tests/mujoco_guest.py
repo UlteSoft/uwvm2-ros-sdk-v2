@@ -54,7 +54,7 @@ def main():
     sys.path.insert(0, str(a.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
     source = ROOT / "tests/mujoco" / ("controller." + {"cpp": "c", "objectc": "c", "tinygo": "go", "fortran": "f90"}.get(a.language, a.language))
-    compiler = ROOT / "bin" / {"c": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "fortran": "wrfortran", "rs": "wrrust", "tinygo": "wrtinygo"}[a.language]
+    compiler = ROOT / "bin" / {"c": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
     sysroots = {32: a.sysroots32.resolve()}
     if 64 in widths:
         sysroots[64] = a.sysroots64.resolve()

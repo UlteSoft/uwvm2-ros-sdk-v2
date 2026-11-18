@@ -1,5 +1,5 @@
 function describe()
-    return {id = "fortran", program = "wrfortran",
+    return {id = "fortran", program = "wrf",
             extensions = {".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn"}}
 end
 

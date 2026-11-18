@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     llvm::SMDiagnostic diagnostic;
     auto module = llvm::parseIRFile(argv[3], diagnostic, context);
     if (!module) {
-        diagnostic.print("wrfortran", llvm::errs());
+        diagnostic.print("wrf", llvm::errs());
         return 1;
     }
     const auto &triple = module->getTargetTriple();

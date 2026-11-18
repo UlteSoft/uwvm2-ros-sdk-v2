@@ -10,6 +10,25 @@ read [Local driver and model attachments](local-attachments.md).
 
 [Build and run a Wasm project with xmake](xmake.md) · [Xmake API index](xmake-api-index.md)
 
+## Compiler command names
+
+The public compiler name uses `wr` followed by the language abbreviation. Use the language ID with the installer and Xmake. Run the command from the selected installation’s `bin` directory.
+
+| Language | Installation ID | Command |
+| --- | --- | --- |
+| C | `c` | `wrc` |
+| C++ | `cpp` | `wrcc` |
+| Objective-C | `objectc` | `wrobjc` |
+| Fortran | `fortran` | `wrf` |
+| Rust | `rs` | `wrrs` |
+| TinyGo | `tinygo` | `wrtg` |
+| Nim | `nim` | `wrnim` |
+| Lua | `lua` | `wrlua` |
+| Java | `java` | `wrjava` |
+| Kotlin | `kotlin` | `wrkt` |
+
+Java and Kotlin are available with the `synchronous-aot` selection. C# has the reserved command `wrcs`. Check `revision-help` at the selected commit for the command and use `plan` to check package availability. The archive utility is `wrar`. Previous installations retain the names from their pinned commit.
+
 ## Install a pinned selection
 
 Run the trusted bootstrap with Python 3.11 or newer. The commit argument is the full 40-character Git object ID. Use the same bootstrap with later SDK commits that implement the installation contract. The default source is the official public SDK repository. A trusted local Git repository works offline.

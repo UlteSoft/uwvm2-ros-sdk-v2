@@ -8,6 +8,28 @@ class Installer(unittest.TestCase):
         tmp=root/".tmp";tmp.mkdir(exist_ok=True);self.tmp=tempfile.TemporaryDirectory(dir=tmp)
         self.prefix=Path(self.tmp.name); self.commit=subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip()
     def tearDown(self):self.tmp.cleanup()
+    def test_installed_compiler_command_names(self):
+        from revision import COMPILER_COMMANDS, DEVELOPMENT, LANGUAGES
+
+        self.assertEqual(set(COMPILER_COMMANDS), set(LANGUAGES) - {"c_ffi_bridge"})
+        self.assertEqual(len(COMPILER_COMMANDS), len(set(COMPILER_COMMANDS.values())))
+        self.assertEqual([COMPILER_COMMANDS[k] for k in ("java", "csharp", "kotlin")],
+                         ["wrjava", "wrcs", "wrkt"])
+        for language in (*DEVELOPMENT, "java", "kotlin"):
+            with self.subTest(language=language):
+                options = [] if language in DEVELOPMENT else ["--component", "synchronous-aot"]
+                installed = install(Source(self.commit, root), "unitree", language, self.prefix, options)
+                directory = Path(installed["directory"])
+                command = COMPILER_COMMANDS[language]
+                metadata = json.loads((directory / "share/language" / (language + ".json")).read_text())
+                self.assertEqual(metadata["command_name"], command)
+                adapter = (directory / "language" / language / "xmake/adapter.lua").read_text()
+                self.assertIn('program = "' + command + '"', adapter)
+                help_text = subprocess.check_output([directory / "bin" / command, "--help"], text=True)
+                self.assertIn("usage: " + command + " ", help_text)
+                self.assertLessEqual({p.name for p in (directory / "bin").iterdir()},
+                                     {command, "wrar", "wrc", "wrcc"})
+
     def test_shared_compiler_source_selection(self):
         for language in ("c", "cpp", "fortran", "lua", "objectc", "rs", "tinygo", "nim"):
             with self.subTest(language=language):

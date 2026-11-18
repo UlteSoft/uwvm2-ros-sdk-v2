@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/fortran.json",
-      "bytes": 53,
+      "bytes": 78,
       "mode": 420,
-      "sha256": "ccb65bd8648d08be7a3bfc5fd75e78263c88907892334a9a6a132debd2eaa791"
+      "sha256": "2962a9a500a331c59f979fd516364420345dd23203cd696c86f9576feefafafe"
     }
   ]
 }

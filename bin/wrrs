@@ -156,13 +156,13 @@ def main():
         source = options.source.resolve(strict=True)
         output = options.output.absolute()
         if options.eh:
-            raise ValueError("wrrust currently requires panic=abort and a --no-eh sysroot")
+            raise ValueError("wrrs currently requires panic=abort and a --no-eh sysroot")
         if source.suffix != ".rs" or output.suffix != ".wasm" or output.resolve() == source:
             raise ValueError("expected a Rust crate root (.rs) and a distinct .wasm output")
         with tempfile.TemporaryDirectory(dir=output.parent) as temporary:
             compile_rust(options, source, output, Path(temporary))
     except (OSError, ValueError, KeyError, tarfile.TarError, subprocess.SubprocessError) as exc:
-        parser.exit(1, f"wrrust: {exc}\n")
+        parser.exit(1, f"wrrs: {exc}\n")
 
 
 if __name__ == "__main__":

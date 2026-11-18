@@ -1,6 +1,6 @@
 # Rust core applications
 
-`wrrust` builds one Rust 2024 crate root and its Rust modules into a wasm32 reactor. This profile uses Core 3.0, one thread and `panic=abort`. It supports `core`, compiler builtins and the SDK's raw ROS imports. Programs requiring Cargo dependency resolution, procedural macros, `alloc`, `std`, unwinding or memory64 need a different runtime closure. No such closure is installed by this selection.
+`wrrs` builds one Rust 2024 crate root and its Rust modules into a wasm32 reactor. This profile uses Core 3.0, one thread and `panic=abort`. It supports `core`, compiler builtins and the SDK's raw ROS imports. Programs requiring Cargo dependency resolution, procedural macros, `alloc`, `std`, unwinding or memory64 need a different runtime closure. No such closure is installed by this selection.
 
 ## Install and compile
 
@@ -9,7 +9,7 @@ Choose the `rs` language and a platform which declares it, such as `unitree`. Su
 ```sh
 python3 install/bootstrap.py install --commit "$REV" --platform unitree --language rs --prefix "$PREFIX"
 SDK="$PREFIX/$REV/unitree/rs/development"
-"$SDK/bin/wrrust" app.rs --rustroot "$WROS_RUSTROOT" --toolchain "$WROS_TOOLCHAIN" \
+"$SDK/bin/wrrs" app.rs --rustroot "$WROS_RUSTROOT" --toolchain "$WROS_TOOLCHAIN" \
   --sysroots "$WROS_SYSROOTS" --no-eh -O3 -g -o robot.wasm
 ```
 

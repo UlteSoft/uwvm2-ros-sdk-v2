@@ -1,6 +1,6 @@
 # 用 Fortran 开发 Wasm 应用
 
-`bin/wrfortran` 将 Fortran 的 `PROGRAM` 编译为 Wasm 可执行文件。它接受固定格式与自由格式源码，支持有依赖顺序的模块、ISO C 互操作，以及随 SDK 编译的 Flang 数值运行库。入口为 `_start`，数据保存在模块自己的线性内存中。计算运行库支持可分配数组、指针分配和 ISO C 描述符。通用外部文件 I/O 和 coarray 程序还需要额外运行库。
+`bin/wrf` 将 Fortran 的 `PROGRAM` 编译为 Wasm 可执行文件。它接受固定格式与自由格式源码，支持有依赖顺序的模块、ISO C 互操作，以及随 SDK 编译的 Flang 数值运行库。入口为 `_start`，数据保存在模块自己的线性内存中。计算运行库支持可分配数组、指针分配和 ISO C 描述符。通用外部文件 I/O 和 coarray 程序还需要额外运行库。
 
 ## 准备编译器
 
@@ -28,7 +28,7 @@ end program
 ```
 
 ```sh
-bin/wrfortran --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" \
+bin/wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" \
   --target wasm32 -O3 -g application.f90 -o application.wasm
 ```
 

@@ -1,6 +1,6 @@
 # 使用 TinyGo 开发机器人应用
 
-`wrtinygo` 将本地 Go 模块编译为单个 wasm32 命令模块，内置保守式垃圾回收器。开发机为 Linux x86-64，客户程序使用 WebAssembly Core 3.0、一个线性内存和一个执行线程。下例的应用入口为 `_start`。应用需要的 ROS 和时钟操作由 VM 操作员分别授权。
+`wrtg` 将本地 Go 模块编译为单个 wasm32 命令模块，内置保守式垃圾回收器。开发机为 Linux x86-64，客户程序使用 WebAssembly Core 3.0、一个线性内存和一个执行线程。下例的应用入口为 `_start`。应用需要的 ROS 和时钟操作由 VM 操作员分别授权。
 
 ## 准备编译环境
 
@@ -39,7 +39,7 @@ func main() {
 }
 EOF_GO
 
-"$SDK/bin/wrtinygo" . -o body.wasm \
+"$SDK/bin/wrtg" . -o body.wasm \
     --goroot "$GO_ROOT" --tinygoroot "$TINYGO_ROOT" \
     --toolchain "$WROS_LLVM" --sysroots "$SYSROOT_RECEIPT" \
     --host-cxx /usr/bin/c++ --print-identity

@@ -1,22 +1,22 @@
 {
   "files": [
     {
-      "path": "bin/wrtinygo",
-      "bytes": 10069,
+      "path": "bin/wrtg",
+      "bytes": 10065,
       "mode": 493,
-      "sha256": "01dc2afda2f60701df3c29b34c093e661bbc0e1180ea347d05f899d4ddc51cf7"
+      "sha256": "855f274a40eba76f8b168235e890de8e3d0da3e0caca545a126155b0be9c9718"
     },
     {
       "path": "document/en/tinygo.md",
-      "bytes": 5976,
+      "bytes": 5968,
       "mode": 420,
-      "sha256": "81c530267360975cef952ac688c2d5d6393eaa1cffa8885643a1f3784b4f68f7"
+      "sha256": "eb38c666b1b4051c914a4fac832938feca945b9ede455a44c52b55d36a2d00b8"
     },
     {
       "path": "document/zh/tinygo.md",
-      "bytes": 5537,
+      "bytes": 5529,
       "mode": 420,
-      "sha256": "def5469a047c3133b858ff73e5d4ad366e37b5d9f0038e74519d03b152c4c7f7"
+      "sha256": "58fb2030728ea6621b2b151c3e3b22fd8fc407cbf5e3b9e70afc4cd267399314"
     },
     {
       "path": "include/wros/scene.h",
@@ -86,9 +86,9 @@
     },
     {
       "path": "language/tinygo/xmake/adapter.lua",
-      "bytes": 1641,
+      "bytes": 1637,
       "mode": 420,
-      "sha256": "6cc3da00ab404973f07fb89837c722fc91ce121d0c5cf2154aba571c0e059f44"
+      "sha256": "12ffd8b7c86550788f254ceb7c424151c6bfc1e00507f5b2d2608425753afaf5"
     },
     {
       "path": "tools/wasm/tag_ir.cpp",

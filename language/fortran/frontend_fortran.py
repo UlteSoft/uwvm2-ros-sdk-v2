@@ -195,4 +195,4 @@ def main():
             qualification.finish(admission, opts, staged, output)
         return 0
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as exc:
-        parser.exit(1, f"wrfortran: {exc}\n")
+        parser.exit(1, f"wrf: {exc}\n")

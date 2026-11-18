@@ -43,7 +43,7 @@ def main():
             raise RuntimeError(f"{label} returned {result.returncode}: {result.stderr[-1200:]!r}")
         return result.stdout
 
-    compiler = [sys.executable, sdk / "bin/wrtinygo", app, "--goroot", args.goroot, "--tinygoroot",
+    compiler = [sys.executable, sdk / "bin/wrtg", app, "--goroot", args.goroot, "--tinygoroot",
                 args.tinygoroot, "--toolchain", args.toolchain, "--print-identity",
                 "-o", wasm]
     for receipt in args.sysroots:

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/php.json",
-      "bytes": 50,
+      "bytes": 77,
       "mode": 420,
-      "sha256": "f32984e7c7a410453658f37d20e391fa05e94093f7f823e8a88ba9a125ea0cd3"
+      "sha256": "bc6f0167faf11686129790fc597308093cd36ca71008bac9261841f9c3101c12"
     }
   ]
 }

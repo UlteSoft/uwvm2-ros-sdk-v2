@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/typescript.json",
-      "bytes": 57,
+      "bytes": 83,
       "mode": 420,
-      "sha256": "bea214b3bcec5902137117489845e31afb2d269dfe7b412d4218bc4ff048f595"
+      "sha256": "0d6ae68aafed671633fc1b4e349c0aa095e62bebaf157b05bbdc929f09a01061"
     }
   ]
 }

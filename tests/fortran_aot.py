@@ -39,7 +39,7 @@ def main():
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     fixtures = ROOT / "tests/fortran"
     inputs = [tc / "bin/clang", tc / "bin/wasm-ld", tc / "bin/llvm-objdump", *receipts, fc, marker,
-              marker.with_name(marker.name + ".json"), vm, ROOT / "bin/wrfortran", ROOT / "bin/wrc",
+              marker.with_name(marker.name + ".json"), vm, ROOT / "bin/wrf", ROOT / "bin/wrc",
               ROOT / "share/abi/ros.json", Path(__file__), *fixtures.glob("*"),
               *(ROOT / "language/fortran").glob("*.py"), *(ROOT / "language/fortran").glob("*.cpp"),
               ROOT / "language/fortran/entry.c", *(ROOT / "install").glob("*.py"),
@@ -81,7 +81,7 @@ def main():
                 flags.append("--threads")
             if opt.no_mte:
                 flags.append("--no-mte")
-            cmd = [sys.executable, ROOT / "bin/wrfortran", *flags, "--flang", fc, "--mte-tool", marker]
+            cmd = [sys.executable, ROOT / "bin/wrf", *flags, "--flang", fc, "--mte-tool", marker]
             output, obj = work / (name + ".wasm"), work / (name + ".o")
             run(name + "-compile-c", [sys.executable, ROOT / "bin/wrc", *flags, fixtures / "interop.c",
                                       "-c", "-o", obj])
