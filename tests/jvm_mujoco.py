@@ -1,7 +1,10 @@
 """Build Java or Kotlin source and compare the secured humanoid driver with native MuJoCo."""
 import argparse
+import hashlib
+import json
 from pathlib import Path
 import struct
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +67,30 @@ def main():
                              sources/"jvm_frontend.py", sources/"contracts.h", sources/"java/wros/scene/Driver.java",
                              ROOT/"language"/args.language/"host-inputs.json", ROOT/"include/wros/scene.h",
                              args.toolchain.resolve()/"bin/clang", args.toolchain.resolve()/"bin/wasm-ld"))
+
+    # A signal capability can be opened but cannot authorize a driver's typed operations.
+    denied = controller.with_name("Denied." + ext)
+    out = args.output.resolve()
+    guest = out / "driver-permissions.wasm"
+    report = {"complete": False, "source_sha256": hashlib.sha256(denied.read_bytes()).hexdigest(), "cases": []}
+    def check(label, argv):
+        proc = subprocess.run(list(map(str,argv)),capture_output=True,timeout=220)
+        (out/("permission-"+label+".log")).write_bytes(proc.stdout+proc.stderr)
+        report["cases"].append({"name":label,"argv":list(map(str,argv)),"status":proc.returncode})
+        (out/"driver-permissions.json").write_text(json.dumps(report,indent=2)+"\n")
+        if proc.returncode: raise RuntimeError(label+": "+proc.stderr[-2000:].decode(errors="replace"))
+    check("compile",[sys.executable,compiler,"--toolchain",args.toolchain.resolve(),"--sysroots",args.sysroots.resolve(),
+                     "--bundle",args.bundle.resolve(),"--legacy-mte","--main-class","simulation.Denied",denied,"-o",guest])
+    assert {i["name"] for i in inspect(guest.read_bytes())} == {"capability.open","capability.close","driver.connect"}
+    for engine in ("int","aot"):
+        vm=[args.runtime.resolve(),*Profile().uwvm_feature_flags(),"--debug-fault-action","exit","--runtime-"+engine,
+            "--runtime-compile-threads","0","--runtime-llvm-jit-cache-path","disable","--wasm-set-main-module-name","main",
+            "--ros-scene-create","robot","--ros-scene-bind","robot","main"]
+        for operation in ("capability.open","capability.close","driver.connect"):
+            vm += ["--ros-scene-interface","robot",operation,"allow"]
+        check(engine,[*vm,"--ros-scene-grant","robot","read","guard","signal","local","guard.create","--run",guest])
+    report["complete"]=True
+    (out/"driver-permissions.json").write_text(json.dumps(report,indent=2)+"\n")
 
 
 if __name__ == "__main__":
