@@ -20,9 +20,9 @@
     },
     {
       "path": "language/jvm/Admit.java",
-      "bytes": 6299,
+      "bytes": 8822,
       "mode": 420,
-      "sha256": "6b34b022962f61792a0fb296c21fa82a21994fe0c8b3a3482c2bcbcaa859ee56"
+      "sha256": "cf3ea5d218b9c69681248ef7691569beb0a7ba7aaf8578387d72ab9b4e569826"
     },
     {
       "path": "language/jvm/Translate.java",
@@ -56,9 +56,9 @@
     },
     {
       "path": "language/jvm/jvm_frontend.py",
-      "bytes": 7290,
+      "bytes": 7352,
       "mode": 420,
-      "sha256": "ff98da20b9899bda67161181513e3909454c68d853d0fb1c23ac46e09a69c899"
+      "sha256": "8f0c254c90ffb764a1466eb28f05ae717c064bee2e324c0ad337ed0c6e49d12b"
     },
     {
       "path": "third-parties/jvm/LICENSE",

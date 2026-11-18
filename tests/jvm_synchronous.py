@@ -76,6 +76,17 @@ def main():
                                 '@file:JvmName("Main")\npackage example\nfun main(args:Array<String>){'+kt_body+'}')
             run(label,[*base,"--legacy-mte",rejected],False,diagnostic)
             assert guest.read_bytes()==prior
+        for label,java_decl,kt_decl,diagnostic in (
+                ("inherited-member", "class Main { public static void main(String[] a){ new Main().hashCode(); } }",
+                 'class Child; fun main(a:Array<String>) { Child().hashCode() }', b"hashCode()I"),
+                ("native", "class Main { static native void host(); public static void main(String[] a){} }",
+                 'external fun host(); fun main(a:Array<String>) {}', b"unsupported synchronous JVM feature: host"),
+                ("missing-entry", "class Main { public static void main(int wrong){} }",
+                 'fun main(wrong:Int) {}', b"entry must declare public static void main(String[])")):
+            rejected.write_text("package example; " + java_decl if lang == "java" else
+                                '@file:JvmName("Main")\npackage example\n' + kt_decl)
+            run(label,[*base,"--legacy-mte",rejected],False,diagnostic)
+            assert guest.read_bytes()==prior
         entry=project/("GuardApplication."+suffix)
         guard=out/(lang+"-guard.wasm")
         run("build-guard",[sdk/"bin"/("wr"+lang),"--legacy-mte","--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),

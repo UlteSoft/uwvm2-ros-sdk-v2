@@ -121,7 +121,9 @@ def main(language):
     suffix=".java" if language=="java" else ".kt"
     try:
         opts.sources=[p.resolve(strict=True) for p in opts.sources]
-        if len(opts.sources)>256 or any(p.suffix!=suffix or p.stat().st_size>16*1024*1024 for p in opts.sources):
+        if len(opts.sources) > 256 or any(
+                not p.is_file() or p.suffix != suffix or p.stat().st_size > 16 * 1024 * 1024
+                for p in opts.sources):
             raise ValueError("expected bounded source files for the selected language")
         print("warning: explicitly selected unsigned synchronous JVM AOT with WasmMTE instrumentation",file=sys.stderr)
         if opts.work:
