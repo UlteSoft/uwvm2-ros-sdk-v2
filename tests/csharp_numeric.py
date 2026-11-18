@@ -164,12 +164,17 @@ public static class Track {
     [MethodImpl(MethodImplOptions.Synchronized)] public static int Sum(int n) => n + 1;
 }""")
     run("synchronized", [*cli, "--legacy-mte", "--entry", "Track.Sum", body, "-o", cli_out], b"method flags need the CLR")
+    body.write_text("""public static class Track {
+    public static int Helper(int n) => n + 1;
+    public static int Sum(int n) => Helper(n);
+}""")
+    run("managed-call", [*cli, "--legacy-mte", "--entry", "Track.Sum", body, "-o", cli_out], b"unsupported numeric IL operation: call")
     body.write_text("""using System.Runtime.InteropServices;
 public static class Track {
     [DllImport("device")] public static extern int Native(int n);
     public static int Sum(int n) => Native(n);
 }""")
-    run("pinvoke", [*cli, "--legacy-mte", "--entry", "Track.Sum", body, "-o", cli_out], b"unsupported numeric IL")
+    run("pinvoke", [*cli, "--legacy-mte", "--entry", "Track.Sum", body, "-o", cli_out], b"DllImportAttribute' could not be found")
     if cli_out.read_bytes() != b"original":
         raise ValueError("rejected input modified existing output")
     report["complete"] = True
