@@ -3,7 +3,7 @@
 Select the `js` development package and your platform with the SDK installer. A strict site profile for the C backend supplies the measured toolchain and sysroot. For example, in a pinned SDK checkout run
 
 ```sh
-python3 install/bootstrap.py --commit "$REV" --platform unitree --language js \
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language js \
     --prefix "$PREFIX" --site-profile "$C_SITE"
 "$PREFIX/$REV/unitree/js/development/bin/wrjs" application.js \
     -o application.wasm --ros-abi --build-receipt

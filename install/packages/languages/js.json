@@ -14,15 +14,15 @@
     },
     {
       "path": "document/en/js.md",
-      "bytes": 3055,
+      "bytes": 3063,
       "mode": 420,
-      "sha256": "296e1ff791e4fcbf089d65525ae3bcc087314728cb26fb5b701f613bde59f0ae"
+      "sha256": "909389e8205bad621629e9a2f56b69767ea3c1eef4bc0af9372e93eb01a12e92"
     },
     {
       "path": "document/zh/js.md",
-      "bytes": 2438,
+      "bytes": 2446,
       "mode": 420,
-      "sha256": "ba5cb8256acd1c2ecffe8442c6a964265c683fa7c10ae6615db6aec9ad97d3f9"
+      "sha256": "28f4d44bd8d94aa7484396400030ea4bad8131118479c541664e525cfdace1c0"
     },
     {
       "path": "examples/js/body.js",

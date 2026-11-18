@@ -5,7 +5,7 @@
 例如，以下命令使用完整的 SDK 提交号 REV、安装目录 PREFIX 和本站审核通过的 C 工具链配置 C_SITE。
 
 ```sh
-python3 install/bootstrap.py --commit "$REV" --platform unitree --language js \
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language js \
     --prefix "$PREFIX" --site-profile "$C_SITE"
 "$PREFIX/$REV/unitree/js/development/bin/wrjs" application.js -o application.wasm --ros-abi --build-receipt
 ```
