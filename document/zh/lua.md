@@ -32,7 +32,7 @@ bin/wrlua examples/lua/body.lua --ros-abi \
 
 `--ros-abi` 提供 `wros.abi()`。重复传入 `--ros-operation 名称` 可选择需要的 ROSv2 接口，Xmake 使用 `add_wros_lua_operations(...)`。每个导入都必须由部署者暴露。
 
-`capability.open` 提供 `wros.open(alias)`，返回状态码和不透明句柄，失败时句柄为 nil。`capability.close` 提供 `wros.close(handle)`。其他消息操作以 `wros["域.操作"](handle, 请求字节串, 响应容量)` 调用，返回状态码、成功时的二进制字符串（失败为 nil）以及 VM 报告的长度。允许零令牌的接口可用 nil。按 `share/abi/ros.json` 定义的小端格式编码消息。临时收发缓冲区受 Lua 堆配额限制，调用完成后清零，响应字符串分配失败也会清零。应用自己的字符串由 Lua 管理。
+`capability.open` 提供 `wros.open(alias)`，返回状态码和不透明句柄，失败时句柄为 nil。`capability.close` 提供 `wros.close(handle)`。其他消息操作以 `wros["域.操作"](handle, 请求字节串, 响应容量)` 调用，返回状态码、VM 返回的二进制字符串以及 VM 报告的长度。用 `permission.report` 或 `module.permission.report` 查询未编译的整个接口族时，状态码为 95，报告中的 supported 字段为 false。查询不存在的具体函数会得到 95 和 nil。拒绝查询时数据为 nil。容量不足时可按 VM 返回的长度重试。允许零令牌的接口可用 nil。按 `share/abi/ros.json` 定义的小端格式编码消息。临时收发缓冲区受 Lua 堆配额限制，调用完成后清零，响应字符串分配失败也会清零。应用自己的字符串由 Lua 管理。
 
 安装的 `examples/lua/guard.lua` 使用 `capability.open`、`capability.close`、`guard.create`、`guard.trigger`、`guard.take`。编译时逐项选择这五个导入，可用 `--guest-seed 1` 在客户模块内提供种子。部署时暴露上述接口，并给 `signal` 授予三个 guard 操作。缺少资源授权时 Lua 可以读取失败状态。
 

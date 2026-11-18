@@ -8,21 +8,21 @@
     },
     {
       "path": "bin/wrlua",
-      "bytes": 9208,
+      "bytes": 9328,
       "mode": 493,
-      "sha256": "173890a814d2f537a88ca18d5694ff2d056ba473e537ec5f013bcf8b2b72e78f"
+      "sha256": "d358a512556a691299a5ddece5935c0c642f9eae773c5079a942cc4a09e6fa3e"
     },
     {
       "path": "document/en/lua.md",
-      "bytes": 5253,
+      "bytes": 5549,
       "mode": 420,
-      "sha256": "e967ccc431243ac08d4bfb85c920a9f5c66a9b026f07a92c952cb8f69001b771"
+      "sha256": "358766a5d130aa6e2766f0ea8672dd3180e48769d16908ef0f609d4561bdc449"
     },
     {
       "path": "document/zh/lua.md",
-      "bytes": 4654,
+      "bytes": 4921,
       "mode": 420,
-      "sha256": "abe0afddad5a29964877a8e4f49d4bd9fd168316f8906021652029e36d8be75b"
+      "sha256": "04bee1977f73eb1b0ecaca47e12f5da258afa186d9ec6f91ad235c0886be82f5"
     },
     {
       "path": "examples/lua/body.lua",
@@ -50,9 +50,9 @@
     },
     {
       "path": "language/lua/scene.hpp",
-      "bytes": 4658,
+      "bytes": 4937,
       "mode": 420,
-      "sha256": "c1fe6be188adce9cd6ae600e57e7318f0213e14627d368a387c6e5457171b562"
+      "sha256": "8f9aa4266e3e53b649cf529210d92ae134c000fa3e744159c31df2e1586aa10d"
     },
     {
       "path": "language/lua/xmake/adapter.lua",

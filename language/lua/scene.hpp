@@ -73,7 +73,7 @@ inline int copy_reply(lua_State *s) {
 using operation = std::uint32_t(std::uint64_t, std::uint32_t, std::uint64_t, std::uint64_t,
                                 std::uint64_t, std::uint64_t, std::uint64_t);
 
-template<operation &invoke>
+template<operation &invoke, bool permission_report = false>
 int call(lua_State *s) {
     // Some introspection operations use token zero. Only the VM decides whether it is authorized.
     auto token = lua_isnil(s, 1) ? 0 : checked(s)->token;
@@ -96,7 +96,10 @@ int call(lua_State *s) {
     erase(input, n);
     int copy_status = LUA_OK;
     lua_pushinteger(s, status);
-    if (!status && written <= static_cast<std::uint64_t>(capacity)) {
+    // A whole uncompiled family returns ENOTSUP with a nonempty report. An
+    // unknown exact function returns the same status without writing the length.
+    bool has_reply = !status || (permission_report && status == 95 && written != 0);
+    if (has_reply && written <= static_cast<std::uint64_t>(capacity)) {
         lua_pushcfunction(s, copy_reply);
         lua_pushlightuserdata(s, output);
         lua_pushinteger(s, static_cast<lua_Integer>(written));
@@ -106,7 +109,7 @@ int call(lua_State *s) {
     }
     erase(output, static_cast<size_t>(capacity));
     if (copy_status != LUA_OK) return lua_error(s);
-    if ((!status && written > static_cast<std::uint64_t>(capacity)) ||
+    if ((has_reply && written > static_cast<std::uint64_t>(capacity)) ||
         written > static_cast<std::uint64_t>(std::numeric_limits<lua_Integer>::max()))
         return luaL_error(s, "invalid ROS reply length");
     lua_pushinteger(s, static_cast<lua_Integer>(written));

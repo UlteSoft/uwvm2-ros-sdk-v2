@@ -11,6 +11,7 @@ from separate_compilation import Profile, cgroup_record, inspect, sha
 
 ROOT = Path(__file__).resolve().parents[1]
 GUARD = ("capability.open", "capability.close", "guard.create", "guard.trigger", "guard.take")
+REPORTS = ("permission.report", "module.permission.report")
 CHECKS = '''
 assert(wros.close and not wros["driver.submit"])
 assert(not pcall(wros.close, signal))
@@ -27,6 +28,28 @@ assert(not pcall(create, restricted, {}, 8))
 local too_small, no_data = create(restricted, "", 4)
 assert(too_small == 90 and no_data == nil)
 assert(wros.close(restricted) == 0)
+
+local function query(report, prefix, family, func, capacity)
+  return report(nil, prefix .. string.pack("<s8s8I8", family, func, 0), capacity)
+end
+for _, target in ipairs({
+  {wros["permission.report"], ""},
+  {wros["module.permission.report"], string.pack("<s8", "peer")}
+}) do
+  local report, prefix = target[1], target[2]
+  for _, family in ipairs({"rosv2", "preloaddl", "ros1v1", "ros2v1"}) do
+    local size_status, empty, need = query(report, prefix, family, "", 1)
+    assert(size_status == 90 and empty == nil and need >= 40)
+    local code, page, written = query(report, prefix, family, "", need)
+    assert((code == 0 or code == 95) and #page == need and written == need)
+    assert(string.unpack("<I8", page) == (code == 0 and 1 or 0))
+    if family == REQUIRE_UNCOMPILED then assert(code == 95) end
+  end
+  local unsupported, absent, length = query(report, prefix, "rosv2", "no.such.function", 1024)
+  assert(unsupported == 95 and absent == nil and length == 0)
+end
+local forbidden, private, length = query(wros["module.permission.report"], string.pack("<s8", "ungranted"), "rosv2", "", 1024)
+assert(forbidden == 13 and private == nil and length == 0)
 '''
 
 
@@ -36,6 +59,7 @@ def main():
         parser.add_argument("--" + name, required=True, type=Path)
     parser.add_argument("--address-bits", required=True, type=int, choices=(32, 64))
     parser.add_argument("--frontend-root", type=Path, default=ROOT)
+    parser.add_argument("--require-uncompiled", choices=("preloaddl", "ros1v1", "ros2v1"))
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--no-mte", action="store_true")
     mode.add_argument("--candidate-mte", action="store_true")
@@ -72,9 +96,10 @@ def main():
                 "--sysroots", args.sysroots.resolve(), "--target", f"wasm{args.address_bits}",
                 "--guest-seed", "5", "--no-mte" if args.no_mte else "--legacy-mte" if args.candidate_mte else "--mte"]
     sample = out / "application.lua"
-    sample.write_text(workflow.read_text() + CHECKS)
+    sample.write_text(workflow.read_text() + CHECKS.replace("REQUIRE_UNCOMPILED",
+                      json.dumps(args.require_uncompiled) if args.require_uncompiled else "nil"))
     guest = out / "application.wasm"
-    for label, operations in (("catalog", all_operations), ("selected", GUARD)):
+    for label, operations in (("catalog", all_operations), ("selected", GUARD + REPORTS)):
         run(label, [*compiler, *[arg for name in operations for arg in ("--ros-operation", name)], sample, "-o", guest])
         names = {(row["module"], row["name"]) for row in inspect(guest.read_bytes())}
         if names != {("uwvm_ros_v2", name) for name in operations}:
@@ -84,10 +109,15 @@ def main():
         b"unknown ROSv2 operation")
     assert sha(guest) == artifact
     scene = ["--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main"]
-    for op in GUARD:
+    for op in GUARD + REPORTS:
         scene += ["--ros-scene-interface", "robot", op, "allow"]
     grants = ["--ros-scene-grant", "robot", "signal", "guard", "signal", "local", "guard.create,guard.trigger,guard.take",
               "--ros-scene-grant", "robot", "limited", "guard", "limited", "local", "guard.create"]
+    peer = out / "report-peer.wasm"
+    peer.write_bytes(b"\0asm\1\0\0\0")
+    grants += ["--ros-scene-create", "peers", "--ros-scene-bind", "peers", "report-peer",
+               "--wasm-preload-library", str(peer), "report-peer", "--ros-scene-grant", "robot",
+               "peer", "module", "report-peer", "metadata", "module.permission.report"]
     for engine in ("int", "aot"):
         base = [args.runtime.resolve(), *Profile(args.address_bits).uwvm_feature_flags(), "--runtime-" + engine,
                 "--wasm-set-main-module-name", "main", "--runtime-compile-threads", "0",
