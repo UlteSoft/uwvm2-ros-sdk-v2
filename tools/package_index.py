@@ -79,7 +79,7 @@ def main():
     render_inventory(registry)
     package("license", ["LICENSE"])
     package("migration/resources", [
-        "tools/migration/package_manifest.py", "tools/migration/package_resources.py",
+        "tools/migration/package_manifest.py", "tools/migration/package_resources.py", "tools/migration/legacy_permissions.py",
         "include/wros/package_resources.h", "document/en/migration.md", "document/zh/migration.md",
     ])
     for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",

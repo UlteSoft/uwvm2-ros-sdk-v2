@@ -41,3 +41,15 @@ From the SDK source tree, run `tools/migration/audit_ros_packages.py --corpus CO
 The SDK test `tests/migration/package_resource_corpus.py` checks each selected original file in a native executable and in both VM engines for wasm32 and wasm64. It preserves source variants and records the files selected from each package. A resource check alone cannot qualify a package's executable, middleware, drivers or transitive dependencies.
 
 Use `tests/migration/resource_urdf_mujoco.py` with the resulting `variants.jsonl.gz` to replay supported URDF models with an installed MuJoCo SDK. Models can include STL meshes from the same package. The runner resolves every mesh URI relative to that snapshot, pins its digest and gives distinct geometry a distinct filename inside the simulator's virtual filesystem. Joint limits, inertias, link poses and geometry bytes are preserved. The report records simulator rejections and dependencies requiring a different fixture. Fixed-link models have zero dynamic degrees of freedom.
+
+## Review legacy observer permissions
+
+Export the legacy policy argument vector as a UTF-8 JSON array. Include full ROS1 or ROS2 global, single and group grant, set, enable, disable, create and membership options in their original order. Run the installed reviewer before rewriting a deployment permission recommendation.
+
+```sh
+python3 "$SDK/tools/migration/legacy_permissions.py" legacy-grants.json
+```
+
+Exit 2 identifies a policy that requires manual migration. The output names the observer, source, backend and target for each pair. A legacy service observation checks both the observation grant and the distinct service-call grant. It can require a bounded native wait. An event observer is tied to its own source capability and its permitted events. Preserve these relationships when deciding what to authorize. ROSv2 endpoint readiness, graph visibility and an event stream each prove different things. Using the same alias in two independent environments establishes no relationship.
+
+Exit 0 reports that no paired observer declaration occurred among the recognized arguments. Exit 3 refuses malformed input or an unsupported option. The tool emits no grants, reads no credentials and starts no VM. Its report covers paired authority only. Separately review event kinds, budgets, rates, type identities and transport configuration before applying any new policy.
