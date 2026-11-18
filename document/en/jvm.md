@@ -4,6 +4,17 @@ The optional `synchronous-aot` component compiles an application’s JVM classes
 
 Install one platform and language at a full SDK commit. Use the fixed bootstrap invocation in the installation guide and pass `--component synchronous-aot` after the bootstrap’s `--`. The installed path ends in `<platform>/<java-or-kotlin>/synchronous-aot`. The selected package contains its language frontend and Xmake adapter, the shared guarded runtime sources, pinned host identities, examples and this guide. Verify the existing Linux x86-64 SDK1 JVM build-host bundle with the selected `language/<language>/host-inputs.json`. Only named JARs enter the compiler classpath. Java excludes the Kotlin compiler and runtime JARs. LLVM and the independently matched strong-MTE sysroot are supplied by the developer.
 
+Prepare a build-host bundle from Ubuntu OpenJDK 21.0.10+7-Ubuntu-125.10, matching system libraries and the selected Maven inputs. The helper reads a local Maven cache or an optional flat `--jars DIR`. Add `--fetch-missing-jars` to fetch only missing entries in this language’s pinned manifest. Every byte is checked before the new directory is published. The Linux x86-64 JDK and system library paths below apply to the qualified host.
+
+```sh
+python3 "$UWVM_ROS_SDK_ROOT/language/jvm/prepare_host.py" java \
+  --jdk /usr/lib/jvm/java-21-openjdk-amd64 --system-libs /usr/lib/x86_64-linux-gnu \
+  --fetch-missing-jars --output "$BUILD_DIR/java-host"
+export WROS_JVM_BUNDLE="$BUILD_DIR/java-host"
+```
+
+Select `kotlin` to provision the Kotlin compiler. Java requires 29 pinned JARs and Kotlin requires 36. An installed compiler bundle can also supply the `--jdk`, `--system-libs` and `--jars` inputs offline.
+
 ```sh
 "$UWVM_ROS_SDK_ROOT/bin/wrjava" --legacy-mte --main-class example.Main \
   --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --bundle "$WROS_JVM_BUNDLE" \

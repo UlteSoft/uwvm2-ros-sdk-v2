@@ -4,217 +4,253 @@
       "bytes": 17536,
       "executable": false,
       "path": "compiler-jars/annotations-13.0.jar",
-      "sha256": "ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478"
+      "sha256": "ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/annotations/13.0/annotations-13.0.jar"
     },
     {
       "bytes": 126113,
       "executable": false,
       "path": "compiler-jars/asm-9.8.jar",
-      "sha256": "876eab6a83daecad5ca67eb9fcabb063c97b5aeb8cf1fca7a989ecde17522051"
+      "sha256": "876eab6a83daecad5ca67eb9fcabb063c97b5aeb8cf1fca7a989ecde17522051",
+      "source": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.jar"
     },
     {
       "bytes": 35151,
       "executable": false,
       "path": "compiler-jars/asm-analysis-9.8.jar",
-      "sha256": "e640732fbcd3c6271925a504f125e38384688f4dfbbf92c8622dfcee0d09edb9"
+      "sha256": "e640732fbcd3c6271925a504f125e38384688f4dfbbf92c8622dfcee0d09edb9",
+      "source": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-analysis/9.8/asm-analysis-9.8.jar"
     },
     {
       "bytes": 73498,
       "executable": false,
       "path": "compiler-jars/asm-commons-9.8.jar",
-      "sha256": "3301a1c1cb4c59fcc5292648dac1d7c5aed4c0f067dfbe88873b8cdfe77404f4"
+      "sha256": "3301a1c1cb4c59fcc5292648dac1d7c5aed4c0f067dfbe88873b8cdfe77404f4",
+      "source": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.8/asm-commons-9.8.jar"
     },
     {
       "bytes": 51934,
       "executable": false,
       "path": "compiler-jars/asm-tree-9.8.jar",
-      "sha256": "14b7880cb7c85eed101e2710432fc3ffb83275532a6a894dc4c4095d49ad59f1"
+      "sha256": "14b7880cb7c85eed101e2710432fc3ffb83275532a6a894dc4c4095d49ad59f1",
+      "source": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.8/asm-tree-9.8.jar"
     },
     {
       "bytes": 94559,
       "executable": false,
       "path": "compiler-jars/asm-util-9.8.jar",
-      "sha256": "8ba0460ecb28fd0e2980e5f3ef3433a513a457bc077f81a53bdc75b587a08d15"
+      "sha256": "8ba0460ecb28fd0e2980e5f3ef3433a513a457bc077f81a53bdc75b587a08d15",
+      "source": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-util/9.8/asm-util-9.8.jar"
     },
     {
       "bytes": 563971,
       "executable": false,
       "path": "compiler-jars/commons-io-2.20.0.jar",
-      "sha256": "df90bba0fe3cb586b7f164e78fe8f8f4da3f2dd5c27fa645f888100ccc25dd72"
+      "sha256": "df90bba0fe3cb586b7f164e78fe8f8f4da3f2dd5c27fa645f888100ccc25dd72",
+      "source": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar"
     },
     {
       "bytes": 1529274,
       "executable": false,
       "path": "compiler-jars/hppc-0.10.0.jar",
-      "sha256": "edc83b336476a2b06f7c17d09b17e98bb07678daf968c9825cc14275bdf20a26"
+      "sha256": "edc83b336476a2b06f7c17d09b17e98bb07678daf968c9825cc14275bdf20a26",
+      "source": "https://repo.maven.apache.org/maven2/com/carrotsearch/hppc/0.10.0/hppc-0.10.0.jar"
     },
     {
       "bytes": 636782,
       "executable": false,
       "path": "compiler-jars/joda-time-2.12.2.jar",
-      "sha256": "8d4d807adc8e92a83913d9ccd61e634b4907c78d88f3016d06b3b3d2b4795a02"
+      "sha256": "8d4d807adc8e92a83913d9ccd61e634b4907c78d88f3016d06b3b3d2b4795a02",
+      "source": "https://repo.maven.apache.org/maven2/joda-time/joda-time/2.12.2/joda-time-2.12.2.jar"
     },
     {
       "bytes": 71976,
       "executable": false,
       "path": "compiler-jars/jzlib-1.1.3.jar",
-      "sha256": "89b1360f407381bf61fde411019d8cbd009ebb10cff715f3669017a031027560"
+      "sha256": "89b1360f407381bf61fde411019d8cbd009ebb10cff715f3669017a031027560",
+      "source": "https://repo.maven.apache.org/maven2/com/jcraft/jzlib/1.1.3/jzlib-1.1.3.jar"
     },
     {
       "bytes": 56909275,
       "executable": false,
       "path": "compiler-jars/kotlin-compiler-embeddable-2.1.20.jar",
-      "sha256": "c54a00718c8c0e3ee858bf42771c7f401c5e3c1738861e18e9536371042fa1b3"
+      "sha256": "c54a00718c8c0e3ee858bf42771c7f401c5e3c1738861e18e9536371042fa1b3",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-compiler-embeddable/2.1.20/kotlin-compiler-embeddable-2.1.20.jar"
     },
     {
       "bytes": 345429,
       "executable": false,
       "path": "compiler-jars/kotlin-daemon-embeddable-2.1.20.jar",
-      "sha256": "d9e83df1d847a201ba3c016a786ced091be9503997d09f6a9cf1796ee489f374"
+      "sha256": "d9e83df1d847a201ba3c016a786ced091be9503997d09f6a9cf1796ee489f374",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-daemon-embeddable/2.1.20/kotlin-daemon-embeddable-2.1.20.jar"
     },
     {
       "bytes": 3038560,
       "executable": false,
       "path": "compiler-jars/kotlin-reflect-1.6.10.jar",
-      "sha256": "3277ac102ae17aad10a55abec75ff5696c8d109790396434b496e75087854203"
+      "sha256": "3277ac102ae17aad10a55abec75ff5696c8d109790396434b496e75087854203",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-reflect/1.6.10/kotlin-reflect-1.6.10.jar"
     },
     {
       "bytes": 43365,
       "executable": false,
       "path": "compiler-jars/kotlin-script-runtime-2.1.20.jar",
-      "sha256": "ae4397fbb3aa2a1ada09290e753bba99a4114548977c3115526b9958f4cb1a04"
+      "sha256": "ae4397fbb3aa2a1ada09290e753bba99a4114548977c3115526b9958f4cb1a04",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-script-runtime/2.1.20/kotlin-script-runtime-2.1.20.jar"
     },
     {
       "bytes": 1724057,
       "executable": false,
       "path": "compiler-jars/kotlin-stdlib-2.1.20.jar",
-      "sha256": "1bcc74e8ce84e2c25eaafde10f1248349cce3062b6e36978cbeec610db1e930a"
+      "sha256": "1bcc74e8ce84e2c25eaafde10f1248349cce3062b6e36978cbeec610db1e930a",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.1.20/kotlin-stdlib-2.1.20.jar"
     },
     {
       "bytes": 1548360,
       "executable": false,
       "path": "compiler-jars/kotlinx-coroutines-core-jvm-1.8.0.jar",
-      "sha256": "9860906a1937490bf5f3b06d2f0e10ef451e65b95b269f22daf68a3d1f5065c5"
+      "sha256": "9860906a1937490bf5f3b06d2f0e10ef451e65b95b269f22daf68a3d1f5065c5",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.8.0/kotlinx-coroutines-core-jvm-1.8.0.jar"
     },
     {
       "bytes": 1407735,
       "executable": false,
       "path": "compiler-jars/rhino-1.7.15.jar",
-      "sha256": "2427fdcbc149ca0a25ccfbb7c71b01f39ad42708773a47816cd2342861766b63"
+      "sha256": "2427fdcbc149ca0a25ccfbb7c71b01f39ad42708773a47816cd2342861766b63",
+      "source": "https://repo.maven.apache.org/maven2/org/mozilla/rhino/1.7.15/rhino-1.7.15.jar"
     },
     {
       "bytes": 17768641,
       "executable": false,
       "path": "compiler-jars/teavm-classlib-0.13.1.jar",
-      "sha256": "a250f7baf877767af72634cd3f19d30f2a6b8a3fb16bd3931b99fde1b17cd12d"
+      "sha256": "a250f7baf877767af72634cd3f19d30f2a6b8a3fb16bd3931b99fde1b17cd12d",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-classlib/0.13.1/teavm-classlib-0.13.1.jar"
     },
     {
       "bytes": 2950160,
       "executable": false,
       "path": "compiler-jars/teavm-core-0.13.1.jar",
-      "sha256": "b9fe1b008512c8f11ff3efbd9cf2f0565b4bfa76943a9f23910befc0812f7ebf"
+      "sha256": "b9fe1b008512c8f11ff3efbd9cf2f0565b4bfa76943a9f23910befc0812f7ebf",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-core/0.13.1/teavm-core-0.13.1.jar"
     },
     {
       "bytes": 13753,
       "executable": false,
       "path": "compiler-jars/teavm-interop-0.13.1.jar",
-      "sha256": "f00f983b986d367799570ab482fee89502915213fe347d361e5bcf1e23a8fa04"
+      "sha256": "f00f983b986d367799570ab482fee89502915213fe347d361e5bcf1e23a8fa04",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-interop/0.13.1/teavm-interop-0.13.1.jar"
     },
     {
       "bytes": 8391,
       "executable": false,
       "path": "compiler-jars/teavm-jso-0.13.1.jar",
-      "sha256": "421b848c79d161c34e9f178d3d37b35e8efaadada487056c3fd3d4d3de1c172c"
+      "sha256": "421b848c79d161c34e9f178d3d37b35e8efaadada487056c3fd3d4d3de1c172c",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-jso/0.13.1/teavm-jso-0.13.1.jar"
     },
     {
       "bytes": 177707,
       "executable": false,
       "path": "compiler-jars/teavm-jso-apis-0.13.1.jar",
-      "sha256": "7a7c211dd03dfbca4445ea5e01b70091226d9e52ce7425d675294ef47a76586b"
+      "sha256": "7a7c211dd03dfbca4445ea5e01b70091226d9e52ce7425d675294ef47a76586b",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-jso-apis/0.13.1/teavm-jso-apis-0.13.1.jar"
     },
     {
       "bytes": 198975,
       "executable": false,
       "path": "compiler-jars/teavm-jso-impl-0.13.1.jar",
-      "sha256": "335778b447c10a8029d59a413c37b3b499f1c34ef9e25b08d11f2414a511df0a"
+      "sha256": "335778b447c10a8029d59a413c37b3b499f1c34ef9e25b08d11f2414a511df0a",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-jso-impl/0.13.1/teavm-jso-impl-0.13.1.jar"
     },
     {
       "bytes": 9696,
       "executable": false,
       "path": "compiler-jars/teavm-metaprogramming-api-0.13.1.jar",
-      "sha256": "c74a51421913054f434a568f4b13cccc6f832cc5af616837332d7caf4a9eed5b"
+      "sha256": "c74a51421913054f434a568f4b13cccc6f832cc5af616837332d7caf4a9eed5b",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-metaprogramming-api/0.13.1/teavm-metaprogramming-api-0.13.1.jar"
     },
     {
       "bytes": 112951,
       "executable": false,
       "path": "compiler-jars/teavm-metaprogramming-impl-0.13.1.jar",
-      "sha256": "56f5536c8287288d823af3ab80874eab2968cda6acbbe3f33c5212c88a4eb890"
+      "sha256": "56f5536c8287288d823af3ab80874eab2968cda6acbbe3f33c5212c88a4eb890",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-metaprogramming-impl/0.13.1/teavm-metaprogramming-impl-0.13.1.jar"
     },
     {
       "bytes": 131492,
       "executable": false,
       "path": "compiler-jars/teavm-platform-0.13.1.jar",
-      "sha256": "ca725f27d0be52d1ddc95e11b63bad8cfe0f66dac9977a46d4089c6282ee1f8e"
+      "sha256": "ca725f27d0be52d1ddc95e11b63bad8cfe0f66dac9977a46d4089c6282ee1f8e",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-platform/0.13.1/teavm-platform-0.13.1.jar"
     },
     {
       "bytes": 126383,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-asm-0.13.1.jar",
-      "sha256": "400496e463dddd878fed2b9b25a66deca2126f71bb68e41f82244b4315006018"
+      "sha256": "400496e463dddd878fed2b9b25a66deca2126f71bb68e41f82244b4315006018",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-asm/0.13.1/teavm-relocated-libs-asm-0.13.1.jar"
     },
     {
       "bytes": 34800,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-asm-analysis-0.13.1.jar",
-      "sha256": "6bb5ef62ab00d557061d9b04dc4571f711fbe11d339783e55029b37b75d5159c"
+      "sha256": "6bb5ef62ab00d557061d9b04dc4571f711fbe11d339783e55029b37b75d5159c",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-asm-analysis/0.13.1/teavm-relocated-libs-asm-analysis-0.13.1.jar"
     },
     {
       "bytes": 73343,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-asm-commons-0.13.1.jar",
-      "sha256": "d49685681db5039075f2fde01568f2bb6df14a99ef88d39b29df8e701e12e140"
+      "sha256": "d49685681db5039075f2fde01568f2bb6df14a99ef88d39b29df8e701e12e140",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-asm-commons/0.13.1/teavm-relocated-libs-asm-commons-0.13.1.jar"
     },
     {
       "bytes": 51412,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-asm-tree-0.13.1.jar",
-      "sha256": "6b475fd62b8ddedfa0808c0c412c311f000a80a13123b6ba07f5da531164fd5b"
+      "sha256": "6b475fd62b8ddedfa0808c0c412c311f000a80a13123b6ba07f5da531164fd5b",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-asm-tree/0.13.1/teavm-relocated-libs-asm-tree-0.13.1.jar"
     },
     {
       "bytes": 94715,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-asm-util-0.13.1.jar",
-      "sha256": "a41247ca7f023959712be0e713d3f2f5687b4dfeda6b112b2d976494d52cdc57"
+      "sha256": "a41247ca7f023959712be0e713d3f2f5687b4dfeda6b112b2d976494d52cdc57",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-asm-util/0.13.1/teavm-relocated-libs-asm-util-0.13.1.jar"
     },
     {
       "bytes": 563696,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-commons-io-0.13.1.jar",
-      "sha256": "5e1a666948a40dada1d3fbce41503bad6ce86035662bf131c8df227b30859a79"
+      "sha256": "5e1a666948a40dada1d3fbce41503bad6ce86035662bf131c8df227b30859a79",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-commons-io/0.13.1/teavm-relocated-libs-commons-io-0.13.1.jar"
     },
     {
       "bytes": 1509391,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-hppc-0.13.1.jar",
-      "sha256": "7b82fedf747e0bf5d7a50acece86a8a684901e469165a3c5621c653128df4cd6"
+      "sha256": "7b82fedf747e0bf5d7a50acece86a8a684901e469165a3c5621c653128df4cd6",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-hppc/0.13.1/teavm-relocated-libs-hppc-0.13.1.jar"
     },
     {
       "bytes": 1426826,
       "executable": false,
       "path": "compiler-jars/teavm-relocated-libs-rhino-0.13.1.jar",
-      "sha256": "49cedc9bfcdd44d30b8bc8d1d46d78fb7f8f2044b8c85c9c3f1ece33e94ee7e9"
+      "sha256": "49cedc9bfcdd44d30b8bc8d1d46d78fb7f8f2044b8c85c9c3f1ece33e94ee7e9",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-relocated-libs-rhino/0.13.1/teavm-relocated-libs-rhino-0.13.1.jar"
     },
     {
       "bytes": 69009,
       "executable": false,
       "path": "compiler-jars/teavm-tooling-0.13.1.jar",
-      "sha256": "b382fd7c02b48c133d27ed4d89047659006c3e275ab97acf3f9d14e432d4cb1a"
+      "sha256": "b382fd7c02b48c133d27ed4d89047659006c3e275ab97acf3f9d14e432d4cb1a",
+      "source": "https://repo.maven.apache.org/maven2/org/teavm/teavm-tooling/0.13.1/teavm-tooling-0.13.1.jar"
     },
     {
       "bytes": 572985,
       "executable": false,
       "path": "compiler-jars/trove4j-1.0.20200330.jar",
-      "sha256": "c5fd725bffab51846bf3c77db1383c60aaaebfe1b7fe2f00d23fe1b7df0a439d"
+      "sha256": "c5fd725bffab51846bf3c77db1383c60aaaebfe1b7fe2f00d23fe1b7df0a439d",
+      "source": "https://repo.maven.apache.org/maven2/org/jetbrains/intellij/deps/trove4j/1.0.20200330/trove4j-1.0.20200330.jar"
     },
     {
       "bytes": 14536,

@@ -26,9 +26,9 @@
     },
     {
       "path": "language/kotlin/host-inputs.json",
-      "bytes": 52575,
+      "bytes": 56953,
       "mode": 420,
-      "sha256": "f9529a37acab9ed9e2fc99201d443d93ef10212a5b9b9d15a4b313cb228c8e62"
+      "sha256": "80a8976cd4314a7b9590441c251ede172b3b1fe0c2327388844d8266e380aa4f"
     },
     {
       "path": "language/kotlin/xmake/adapter.lua",

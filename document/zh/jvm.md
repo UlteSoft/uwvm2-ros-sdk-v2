@@ -4,6 +4,17 @@
 
 使用完整 SDK 提交、平台和语言运行固定入口安装脚本，在 `--` 后传入 `--component synchronous-aot`。安装目录结尾为 `<平台>/<java或kotlin>/synchronous-aot`。该目录包含所选语言、对应 Xmake 适配、共享 AOT 与运行时源码、示例和宿主输入哈希。使用旧 SDK 固定的 Linux x86-64 JVM 宿主包，依据 `language/<语言>/host-inputs.json` 逐文件校验。Java 使用的类路径仅包括清单中的 JAR，不依赖 Kotlin 编译器。另需匹配的 LLVM 及 wasm32 单线程 EH sysroot。
 
+可以从 Ubuntu OpenJDK 21.0.10+7-Ubuntu-125.10、与清单匹配的系统库和 Maven 依赖生成单语言宿主包。脚本优先读取本地 Maven 缓存，也支持从 `--jars DIR` 指定的平铺目录取包。显式使用 `--fetch-missing-jars` 时只从 Maven Central 下载本语言清单内缺少的 JAR。所有文件的长度与 SHA-256 校验成功后才发布输出目录。以下路径对应已验证的 Linux x86-64 宿主。
+
+```sh
+python3 "$UWVM_ROS_SDK_ROOT/language/jvm/prepare_host.py" java \
+  --jdk /usr/lib/jvm/java-21-openjdk-amd64 --system-libs /usr/lib/x86_64-linux-gnu \
+  --fetch-missing-jars --output "$BUILD_DIR/java-host"
+export WROS_JVM_BUNDLE="$BUILD_DIR/java-host"
+```
+
+Kotlin 用户将 `java` 换成 `kotlin`。Java 选择 29 个 JAR，Kotlin 选择 36 个。已有的开发宿主包也可以按 `--jdk`、`--system-libs`、`--jars` 三个目录提供离线输入。
+
 ```sh
 "$UWVM_ROS_SDK_ROOT/bin/wrkotlin" --legacy-mte --main-class example.Main \
   --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --bundle "$WROS_JVM_BUNDLE" \

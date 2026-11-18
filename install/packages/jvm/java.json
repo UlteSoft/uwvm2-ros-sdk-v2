@@ -26,9 +26,9 @@
     },
     {
       "path": "language/java/host-inputs.json",
-      "bytes": 51111,
+      "bytes": 54528,
       "mode": 420,
-      "sha256": "580c518181bb7668167c54707421b5c52a1d3e3d84e05d1bf4d67119e078e1de"
+      "sha256": "1b5b5c2d1c4e9efcd2ba93adf7c43b65abb7ab17d4815d0df01eb7f8ea8a47d3"
     },
     {
       "path": "language/java/xmake/adapter.lua",

@@ -55,6 +55,18 @@ def main():
             report["cases"].append(dict(name=key,argv=list(map(str,args)),exit=proc.returncode,passed=ok))
             save();print(key,proc.returncode,ok,flush=True)
             if not ok: raise RuntimeError(log.decode(errors="replace")[-2200:])
+        host = out / (lang + "-host")
+        prep = [sys.executable, sdk/"language/jvm/prepare_host.py", lang, "--jdk", opts.bundle/"jdk21",
+                "--system-libs", opts.bundle/"lib/host-runtime", "--maven-cache", out/"empty-cache"]
+        corrupt = out / (lang + "-corrupt-jars")
+        corrupt.mkdir()
+        (corrupt/"annotations-13.0.jar").write_bytes(b"incomplete")
+        run("host-content-mismatch", [*prep, "--jars", corrupt, "--output", host], False, b"incomplete host file")
+        assert not host.exists()
+        run("prepare-local-host", [*prep, "--jars", opts.bundle/"compiler-jars", "--output", host])
+        manifest = json.loads((sdk/"language"/lang/"host-inputs.json").read_text())["files"]
+        assert {p.relative_to(host).as_posix() for p in host.rglob("*") if p.is_file()} == {r["path"] for r in manifest}
+        env["WROS_JVM_BUNDLE"] = str(host)
         run("xmake-configure",[opts.xmake,"f","-c","-y","-a","wasm32"])
         run("xmake-build",[opts.xmake,"-j1","robot"])
         run("xmake-hidden",[opts.xmake,"run","robot"],False,b"ROS scene interface is hidden",WROS_RUN_QUERIES="")
@@ -62,7 +74,7 @@ def main():
         guest=next(project.glob("build/*/wasm32/*/robot.wasm"))
         assert {(x["module"],x["name"]) for x in inspect(guest.read_bytes())}=={("uwvm_ros_v2","abi")}
         prior=guest.read_bytes()
-        base=[sdk/"bin"/("wr"+lang),"--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),"--bundle",opts.bundle.resolve(),
+        base=[sdk/"bin"/("wr"+lang),"--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),"--bundle",host,
               "--main-class","example.Main","-o",guest]
         for mode in ([],["--mte"],["--no-mte"]):
             run("unsigned-"+("-".join(mode) or "default"),[*base,*mode,project/("Main."+suffix)],False,b"no signed")
@@ -90,7 +102,7 @@ def main():
         entry=project/("GuardApplication."+suffix)
         guard=out/(lang+"-guard.wasm")
         run("build-guard",[sdk/"bin"/("wr"+lang),"--legacy-mte","--toolchain",opts.toolchain.resolve(),"--sysroots",opts.sysroots.resolve(),
-                           "--bundle",opts.bundle.resolve(),"--main-class","example.GuardApplication","-o",guard,entry])
+                           "--bundle",host,"--main-class","example.GuardApplication","-o",guard,entry])
         ops=("capability.open","capability.close","guard.create","guard.trigger","guard.take")
         assert {(x["module"],x["name"]) for x in inspect(guard.read_bytes())}=={("uwvm_ros_v2",n) for n in ops}
         report["guests"][lang]=hashlib.sha256(guard.read_bytes()).hexdigest()
