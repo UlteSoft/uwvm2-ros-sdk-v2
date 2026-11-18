@@ -19,6 +19,7 @@ bin/wrlua examples/lua/body.lua --ros-abi \
 | `--toolchain DIR` | Prefix containing the SDK's WasmMTE-capable Clang and linker. |
 | `--sysroots FILE` | Build receipt for matching target headers and libraries. |
 | `--target wasm32` or `--target wasm64` | Guest pointer width. The default is wasm32. |
+| `--guest-seed UINT32` | Use a guest-local, publicly known unsigned 32-bit seed for hash initialization, sort pivots and the initial math PRNG state. The final guest imports no clock. With `--ros-abi`, its only import is `uwvm_ros_v2.abi`. This mode enables repeatable pseudo-random sequences and offers no unpredictable hash seed for adversarial table keys. |
 | `--ros-abi` | Register `wros.abi()` in Lua and link its ROSv2 import. |
 
 This interpreter build uses Wasm Core 3.0, C++ exceptions for Lua protected calls, WasmMTE by default and a single guest thread. Optimization and debug symbols are enabled together. Each call of `_start` creates a fresh Lua state with a 16 MiB limit on live Lua heap allocations. Set the overall Wasm memory and execution limits in the VM. Embedded chunk text is part of the compiled module and can be read from the artifact.
@@ -27,7 +28,7 @@ This interpreter build uses Wasm Core 3.0, C++ exceptions for Lua protected call
 
 The guest exposes the base, table, string, math, UTF-8 and coroutine libraries. General file and OS access, package loading, debug library access, and the base functions `dofile`, `loadfile`, `load`, `print` and `warn` are unavailable. Uncaught Lua errors and syntax errors trap the guest. An application can catch errors raised inside `pcall` and continue. Coroutines share the guest thread.
 
-The runtime uses Preview1 `clock_time_get` for upstream seeding and sort pivot selection. A wasm64 build imports `clock_time_get_wasm64`. The VM must expose this import for linking. Realtime and monotonic read grants can be controlled separately. If a read is denied, the runtime has a fallback seed or pivot; `math.random` is unsuitable for generating secrets.
+By default, the runtime uses Preview1 `clock_time_get` for upstream seeding and sort pivot selection. A wasm64 build imports `clock_time_get_wasm64`. The VM must expose this import for linking. Realtime and monotonic read grants can be controlled separately. If the VM denies an individual read, Lua can still initialize a seed or select a pivot. The guest-seeded mode also disables the clock lookup in the single-threaded C library’s timed-wait fallback. The linker output is checked against the permitted imports for the selected mode. Use a cryptographic source for secrets.
 
 `--ros-abi` adds the import `uwvm_ros_v2.abi`. A VM deployment must bind the guest to a scene and expose `abi` there. The build flag only changes the guest API. This Lua profile currently exposes the ABI query as its ROS operation. Additional sensor, model and vendor operations need language bindings with their own tests.
 

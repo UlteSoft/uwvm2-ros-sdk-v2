@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "bin/wrrust",
-      "bytes": 8550,
+      "bytes": 8823,
       "mode": 493,
-      "sha256": "6453e408f708d3028e068a076e45f4cf6a71006770f6d1b03e06fa93a5c2e02b"
+      "sha256": "f54063932bee3a850a3455e1e44e3ad0d7475c5a8ed91b7b1191bcf215120840"
     },
     {
       "path": "document/en/rust.md",
@@ -20,9 +20,9 @@
     },
     {
       "path": "language/rs/xmake/adapter.lua",
-      "bytes": 1590,
+      "bytes": 1641,
       "mode": 420,
-      "sha256": "09444681fa67065639f11c33d1370955011fbed7cfc277dbaca58864e9d79e88"
+      "sha256": "5fd7424013691a7d4bc6b9426416448e774f7cb17da6ad6520ce1f3f32795550"
     },
     {
       "path": "language/rust/scene.rs",

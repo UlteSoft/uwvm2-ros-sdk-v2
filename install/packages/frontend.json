@@ -7,10 +7,22 @@
       "sha256": "e4bad02ced4a04ac71b90c94dbf4a23e9efc09f51fe3ca1914cd78746a4709a9"
     },
     {
+      "path": "document/en/memory-qualification.md",
+      "bytes": 8709,
+      "mode": 420,
+      "sha256": "5d4cc2a13ab0b32ed5afdcc5183e57ed4625c25ad33c9ec0fd6b1ebc6bafd6c3"
+    },
+    {
       "path": "document/en/memtag.md",
       "bytes": 7037,
       "mode": 420,
       "sha256": "a3a16921cfa67724b468479d93e100ea675acb8204a6e862e1d131921d7d39f8"
+    },
+    {
+      "path": "document/zh/memory-qualification.md",
+      "bytes": 7669,
+      "mode": 420,
+      "sha256": "39ed996f029fa385aeefc7b20038dd4b6b4655d6f82f6b656ed50dcaea309fde"
     },
     {
       "path": "document/zh/memtag.md",
@@ -26,9 +38,9 @@
     },
     {
       "path": "install/artifacts.py",
-      "bytes": 9748,
+      "bytes": 10513,
       "mode": 420,
-      "sha256": "52880cbd8590daefc12c3a2ad1ff71029bd89d49419e72e70a579b9919191af7"
+      "sha256": "e84c7dd8d29811d91ff790cd0a02437437520fad28aaed86a67b7e8a4fb17c45"
     },
     {
       "path": "install/compiler.py",
@@ -38,9 +50,9 @@
     },
     {
       "path": "install/frontend.py",
-      "bytes": 6818,
+      "bytes": 6941,
       "mode": 420,
-      "sha256": "88d6f5926ade6a8abc6bd8d98baecc3b09ba9e29514dd165595aa0e92455df85"
+      "sha256": "0bf39b4d5a95075c2d7791f6f3c69ab5195f41e8b6465faf4f982292b725d095"
     },
     {
       "path": "install/guest_profile.py",
@@ -53,6 +65,24 @@
       "bytes": 9179,
       "mode": 420,
       "sha256": "764e649dd56b5754fc9b0a9091393a0f6d1b08078b960e2aa1cca07b57d4ba4b"
+    },
+    {
+      "path": "install/local_release.py",
+      "bytes": 4674,
+      "mode": 420,
+      "sha256": "fe90deb15e2b79ed0a5b77a140fe1b49f24fa1c5cad556d812715cc2a8ec84e7"
+    },
+    {
+      "path": "install/qualification.py",
+      "bytes": 14894,
+      "mode": 420,
+      "sha256": "4c361b39c87739d8bf042051872bb1076e397b221bb556e56ee70469d401ccf9"
+    },
+    {
+      "path": "share/qualification/memory-neighbors.json",
+      "bytes": 91,
+      "mode": 420,
+      "sha256": "d3550dbffd019cba1ef5766e8f3f2353914829bfb7a338213bae26974837131c"
     }
   ]
 }

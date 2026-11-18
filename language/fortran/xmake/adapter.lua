@@ -12,7 +12,7 @@ end
 function build(target, req, sources)
     local args = {"--target", req.arch, "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN"),
         "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to a matching receipt"),
-        req.mte and "--mte" or "--no-mte", req.eh and "--eh" or "--no-eh"}
+        req.mte_flag, req.eh and "--eh" or "--no-eh"}
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3", smallest = "s"}
     table.insert(args, "-O" .. assert(levels[target:get("optimize") or "fastest"], "Unsupported optimization"))
     for _, symbol in ipairs(table.wrap(target:get("symbols"))) do
@@ -27,5 +27,6 @@ function build(target, req, sources)
         assert(provider and provider.kind == "static", "Fortran dependencies must be checked WROS static archives")
         table.join2(args, {"--link-object", dep:targetfile()})
     end
+    if req.build_receipt then table.insert(args, "--build-receipt") end
     os.vrunv(req.program, table.join(args, sources, {"-o", target:targetfile()}))
 end

@@ -14,9 +14,11 @@ end
 
 function build(target, req, sources)
     assert(#sources == 1 and #target:orderdeps() == 0, "Lua expects one application script")
-    local args = {sources[1], "--target", req.arch, req.mte and "--mte" or "--no-mte",
+    local args = {sources[1], "--target", req.arch, req.mte_flag,
                   "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN"),
                   "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to a matching receipt")}
+    if req.lua_seed then table.insert(args, "--guest-seed"); table.insert(args, req.lua_seed) end
     if req.lua_abi then table.insert(args, "--ros-abi") end
+    if req.build_receipt then table.insert(args, "--build-receipt") end
     os.vrunv(req.program, table.join(args, {"-o", target:targetfile()}))
 end

@@ -56,9 +56,9 @@
     },
     {
       "path": "language/fortran/frontend_fortran.py",
-      "bytes": 8796,
+      "bytes": 9021,
       "mode": 420,
-      "sha256": "e0622f31c7d6f6f0fed9d185e8475e577812ebfa10d4f50c8b487ea2ad15c43b"
+      "sha256": "0700aad46b18f681aec2a43c4f68f7819ce17d5999d2abc3213853cc129d3e66"
     },
     {
       "path": "language/fortran/mark_mte.cpp",
@@ -74,9 +74,9 @@
     },
     {
       "path": "language/fortran/xmake/adapter.lua",
-      "bytes": 1801,
+      "bytes": 1852,
       "mode": 420,
-      "sha256": "626aadc91b62c12644949c26606609e96815a6a38c4e9ab26d1670adcac997f2"
+      "sha256": "1f0f0a08132dc811a88206033d0628c8a9e3a2930c09164775d398e131d887fa"
     },
     {
       "path": "third-parties/fortran/LICENSE.TXT",

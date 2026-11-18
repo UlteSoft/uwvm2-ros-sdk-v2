@@ -15,6 +15,7 @@ from compiler import compiler_environment, make_command
 from prepare import require_marker
 from flang_identity import require_compiler
 from guest_profile import Profile
+import qualification
 KINDS = {"i32": ("int32_t", 4), "i64": ("int64_t", 8)}
 FORMS = {".f90", ".f95", ".f03", ".f08", ".f18"}
 
@@ -47,7 +48,7 @@ def write_bindings(work):
     (work / "wros_imports.c").write_text("\n".join(header) + "\n")
 
 
-def lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source, work, i):
+def lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source, work, i, release):
     """Keep every user function in the common LLVM optimization/MTE pipeline."""
     ir, bc, obj = [work / (str(i) + suffix) for suffix in (".ll", ".bc", ".o")]
     env = compiler_environment(toolchain)
@@ -60,7 +61,7 @@ def lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source,
         flags.append("-g")
     cmd, provenance = make_command(toolchain, receipts, profile, "c", flags, verify=True)
     subprocess.run([*cmd, bc, "-o", obj], check=True, cwd=work, env=env)
-    obj.write_bytes(seal_object(read_bounded(obj), profile.to_dict(), provenance["compiler_sha256"], provenance["closure_sha256"]))
+    obj.write_bytes(seal_object(read_bounded(obj), profile.to_dict(), provenance["compiler_sha256"], provenance["closure_sha256"], release))
     return obj
 
 
@@ -92,7 +93,7 @@ def main():
     parser.add_argument("-g", action="store_true")
     parser.add_argument("--core", choices=("mvp", "3.0"), default="3.0")
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=None)
-    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    qualification.arguments(parser)
     parser.add_argument("-pthread", "--threads", action="store_true")
     parser.add_argument("--link-object", action="append", type=Path, default=[],
                         help="WROS-sealed guest object/archive for the selected profile")
@@ -114,13 +115,14 @@ def main():
         receipts = [p.resolve(strict=True) for p in opts.sysroots]
         compiler = (opts.flang or toolchain / "bin/flang").resolve(strict=True)
         marker = (opts.mte_tool or toolchain / "bin/wros-flang-mte").resolve(strict=True)
-        require_compiler(compiler, opts.flang is not None)
-        require_marker(marker, toolchain)
         env = compiler_environment(toolchain)
         bits = int(opts.target[4:])
         eh = opts.core == "3.0" if opts.eh is None else opts.eh
         profile = Profile(bits, wasm_version="1.0" if opts.core == "mvp" else "3.0",
                           threads=opts.threads, mte=opts.mte, exceptions="eh" if eh else "noeh")
+        admission = qualification.admit("fortran", opts, profile, {"flang": compiler, "marker": marker})
+        require_compiler(compiler, opts.flang is not None)
+        require_marker(marker, toolchain)
         with tempfile.TemporaryDirectory(dir=output.parent) as scratch:
             work = Path(scratch)
             fc = ["-fc1", "-triple", opts.target + "-unknown-wasip1",
@@ -131,20 +133,22 @@ def main():
                 subprocess.run([compiler, *fc, "-cpp", "-fsyntax-only", mod_dir / (name + ".f90")],
                                check=True, cwd=work, env=env)
             subprocess.run([compiler, *fc, "-fsyntax-only", work / "wros_scene.f90"], check=True, cwd=work, env=env)
-            units = [lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source, work, i)
+            units = [lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source, work, i, admission.get("release_sha256"))
                      for i, source in enumerate(sources)]
             flags = ["--toolchain", toolchain, "--target", opts.target, "-O" + opts.O]
             for receipt in receipts:
                 flags.extend(("--sysroots", receipt))
-            flags.extend(("--core", opts.core, "--eh" if eh else "--no-eh", "--mte" if opts.mte else "--no-mte"))
+            flags.extend(("--core", opts.core, "--eh" if eh else "--no-eh", qualification.switch(opts)))
             if opts.threads:
                 flags.append("--threads")
             if opts.g:
                 flags.append("-g")
             runtime = numerical_runtime([sys.executable, ROOT / "bin/wrcc", *flags], env, work, toolchain)
+            staged = work / "guest.wasm"
             subprocess.run([sys.executable, ROOT / "bin/wrc", *flags, "--reactor", "--export", "_start",
                             *units, work / "wros_imports.c", ROOT / "language/fortran/entry.c",
-                            *objects, runtime, "-o", output], check=True, cwd=work, env=env)
+                            *objects, runtime, "-o", staged], check=True, cwd=work, env=env)
+            qualification.finish(admission, opts, staged, output)
         return 0
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as exc:
         parser.exit(1, f"wrfortran: {exc}\n")

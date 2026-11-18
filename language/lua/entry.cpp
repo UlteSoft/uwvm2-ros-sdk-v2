@@ -10,6 +10,18 @@
 #include "lualib.h"
 #include <cstdlib>
 #include "chunk.inc"
+#ifdef WROS_LUA_GUEST_CLOCKLESS
+#include <cerrno>
+#include <ctime>
+
+// The single-threaded wasi-libc futex fallback can consult absolute time when
+// given a deadline. No Lua library exposes timed waits in this profile. Make
+// such a request return an explicit error without acquiring a clock import.
+extern "C" int __clock_gettime(clockid_t, struct timespec *) {
+    errno = ENOTSUP;
+    return -1;
+}
+#endif
 #ifdef WROS_LUA_ABI
 #include <wros/scene.h>
 static int abi(lua_State *state) {

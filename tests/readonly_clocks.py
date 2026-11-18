@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from separate_compilation import Profile, cgroup_record, inspect, sha
+from separate_compilation import Profile, cgroup_record, inspect, sha, candidate_arguments, candidate_command
 
 GUEST = """
 #include <wasi/api.h>
@@ -35,6 +35,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("toolchain", "sysroots", "runtime", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
+    candidate_arguments(parser)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     work = args.output.resolve()
@@ -52,7 +53,7 @@ def main():
         (work / "results.json").write_text(json.dumps(record, indent=2) + "\n")
 
     def run(name, argv, expected_error=None):
-        command = list(map(str, argv))
+        command = candidate_command(argv, args.candidate_mte)
         result = subprocess.run(command, cwd=work, capture_output=True, timeout=120)
         (work / (name + ".stderr")).write_bytes(result.stderr)
         record["cases"].append(dict(name=name, command=command, exit=result.returncode))

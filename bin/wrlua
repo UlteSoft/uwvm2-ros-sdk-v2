@@ -10,6 +10,11 @@ import tarfile
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "install"))
+from guest_profile import Profile
+from imports import inspect
+import qualification
+
 ARCHIVE = ROOT / "third-parties/lua/lua-5.4.9.tar.gz"
 SHA256 = "2335b6c582a52654f94612bf10d2f4672805d05329aa6568b1d8cd9e5c6fb8e6"
 CORE = ("lapi lcode lctype ldebug ldo ldump lfunc lgc llex lmem lobject lopcodes "
@@ -17,7 +22,7 @@ CORE = ("lapi lcode lctype ldebug ldo ldump lfunc lgc llex lmem lobject lopcodes
         "lcorolib lmathlib lstrlib ltablib lutf8lib").split()
 
 
-def prepare(directory):
+def prepare(directory, guest_seed=None):
     archive = ARCHIVE.read_bytes()
     if hashlib.sha256(archive).hexdigest() != SHA256:
         raise ValueError("Lua source archive digest mismatch")
@@ -37,7 +42,7 @@ def prepare(directory):
                     if data.count(entry) != 1:
                         raise ValueError("unexpected upstream base library registration")
                     data = data.replace(entry, "")
-            if path.stem == "ltablib":
+            if path.stem == "ltablib" and guest_seed is None:
                 # Upstream only uses clock() for pivot selection after a bad
                 # partition. Preview1 supplies wall/monotonic clock reads.
                 data = data.replace("clock_t c = clock();", "struct timespec tmono = {};\n"
@@ -52,6 +57,20 @@ def prepare(directory):
             config = ("#define lua_writestring(s,l) ((void)0)\n"
                       "#define lua_writeline() ((void)0)\n"
                       "#define lua_writestringerror(s,p) ((void)0)\n")
+            if guest_seed is not None:
+                # Upstream offers hooks for string hashes and sort pivots. The
+                # pinned math library additionally seeds its generator from the
+                # clock and a state pointer; provide both seed words explicitly.
+                if path.stem == "lstate":
+                    config += f"#define luai_makeseed(L) {guest_seed}U\n"
+                elif path.stem == "ltablib":
+                    config += f"#define l_randomizePivot() ({guest_seed}U | 1U)\n"
+                elif path.stem == "lmathlib":
+                    old = ("lua_Unsigned seed1 = (lua_Unsigned)time(NULL);\n"
+                           "  lua_Unsigned seed2 = (lua_Unsigned)(size_t)L;")
+                    if data.count(old) != 1:
+                        raise ValueError("unexpected upstream math seed initialization")
+                    data = data.replace(old, f"lua_Unsigned seed1 = {guest_seed}U;\n  lua_Unsigned seed2 = 0;")
             (directory / (path.stem + ".cpp")).write_bytes((config + data).encode("utf-8", errors="surrogateescape"))
     return [directory / (name + ".cpp") for name in CORE]
 
@@ -63,9 +82,15 @@ def main():
     parser.add_argument("--target", default="wasm32", choices=("wasm32", "wasm64"))
     parser.add_argument("--toolchain", type=Path, required=True)
     parser.add_argument("--sysroots", type=Path, required=True)
-    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    qualification.arguments(parser)
     parser.add_argument("--ros-abi", action="store_true", help="expose wros.abi() inside Lua")
+    parser.add_argument("--guest-seed", type=int, metavar="UINT32",
+                        help="use an explicit non-secret seed inside the guest without importing a host clock")
     args = parser.parse_args()
+    if args.guest_seed is not None and not 0 <= args.guest_seed <= 0xffffffff:
+        parser.error("--guest-seed must be an unsigned 32-bit integer")
+    profile = Profile(int(args.target[4:]), mte=args.mte)
+    admission = qualification.admit("lua", args, profile)
     if args.script.resolve() == args.output.resolve():
         parser.error("script and output must differ")
     with args.script.open("rb") as stream:
@@ -74,17 +99,28 @@ def main():
         parser.error("expected up to 1 MiB of Lua text")
     with tempfile.TemporaryDirectory(dir=args.output.parent) as scratch:
         directory = Path(scratch).resolve()
-        units = prepare(directory)
+        units = prepare(directory, args.guest_seed)
         # Encode bytes as fixed-width octal so application text cannot become C++.
         literal = "\n".join('"' + "".join("\\%03o" % b for b in data[i:i+128]) + '"'
                             for i in range(0, len(data), 128)) or '""'
         (directory / "chunk.inc").write_text("static const char script[] = " + literal + ";\n")
         cmd = [sys.executable, ROOT / "bin/wrcc", "--toolchain", args.toolchain, "--sysroots",
-               args.sysroots, "--target", args.target, "--mte" if args.mte else "--no-mte", "--reactor", "--export", "_start",
+               args.sysroots, "--target", args.target, qualification.switch(args), "--reactor", "--export", "_start",
                "-O3", "-g", "-Dl_signalT=int", "-DLUA_USE_JUMPTABLE=0", "-I", directory]
+        if args.guest_seed is not None:
+            cmd += ["-D", "WROS_LUA_GUEST_CLOCKLESS"]
         if args.ros_abi:
             cmd += ["-D", "WROS_LUA_ABI"]
-        subprocess.run([*cmd, ROOT / "language/lua/entry.cpp", *units, "-o", args.output], check=True)
+        staged = directory / "guest.wasm"
+        subprocess.run([*cmd, ROOT / "language/lua/entry.cpp", *units, "-o", staged], check=True)
+        imports = {(entry["module"], entry["name"]) for entry in inspect(staged.read_bytes())}
+        expected = {("uwvm_ros_v2", "abi")} if args.ros_abi else set()
+        if args.guest_seed is None:
+            clock = "clock_time_get_wasm64" if args.target == "wasm64" else "clock_time_get"
+            expected.add(("wasi_snapshot_preview1", clock))
+        if imports != expected:
+            raise ValueError("unexpected embedded Lua interfaces: " + str(sorted(imports)))
+        qualification.finish(admission, args, staged, args.output)
 
 
 if __name__ == "__main__":

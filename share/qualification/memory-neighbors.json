@@ -1,0 +1,5 @@
+{
+  "format": "wros-memory-neighbor-releases",
+  "managed_gap_bytes": 64,
+  "routes": []
+}

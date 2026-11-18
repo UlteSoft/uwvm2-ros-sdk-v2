@@ -15,6 +15,7 @@ def main():
         parser.add_argument("--" + name, required=True, type=lambda value: Path(value).resolve())
     parser.add_argument("--sysroots", action="append", required=True, type=lambda value: Path(value).resolve())
     parser.add_argument("--address-bits", type=int, nargs="+", choices=(32, 64), default=(32, 64))
+    parser.add_argument("--eh", action="store_true")
     args = parser.parse_args()
     if not args.output.is_relative_to(ROOT / ".tmp"):
         parser.error("choose an unused directory in the SDK .tmp")
@@ -40,12 +41,12 @@ def main():
     for bits in dict.fromkeys(args.address_bits):
         name = "libc" + str(bits)
         module = args.output / (name + ".wasm")
-        profile = Profile(bits, exceptions="noeh")
+        profile = Profile(bits, exceptions="eh" if args.eh else "noeh")
         command, _ = make_command(args.toolchain, args.sysroots, profile, "c",
                                   ["-O3", "-g", "-mexec-model=reactor", "-Wl,--export=_start",
                                    "-Wl,--wrap=malloc,--wrap=free,--wrap=__wasi_poll_oneoff", str(source),
                                    "-lc-printscan-long-double", "-o", str(module)], verify=True)
-        run(name + "-build", command, compiler_environment(args.toolchain))
+        run(name + "-build", command, {**compiler_environment(args.toolchain), "TMPDIR": str(args.output)})
         imports = inspect(module.read_bytes())
         grants = []
         clock = "clock_time_get" if bits == 32 else "clock_time_get_wasm64"

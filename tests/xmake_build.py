@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 
-from separate_compilation import cgroup_record, inspect, sha
+from separate_compilation import candidate_arguments, cgroup_record, inspect, sha
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
@@ -25,9 +25,10 @@ def main():
     parser.add_argument("--rustroot", type=Path)
     parser.add_argument("--goroot", type=Path)
     parser.add_argument("--tinygoroot", type=Path)
+    candidate_arguments(parser)
     args = parser.parse_args()
     work = args.output.resolve()
-    record = dict(complete=False, cgroup=cgroup_record(), commit=args.commit, cases=[], modules={})
+    record = dict(complete=False, cgroup=cgroup_record(), commit=args.commit, candidate_mte=args.candidate_mte, cases=[], modules={})
     work.mkdir(parents=True, exist_ok=False)
     tmp = work / "tmp"
     tmp.mkdir()
@@ -58,12 +59,23 @@ def main():
             raise RuntimeError(name + ": " + log.decode(errors="replace")[-1500:])
         print(name, flush=True)
 
+    def select_candidate(directory):
+        if args.candidate_mte:
+            script = directory / "xmake.lua"
+            script.write_text(script.read_text().replace("target_end()", 'set_wros_profile({mte="legacy"})\ntarget_end()'))
+
     demo = work / "demo"
     shutil.copytree(Path(env["SELECTION_C"]) / "examples/c", demo)
+    demo_script = demo / "xmake.lua"
+    demo_script.write_text(demo_script.read_text().replace("target_end()", "set_wros_profile({build_receipt=true})\ntarget_end()"))
+    select_candidate(demo)
     for arch in ("wasm32", "wasm64"):
         run("configure-" + arch, demo, [xmake, "f", "-c", "-y", "-a", arch])
         run("build-" + arch, demo, [xmake, "-j1", "robot"])
         module = next(demo.glob("build/*/" + arch + "/*/robot.wasm"))
+        receipt = json.loads(Path(str(module) + ".wros-build.json").read_bytes())
+        if receipt["artifact_sha256"] != sha(module) or receipt["mode"] != ("legacy" if args.candidate_mte else "strict"):
+            raise AssertionError("linked artifact build receipt mismatch")
         rows = inspect(module.read_bytes())
         if [(r["module"], r["name"]) for r in rows] != [("uwvm_ros_v2", "abi")]:
             raise AssertionError(rows)
@@ -118,6 +130,7 @@ target("body")
     add_files("body.cpp")
 target_end()
 ''')
+    select_candidate(multi)
     run("two-selection-configure", multi, [xmake, "f", "-c", "-y"])
     run("two-selection-build", multi, [xmake, "-j1", "body"])
     run("two-selection-run", multi, [xmake, "run", "body"], WROS_RUN_QUERIES="abi")
@@ -136,6 +149,7 @@ target("script")
     add_files("body.lua")
 target_end()
 ''')
+    select_candidate(lua)
     run("lua-configure", lua, [xmake, "f", "-c", "-y"])
     run("lua-build", lua, [xmake, "-j1", "script"])
     run("lua-run", lua, [xmake, "run", "script"], WROS_RUN_QUERIES="abi,realtime-clock")
@@ -172,6 +186,8 @@ target_end()
                 + 'target("robot")\nset_kind("binary")\nset_ros_platform("unitree")\nset_language("' + language + '")\n'
                 + ('set_wros_profile({mte=false})\n' if not mte else '')
                 + 'set_symbols("debug")\nset_optimize("fastest")\nadd_files("' + source + '")\ntarget_end()\n')
+            if mte:
+                select_candidate(project)
             run(label + "-configure", project, [xmake, "f", "-c", "-y"], **settings)
             run(label + "-build", project, [xmake, "-j1", "robot"], **settings)
             module = next(project.glob("build/*/wasm32/*/robot.wasm"))

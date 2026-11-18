@@ -42,11 +42,35 @@ def cgroup_record():
     raise RuntimeError("no visible 64 GiB zero-swap ancestor; use the repository gate")
 
 
+def candidate_arguments(parser):
+    parser.add_argument("--candidate-mte", action="store_true",
+                        help="test an unreviewed instrumented producer using the explicit legacy admission path")
+
+
+def candidate_command(command, enabled):
+    """Allow independent release evidence to be collected before strict admission.
+
+    Only alter the frontends' own arguments. VM, native compiler, archiver and
+    explicit whole-target opt-out commands keep their original arguments.
+    """
+    args = list(map(str, command))
+    if enabled and args:
+        index = 1 if Path(args[0]).name.startswith("python") else 0
+        if (index < len(args) and Path(args[index]).name in {"wrc", "wrcc", "wrfortran", "wrtinygo", "wrrust", "wrlua"}
+                and "--no-mte" not in args and "--legacy-mte" not in args):
+            if "--mte" in args:
+                args[args.index("--mte")] = "--legacy-mte"
+            else:
+                args.insert(index + 1, "--legacy-mte")
+    return args
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("frontend-root", "toolchain", "sysroots", "runtime", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--no-mte-sysroots", type=Path)
+    candidate_arguments(parser)
     options = parser.parse_args()
     controller = cgroup_record()
     front, toolchain, receipt, runtime, work = [getattr(options, name).resolve() for name in
@@ -69,7 +93,7 @@ def main():
         (work / "results.json").write_text(json.dumps(result, indent=2) + "\n")
 
     def run(label, argv, ok=True, error=None):
-        cmd = list(map(str, argv))
+        cmd = candidate_command(argv, options.candidate_mte)
         proc = subprocess.run(cmd, cwd=work, capture_output=True, timeout=120)
         (work / (label + ".stdout")).write_bytes(proc.stdout)
         (work / (label + ".stderr")).write_bytes(proc.stderr)

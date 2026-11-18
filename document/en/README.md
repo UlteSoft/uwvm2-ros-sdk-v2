@@ -1,6 +1,7 @@
 # WROS SDK developer guide
 
 [WasmMTE detection guarantees](memtag.md)
+- [Qualify and sign a local memory-tagging toolchain](memory-qualification.md)
 
 For driver/model security and the division between Wasm and deployment authority,
 read [Local driver and model attachments](local-attachments.md).

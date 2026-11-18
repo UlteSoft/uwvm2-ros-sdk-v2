@@ -18,11 +18,12 @@ function build(target, req, sources)
     assert(#sources == 1 and path.filename(sources[1]) == "go.mod" and #target:orderdeps() == 0,
            "TinyGo expects one go.mod file for the main package")
     local args = {path.directory(path.absolute(sources[1])), "--target", req.arch, "--core", req.core,
-        req.eh and "--eh" or "--no-eh", req.mte and "--mte" or "--no-mte",
+        req.eh and "--eh" or "--no-eh", req.mte_flag,
         "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN"),
         "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to a matching receipt"),
         "--goroot", assert(os.getenv("WROS_GOROOT"), "Set WROS_GOROOT"),
         "--tinygoroot", assert(os.getenv("WROS_TINYGOROOT"), "Set WROS_TINYGOROOT")}
     if os.getenv("WROS_HOST_CXX") then table.join2(args, {"--host-cxx", os.getenv("WROS_HOST_CXX")}) end
+    if req.build_receipt then table.insert(args, "--build-receipt") end
     os.vrunv(req.program, table.join(args, {"-o", target:targetfile()}))
 end

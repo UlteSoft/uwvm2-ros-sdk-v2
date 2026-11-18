@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from separate_compilation import Profile, cgroup_record, inspect, sha
+from separate_compilation import Profile, cgroup_record, inspect, sha, candidate_arguments, candidate_command
 
 ROOT = Path(__file__).resolve().parents[1]
 LIBRARIES = """
@@ -24,6 +24,20 @@ assert(ok and value == 42)
 -- allocator and interpreter must remain usable after Lua's emergency GC.
 assert(not pcall(string.rep, "x", 20 * 1024 * 1024))
 assert(string.rep("x", 5) == "xxxxx")
+for _, mode in ipairs({"incremental", "generational"}) do
+    collectgarbage(mode)
+    local retained = {}
+    for cycle = 1, 4 do
+        for i = 1, 80 do
+            retained[i] = {n = i, bytes = string.rep(string.char(i), 11 + i)}
+        end
+        for i = 2, 80, 2 do retained[i] = nil end
+        collectgarbage("collect")
+        for i = 1, 80, 2 do
+            assert(retained[i].n == i and retained[i].bytes:byte(11 + i) == i)
+        end
+    end
+end
 """
 
 
@@ -31,8 +45,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("toolchain", "sysroots", "runtime", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--address-bits", type=int, nargs="+", choices=(32, 64), default=(32, 64))
     parser.add_argument("--frontend-root", type=Path, default=ROOT)
     parser.add_argument("--no-mte", action="store_true", help="build and run the entire Lua interpreter without WasmMTE")
+    candidate_arguments(parser)
     args = parser.parse_args()
     front, tc, sr, vm, work = (path.resolve() for path in
         (args.frontend_root, args.toolchain, args.sysroots, args.runtime, args.output))
@@ -52,10 +68,10 @@ def main():
         (work / "results.json").write_text(json.dumps(result, indent=2) + "\n")
 
     def run(label, argv, diagnostic=None):
-        command = list(map(str, argv))
+        command = candidate_command(argv, args.candidate_mte)
         proc = subprocess.run(command, cwd=work, capture_output=True, timeout=150)
         (work / (label + ".stderr")).write_bytes(proc.stderr)
-        result["cases"].append(dict(name=label, argv=command, exit=proc.returncode))
+        result["cases"].append(dict(name=label, argv=command, exit=proc.returncode, expected_success=diagnostic is None))
         save()
         if diagnostic is None:
             proc.check_returncode()
@@ -63,26 +79,33 @@ def main():
             raise RuntimeError(label + ": " + proc.stderr.decode(errors="replace")[-1500:])
         print(label, flush=True)
 
-    for bits in (32, 64):
+    for bits in dict.fromkeys(args.address_bits):
         clock = "clock_time_get" + ("_wasm64" if bits == 64 else "")
         compiler = [sys.executable, front / "bin/wrlua", "--toolchain", tc, "--sysroots", sr,
                     "--target", f"wasm{bits}"]
         if args.no_mte:
             compiler.append("--no-mte")
-        for mode in ("permitted", "standalone", "syntax-error"):
+        for mode in ("permitted", "standalone", "guest-only", "ros-only", "syntax-error"):
+            seeded = mode in ("guest-only", "ros-only")
+            ros = mode in ("permitted", "ros-only")
             label = f"{mode}{bits}"
             body = work / (label + ".lua")
             text = (front / "examples/lua/body.lua").read_text()
-            body.write_text((text if mode == "permitted" else "assert(wros == nil)\n") +
+            body.write_text((text if ros else "assert(wros == nil)\n") +
                             LIBRARIES if mode != "syntax-error" else "local incomplete =")
+            if seeded:
+                with body.open("a") as stream:
+                    stream.write("\nlocal a,b=math.randomseed(); assert(a==4294967295 and b==0)\n")
             app = work / (label + ".wasm")
             build = [*compiler, body, "-o", app]
-            if mode == "permitted":
+            if ros:
                 build += ["--ros-abi"]
+            if seeded:
+                build += ["--guest-seed", "4294967295"]
             run(label + "-compile", build)
             imports = inspect(app.read_bytes())
-            expected = {("wasi_snapshot_preview1", clock)}
-            if mode == "permitted":
+            expected = set() if seeded else {("wasi_snapshot_preview1", clock)}
+            if ros:
                 expected.add(("uwvm_ros_v2", "abi"))
             if {(r["module"], r["name"]) for r in imports} != expected:
                 raise RuntimeError(f"unexpected final import set: {imports}")
@@ -90,12 +113,14 @@ def main():
             for engine in ("int", "aot"):
                 base = [vm, *Profile(bits).uwvm_feature_flags(), "--runtime-" + engine,
                         "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
-                        "--wasm-set-main-module-name", "main", "--wasip1-single-create", "main",
-                        "--wasip1-single-enable", "main", "--wasip1-single-interface", "main", clock, "allow"]
+                        "--wasm-set-main-module-name", "main"]
+                if not seeded:
+                    base += ["--wasip1-single-create", "main", "--wasip1-single-enable",
+                             "main", "--wasip1-single-interface", "main", clock, "allow"]
                 if args.no_mte:
                     base.append("--wasm-feature-disable-memtag-extension")
-                granted = [*base, "--wasip1-single-grant", "main", "realtime-clock"]
-                if mode == "permitted":
+                granted = base.copy() if seeded else [*base, "--wasip1-single-grant", "main", "realtime-clock"]
+                if ros:
                     bound = ["--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main",
                              "--ros-scene-interface", "robot", "abi", "allow"]
                     run(label + "-abi-denied-" + engine, [*granted, "--run", app], b"ROS scene interface is hidden")

@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 import subprocess
 
-from separate_compilation import Profile, cgroup_record, sha
+from separate_compilation import Profile, cgroup_record, sha, candidate_arguments, candidate_command
 from imports import inspect
 
 
@@ -14,6 +14,7 @@ def main():
     for key in ("rustroot", "toolchain", "sysroots", "plain-sysroots", "runtime", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--sdk", type=Path, default=Path(__file__).resolve().parents[1])
+    candidate_arguments(parser)
     args = parser.parse_args()
     sdk, work, rust, tool, runtime = [p.resolve() for p in
         (args.sdk, args.output, args.rustroot, args.toolchain, args.runtime)]
@@ -31,7 +32,7 @@ def main():
         report.write_text(json.dumps(receipt, indent=2) + "\n")
 
     def run(name, cmd, expected=True, diagnostic=None):
-        command = list(map(str, cmd))
+        command = candidate_command(cmd, args.candidate_mte)
         result = subprocess.run(command, capture_output=True, timeout=360, cwd=work)
         (work / (name + ".stdout")).write_bytes(result.stdout)
         (work / (name + ".stderr")).write_bytes(result.stderr)

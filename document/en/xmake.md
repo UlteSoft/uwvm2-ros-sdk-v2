@@ -49,10 +49,12 @@ target_end()
 | Profile field | Type and default | Meaning |
 | --- | --- | --- |
 | `core` | String, `"3.0"` | Select `"3.0"` or `"mvp"`. MVP selects the Core 1.0 baseline with wasm32, single thread, EH off. MTE follows its own target setting. |
-| `mte` | Boolean, true | Use false to compile the complete target against its non-instrumented sysroot. Object and archive profiles must match. C/C++ source attributes can change local instrumentation within the selected profile. |
+| `mte` | Boolean or `"legacy"`, default true | The default requires a reviewed neighbor-aware release. Use false for a matching uninstrumented sysroot or `"legacy"` to build with unqualified tagged inputs and a warning. C/C++ source attributes can change local instrumentation. [Release and application review](memory-qualification.md) |
+| `build_receipt` | Boolean, false | For linked Wasm targets, write the artifact-specific `.wros-build.json` sidecar next to the binary. |
 | `eh` | Boolean, true for Core 3.0 | Select the matching exception runtime. Default false on MVP. |
 | `std` | Optional string | C accepts `c11`, `c17`, `c23`. C++ accepts `c++17`, `c++20`, `c++23`. |
 | `lua_abi` | Boolean, false | Include `wros.abi()` in a Lua application. Local VM execution also requires the operator to expose the ABI query. |
+| `lua_seed` | Optional unsigned 32-bit integer | Build Lua with `--guest-seed` and no host clock import. |
 
 ### Xmake target controls
 

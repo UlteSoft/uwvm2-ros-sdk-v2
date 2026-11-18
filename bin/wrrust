@@ -17,6 +17,7 @@ from artifacts import read_bounded
 from compiler import compiler_environment, digest, make_command
 from frontend import audit
 from guest_profile import Profile
+import qualification
 
 LANGUAGE = SDK / "language/rust"
 INSTRUMENTER = SDK / "tools/wasm/tag_ir.cpp"
@@ -69,8 +70,10 @@ def unpack_sources(lock, work):
 def compile_rust(options, source, output, work):
     profile = Profile(32, mte=options.mte, exceptions="noeh")
     tool = options.toolchain.resolve(strict=True)
-    host_cxx = options.host_cxx.resolve(strict=True)
+    # clang++ uses its invocation name to select the C++ link runtime.
+    host_cxx = options.host_cxx.absolute()
     receipts = [receipt.resolve(strict=True) for receipt in options.sysroots]
+    admission = qualification.admit("rs", options, profile, {"host_cxx": host_cxx, "rustc": options.rustroot / "bin/rustc"})
     _, closure = make_command(tool, receipts, profile, "c", ["-c"], verify=True)
     env = compiler_environment(tool)
     env.update(HOME=str(work), TMPDIR=str(work), LC_ALL="C")
@@ -115,7 +118,7 @@ def compile_rust(options, source, output, work):
         command, _ = make_command(tool, receipts, profile, "c", args)
         subprocess.run(command, cwd=work, env=env, check=True)
         objects.append(str(obj))
-        if options.print_identity:
+        if options.print_identity or options.build_receipt:
             stages[name] = dict(raw_ir=digest(bc), lowered_ir=digest(tagged), object_sha256=digest(obj),
                                 suppressions=suppressed)
     module = work / "application.wasm"
@@ -130,7 +133,7 @@ def compile_rust(options, source, output, work):
                         marker_source_sha256=digest(INSTRUMENTER), bindings_sha256=digest(bindings),
                         stages=stages, module_sha256=digest(module))
         print(json.dumps(identity, sort_keys=True))
-    os.replace(module, output)
+    qualification.finish(admission, options, module, output, {name: row["suppressions"] for name, row in stages.items()})
 
 
 def main():
@@ -143,7 +146,7 @@ def main():
     parser.add_argument("--host-cxx", type=Path, default=Path("/usr/bin/c++"))
     parser.add_argument("--target", choices=["wasm32"], default="wasm32")
     parser.add_argument("--core", choices=["3.0"], default="3.0")
-    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    qualification.arguments(parser)
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("-O", choices=list("0123"), default="2")
     parser.add_argument("-g", action="store_true")

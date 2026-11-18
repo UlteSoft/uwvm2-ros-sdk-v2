@@ -1,0 +1,79 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
+@@ -223,22 +223,41 @@
+     return Result;
+   }
+ 
+-  Value *materializeConstantExpr(ConstantExpr *CE, Instruction *InsertBefore) {
+-    Instruction *NewI = CE->getAsInstruction();
+-    NewI->insertBefore(InsertBefore->getIterator());
+-    for (Use &U : NewI->operands()) {
+-      Value *Op = U.get();
+-      if (auto *G = dyn_cast<GlobalValue>(Op);
+-          G && TaggedGlobals.contains(G)) {
+-        U.set(getTaggedPtr(G));
+-      } else if (auto *Nested = dyn_cast<ConstantExpr>(Op);
+-                 Nested && containsTaggedGlobal(Nested, TaggedGlobals)) {
+-        // A nested expression must dominate the newly materialized user,
+-        // not merely the original instruction using the outer expression.
+-        U.set(materializeConstantExpr(Nested, NewI));
++  // SROA and SLP may turn several scalar field stores into one constant
++  // vector or nested aggregate. Preserve the runtime pointer provenance of
++  // every tagged leaf (including GEPs), while keeping untagged lanes constant.
++  Value *materializeConstant(Constant *C, Instruction *Before) {
++    if (auto *G = dyn_cast<GlobalValue>(C))
++      return getTaggedPtr(G);
++
++    if (auto *CE = dyn_cast<ConstantExpr>(C)) {
++      Instruction *I = CE->getAsInstruction();
++      I->insertBefore(Before->getIterator());
++      for (Use &U : I->operands()) {
++        auto *Part = dyn_cast<Constant>(U.get());
++        if (Part && containsTaggedGlobal(Part, TaggedGlobals))
++          U.set(materializeConstant(Part, I));
+       }
++      return I;
+     }
+-    return NewI;
++
++    if (auto *Aggregate = dyn_cast<ConstantAggregate>(C)) {
++      Value *Result = C;
++      bool IsVector = C->getType()->isVectorTy();
++      for (unsigned Index = 0; Index < Aggregate->getNumOperands(); ++Index) {
++        Constant *Part = Aggregate->getOperand(Index);
++        if (!containsTaggedGlobal(Part, TaggedGlobals))
++          continue;
++        Value *Tagged = materializeConstant(Part, Before);
++        IRBuilder<> Builder(Before);
++        if (IsVector)
++          Result = Builder.CreateInsertElement(Result, Tagged, Index);
++        else
++          Result = Builder.CreateInsertValue(Result, Tagged, Index);
++      }
++      return Result;
++    }
++    return C;
+   }
+ 
+   void rewriteOperands(Instruction &I) {
+@@ -283,8 +302,9 @@
+       if (auto *G = dyn_cast<GlobalValue>(Op);
+           G && TaggedGlobals.contains(G)) {
+         U.set(getTaggedPtr(G));
+-      } else if (auto *CE = dyn_cast<ConstantExpr>(Op);
+-                 CE && containsTaggedGlobal(CE, TaggedGlobals)) {
++      } else if (auto *C = dyn_cast<Constant>(Op);
++                 C && (isa<ConstantExpr, ConstantAggregate>(C)) &&
++                 containsTaggedGlobal(C, TaggedGlobals)) {
+         // A PHI operand is evaluated on its incoming edge. Inserting before
+         // the PHI would both split the PHI group and fail to dominate that
+         // edge. These pure constant expressions may safely be evaluated
+@@ -293,7 +313,7 @@
+         if (auto *Phi = dyn_cast<PHINode>(&I))
+           InsertBefore =
+               Phi->getIncomingBlock(U.getOperandNo())->getTerminator();
+-        U.set(materializeConstantExpr(CE, InsertBefore));
++        U.set(materializeConstant(C, InsertBefore));
+       }
+     }
+   }

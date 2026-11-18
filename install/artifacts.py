@@ -77,7 +77,7 @@ def validate_profile(value):
     return value
 
 
-def seal_object(data, profile, compiler_sha256, closure_sha256):
+def seal_object(data, profile, compiler_sha256, closure_sha256, release=None):
     """Append one digest-bound note to a compiler-produced relocatable object."""
     validate_profile(profile)
     if not re.fullmatch(r"[0-9a-f]{64}", compiler_sha256):
@@ -97,6 +97,10 @@ def seal_object(data, profile, compiler_sha256, closure_sha256):
         raise ValueError("expected one relocatable Wasm linking section")
     note = dict(schema=NOTE, profile=profile, compiler_sha256=compiler_sha256, closure_sha256=closure_sha256,
                 object_sha256=hashlib.sha256(data).hexdigest())
+    if release is not None:
+        if not isinstance(release, str) or not re.fullmatch(r"[0-9a-f]{64}", release):
+            raise ValueError("invalid strict release identity")
+        note["neighbor_release"] = release
     payload = NOTE.encode()
     payload = uleb(len(payload)) + payload + json.dumps(note, sort_keys=True, separators=(",", ":")).encode()
     result = data + b"\0" + uleb(len(payload)) + payload
@@ -114,7 +118,7 @@ def unique_object(pairs):
     return result
 
 
-def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None):
+def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None, releases=None):
     """Check the entire object against its final note and optional expected ABI."""
     inspect(data)
     notes, linking = [], 0
@@ -131,8 +135,14 @@ def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None):
                 note = json.loads(bytes(body.take(remaining)), object_pairs_hook=unique_object)
             except (UnicodeError, RecursionError, json.JSONDecodeError) as error:
                 raise ValueError("invalid object build note") from error
-            if not isinstance(note, dict) or set(note) != {"schema", "profile", "compiler_sha256", "closure_sha256", "object_sha256"}:
+            fields = {"schema", "profile", "compiler_sha256", "closure_sha256", "object_sha256"}
+            if not isinstance(note, dict) or set(note) not in (fields, fields | {"neighbor_release"}):
                 raise ValueError("invalid build note fields")
+            if "neighbor_release" in note and (not isinstance(note["neighbor_release"], str)
+                    or not re.fullmatch(r"[0-9a-f]{64}", note["neighbor_release"])):
+                raise ValueError("invalid object neighbor release")
+            if releases is not None and note.get("neighbor_release") not in releases:
+                raise ValueError("input object lacks a matching reviewed neighbor release")
             if note["schema"] != NOTE or note["object_sha256"] != hashlib.sha256(data[:start]).hexdigest():
                 raise ValueError("object digest mismatch")
             validate_profile(note["profile"])
@@ -211,7 +221,7 @@ def archive(toolchain, output, members, work):
     subprocess.run([str(archiver), "--format=gnu", "rcsD", str(output), *map(str, paths)], check=True)
 
 
-def stage_inputs(sources, work, profile, compiler_sha256, closure_sha256, toolchain):
+def stage_inputs(sources, work, profile, compiler_sha256, closure_sha256, toolchain, releases=None):
     """Snapshot every object/archive; refuse ABI mixtures before linking."""
     result, total, count = [], 0, 0
     for index, source in enumerate(sources):
@@ -227,7 +237,7 @@ def stage_inputs(sources, work, profile, compiler_sha256, closure_sha256, toolch
         if count > MAX_MEMBERS:
             raise ValueError("too many input object members")
         for member in members:
-            check_object(member, profile, compiler_sha256, closure_sha256)
+            check_object(member, profile, compiler_sha256, closure_sha256, releases)
         path = work / (f"input{index}" + source.suffix)
         if source.suffix == ".a":
             archive(toolchain, path, members, work / f"archive{index}")

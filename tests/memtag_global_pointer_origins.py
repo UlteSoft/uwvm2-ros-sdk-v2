@@ -14,6 +14,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for flag in ("toolchain", "runtime", "work"):
         parser.add_argument("--" + flag, type=Path, required=True)
+    parser.add_argument("-O", choices=("2", "3"), default="3")
+    parser.add_argument("--debug", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args()
     group = cgroup_record()
     work = args.work.resolve()
@@ -42,7 +44,7 @@ def main():
         for source in fixtures:
             obj = work / f"{source.stem}{bits}.o"
             run(obj.stem, [compiler, "--no-default-config", f"--target=wasm{bits}-unknown-unknown",
-                           "-O3", "-g", "-ffreestanding", "-nostdlib", "-fsanitize=memtag",
+                           "-O" + args.O, *(["-g"] if args.debug else []), "-ffreestanding", "-nostdlib", "-fsanitize=memtag",
                            "-c", source, "-o", obj])
             objects.append(obj)
         guest = work / f"origins{bits}.wasm"

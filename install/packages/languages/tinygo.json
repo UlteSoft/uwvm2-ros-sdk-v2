@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "bin/wrtinygo",
-      "bytes": 9872,
+      "bytes": 10069,
       "mode": 493,
-      "sha256": "4ae87078647fe22926f73809fdad8dfbf5fb0c1aa9e42d32d831542c30c54b0e"
+      "sha256": "01dc2afda2f60701df3c29b34c093e661bbc0e1180ea347d05f899d4ddc51cf7"
     },
     {
       "path": "document/en/tinygo.md",
@@ -56,9 +56,9 @@
     },
     {
       "path": "language/tinygo/runtime/wros_gc.c",
-      "bytes": 1076,
+      "bytes": 1844,
       "mode": 420,
-      "sha256": "831a463058e07507fd40fe7e89986ae31a734b104c4adbe9ba16afefebb135b2"
+      "sha256": "751720f45fc714cff595b241a863dd66d4d457d96c51c12688cbb369d62ffda1"
     },
     {
       "path": "language/tinygo/runtime/wros_gc.go",
@@ -86,9 +86,9 @@
     },
     {
       "path": "language/tinygo/xmake/adapter.lua",
-      "bytes": 1590,
+      "bytes": 1641,
       "mode": 420,
-      "sha256": "2276bf5f393daf34accb573312657f9d3270981f35a91d568a339f334c5f98f7"
+      "sha256": "6cc3da00ab404973f07fb89837c722fc91ce121d0c5cf2154aba571c0e059f44"
     },
     {
       "path": "tools/wasm/tag_ir.cpp",

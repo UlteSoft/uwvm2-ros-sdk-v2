@@ -51,7 +51,9 @@ function configure(target, entry)
     local core = target:values("wros.core") or "3.0"
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
     local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs")
-    local mte = boolean(target, "mte", true)
+    local legacy_mte = target:values("wros.mte") == "legacy"
+    local mte = legacy_mte or boolean(target, "mte", true)
+    local mte_flag = legacy_mte and "--legacy-mte" or (mte and "--mte" or "--no-mte")
     local sysroots = (not mte and os.getenv("WROS_SYSROOTS_NO_MTE")) or os.getenv("WROS_SYSROOTS")
     local arch = target:arch()
     local plat = target:plat()
@@ -61,8 +63,15 @@ function configure(target, entry)
     assert(core ~= "mvp" or (arch == "wasm32" and not eh and not threads), "MVP requires wasm32, no threads and no EH")
     local kind = target:kind()
     assert(kind == "binary" or (kind == "static" and adapter.family == "c"), "Unsupported artifact kind: " .. tostring(kind))
+    local build_receipt = boolean(target, "build_receipt", false)
+    assert(not build_receipt or kind == "binary", "Deployment build receipts require a linked Wasm binary")
     local exports = table.wrap(target:values("wros.exports"))
     local lua_abi = boolean(target, "lua_abi", false)
+    local lua_seed = target:values("wros.lua_seed")
+    if lua_seed then
+        assert(language == "lua" and lua_seed:match("^%d+$") and tonumber(lua_seed) <= 4294967295,
+               "lua_seed expects an unsigned decimal 32-bit seed on a Lua target")
+    end
     local std = target:values("wros.std")
     assert(language == "lua" or not lua_abi, "lua_abi is specific to Lua")
     for _, key in ipairs({"links", "syslinks", "linkdirs", "cxflags", "cflags", "cxxflags", "ldflags", "shflags", "frameworks", "packages"}) do
@@ -77,8 +86,8 @@ function configure(target, entry)
     local extension = kind == "binary" and ".wasm" or ".a"
     assert(path.extension(name) == extension, "Target filename must end in " .. extension)
     target:set("filename", name)
-    local request = {root = root, adapter = adapter, program = program, kind = kind, arch = arch,
-        core = core, eh = eh, mte = mte, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, std = std, implementation = implementation}
+    local request = {root = root, adapter = adapter, program = program, kind = kind, arch = arch, build_receipt = build_receipt,
+        core = core, eh = eh, mte = mte, mte_flag = mte_flag, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, lua_seed = lua_seed, std = std, implementation = implementation}
     if implementation.validate then implementation.validate(target, request) end
     target:data_set("wros.request", request)
 end
@@ -99,7 +108,7 @@ local function compiler_args(target, request)
     local args = {"--target", request.arch, "--toolchain", toolchain, "--sysroots", sysroots}
     local optimize = target:get("optimize")
     local symbols = table.wrap(target:get("symbols"))
-    table.join2(args, {"--core", request.core, request.eh and "--eh" or "--no-eh", request.mte and "--mte" or "--no-mte"})
+    table.join2(args, {"--core", request.core, request.eh and "--eh" or "--no-eh", request.mte_flag})
     if request.threads then table.insert(args, "-pthread") end
     if request.std then table.join2(args, {"--std", request.std}) end
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3", smallest = "s"}
@@ -136,6 +145,7 @@ function build(target)
         os.vrunv(path.join(request.root, "bin/wrar"), table.join({"--toolchain", toolchain, "-o", output}, objects))
         return
     end
+    if request.build_receipt then table.insert(args, "--build-receipt") end
     table.join2(args, {"--reactor", "--export", "_start"})
     for _, name in ipairs(request.exports) do table.join2(args, {"--export", name}) end
     table.join2(args, sources)

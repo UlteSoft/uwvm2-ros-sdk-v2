@@ -6,7 +6,7 @@ import resource
 import subprocess
 import sys
 
-from separate_compilation import Profile, cgroup_record, inspect, sha
+from separate_compilation import Profile, cgroup_record, inspect, sha, candidate_arguments, candidate_command
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--sysroots", type=lambda name: Path(name).resolve(), required=True, action="append")
     parser.add_argument("--sdk", type=Path, default=ROOT, help="SDK tree or selective development installation")
     parser.add_argument("--host-cxx", type=Path)
+    candidate_arguments(parser)
     args = parser.parse_args()
     work, sdk = args.output, args.sdk.resolve()
     record = dict(complete=False, cgroup=cgroup_record(), cases=[], artifacts={}, vm_sha256=sha(args.runtime))
@@ -32,7 +33,7 @@ def main():
     def save():
         (work / "results.json").write_text(json.dumps(record, indent=2) + "\n")
     def run(label, command, expect=None):
-        argv = list(map(str, command))
+        argv = candidate_command(command, args.candidate_mte)
         result = subprocess.run(argv, cwd=work, capture_output=True, timeout=240)
         (work / (label + ".stderr")).write_bytes(result.stderr)
         record["cases"].append(dict(name=label, argv=argv, exit=result.returncode))

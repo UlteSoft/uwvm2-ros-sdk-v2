@@ -72,6 +72,14 @@
         {
           "path": "tools/wasm/memtag/patches/llvm-23.1.5-wasm-core-wasi-targets.patch",
           "sha256": "9b6aabce6a335a00d2a032cd9f8be778205a6c3819e56997861b61dd5609a115"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-owner-scoped-unwind.patch",
+          "sha256": "1368d772f81a54113a87ee4e56c3873cb7afb7ab6c2531d7b005a6ee74e6fefa"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-aggregate-global-pointers.patch",
+          "sha256": "10a729b468f7d67fb4d6ec4f0ea89843901795ae8c8bc988dda9900141403ac3"
         }
       ],
       "status": "awaiting-stable-build-qualification",

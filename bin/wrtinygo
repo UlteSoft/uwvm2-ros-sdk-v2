@@ -17,6 +17,7 @@ from artifacts import read_bounded
 from compiler import digest, make_command
 from frontend import audit
 from guest_profile import Profile
+import qualification
 
 LANGUAGE = SDK / "language/tinygo"
 GO_SHA = "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
@@ -91,6 +92,11 @@ def build(args, project, output, scratch):
     sp = scratch / "tinygo/src/runtime/asm_tinygowasm.S"
     profile = Profile(mte=args.mte, exceptions="eh" if args.eh else "noeh")
 
+    host_cxx = args.host_cxx or shutil.which("c++", path="/usr/bin:/bin")
+    if not host_cxx:
+        raise ValueError("host C++ compiler required to build the LLVM IR tool")
+    admission = qualification.admit("tinygo", args, profile, {"go": go / "bin/go", "tinygo": tinygo / "bin/tinygo", "host_cxx": host_cxx})
+
     def command(arguments):
         return make_command(tool, args.sysroots, profile, "c", arguments)[0]
 
@@ -118,9 +124,6 @@ def build(args, project, output, scratch):
     host_flags = subprocess.check_output([config, "--cxxflags", "--ldflags", "--libs",
                                           "irreader", "bitwriter", "core", "--system-libs"],
                                          text=True, env=env)
-    host_cxx = args.host_cxx or shutil.which("c++", path="/usr/bin:/bin")
-    if not host_cxx:
-        raise ValueError("host C++ compiler required to build the LLVM IR instrumenter")
     run([Path(host_cxx).absolute(), "-O3", "-g", SDK / "tools/wasm/tag_ir.cpp",
          "-o", scratch / "instrument", *shlex.split(host_flags)])
     suppressions = json.loads(subprocess.check_output(
@@ -129,7 +132,7 @@ def build(args, project, output, scratch):
     run(command(["-O3", "-g", "-c", str(scratch / "tag.bc"), "-o", str(scratch / "application.o")]))
     objects = [str(scratch / "application.o"), str(scratch / "stack-pointer.o")]
     if args.mte:
-        run(command(["-O3", "-g", "-c", str(LANGUAGE / "runtime/wros_gc.c"), "-o", str(scratch / "heap.o")]))
+        run(command(["-O3", "-g", *(["-DWROS_LEGACY_MTE"] if args.legacy_mte else []), "-c", str(LANGUAGE / "runtime/wros_gc.c"), "-o", str(scratch / "heap.o")]))
         objects.append(str(scratch / "heap.o"))
     # This reviewed assembly implements a single read of __stack_pointer.
     run(stack_pointer)
@@ -152,7 +155,7 @@ def build(args, project, output, scratch):
             if source.is_file():
                 files["runtime/" + source.name] = source
         identity = dict(sysroot=closure, source_suppressions=suppressions, sha256={name: digest(path) for name, path in files.items()})
-    os.replace(wasm, output)
+    qualification.finish(admission, args, wasm, output, suppressions)
     if args.print_identity:
         print(json.dumps(identity, sort_keys=True))
 
@@ -168,7 +171,7 @@ def main():
     parser.add_argument("--host-cxx", type=Path, help="native compiler for the SDK's build-time LLVM tool")
     parser.add_argument("--target", choices=("wasm32",), default="wasm32")
     parser.add_argument("--core", choices=("3.0",), default="3.0")
-    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    qualification.arguments(parser)
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--print-identity", action="store_true", help="print producer, stages and final module SHA-256")
     args = parser.parse_args()

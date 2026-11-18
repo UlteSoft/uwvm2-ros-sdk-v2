@@ -1,7 +1,6 @@
 """Wasm-only C and C++ compiler driver. Validate imports before publishing output."""
 import argparse
 import json
-import os
 import re
 import subprocess
 import tempfile
@@ -10,6 +9,7 @@ from compiler import compiler_environment, make_command
 from guest_profile import Profile
 from imports import inspect
 import artifacts
+import qualification
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -47,7 +47,7 @@ def main(language):
     parser.add_argument("--target", choices=("wasm32","wasm64"), default="wasm32")
     parser.add_argument("--core", choices=("mvp","3.0"), default="3.0")
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=None)
-    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    qualification.arguments(parser)
     parser.add_argument("-pthread","--threads", action="store_true")
     parser.add_argument("--reactor", action="store_true")
     parser.add_argument("--export", action="append", default=[])
@@ -62,6 +62,7 @@ def main(language):
     try:
         profile = Profile(int(a.target[4:]), "1.0" if a.core=="mvp" else "3.0", a.threads, a.mte,
                           "eh" if (a.eh if a.eh is not None else a.core!="mvp") else "noeh")
+        admission = qualification.admit(language, a, profile)
         if any(not re.fullmatch(r"[a-zA-Z_]\w*", n,re.ASCII) for n in a.export):
             raise ValueError("invalid Wasm export name")
         sources=[p.resolve(strict=True) for p in a.sources]
@@ -90,7 +91,7 @@ def main(language):
             # every separately compiled input. Copy validated object bytes into
             # our private work directory so later path replacement cannot race.
             command, record = make_command(a.toolchain,a.sysroots,profile,language,args,verify=True)
-            inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], a.toolchain)
+            inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], a.toolchain, qualification.object_releases(admission))
             command += [*map(str, inputs), "-o",str(staged)]
             if not a.compile_only:
                 # wasi-libc's compact formatter pulls stderr into even memory-only
@@ -104,12 +105,12 @@ def main(language):
             subprocess.run(command, check=True, env=compiler_environment(a.toolchain))
             data = artifacts.read_bounded(staged)
             if a.compile_only:
-                data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], record["closure_sha256"])
+                data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], admission.get("release_sha256"))
             else:
                 data = artifacts.strip_notes(data)
                 audit(data,profile)
             staged.write_bytes(data)
-            os.replace(staged,a.output)
+            qualification.finish(admission, a, staged, a.output)
     except (ValueError,OSError,KeyError,TypeError,subprocess.SubprocessError) as exc:
         parser.exit(1,f"{parser.prog}: {exc}\n")
     return 0

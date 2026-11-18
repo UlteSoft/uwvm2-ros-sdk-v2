@@ -10,3 +10,4 @@ __pycache__/
 *.key
 *.core
 .xmake/
+/share/qualification/local-trust.json

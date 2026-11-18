@@ -1,0 +1,490 @@
+diff --git a/llvm/include/llvm/Transforms/Utils/Cloning.h b/llvm/include/llvm/Transforms/Utils/Cloning.h
+--- a/llvm/include/llvm/Transforms/Utils/Cloning.h
++++ b/llvm/include/llvm/Transforms/Utils/Cloning.h
+@@ -51,6 +51,13 @@
+ class ReturnInst;
+ class DomTreeUpdater;
+ 
++/// Return the unwind destination token constrained by a scoped EH pad.
++/// A null token means the IR does not constrain the destination. The none
++/// token means escape to the caller; an instruction identifies a local pad.
++/// Keep the memo local to a single, unchanged EH graph.
++LLVM_ABI Value *getScopedUnwindDestToken(Instruction *Pad,
++                                         DenseMap<Instruction *, Value *> &Memo);
++
+ /// Return an exact copy of the specified module
+ LLVM_ABI std::unique_ptr<Module> CloneModule(const Module &M);
+ LLVM_ABI std::unique_ptr<Module> CloneModule(const Module &M,
+diff --git a/llvm/lib/CodeGen/FinalizeISel.cpp b/llvm/lib/CodeGen/FinalizeISel.cpp
+--- a/llvm/lib/CodeGen/FinalizeISel.cpp
++++ b/llvm/lib/CodeGen/FinalizeISel.cpp
+@@ -76,6 +76,21 @@
+       }
+     }
+   }
++  // A custom inserter can turn a non-terminating pseudo such as Wasm's
++  // RET_CALL_RESULTS into a returning call. Debug-location kills immediately
++  // following the pseudo have no PC after that return. Preserve the source
++  // location boundary at the last executable instruction.
++  if (Changed) {
++    for (MachineBasicBlock &MBB : MF) {
++      auto Term = MBB.getFirstTerminator();
++      if (Term == MBB.end() || !Term->isCall() || !Term->isReturn())
++        continue;
++      for (MachineInstr &MI : make_early_inc_range(
++               make_range(std::next(Term), MBB.end())))
++        if (MI.isUndefDebugValue())
++          MI.moveBefore(&*Term);
++    }
++  }
+   return {Changed, PreserveCFG};
+ }
+ 
+diff --git a/llvm/lib/CodeGen/MachineVerifier.cpp b/llvm/lib/CodeGen/MachineVerifier.cpp
+--- a/llvm/lib/CodeGen/MachineVerifier.cpp
++++ b/llvm/lib/CodeGen/MachineVerifier.cpp
+@@ -3920,8 +3920,20 @@
+     // Check that VNI is live-out of all predecessors.
+     for (const MachineBasicBlock *Pred : MFI->predecessors()) {
+       SlotIndex PEnd = LiveInts->getMBBEndIdx(Pred);
+-      // Predecessor of landing pad live-out on last call.
+-      if (MFI->isEHPad()) {
++      // An invoke transfers to its landing pad at the throwing call. A
++      // cleanupret transfers at the terminator, after the cleanup's calls
++      // and any values it defines on the way out. Test the exact IR
++      // destination as an exceptional call can have other successors.
++      const BasicBlock *PredIR = Pred->getBasicBlock();
++      const auto *Cleanup = PredIR
++          ? dyn_cast<CleanupReturnInst>(PredIR->getTerminator()) : nullptr;
++      bool ViaCleanupRet = Cleanup && Cleanup->hasUnwindDest() &&
++          Cleanup->getUnwindDest() == MFI->getBasicBlock() &&
++          Pred->succ_size() == 1 &&
++          Pred->getFirstTerminator() != Pred->end() &&
++          (Pred->getFirstTerminator()->isEHScopeReturn() ||
++           Pred->getFirstTerminator()->isBarrier());
++      if (MFI->isEHPad() && !ViaCleanupRet) {
+         for (const MachineInstr &MI : llvm::reverse(*Pred)) {
+           if (MI.isCall()) {
+             PEnd = Indexes->getInstructionIndex(MI).getBoundaryIndex();
+diff --git a/llvm/lib/Target/WebAssembly/WebAssembly.h b/llvm/lib/Target/WebAssembly/WebAssembly.h
+--- a/llvm/lib/Target/WebAssembly/WebAssembly.h
++++ b/llvm/lib/Target/WebAssembly/WebAssembly.h
+@@ -17,6 +17,7 @@
+ 
+ #include "GISel/WebAssemblyRegisterBankInfo.h"
+ #include "WebAssemblySubtarget.h"
++#include "WebAssemblyStackTagging.h"
+ #include "llvm/CodeGen/GlobalISel/InstructionSelector.h"
+ #include "llvm/CodeGen/SelectionDAGISel.h"
+ #include "llvm/PassRegistry.h"
+@@ -81,9 +82,7 @@
+ FunctionPass *createWebAssemblyPeephole();
+ ModulePass *createWebAssemblyMCLowerPrePass();
+ 
+-FunctionPass *createWebAssemblyStackTaggingPass();
+ ModulePass *createWebAssemblyGlobalsTaggingPass();
+-void initializeWebAssemblyStackTaggingPass(PassRegistry &);
+ void initializeWebAssemblyGlobalsTaggingPass(PassRegistry &);
+ 
+ // PassRegistry initialization declarations.
+diff --git a/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp b/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
+@@ -5,9 +5,13 @@
+ // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ //
+ //===----------------------------------------------------------------------===//
+-#include "WebAssembly.h"
++#include "WebAssemblyStackTagging.h"
++#include "Utils/WasmAddressSpaces.h"
++#include "llvm/IR/Module.h"
+ #include "llvm/Analysis/OptimizationRemarkEmitter.h"
+ #include "llvm/IR/Dominators.h"
++#include "llvm/IR/EHPersonalities.h"
++#include "llvm/Transforms/Utils/Cloning.h"
+ #include "llvm/IR/CFG.h"
+ #include "llvm/IR/Constants.h"
+ #include "llvm/IR/Function.h"
+@@ -29,6 +33,11 @@
+ 
+ #define DEBUG_TYPE "wasm-stack-tagging"
+ 
++// The native Wasm EH target option is defined by WebAssemblyTargetMachine.
++namespace llvm::WebAssembly {
++extern cl::opt<bool> WasmEnableEH;
++}
++
+ namespace {
+ 
+ static cl::opt<bool> FuseZeroInitialization(
+@@ -94,7 +103,14 @@
+   SmallVector<AllocaInst *, 2> Registers;
+   IRBuilder<> Entry(&*F->getEntryBlock().getFirstInsertionPt());
+   Type *Ptr = AI->getType();
+-  auto *Current = Entry.CreateAlloca(Ptr, nullptr, "memtag.current");
++  // A changing token may cross multiple exceptional edges of one funclet.
++  // Keep it in a private Wasm local on that path; EH preparation would
++  // otherwise spill SSA PHIs into addressable linear memory.
++  bool FuncletLocals = F->hasPersonalityFn() && WebAssembly::WasmEnableEH;
++  unsigned RegisterSpace = FuncletLocals ? WebAssembly::WASM_ADDRESS_SPACE_VAR
++                                         : F->getDataLayout().getAllocaAddrSpace();
++  Type *StateTy = FuncletLocals ? Entry.getInt32Ty() : Entry.getInt1Ty();
++  auto *Current = Entry.CreateAlloca(Ptr, RegisterSpace, nullptr, "memtag.current");
+   Registers.push_back(Current);
+ 
+   enum { Dead = 1, Live = 2 };
+@@ -173,13 +189,13 @@
+     auto *Fn = Intrinsic::getOrInsertDeclaration(M, ID, {IntPtrTy});
+     return B.CreateCall(Fn, {B.getInt32(0), Address, Length});
+   };
+-  auto *Active = Entry.CreateAlloca(Entry.getInt1Ty(), nullptr, "memtag.active");
++  auto *Active = Entry.CreateAlloca(StateTy, RegisterSpace, nullptr, "memtag.active");
+   Registers.push_back(Active);
+   IRBuilder<> Init(AI->getNextNode());
+   Init.CreateStore(Op(StartsLive ? Intrinsic::wasm_memtag_claim
+                                 : Intrinsic::wasm_memtag_reserve,
+                       Init, AI), Current);
+-  Init.CreateStore(Init.getInt1(StartsLive), Active);
++  Init.CreateStore(ConstantInt::get(StateTy, StartsLive), Active);
+   DenseMap<Instruction *, unsigned> States;
+   for (auto *I : Info.LifetimeStart)
+     States[I] = StateBefore(I);
+@@ -202,7 +218,7 @@
+       Restart(B);
+     } else if (State == (Live | Dead)) {
+       Instruction *IfLive, *IfDead;
+-      SplitBlockAndInsertIfThenElse(B.CreateLoad(B.getInt1Ty(), Active),
++      SplitBlockAndInsertIfThenElse(B.CreateIsNotNull(B.CreateLoad(StateTy, Active)),
+                                     Start, &IfLive, &IfDead);
+       IRBuilder<> LB(IfLive), DB(IfDead);
+       Restart(LB);
+@@ -211,7 +227,7 @@
+       Activate(B);
+     }
+     IRBuilder<> Update(Start);
+-    Update.CreateStore(Update.getTrue(), Active);
++    Update.CreateStore(ConstantInt::get(StateTy, 1), Active);
+   }
+   for (auto *End : Info.LifetimeEnd) {
+     unsigned State = States.lookup(End);
+@@ -220,13 +236,13 @@
+     IRBuilder<> B(End);
+     if (State & Dead) {
+       auto *IfLive = SplitBlockAndInsertIfThen(
+-          B.CreateLoad(B.getInt1Ty(), Active), End, false);
++          B.CreateIsNotNull(B.CreateLoad(StateTy, Active)), End, false);
+       B.SetInsertPoint(IfLive);
+     }
+     auto *Token = B.CreateLoad(Ptr, Current);
+     auto *Parent = Op(Intrinsic::wasm_memtag_release, B, Token);
+     B.CreateStore(Op(Intrinsic::wasm_memtag_reserve, B, Parent), Current);
+-    B.CreateStore(B.getFalse(), Active);
++    B.CreateStore(ConstantInt::get(StateTy, 0), Active);
+   }
+   // General-case objects always hold exactly one pending or active token.
+   // Retire both states before every supported frame exit.
+@@ -235,7 +251,16 @@
+     Op(Intrinsic::wasm_memtag_release, B, B.CreateLoad(Ptr, Current));
+   }
+ 
++  // A switch may send several edges to the same successor. LLVM requires
++  // identical incoming values for a PHI on repeated edges from one block.
++  // Each such edge observes exactly the same token at its terminator.
++  DenseMap<std::pair<Instruction *, Value *>, Value *> Materialized;
+   for (auto &[Operand, At, Address] : Bindings) {
++    auto Key = std::make_pair(At, Address);
++    if (Value *Previous = Materialized.lookup(Key)) {
++      Operand->set(Previous);
++      continue;
++    }
+     IRBuilder<> B(At);
+     Value *PtrValue = B.CreateLoad(Ptr, Current);
+     SmallVector<Instruction *, 4> Derivation;
+@@ -250,17 +275,114 @@
+       B.Insert(Copy);
+       PtrValue = Copy;
+     }
++    Materialized[Key] = PtrValue;
+     Operand->set(PtrValue);
+   }
+   // These are compiler registers. They must never be addressable Wasm slots.
+   DT.recalculate(*F);
+-  PromoteMemToReg(Registers, DT);
++  if (!FuncletLocals)
++    PromoteMemToReg(Registers, DT);
+   // Backend stack colouring cannot overlay an outstanding reservation with
+   // another physical object. Owner operations carry the complete lifetime.
+   for (auto *I : Info.LifetimeStart)
+     I->eraseFromParent();
+   for (auto *I : Info.LifetimeEnd)
+     I->eraseFromParent();
++}
++
++// Make native Wasm frame escapes explicit before owner-token SSA is built.
++// The outer cleanuppad catches all exception tags and rethrows the original
++// exception after the frame's current owner tokens have been released. Existing
++// typed handlers and local cleanup-to-handler edges keep their destinations.
++static bool prepareOwnerUnwind(Function &F, memtag::StackInfo &Info) {
++  SmallVector<CallInst *, 8> Calls;
++  SmallVector<CatchSwitchInst *, 4> Switches;
++  SmallVector<CleanupReturnInst *, 4> CleanupReturns;
++  DenseMap<Instruction *, Value *> UnwindMemo;
++  auto constrainedDestination = [&](Instruction *Pad) -> BasicBlock * {
++    auto *Dest = dyn_cast_or_null<Instruction>(getScopedUnwindDestToken(Pad, UnwindMemo));
++    return Dest ? Dest->getParent() : nullptr;
++  };
++  auto reject = [&](Instruction &I) {
++    F.getContext().emitError(&I, "strict WasmMTE cannot match this non-local "
++                                 "exit to an exact stack-owner release");
++    return false;
++  };
++  for (Instruction &I : instructions(F)) {
++    if (auto *Call = dyn_cast<CallInst>(&I)) {
++      if (Call->canReturnTwice())
++        return reject(I);
++      if (F.doesNotThrow() || Call->doesNotThrow() || Call->isMustTailCall())
++        continue;
++      if (!WebAssembly::WasmEnableEH || Call->isInlineAsm() ||
++          Call->getIntrinsicID() == Intrinsic::experimental_deoptimize ||
++          Call->getIntrinsicID() == Intrinsic::experimental_guard)
++        return reject(I);
++      if (auto Funclet = Call->getOperandBundle(LLVMContext::OB_funclet))
++        if (constrainedDestination(cast<Instruction>(Funclet->Inputs[0])))
++          return reject(I);
++      Calls.push_back(Call);
++    } else if (auto *CS = dyn_cast<CatchSwitchInst>(&I)) {
++      if (CS->unwindsToCaller()) {
++        if (!WebAssembly::WasmEnableEH)
++          return reject(I);
++        if (auto *Parent = dyn_cast<Instruction>(CS->getParentPad()))
++          if (constrainedDestination(Parent))
++            return reject(I);
++        Switches.push_back(CS);
++      }
++    } else if (auto *CR = dyn_cast<CleanupReturnInst>(&I)) {
++      if (CR->unwindsToCaller())
++        CleanupReturns.push_back(CR);
++    }
++  }
++  if (Calls.empty() && Switches.empty())
++    return true;
++  if (F.hasPersonalityFn() &&
++      classifyEHPersonality(F.getPersonalityFn()) != EHPersonality::Wasm_CXX)
++    return reject(F.getEntryBlock().front());
++  if (!F.hasPersonalityFn()) {
++    auto *FT = FunctionType::get(Type::getInt32Ty(F.getContext()), true);
++    auto Person = F.getParent()->getOrInsertFunction(
++        getEHPersonalityName(EHPersonality::Wasm_CXX), FT);
++    F.setPersonalityFn(cast<Constant>(Person.getCallee()));
++  }
++  // Ensure entry allocas (and their generated tokens) dominate even the first
++  // throwing call. Static Wasm stack slots have control-independent sizes.
++  auto At = F.getEntryBlock().getFirstInsertionPt();
++  for (auto &[AI, Allocation] : Info.AllocasToInstrument)
++    if (AI->getIterator() != At)
++      AI->moveBeforePreserving(F.getEntryBlock(), At);
++  auto *Outer = BasicBlock::Create(F.getContext(), "memtag.unwind", &F);
++  IRBuilder<> B(Outer);
++  auto *Pad = B.CreateCleanupPad(ConstantTokenNone::get(F.getContext()), {});
++  B.CreateCleanupRet(Pad, nullptr);
++  for (auto *C : Calls)
++    changeToInvokeAndSplitBasicBlock(C, Outer);
++  for (auto *CS : Switches) {
++    auto *Redirect = CatchSwitchInst::Create(CS->getParentPad(), Outer,
++                                  CS->getNumHandlers(), "", CS->getIterator());
++    Redirect->setDebugLoc(CS->getDebugLoc());
++    for (BasicBlock *Handler : CS->handlers())
++      Redirect->addHandler(Handler);
++    Redirect->takeName(CS);
++    CS->replaceAllUsesWith(Redirect);
++    CS->eraseFromParent();
++  }
++  for (auto *CR : CleanupReturns) {
++    auto *Redirect = CleanupReturnInst::Create(CR->getCleanupPad(), Outer,
++                                                CR->getIterator());
++    Redirect->setDebugLoc(CR->getDebugLoc());
++    CR->eraseFromParent();
++  }
++  Info.RetVec.clear();
++  for (Instruction &I : instructions(F)) {
++    if (auto *CR = dyn_cast<CleanupReturnInst>(&I); CR && !CR->unwindsToCaller())
++      continue;
++    if (auto *Exit = memtag::getUntagLocationIfFunctionExit(I))
++      Info.RetVec.push_back(Exit);
++  }
++  return true;
+ }
+ 
+ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
+@@ -339,17 +461,9 @@
+   if (AllocasToInstrument.empty()) {
+     return true;
+   }
+-  for (Instruction &I : instructions(Fn)) {
+-    const auto *Call = dyn_cast<CallInst>(&I);
+-    const auto *Switch = dyn_cast<CatchSwitchInst>(&I);
+-    if ((Call && (Call->canReturnTwice() ||
+-                  (!Fn.doesNotThrow() && !Call->doesNotThrow()))) ||
+-        (Switch && Switch->unwindsToCaller())) {
+-      Fn.getContext().emitError(&I, "strict WasmMTE cannot match this "
+-          "non-local exit to an exact stack-owner release");
+-      return false;
+-    }
+-  }
++  if (!prepareOwnerUnwind(Fn, SInfo))
++    return false;
++  DT.recalculate(Fn);
+ 
+   LLVMContext &Ctx = Fn.getContext();
+   Type *Int32Type = Type::getInt32Ty(Ctx);
+diff --git a/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.h b/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.h
+new file mode 100644
+--- /dev/null
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.h
+@@ -0,0 +1,16 @@
++//===- WebAssemblyStackTagging.h - Managed linear stack owners ----*- C++ -*-===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++#ifndef LLVM_LIB_TARGET_WEBASSEMBLY_WEBASSEMBLYSTACKTAGGING_H
++#define LLVM_LIB_TARGET_WEBASSEMBLY_WEBASSEMBLYSTACKTAGGING_H
++namespace llvm {
++class FunctionPass;
++class PassRegistry;
++FunctionPass *createWebAssemblyStackTaggingPass();
++void initializeWebAssemblyStackTaggingPass(PassRegistry &);
++}
++#endif
+diff --git a/llvm/lib/Transforms/Utils/InlineFunction.cpp b/llvm/lib/Transforms/Utils/InlineFunction.cpp
+--- a/llvm/lib/Transforms/Utils/InlineFunction.cpp
++++ b/llvm/lib/Transforms/Utils/InlineFunction.cpp
+@@ -550,6 +550,11 @@
+   }
+ 
+   return UnwindDestToken;
++}
++
++Value *llvm::getScopedUnwindDestToken(Instruction *Pad,
++                                     DenseMap<Instruction *, Value *> &Memo) {
++  return getUnwindDestToken(Pad, Memo);
+ }
+ 
+ /// When we inline a basic block into an invoke,
+diff --git a/llvm/test/CodeGen/WebAssembly/memtag-stack-scoped-unwind.ll b/llvm/test/CodeGen/WebAssembly/memtag-stack-scoped-unwind.ll
+new file mode 100644
+--- /dev/null
++++ b/llvm/test/CodeGen/WebAssembly/memtag-stack-scoped-unwind.ll
+@@ -0,0 +1,110 @@
++; RUN: llc -mtriple=wasm32 -wasm-enable-eh -wasm-use-legacy-eh=false -exception-model=wasm -mattr=+memtag,+reference-types,+exception-handling -verify-machineinstrs -verify-each -O3 %s -o - | FileCheck %s
++; RUN: llc -mtriple=wasm64 -wasm-enable-eh -wasm-use-legacy-eh=false -exception-model=wasm -mattr=+memtag,+reference-types,+exception-handling -verify-machineinstrs -verify-each -O3 %s -o - | FileCheck %s
++; CHECK-LABEL: frame:
++; CHECK: memtag.reserve
++; CHECK: memtag.activate
++; CHECK: try_table {{.*}}catch_all_ref
++; CHECK: memtag.release
++; CHECK: throw_ref
++; CHECK-LABEL: nested:
++; CHECK: memtag.claim
++; CHECK: try_table
++; CHECK: memtag.release
++
++target triple = "wasm32-unknown-unknown"
++@count = global i32 0, align 4
++@previous = global ptr null, align 16
++
++declare i32 @__gxx_wasm_personality_v0(...)
++declare void @llvm.wasm.throw(i32,ptr)
++declare ptr @llvm.wasm.get.exception(token)
++declare i32 @llvm.wasm.get.ehselector(token)
++declare void @llvm.wasm.rethrow()
++declare void @llvm.lifetime.start.p0(ptr)
++declare void @llvm.lifetime.end.p0(ptr)
++declare void @llvm.trap()
++declare ptr @llvm.wasm.memtag.untag(i32 immarg,ptr)
++define void @raise_or_continue(ptr %p, i1 %shouldthrow) noinline {
++  %raw = call ptr @llvm.wasm.memtag.untag(i32 0,ptr %p)
++  %old = load volatile ptr,ptr @previous
++  store volatile ptr %raw,ptr @previous
++  %initial = icmp eq ptr %old,null
++  %same = icmp eq ptr %old,%raw
++  %correct = or i1 %initial,%same
++  br i1 %correct,label %dispatch,label %bad
++dispatch:
++  br i1 %shouldthrow,label %throw,label %return
++bad:
++  call void @llvm.trap()
++  unreachable
++throw:
++  call void @llvm.wasm.throw(i32 0,ptr null)
++  unreachable
++return:
++  ret void
++}
++
++define void @frame(i1 %throws) noinline sanitize_memtag {
++  %x = alloca [16 x i8], align 16
++  call void @llvm.lifetime.start.p0(ptr %x)
++  store volatile i8 28,ptr %x
++  call void @raise_or_continue(ptr %x,i1 %throws)
++  %v = load volatile i8,ptr %x
++  %ok = icmp eq i8 %v,28
++  call void @llvm.lifetime.end.p0(ptr %x)
++  br i1 %ok,label %return,label %bad
++bad:
++  call void @llvm.trap()
++  unreachable
++return:
++  ret void
++}
++
++; A frame with a real catchswitch and explicit rethrow must allow the original
++; exception to escape. Its separate stack object stays live in the handler.
++define void @nested(i1 %shouldthrow) noinline sanitize_memtag personality ptr @__gxx_wasm_personality_v0 {
++  %y = alloca [16 x i8],align 16
++  store volatile i8 91,ptr %y
++  invoke void @frame(i1 %shouldthrow) to label %normal unwind label %dispatch
++dispatch:
++  %cs = catchswitch within none [label %handler] unwind to caller
++handler:
++  %cp = catchpad within %cs [ptr null]
++  %ex = call ptr @llvm.wasm.get.exception(token %cp)
++  %sel = call i32 @llvm.wasm.get.ehselector(token %cp)
++  %v = load volatile i8,ptr %y
++  %ok = icmp eq i8 %v,91
++  br i1 %ok,label %again,label %bad
++again:
++  call void @llvm.wasm.rethrow() [ "funclet"(token %cp) ]
++  unreachable
++bad:
++  call void @llvm.trap()
++  unreachable
++normal:
++  ret void
++}
++
++define void @_start() noinline personality ptr @__gxx_wasm_personality_v0 {
++  br label %loop
++loop:
++  %i = phi i32 [0,%0],[%next,%caught]
++  invoke void @nested(i1 true) to label %fail unwind label %dispatch
++dispatch:
++  %cs = catchswitch within none [label %handler] unwind to caller
++handler:
++  %pad = catchpad within %cs [ptr null]
++  %ex = call ptr @llvm.wasm.get.exception(token %pad)
++  %selector = call i32 @llvm.wasm.get.ehselector(token %pad)
++  catchret from %pad to label %caught
++caught:
++  call void @nested(i1 false)
++  %next = add i32 %i,1
++  %repeat = icmp ult i32 %next,32
++  br i1 %repeat,label %loop,label %end
++fail:
++  call void @llvm.trap()
++  unreachable
++end:
++  ret void
++}

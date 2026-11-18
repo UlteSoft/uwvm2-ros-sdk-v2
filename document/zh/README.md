@@ -1,6 +1,7 @@
 # WROS SDK 开发指南
 
 [WasmMTE 的检测范围](memtag.md)
+- [内存标签工具链的本地验收与签署](memory-qualification.md)
 
 驱动、模型和部署权限的边界见[本机驱动与模型接入](local-attachments.md)。
 

@@ -5,7 +5,7 @@ from pathlib import Path
 import resource
 import subprocess
 import sys
-from separate_compilation import Profile, cgroup_record, inspect, sha
+from separate_compilation import Profile, cgroup_record, inspect, sha, candidate_arguments, candidate_command
 
 ROOT = Path(__file__).resolve().parents[1]
 PROGRAM = """program invalid_modulus
@@ -29,6 +29,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("toolchain", "sysroots", "plain-sysroots", "flang", "mte-tool", "runtime", "output"):
         parser.add_argument("--" + name, required=True, type=Path)
+    candidate_arguments(parser)
     args = parser.parse_args()
     work = args.output.resolve()
     report = dict(complete=False, cgroup=cgroup_record(), modules={}, runs=[])
@@ -44,6 +45,7 @@ def main():
                      "--sysroots", (args.sysroots if tagged else args.plain_sysroots).resolve(),
                      "--flang", args.flang.resolve(), "--mte-tool", args.mte_tool.resolve(),
                      "--target", f"wasm{bits}", "--mte" if tagged else "--no-mte", "-O3", "-g", source, "-o", app]
+            build = candidate_command(build, args.candidate_mte)
             subprocess.run(build, cwd=work, check=True, timeout=180)
             imports = inspect(app.read_bytes())
             if imports:

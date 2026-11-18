@@ -15,7 +15,7 @@ function build(target, req, sources)
         "--rustroot", assert(os.getenv("WROS_RUSTROOT"), "Set WROS_RUSTROOT to the pinned rustc prefix"),
         "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN"),
         "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to the matching build receipt"),
-        req.mte and "--mte" or "--no-mte"}
+        req.mte_flag}
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3"}
     table.insert(args, "-O" .. assert(levels[target:get("optimize") or "faster"], "Unsupported Rust optimization"))
     for _, symbol in ipairs(table.wrap(target:get("symbols"))) do
@@ -23,5 +23,6 @@ function build(target, req, sources)
         table.insert(args, "-g")
     end
     if os.getenv("WROS_HOST_CXX") then table.join2(args, {"--host-cxx", os.getenv("WROS_HOST_CXX")}) end
+    if req.build_receipt then table.insert(args, "--build-receipt") end
     os.vrunv(req.program, table.join(args, {"-o", target:targetfile()}))
 end
