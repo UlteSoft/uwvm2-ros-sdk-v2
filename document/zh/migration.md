@@ -41,3 +41,5 @@ int read_description(wros_package_view *result) {
 `tests/migration/package_resource_corpus.py` 在 native、wasm32 和 wasm64 下逐一读取选中的原文件，两种 Wasm 位宽均测试解释器和 AOT。每个源码版本都有记录，可以追溯选中了哪些资源。应用可执行文件、DDS 语义、驱动及传递依赖需要另外验收。
 
 `tests/migration/resource_urdf_mujoco.py` 可读取以上结果中的 `variants.jsonl.gz`，使用已安装的 MuJoCo SDK 回放 URDF 和同包 STL。每个网格来自相同源码快照，固定内容摘要后在仿真的虚拟文件系统中分配文件名，避免不同目录的同名网格互相覆盖。关节限制、惯量、位姿和网格字节均保留。报告列出仿真器拒绝的模型和需要其他工具的依赖。只有固定关节的模型没有动态自由度。
+
+改写 ROSv2 权限推荐前，请核对旧观察者与来源的双权限关系。迁移组件包含这项检查工具。 [检查旧版观察权限](legacy-permissions.md)

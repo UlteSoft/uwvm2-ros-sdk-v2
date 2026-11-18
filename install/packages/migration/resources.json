@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/migration.md",
-      "bytes": 4467,
+      "bytes": 4676,
       "mode": 420,
-      "sha256": "94168b18bb3ec4993fba9de3ba0ce34f9d1812d1b5b7394af89377438149aac6"
+      "sha256": "8340d3eef4392ca7936b44d8ab5319f815c0d4013d631a4a0aa7e88297c86a53"
     },
     {
       "path": "document/zh/migration.md",
-      "bytes": 3951,
+      "bytes": 4124,
       "mode": 420,
-      "sha256": "efcbca11155ae1748c9280715f27531dd2e78f8493719563396dc24eaae87327"
+      "sha256": "503ed5e1f847a559d355ff8ec340fbcb827e4ce3484dcd1c83c3d3ab875b6b40"
     },
     {
       "path": "include/wros/package_resources.h",

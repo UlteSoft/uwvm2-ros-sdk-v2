@@ -29,7 +29,7 @@ def main():
     parser.add_argument("platform")
     parser.add_argument("language")
     parser.add_argument("--revision-help", action="store_true")
-    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot", "numeric-aot", "migration"),
+    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot", "numeric-aot", "migration", "policy-review"),
                         default="development")
     args = parser.parse_args()
     if args.revision_help:
@@ -44,7 +44,9 @@ def main():
     if args.language not in LANGUAGES:
         parser.error("unknown language: " + args.language)
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
-    if args.component == "numeric-aot":
+    if args.component == "policy-review":
+        packages.append("migration/policy")
+    elif args.component == "numeric-aot":
         if args.language != "csharp":
             parser.error("the numeric-aot component requires csharp")
         packages.extend(("protocol", "frontend", "csharp/numeric", "xmake/common", "xmake/platforms/" + args.platform))
@@ -67,7 +69,7 @@ def main():
             if args.component == "migration":
                 if args.language not in ("c", "cpp"):
                     parser.error("the migration resource component currently requires c or cpp")
-                packages.append("migration/resources")
+                packages.extend(("migration/resources", "migration/policy"))
             if args.component == "compiler-source":
                 packages.append("compiler-source")
                 if args.language == "nim":
