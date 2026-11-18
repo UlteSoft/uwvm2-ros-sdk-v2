@@ -26,8 +26,9 @@ def main():
     fixtures = ROOT / "tools/wasm/memtag"
     ir = fixtures / "memtag-lifetime-generations.ll"
     observer = fixtures / "memtag-lifetime-observer.c"
+    abi_loop = ROOT / "tests/memtag/stack_abi_loop.c"
     receipt = {"complete": False, "cgroup": group, "inputs": {str(p): sha(p) for p in
-               (Path(__file__), tool / "llc", tool / "clang", tool / "wasm-ld", tool / "FileCheck", vm, ir, observer)}, "cases": []}
+               (Path(__file__), tool / "llc", tool / "clang", tool / "wasm-ld", tool / "FileCheck", vm, ir, observer, abi_loop)}, "cases": []}
 
     def save():
         (work / "results.json").write_text(json.dumps(receipt, indent=2) + "\n")
@@ -73,7 +74,18 @@ def main():
             raise ValueError("expected a fully freestanding Wasm application")
         receipt["inputs"][str(app)] = sha(app)
         entry = str(exported_index(app, "check_stack_generations"))
+        loop = work / ("abi-loop-" + ident + ".wasm")
+        run("abi-loop-build-" + ident, [tool / "clang", "--no-default-config", "--target=" + guest,
+            "-ffreestanding", "-nostdlib", "-O3", "-g", "-fsanitize=memtag", "-I", ROOT / "include",
+            "-fuse-ld=" + str(tool / "wasm-ld"), "-Wl,--no-entry,--export=_start", abi_loop, "-o", loop])
+        receipt["inputs"][str(loop)] = sha(loop)
         for engine in ("int", "aot"):
+            run(f"abi-loop-{ident}-{engine}", [vm, *Profile(width).uwvm_feature_flags(), "--runtime-" + engine,
+                "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
+                "--wasm-set-main-module-name", "main", "--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main",
+                "--ros-scene-interface", "robot", "capability.open", "allow",
+                "--ros-scene-interface", "robot", "capability.close", "allow",
+                "--ros-scene-grant", "robot", "signal", "guard", "signal", "local", "guard.create", "--run", loop])
             for enabled in (True, False):
                 flags = [] if enabled else ["--runtime-disable-memtag"]
                 run(f"{ident}-{engine}-runtime-{'on' if enabled else 'off'}",

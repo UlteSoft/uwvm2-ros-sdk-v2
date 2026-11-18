@@ -181,6 +181,12 @@
       "sha256": "10a729b468f7d67fb4d6ec4f0ea89843901795ae8c8bc988dda9900141403ac3"
     },
     {
+      "path": "tools/wasm/memtag/patches/llvm-wasm-lifetime-address-casts.patch",
+      "bytes": 1246,
+      "mode": 420,
+      "sha256": "75b7ac06ecd73a699e3472768f122e4f52b934d88ac219bf4d261e50df6572d5"
+    },
+    {
       "path": "tools/wasm/memtag/patches/llvm-wasm-memtag-mc-address-width.patch",
       "bytes": 11275,
       "mode": 420,
@@ -284,9 +290,9 @@
     },
     {
       "path": "tools/wasm/memtag/source-lock.json",
-      "bytes": 7640,
+      "bytes": 7834,
       "mode": 420,
-      "sha256": "d8111e14c6677de4fd9686238a293a46cda8c3699840dfe28d66aa89a1ab43e1"
+      "sha256": "00f1b4148c4a7fa9d01c2be082f45cb4cc1a24cc0bc8931a478a61e61719d69d"
     }
   ]
 }

@@ -1,0 +1,22 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
+@@ -95,7 +95,8 @@
+ // or derived while live. The SSA value for an earlier such use is never
+ // recovered from the current allocation tag. For pure address arithmetic
+ // hoisted to a definitely dead region, materialize the arithmetic at its first
+-// non-preparatory use. This permits a loop-invariant GEP to serve each lifetime.
++// non-preparatory use. A loop-invariant address or integer representation
++// must observe the active generation when passed to the guest ABI.
+ static void manageOwnerLifetimes(memtag::AllocaInfo &Info, DominatorTree &DT,
+                          Type *IntPtrTy, uint64_t Size, ArrayRef<Instruction *> Exits) {
+   AllocaInst *AI = Info.AI;
+@@ -174,7 +175,8 @@
+       Instruction *At = Phi ? Phi->getIncomingBlock(U)->getTerminator() : I;
+       unsigned State = StateBefore(At);
+       if (!(State & Live) && U.getOperandNo() == 0 &&
+-          (isa<GetElementPtrInst>(I) || isa<BitCastInst>(I))) {
++          (isa<GetElementPtrInst, BitCastInst, PtrToIntInst, IntToPtrInst,
++               ZExtInst, SExtInst, TruncInst>(I))) {
+         Prepare.push_back(I);
+         continue;
+       }

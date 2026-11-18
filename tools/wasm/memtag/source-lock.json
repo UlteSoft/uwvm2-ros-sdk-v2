@@ -88,6 +88,10 @@
         {
           "path": "tools/wasm/memtag/patches/llvm-wasm-stack-diagnostic-location.patch",
           "sha256": "dc276810df38441194f29ce35b889fbc7276c2b070f01316745e293dbae24710"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-lifetime-address-casts.patch",
+          "sha256": "75b7ac06ecd73a699e3472768f122e4f52b934d88ac219bf4d261e50df6572d5"
         }
       ],
       "status": "awaiting-stable-build-qualification",
