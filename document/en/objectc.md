@@ -39,3 +39,15 @@ The example xmake target uses `set_language("objectc")`. Set `WROS_TOOLCHAIN`, `
 ## Qualify the default MTE profile
 
 Run the source qualification command in the compiler-source checkout as described in [local release qualification](memory-qualification.md). Select `--language objectc --target wasm32 -O3 -g --eh`. Supply `--objc-clang`, `--objc-runtime` and `--approved-objc-inputs-sha256`. The last digest covers the canonical JSON map of three SHA-256 values: `objc_frontend` for the dedicated compiler, `objc_runtime` for its runtime.json, and `objc_archive` for libobjc.a. Review these inputs separately from the base compiler and sysroot. The language proof runs real class instances through allocation, copying scalar values through messages, retirement and capability checks on both VM engines. It requires repeated close heap allocations of different sizes and checks the hidden reference-count header in the pinned GNUstep allocator. The resulting qualification statement must be reviewed, signed and installed according to the operator's local trust policy.
+
+## Signed site installation
+
+A site operator places the approved Wasm Objective-C compiler and its compiler receipt at `TOOLCHAIN/bin/wros-objc-clang` and `TOOLCHAIN/bin/wros-objc-clang.json`. Put the matching single-threaded GNUstep runtime, headers and `runtime.json` in `TOOLCHAIN/share/wros/objectc/PROFILE`. Use the profile identity from the runtime build. The site file points to this toolchain, a matching sysroot receipt, and the operator's independently approved signed Objective-C qualification.
+
+With the SDK's fixed installer, install the selected language and platform into a fresh prefix in one command.
+
+```sh
+python3 install/bootstrap.py install --commit "$SDK_COMMIT" --platform unitree --language objectc --prefix "$PREFIX" --site-profile "$SITE"
+```
+
+The installation output identifies the SDK directory. In that directory, compile the installed example with `bin/wrobjc examples/objectc/body.m --reactor --export _start -o body.wasm --build-receipt`. The `examples/objectc/xmake.lua` project uses the same signed inputs when `UWVM_ROS_SDK_ROOT` points to the installed directory. Each build checks its Objective-C producer, GNUstep archive and headers, and sysroot against the qualification.

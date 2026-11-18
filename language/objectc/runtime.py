@@ -77,3 +77,10 @@ def verify_runtime(root, profile, compiler, base_record):
     if json.loads(marker.read_bytes()) != expected:
         raise ValueError("Objective-C runtime, headers, compiler or sysroot differs from its build receipt")
     return marker
+
+
+def verified_inputs(toolchain, profile, base_record, compiler=None, directory=None):
+    clang = frontend(toolchain, compiler)
+    root = (directory or toolchain / "share/wros/objectc" / profile.identity).resolve(strict=True)
+    marker = verify_runtime(root, profile, clang, base_record)
+    return {"objc_frontend": clang, "objc_runtime": marker, "objc_archive": root / "libobjc.a"}

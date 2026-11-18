@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/objectc.md",
-      "bytes": 5542,
+      "bytes": 6755,
       "mode": 420,
-      "sha256": "c60a609bd93530e6a4b5b86e7c7f0c83635873e3fa24ccbc03037fd9f83143c7"
+      "sha256": "7d188b1ec0d03be0af83c5ce7445fcc5ad8aea17b0466305a266dbdf835d0d97"
     },
     {
       "path": "document/zh/objectc.md",
-      "bytes": 4635,
+      "bytes": 5756,
       "mode": 420,
-      "sha256": "ee2eac70313068f1c5cc1f683fc56a0984aa2d3a14a2ad6c0fc5fe50618c838f"
+      "sha256": "cf56193073dc2871947adb8e02f933102dcf42a9a0343745b5330362971fcef0"
     },
     {
       "path": "examples/objectc/body.m",
@@ -55,16 +55,22 @@
       "sha256": "cbc6960a5b796588283d250f2c1bea3f3a04b00e6c69bb511a77fd3c12bbf797"
     },
     {
-      "path": "language/objectc/frontend_objectc.py",
-      "bytes": 5707,
+      "path": "language/objectc/check_site.py",
+      "bytes": 1316,
       "mode": 420,
-      "sha256": "fe21f718154592475d5616607538799a0aeb559b5a981a872e780d15b3471c58"
+      "sha256": "1dfe3dccd5a669c469d92142a84f160e4a6df13e4ffcfd3c80615d7c0e6f85a7"
+    },
+    {
+      "path": "language/objectc/frontend_objectc.py",
+      "bytes": 5648,
+      "mode": 420,
+      "sha256": "ed017ddd37aebc782b9da7557a3da32280343014821fc3c1ffcd9ab7f036e1fd"
     },
     {
       "path": "language/objectc/runtime.py",
-      "bytes": 4159,
+      "bytes": 4546,
       "mode": 420,
-      "sha256": "ae7ba6e7b9e72d86a6746cf65d99130ac80438ef16bbbc8f93246ea0c47b62de"
+      "sha256": "1449ffa22901a4cb24d70a1c0ab80017051041ba13c69382901ec16a6cd2c080"
     },
     {
       "path": "language/objectc/xmake/adapter.lua",

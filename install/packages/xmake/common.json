@@ -26,9 +26,9 @@
     },
     {
       "path": "tools/xmake/dispatch.lua",
-      "bytes": 11285,
+      "bytes": 11249,
       "mode": 420,
-      "sha256": "c52af393c0776fd7dee03693c1279461852c7cba9e013d979a8c1c679c38e12f"
+      "sha256": "b2d1e4cc0dd74d2f44f7634c3ba53d577707042cafc7f0fad653beec01e28d0d"
     },
     {
       "path": "tools/xmake/ros.lua",
@@ -44,9 +44,9 @@
     },
     {
       "path": "tools/xmake/site_archive.py",
-      "bytes": 916,
+      "bytes": 1106,
       "mode": 420,
-      "sha256": "eb88487b6527ed1de7a02b81e7317ff0ea1aac673f55132946b1ea22c0574f3d"
+      "sha256": "e469f3ebcd46b4d524f2bec6229abd24d48a87139f5c3daafa7b0e11917e3194"
     }
   ]
 }

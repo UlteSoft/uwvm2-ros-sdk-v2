@@ -12,7 +12,6 @@ sys.path.insert(0, str(ROOT / "install"))
 import artifacts
 from compiler import compiler_environment, make_command
 from frontend import audit
-from guest_profile import Profile
 import qualification
 import runtime
 
@@ -20,16 +19,16 @@ def main():
     parser = argparse.ArgumentParser(prog="wrobjc", description=__doc__)
     parser.add_argument("sources", type=Path, nargs="+")
     parser.add_argument("-o","--output",type=Path,required=True)
-    parser.add_argument("--toolchain",type=Path,required=True)
-    parser.add_argument("--sysroots",type=Path,action="append",required=True)
+    parser.add_argument("--toolchain",type=Path)
+    parser.add_argument("--sysroots",type=Path,action="append")
     parser.add_argument("--objc-clang",type=Path,default=os.environ.get("WROS_OBJC_CLANG"))
     parser.add_argument("--objc-runtime",type=Path,default=os.environ.get("WROS_OBJC_RUNTIME"))
-    parser.add_argument("--target",choices=("wasm32","wasm64"),default="wasm32")
+    parser.add_argument("--target",choices=("wasm32","wasm64"))
     parser.add_argument("--core",choices=("3.0",),default="3.0")
-    parser.add_argument("--eh",action=argparse.BooleanOptionalAction,default=True)
+    parser.add_argument("--eh",action=argparse.BooleanOptionalAction)
     qualification.arguments(parser)
-    parser.add_argument("-O",choices=tuple("0123sz"),default="3")
-    parser.add_argument("-g",action="store_true")
+    parser.add_argument("-O",choices=tuple("0123sz"))
+    parser.add_argument("-g",action="store_true",default=None)
     parser.add_argument("-c",action="store_true",dest="compile_only")
     parser.add_argument("--reactor",action="store_true")
     parser.add_argument("--export",action="append",default=[])
@@ -38,14 +37,16 @@ def main():
     parser.add_argument("-D",dest="macros",action="append",default=[])
     opts=parser.parse_args()
     try:
-        profile=Profile(int(opts.target[4:]),exceptions="eh" if opts.eh else "noeh",mte=opts.mte)
+        opts.threads = False
+        if opts.O is None and opts.toolchain is not None and opts.sysroots is not None:
+            opts.O = "3"
+        profile, selected = qualification.frontend_profile(opts, "objectc")
         tc=opts.toolchain.resolve(strict=True)
-        objc=runtime.frontend(tc,opts.objc_clang)
-        lib=(opts.objc_runtime or tc/"share/wros/objectc"/profile.identity).resolve(strict=True)
         tools,rec=make_command(tc,opts.sysroots,profile,"c",["-c"],verify=True)
-        marker=runtime.verify_runtime(lib,profile,objc,rec)
-        extras={"objc_frontend":objc,"objc_runtime":marker,"objc_archive":lib/"libobjc.a"}
-        admit=qualification.admit("objectc",opts,profile,extras)
+        extras = runtime.verified_inputs(tc, profile, rec, opts.objc_clang, opts.objc_runtime)
+        objc = extras["objc_frontend"]
+        lib = extras["objc_archive"].parent
+        admit = qualification.admit("objectc", opts, profile, extras, selected_release=selected)
         sources=[s.resolve(strict=True) for s in opts.sources]
         if any(s.suffix not in (".m",".a",".o") for s in sources) or len(sources)>artifacts.MAX_MEMBERS:
             raise ValueError("expected Objective-C .m sources or checked WROS .o/.a objects")

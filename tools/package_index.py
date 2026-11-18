@@ -144,7 +144,7 @@ def main():
         "bin/wrobjc", "include/wros/scene.h", "document/en/objectc.md", "document/zh/objectc.md",
         "examples/objectc/body.m", "examples/objectc/xmake.lua",
         *["language/objectc/" + name for name in ("base_object.m", "build_frontend.py", "build_runtime.py",
-                                                 "frontend_objectc.py", "runtime.py")],
+                                                 "check_site.py", "frontend_objectc.py", "runtime.py")],
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/objectc").iterdir() if p.is_file()],
     ]
     language_files["fortran"] = [

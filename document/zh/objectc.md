@@ -39,3 +39,15 @@ python3 "$SDK/language/objectc/build_runtime.py" \
 ## 验证默认的 MTE 配置
 
 按照[本地签署指南](memory-qualification.md)，在固定提交的 compiler-source 工作树中使用源验证命令。选择 `--language objectc --target wasm32 -O3 -g --eh`，传入 `--objc-clang`、`--objc-runtime` 与 `--approved-objc-inputs-sha256`。最后一项是三个输入摘要组成的规范 JSON 对象的 SHA-256：`objc_frontend` 为专用编译器，`objc_runtime` 为 runtime.json，`objc_archive` 为 libobjc.a。应分别核验这些文件及底层工具链和 sysroot。语言测试在两种 VM 引擎中创建对象、传递标量消息、回收对象并检查权限。测试使用多种实例大小和相近的实际堆分配，按固定 GNUstep 版本的引用计数头核对分配范围。部署者审阅并签署输出，再按本地信任策略安装。
+
+## 安装已签署资格的站点工具链
+
+站点管理员将已审核的 Wasm Objective-C 编译器及其构建收据放到 `TOOLCHAIN/bin/wros-objc-clang` 和 `TOOLCHAIN/bin/wros-objc-clang.json`。将匹配的单线程 GNUstep 运行库、头文件和 `runtime.json` 放到 `TOOLCHAIN/share/wros/objectc/PROFILE`，其中 PROFILE 取自运行库构建标识。站点文件指定工具链、匹配的 sysroot 收据和管理员独立审核的 Objective-C 资格签名。
+
+使用 SDK 的固定安装程序，一条命令即可把所选语言和平台安装到空前缀。
+
+```sh
+python3 install/bootstrap.py install --commit "$SDK_COMMIT" --platform unitree --language objectc --prefix "$PREFIX" --site-profile "$SITE"
+```
+
+安装结果给出 SDK 目录。在该目录执行 `bin/wrobjc examples/objectc/body.m --reactor --export _start -o body.wasm --build-receipt` 即可编译随附示例。将 `UWVM_ROS_SDK_ROOT` 指向安装目录，`examples/objectc/xmake.lua` 项目也会使用同一组签名输入。每次构建都会依资格收据核验 Objective-C 编译器、GNUstep 归档和头文件以及 sysroot。

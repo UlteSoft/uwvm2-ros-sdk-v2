@@ -144,7 +144,7 @@ function build(target)
     os.mkdir(path.directory(output))
     if request.adapter.family == "c" or request.adapter.id == "fortran" or request.adapter.id == "lua" or request.adapter.id == "nim" then
         local toolchain = os.getenv("WROS_TOOLCHAIN")
-        request.site = request.adapter.id ~= "objectc" and not toolchain and not request.sysroots and
+        request.site = not toolchain and not request.sysroots and
                        os.isfile(path.join(request.root, "share/qualification/site-profile.json"))
         if request.site then
             assert(request.mte_flag == "--mte", "Provide explicit matching tools and sysroots for another MTE mode")
