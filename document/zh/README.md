@@ -58,6 +58,27 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 
 已有编译环境时，可使用 `-- --component bindings` 单独安装所选语言的原始声明、许可证以及所选语言和平台的元数据。C 和 C++ 共用头文件，本修订还提供 Rust 和 AssemblyScript 的声明。此模式仅请求这些文件。首个 commit 的安装入口也可通过 `revision-help` 发现新选项。
 
+### 一条命令安装宇树开发工具
+
+在 Bash 中将 `REV` 设为可信的 40 位 SDK 提交 ID。以下命令直接从官方仓库下载安装入口和所选文件。
+
+```sh
+set -o pipefail
+curl --fail --silent --show-error \
+  "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | \
+  python3 -I -B - install --commit "$REV" --platform unitree --language fortran
+```
+
+安装结果的 `directory` 字段给出 SDK 目录，其中包含 C 前端 `bin/wrc`、C++ 前端 `bin/wrcc`、Fortran 前端 `bin/wrf` 和归档工具 `bin/wrar`。语言源码与 Xmake 平台文件分别选取 Fortran 和宇树对应的包。下载中断后，使用相同前缀重复执行即可复用已校验的对象。
+
+构建时，`PRODUCER` 指向本机已审核的编译器目录，`RECEIPT` 指向对应的 sysroot 构建记录。前端会校验所选构建输入。默认内存标记配置还需要运营方针对这些输入和选项签署的资格记录。宿主工具链、sysroot 和 VM 需要单独准备。[宿主工具及本地资格验证](fortran.md)
+
+```sh
+sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
+"$sdk/bin/wrc" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g body.c -o body.wasm
+"$sdk/bin/wrf" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g "$sdk/examples/fortran/body.f90" -o robot.wasm
+```
+
 ### 修订脚本和文件清单格式
 
 固定入口为所选提交中的 `install/revision.py`。安装器通过 Python 隔离模式执行该脚本，依次传入平台名、语言名以及分隔符 `--` 后的扩展参数。`revision-help` 传入 `--revision-help`，读取含 `help` 字符串的 JSON 对象。正常选择时，脚本向标准输出写入一个 JSON 对象，例如

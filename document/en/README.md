@@ -59,6 +59,27 @@ The stable operations are `plan`, `install` and `revision-help`. Pass revision-s
 
 For an existing compiler integration, pass `-- --component bindings` to install only the selected raw declarations, the licence, and the selected language and platform metadata. C and C++ share a header. This revision also publishes Rust and AssemblyScript declarations. This component fetches no compiler, compiler sources or full ABI catalogue. The original bootstrap can discover it with `revision-help` at this commit.
 
+### One-command Unitree installation
+
+In Bash, set `REV` to a trusted 40-character SDK commit. This command downloads the installer and selected files directly from the official repository.
+
+```sh
+set -o pipefail
+curl --fail --silent --show-error \
+  "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | \
+  python3 -I -B - install --commit "$REV" --platform unitree --language fortran
+```
+
+The result’s `directory` field gives the location of `bin/wrc` (C), `bin/wrcc` (C++), `bin/wrf` (Fortran), and `bin/wrar` (archives). Language sources and Xmake platform files are specific to Fortran and Unitree. After a network interruption, repeat the command using the same prefix to reuse verified objects.
+
+For development, supply the paths to the host’s reviewed compiler prefix (`PRODUCER`) and matching sysroot manifest (`RECEIPT`). The wrappers validate the selected build inputs. The default memory-tagged profile also requires the operator’s signed qualification for those inputs and options. Provision the toolchain, sysroot and VM separately. [Host tools and local qualification](fortran.md)
+
+```sh
+sdk="$HOME/.local/share/wros-sdk/$REV/unitree/fortran/development"
+"$sdk/bin/wrc" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g body.c -o body.wasm
+"$sdk/bin/wrf" --toolchain "$PRODUCER" --sysroots "$RECEIPT" --target wasm32 -O3 -g "$sdk/examples/fortran/body.f90" -o robot.wasm
+```
+
 ### Revision hook and package format
 
 At the selected commit the fixed entry is `install/revision.py`. The bootstrap invokes it with Python's isolated mode, positional platform and language identifiers, and the arguments following `--`. For `revision-help` it appends `--revision-help` and reads a JSON object containing a `help` string. A successful selection prints one JSON object, for example:
