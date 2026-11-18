@@ -171,6 +171,8 @@ def main():
                       [*language_flags, "--output", a.output / "fortran-descriptors"]))
         tests.append(("fortran-intrinsics", "fortran_intrinsics.py",
                       [*language_flags, "--output", a.output / "fortran-intrinsics"]))
+        tests.append(("fortran-clocks", "fortran_clocks.py",
+                      [*language_flags, "--output", a.output / "fortran-clocks"]))
         tests.append(("fortran-archives", "fortran_archives.py",
                       [*language_flags, "--output", a.output / "fortran-archives"]))
     for label, script, arguments in tests:

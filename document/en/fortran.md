@@ -125,3 +125,9 @@ wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --link-object filt
 In Xmake, give the library target `set_kind("static")` and add it to the executable using `add_deps`. Both targets select the same SDK commit, width, exception mode and MTE configuration. [Two-target project](../../examples/fortran/static/xmake.lua)
 
 The archive regression can also use the original LAPACK norm procedure shipped with the Lite3 SDK and the division procedure shipped with the ROS Taskflow release. Supply their paths through `--dlapy3` and `--dladiv`. The test checks the exact source digests and evaluates the numerical results in both VM engines. [Archive regression](../../tests/fortran_archives.py)
+
+## Reading clocks
+
+Fortran `SYSTEM_CLOCK` reads the WASIp1 monotonic clock. `CPU_TIME` reads the VM process CPU clock. The frontend links the clock adapter when a guest object or static archive references these intrinsics. Both use the single read-only `clock_time_get` import, spelled `clock_time_get_wasm64` in a wasm64 module. The deployment supplies the interface and grants each clock ID separately. Process CPU time includes work performed by other modules in the same VM process.
+
+With monotonic clock access, a 32-bit count advances in milliseconds and a 64-bit count in nanoseconds. If the query fails, `COUNT` receives `-HUGE(COUNT)`, and `COUNT_RATE` and `COUNT_MAX` receive zero. A failed CPU-time query returns a negative value. Each read checks current authority. For simulated or externally controlled ROS time, use the `wr_clock_read` binding with its ROSv2 clock capability. [Clock regression](../../tests/fortran_clocks.py)

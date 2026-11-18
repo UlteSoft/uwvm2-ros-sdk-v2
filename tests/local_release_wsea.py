@@ -231,6 +231,10 @@ def main():
         calls = [(item["module"], item["name"]) for item in inspect(app_with_library.read_bytes())]
         if not archive.read_bytes().startswith(b"!<arch>\n") or calls != [("uwvm_ros_v2", "abi")]:
             raise ValueError("unexpected linked Fortran archive output or imports")
+        run("installed-fortran-clocks", [sys.executable, "-B", ROOT / "tests/fortran_clocks.py", "--sdk", sdk,
+                "--toolchain", a.toolchain, "--sysroots", a.sysroots, "--runtime", a.runtime,
+                "--address-width", str(a.address_bits), *(["--no-debug"] if a.fortran_default else []),
+                "--output", a.output / "fortran-clocks"], timeout=600)
         if a.fortran_lapack:
             run("signed-ros-lapack", [sys.executable, "-B", ROOT / "tests/fortran_archives.py",
                 "--toolchain", a.toolchain, "--sysroots", a.sysroots, "--runtime", a.runtime, "--sdk", sdk,

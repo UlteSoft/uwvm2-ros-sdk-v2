@@ -108,6 +108,7 @@ def runtime_requirements(inputs):
     prefixes = ("_FortranAAllocatable", "_FortranAAssign", "_FortranACopyInAssign",
                 "_FortranACopyOutAssign", "_FortranAMoveAlloc", "_FortranAPointer", "CFI_")
     descriptors = False
+    clocks = False
     intrinsics = set()
     for path in inputs:
         data = read_bounded(path)
@@ -117,13 +118,16 @@ def runtime_requirements(inputs):
                 if item["module"] != "env":
                     continue
                 name = item["name"]
+                if name in ("_FortranASystemClockCount", "_FortranASystemClockCountRate",
+                            "_FortranASystemClockCountMax", "_FortranACpuTime"):
+                    clocks = True
                 if name.startswith(prefixes):
                     descriptors = True
                 if name.startswith("_FortranA"):
                     unit = array_intrinsic_unit(name.removeprefix("_FortranA"))
                     if unit:
                         intrinsics.add(unit)
-    return descriptors or bool(intrinsics), sorted(intrinsics)
+    return descriptors or bool(intrinsics), sorted(intrinsics), clocks
 
 
 def guest_runtime(command, env, work, toolchain, descriptors, intrinsics):
@@ -226,12 +230,15 @@ def main():
                 flags.append("--threads")
             if opts.g:
                 flags.append("-g")
-            descriptors, intrinsics = runtime_requirements([*units, *objects])
+            descriptors, intrinsics, clocks = runtime_requirements([*units, *objects])
             cc = [sys.executable, "-B", ROOT / "bin/wrc", *flags]
             cxx = [sys.executable, "-B", ROOT / "bin/wrcc", *flags]
             runtime = guest_runtime(cxx, env, work, toolchain, descriptors, intrinsics)
             stubs = []
-            for source in (work / "wros_imports.c", ROOT / "language/fortran/entry.c"):
+            bridge_sources = [work / "wros_imports.c", ROOT / "language/fortran/entry.c"]
+            if clocks:
+                bridge_sources.append(ROOT / "language/fortran/clock.c")
+            for source in bridge_sources:
                 obj = work / (source.stem + ".o")
                 subprocess.run([*cc, "-c", source, "-o", obj], check=True, cwd=work, env=env)
                 stubs.append(obj)

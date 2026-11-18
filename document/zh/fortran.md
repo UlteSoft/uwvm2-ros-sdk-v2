@@ -125,3 +125,9 @@ wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --link-object filt
 在 Xmake 中为库目标设置 `set_kind("static")`，并在应用目标中通过 `add_deps` 添加依赖。两个目标应使用同一 SDK 提交、地址宽度、异常模型和 MTE 配置。[双目标工程](../../examples/fortran/static/xmake.lua)
 
 静态库回归也可读取 Lite3 SDK 自带的 LAPACK 范数过程和 ROS Taskflow 发行包自带的除法过程。通过 `--dlapy3` 和 `--dladiv` 传入原文件路径，测试会核对源码摘要，并在两种 VM 引擎上检查数值结果。[静态库回归](../../tests/fortran_archives.py)
+
+## 读取时钟
+
+Fortran 的 `SYSTEM_CLOCK` 读取 WASIp1 单调时钟，`CPU_TIME` 读取 VM 进程消耗的 CPU 时间。应用或静态库引用这些内建例程时，前端才链接时钟适配。两者共用一个只读导入 `clock_time_get`，wasm64 模块中的导入名称为 `clock_time_get_wasm64`。部署时需开放接口，并分别授予单调时钟和进程时钟权限。进程 CPU 时间会包含同一 VM 进程内其他模块的计算。
+
+单调时钟可用时，32 位计数以毫秒为单位，64 位计数以纳秒为单位。查询失败时，`COUNT` 返回 `-HUGE(COUNT)`，`COUNT_RATE` 和 `COUNT_MAX` 返回零。CPU 时间查询失败时返回负数。每次读取都会使用当前权限。读取仿真时间或由外部更新的 ROS 时间时，可使用 `wr_clock_read` 和对应的 ROSv2 时钟能力。[时钟回归测试](../../tests/fortran_clocks.py)

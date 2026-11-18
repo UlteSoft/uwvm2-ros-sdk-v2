@@ -20,15 +20,15 @@
     },
     {
       "path": "document/en/fortran.md",
-      "bytes": 14184,
+      "bytes": 15127,
       "mode": 420,
-      "sha256": "70234e5daaa39cb3a989872b4443f7bb3cdd69f37e5cb8dc6133cd389f33dedf"
+      "sha256": "3dd266649de9fa1f4082b879b515373ae32ee2997b95aba759b771d135951945"
     },
     {
       "path": "document/zh/fortran.md",
-      "bytes": 12612,
+      "bytes": 13502,
       "mode": 420,
-      "sha256": "1d4fb02fa87beb7a65dcd820d06fab044cba3204d14043c747b3a7d0bbdc8372"
+      "sha256": "abe133630c8796df0504379a93b60288902f294899ee35076ee4a3b45de8a3ca"
     },
     {
       "path": "examples/fortran/body.f90",
@@ -73,6 +73,12 @@
       "sha256": "b947ad33e7e043f9d37cbeda11053e0e94e89d1beaa71242f69b246cff562be0"
     },
     {
+      "path": "language/fortran/clock.c",
+      "bytes": 1834,
+      "mode": 420,
+      "sha256": "fc53849f78bdf73b2eb7bf1964c67f33a5719ca950be2d2c2055c6a7a613fbfd"
+    },
+    {
       "path": "language/fortran/compute_platform.cpp",
       "bytes": 776,
       "mode": 420,
@@ -92,9 +98,9 @@
     },
     {
       "path": "language/fortran/frontend_fortran.py",
-      "bytes": 14161,
+      "bytes": 14541,
       "mode": 420,
-      "sha256": "08cf6c34a5eef313d57ffaaa4a222c91eec4895501eec19adfc4626b4c298647"
+      "sha256": "c0dbaf4f578c93c671ed5255625cbe8d0e71f42c9782c84ba3fb6053bfe4340b"
     },
     {
       "path": "language/fortran/mark_mte.cpp",

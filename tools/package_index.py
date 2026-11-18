@@ -135,7 +135,7 @@ def main():
         "examples/fortran/static/body.f90", "examples/fortran/static/kernel.f90", "examples/fortran/static/xmake.lua",
         "bin/wrf", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
         "document/en/fortran.md", "document/zh/fortran.md",
-        *["language/fortran/" + name for name in ("build_flang.py", "compute_platform.cpp", "entry.c", "flang_identity.py",
+        *["language/fortran/" + name for name in ("build_flang.py", "clock.c", "compute_platform.cpp", "entry.c", "flang_identity.py",
                                                    "frontend_fortran.py", "mark_mte.cpp", "prepare.py")],
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/fortran").rglob("*") if p.is_file()],
     ]
