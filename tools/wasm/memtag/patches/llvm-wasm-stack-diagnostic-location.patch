@@ -1,0 +1,61 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
+@@ -9,6 +9,7 @@
+ #include "Utils/WasmAddressSpaces.h"
+ #include "llvm/IR/Module.h"
+ #include "llvm/Analysis/OptimizationRemarkEmitter.h"
++#include "llvm/IR/DiagnosticInfo.h"
+ #include "llvm/IR/Dominators.h"
+ #include "llvm/IR/EHPersonalities.h"
+ #include "llvm/Transforms/Utils/Cloning.h"
+@@ -290,6 +291,14 @@
+     I->eraseFromParent();
+ }
+ 
++static void reportOwnerError(Instruction &I, const Twine &Message) {
++  const Function &F = *I.getFunction();
++  DiagnosticLocation Loc = I.getDebugLoc()
++                               ? DiagnosticLocation(I.getDebugLoc())
++                               : DiagnosticLocation(F.getSubprogram());
++  F.getContext().diagnose(DiagnosticInfoUnsupported(F, Message, Loc));
++}
++
+ // Make native Wasm frame escapes explicit before owner-token SSA is built.
+ // The outer cleanuppad catches all exception tags and rethrows the original
+ // exception after the frame's current owner tokens have been released. Existing
+@@ -304,7 +313,7 @@
+     return Dest ? Dest->getParent() : nullptr;
+   };
+   auto reject = [&](Instruction &I) {
+-    F.getContext().emitError(&I, "strict WasmMTE cannot match this non-local "
++    reportOwnerError(I, "strict WasmMTE cannot match this non-local "
+                                  "exit to an exact stack-owner release");
+     return false;
+   };
+@@ -398,7 +407,7 @@
+   for (Instruction &I : instructions(Fn)) {
+     if (auto *II = dyn_cast<IntrinsicInst>(&I);
+         II && II->getIntrinsicID() == Intrinsic::structured_alloca) {
+-      Fn.getContext().emitError(&I,
++      reportOwnerError(I,
+           "strict WasmMTE stack ownership cannot claim structured allocation");
+       return false;
+     }
+@@ -408,7 +417,7 @@
+     auto Bytes = AI->getAllocationSize(*DL);
+     if (!AI->isStaticAlloca() || AI->isUsedWithInAlloca() ||
+         !Bytes || Bytes->isScalable()) {
+-      Fn.getContext().emitError(&I,
++      reportOwnerError(I,
+           "strict WasmMTE stack ownership requires a statically bounded "
+           "allocation with an exact release");
+       return false;
+@@ -416,7 +425,7 @@
+     uint64_t Max = iswasm32 ? std::numeric_limits<uint32_t>::max()
+                             : std::numeric_limits<uint64_t>::max();
+     if (Bytes->getFixedValue() > Max - (kTagGranuleSize.value() - 1)) {
+-      Fn.getContext().emitError(&I,
++      reportOwnerError(I,
+           "strict WasmMTE padded extent does not fit the memory address width");
+       return false;
+     }

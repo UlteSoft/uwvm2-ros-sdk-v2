@@ -1,0 +1,35 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
+@@ -297,6 +297,11 @@
+       return;
+     }
+ 
++    // A switch can have multiple edges from the same predecessor to one
++    // PHI. LLVM requires identical SSA values on those duplicate edges.
++    // Key by the terminator so an entry split during materialization keeps
++    // the same identity even if the instruction changes its parent block.
++    DenseMap<std::pair<Instruction *, Constant *>, Value *> PhiConstants;
+     for (Use &U : I.operands()) {
+       Value *Op = U.get();
+       if (auto *G = dyn_cast<GlobalValue>(Op);
+@@ -309,11 +314,16 @@
+         // the PHI would both split the PHI group and fail to dominate that
+         // edge. These pure constant expressions may safely be evaluated
+         // before the predecessor terminator, including on a critical edge.
+-        Instruction *InsertBefore = &I;
+-        if (auto *Phi = dyn_cast<PHINode>(&I))
+-          InsertBefore =
++        if (auto *Phi = dyn_cast<PHINode>(&I)) {
++          Instruction *Terminator =
+               Phi->getIncomingBlock(U.getOperandNo())->getTerminator();
+-        U.set(materializeConstant(C, InsertBefore));
++          auto Inserted = PhiConstants.try_emplace({Terminator, C}, nullptr);
++          if (Inserted.second)
++            Inserted.first->second = materializeConstant(C, Terminator);
++          U.set(Inserted.first->second);
++        } else {
++          U.set(materializeConstant(C, &I));
++        }
+       }
+     }
+   }

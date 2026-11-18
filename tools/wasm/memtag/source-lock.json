@@ -80,6 +80,14 @@
         {
           "path": "tools/wasm/memtag/patches/llvm-wasm-aggregate-global-pointers.patch",
           "sha256": "10a729b468f7d67fb4d6ec4f0ea89843901795ae8c8bc988dda9900141403ac3"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-phi-repeated-incoming.patch",
+          "sha256": "ae051f88975bdd7e75ef069b0c477521fc2b2738e61ab7c722ed2ce5cd002c0a"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-stack-diagnostic-location.patch",
+          "sha256": "dc276810df38441194f29ce35b889fbc7276c2b070f01316745e293dbae24710"
         }
       ],
       "status": "awaiting-stable-build-qualification",
