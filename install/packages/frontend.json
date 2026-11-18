@@ -8,27 +8,27 @@
     },
     {
       "path": "install/archiver.py",
-      "bytes": 1932,
+      "bytes": 1989,
       "mode": 420,
-      "sha256": "a4e34d75751b7f02e861e1146c55d29c1caee18983d45965e30cfcff189ef76f"
+      "sha256": "4a734fc5ecab5d64d1d27315d21291ab97971baae7d03ddb572b36a9b0a005f4"
     },
     {
       "path": "install/artifacts.py",
-      "bytes": 9203,
+      "bytes": 9853,
       "mode": 420,
-      "sha256": "5e914be660a8824493e3539b6f1c466433eeb208a3b378735df9f641d3489add"
+      "sha256": "52b66b0734989e5acf9d8885d535a47470ac730d5378575cda6dd3babacb9216"
     },
     {
       "path": "install/compiler.py",
-      "bytes": 8241,
+      "bytes": 7470,
       "mode": 420,
-      "sha256": "cff1a1fb039ee338f320bc0663b019061a7582d4fcb0a6862cbbd1f928e111aa"
+      "sha256": "18c0e467a033c91ca94a52c72d5b6fb853c37e89af7909bf88beac652b2202c6"
     },
     {
       "path": "install/frontend.py",
-      "bytes": 6370,
+      "bytes": 6856,
       "mode": 420,
-      "sha256": "2c5e1cbb316fe125321da9b0cf6e2ebf6d9fea1c6d2a1b527fdf8860b6b6e090"
+      "sha256": "6518218b017cbb2994eff5956af0d110cf191793f96378fdb9d0f0a375893314"
     },
     {
       "path": "install/guest_profile.py",

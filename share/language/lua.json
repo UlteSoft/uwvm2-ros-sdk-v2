@@ -1,4 +1,4 @@
 {
   "id": "lua",
-  "development_package": false
+  "development_package": true
 }

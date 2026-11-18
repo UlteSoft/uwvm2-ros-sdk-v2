@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/nvidia-groot/xmake/platform.lua",
+      "bytes": 300,
+      "mode": 420,
+      "sha256": "6d5eb471cdab326a58c5475e9945f2da7b701bea63fb3f303055d3a84af1008c"
+    }
+  ]
+}

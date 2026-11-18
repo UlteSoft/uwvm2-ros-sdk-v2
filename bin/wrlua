@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Build the pinned Lua interpreter and a text application into one Wasm module."""
+import argparse
+import hashlib
+import io
+from pathlib import Path
+import subprocess
+import sys
+import tarfile
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+ARCHIVE = ROOT / "third-parties/lua/lua-5.4.9.tar.gz"
+SHA256 = "2335b6c582a52654f94612bf10d2f4672805d05329aa6568b1d8cd9e5c6fb8e6"
+CORE = ("lapi lcode lctype ldebug ldo ldump lfunc lgc llex lmem lobject lopcodes "
+        "lparser lstate lstring ltable ltm lundump lvm lzio lauxlib lbaselib "
+        "lcorolib lmathlib lstrlib ltablib lutf8lib").split()
+
+
+def prepare(directory):
+    archive = ARCHIVE.read_bytes()
+    if hashlib.sha256(archive).hexdigest() != SHA256:
+        raise ValueError("Lua source archive digest mismatch")
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as source:
+        for member in source:
+            path = Path(member.name)
+            if path.parent != Path("lua-5.4.9/src") or not member.isfile():
+                continue
+            if path.suffix == ".h":
+                (directory / path.name).write_bytes(source.extractfile(member).read())
+            if path.suffix != ".c" or path.stem not in CORE:
+                continue
+            data = source.extractfile(member).read().decode("utf-8", errors="surrogateescape")
+            if path.stem == "lbaselib":
+                for function in ("dofile", "loadfile", "load", "warn", "print"):
+                    entry = '  {"%s", luaB_%s},\n' % (function, function)
+                    if data.count(entry) != 1:
+                        raise ValueError("unexpected upstream base library registration")
+                    data = data.replace(entry, "")
+            if path.stem == "ltablib":
+                # Upstream only uses clock() for pivot selection after a bad
+                # partition. Preview1 supplies wall/monotonic clock reads.
+                data = data.replace("clock_t c = clock();", "struct timespec tmono = {};\n"
+                                    "  clock_gettime(CLOCK_MONOTONIC, &tmono);\n"
+                                    "  clock_t c = (clock_t)tmono.tv_nsec;")
+            if path.stem == "lauxlib":
+                # Drop the complete FILE reader before linking. The embedded
+                # interpreter only uses upstream's counted, in-memory reader.
+                first = data.index("typedef struct LoadF {")
+                last = data.index("typedef struct LoadS {", first)
+                data = data[:first] + data[last:]
+            config = ("#define lua_writestring(s,l) ((void)0)\n"
+                      "#define lua_writeline() ((void)0)\n"
+                      "#define lua_writestringerror(s,p) ((void)0)\n")
+            (directory / (path.stem + ".cpp")).write_bytes((config + data).encode("utf-8", errors="surrogateescape"))
+    return [directory / (name + ".cpp") for name in CORE]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("script", type=Path)
+    parser.add_argument("-o", "--output", required=True, type=Path)
+    parser.add_argument("--target", default="wasm32", choices=("wasm32", "wasm64"))
+    parser.add_argument("--toolchain", type=Path, required=True)
+    parser.add_argument("--sysroots", type=Path, required=True)
+    parser.add_argument("--ros-abi", action="store_true", help="expose wros.abi() inside Lua")
+    args = parser.parse_args()
+    if args.script.resolve() == args.output.resolve():
+        parser.error("script and output must differ")
+    with args.script.open("rb") as stream:
+        data = stream.read(1024 * 1024 + 1)
+    if len(data) > 1024 * 1024 or b"\0" in data or data.startswith(b"\x1b"):
+        parser.error("expected up to 1 MiB of Lua text")
+    with tempfile.TemporaryDirectory(dir=args.output.parent) as scratch:
+        directory = Path(scratch).resolve()
+        units = prepare(directory)
+        # Encode bytes as fixed-width octal so application text cannot become C++.
+        literal = "\n".join('"' + "".join("\\%03o" % b for b in data[i:i+128]) + '"'
+                            for i in range(0, len(data), 128)) or '""'
+        (directory / "chunk.inc").write_text("static const char script[] = " + literal + ";\n")
+        cmd = [sys.executable, ROOT / "bin/wrcc", "--toolchain", args.toolchain, "--sysroots",
+               args.sysroots, "--target", args.target, "--reactor", "--export", "_start",
+               "-O3", "-g", "-Dl_signalT=int", "-DLUA_USE_JUMPTABLE=0", "-I", directory]
+        if args.ros_abi:
+            cmd += ["-D", "WROS_LUA_ABI"]
+        subprocess.run([*cmd, ROOT / "language/lua/entry.cpp", *units, "-o", args.output], check=True)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        sys.exit(str(error))

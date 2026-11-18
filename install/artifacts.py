@@ -73,16 +73,20 @@ def validate_profile(value):
     if not isinstance(value, dict):
         raise ValueError("invalid object profile")
     profile = Profile(**{key: value[key] for key in Profile.__dataclass_fields__})
+    if not profile.mte:
+        raise ValueError("industrial objects require WasmMTE")
     if value != profile.to_dict():
         raise ValueError("inconsistent object profile")
     return value
 
 
-def seal_object(data, profile, compiler_sha256):
+def seal_object(data, profile, compiler_sha256, closure_sha256):
     """Append one digest-bound note to a compiler-produced relocatable object."""
     validate_profile(profile)
     if not re.fullmatch(r"[0-9a-f]{64}", compiler_sha256):
         raise ValueError("invalid compiler digest")
+    if not re.fullmatch(r"[0-9a-f]{64}", closure_sha256):
+        raise ValueError("invalid sysroot closure digest")
     linking = 0
     for _, _, name, body in sections(data):
         if name == NOTE:
@@ -93,7 +97,7 @@ def seal_object(data, profile, compiler_sha256):
                 raise ValueError("unsupported Wasm linking metadata")
     if linking != 1:
         raise ValueError("expected one relocatable Wasm linking section")
-    note = dict(schema=NOTE, profile=profile, compiler_sha256=compiler_sha256,
+    note = dict(schema=NOTE, profile=profile, compiler_sha256=compiler_sha256, closure_sha256=closure_sha256,
                 object_sha256=hashlib.sha256(data).hexdigest())
     payload = NOTE.encode()
     payload = uleb(len(payload)) + payload + json.dumps(note, sort_keys=True, separators=(",", ":")).encode()
@@ -112,7 +116,7 @@ def unique_object(pairs):
     return result
 
 
-def check_object(data, profile=None, compiler_sha256=None):
+def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None):
     """Check the entire object against its final note and optional expected ABI."""
     notes, linking = [], 0
     for start, end, name, body in sections(data):
@@ -128,13 +132,15 @@ def check_object(data, profile=None, compiler_sha256=None):
                 note = json.loads(bytes(body.take(remaining)), object_pairs_hook=unique_object)
             except (UnicodeError, RecursionError, json.JSONDecodeError) as error:
                 raise ValueError("invalid object build note") from error
-            if not isinstance(note, dict) or set(note) != {"schema", "profile", "compiler_sha256", "object_sha256"}:
+            if not isinstance(note, dict) or set(note) != {"schema", "profile", "compiler_sha256", "closure_sha256", "object_sha256"}:
                 raise ValueError("invalid build note fields")
             if note["schema"] != NOTE or note["object_sha256"] != hashlib.sha256(data[:start]).hexdigest():
                 raise ValueError("object digest mismatch")
             validate_profile(note["profile"])
             if not isinstance(note["compiler_sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", note["compiler_sha256"]):
                 raise ValueError("invalid compiler digest")
+            if not isinstance(note["closure_sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", note["closure_sha256"]):
+                raise ValueError("invalid sysroot closure digest")
             notes.append(note)
     if linking != 1 or len(notes) != 1:
         raise ValueError("expected one relocatable linking section and WROS build note")
@@ -143,6 +149,8 @@ def check_object(data, profile=None, compiler_sha256=None):
         raise ValueError("object guest profile mismatch")
     if compiler_sha256 is not None and note["compiler_sha256"] != compiler_sha256:
         raise ValueError("object compiler digest mismatch")
+    if closure_sha256 is not None and note["closure_sha256"] != closure_sha256:
+        raise ValueError("object sysroot closure mismatch")
     return note
 
 
@@ -204,7 +212,7 @@ def archive(toolchain, output, members, work):
     subprocess.run([str(archiver), "--format=gnu", "rcsD", str(output), *map(str, paths)], check=True)
 
 
-def stage_inputs(sources, work, profile, compiler_sha256, toolchain):
+def stage_inputs(sources, work, profile, compiler_sha256, closure_sha256, toolchain):
     """Snapshot every object/archive; refuse ABI mixtures before linking."""
     result, total, count = [], 0, 0
     for index, source in enumerate(sources):
@@ -220,7 +228,7 @@ def stage_inputs(sources, work, profile, compiler_sha256, toolchain):
         if count > MAX_MEMBERS:
             raise ValueError("too many input object members")
         for member in members:
-            check_object(member, profile, compiler_sha256)
+            check_object(member, profile, compiler_sha256, closure_sha256)
         path = work / (f"input{index}" + source.suffix)
         if source.suffix == ".a":
             archive(toolchain, path, members, work / f"archive{index}")

@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/fanuc/xmake/platform.lua",
+      "bytes": 452,
+      "mode": 420,
+      "sha256": "debdd4ec2d06533a40ca989c8e245e6ac915f652e572c7b56bfa8fcfe4cacf61"
+    }
+  ]
+}

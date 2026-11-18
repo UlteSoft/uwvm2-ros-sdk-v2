@@ -56,9 +56,9 @@
     },
     {
       "path": "tools/wasm/memtag/build_sysroots.py",
-      "bytes": 18099,
+      "bytes": 18184,
       "mode": 420,
-      "sha256": "86b7c90690028a73d601d682dd02cc5d8f8b7257413be33074606efe097b9359"
+      "sha256": "806102878e467e3c8dc3f2579275523982cbe752a3957ca783af499e8974cd4f"
     },
     {
       "path": "tools/wasm/memtag/patches/libc-wros-runtime-diagnostics.patch",

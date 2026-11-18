@@ -1,38 +1,117 @@
-"""Create content-addressed file lists used by this SDK commit."""
-import hashlib,json
+"""Generate this revision's selective installation manifests and platform declarations."""
+import hashlib
+import json
 from pathlib import Path
-root=Path(__file__).resolve().parents[1]
+import re
+import runpy
+import textwrap
 
-def write(path,value):
-    p=root/path;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(value,indent=2)+"\n")
+
+ROOT = Path(__file__).resolve().parents[1]
+HOOK = ROOT / "install/revision.py"
+DEVELOPMENT = runpy.run_path(str(HOOK))["DEVELOPMENT"]
+
+
+def write(path, text):
+    file = ROOT / path
+    file.parent.mkdir(parents=True, exist_ok=True)
+    file.write_text(text, encoding="utf-8")
+
+
+def write_json(path, value):
+    write(path, json.dumps(value, indent=2) + "\n")
+
 
 def package(name, paths):
-    entries=[]
+    entries = []
     for path in sorted(set(paths)):
-        p=root/path
-        if not p.is_file() or p.is_symlink():raise ValueError(path)
-        with p.open("rb") as f:digest=hashlib.file_digest(f,"sha256").hexdigest()
-        entries.append({"path":path,"bytes":p.stat().st_size,"mode":493 if path.startswith("bin/") else 420,"sha256":digest})
-    write("install/packages/"+name+".json",{"files":entries})
+        file = ROOT / path
+        if not file.is_file() or file.is_symlink():
+            raise ValueError("missing package input: " + path)
+        with file.open("rb") as stream:
+            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+        entries.append(dict(path=path, bytes=file.stat().st_size,
+                            mode=0o755 if path.startswith("bin/") else 0o644, sha256=digest))
+    write_json("install/packages/" + name + ".json", {"files": entries})
+
+
+def render_inventory(registry):
+    """The bootstrap runs revision.py alone. Embed only IDs in that small file."""
+    languages = registry["languages"]
+    grouped = {}
+    for platform, declared in registry["platforms"].items():
+        if not set(declared) <= set(languages):
+            raise ValueError("unknown language in platform " + platform)
+        grouped.setdefault(tuple(declared), []).append(platform)
+    def words(values):
+        if any(not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", entry) for entry in values):
+            raise ValueError("invalid target identifier")
+        return json.dumps(" ".join(values))
+    header = "# BEGIN generated target inventory (tools/package_index.py)\n"
+    footer = "# END generated target inventory"
+    block = [f"LANGUAGES = {words(languages)}.split()", "PLATFORM_LANGUAGES = {",
+             "    platform: routes.split()", "    for group, routes in ("]
+    for declared, group in grouped.items():
+        block.extend(("        (" + words(group) + ",", "         " + words(declared) + "),"))
+    block.extend(("    )", "    for platform in group.split()", "}"))
+    before, section = HOOK.read_text().split(header)
+    _, after = section.split(footer)
+    write(HOOK, before + header + "\n".join(block) + "\n" + footer + after)
+
+
+def platform_adapter(platform, languages):
+    source = f"platform/{platform}/sources.json"
+    data = json.loads((ROOT / source).read_text())
+    if data["platform"] != platform or not re.fullmatch(r"[a-z][a-z0-9_-]*", data["admission"]):
+        raise ValueError("unexpected platform admission for " + platform)
+    path = f"platform/{platform}/xmake/platform.lua"
+    ids = ", ".join(json.dumps(language) for language in languages)
+    rows = textwrap.wrap(ids, width=89, break_long_words=False, break_on_hyphens=False)
+    code = ["-- Generated from this platform's inventory by tools/package_index.py.",
+            "function describe()", "    return {", "        id = " + json.dumps(platform) + ",",
+            "        admission = " + json.dumps(data["admission"]) + ",", "        languages = {"]
+    code.extend("            " + row for row in rows)
+    code.extend(("        }", "    }", "end", ""))
+    write(path, "\n".join(code))
+    package("platforms/" + platform, [source])
+    package("xmake/platforms/" + platform, [path])
+
 
 def main():
-    registry=json.loads((root/"share/targets.json").read_text())
+    registry = json.loads((ROOT / "share/targets.json").read_text())
+    render_inventory(registry)
     package("license", ["LICENSE"])
-    for language, path in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs", "as": "language/assemblyscript/scene.ts"}.items():
-        package("bindings/" + language, [path])
-    package("protocol",["share/abi/ros.json","LICENSE"])
-    for platform in registry["platforms"]:
-        package("platforms/"+platform,["platform/"+platform+"/sources.json"])
+    for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",
+                        "as": "language/assemblyscript/scene.ts"}.items():
+        package("bindings/" + key, [source])
+    package("protocol", ["share/abi/ros.json", "LICENSE"])
+    for name, languages in registry["platforms"].items():
+        platform_adapter(name, languages)
     for language in registry["languages"]:
-        meta="share/language/"+language+".json"
-        write(meta,{"id":language,"development_package":language in ("c","cpp","rs","as")})
-        package("metadata/"+language,[meta])
-    package("languages/c",["bin/wrc","include/wros/scene.h"])
-    package("languages/cpp",["bin/wrc","bin/wrcc","include/wros/scene.h"])
-    package("languages/rs",["language/rust/scene.rs"])
-    package("languages/as",["language/assemblyscript/scene.ts"])
-    package("frontend",["bin/wrar"]+["install/"+filename for filename in ["frontend.py","imports.py","guest_profile.py","compiler.py","artifacts.py","archiver.py"]])
-    package("compiler-source",[p.relative_to(root).as_posix() for top in ("tools/wasm/memtag","third-parties/sources")
-                               for p in (root/top).rglob("*") if p.is_file() and "__pycache__" not in p.parts])
+        path = "share/language/" + language + ".json"
+        write_json(path, {"id": language, "development_package": language in DEVELOPMENT})
+        package("metadata/" + language, [path])
 
-if __name__=="__main__":main()
+    policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py")]
+    package("frontend", [*policy, "bin/wrar", "install/archiver.py"])
+    package("xmake/common", ["tools/xmake/ros.lua", "tools/xmake/dispatch.lua", "tools/xmake/run_guest.py",
+                             "document/en/xmake.md", "document/zh/xmake.md",
+                             "document/en/xmake-api-index.md", "document/zh/xmake-api-index.md"])
+    language_files = {
+        "c": ["bin/wrc", "include/wros/scene.h", "examples/c/body.c", "examples/c/xmake.lua"],
+        "cpp": ["bin/wrc", "bin/wrcc", "include/wros/scene.h"],
+        "lua": ["bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp",
+                "third-parties/lua/lua-5.4.9.tar.gz", "third-parties/lua/LICENSE", "third-parties/lua/README.md",
+                "examples/lua/body.lua", "document/en/lua.md", "document/zh/lua.md"],
+    }
+    if set(language_files) != set(DEVELOPMENT):
+        raise ValueError("developer payloads must match the revision hook")
+    for language, files in language_files.items():
+        package("languages/" + language, [*files, f"language/{language}/xmake/adapter.lua"])
+    inputs = (file.relative_to(ROOT).as_posix() for directory in ("tools/wasm/memtag", "third-parties/sources")
+              for file in (ROOT / directory).rglob("*") if file.is_file() and "__pycache__" not in file.parts)
+    package("compiler-source", inputs)
+
+
+if __name__ == "__main__":
+    main()

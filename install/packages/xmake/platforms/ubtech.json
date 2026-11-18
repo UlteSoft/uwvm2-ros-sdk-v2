@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/ubtech/xmake/platform.lua",
+      "bytes": 453,
+      "mode": 420,
+      "sha256": "d1eb31d9c1004d3a4a58fd6548b95857aa50f55878f045c4750eab9f70671622"
+    }
+  ]
+}

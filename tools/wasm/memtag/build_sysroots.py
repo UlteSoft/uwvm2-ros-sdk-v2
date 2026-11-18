@@ -93,6 +93,8 @@ def diagnostics_overlay(source, entry, work):
 
 
 def build(args):
+    if not args.mte:
+        raise ValueError("industrial sysroots require WasmMTE")
     if args.jobs < 1:
         raise ValueError("--jobs must be positive")
     # Validate all requested axes before extracting or compiling anything.

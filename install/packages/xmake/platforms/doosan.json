@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/doosan/xmake/platform.lua",
+      "bytes": 453,
+      "mode": 420,
+      "sha256": "9dbedf058406aa0a566a969a171c3b2faf502743865a126ba135d9e5b070cb53"
+    }
+  ]
+}

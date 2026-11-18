@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/dobot/xmake/platform.lua",
+      "bytes": 348,
+      "mode": 420,
+      "sha256": "5907657ee3c6fd2963c59f982fec87b2325ab5a6fb13bbd710e6877264ff9622"
+    }
+  ]
+}

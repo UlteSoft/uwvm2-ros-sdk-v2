@@ -3,6 +3,8 @@
 For driver/model security and the division between Wasm and deployment authority,
 read [Local driver and model attachments](local-attachments.md).
 
+[Build and run a Wasm project with xmake](xmake.md) · [Xmake API index](xmake-api-index.md)
+
 ## Install a pinned selection
 
 Run the trusted bootstrap with Python 3.11 or newer. The commit argument is the full 40-character Git object ID. Use the same bootstrap with later SDK commits that implement the installation contract. The default source is the official public SDK repository. A trusted local Git repository works offline.
@@ -47,7 +49,7 @@ Each package name resolves to `install/packages/<name>.json` at that same commit
 bin/wrc --toolchain "$PRODUCER" --sysroots "$RECEIPT" --reactor --export _start -O3 -g -o robot.wasm robot.c
 ```
 
-Defaults are wasm32, Core 3.0, WasmMTE, standard Wasm exceptions and single-threaded output. Select `--target wasm64`, `--no-mte`, `--no-eh`, `--core mvp` or `-pthread` explicitly. A pthread-dependent build must propagate the thread option. Missing matching sysroot inputs stop the build. C++ EH and no-EH use distinct library closures. After link, the driver checks binary import signatures before replacing the output. It admits the ROSv2 contract, WASIp1 environment queries, clock reads, clock resolution queries and process exit, and the selected thread import. The VM independently enforces deployed permissions.
+Defaults are wasm32, Core 3.0, WasmMTE, standard Wasm exceptions and single-threaded output. Select `--target wasm64`, `--no-eh`, `--core mvp` or `-pthread` explicitly. A pthread-dependent build must propagate the thread option. Missing matching sysroot inputs stop the build. C++ EH and no-EH use distinct library closures. After link, the driver checks binary import signatures before replacing the output. It admits the ROSv2 contract, WASIp1 environment queries, clock reads, clock resolution queries and process exit, and the selected thread import. The VM independently enforces deployed permissions.
 
 ### Separate compilation and static libraries
 
@@ -79,4 +81,6 @@ Include `<wros/scene.h>` for the raw ABI. Rust and AssemblyScript declarations l
 
 The platform directory is open to additional Chinese and international manufacturers. Each platform records pinned source references. Implement pure transformations in Wasm and route native device access through authenticated external drivers. A new VM extension requires a concrete host-enforced permission that the common contract cannot express. The upstream fetcher obtains licensed vendor artifacts from the approved supplier. The deployer consumes their local paths and verified digests. Source references, simulator qualification and hardware qualification are independent records.
 
-The legacy registry supplies 29 language identifiers and 32 platform identifiers. C and C++ have compiler drivers here. The remaining compiler/runtime closures, high-level language bindings, vendor products and source-compatibility layers for rcl, rclcpp, rclpy and rcljava require separate implementation and execution evidence.
+The legacy registry supplies 29 language identifiers and 32 platform identifiers. C and C++ have compiler drivers. The Lua frontend builds and embeds the interpreter. The remaining compiler/runtime closures, high-level language bindings, vendor products and source-compatibility layers for rcl, rclcpp, rclpy and rcljava require separate implementation and execution evidence.
+
+Industrial builds bind each object to the compiler digest, the MTE guest profile and a digest of the selected sysroot inventory. Recompile older objects before linking. The build verifies compiler-rt and the selected header and library files. Treat the producer, sysroot receipt and build inputs as trusted. The optimizer can omit a stack tag only when its analysis proves the relevant accesses stay within bounds and lifetime. A passing regression suite is evidence for the tested paths; it cannot establish whole-program memory safety.

@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/agibot/xmake/platform.lua",
+      "bytes": 453,
+      "mode": 420,
+      "sha256": "95c15d20603418cbebb7522d0a7845fa9942d8466b38a79754c1c18e55ead452"
+    }
+  ]
+}

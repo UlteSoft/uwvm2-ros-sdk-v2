@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/abb/xmake/platform.lua",
+      "bytes": 450,
+      "mode": 420,
+      "sha256": "1086c77394133472a23f83d7c72fe09a676e2554ae73157f28d18c64515c4c6e"
+    }
+  ]
+}

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/lua.json",
-      "bytes": 50,
+      "bytes": 49,
       "mode": 420,
-      "sha256": "f0afa5d8f999ffa19c287cc85e22a4c233f15e99ae6cc84bc397d729d0648dd6"
+      "sha256": "a2cfe43a084c8d46fad562c96c7d19dd5367dc4f9a40ee6dbaeb40d9c6e185d5"
     }
   ]
 }

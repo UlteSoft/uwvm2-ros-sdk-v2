@@ -7,10 +7,28 @@
       "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
     },
     {
+      "path": "examples/c/body.c",
+      "bytes": 88,
+      "mode": 420,
+      "sha256": "837afadfa78502cc099f161192c62965f2a53c97406643ca1421908cc29b8cb3"
+    },
+    {
+      "path": "examples/c/xmake.lua",
+      "bytes": 370,
+      "mode": 420,
+      "sha256": "587f5c6c8ad49ed44f03f687b3764dac4b56ec263ebd7a38ba06d0b8816cb264"
+    },
+    {
       "path": "include/wros/scene.h",
       "bytes": 34227,
       "mode": 420,
       "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/c/xmake/adapter.lua",
+      "bytes": 110,
+      "mode": 420,
+      "sha256": "19ccc120e2e92e20365e656eff65cc28b420a8e10e6278022541c2675e43e56f"
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/yaskawa/xmake/platform.lua",
+      "bytes": 454,
+      "mode": 420,
+      "sha256": "2e9a0ec21abc8871433a0a3318ed3e79153976c9ea525db92b33868fab680f88"
+    }
+  ]
+}

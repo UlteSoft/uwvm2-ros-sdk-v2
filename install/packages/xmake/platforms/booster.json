@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/booster/xmake/platform.lua",
+      "bytes": 277,
+      "mode": 420,
+      "sha256": "421025c1173fca46da84e180831e33f30cf28b803c3b1307df91c75045a900f9"
+    }
+  ]
+}

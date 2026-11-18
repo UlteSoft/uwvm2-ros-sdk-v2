@@ -21,14 +21,14 @@ def main():
         if args.output.resolve() in paths:
             raise ValueError("output aliases an input")
         compiler_sha256 = digest(args.toolchain.resolve() / "bin/clang")
-        members, total, profile = [], 0, None
+        members, total, profile, closure = [], 0, None, None
         for path in paths:
             data = artifacts.read_bounded(path)
             total += len(data) + 60
             if total > artifacts.MAX_BYTES:
                 raise ValueError("archive objects exceed 128 MiB")
-            note = artifacts.check_object(data, profile, compiler_sha256)
-            profile = note["profile"]
+            note = artifacts.check_object(data, profile, compiler_sha256, closure)
+            profile, closure = note["profile"], note["closure_sha256"]
             members.append(data)
         with tempfile.TemporaryDirectory(dir=args.output.parent) as directory:
             work = Path(directory)

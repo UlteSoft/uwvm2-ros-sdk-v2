@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/hello_robot/xmake/platform.lua",
+      "bytes": 458,
+      "mode": 420,
+      "sha256": "4ca97063c3ad5b7edc2e3169ad072b2626f004f108a8e1de4a168fcee7eb56e2"
+    }
+  ]
+}

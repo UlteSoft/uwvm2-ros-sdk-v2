@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/trossen/xmake/platform.lua",
+      "bytes": 454,
+      "mode": 420,
+      "sha256": "b19ed27a12bd9ecb44d909e16c8963c39ba17ddea4af445eb4797bb26a6857be"
+    }
+  ]
+}

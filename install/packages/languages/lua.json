@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "path": "bin/wrcc",
+      "bytes": 185,
+      "mode": 493,
+      "sha256": "0705fff5e24d24cd248ad8701df16ac7a5737c50c881f4770849480572c91c96"
+    },
+    {
+      "path": "bin/wrlua",
+      "bytes": 4866,
+      "mode": 493,
+      "sha256": "826c3b57e50ec343d372a3d00419b7e9ed52f076fc9d7211fb783b1a6d95ef18"
+    },
+    {
+      "path": "document/en/lua.md",
+      "bytes": 3407,
+      "mode": 420,
+      "sha256": "93bcab07edffaf75722c70dd251a79518f51c1e4e54d5bbc193893e071538d78"
+    },
+    {
+      "path": "document/zh/lua.md",
+      "bytes": 3121,
+      "mode": 420,
+      "sha256": "a0f0344b1eee3e2c2fe44b4fc93a3085506ae506423e1878aeb697e19d607d48"
+    },
+    {
+      "path": "examples/lua/body.lua",
+      "bytes": 224,
+      "mode": 420,
+      "sha256": "5889482c2c61fed94b443eb5a29cd8c18d5bcce1c707811155e48c9e2c524e1e"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/lua/entry.cpp",
+      "bytes": 2207,
+      "mode": 420,
+      "sha256": "063dd3a797043079130b318963c08a3c9cc5e7b764951a4b79bfc329d424bdd9"
+    },
+    {
+      "path": "language/lua/xmake/adapter.lua",
+      "bytes": 1185,
+      "mode": 420,
+      "sha256": "eea52b95521a468b8931e2ea6ef7a266930c735d3812ade7a6fe2943a3ab3036"
+    },
+    {
+      "path": "third-parties/lua/LICENSE",
+      "bytes": 1066,
+      "mode": 420,
+      "sha256": "d1f51991ae78b089d96ed969246ddaa2b95fccda29a567b4235dfbd3335b81f3"
+    },
+    {
+      "path": "third-parties/lua/README.md",
+      "bytes": 499,
+      "mode": 420,
+      "sha256": "e2e3bc266b53e3e3f5339d25ccb5ae23bcc991f5aa7f2f8d22ad6aa8cfbdfd67"
+    },
+    {
+      "path": "third-parties/lua/lua-5.4.9.tar.gz",
+      "bytes": 373429,
+      "mode": 420,
+      "sha256": "2335b6c582a52654f94612bf10d2f4672805d05329aa6568b1d8cd9e5c6fb8e6"
+    }
+  ]
+}

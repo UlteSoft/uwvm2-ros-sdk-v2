@@ -34,7 +34,7 @@ class BuildInputTests(unittest.TestCase):
         self.profile = Profile().to_dict()
         self.compiler = "a" * 64
         self.raw = a.MAGIC + section(0, string("linking") + b"\2")
-        self.object = a.seal_object(self.raw, self.profile, self.compiler)
+        self.object = a.seal_object(self.raw, self.profile, self.compiler, "c" * 64)
 
     def test_note_integrity_and_profile(self):
         self.assertEqual(a.check_object(self.object)["object_sha256"], hashlib.sha256(self.raw).hexdigest())
@@ -46,6 +46,12 @@ class BuildInputTests(unittest.TestCase):
                                   (Profile(exceptions="noeh").to_dict(), self.compiler),
                                   (Profile(threads=True).to_dict(), self.compiler)):
             with self.assertRaisesRegex(ValueError, "mismatch"): a.check_object(self.object, profile, compiler)
+
+    def test_mte_and_closure_required(self):
+        with self.assertRaisesRegex(ValueError, "WasmMTE"):
+            a.seal_object(self.raw, Profile(mte=False).to_dict(), self.compiler, "c" * 64)
+        with self.assertRaisesRegex(ValueError, "closure mismatch"):
+            a.check_object(self.object, self.profile, self.compiler, "d" * 64)
 
     def test_archive_envelope(self):
         def member(name, body):

@@ -1,0 +1,12 @@
+set_project("robot")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("robot")
+    set_kind("binary")
+    set_language("c")
+    set_ros_platform(os.getenv("WROS_PLATFORM") or "unitree")
+    set_wros_profile({core = "3.0", mte = true, eh = true})
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_files("body.c")
+target_end()

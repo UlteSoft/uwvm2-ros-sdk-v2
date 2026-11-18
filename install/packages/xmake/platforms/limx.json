@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/limx/xmake/platform.lua",
+      "bytes": 274,
+      "mode": 420,
+      "sha256": "22e0abd226d225ab48b1dedea1359f5c1a0e59ecc580dcb22346ef7fa926eba6"
+    }
+  ]
+}

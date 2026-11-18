@@ -17,6 +17,12 @@
       "bytes": 34227,
       "mode": 420,
       "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/cpp/xmake/adapter.lua",
+      "bytes": 136,
+      "mode": 420,
+      "sha256": "d7b196406f970dc62ed4e508d69e9a0c0903821bc583f55731cd618e54719c06"
     }
   ]
 }

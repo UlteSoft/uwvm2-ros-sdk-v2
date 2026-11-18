@@ -60,6 +60,8 @@ def main(language):
                         ("c++17", "c++20", "c++23"))
     a = parser.parse_args()
     try:
+        if not a.mte:
+            raise ValueError("industrial guest compilation requires WasmMTE")
         profile = Profile(int(a.target[4:]), "1.0" if a.core=="mvp" else "3.0", a.threads, a.mte,
                           "eh" if (a.eh if a.eh is not None else a.core!="mvp") else "noeh")
         if any(not re.fullmatch(r"[a-zA-Z_]\w*", n,re.ASCII) for n in a.export):
@@ -90,8 +92,13 @@ def main(language):
             # every separately compiled input. Copy validated object bytes into
             # our private work directory so later path replacement cannot race.
             command, record = make_command(a.toolchain,a.sysroots,profile,language,args,verify=True)
-            inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], a.toolchain)
+            inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], a.toolchain)
             command += [*map(str, inputs), "-o",str(staged)]
+            if not a.compile_only:
+                # wasi-libc's compact formatter pulls stderr into even memory-only
+                # snprintf calls via its unsupported long-double diagnostic.
+                # The full formatter ships in the same verified guest sysroot.
+                command.append("-lc-printscan-long-double")
             # Archive dependencies must precede libunwind in static link order.
             if "-lunwind" in command:
                 command.remove("-lunwind")
@@ -99,7 +106,7 @@ def main(language):
             subprocess.run(command,check=True)
             data = artifacts.read_bounded(staged)
             if a.compile_only:
-                data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"])
+                data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], record["closure_sha256"])
             else:
                 data = artifacts.strip_notes(data)
                 audit(data,profile)

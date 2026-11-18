@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/realman/xmake/platform.lua",
+      "bytes": 350,
+      "mode": 420,
+      "sha256": "f76b688efd27bfe44c22b959abf91de825d933ff0f8b85093ed9bd78cb17ae8f"
+    }
+  ]
+}

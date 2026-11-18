@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "platform/kinova/xmake/platform.lua",
+      "bytes": 453,
+      "mode": 420,
+      "sha256": "a623b585504541d6a1de02ec4b65567fa9cf17e4583b311f5c323e1dd5f8b4ae"
+    }
+  ]
+}
