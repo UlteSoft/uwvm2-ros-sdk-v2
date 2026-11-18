@@ -62,11 +62,13 @@ def main(language):
     a = parser.parse_args()
     try:
         site = local_release.site_config(ROOT)
+        selected_release = None
         defaults = dict(target="wasm32", core="3.0", threads=False, O="2", g=False)
         if site is not None and (a.toolchain is None or a.sysroots is None):
             if not a.mte or a.legacy_mte:
                 raise ValueError("site defaults require strict MTE; provide explicit tools for another mode")
             row = qualification.site_release(site, language)
+            selected_release = qualification.canonical(row)
             a.toolchain = a.toolchain or Path(site["toolchain"])
             a.sysroots = a.sysroots or list(map(Path, site["sysroots"]))
             preset = row["profile"]
@@ -82,6 +84,8 @@ def main(language):
         eh = a.eh if a.eh is not None else core == "3.0"
         profile = Profile(int(a.target[4:]), core, a.threads, a.mte, "eh" if eh else "noeh")
         admission = qualification.admit(language, a, profile)
+        if selected_release is not None and admission["release_sha256"] != selected_release:
+            raise ValueError("build inputs differ from the selected site release")
         if any(not re.fullmatch(r"[a-zA-Z_]\w*", n,re.ASCII) for n in a.export):
             raise ValueError("invalid Wasm export name")
         sources=[p.resolve(strict=True) for p in a.sources]

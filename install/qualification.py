@@ -176,7 +176,7 @@ def measure_inputs(language, options, profile, extra=None, sdk=ROOT, candidates=
 def site_release(site, language):
     """Select exactly one externally signed row for this development language."""
     rows = [row for row in local_release.verified_releases(site["trust"])
-            if row.get("language") == language and complete_release(row)
+            if isinstance(row, dict) and row.get("language") == language and complete_release(row)
             and ("release_sha256" not in site or canonical(row) == site["release_sha256"])]
     if len(rows) != 1:
         raise ValueError("site profile must select one signed release for " + language)
