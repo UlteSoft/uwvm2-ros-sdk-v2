@@ -58,6 +58,21 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 
 已有编译环境时，可使用 `-- --component bindings` 单独安装所选语言的原始声明、许可证以及所选语言和平台的元数据。C 和 C++ 共用头文件，本修订还提供 Rust 和 AssemblyScript 的声明。此模式仅请求这些文件。首个 commit 的安装入口也可通过 `revision-help` 发现新选项。
 
+
+### 从公开安装编译第一个 Nim Wasm 应用
+
+这个示例固定到已通过空缓存安装测试的 SDK 提交。请使用部署方签发的 Nim 站点配置，其中指定了已审核的宿主编译器、目标 sysroot 和与 VM 对应的发行资格。需要 Python 3.11 或更新版本。
+
+```sh
+REV=f8349b2666c8dd97957e94afe50c547f232a5249
+curl --fail --silent --show-error "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | python3 -I -B - install --commit "$REV" --platform unitree --language nim --site-profile /etc/wros/nim-site.json
+SDK="$HOME/.local/share/wros-sdk/$REV/unitree/nim/development"
+"$SDK/bin/wrnim" "$SDK/examples/nim/body.nim" --build-receipt -o robot.wasm
+```
+
+这个选择在空缓存中只拉取了 53 个文件。实测也用安装目录里的 Xmake 适配器生成了应用，并在两个 VM 引擎运行。示例查询 ROS ABI，宿主需要向该模块开放 `uwvm_ros_v2.abi`。运行前可使用该 VM 核对构建收据。[Nim 编译器与支持的配置](nim.md) · [Xmake 构建配置](xmake.md)
+
+
 ### 一条命令安装宇树开发工具
 
 在 Bash 中将 `REV` 设为可信的 40 位 SDK 提交 ID。以下命令直接从官方仓库下载安装入口和所选文件。

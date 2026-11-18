@@ -59,6 +59,21 @@ The stable operations are `plan`, `install` and `revision-help`. Pass revision-s
 
 For an existing compiler integration, pass `-- --component bindings` to install only the selected raw declarations, the licence, and the selected language and platform metadata. C and C++ share a header. This revision also publishes Rust and AssemblyScript declarations. This component fetches no compiler, compiler sources or full ABI catalogue. The original bootstrap can discover it with `revision-help` at this commit.
 
+
+### Build a Nim Wasm application from a public installation
+
+This example pins the public SDK revision exercised by the clean-install test. Supply the signed Nim site profile distributed by your operator. It identifies the approved host compiler, target sysroot and release for the selected VM. Python 3.11 or later is required.
+
+```sh
+REV=f8349b2666c8dd97957e94afe50c547f232a5249
+curl --fail --silent --show-error "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$REV/install/bootstrap.py" | python3 -I -B - install --commit "$REV" --platform unitree --language nim --site-profile /etc/wros/nim-site.json
+SDK="$HOME/.local/share/wros-sdk/$REV/unitree/nim/development"
+"$SDK/bin/wrnim" "$SDK/examples/nim/body.nim" --build-receipt -o robot.wasm
+```
+
+The installer fetched 53 files for this selection in an empty cache. The installed Xmake adapter also built the application for both VM engines. The program queries the ROS ABI, so the host must expose `uwvm_ros_v2.abi` to the module for it to run. The same receipt was checked against the VM before execution. [Nim compiler and supported profile](nim.md) · [Xmake configuration](xmake.md)
+
+
 ### One-command Unitree installation
 
 In Bash, set `REV` to a trusted 40-character SDK commit. This command downloads the installer and selected files directly from the official repository.
