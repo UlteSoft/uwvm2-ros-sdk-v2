@@ -9,6 +9,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
 from guest_profile import Profile
+from imports import inspect
 import local_release
 from qualification import select_site_release
 
@@ -35,9 +36,9 @@ def main():
                    help="exercise one address width from the selected language toolchain")
     p.add_argument("--vendor-model", type=Path, help="a pinned platform MJCF manifest from the VM fixtures")
     p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
-    p.add_argument("--language", choices=("c", "cpp", "nim", "objectc", "lua", "js", "rs", "tinygo", "fortran", "csharp"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "rs", "tinygo", "fortran", "csharp"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
-    p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; a signed Objective-C site can supply its own tools and sysroots")
+    p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D and Objective-C sites supply their own tools and sysroots")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
     p.add_argument("--toolchain64", type=Path, help="base compiler prefix for a distinct wasm64 sysroot")
     p.add_argument("--objc-clang", type=Path)
@@ -67,23 +68,30 @@ def main():
         p.error("--rustroot is required for Rust")
     if any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
         p.error("--goroot and --tinygoroot are required for TinyGo")
-    widths = (32,) if a.language in ("rs", "tinygo", "csharp", "js") else (32, 64)
+    widths = (32,) if a.language in ("rs", "tinygo", "csharp", "js", "d") else (32, 64)
     site = None
-    if a.language == "objectc" and a.installed_sdk:
-        explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64)
-        if not any(explicit):
-            site = local_release.site_config(compiler_root)
+    explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64)
+    if a.language in ("d", "objectc") and a.installed_sdk and not any(explicit):
+        site = local_release.site_config(compiler_root)
+    if a.language == "d" and (not site or not (compiler_root / "bin/wrd").is_file()):
+        p.error("D BetterC requires --installed-sdk pointing to a signed D site without toolchain overrides")
     if site:
-        rows = local_release.verified_releases(site["trust"])
-        row = select_site_release(rows, "objectc", site.get("release_sha256"))
+        if a.language == "d":
+            sys.path.insert(0, str(compiler_root / "language/d"))
+            from release import authorized
+            row = authorized(site)
+        else:
+            rows = local_release.verified_releases(site["trust"])
+            row = select_site_release(rows, "objectc", site.get("release_sha256"))
         with a.runtime.open("rb") as stream:
             vm_digest = hashlib.file_digest(stream, "sha256").hexdigest()
         if row["vm_sha256"] != vm_digest:
-            p.error("the VM differs from the signed Objective-C site release")
+            p.error("the VM differs from the signed " + a.language + " site release")
         profile = Profile(**{name: row["profile"][name] for name in Profile.__dataclass_fields__})
         widths = (profile.address_bits,)
         a.toolchain = Path(site["toolchain"])
-        a.objc_clang = a.toolchain / "bin/wros-objc-clang"
+        if a.language == "objectc":
+            a.objc_clang = a.toolchain / "bin/wros-objc-clang"
     if a.address_bits:
         if a.address_bits not in widths:
             p.error("the requested address width is unavailable for this language")
@@ -91,7 +99,7 @@ def main():
     sysroots = {width: getattr(a, "sysroots" + str(width)) for width in widths}
     if not a.toolchain or (not site and not all(sysroots.values())):
         p.error("supply the toolchain and a sysroot for each selected width, or an installed Objective-C site")
-    objc_runtimes = ({profile.address_bits: a.toolchain / "share/wros/objectc" / profile.identity} if site else
+    objc_runtimes = ({profile.address_bits: a.toolchain / "share/wros/objectc" / profile.identity} if site and a.language == "objectc" else
                      {32: a.objc_runtime32, 64: a.objc_runtime64})
     objc_runtimes = {width: objc_runtimes[width] for width in widths}
     if a.language == "objectc" and (not a.objc_clang or not all(objc_runtimes.values())):
@@ -101,7 +109,7 @@ def main():
     sys.path.insert(0, str(a.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
     source = ROOT / "tests/mujoco" / ("controller." + {"csharp": "c", "cpp": "c", "objectc": "c", "tinygo": "go", "fortran": "f90"}.get(a.language, a.language))
-    compiler = compiler_root / "bin" / {"c": "wrc", "csharp": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "js": "wrjs", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
+    compiler = compiler_root / "bin" / {"d": "wrd", "c": "wrc", "csharp": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "js": "wrjs", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
     manifests = list(map(Path, site["sysroots"])) if site else [path.resolve() for path in sysroots.values()]
 
     toolchains = {32: a.toolchain.resolve(), 64: (a.toolchain64 or a.toolchain).resolve()}
@@ -120,6 +128,12 @@ def main():
         app = directory / ("controller." + {"objectc": "m", "fortran": "f90", "tinygo": "go", "csharp": "c"}.get(a.language, a.language))
         app.write_bytes(source.read_bytes())
         options = ["-O3", "-g", "--reactor", "--export", "_start"]
+        if a.language == "d":
+            options = ["-O3", "-g"]
+            prelude = (f"module application;\nenum steps = {count}; enum targetOffset = {24+len(prefix)+8};\n"
+                       f"enum bool success = {str(mode=='success').lower()}; enum bool crash = {str(mode=='crash').lower()};\n"
+                       f"__gshared ubyte[{len(request)}] request = [" + ",".join(map(str, request)) + "];\n")
+            app.write_text(prelude + source.read_text())
         if a.language == "nim":
             options = ["-O3", "-g", "--producer", a.producer.resolve()]
             (directory / "simulation.nim").write_text(
@@ -178,7 +192,19 @@ def main():
                                     *options, app, *objects, "-o", wasm])
         if site:
             receipt = Path(str(wasm) + ".wros-build.json")
-            run(wasm.stem + "-verify", [sys.executable, "-B", compiler_root / "install/qualification.py", "--artifact", wasm,
+            verifier = [compiler_root / "install/qualification.py"]
+            if a.language == "d":
+                verifier = [compiler, "verify"]
+                record = json.loads(receipt.read_bytes())
+                if record.get("source_sha256") != hashlib.sha256(app.read_bytes()).hexdigest():
+                    raise ValueError("the BetterC receipt refers to a different controller source")
+                entries = inspect(wasm.read_bytes())
+                expected = {"capability.open", "driver.connect", "driver.submit", "driver.result", "driver.disconnect"}
+                if mode == "crash":
+                    expected.add("driver.describe")
+                if sorted((i["module"], i["name"]) for i in entries) != sorted(("uwvm_ros_v2", name) for name in expected):
+                    raise ValueError("unexpected BetterC controller imports")
+            run(wasm.stem + "-verify", [sys.executable, "-B", *verifier, "--artifact", wasm,
                                         "--receipt", receipt, "--vm", a.runtime.resolve(), "--approved-receipt-sha256",
                                         hashlib.sha256(receipt.read_bytes()).hexdigest()])
         controls = Profile(width, exceptions="noeh" if a.language == "rs" else "eh").uwvm_feature_flags()
@@ -196,6 +222,9 @@ def main():
         args.extend(["--vendor-model",str(a.vendor_model.resolve()),"--vendor-assets",str(a.vendor_assets.resolve()),
                      "--platform-targets",str(ROOT/"share/targets.json"),"--audit-calls"])
     producers = [path for path in (a.flang, a.producer) if path]
+    if a.language == "d":
+        producers.extend((compiler_root / "language/d/wros_scene.d", compiler_root / "language/d/imports.c",
+                          compiler_root / "share/qualification/site-profile.json", Path(site["trust"]["statement"])))
     if a.language == "csharp":
         producers.extend((compiler_root / "bin/wrcs", ROOT / "tests/mujoco/controller.cs",
                           *(ROOT / "language/csharp" / file for file in ("inputs.sha256", "Admit.cs", "leaf.cpp", "numeric.py", "host.py"))))

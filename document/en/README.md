@@ -220,6 +220,15 @@ python3 tests/mujoco_guest.py --language lua \
 
 The test covers C, C++, Fortran, Lua, Nim and Objective-C on wasm32 and wasm64. Rust no_std and TinyGo use their supported wasm32 profiles. Pass `--rustroot` for Rust, `--goroot` and `--tinygoroot` for TinyGo, and `--producer` for Nim. The Objective-C route also requires `--objc-clang`, `--objc-runtime32` and `--objc-runtime64`. Fortran accepts `--flang`. The suite checks native agreement after 128 physics steps, rejection of an out-of-range command, and the reported state after a receiver crash in both VM engines. Inspect `results.json` for the executable and input digests, applied policy, backend, effects and native reference. A test of a development producer can explicitly pass `--candidate-mte`. It runs with instrumentation and does not produce a signed toolchain qualification.
 
+For the Unitree Go2 model, set `SDK` to a signed Unitree D development installation and `GO2_ASSETS` to the vendor model directory named by the VM profile. The fixture builds a wasm32 BetterC controller for each case and verifies its receipt with the installed `wrd`. Both VM engines exercise the typed driver calls for normal stepping, a rejected command and a receiver crash.
+
+```sh
+python3 tests/mujoco_guest.py --language d --installed-sdk "$SDK" --address-bits 32 \
+  --vm-source "$VM_SOURCE" --runtime "$VM" --openssl-root "$OPENSSL" --mujoco "$MUJOCO" \
+  --vendor-model "$VM_SOURCE/test/0084.ros-runtime/mujoco_profiles/unitree-go2.json" \
+  --vendor-assets "$GO2_ASSETS" --output "$OUT"
+```
+
 The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
 [JavaScript interpreter and ROS operations](js.md)

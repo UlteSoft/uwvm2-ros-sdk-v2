@@ -217,6 +217,15 @@ python3 tests/mujoco_guest.py --language lua \
 
 C、C++、Fortran、Lua、Nim 和 Objective-C 可选择双位宽测试。Rust no_std 和 TinyGo 当前测试 wasm32。Rust 指定 `--rustroot`，TinyGo 指定 `--goroot` 和 `--tinygoroot`，Nim 指定 `--producer`。Objective-C 还需 `--objc-clang`、`--objc-runtime32` 和 `--objc-runtime64`。Fortran 可指定 `--flang`。解释器和 AOT 都会执行三种场景，分别验证 128 步与原生仿真的一致性、越限指令被拒和接收端崩溃后的状态。各次使用的二进制与输入摘要、授权、后端、执行结果和原生参考值均记录在 `results.json`。使用开发工具链时可显式传入 `--candidate-mte`，此时保留插装，单次仿真不产生签名工具链资格。
 
+测试 Unitree Go2 时，将 `SDK` 设为已签署的 Unitree D 开发安装目录，`GO2_ASSETS` 设为 VM 模型配置指定的原厂资产目录。夹具逐个编译 wasm32 BetterC 控制器，并通过安装的 `wrd` 验证收据。解释器和 AOT 均通过 D 声明调用驱动，测试正常步进、越限指令和接收端崩溃。
+
+```sh
+python3 tests/mujoco_guest.py --language d --installed-sdk "$SDK" --address-bits 32 \
+  --vm-source "$VM_SOURCE" --runtime "$VM" --openssl-root "$OPENSSL" --mujoco "$MUJOCO" \
+  --vendor-model "$VM_SOURCE/test/0084.ros-runtime/mujoco_profiles/unitree-go2.json" \
+  --vendor-assets "$GO2_ASSETS" --output "$OUT"
+```
+
 Java/Kotlin 可选同步 AOT 组件使用 `set_wros_jvm_main(class_name)` 指定入口。详见 [JVM 编译与 Xmake 参数](jvm.md)。
 
 [JavaScript 解释器与 ROS 接口](js.md)
