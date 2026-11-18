@@ -99,7 +99,7 @@ def main():
     body.write_text("""public static class Track {
     public static unsafe int Tags(int n) {
         long a = n, b = n + 1;
-        return (int)(((nuint)&a >> 28) | (((nuint)&b >> 28) << 4));
+        return (int)(((nuint)(&a) >> 28) | (((nuint)(&b) >> 28) << 4));
     }
     public static int Sum(int x) { int y = 0; for (int i = 0; i < 5; i++) y += x ^ i; return y; }
     public static int Array(int n) { int[] a = new int[4]; a[0] = n; return a[0] + a.Length; }
