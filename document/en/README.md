@@ -1,5 +1,8 @@
 # WROS SDK developer guide
 
+For driver/model security and the division between Wasm and deployment authority,
+read [Local driver and model attachments](local-attachments.md).
+
 ## Install a pinned selection
 
 Run the trusted bootstrap with Python 3.11 or newer. The commit argument is the full 40-character Git object ID. Use the same bootstrap with later SDK commits that implement the installation contract. The default source is the official public SDK repository. A trusted local Git repository works offline.

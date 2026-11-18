@@ -1,5 +1,7 @@
 # WROS SDK 开发指南
 
+驱动、模型和部署权限的边界见[本机驱动与模型接入](local-attachments.md)。
+
 ## 按 commit 安装
 
 使用 Python 3.11 或更高版本。REV 必须是可信的 40 位小写 Git commit。固定入口可用于后来遵循同一安装协议的版本。用普通开发用户执行脚本。
