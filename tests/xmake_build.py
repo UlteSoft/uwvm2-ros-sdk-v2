@@ -20,6 +20,10 @@ def main():
     for key in ("repository", "toolchain", "sysroots", "no-mte-sysroots", "vm", "xmake", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--commit", required=True)
+    parser.add_argument("--flang", type=Path)
+    parser.add_argument("--flang-mte-tool", type=Path)
+    parser.add_argument("--goroot", type=Path)
+    parser.add_argument("--tinygoroot", type=Path)
     args = parser.parse_args()
     work = args.output.resolve()
     record = dict(complete=False, cgroup=cgroup_record(), commit=args.commit, cases=[], modules={})
@@ -134,6 +138,43 @@ target_end()
     run("lua-configure", lua, [xmake, "f", "-c", "-y"])
     run("lua-build", lua, [xmake, "-j1", "script"])
     run("lua-run", lua, [xmake, "run", "script"], WROS_RUN_QUERIES="abi,realtime-clock")
+    for language, inputs in (("fortran", (args.flang, args.flang_mte_tool)), ("tinygo", (args.goroot, args.tinygoroot))):
+        if not any(inputs):
+            continue
+        if not all(inputs):
+            parser.error("supply both build inputs for " + language)
+        directory = Path(install(Source(args.commit, args.repository.resolve()), "unitree", language, work / "sdk", [])["directory"])
+        settings = dict(UWVM_ROS_SDK_ROOT=str(directory))
+        if language == "fortran":
+            settings.update(WROS_FLANG=str(args.flang.resolve()), WROS_FLANG_MTE_TOOL=str(args.flang_mte_tool.resolve()))
+        else:
+            settings.update(WROS_GOROOT=str(args.goroot.resolve()), WROS_TINYGOROOT=str(args.tinygoroot.resolve()))
+        for mte in (True, False):
+            label = language + ("-default" if mte else "-off")
+            project = work / label
+            project.mkdir()
+            if language == "fortran":
+                source = "body.f90"
+                (project / source).write_text("program robot\nuse wros_scene\nimplicit none\ninteger :: version\nversion = wr_abi()\nend program\n")
+            else:
+                source = "go.mod"
+                (project / source).write_text("module example.local/robot\n\ngo 1.24\n\nrequire wros.local/scene v0.0.0\n"
+                    + "replace wros.local/scene => " + json.dumps(str(directory / "language/tinygo/scene")) + "\n")
+                (project / "main.go").write_text('package main\nimport "wros.local/scene"\nfunc main(){ if scene.Abi()!=2 { panic("ABI") } }\n')
+            (project / "xmake.lua").write_text(
+                'includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))\n'
+                + 'target("robot")\nset_kind("binary")\nset_ros_platform("unitree")\nset_language("' + language + '")\n'
+                + ('set_wros_profile({mte=false})\n' if not mte else '')
+                + 'set_symbols("debug")\nset_optimize("fastest")\nadd_files("' + source + '")\ntarget_end()\n')
+            run(label + "-configure", project, [xmake, "f", "-c", "-y"], **settings)
+            run(label + "-build", project, [xmake, "-j1", "robot"], **settings)
+            module = next(project.glob("build/*/wasm32/*/robot.wasm"))
+            rows = inspect(module.read_bytes())
+            if [(r["module"], r["name"]) for r in rows] != [("uwvm_ros_v2", "abi")]:
+                raise AssertionError(rows)
+            record["modules"][label] = dict(sha256=sha(module), imports=rows)
+            run(label + "-denied", project, [xmake, "run", "robot"], "ROS scene interface is hidden", **settings)
+            run(label + "-run", project, [xmake, "run", "robot"], WROS_RUN_QUERIES="abi", **settings)
     record["complete"] = True
     save()
 

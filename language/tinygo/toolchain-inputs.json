@@ -1,0 +1,29 @@
+{
+  "go": {
+    "src": "dfa4ff262788cc78c61b8ee449497db63e7d97c125c4057937301dba0bd0e600",
+    "bin/go": "065caf3b54b1fd96aab65f756188b7baa4e97e750d5d64766e991d4fb05793d1",
+    "pkg": "94e76a7813591fe40698f80fd2d3bd0ea17b9fec96bfee11069b79fcaffae01c",
+    "lib": "aa0ef401263cf14629c5f6ab1ec5aa9518823d2c56c86cb62453948067a827f0",
+    "VERSION": "c7339977bee56ca617a1e7c2dc6512341e61cbb774e2bc29aa7ff4cab8c1ca97",
+    "go.env": "4457679288f1fa7aafc9d5cc80000a019f2c1ccf67754d673a6f04d3fb4b135e"
+  },
+  "tinygo": {
+    "bin/tinygo": "2729ccdebb03b598c6c43200ac66da35d357260e19ae9b8e733cdbbbf903b323",
+    "targets/wasip1.json": "50ba6d8103eb842962bf132a0c2918658d9692b25ae8c0ae275b36b0a9ad0102",
+    "lib/clang": "5ba563bc57b3ab5a94d25711fe3b2466f6124a615e8e327a6cc00c68eda9e4bf",
+    "lib/wasi-libc": "e16f09933efdd1384408e870350ae2d393b6a3ac4cd2f1b0ee36d6accd6a0ffd",
+    "lib/compiler-rt-builtins": "b43d50e074d864377d0b18a10d462a2d91e7437486d02a71a0a290cc1d7d9447",
+    "src/crypto": "0355d87348c5d8a8f7d90135eacb1448d63f2c9d3c32a6720393e947a7088b1e",
+    "src/internal": "a555f583b655dd688f0ecbcaec7c32c950c64bfd42a5ed7b405e79976044f4a7",
+    "src/net": "d6a5bc2a4b8f275d9e69aa90d2fc59dec2174613fe52c8e58496935b8b59a305",
+    "src/os": "fdc0454af08b57fa235ba9333187ffea90328686b223328ac9cb0e35340a1f13",
+    "src/reflect": "a06de72aaf59f06f0472978ffe42d07eae03af00ca357636c57a765b984c8698",
+    "src/runtime": "dec1754be7baa06c0da48734075478431252d89e761940f4083d2a7c16d721e0",
+    "src/sync": "d2485d1afdae704d9638cfd15b0048646aa31a0c3f2b48bcf7674a41d6f7e1b4",
+    "src/syscall": "4ecfb341f10092d219b520db0d41caf4c4fb819d2e047178260fd9fd8b1d806c",
+    "src/testing": "2d68e9d0150946fa6eb16c550a9de9f8a5f5f45fd9118500b186991820681fb3",
+    "src/tinygo": "20cebedcdbf30ac4b1fe8e02abc5a5b34d86ce728faac9e906dfc7ae52bc29bf",
+    "src/unique": "2a3a650f51432c1347b4f85ed27edfa6b20a3d39c73636b4d7326c2558762ab8",
+    "src/device/arm/arm.go": "95c27ea84e2194b9ad10adc54fe7c990cc4230fa091e17b8a124d42a33180c94"
+  }
+}

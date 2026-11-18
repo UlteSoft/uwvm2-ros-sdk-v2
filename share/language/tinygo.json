@@ -1,4 +1,4 @@
 {
   "id": "tinygo",
-  "development_package": false
+  "development_package": true
 }

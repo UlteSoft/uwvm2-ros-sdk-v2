@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+"""Compile a local Go application to wasm32 with the TinyGo WasmMTE runtime."""
+import argparse
+import hashlib
+import json
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+SDK = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SDK / "install"))
+from artifacts import read_bounded
+from compiler import digest, make_command
+from frontend import audit
+from guest_profile import Profile
+
+LANGUAGE = SDK / "language/tinygo"
+GO_SHA = "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
+TINYGO_SHA = "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
+RUNTIME = {
+    "gc_blocks.go": "d0b149e1036645b0a921b28350a0cfdb7b0610e628362834f37bdbda6937f0b7",
+    "arch_tinygowasm.go": "163235af602e4b6f8e8ac625284876dcec29c3546dc9963135edf65ba9928dbf",
+    "runtime_tinygowasm.go": "0dd7c992928dcd48f13d13c5f9a86c1fd3beb9c0f90db7b764d2ffae4335e8bd",
+    "runtime_wasip1.go": "54a75944e52215d0e6b9f143cb38cb2c3a06b358fb111684e38a7b56a2d3ce4c",
+}
+SP_SHA = "bf1d6728136da497003d3ae4e044dccddaf6db55cc831006fce5f006c39f3afa"
+
+
+def verify(path, expected):
+    with path.open("rb") as stream:
+        if hashlib.file_digest(stream, "sha256").hexdigest() != expected:
+            raise ValueError("toolchain input differs from pinned revision: " + str(path))
+
+
+def checked_view(prefix, language, work):
+    """Pin both file membership and contents of every visible producer component.
+
+    The operator owns the compiler installation throughout this build. Paths
+    outside its selected release components never enter either frontend root.
+    """
+    expected = json.loads((LANGUAGE / "toolchain-inputs.json").read_text())[language]
+    view = work / language
+    view.mkdir()
+    for component, identity in expected.items():
+        source = prefix / component
+        if not source.exists():
+            raise ValueError("missing compiler component " + str(source))
+        entries = sorted(source.rglob("*"), key=lambda entry: entry.as_posix()) if source.is_dir() else [source]
+        tree = hashlib.sha256()
+        for entry in entries:
+            if not entry.resolve(strict=True).is_relative_to(prefix) or (entry.is_symlink() and entry.is_dir()):
+                raise ValueError("unexpected toolchain symlink: " + str(entry))
+            if entry.is_dir():
+                continue
+            if not entry.is_file():
+                raise ValueError("unexpected toolchain file type: " + str(entry))
+            relative = entry.relative_to(prefix)
+            copied = view / relative
+            copied.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(entry, copied)
+            copied.chmod(0o755 if os.access(entry, os.X_OK) else 0o644)
+            tree.update(str(relative).encode() + b"\0" + bytes.fromhex(digest(copied)))
+        if tree.hexdigest() != identity:
+            raise ValueError("compiler component differs from pinned release: " + str(source))
+    return view
+
+
+def runtime_view(tinygo, work, mte):
+    """Create the patched runtime. Its library merger requires real directories."""
+    view = checked_view(tinygo, "tinygo", work)
+    overlays = RUNTIME.keys() if mte else ("runtime_tinygowasm.go", "runtime_wasip1.go")
+    for name in overlays:
+        destination = view / "src/runtime" / name
+        verify(destination, RUNTIME[name])
+        shutil.copyfile(LANGUAGE / "runtime" / name, destination)
+    if mte:
+        shutil.copyfile(LANGUAGE / "runtime/wros_gc.go", view / "src/runtime/wros_gc.go")
+    return view
+
+
+def build(args, project, output, scratch):
+    go = args.goroot.resolve(strict=True)
+    tinygo = args.tinygoroot.resolve(strict=True)
+    tool = args.toolchain.resolve(strict=True)
+    verify(go / "bin/go", GO_SHA)
+    verify(tinygo / "bin/tinygo", TINYGO_SHA)
+    sp = scratch / "tinygo/src/runtime/asm_tinygowasm.S"
+    profile = Profile(mte=args.mte, exceptions="eh" if args.eh else "noeh")
+
+    def command(arguments):
+        return make_command(tool, args.sysroots, profile, "c", arguments)[0]
+
+    # Verify the exact producer and matching runtime closure before running the
+    # frontend. Resolve local modules using an isolated offline Go environment.
+    stack_pointer, closure = make_command(tool, args.sysroots, profile, "c",
+                                          ["-c", str(sp), "-o", str(scratch / "stack-pointer.o")], verify=True)
+    go_view = checked_view(go, "go", scratch)
+    tiny_view = runtime_view(tinygo, scratch, args.mte)
+    verify(sp, SP_SHA)
+    env = dict(HOME=str(scratch), XDG_CACHE_HOME=str(scratch / "cache"), GOCACHE=str(scratch / "gocache"),
+               GOMODCACHE=str(scratch / "modcache"), TMPDIR=str(scratch), GOENV="off", GOWORK="off",
+               GOTOOLCHAIN="local", GOPROXY="off", GOSUMDB="off", GOVCS="*:off", GOOS="wasip1",
+               GOARCH="wasm", CGO_ENABLED="0", GOMAXPROCS="1", GOROOT=str(go_view),
+               TINYGOROOT=str(tiny_view),
+               PATH=os.pathsep.join([str(go_view / "bin"), str(tiny_view / "bin"), "/usr/bin", "/bin"]))
+    def run(argv, cwd=scratch):
+        subprocess.run(argv, env=env, cwd=cwd, check=True)
+
+    run([tiny_view / "bin/tinygo", "build", "-p", "1", "-target=wasip1", "-scheduler=none",
+         "-gc=conservative", "-tags=custommalloc," + ("wros_mte" if args.mte else "wros_nomte"), "-buildmode=wasi-legacy", "-panic=trap",
+         "-opt=2", "-o", scratch / "application.bc", "."], cwd=project)
+
+    config = tool / "bin/llvm-config"
+    host_flags = subprocess.check_output([config, "--cxxflags", "--ldflags", "--libs",
+                                          "irreader", "bitwriter", "core", "--system-libs"],
+                                         text=True, env=env)
+    host_cxx = args.host_cxx or shutil.which("c++", path="/usr/bin:/bin")
+    if not host_cxx:
+        raise ValueError("host C++ compiler required to build the LLVM IR instrumenter")
+    run([Path(host_cxx).absolute(), "-O3", "-g", LANGUAGE / "tag.cpp",
+         "-o", scratch / "instrument", *shlex.split(host_flags)])
+    suppressions = json.loads(subprocess.check_output(
+        [scratch / "instrument", "--mte" if args.mte else "--no-mte",
+         scratch / "application.bc", scratch / "tag.bc"], env=env, cwd=scratch))
+    run(command(["-O3", "-g", "-c", str(scratch / "tag.bc"), "-o", str(scratch / "application.o")]))
+    objects = [str(scratch / "application.o"), str(scratch / "stack-pointer.o")]
+    if args.mte:
+        run(command(["-O3", "-g", "-c", str(LANGUAGE / "runtime/wros_gc.c"), "-o", str(scratch / "heap.o")]))
+        objects.append(str(scratch / "heap.o"))
+    # This reviewed assembly implements a single read of __stack_pointer.
+    run(stack_pointer)
+    wasm = scratch / "application.wasm"
+    run(command(["-nostartfiles", "-Wl,--fatal-warnings,--stack-first,-z,stack-size=32768",
+                 "-Wl,--max-memory=268435456,--no-entry,--export=_start",
+                 *objects, "-o", str(wasm)]))
+    audit(read_bounded(wasm), profile)
+    if args.print_identity:
+        files = {"go": go_view / "bin/go", "tinygo": tiny_view / "bin/tinygo",
+                 "input_lock": LANGUAGE / "toolchain-inputs.json", "driver": Path(__file__),
+                 "instrumenter_source": LANGUAGE / "tag.cpp", "instrumenter": scratch / "instrument",
+                 "llvm_config": config, "linker": tool / "bin/wasm-ld", "host_cxx": Path(host_cxx),
+                 "input_bitcode": scratch / "application.bc", "instrumented_bitcode": scratch / "tag.bc",
+                 "guest_object": scratch / "application.o",
+                 "stack_pointer_object": scratch / "stack-pointer.o", "guest": wasm}
+        if args.mte:
+            files["collector_object"] = scratch / "heap.o"
+        for source in (LANGUAGE / "runtime").iterdir():
+            if source.is_file():
+                files["runtime/" + source.name] = source
+        identity = dict(sysroot=closure, source_suppressions=suppressions, sha256={name: digest(path) for name, path in files.items()})
+    os.replace(wasm, output)
+    if args.print_identity:
+        print(json.dumps(identity, sort_keys=True))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("project", type=Path, help="directory containing go.mod and package main")
+    parser.add_argument("-o", "--output", type=Path, required=True)
+    parser.add_argument("--goroot", type=Path, required=True)
+    parser.add_argument("--tinygoroot", type=Path, required=True)
+    parser.add_argument("--toolchain", type=Path, required=True, help="patched LLVM development prefix")
+    parser.add_argument("--sysroots", type=Path, required=True, action="append")
+    parser.add_argument("--host-cxx", type=Path, help="native compiler for the SDK's build-time LLVM tool")
+    parser.add_argument("--target", choices=("wasm32",), default="wasm32")
+    parser.add_argument("--core", choices=("3.0",), default="3.0")
+    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--print-identity", action="store_true", help="print producer, stages and final module SHA-256")
+    args = parser.parse_args()
+    try:
+        project = args.project.resolve(strict=True)
+        output = args.output.absolute()
+        if not (project / "go.mod").is_file() or output.suffix != ".wasm":
+            raise ValueError("expected a Go module directory and a .wasm output")
+        with tempfile.TemporaryDirectory(dir=output.parent, prefix=".wrtinygo-") as name:
+            build(args, project, output, Path(name))
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        parser.exit(1, f"{parser.prog}: {error}\n")
+
+
+if __name__ == "__main__":
+    main()

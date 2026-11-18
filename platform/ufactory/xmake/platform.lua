@@ -4,8 +4,8 @@ function describe()
         id = "ufactory",
         admission = "generic-driver",
         languages = {
-            "as", "c", "c_ffi_bridge", "cpp", "go", "java", "js", "kotlin", "lua", "objectc", "php",
-            "py", "rs", "ruby", "tinygo"
+            "as", "c", "c_ffi_bridge", "cpp", "fortran", "go", "java", "js", "kotlin", "lua",
+            "objectc", "php", "py", "rs", "ruby", "tinygo"
         }
     }
 end

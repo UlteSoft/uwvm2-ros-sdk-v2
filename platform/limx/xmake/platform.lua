@@ -4,7 +4,7 @@ function describe()
         id = "limx",
         admission = "generic-driver",
         languages = {
-            "c", "c_ffi_bridge", "cpp", "js", "lua", "objectc", "py"
+            "c", "c_ffi_bridge", "cpp", "fortran", "js", "lua", "objectc", "py"
         }
     }
 end

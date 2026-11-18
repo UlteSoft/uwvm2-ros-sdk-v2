@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/ufactory/xmake/platform.lua",
-      "bytes": 351,
+      "bytes": 362,
       "mode": 420,
-      "sha256": "84b5b34805460004141797cfb5ed2c6d69b9e8794e83a4d4e634a17fe72d9fa5"
+      "sha256": "106fc1692b8fdb610f1505fbef77e14de3319278dabbdde441a2c99bf8fdf0b3"
     }
   ]
 }

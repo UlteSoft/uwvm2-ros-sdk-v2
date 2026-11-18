@@ -16,7 +16,7 @@ from separate_compilation import cgroup_record, sha
 def configure(xmake, destination, project, platform, language):
     """Load the installed descriptors into a fresh Xmake project for each pair."""
     project.mkdir(parents=True)
-    name = {"c": "body.c", "cpp": "body.cpp", "lua": "body.lua"}[language]
+    name = {"c": "body.c", "cpp": "body.cpp", "lua": "body.lua", "tinygo": "go.mod", "fortran": "body.f90"}[language]
     script = [
         'set_project("selection")',
         'includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))',

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/pal/xmake/platform.lua",
-      "bytes": 450,
+      "bytes": 461,
       "mode": 420,
-      "sha256": "97b65eba8f9f3a4dda8a674dc05a9322d1941edf7fbe27ff538240136b53ecf8"
+      "sha256": "8b4c80a3b3f2007146560a6b19204a051ceb3fa67fdabf3ec99392470d9c51ce"
     }
   ]
 }

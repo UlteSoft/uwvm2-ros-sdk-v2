@@ -104,6 +104,19 @@ def main():
                 "third-parties/lua/lua-5.4.9.tar.gz", "third-parties/lua/LICENSE", "third-parties/lua/README.md",
                 "examples/lua/body.lua", "document/en/lua.md", "document/zh/lua.md"],
     }
+    language_files["fortran"] = [
+        "bin/wrfortran", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
+        "document/en/fortran.md", "document/zh/fortran.md",
+        *["language/fortran/" + name for name in ("build_flang.py", "entry.c", "flang_identity.py",
+                                                   "frontend_fortran.py", "mark_mte.cpp", "prepare.py")],
+        *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/fortran").rglob("*") if p.is_file()],
+    ]
+    language_files["tinygo"] = [
+        "bin/wrtinygo", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
+        *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json", "tag.cpp",
+            "scene/go.mod", "scene/scene_wros.go", "runtime/arch_tinygowasm.go", "runtime/gc_blocks.go",
+            "runtime/runtime_tinygowasm.go", "runtime/runtime_wasip1.go", "runtime/wros_gc.go", "runtime/wros_gc.c")],
+    ]
     if set(language_files) != set(DEVELOPMENT):
         raise ValueError("developer payloads must match the revision hook")
     for language, files in language_files.items():

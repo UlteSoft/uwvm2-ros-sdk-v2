@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/fourier/xmake/platform.lua",
-      "bytes": 454,
+      "bytes": 465,
       "mode": 420,
-      "sha256": "23e1fbf2284f94f63c2d667d0895cc5c51c530a2db645696f0c1e0bebb04cc1d"
+      "sha256": "7c26360b0068bd93411139140221575fae27e64f968e0914a983452a0bfe04de"
     }
   ]
 }

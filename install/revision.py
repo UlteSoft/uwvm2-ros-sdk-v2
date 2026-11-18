@@ -4,7 +4,7 @@ import json
 
 
 BINDINGS = {"c": "c", "cpp": "c", "rs": "rs", "as": "as"}
-DEVELOPMENT = ("c", "cpp", "lua")
+DEVELOPMENT = ("c", "cpp", "fortran", "lua", "tinygo")
 
 # BEGIN generated target inventory (tools/package_index.py)
 LANGUAGES = "as c c_ffi_bridge cpp csharp d fortran fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo typescript vbnet wat zig".split()
@@ -12,19 +12,19 @@ PLATFORM_LANGUAGES = {
     platform: routes.split()
     for group, routes in (
         ("abb agibot doosan fanuc flexiv fourier franka hello_robot kinova leju pal robotis trossen ubtech universal_robots yaskawa",
-         "as c c_ffi_bridge cpp csharp d fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo vbnet zig"),
+         "as c c_ffi_bridge cpp csharp d fortran fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo vbnet zig"),
         ("agilex boston_dynamics clearpath",
-         "as c cpp d go haskell moonbit nim odin rs swift tinygo zig"),
+         "as c cpp d fortran go haskell moonbit nim odin rs swift tinygo zig"),
         ("booster deep_robotics limx",
-         "c c_ffi_bridge cpp js lua objectc py"),
+         "c c_ffi_bridge cpp fortran js lua objectc py"),
         ("dobot elephant realman ufactory",
-         "as c c_ffi_bridge cpp go java js kotlin lua objectc php py rs ruby tinygo"),
+         "as c c_ffi_bridge cpp fortran go java js kotlin lua objectc php py rs ruby tinygo"),
         ("kuka",
-         "as c c_ffi_bridge cpp csharp d fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo typescript vbnet zig"),
+         "as c c_ffi_bridge cpp csharp d fortran fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo typescript vbnet zig"),
         ("nvidia nvidia-groot nvidia-isaac-ros nvidia-isaac-sim",
-         "as c c_ffi_bridge cpp go js rs tinygo typescript"),
+         "as c c_ffi_bridge cpp fortran go js rs tinygo typescript"),
         ("unitree",
-         "as c c_ffi_bridge cpp d go haskell java js kotlin lua moonbit nim objectc odin php py rs ruby swift tinygo typescript zig"),
+         "as c c_ffi_bridge cpp d fortran go haskell java js kotlin lua moonbit nim objectc odin php py rs ruby swift tinygo typescript zig"),
     )
     for platform in group.split()
 }
@@ -60,7 +60,7 @@ def main():
                 parser.error("a development package has not been published for this language")
             if args.language not in PLATFORM_LANGUAGES[args.platform]:
                 parser.error("this platform has no development route for the requested language")
-            if args.component == "compiler-source" and args.language not in ("c", "cpp"):
+            if args.component == "compiler-source" and args.language not in ("c", "cpp", "fortran"):
                 parser.error("no compiler source package for this language")
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
             if args.component == "compiler-source":

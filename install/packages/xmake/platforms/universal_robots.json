@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/universal_robots/xmake/platform.lua",
-      "bytes": 463,
+      "bytes": 474,
       "mode": 420,
-      "sha256": "0529bd7624b68fd51757acbdcc3d9ee1ba8d6e99e89347ab511b7f549a75a9b3"
+      "sha256": "b01edc330d9408df973032d86dfff56af3ac610df41cf5c60d5f34eb1c3ee53c"
     }
   ]
 }

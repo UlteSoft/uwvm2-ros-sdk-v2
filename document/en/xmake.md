@@ -84,10 +84,16 @@ Raw C/compiler/linker flags, host packages, host library directories and framewo
 | `WROS_VM` | Absolute path of the developer-selected VM for `xmake run`. |
 | `WROS_RUN_QUERIES` | Optional comma-separated local test grants. Allowed names are `abi`, `realtime-clock`, `monotonic-clock`, `realtime-resolution`, and `monotonic-resolution`. Empty by default. For a full deployment policy use the deployer or the VM CLI. |
 
-Lua builds with Core 3.0, single thread, selectable MTE, EH and `-O3 -g`. Go and TinyGo development packages remain unavailable pending whole-runtime MTE support. A missing compiler, incompatible sysroot, unavailable adapter or disallowed final import ends the build. Processor or platform inventory entries alone do not enable compilation.
+Lua builds with Core 3.0, single thread, selectable MTE, EH and `-O3 -g`. The TinyGo adapter builds a wasm32 Go module with a conservative collector. The numerical Fortran adapter supports wasm32 and wasm64. Standard Go uses a separate compiler and runtime. A missing compiler, incompatible sysroot, unavailable adapter or disallowed final import ends the build. Processor or platform inventory entries alone do not enable compilation.
 
 ### Selective installation and adapter layout
 
 Each development installation contains the common declarations plus `platform/<platform>/xmake/platform.lua` and `language/<language>/xmake/adapter.lua`. The isolated revision hook checks the pair before installation. The bootstrap fetches the selected files, verifies their lengths and hashes and reuses identical blobs. The protocol and raw bindings components can be installed independently. To add a second target, install its specific pair and point that target's `set_wros_sdk` at the second selection.
 
 Platform adapters export `describe()` with `id`, `languages`, and `admission`. Language adapters export `describe()` with `id`, `program` and `extensions`. C-family adapters select the common C builder. Other adapters can implement `validate(target, request)` for configuration and `build(target, request, sources)` for compilation. The loader verifies the selection before invoking either. Shared code controls artifact naming and executes local test guests through the VM.
+
+### TinyGo and numerical Fortran
+
+Use `set_language("tinygo")` and `add_files("go.mod")` for a Go main module. Set `WROS_GOROOT` and `WROS_TINYGOROOT` to the verified Go and TinyGo releases. The optional `WROS_HOST_CXX` selects the host C++ compiler used to build the LLVM helper. This guest uses wasm32, Core 3.0, a single thread and `-O3 -g`. See [TinyGo](tinygo.md).
+
+Use `set_language("fortran")` and add the Fortran sources for a numerical program. The frontend defaults to `bin/flang` and `bin/wros-flang-mte` under the toolchain. `WROS_FLANG` and `WROS_FLANG_MTE_TOOL` may select verified tools explicitly. Checked Wasm static libraries can be added with `add_deps`. The xmake adapter exposes Core 3.0, both pointer widths and both EH modes, with one guest thread. Each build uses its selected MTE mode. See [Fortran](fortran.md).

@@ -84,10 +84,16 @@ SDK 目标拒绝透传原始编译或链接参数、宿主软件包、宿主库�
 | `WROS_VM` | `xmake run` 使用的可信 uwvm2-ros 绝对路径。 |
 | `WROS_RUN_QUERIES` | 逗号分隔的本地测试授权，默认空。可选 `abi`、`realtime-clock`、`monotonic-clock`、`realtime-resolution` 和 `monotonic-resolution`。完整部署策略由部署器或 VM 命令行指定。 |
 
-Lua 编译配置为 Core 3.0、单线程、可选 MTE、EH、`-O3 -g`。Go 与 TinyGo 的完整运行时 MTE 仍待实现，因此开发包暂不开放。缺少工具链、sysroot、适配器或最终导入检查失败都会终止构建。平台清单的登记本身不能用于编译。
+Lua 编译配置为 Core 3.0、单线程、可选 MTE、EH、`-O3 -g`。TinyGo 适配器将 Go 模块及其保守式垃圾收集器编为 wasm32。数值 Fortran 适配器支持 wasm32 与 wasm64。标准 Go 有独立的编译器和运行库。缺少工具链、sysroot、适配器或最终导入检查失败都会终止构建。平台清单的登记本身不能用于编译。
 
 ### 按需安装和适配器目录
 
 开发包包含公共入口、`platform/<平台>/xmake/platform.lua` 和 `language/<语言>/xmake/adapter.lua`。安装脚本在下载载荷前检查平台与语言组合，逐个校验选择的文件及摘要，相同文件复用缓存。协议和原始绑定可独立安装。多目标项目先安装所需组合，再用每个目标自己的 `set_wros_sdk` 指向相应安装目录。
 
 平台适配器的 `describe()` 返回 `id`、`languages`、`admission`。语言适配器的 `describe()` 返回 `id`、`program`、`extensions`。C 系列使用公共构建器。其他语言可在 `validate(target, request)` 校验配置，在 `build(target, request, sources)` 调用对应前端。入口会先核对安装选择，再调用这些函数。公共代码负责产物命名，本机测试由 VM 执行。
+
+### TinyGo 和数值 Fortran
+
+TinyGo 主模块使用 `set_language("tinygo")` 和 `add_files("go.mod")`。通过 `WROS_GOROOT` 与 `WROS_TINYGOROOT` 指定已校验的 Go、TinyGo 发布包。可用 `WROS_HOST_CXX` 指定构建 LLVM 辅助工具所需的宿主 C++ 编译器。来宾使用 wasm32、Core 3.0、单线程和 `-O3 -g`。[TinyGo 开发指南](tinygo.md)
+
+数值 Fortran 程序使用 `set_language("fortran")` 并添加 Fortran 源文件。前端默认使用工具链内的 `bin/flang` 和 `bin/wros-flang-mte`，也可用 `WROS_FLANG` 与 `WROS_FLANG_MTE_TOOL` 显式指定已校验的工具。通过 `add_deps` 关联经过 SDK 校验的 Wasm 静态库。xmake 适配器支持 Core 3.0、两种位宽与两种 EH 模式，来宾使用单线程。每个目标使用所选的 MTE 配置。[Fortran 开发指南](fortran.md)

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/unitree/xmake/platform.lua",
-      "bytes": 434,
+      "bytes": 445,
       "mode": 420,
-      "sha256": "1783200a0ad75301ee3320a6f5cd392a8063261cabed5b4ff5ea1d38256bfe19"
+      "sha256": "0ce914d859c220844843d9dbf6f7ae0869db9e054648fed5129f4979d251a6a1"
     }
   ]
 }

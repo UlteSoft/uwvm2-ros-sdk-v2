@@ -4,8 +4,8 @@ function describe()
         id = "clearpath",
         admission = "generic-driver",
         languages = {
-            "as", "c", "cpp", "d", "go", "haskell", "moonbit", "nim", "odin", "rs", "swift",
-            "tinygo", "zig"
+            "as", "c", "cpp", "d", "fortran", "go", "haskell", "moonbit", "nim", "odin", "rs",
+            "swift", "tinygo", "zig"
         }
     }
 end

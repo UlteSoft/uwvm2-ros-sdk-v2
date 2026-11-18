@@ -1,0 +1,217 @@
+--- a/flang/lib/Optimizer/CodeGen/Target.cpp
++++ b/flang/lib/Optimizer/CodeGen/Target.cpp
+@@ -1893,6 +1893,132 @@
+ };
+ } // namespace
+ 
++
++//===----------------------------------------------------------------------===//
++// WebAssembly single-value C ABI, shared by wasm32 and wasm64.
++//===----------------------------------------------------------------------===//
++
++namespace {
++/// @brief Marshal Fortran interfaces using Clang's ordinary Wasm C ABI.
++/// @details Aggregates use indirect arguments/results except for one scalar
++/// field with no trailing padding. Character lengths follow the pointer width.
++template <int Width>
++struct TargetWasm : public GenericTarget<TargetWasm<Width>> {
++  using Base = GenericTarget<TargetWasm<Width>>;
++  using Base::Base;
++  using AT = CodeGenSpecifics::Attributes;
++  static constexpr int defaultWidth = Width;
++
++  /// @brief Find the scalar representation of a C-compatible single-field type.
++  /// @param loc Original interface location for layout diagnostics.
++  /// @param type Field or record to classify without changing its memory layout.
++  /// @return Scalar coercion type, or an empty type for an indirect aggregate.
++  mlir::Type singleElement(mlir::Location loc, mlir::Type type) const {
++    if (auto record = mlir::dyn_cast<fir::RecordType>(type)) {
++      mlir::Type element;
++      for (const auto &field : record.getTypeList()) {
++        auto [size, alignment] = fir::getTypeSizeAndAlignmentOrCrash(
++            loc, field.second, this->getDataLayout(), this->kindMap);
++        if (size == 0)
++          continue;
++        if (element)
++          return {};
++        element = singleElement(loc, field.second);
++        if (!element)
++          return {};
++      }
++      if (!element)
++        return {};
++      auto [recordSize, recordAlignment] = fir::getTypeSizeAndAlignmentOrCrash(
++          loc, record, this->getDataLayout(), this->kindMap);
++      auto [elementSize, elementAlignment] = fir::getTypeSizeAndAlignmentOrCrash(
++          loc, element, this->getDataLayout(), this->kindMap);
++      return recordSize == elementSize ? element : mlir::Type{};
++    }
++    if (auto sequence = mlir::dyn_cast<fir::SequenceType>(type)) {
++      for (auto extent : sequence.getShape())
++        if (extent != 1)
++          return {};
++      return singleElement(loc, sequence.getEleTy());
++    }
++    if (auto character = mlir::dyn_cast<fir::CharacterType>(type)) {
++      if (character.getLen() != 1)
++        return {};
++      return mlir::IntegerType::get(
++          type.getContext(), this->kindMap.getCharacterBitsize(character.getFKind()));
++    }
++    if (auto logical = mlir::dyn_cast<fir::LogicalType>(type))
++      return mlir::IntegerType::get(
++          type.getContext(), this->kindMap.getLogicalBitsize(logical.getFKind()));
++    if (mlir::isa<mlir::ComplexType>(type))
++      return {};
++    return type;
++  }
++
++  /// @brief Pass or return an ordinary C aggregate through its natural storage.
++  /// @param loc Original interface location for layout diagnostics.
++  /// @param type Aggregate's genuine Fortran memory type.
++  /// @param result Select a hidden sret pointer instead of a byval argument.
++  /// @return Exact FIR argument/result marshalling and alignment attributes.
++  CodeGenSpecifics::Marshalling indirect(mlir::Location loc, mlir::Type type,
++                                        bool result) const {
++    auto [size, alignment] = fir::getTypeSizeAndAlignmentOrCrash(
++        loc, type, this->getDataLayout(), this->kindMap);
++    CodeGenSpecifics::Marshalling marshal;
++    marshal.emplace_back(fir::ReferenceType::get(type),
++                         AT{alignment, /*byval=*/!result, /*sret=*/result});
++    return marshal;
++  }
++
++  CodeGenSpecifics::Marshalling
++  complexArgumentType(mlir::Location loc, mlir::Type element) const override {
++    return complexType(loc, element, /*result=*/false);
++  }
++
++  CodeGenSpecifics::Marshalling
++  complexReturnType(mlir::Location loc, mlir::Type element) const override {
++    return complexType(loc, element, /*result=*/true);
++  }
++
++  /// @brief Keep both complex components together in naturally aligned storage.
++  /// @details The ordinary Wasm ABI does not use experimental multivalue tuples.
++  CodeGenSpecifics::Marshalling complexType(mlir::Location loc,
++                                           mlir::Type element,
++                                           bool result) const {
++    auto [size, alignment] = fir::getTypeSizeAndAlignmentOrCrash(
++        loc, element, this->getDataLayout(), this->kindMap);
++    auto memory = this->complexMemoryType(element);
++    CodeGenSpecifics::Marshalling marshal;
++    marshal.emplace_back(fir::ReferenceType::get(memory),
++                         AT{alignment, /*byval=*/!result, /*sret=*/result});
++    return marshal;
++  }
++
++  /// @brief Apply the single-element exception or the ordinary indirect ABI.
++  CodeGenSpecifics::Marshalling recordType(mlir::Location loc,
++                                          fir::RecordType type,
++                                          bool result) const {
++    if (auto element = singleElement(loc, type)) {
++      CodeGenSpecifics::Marshalling marshal;
++      marshal.emplace_back(element, AT{});
++      return marshal;
++    }
++    return indirect(loc, type, result);
++  }
++
++  CodeGenSpecifics::Marshalling
++  structArgumentType(mlir::Location loc, fir::RecordType type,
++                     const CodeGenSpecifics::Marshalling &) const override {
++    return recordType(loc, type, /*result=*/false);
++  }
++
++  CodeGenSpecifics::Marshalling
++  structReturnType(mlir::Location loc, fir::RecordType type) const override {
++    return recordType(loc, type, /*result=*/true);
++  }
++};
++} // namespace
++
+ // Instantiate the overloaded target instance based on the triple value.
+ // TODO: Add other targets to this file as needed.
+ std::unique_ptr<fir::CodeGenSpecifics> fir::CodeGenSpecifics::get(
+@@ -1902,6 +2028,14 @@
+   switch (trp.getArch()) {
+   default:
+     break;
++  case llvm::Triple::ArchType::wasm32:
++    return std::make_unique<TargetWasm<32>>(
++        ctx, std::move(trp), std::move(kindMap), targetCPU, targetFeatures,
++        targetABI, dl);
++  case llvm::Triple::ArchType::wasm64:
++    return std::make_unique<TargetWasm<64>>(
++        ctx, std::move(trp), std::move(kindMap), targetCPU, targetFeatures,
++        targetABI, dl);
+   case llvm::Triple::ArchType::x86:
+     if (trp.isOSWindows())
+       return std::make_unique<TargetI386Win>(ctx, std::move(trp),
+--- a/flang/lib/Frontend/CompilerInvocation.cpp
++++ b/flang/lib/Frontend/CompilerInvocation.cpp
+@@ -1881,6 +1881,20 @@
+   switch (targetTriple.getArch()) {
+   default:
+     break;
++  case llvm::Triple::ArchType::wasm32:
++  case llvm::Triple::ArchType::wasm64: {
++    const bool memory64 = targetTriple.getArch() == llvm::Triple::ArchType::wasm64;
++    fortranOptions.predefinitions.emplace_back("__wasm__", "1");
++    fortranOptions.predefinitions.emplace_back(
++        memory64 ? "__wasm64__" : "__wasm32__", "1");
++    fortranOptions.predefinitions.emplace_back(
++        "__SIZEOF_POINTER__", memory64 ? "8" : "4");
++    fortranOptions.predefinitions.emplace_back(
++        "__SIZEOF_LONG__", memory64 ? "8" : "4");
++    if (targetTriple.getOSName().starts_with("wasi"))
++      fortranOptions.predefinitions.emplace_back("__wasi__", "1");
++    break;
++  }
+   case llvm::Triple::ArchType::x86_64:
+     fortranOptions.predefinitions.emplace_back("__x86_64__", "1");
+     fortranOptions.predefinitions.emplace_back("__x86_64", "1");
+--- a/flang-rt/lib/runtime/__fortran_builtins.f90
++++ b/flang-rt/lib/runtime/__fortran_builtins.f90
+@@ -42,13 +42,19 @@
+ 
+   intrinsic :: selected_int_kind
+   integer, parameter :: int64 = selected_int_kind(18)
++#if defined(__wasm32__)
++  ! C pointers occupy one target address, including in BIND(C) aggregates.
++  integer, parameter :: c_address_kind = selected_int_kind(9)
++#else
++  integer, parameter :: c_address_kind = int64
++#endif
+ 
+   type, bind(c), public :: __builtin_c_ptr
+-    integer(kind=int64), private :: __address
++    integer(kind=c_address_kind), private :: __address
+   end type
+ 
+   type, bind(c), public :: __builtin_c_funptr
+-    integer(kind=int64), private :: __address
++    integer(kind=c_address_kind), private :: __address
+   end type
+ 
+   type, public :: __builtin_event_type
+--- a/flang-rt/lib/runtime/iso_c_binding.f90
++++ b/flang-rt/lib/runtime/iso_c_binding.f90
+@@ -45,7 +45,7 @@
+   integer, parameter, public :: &
+     c_int = c_int32_t, &
+     c_short = c_int16_t, &
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__wasm32__)
+     c_long = c_int32_t, &
+ #else
+     c_long = c_int64_t, &
+@@ -128,7 +128,7 @@
+     c_unsigned_char = c_uint8_t, &
+     c_unsigned_short = c_uint16_t, &
+     c_unsigned = c_uint32_t, &
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__wasm32__)
+     c_unsigned_long = c_uint32_t, &
+ #else
+     c_unsigned_long = c_uint64_t, &

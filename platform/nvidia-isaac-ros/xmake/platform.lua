@@ -4,7 +4,7 @@ function describe()
         id = "nvidia-isaac-ros",
         admission = "generic-driver",
         languages = {
-            "as", "c", "c_ffi_bridge", "cpp", "go", "js", "rs", "tinygo", "typescript"
+            "as", "c", "c_ffi_bridge", "cpp", "fortran", "go", "js", "rs", "tinygo", "typescript"
         }
     }
 end

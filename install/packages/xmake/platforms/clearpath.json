@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/clearpath/xmake/platform.lua",
-      "bytes": 331,
+      "bytes": 342,
       "mode": 420,
-      "sha256": "6aafd209b32173785d04d88c7f41b22208cbaaaeb28efb7572398014da11ad5e"
+      "sha256": "9a122574d39c06932f99c02d7d765b2cc25fb843f860a6f32edbd327efbba7d4"
     }
   ]
 }

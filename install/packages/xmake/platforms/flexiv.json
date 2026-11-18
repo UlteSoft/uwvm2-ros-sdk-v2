@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/flexiv/xmake/platform.lua",
-      "bytes": 453,
+      "bytes": 464,
       "mode": 420,
-      "sha256": "49758098704a5947faddc36ca6c3a1cf00eb5646756e6d2ae59a18a6ef5bc749"
+      "sha256": "8b9812949181afc074d1350a7a00505002766d132acbe3a8f0f1965a164d4467"
     }
   ]
 }

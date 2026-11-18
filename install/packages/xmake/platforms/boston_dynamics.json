@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/boston_dynamics/xmake/platform.lua",
-      "bytes": 337,
+      "bytes": 348,
       "mode": 420,
-      "sha256": "cd3a852703912a9381a17d8fc71fb4deca2d3c2e0f71f8aab2f014b4c09fe0b3"
+      "sha256": "5315e81d498415cd81f3256ac7375a3483d131af630d8e17578ad09db6b4af7d"
     }
   ]
 }

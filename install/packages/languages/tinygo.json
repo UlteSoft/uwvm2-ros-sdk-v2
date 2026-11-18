@@ -1,0 +1,100 @@
+{
+  "files": [
+    {
+      "path": "bin/wrtinygo",
+      "bytes": 9854,
+      "mode": 493,
+      "sha256": "e7b60ae6140de23a0511d614e290718cef4ad07b596fcd647be0f86a6287b7e9"
+    },
+    {
+      "path": "document/en/tinygo.md",
+      "bytes": 5976,
+      "mode": 420,
+      "sha256": "81c530267360975cef952ac688c2d5d6393eaa1cffa8885643a1f3784b4f68f7"
+    },
+    {
+      "path": "document/zh/tinygo.md",
+      "bytes": 5537,
+      "mode": 420,
+      "sha256": "def5469a047c3133b858ff73e5d4ad366e37b5d9f0038e74519d03b152c4c7f7"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/tinygo/LICENSE-TinyGo",
+      "bytes": 1766,
+      "mode": 420,
+      "sha256": "b51264cf951607cde87bd388b953264d0fa9b75d1f4f96ac828b29ebbb57294e"
+    },
+    {
+      "path": "language/tinygo/runtime/arch_tinygowasm.go",
+      "bytes": 2674,
+      "mode": 420,
+      "sha256": "8645c7d967af9a88f1d10b63ffec9acf48ac44a5071460b115898b7f153036ef"
+    },
+    {
+      "path": "language/tinygo/runtime/gc_blocks.go",
+      "bytes": 24036,
+      "mode": 420,
+      "sha256": "6c3e50dd4673e722b0e5191fb949bd2962400e360757229fdf02a9fd3d688294"
+    },
+    {
+      "path": "language/tinygo/runtime/runtime_tinygowasm.go",
+      "bytes": 1560,
+      "mode": 420,
+      "sha256": "ddc0222eaeca1b2e6218da2d4d55aa965ecb67a7b51222b419bf84eb1c3eb2dc"
+    },
+    {
+      "path": "language/tinygo/runtime/runtime_wasip1.go",
+      "bytes": 913,
+      "mode": 420,
+      "sha256": "7787c48d358b01f6556325129c569c940dec28d5ad34b671dd8541c8b7c6b686"
+    },
+    {
+      "path": "language/tinygo/runtime/wros_gc.c",
+      "bytes": 1076,
+      "mode": 420,
+      "sha256": "831a463058e07507fd40fe7e89986ae31a734b104c4adbe9ba16afefebb135b2"
+    },
+    {
+      "path": "language/tinygo/runtime/wros_gc.go",
+      "bytes": 269,
+      "mode": 420,
+      "sha256": "43e8cedb307aabc61cfd34e8aba8a5bfe6caa3f73d4d0dccd3a2add48c6b015f"
+    },
+    {
+      "path": "language/tinygo/scene/go.mod",
+      "bytes": 33,
+      "mode": 420,
+      "sha256": "11fabb745bfa9f4327ab1e00c7710ae5daf996ec8833ac290dbb46d66fbaac04"
+    },
+    {
+      "path": "language/tinygo/scene/scene_wros.go",
+      "bytes": 26251,
+      "mode": 420,
+      "sha256": "4c6b198cc24bd08c7d27e7982895642509f087d08beee7f23d7600e37221a192"
+    },
+    {
+      "path": "language/tinygo/tag.cpp",
+      "bytes": 4088,
+      "mode": 420,
+      "sha256": "9f459a47ff2d5a35093e779a10429be9c1ca0df383e3da448b264658fad16193"
+    },
+    {
+      "path": "language/tinygo/toolchain-inputs.json",
+      "bytes": 2014,
+      "mode": 420,
+      "sha256": "7ae0ef20477328ec3b44d32a7e39a37665a0f21429c1b34ee78e70cefaede002"
+    },
+    {
+      "path": "language/tinygo/xmake/adapter.lua",
+      "bytes": 1590,
+      "mode": 420,
+      "sha256": "2276bf5f393daf34accb573312657f9d3270981f35a91d568a339f334c5f98f7"
+    }
+  ]
+}

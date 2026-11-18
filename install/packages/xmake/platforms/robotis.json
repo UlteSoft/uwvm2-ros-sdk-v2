@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/robotis/xmake/platform.lua",
-      "bytes": 454,
+      "bytes": 465,
       "mode": 420,
-      "sha256": "0fa735078e802896a5cdb48f7b864fb508680a536052a489eb78dc495831b9f8"
+      "sha256": "bcf42d75f0fc99ca13249d7348eccb26764eb01fe8ff6513966ab4b50b26c466"
     }
   ]
 }

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/elephant/xmake/platform.lua",
-      "bytes": 351,
+      "bytes": 362,
       "mode": 420,
-      "sha256": "7612972f76d141b2c968238a710fa506ed52c95b8ac52039fdd97b81dea2bb3f"
+      "sha256": "336a45ea5207a0aa6e6aba9f3f357f5d58500921d6416c390e1eee2b3edee3bd"
     }
   ]
 }

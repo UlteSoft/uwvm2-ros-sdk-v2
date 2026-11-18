@@ -1,0 +1,316 @@
+{
+  "files": [
+    {
+      "path": "bin/wrc",
+      "bytes": 183,
+      "mode": 493,
+      "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
+    },
+    {
+      "path": "bin/wrcc",
+      "bytes": 185,
+      "mode": 493,
+      "sha256": "0705fff5e24d24cd248ad8701df16ac7a5737c50c881f4770849480572c91c96"
+    },
+    {
+      "path": "bin/wrfortran",
+      "bytes": 202,
+      "mode": 493,
+      "sha256": "8f122dc20f53f0b5a5949c604f906e9c8625871401ad3b4b45d4ee9d0ddc30dd"
+    },
+    {
+      "path": "document/en/fortran.md",
+      "bytes": 4025,
+      "mode": 420,
+      "sha256": "e1b4c886e6ca8250373982927d849fa9bb28c42991a94cbb537c3a2122bce7d2"
+    },
+    {
+      "path": "document/zh/fortran.md",
+      "bytes": 3602,
+      "mode": 420,
+      "sha256": "0d01bcc7eb8c8480311e9f29d7ef549d4dc2913429f487c3ea267e0ccba24d41"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/fortran/build_flang.py",
+      "bytes": 5240,
+      "mode": 420,
+      "sha256": "d8084da4f1630a791509c4b3057cee6bad03911127f2f56b81379914a9608951"
+    },
+    {
+      "path": "language/fortran/entry.c",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "3a156713b61fcd2bb98851842d2497c4aa93111f6f11b1706e811eb5916ef372"
+    },
+    {
+      "path": "language/fortran/flang_identity.py",
+      "bytes": 1107,
+      "mode": 420,
+      "sha256": "85527d1b034f5e815a65ab34e7fc3fb1555b5ecc9859b980fae622766237b254"
+    },
+    {
+      "path": "language/fortran/frontend_fortran.py",
+      "bytes": 8796,
+      "mode": 420,
+      "sha256": "e0622f31c7d6f6f0fed9d185e8475e577812ebfa10d4f50c8b487ea2ad15c43b"
+    },
+    {
+      "path": "language/fortran/mark_mte.cpp",
+      "bytes": 3534,
+      "mode": 420,
+      "sha256": "2e15a77c92a87b74773367a127b8e8cd3b9fc633a1ed3cb0c57e3df5cc056023"
+    },
+    {
+      "path": "language/fortran/prepare.py",
+      "bytes": 2735,
+      "mode": 420,
+      "sha256": "edca0cb83c89dcf446d132d2173e59c865d70638f706e7dc1429f89738f24c40"
+    },
+    {
+      "path": "language/fortran/xmake/adapter.lua",
+      "bytes": 1801,
+      "mode": 420,
+      "sha256": "626aadc91b62c12644949c26606609e96815a6a38c4e9ab26d1670adcac997f2"
+    },
+    {
+      "path": "third-parties/fortran/LICENSE.TXT",
+      "bytes": 15141,
+      "mode": 420,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+    },
+    {
+      "path": "third-parties/fortran/README.md",
+      "bytes": 1320,
+      "mode": 420,
+      "sha256": "0c2589afc4953fee6a520c6807877f4bed8a8606b610dc6e67fd8a62380cae84"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/allocator-registry.h",
+      "bytes": 2773,
+      "mode": 420,
+      "sha256": "74ca5acadbd37b366b2306ba97d3fa29ddc17178dfc3cf9b2b57e1ea46024ddd"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/descriptor.h",
+      "bytes": 23968,
+      "mode": 420,
+      "sha256": "8c368d2eff9a3fc1171d57297c01ee74a602edcf71879594df1d2be3a8cdc36a"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/memory.h",
+      "bytes": 5146,
+      "mode": 420,
+      "sha256": "ef74966c68150b809fa86911675dff41494815198719c5a0f611441835b31538"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/numeric-templates.h",
+      "bytes": 12341,
+      "mode": 420,
+      "sha256": "fc2fc97b0d0b0c3e661f01bd5c3449ed9229cf98945cb8c12d055e6b81050996"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/stat.h",
+      "bytes": 2700,
+      "mode": 420,
+      "sha256": "4b07c769377b80bc79754d3648bdf9fbd9af2492587cfa5cd7464a3cd8badd31"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/terminator.h",
+      "bytes": 4894,
+      "mode": 420,
+      "sha256": "1c532f8137d09d4f16f98f4ca01ef856ddc718edda9396f3cb2bd5ce9924d09c"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/tools.h",
+      "bytes": 19550,
+      "mode": 420,
+      "sha256": "0cb14be3c315f398ed1143d3996e0d3f5b62b3a64711fab301dac3f45f2b42bb"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/type-code.h",
+      "bytes": 2621,
+      "mode": 420,
+      "sha256": "f800626aaf5506f0080c862b0cca408aeabfb7aca798b5fa426558a8ca07da2e"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/__fortran_builtins.f90",
+      "bytes": 9667,
+      "mode": 420,
+      "sha256": "1a839d0e6f3607eecebb250da34321b9e25e3d9b6bc31253b736ad7e6a97aac8"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/complex-powi.cpp",
+      "bytes": 4638,
+      "mode": 420,
+      "sha256": "b36596285875c3b8f9d28226f4abfc11f25bb572e62eaa1820582dc8f91abfec"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/iso_c_binding.f90",
+      "bytes": 5233,
+      "mode": 420,
+      "sha256": "980031291f3caa21bbf2d7e5e15da6bff6cf1d9202c9cc3b28cd39b5d3665127"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/iso_fortran_env.f90",
+      "bytes": 4488,
+      "mode": 420,
+      "sha256": "129f8dd868ac159516db329004e624391db63a7ebe6f598598eac8665d9d0470"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/iso_fortran_env_impl.f90",
+      "bytes": 7123,
+      "mode": 420,
+      "sha256": "28666c060c47eca73e0b9e2e9607b06b9a8738019a24d786a65176b1ec42a97d"
+    },
+    {
+      "path": "third-parties/fortran/flang-rt/lib/runtime/numeric.cpp",
+      "bytes": 31920,
+      "mode": 420,
+      "sha256": "a874995804387ade894148ef2872d4f49cc0cedfd258d8eef19e37766dadf397"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/Fortran-consts.h",
+      "bytes": 1923,
+      "mode": 420,
+      "sha256": "822a77e4bd1748ceb6d621725755da89ee95fec69abf2d1b99ef6cf6d978af88"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/ISO_Fortran_binding_wrapper.h",
+      "bytes": 1369,
+      "mode": 420,
+      "sha256": "800d7d5ad3c416f0f99540996487497511b8a05a8855902cd0e145900a49ec0d"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/api-attrs.h",
+      "bytes": 7504,
+      "mode": 420,
+      "sha256": "355ab633bd5365a7ee64c1fbea37daf50836d5fb05911e1fea527e5f881f68bd"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/enum-class.h",
+      "bytes": 2451,
+      "mode": 420,
+      "sha256": "cb93d665f12ae9ae63c9603a9fdcd32fcf206fdc5bf9b836f0969f2f1c6be5eb"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/erfc-scaled.h",
+      "bytes": 4055,
+      "mode": 420,
+      "sha256": "18848f28f168c35762adf100093368ea52fc7f757343c8369d889889a153020b"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/float128.h",
+      "bytes": 2849,
+      "mode": 420,
+      "sha256": "3d28965b2ee6119f14bc07a01a02a7e74743d8a6c49ca99baad580d48672bc30"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/float80.h",
+      "bytes": 1318,
+      "mode": 420,
+      "sha256": "da9b2703660ed5205533385687eb41dac1edbb5c9a41e650daff1466ee8f2ace"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/leading-zero-bit-count.h",
+      "bytes": 4394,
+      "mode": 420,
+      "sha256": "0953a81da39bb8e85894836b4dd82f9f24f5e23ee5f28379cc2fb7414a4a0822"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/optional.h",
+      "bytes": 8310,
+      "mode": 420,
+      "sha256": "e2beae04fb29859011cc53dc3e2ed14677012b013b3bfe67c311d244fb35aed4"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Common/uint128.h",
+      "bytes": 9554,
+      "mode": 420,
+      "sha256": "c6fdef1f70e73692c16f45f85b5a394ff8bda520471dc7a38b9d8e3cd4a00230"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/ISO_Fortran_binding.h",
+      "bytes": 7628,
+      "mode": 420,
+      "sha256": "24ed2bd02a212f918afa613633ae4fcad5ddf1fbb082c42b3cee1550891a51a2"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/allocator-registry-consts.h",
+      "bytes": 928,
+      "mode": 420,
+      "sha256": "96da5ef55b6ef0a1f576de630217ba9b9a27b0cf6ccc3e6907ee65e77a7e04da"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/c-or-cpp.h",
+      "bytes": 950,
+      "mode": 420,
+      "sha256": "73b1c285a4f2aca37b67fb6766ddeeb58d273174a5099e595dcb6f919c80c683"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/complex.h",
+      "bytes": 1290,
+      "mode": 420,
+      "sha256": "5fdc9b8946bbecbb275a80f2a39af5ada7bf0259b1a0349fd02be8ed306a3c2f"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/cpp-type.h",
+      "bytes": 3303,
+      "mode": 420,
+      "sha256": "6d07c68b5d93ceb3f5c3ef0334e76b3615e3e9a96b8ed1391c330d4e06266068"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/descriptor-consts.h",
+      "bytes": 2734,
+      "mode": 420,
+      "sha256": "5258af113e7a3f094d8cdd930a2ce8cf6dd41b5ac288d22876e75cb545c11925"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/entry-names.h",
+      "bytes": 1488,
+      "mode": 420,
+      "sha256": "e79128ba305c86302c5bea82881d12297d18663f65d2b531426b1af967d5ec80"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/extensions.h",
+      "bytes": 3878,
+      "mode": 420,
+      "sha256": "8db0a51d5b2ec6e084fdf7163aeb00cebb5408ef79f82d224715626527cde361"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/freestanding-tools.h",
+      "bytes": 8688,
+      "mode": 420,
+      "sha256": "f118a6b1dbf053956b222088872b31c0b9b0ee232a84322b1662d02367d223d2"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/magic-numbers.h",
+      "bytes": 4663,
+      "mode": 420,
+      "sha256": "8384422a13e509fc72a3abdadf564da70752ad36ddb6f099f6f2aa72df7c5aed"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/numeric.h",
+      "bytes": 18892,
+      "mode": 420,
+      "sha256": "fc57c8c692aa9189bcb26774e42973b4ab1af1e88b5dabcb4b1c77568186da0c"
+    },
+    {
+      "path": "third-parties/fortran/flang/include/flang/Runtime/stop.h",
+      "bytes": 1866,
+      "mode": 420,
+      "sha256": "2f6d3cba19d233fccdb7a07d0b28591b3489973d441617aae542fc9702561f09"
+    },
+    {
+      "path": "third-parties/fortran/llvm23-wasm-abi.patch",
+      "bytes": 8974,
+      "mode": 420,
+      "sha256": "72f1bccd7366c2f624473f5418113e5275a4fa3762e08a013e1e98be1d144ff8"
+    }
+  ]
+}

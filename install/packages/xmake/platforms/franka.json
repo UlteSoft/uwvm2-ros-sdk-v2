@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/franka/xmake/platform.lua",
-      "bytes": 453,
+      "bytes": 464,
       "mode": 420,
-      "sha256": "b363f7ed05b8832ed2a2d9aadfd1b88335aa1392308ff0e500eee0eee89bf6d6"
+      "sha256": "6e63c2134282a739fbd85d0f99c47f166cd0e6b6021ca058ef9645cbd875c882"
     }
   ]
 }

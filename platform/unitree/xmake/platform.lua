@@ -4,9 +4,9 @@ function describe()
         id = "unitree",
         admission = "generic-driver",
         languages = {
-            "as", "c", "c_ffi_bridge", "cpp", "d", "go", "haskell", "java", "js", "kotlin", "lua",
-            "moonbit", "nim", "objectc", "odin", "php", "py", "rs", "ruby", "swift", "tinygo",
-            "typescript", "zig"
+            "as", "c", "c_ffi_bridge", "cpp", "d", "fortran", "go", "haskell", "java", "js",
+            "kotlin", "lua", "moonbit", "nim", "objectc", "odin", "php", "py", "rs", "ruby", "swift",
+            "tinygo", "typescript", "zig"
         }
     }
 end
