@@ -26,17 +26,28 @@ def grants(backend="ros1", scope="global", target="robots", observation="service
     if ref:
         put("observe", module.PAIRS[observation], ref)
     if observation == "service.available" and backend == "ros2":
+        # Effective RMW values used by the old native_graph_availability test.
+        qos = {"qos.reliability":"reliable", "qos.durability":"volatile", "qos.history":"keep-last",
+               "qos.depth":"4", "qos.deadline":"infinite", "qos.lifespan":"infinite",
+               "qos.liveliness":"automatic", "qos.liveliness-lease-duration":"infinite"}
         for alias in ("call", "observe"):
-            for field in module.QOS:
-                put(alias, field, "keep-last" if field == "qos.history" else "fixed")
+            for field, value in qos.items():
+                put(alias, field, value)
     if observation == "event.observe":
         put("observe", "event-kinds", "service-response,resource-closed")
     return args
 
 
 class Policy(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        default = Path(__file__).resolve().parents[2] / ".tmp"
+        configured = Path(os.environ.get("TMPDIR", default)).resolve()
+        cls.scratch = configured if ".tmp" in configured.parts else default
+        cls.scratch.mkdir(parents=True, exist_ok=True)
+
     def run_cli(self, raw, exit_code):
-        with tempfile.TemporaryDirectory(dir=os.environ["TMPDIR"]) as name:
+        with tempfile.TemporaryDirectory(dir=self.scratch) as name:
             policy = Path(name) / "args.json"
             policy.write_bytes(raw)
             result = subprocess.run([sys.executable, "-I", "-B", REVIEWER, policy], capture_output=True)
@@ -93,7 +104,7 @@ class Policy(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(os, "mkfifo"), "FIFO test requires POSIX")
     def test_nonregular_input(self):
-        with tempfile.TemporaryDirectory(dir=os.environ["TMPDIR"]) as name:
+        with tempfile.TemporaryDirectory(dir=self.scratch) as name:
             path = Path(name) / "input"
             os.mkfifo(path)
             result = subprocess.run([sys.executable, "-I", "-B", REVIEWER, path], capture_output=True, timeout=3)
