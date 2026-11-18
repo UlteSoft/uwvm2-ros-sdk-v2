@@ -42,14 +42,4 @@ int read_description(wros_package_view *result) {
 
 `tests/migration/resource_urdf_mujoco.py` 可读取以上结果中的 `variants.jsonl.gz`，使用已安装的 MuJoCo SDK 回放 URDF 和同包 STL。每个网格来自相同源码快照，固定内容摘要后在仿真的虚拟文件系统中分配文件名，避免不同目录的同名网格互相覆盖。关节限制、惯量、位姿和网格字节均保留。报告列出仿真器拒绝的模型和需要其他工具的依赖。只有固定关节的模型没有动态自由度。
 
-## 检查旧版观察权限
-
-把旧部署的权限参数按原先顺序保存成 UTF-8 JSON 字符串数组，使用 ROS1 或 ROS2 的完整 global、single、group 参数名。工具识别 grant、set、enable、disable、create 和成员配置。改写部署权限推荐前运行安装目录里的检查器。
-
-```sh
-python3 "$SDK/tools/migration/legacy_permissions.py" legacy-grants.json
-```
-
-退出码 2 要求人工迁移。报告逐项列出观察者和来源的别名、ROS 后端以及所属目标。旧版服务可用性查询同时核对独立的查询权限和调用权限，还可能要求在有限时间内等待。旧事件观察器绑定独立的来源能力与事件种类。ROSv2 的客户端就绪、图可见性与事件流各有自己的语义。相同名字出现在不同权限组中不能建立这种关联。
-
-退出码 0 表示已识别的参数里没有配对观察声明，退出码 3 表示输入无效或选项超出检查器范围。工具只输出检查报告。迁移实施前仍需核对事件种类、预算、速率、类型标识和传输配置。
+改写 ROSv2 权限推荐前，请核对旧观察者与来源的双权限关系。迁移组件包含这项检查工具。 [检查旧版观察权限](legacy-permissions.md)

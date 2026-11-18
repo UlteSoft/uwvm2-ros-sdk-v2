@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "document/en/legacy-permissions.md",
+      "bytes": 1607,
+      "mode": 420,
+      "sha256": "36540d8adc963afbc0260722de73e97bbf7455ad02481bab9385f1c429b43963"
+    },
+    {
+      "path": "document/zh/legacy-permissions.md",
+      "bytes": 1307,
+      "mode": 420,
+      "sha256": "202cc5c3349461f3bcc41e149f8963d0747f033562b74fe88dd14aa7090de19e"
+    },
+    {
+      "path": "tools/migration/legacy_permissions.py",
+      "bytes": 8077,
+      "mode": 420,
+      "sha256": "9ca33f5eebb56ab24a96397732aa1f25383b547866a7513d8e03e849e94105e1"
+    }
+  ]
+}

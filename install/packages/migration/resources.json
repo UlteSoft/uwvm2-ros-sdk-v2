@@ -2,27 +2,21 @@
   "files": [
     {
       "path": "document/en/migration.md",
-      "bytes": 5840,
+      "bytes": 4676,
       "mode": 420,
-      "sha256": "69258e01be23775986002530e24ddd5a0bbefc54a4f2a5e748a6d2cc0bcf78b8"
+      "sha256": "8340d3eef4392ca7936b44d8ab5319f815c0d4013d631a4a0aa7e88297c86a53"
     },
     {
       "path": "document/zh/migration.md",
-      "bytes": 5036,
+      "bytes": 4124,
       "mode": 420,
-      "sha256": "384799d76cad7d57558cf6e0f1d9e28697005c6b3908db8eee11c8988c954fa3"
+      "sha256": "503ed5e1f847a559d355ff8ec340fbcb827e4ce3484dcd1c83c3d3ab875b6b40"
     },
     {
       "path": "include/wros/package_resources.h",
       "bytes": 3607,
       "mode": 420,
       "sha256": "0a3cdc4a00c8b21beccde044d7fa6741840cbeb67e167574405cb8218f07d4ce"
-    },
-    {
-      "path": "tools/migration/legacy_permissions.py",
-      "bytes": 8077,
-      "mode": 420,
-      "sha256": "9ca33f5eebb56ab24a96397732aa1f25383b547866a7513d8e03e849e94105e1"
     },
     {
       "path": "tools/migration/package_manifest.py",
