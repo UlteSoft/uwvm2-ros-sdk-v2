@@ -35,7 +35,10 @@ def main():
     for name in ("toolchain", "sysroots", "runtime", "output"):
         parser.add_argument("--" + name, required=True, type=Path)
     parser.add_argument("--address-bits", required=True, type=int, choices=(32, 64))
-    parser.add_argument("--candidate-mte", action="store_true")
+    parser.add_argument("--frontend-root", type=Path, default=ROOT)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--no-mte", action="store_true")
+    mode.add_argument("--candidate-mte", action="store_true")
     args = parser.parse_args()
     out = args.output.resolve()
     group = cgroup_record()
@@ -44,11 +47,12 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     os.environ["TMPDIR"] = str(out)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
-    schema = ROOT / "share/abi/ros.json"
+    front = args.frontend_root.resolve()
+    schema = front / "share/abi/ros.json"
     all_operations = [entry["name"] for entry in json.loads(schema.read_bytes())["operations"]]
-    workflow = ROOT / "examples/lua/guard.lua"
-    inputs = [workflow, schema, ROOT / "language/lua/scene.hpp", ROOT / "language/lua/entry.cpp",
-              ROOT / "bin/wrlua", Path(__file__), args.runtime, args.sysroots]
+    workflow = front / "examples/lua/guard.lua"
+    inputs = [workflow, schema, front / "language/lua/scene.hpp", front / "language/lua/entry.cpp",
+              front / "bin/wrlua", Path(__file__), args.runtime, args.sysroots]
     report = {"complete": False, "cgroup": group, "operations": len(all_operations),
               "inputs": {str(path): sha(path) for path in inputs}, "cases": []}
 
@@ -59,14 +63,14 @@ def main():
         result = subprocess.run(command, cwd=out, capture_output=True, timeout=180)
         (out / (name + ".stderr")).write_bytes(result.stderr)
         passed = result.returncode == 0 if diagnostic is None else result.returncode != 0 and diagnostic in result.stderr
-        report["cases"].append(dict(name=name, exit=result.returncode, passed=passed))
+        report["cases"].append(dict(name=name, exit=result.returncode, passed=passed, expected_success=diagnostic is None))
         save()
         if not passed:
             raise RuntimeError(name + ": " + result.stderr.decode(errors="replace")[-1600:])
 
-    compiler = [sys.executable, ROOT / "bin/wrlua", "--toolchain", args.toolchain.resolve(),
+    compiler = [sys.executable, front / "bin/wrlua", "--toolchain", args.toolchain.resolve(),
                 "--sysroots", args.sysroots.resolve(), "--target", f"wasm{args.address_bits}",
-                "--guest-seed", "5", "--legacy-mte" if args.candidate_mte else "--mte"]
+                "--guest-seed", "5", "--no-mte" if args.no_mte else "--legacy-mte" if args.candidate_mte else "--mte"]
     sample = out / "application.lua"
     sample.write_text(workflow.read_text() + CHECKS)
     guest = out / "application.wasm"
@@ -88,6 +92,8 @@ def main():
         base = [args.runtime.resolve(), *Profile(args.address_bits).uwvm_feature_flags(), "--runtime-" + engine,
                 "--wasm-set-main-module-name", "main", "--runtime-compile-threads", "0",
                 "--runtime-llvm-jit-cache-path", "disable", "--debug-fault-action", "exit"]
+        if args.no_mte:
+            base.append("--wasm-feature-disable-memtag-extension")
         run(engine + "-hidden", [*base, "--run", guest], b"ROS scene interface is hidden")
         run(engine + "-without-grant", [*base, *scene, "--run", guest], b"unreachable")
         run(engine + "-guard", [*base, *scene, *grants, "--run", guest])

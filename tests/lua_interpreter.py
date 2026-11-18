@@ -61,7 +61,8 @@ def main():
     inputs = (front / "bin/wrlua", front / "bin/wrcc", front / "language/lua/entry.cpp",
               front / "third-parties/lua/lua-5.4.9.tar.gz", front / "install/frontend.py",
               front / "install/compiler.py", sr, vm, tc / "bin/clang", tc / "bin/wasm-ld",
-              Path(__file__), front / "examples/lua/body.lua")
+              Path(__file__), ROOT / "tests/lua_scene.py", front / "language/lua/scene.hpp",
+              front / "examples/lua/guard.lua", front / "examples/lua/body.lua")
     result["inputs"] = {str(p): sha(p) for p in inputs}
 
     def save():
@@ -137,6 +138,18 @@ def main():
             if sha(app) != saved:
                 raise RuntimeError("invalid input replaced an existing module")
 
+    for bits in dict.fromkeys(args.address_bits):
+        suite_dir = work / f"scene{bits}"
+        flags = ["--no-mte"] if args.no_mte else ["--candidate-mte"] if args.candidate_mte else []
+        command = [sys.executable, ROOT / "tests/lua_scene.py", "--frontend-root", front,
+                   "--toolchain", tc, "--sysroots", sr, "--runtime", vm, "--output", suite_dir,
+                   "--address-bits", str(bits), *flags]
+        subprocess.run(command, check=True, timeout=240)
+        scene = json.loads((suite_dir / "results.json").read_text())
+        if not scene["complete"] or not all(row["passed"] for row in scene["cases"]):
+            raise RuntimeError("incomplete Lua ROSv2 evidence")
+        result["cases"].extend({**case, "name": f"scene{bits}-" + case["name"]} for case in scene["cases"])
+        result.setdefault("scene_evidence", {})[str(bits)] = sha(suite_dir / "results.json")
     if any(sha(Path(p)) != digest for p, digest in result["inputs"].items()):
         raise RuntimeError("test inputs changed during qualification")
     result["complete"] = True
