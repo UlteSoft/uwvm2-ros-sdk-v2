@@ -8,7 +8,7 @@ import subprocess
 import sys
 import tempfile
 
-from host import environment, REF_PACK, SDK_VERSION, stage
+from host import environment, REF_PACK, SDK_VERSION, sha, stage
 
 HERE = Path(__file__).resolve().parent
 SDK = HERE.parents[1]
@@ -38,17 +38,23 @@ def compile_guest(args, work):
         return result.stdout.decode(errors="replace")
 
     def csc(assembly, sources, references, kind):
+        debug = ["-debug:portable", "-pdb:WrosKernel.pdb", "-checksumalgorithm:SHA256"] if kind == "library" else []
         return run("Roslyn " + assembly, [host / "dotnet", roslyn / "csc.dll", "-nologo", "-noconfig",
-                   "-deterministic+", "-target:" + kind, "-unsafe+", "-optimize+", "-nostdlib+",
+                   "-deterministic+", *debug, "-target:" + kind, "-unsafe+", "-optimize+", "-nostdlib+",
                    *["-reference:" + str(p) for p in references], "-out:" + assembly, *sources])
 
     dll = "WrosKernel.dll"
     csc(dll, args.sources, [refs / filename for filename in ("mscorlib.dll", "System.Runtime.dll", "netstandard.dll")], "library")
     csc("Admit.dll", [HERE / "Admit.cs"], sorted(host_refs.glob("*.dll")), "exe")
-    row = run("C# metadata", [host / "dotnet", "exec", "--runtimeconfig", roslyn / "csc.runtimeconfig.json",
-                              "Admit.dll", dll, *args.entry.split(".")]).strip()
+    record = run("C# metadata", [host / "dotnet", "exec", "--runtimeconfig", roslyn / "csc.runtimeconfig.json",
+                                 "Admit.dll", dll, *args.entry.split("."), "WrosKernel.pdb"]).strip().split(" ")
+    row, digest, line, points = record
     if not row.isascii() or not row.isdecimal() or len(row) > 7:
         raise ValueError("invalid Mono method row")
+    # Trust a sequence point only when its Portable PDB document digest matches
+    # a source compiled in this invocation. The file name exposes no host path.
+    files = {sha(path): path.name for path in args.sources}
+    debug_args = [args.entry, files.get(digest, ""), line, points]
     run("Mono LLVMOnly", [compiler / "bin/mono-aot-cross", "--debug",
                           "--aot=llvmonly,asmonly,static,llvm-outfile=kernel.bc", dll],
         {"LD_LIBRARY_PATH": str(compiler / "lib")})
@@ -56,7 +62,7 @@ def compile_guest(args, work):
                             "transformutils", "irreader", "bitwriter", "core", "support", "--system-libs"]))
     run("LLVM method extractor", [args.host_cxx.resolve(strict=True), "-O3", "-g", HERE / "leaf.cpp", *flags, "-o", "extract"])
     profile = Profile(mte=not args.no_mte)
-    run("managed method", [work / "extract", "--mte" if profile.mte else "--no-mte", row, "kernel.bc", "leaf.bc"])
+    run("managed method", [work / "extract", "--mte" if profile.mte else "--no-mte", row, "kernel.bc", "leaf.bc", *debug_args])
     run("core wasm32", [tool / "clang", "--no-default-config", "--target=" + profile.triple, *profile.llvm_feature_flags(),
                         "-O3", "-g", "-ffreestanding", "-nostdlib", "-fwasm-exceptions", "-mllvm",
                         "-wasm-use-legacy-eh=false", *(["-fsanitize=memtag"] if profile.mte else []),

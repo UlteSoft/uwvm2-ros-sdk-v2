@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/csharp.md",
-      "bytes": 5313,
+      "bytes": 6390,
       "mode": 420,
-      "sha256": "c900d8f98628701875c1070ea4bc504d1466b473b80ebaed0806592de640884b"
+      "sha256": "d554c2a1eb76ec1b6ad60d7b24d7486a4708f2e22c40b4999f66cedb508407cb"
     },
     {
       "path": "document/zh/csharp.md",
-      "bytes": 6184,
+      "bytes": 7160,
       "mode": 420,
-      "sha256": "19b35d49af4af6bc6e85f9fbd39509b8a023e836e573e40cc8148ad1635fd88b"
+      "sha256": "86f1046f3d77d27bab704937ba774bf1cddb9297c981e6d6b0c4921bc1025e42"
     },
     {
       "path": "examples/csharp/numeric-aot/Filter.cs",
@@ -38,9 +38,9 @@
     },
     {
       "path": "language/csharp/Admit.cs",
-      "bytes": 6027,
+      "bytes": 7006,
       "mode": 420,
-      "sha256": "1a5cb6aceeef014e94be64d7271652743fb7e4ba76d4ff4dfbe7e15b6db23d94"
+      "sha256": "caeb4d127efb0e51a6ceb6a9cefa576b70f323b9949578d8538018951b57b79e"
     },
     {
       "path": "language/csharp/host.py",
@@ -56,21 +56,27 @@
     },
     {
       "path": "language/csharp/leaf.cpp",
-      "bytes": 3742,
+      "bytes": 5195,
       "mode": 420,
-      "sha256": "336cb7a35b0c5046c3b87d541bf773ca7dff14031883a0d3de141a56e0d85910"
+      "sha256": "644da6620586d13d12528ee04ff49132409cfed2736848a1558dde9e782b1547"
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 6442,
+      "bytes": 6946,
       "mode": 420,
-      "sha256": "3be2a54395087f25ff1202d56e0550be8e36c54bbaee469bdf75fc7f0b13852b"
+      "sha256": "2ae30111933d1ab8106d248303a4e00b3f0aff5ba24a245e9d4b475b9e709048"
     },
     {
       "path": "language/csharp/xmake/adapter.lua",
       "bytes": 1457,
       "mode": 420,
       "sha256": "43cfc709ff98b362f120fcbb922fb80a2a14cc5b185ea8fe988384c2e7dc7ef4"
+    },
+    {
+      "path": "tests/csharp/README.md",
+      "bytes": 3161,
+      "mode": 420,
+      "sha256": "a3896c7439472fb7e944924223a08e12761d2fc6cd8b3b2a2b0300cd831474af"
     }
   ]
 }

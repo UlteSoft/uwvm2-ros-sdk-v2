@@ -54,3 +54,7 @@ export UWVM_ROS_SDK_ROOT="$SDK_PREFIX/$SDK_COMMIT/unitree/csharp/numeric-aot"
 入口必须位于全局命名空间的非泛型静态类中，签名为 `public static int Scale(int input)`。通过 `类名.方法名` 选择入口。Wasm 导出 `evaluate(i32) -> i32`，内存固定为 64 KiB，宿主导入数量为零。支持整数常量、参数、局部变量、比较、位运算、unchecked 加减乘、分支和循环。工具读取真实 IL，按 MethodDef 行号选择 Mono 生成的方法，核对其隐藏上下文没有参与计算，再生成单参数 ABI。程序集中的类型或模块初始化器，以及入口使用托管数组、对象、其他函数调用、异常或 P/Invoke 时均会被拒绝。这些功能需要更完整的 CLR。其余方法不会成为 Wasm 入口。
 
 `--legacy-mte` 显式生成启用 MTE 的未签署制品，`--no-mte` 显式关闭 MTE。默认严格模式需要签署过的语言资格；当前 C# 尚无相应发布。Xmake 工程可复制 `examples/csharp/numeric-aot/xmake.lua`，设置 `set_language("csharp")` 和 `add_wros_exports("Filter.Scale")`，按 `-O3 -g` 构建。调用方提供整数参数调用 `evaluate`。选择平台不会授予驱动权限。
+
+Roslyn 生成 Portable PDB，并以 SHA-256 标识源文件。AOT 前端将方法第一个可见序列点的文档摘要与本次输入匹配，把 C# 方法名、源文件名和该行写入 DWARF。只有恰好包含一个可见序列点的方法才把指令定位到该条源码语句。包含多个序列点的方法保留方法级定位；隐藏或无法匹配的源码不生成行定位。调试信息省略构建机源文件的绝对路径。
+
+仓库中的 `tests/csharp_source_locations.py` 分别验证单条语句、循环以及重映射文件名。使用 `tests/csharp_numeric_performance.py --help` 查看如何将已构建的 Filter.Scale 模块与独立 native C 函数对比。测试从另一 Wasm 模块调用该入口，核对全部运算的校验和，并在核心 4 上测量两种循环长度的配对耗时斜率。VTune 对两端使用硬件 Hotspots 与 Microarchitecture Exploration，记录实际可用的采样间隔和源码、汇编定位情况。

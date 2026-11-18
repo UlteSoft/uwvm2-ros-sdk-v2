@@ -97,7 +97,22 @@ static class Admit
                 }
             }
             if (selected < 0) throw new Exception("entry method was not found");
-            Console.WriteLine(selected);
+            using var symbols = File.OpenRead(args[3]);
+            using var provider = MetadataReaderProvider.FromPortablePdbStream(symbols);
+            var pdb = provider.GetMetadataReader();
+            var info = pdb.GetMethodDebugInformation(MetadataTokens.MethodDebugInformationHandle(selected + 1));
+            string digest = "";
+            int firstLine = 0, visible = 0;
+            foreach (var point in info.GetSequencePoints()) {
+                if (point.IsHidden) continue;
+                ++visible;
+                if (visible != 1) continue;
+                var document = pdb.GetDocument(point.Document.IsNil ? info.Document : point.Document);
+                if (pdb.GetGuid(document.HashAlgorithm) != new Guid("8829d00f-11b8-4213-878b-770e8597ac16")) continue;
+                digest = Convert.ToHexString(pdb.GetBlobBytes(document.Hash)).ToLowerInvariant();
+                firstLine = point.StartLine;
+            }
+            Console.WriteLine($"{selected} {digest} {firstLine} {visible}");
             return 0;
         } catch (Exception error) {
             Console.Error.WriteLine(error.Message);

@@ -103,6 +103,7 @@ def main():
         "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
         "language/csharp/xmake/adapter.lua", "examples/csharp/numeric-aot/Filter.cs",
         "examples/csharp/numeric-aot/xmake.lua", "document/en/csharp.md", "document/zh/csharp.md",
+        "tests/csharp/README.md",
     ])
     shared_jvm = [p.relative_to(ROOT).as_posix() for name in ("language/jvm", "third-parties/jvm")
                   for p in (ROOT / name).rglob("*") if p.is_file() and "__pycache__" not in p.parts]

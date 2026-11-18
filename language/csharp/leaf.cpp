@@ -2,6 +2,9 @@
 // method table. Rebuild the external ABI with one argument. Code that uses the
 // CLR context, globals, other calls or external state cannot form this module.
 #include "llvm/Bitcode/BitcodeWriter.h"
+#include "llvm/BinaryFormat/Dwarf.h"
+#include "llvm/IR/DIBuilder.h"
+#include "llvm/Support/Path.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
@@ -18,7 +21,7 @@ static int reject(llvm::StringRef reason) {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 5) return 2;
+    if (argc != 9) return 2;
     llvm::StringRef mode(argv[1]);
     unsigned row{};
     if ((mode != "--mte" && mode != "--no-mte") || llvm::StringRef(argv[2]).getAsInteger(10, row)) return 2;
@@ -59,6 +62,25 @@ int main(int argc, char** argv) {
     llvm::CloneFunctionInto(entry, original, mapping, llvm::CloneFunctionChangeType::DifferentModule, returns);
     entry->setAttributes(llvm::AttributeList{});
     if (mode == "--mte") entry->addFnAttr(llvm::Attribute::SanitizeMemTag);
+    unsigned line{}, points{};
+    if (llvm::StringRef(argv[7]).getAsInteger(10, line) || llvm::StringRef(argv[8]).getAsInteger(10, points)) return 2;
+    llvm::StringRef fileName(argv[6]);
+    if (!fileName.empty() && line && points) {
+        guest.addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
+        guest.addModuleFlag(llvm::Module::Warning, "Dwarf Version", 4);
+        llvm::DIBuilder di(guest);
+        auto* file = di.createFile(llvm::sys::path::filename(fileName), llvm::sys::path::parent_path(fileName));
+        di.createCompileUnit(llvm::dwarf::DW_LANG_C_sharp, file, "WasmROS Roslyn + Mono LLVMOnly", true, "-O3 -g", 0);
+        auto* integer = di.createBasicType("int", 32, llvm::dwarf::DW_ATE_signed);
+        auto* signature = di.createSubroutineType(di.getOrCreateTypeArray({integer, integer}));
+        auto* sp = di.createFunction(file, argv[5], "evaluate", file, line, signature, points == 1 ? line : 0, llvm::DINode::FlagZero,
+                                     llvm::DISubprogram::SPFlagDefinition | llvm::DISubprogram::SPFlagOptimized);
+        entry->setSubprogram(sp);
+        for (auto& block : *entry)
+            for (auto& instruction : block)
+                instruction.setDebugLoc(llvm::DILocation::get(context, points == 1 ? line : 0, 0, sp));
+        di.finalize();
+    }
     if (llvm::verifyModule(guest, &llvm::errs())) return 1;
     std::error_code ec;
     llvm::raw_fd_ostream out(argv[4], ec);
