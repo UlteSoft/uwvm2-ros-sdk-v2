@@ -93,7 +93,8 @@ def main():
         package("metadata/" + language, [path])
 
     policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py")]
-    package("frontend", [*policy, "bin/wrar", "install/archiver.py"])
+    package("frontend", [*policy, "bin/wrar", "install/archiver.py",
+                         "document/en/memtag.md", "document/zh/memtag.md"])
     package("xmake/common", ["tools/xmake/ros.lua", "tools/xmake/dispatch.lua", "tools/xmake/run_guest.py",
                              "document/en/xmake.md", "document/zh/xmake.md",
                              "document/en/xmake-api-index.md", "document/zh/xmake-api-index.md"])

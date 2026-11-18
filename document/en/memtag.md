@@ -43,3 +43,5 @@ Run the following acceptance suites with the rebuilt toolchain and VM inside the
 - `tests/memtag_global_pointer_origins.py` links two translation units. A legal one-past pointer for one array and the base of the next array have the same numerical address. The test verifies both tags, interior pointers, and in-bounds reads and writes through the owning arrays.
 
 Both suites execute the same guest with tagging on and off under the interpreter and AOT engine, for wasm32 and wasm64. Their local results record the exact tool and module digests.
+
+For a full C sysroot, `tests/memtag_tag_domain.py` takes `--toolchain`, `--runtime`, one or more `--sysroots` receipts, and a fresh `--output` directory. Use `--exceptions noeh` with the single-threaded no-EH closures. It checks all possible logical tag differences on ordinary reads and writes, including a matching control for each group. Cross-granule cases check each tag bit on the second granule of a dedicated test buffer. Four separate VM invocations verify live and retired heap storage.

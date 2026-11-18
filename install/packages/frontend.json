@@ -7,6 +7,18 @@
       "sha256": "e4bad02ced4a04ac71b90c94dbf4a23e9efc09f51fe3ca1914cd78746a4709a9"
     },
     {
+      "path": "document/en/memtag.md",
+      "bytes": 7037,
+      "mode": 420,
+      "sha256": "a3a16921cfa67724b468479d93e100ea675acb8204a6e862e1d131921d7d39f8"
+    },
+    {
+      "path": "document/zh/memtag.md",
+      "bytes": 6231,
+      "mode": 420,
+      "sha256": "d05110f33df9bf5c9f21cf477191af4dd049501f5709fd6b64ce0b1aeb528680"
+    },
+    {
       "path": "install/archiver.py",
       "bytes": 1989,
       "mode": 420,
