@@ -133,6 +133,11 @@ def main():
                 "third-parties/lua/lua-5.4.9.tar.gz", "third-parties/lua/LICENSE", "third-parties/lua/README.md",
                 "examples/lua/body.lua", "examples/lua/guard.lua", "document/en/lua.md", "document/zh/lua.md"],
     }
+    language_files["js"] = [
+        "bin/wrjs", "bin/wrc", "include/wros/scene.h", "language/js/entry.c",
+        "examples/js/body.js", "examples/js/xmake.lua", "document/en/js.md", "document/zh/js.md",
+        *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/quickjs").iterdir() if p.is_file()],
+    ]
     language_files["nim"] = [
         "bin/wrnim", "bin/wrc", "include/wros/scene.h", "examples/nim/body.nim", "examples/nim/xmake.lua",
         "document/en/nim.md", "document/zh/nim.md", "third-parties/nim/LICENSE", "third-parties/nim/README.md",

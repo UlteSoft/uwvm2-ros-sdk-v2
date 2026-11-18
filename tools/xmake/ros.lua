@@ -11,7 +11,7 @@ toolchain("wros.guest")
 toolchain_end()
 
 rule("wros.source")
-    set_extensions(".c", ".cc", ".cpp", ".cxx", ".C", ".lua", ".go", ".mod", ".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn",
+    set_extensions(".c", ".cc", ".cpp", ".cxx", ".C", ".lua", ".js", ".go", ".mod", ".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn",
                    ".rs", ".java", ".kt", ".cs", ".ts", ".nim", ".m", ".d", ".o", ".a")
 rule_end()
 

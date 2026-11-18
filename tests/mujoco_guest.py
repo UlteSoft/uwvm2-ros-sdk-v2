@@ -30,7 +30,7 @@ def main():
                    help="exercise one address width from the selected language toolchain")
     p.add_argument("--vendor-model", type=Path, help="a pinned platform MJCF manifest from the VM fixtures")
     p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
-    p.add_argument("--language", choices=("c", "cpp", "nim", "objectc", "lua", "rs", "tinygo", "fortran", "csharp"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "nim", "objectc", "lua", "js", "rs", "tinygo", "fortran", "csharp"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
     p.add_argument("--installed-sdk", type=Path, help="compile the controller using a trusted installed SDK")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
@@ -62,7 +62,7 @@ def main():
         p.error("--rustroot is required for Rust")
     if any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
         p.error("--goroot and --tinygoroot are required for TinyGo")
-    widths = (32,) if a.language in ("rs", "tinygo", "csharp") else (32, 64)
+    widths = (32,) if a.language in ("rs", "tinygo", "csharp", "js") else (32, 64)
     if a.address_bits:
         if a.address_bits not in widths:
             p.error("the requested address width is unavailable for this language")
@@ -76,7 +76,7 @@ def main():
     sys.path.insert(0, str(a.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
     source = ROOT / "tests/mujoco" / ("controller." + {"csharp": "c", "cpp": "c", "objectc": "c", "tinygo": "go", "fortran": "f90"}.get(a.language, a.language))
-    compiler = compiler_root / "bin" / {"c": "wrc", "csharp": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
+    compiler = compiler_root / "bin" / {"c": "wrc", "csharp": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "js": "wrjs", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
     sysroots = {32: a.sysroots32.resolve()}
     if 64 in widths:
         sysroots[64] = a.sysroots64.resolve()
@@ -106,6 +106,13 @@ def main():
         if a.language == "objectc":
             lib = a.objc_runtime32 if width == 32 else a.objc_runtime64
             options += ["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", lib.resolve()]
+        if a.language == "js":
+            operations = ("capability.open", "driver.connect", "driver.submit", "driver.result",
+                          "driver.describe", "driver.disconnect")
+            options = [arg for op in operations for arg in ("--ros-operation", op)]
+            app.write_text("const template = " + json.dumps(list(request)) + ";\n" +
+                           f"const steps = {count}, targetOffset = {24+len(prefix)+8};\n" +
+                           f"const mode = {json.dumps(mode)};\n" + source.read_text())
         if a.language == "lua":
             operations = ("capability.open", "driver.connect", "driver.submit", "driver.result",
                           "driver.describe", "driver.disconnect")
@@ -148,7 +155,7 @@ def main():
                                     "--sysroots", sysroots[width], *(["--legacy-mte"] if a.candidate_mte else []),
                                     *options, app, *objects, "-o", wasm])
         controls = Profile(width, exceptions="noeh" if a.language == "rs" else "eh").uwvm_feature_flags()
-        if a.language == "objectc":
+        if a.language in ("js", "objectc"):
             controls += ["--wasip1-single-create", "main", "--wasip1-single-enable", "main",
                          "--wasip1-single-interface", "main", "clock_time_get_wasm64" if width == 64 else "clock_time_get", "allow",
                          "--wasip1-single-grant", "main", "realtime-clock"]
@@ -170,6 +177,8 @@ def main():
     if a.language == "tinygo":
         producers.extend((a.goroot / "bin/go", a.tinygoroot / "bin/tinygo", ROOT / "language/tinygo/scene/scene_wros.go",
                           ROOT / "tools/wasm/tag_ir.cpp"))
+    if a.language == "js":
+        producers.extend((compiler_root / "language/js/entry.c", compiler_root / "third-parties/quickjs/quickjs.c"))
     suite.main(args, compile_guest=compile_guest, guest_name=a.language, guest_widths=widths,
                guest_inputs=(source, Path(__file__), compiler, *producers, *sysroots.values(), *objc_inputs,
                              *([compiler_root / "language/lua/scene.hpp", compiler_root / "language/lua/entry.cpp", compiler_root / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),
