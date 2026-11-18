@@ -1,0 +1,550 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -308,9 +308,12 @@
+ 
+ endif()
+ 
++list(REMOVE_ITEM libobjc_CXX_SRCS objc_wasm_eh.cc)
++add_compile_definitions(UWVM_OBJC_NOEH=1 _WASI_EMULATED_MMAN=1)
++
+ if (BUILD_SHARED_LIBOBJC)
+ 	add_library(objc SHARED ${libobjc_C_SRCS} ${libobjc_ASM_SRCS} ${libobjc_OBJC_SRCS} ${libobjc_OBJCXX_SRCS} ${libobjc_ASM_OBJS})
+-	target_compile_options(objc PRIVATE "$<$<OR:$<COMPILE_LANGUAGE:OBJC>,$<COMPILE_LANGUAGE:OBJCXX>>:-Wno-gnu-folding-constant;-Wno-deprecated-objc-isa-usage;-Wno-objc-root-class;-fobjc-runtime=gnustep-2.0>$<$<COMPILE_LANGUAGE:C>:-Xclang;-fexceptions;-Wno-gnu-folding-constant>")
++	target_compile_options(objc PRIVATE "$<$<OR:$<COMPILE_LANGUAGE:OBJC>,$<COMPILE_LANGUAGE:OBJCXX>>:-Wno-gnu-folding-constant;-Wno-deprecated-objc-isa-usage;-Wno-objc-root-class;-Xclang;-fobjc-runtime=gnustep-2.0>$<$<COMPILE_LANGUAGE:C>:-Wno-gnu-folding-constant>")
+ 	target_compile_features(objc PRIVATE cxx_std_20)
+ 	target_sources(objc PRIVATE ${libobjc_CXX_SRCS})
+ 	target_link_libraries(objc PUBLIC Threads::Threads)
+@@ -334,7 +337,7 @@
+ 
+ if (BUILD_STATIC_LIBOBJC)
+ 	add_library(objc-static STATIC ${libobjc_C_SRCS} ${libobjc_ASM_SRCS} ${libobjc_OBJC_SRCS} ${libobjc_OBJCXX_SRCS} ${libobjc_CXX_SRCS})
+-	target_compile_options(objc-static PRIVATE "$<$<OR:$<COMPILE_LANGUAGE:OBJC>,$<COMPILE_LANGUAGE:OBJCXX>>:-Wno-gnu-folding-constant;-Wno-deprecated-objc-isa-usage;-Wno-objc-root-class;-fobjc-runtime=gnustep-2.0>$<$<COMPILE_LANGUAGE:C>:-Xclang;-fexceptions;-Wno-gnu-folding-constant>")
++	target_compile_options(objc-static PRIVATE "$<$<OR:$<COMPILE_LANGUAGE:OBJC>,$<COMPILE_LANGUAGE:OBJCXX>>:-Wno-gnu-folding-constant;-Wno-deprecated-objc-isa-usage;-Wno-objc-root-class;-Xclang;-fobjc-runtime=gnustep-2.0>$<$<COMPILE_LANGUAGE:C>:-Wno-gnu-folding-constant>")
+ 	target_compile_features(objc-static PRIVATE cxx_std_20)
+ 	target_link_libraries(objc-static PRIVATE "$<BUILD_INTERFACE:tsl::robin_map>")
+ 	target_include_directories(
+diff --git a/abi_version.c b/abi_version.c
+--- a/abi_version.c
++++ b/abi_version.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include "visibility.h"
+ #include "objc/runtime.h"
+ #include "module.h"
+@@ -56,7 +57,7 @@
+ #define FAIL_IF(x, msg) do {\
+ 	if (x)\
+ 	{\
+-		fprintf(stderr, "Objective-C ABI Error: %s while loading %s\n", msg, module->name);\
++		WROS_OBJC_DIAGNOSTIC( "Objective-C ABI Error: %s while loading %s\n", msg, module->name);\
+ 		return NO;\
+ 	}\
+ } while(0)
+diff --git a/arc.mm b/arc.mm
+--- a/arc.mm
++++ b/arc.mm
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #define _LIBCPP_NO_EXCEPTIONS 1
+ #define TSL_NO_EXCEPTIONS 1
+ // Libc++ < 13 requires this for <vector> to be header only.  It is ignored in
+@@ -225,7 +226,7 @@
+ 
+ 	/* Be sure that releasing objects did not push any new pools. */
+ 	} while (tls->pool != stopPool);
+-	/* fprintf(stderr, "New insert: %p.  Stop: %p\n", tls->pool->insert, stop); */
++	/* WROS_OBJC_DIAGNOSTIC( "New insert: %p.  Stop: %p\n", tls->pool->insert, stop); */
+ }
+ 
+ #ifdef arc_tls_store
+@@ -598,7 +599,7 @@
+ 
+ static inline id autorelease(id obj)
+ {
+-	//fprintf(stderr, "Autoreleasing %p\n", obj);
++	//WROS_OBJC_DIAGNOSTIC( "Autoreleasing %p\n", obj);
+ 	if (useARCAutoreleasePool)
+ 	{
+ 		struct arc_tls *tls = getARCThreadData();
+diff --git a/associate.mm b/associate.mm
+--- a/associate.mm
++++ b/associate.mm
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -165,14 +166,18 @@
+ 		lock = lock_for_pointer(r);
+ 		lock->lock();
+ 	}
++	#if __has_feature(objc_exceptions)
+ 	@try
++	#endif
+ 	{
+ 		if (OBJC_ASSOCIATION_ASSIGN != r->policy)
+ 		{
+ 			objc_release((id)r->object);
+ 		}
+ 	}
++	#if __has_feature(objc_exceptions)
+ 	@finally
++	#endif
+ 	{
+ 		r->policy = policy;
+ 		r->object = obj;
+@@ -254,7 +259,7 @@
+ 	DESTROY_LOCK(&list->lock);
+ 	cleanupReferenceList(list);
+ 	freeReferenceList(list->next);
+-	//fprintf(stderr, "Deallocating dtable %p\n", hiddenClass->dtable);
++	//WROS_OBJC_DIAGNOSTIC( "Deallocating dtable %p\n", hiddenClass->dtable);
+ 	free_dtable(hiddenClass->dtable);
+ 	// We shouldn't have any subclasses left at this point
+ 	assert(hiddenClass->subclass_list == 0);
+diff --git a/block_to_imp.c b/block_to_imp.c
+--- a/block_to_imp.c
++++ b/block_to_imp.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ // On some platforms, we need _GNU_SOURCE to expose asprintf()
+ #ifndef _GNU_SOURCE
+ #define _GNU_SOURCE 1
+@@ -259,7 +260,7 @@
+ 
+ static id invalid(id self, SEL _cmd)
+ {
+-	fprintf(stderr, "Invalid block method called for [%s %s]\n",
++	WROS_OBJC_DIAGNOSTIC( "Invalid block method called for [%s %s]\n",
+ 			class_getName(object_getClass(self)), sel_getName(_cmd));
+ 	return nil;
+ }
+diff --git a/blocks_runtime.m b/blocks_runtime.m
+--- a/blocks_runtime.m
++++ b/blocks_runtime.m
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ /*
+  * Copyright (c) 2009 Remy Demarest
+  * Portions Copyright (c) 2009 David Chisnall
+@@ -279,7 +280,7 @@
+ 
+ 	if (&_NSConcreteStackBlock == self->isa)
+ 	{
+-		fprintf(stderr, "Block_release called upon a stack Block: %p, ignored\n", self);
++		WROS_OBJC_DIAGNOSTIC( "Block_release called upon a stack Block: %p, ignored\n", self);
+ 	}
+ 	else if (&_NSConcreteMallocBlock == self->isa)
+ 	{
+diff --git a/caps.c b/caps.c
+--- a/caps.c
++++ b/caps.c
+@@ -6,7 +6,9 @@
+  * runtime.
+  */
+ static const int32_t caps =
++	#ifndef UWVM_OBJC_NOEH
+ 	(1<<OBJC_CAP_EXCEPTIONS) |
++	#endif
+ 	(1<<OBJC_CAP_SYNCRONIZE) |
+ 	(1<<OBJC_CAP_PROPERTIES) |
+ 	(1<<OBJC_CAP_PROPERTY_INTROSPECTION) |
+@@ -17,7 +19,7 @@
+ 	(1<<OBJC_CAP_ARC) |
+ 	(1<<OBJC_CAP_ASSOCIATED_REFERENCES) |
+ 	(1<<OBJC_CAP_PROTOTYPES) |
+-#ifndef NO_OBJCXX
++#if !defined(NO_OBJCXX) && !defined(UWVM_OBJC_NOEH)
+ 	(1<<OBJC_UNIFIED_EXCEPTION_MODEL) |
+ #endif
+ #ifdef TYPE_DEPENDENT_DISPATCH
+diff --git a/category_loader.c b/category_loader.c
+--- a/category_loader.c
++++ b/category_loader.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include <stdio.h>
+ #include "objc/runtime.h"
+ #include "visibility.h"
+@@ -30,7 +31,7 @@
+ {
+ 	register_methods(class, cat->instance_methods);
+ 	register_methods(class->isa, cat->class_methods);
+-	//fprintf(stderr, "Loading %s (%s)\n", cat->class_name, cat->name);
++	//WROS_OBJC_DIAGNOSTIC( "Loading %s (%s)\n", cat->class_name, cat->name);
+ 
+ 	if (cat->protocols)
+ 	{
+@@ -53,13 +54,13 @@
+ static BOOL try_load_category(struct objc_category *cat)
+ {
+ 	Class class = (Class)objc_getClass(cat->class_name);
+-	//fprintf(stderr, "Trying to load %s (%s)\n", cat->class_name, cat->name);
++	//WROS_OBJC_DIAGNOSTIC( "Trying to load %s (%s)\n", cat->class_name, cat->name);
+ 	if (Nil != class)
+ 	{
+ 		load_category(cat, class);
+ 		return YES;
+ 	}
+-	//fprintf(stderr, "waiting to load %s (%s)\n", cat->class_name, cat->name);
++	//WROS_OBJC_DIAGNOSTIC( "waiting to load %s (%s)\n", cat->class_name, cat->name);
+ 	return NO;
+ }
+ 
+diff --git a/class_table.c b/class_table.c
+--- a/class_table.c
++++ b/class_table.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include "objc/runtime.h"
+ #include "objc/hooks.h"
+ #include "objc/developer.h"
+@@ -313,7 +314,7 @@
+ 	static BOOL warned = NO;
+ 	if (!warned)
+ 	{
+-		fprintf(stderr,
++		WROS_OBJC_DIAGNOSTIC(
+ 			"Warning: Calling deprecated private ObjC runtime function %s\n", __func__);
+ 		warned = YES;
+ 	}
+@@ -410,7 +411,7 @@
+ 	{
+ 		if (objc_developer_mode_developer != mode)
+ 		{
+-			fprintf(stderr,
++			WROS_OBJC_DIAGNOSTIC(
+ 				"Loading two versions of %s.  The class that will be used is undefined\n",
+ 				class->name);
+ 			return;
+@@ -609,7 +610,7 @@
+ 
+ Class class_pose_as(Class impostor, Class super_class)
+ {
+-	fprintf(stderr, "Class posing is no longer supported.\n");
+-	fprintf(stderr, "Please use class_replaceMethod() instead.\n");
++	WROS_OBJC_DIAGNOSTIC( "Class posing is no longer supported.\n");
++	WROS_OBJC_DIAGNOSTIC( "Please use class_replaceMethod() instead.\n");
+ 	abort();
+ }
+diff --git a/dtable.c b/dtable.c
+--- a/dtable.c
++++ b/dtable.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #define __BSD_VISIBLE 1
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -80,7 +81,7 @@
+ 
+ 
+ #ifdef DEBUG_ARC_COMPAT
+-#define ARC_DEBUG_LOG(...) fprintf(stderr, __VA_ARGS__)
++#define ARC_DEBUG_LOG(...) WROS_OBJC_DIAGNOSTIC( __VA_ARGS__)
+ #else
+ #define ARC_DEBUG_LOG(...) do {} while(0)
+ #endif
+@@ -663,7 +664,7 @@
+ 	static BOOL warned = NO;
+ 	if (!warned)
+ 	{
+-		fprintf(stderr, 
++		WROS_OBJC_DIAGNOSTIC( 
+ 			"Warning: Calling deprecated private ObjC runtime function %s\n", __func__);
+ 		warned = YES;
+ 	}
+diff --git a/eh_personality.c b/eh_personality.c
+--- a/eh_personality.c
++++ b/eh_personality.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -11,7 +12,7 @@
+ #ifndef DEBUG_EXCEPTIONS
+ #define DEBUG_LOG(...)
+ #else
+-#define DEBUG_LOG(str, ...) fprintf(stderr, str, ## __VA_ARGS__)
++#define DEBUG_LOG(str, ...) WROS_OBJC_DIAGNOSTIC( str, ## __VA_ARGS__)
+ #endif
+ 
+ #ifndef __has_builtin
+diff --git a/hash_table.h b/hash_table.h
+--- a/hash_table.h
++++ b/hash_table.h
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ /**
+  * hash_table.h provides a template for implementing hopscotch hash tables. 
+  *
+@@ -333,7 +334,7 @@
+ 		MAP_UNLOCK();
+ 		return PREFIX(_insert)(table, value);
+ 	}
+-	fprintf(stderr, "Insert failed\n");
++	WROS_OBJC_DIAGNOSTIC( "Insert failed\n");
+ 	MAP_UNLOCK();
+ 	return 0;
+ }
+diff --git a/ivar.c b/ivar.c
+--- a/ivar.c
++++ b/ivar.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include <assert.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -25,7 +26,7 @@
+ 	}
+ 	if (class->ivars->size != sizeof(struct objc_ivar))
+ 	{
+-		fprintf(stderr, "Downgrading ivar struct not yet implemented");
++		WROS_OBJC_DIAGNOSTIC( "Downgrading ivar struct not yet implemented");
+ 		abort();
+ 	}
+ 	int i = 0;
+diff --git a/loader.c b/loader.c
+--- a/loader.c
++++ b/loader.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include <stdlib.h>
+ #include <assert.h>
+ #include "objc/runtime.h"
+@@ -55,15 +56,11 @@
+ 		init_alias_table();
+ 		init_early_blocks();
+ 		init_arc();
+-#if defined(EMBEDDED_BLOCKS_RUNTIME)
++#if defined(EMBEDDED_BLOCKS_RUNTIME) && !defined(__wasm__)
+ 		init_trampolines();
+ #endif
+ 		init_builtin_classes();
+ 		first_run = NO;
+-		if (getenv("LIBOBJC_MEMORY_PROFILE"))
+-		{
+-			atexit(log_memory_stats);
+-		}
+ 	}
+ }
+ 
+@@ -160,11 +157,11 @@
+ 	Dl_info info;
+ 	if (dladdr(init, &info))
+ 	{
+-		fprintf(stderr, "Loading %p from object: %s (%p)\n", init, info.dli_fname, __builtin_return_address(0));
++		WROS_OBJC_DIAGNOSTIC( "Loading %p from object: %s (%p)\n", init, info.dli_fname, __builtin_return_address(0));
+ 	}
+ 	else
+ 	{
+-		fprintf(stderr, "Loading %p from unknown object\n", init);
++		WROS_OBJC_DIAGNOSTIC( "Loading %p from unknown object\n", init);
+ 	}
+ #endif
+ 	LOCK_RUNTIME_FOR_SCOPE();
+@@ -172,7 +169,7 @@
+ 	switch (CurrentABI)
+ 	{
+ 		case LegacyABI:
+-			fprintf(stderr, "Version 2 Objective-C ABI may not be mixed with earlier versions.\n");
++			WROS_OBJC_DIAGNOSTIC( "Version 2 Objective-C ABI may not be mixed with earlier versions.\n");
+ 			abort();
+ 		case UnknownABI:
+ 			isFirstLoad = YES;
+@@ -228,7 +225,7 @@
+ 			continue;
+ 		}
+ #ifdef DEBUG_LOADING
+-		fprintf(stderr, "Loading class %s\n", (*cls)->name);
++		WROS_OBJC_DIAGNOSTIC( "Loading class %s\n", (*cls)->name);
+ #endif
+ 		objc_load_class(*cls);
+ 	}
+@@ -254,7 +251,7 @@
+ 		}
+ 		objc_try_load_category(cat);
+ #ifdef DEBUG_LOADING
+-		fprintf(stderr, "Loading category %s (%s)\n", cat->class_name, cat->name);
++		WROS_OBJC_DIAGNOSTIC( "Loading category %s (%s)\n", cat->class_name, cat->name);
+ #endif
+ 	}
+ 	// Load categories and statics that were deferred.
+@@ -307,7 +304,7 @@
+ 		case LegacyABI:
+ 			break;
+ 		case NewABI:
+-			fprintf(stderr, "Version 2 Objective-C ABI may not be mixed with earlier versions.\n");
++			WROS_OBJC_DIAGNOSTIC( "Version 2 Objective-C ABI may not be mixed with earlier versions.\n");
+ 			abort();
+ 	}
+ 
+diff --git a/mutation.m b/mutation.m
+--- a/mutation.m
++++ b/mutation.m
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include "objc/runtime.h"
+@@ -7,7 +8,7 @@
+ OBJC_PUBLIC
+ void __attribute__((weak)) objc_enumerationMutation(id obj)
+ {
+-	fprintf(stderr, "Mutation occurred during enumeration.");
++	WROS_OBJC_DIAGNOSTIC( "Mutation occurred during enumeration.");
+ 	abort();
+ }
+ 
+diff --git a/objcxx_eh_private.h b/objcxx_eh_private.h
+--- a/objcxx_eh_private.h
++++ b/objcxx_eh_private.h
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ typedef struct objc_object* id;
+ 
+ #include "objc/runtime.h"
+@@ -6,7 +7,7 @@
+ #ifndef DEBUG_EXCEPTIONS
+ #define DEBUG_LOG(...)
+ #else
+-#define DEBUG_LOG(str, ...) fprintf(stderr, str, ## __VA_ARGS__)
++#define DEBUG_LOG(str, ...) WROS_OBJC_DIAGNOSTIC( str, ## __VA_ARGS__)
+ #endif
+ 
+ 
+@@ -109,7 +110,7 @@
+ 			return disp * sizeof(T);
+ 		}
+ 	}
+-	fprintf(stderr, "Unable to find field in C++ exception structure\n");
++	WROS_OBJC_DIAGNOSTIC( "Unable to find field in C++ exception structure\n");
+ 	abort();
+ }
+ 
+@@ -128,7 +129,7 @@
+ 			return disp * sizeof(T);
+ 		}
+ 	}
+-	fprintf(stderr, "Unable to find field in C++ exception structure\n");
++	WROS_OBJC_DIAGNOSTIC( "Unable to find field in C++ exception structure\n");
+ 	abort();
+ }
+ 
+diff --git a/pool.hh b/pool.hh
+--- a/pool.hh
++++ b/pool.hh
+@@ -13,6 +13,14 @@
+ 	return VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+ }
+ 
++#elif defined(__wasi__)
++#include <stdlib.h>
++inline void *allocate_pages(size_t size)
++{
++    void *p = calloc(1, size);
++    if (!p) __builtin_trap();
++    return p;
++}
+ #else
+ #include <sys/mman.h>
+ inline void *allocate_pages(size_t size)
+diff --git a/protocol.c b/protocol.c
+--- a/protocol.c
++++ b/protocol.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include "objc/runtime.h"
+ #include "protocol.h"
+ #include "properties.h"
+@@ -164,7 +165,7 @@
+ 		switch (version)
+ 		{
+ 			default:
+-				fprintf(stderr, "Unknown protocol version");
++				WROS_OBJC_DIAGNOSTIC( "Unknown protocol version");
+ 				abort();
+ #ifdef OLDABI_COMPAT
+ 			case protocol_version_gcc:
+diff --git a/selector_table.cc b/selector_table.cc
+--- a/selector_table.cc
++++ b/selector_table.cc
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ /**
+  * Handle selector uniquing.
+  *
+@@ -339,12 +340,12 @@
+ extern "C" PRIVATE void log_selector_memory_usage(void)
+ {
+ #if 0
+-	fprintf(stderr, "%lu bytes in selector name list.\n", (unsigned long)(table_size * sizeof(void*)));
+-	fprintf(stderr, "%d bytes in selector names.\n", selector_name_copies);
+-	fprintf(stderr, "%d bytes (%d entries) in selector hash table.\n", (int)(sel_table->table_size *
++	WROS_OBJC_DIAGNOSTIC( "%lu bytes in selector name list.\n", (unsigned long)(table_size * sizeof(void*)));
++	WROS_OBJC_DIAGNOSTIC( "%d bytes in selector names.\n", selector_name_copies);
++	WROS_OBJC_DIAGNOSTIC( "%d bytes (%d entries) in selector hash table.\n", (int)(sel_table->table_size *
+ 	        sizeof(struct selector_table_cell_struct)), sel_table->table_size);
+-	fprintf(stderr, "%d selectors registered.\n", selector_count);
+-	fprintf(stderr, "%d hash table cells per selector (%.2f%% full)\n", sel_table->table_size / selector_count,  ((float)selector_count) /  sel_table->table_size * 100);
++	WROS_OBJC_DIAGNOSTIC( "%d selectors registered.\n", selector_count);
++	WROS_OBJC_DIAGNOSTIC( "%d hash table cells per selector (%.2f%% full)\n", sel_table->table_size / selector_count,  ((float)selector_count) /  sel_table->table_size * 100);
+ #endif
+ }
+ 
+diff --git a/sendmsg2.c b/sendmsg2.c
+--- a/sendmsg2.c
++++ b/sendmsg2.c
+@@ -1,3 +1,4 @@
++#define WROS_OBJC_DIAGNOSTIC(...) __builtin_trap()
+ #include "objc/runtime.h"
+ #include "lock.h"
+ #include "dtable.h"
+@@ -46,7 +47,7 @@
+ static IMP objc_selector_type_mismatch(Class cls, SEL
+ 		selector, struct objc_slot2 *result)
+ {
+-	fprintf(stderr, "Calling [%s %c%s] with incorrect signature.  "
++	WROS_OBJC_DIAGNOSTIC( "Calling [%s %c%s] with incorrect signature.  "
+ 			"Method has %s (%s), selector has %s\n",
+ 			cls->name,
+ 			class_isMetaClass(cls) ? '+' : '-',
+@@ -165,7 +166,7 @@
+ 
+ PRIVATE void logInt(void *a)
+ {
+-	fprintf(stderr, "Value: %p\n", a);
++	WROS_OBJC_DIAGNOSTIC( "Value: %p\n", a);
+ }
+ 
+ /**
+@@ -464,7 +465,7 @@
+  */
+ void *objc_msg_sendv(void)
+ {
+-	fprintf(stderr, "objc_msg_sendv() never worked correctly.  Don't use it.\n");
++	WROS_OBJC_DIAGNOSTIC( "objc_msg_sendv() never worked correctly.  Don't use it.\n");
+ 	abort();
+ }
+ #endif
+diff --git a/spinlock.h b/spinlock.h
+--- a/spinlock.h
++++ b/spinlock.h
+@@ -57,8 +57,14 @@
+ 	template<typename T>
+ 	static void wait(T &atomic, LockState expected) requires (!Waitable<T>)
+ 	{
+-		using namespace std::chrono_literals;
+-		std::this_thread::sleep_for(1ms);
++#if defined(__wasi__) && !defined(_REENTRANT)
++        // With one guest thread, contention cannot make progress. Preserve
++        // exclusive ownership and diagnose recursive use of a nonrecursive lock.
++        __builtin_trap();
++#else
++        using namespace std::chrono_literals;
++        std::this_thread::sleep_for(1ms);
++#endif
+ 	}
+ 
+ 	public:

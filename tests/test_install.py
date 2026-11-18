@@ -9,7 +9,7 @@ class Installer(unittest.TestCase):
         self.prefix=Path(self.tmp.name); self.commit=subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip()
     def tearDown(self):self.tmp.cleanup()
     def test_shared_compiler_source_selection(self):
-        for language in ("c", "cpp", "fortran", "lua", "rs", "tinygo", "nim"):
+        for language in ("c", "cpp", "fortran", "lua", "objectc", "rs", "tinygo", "nim"):
             with self.subTest(language=language):
                 source = Source(self.commit, root)
                 plan = install(source, "kuka", language, self.prefix, ["--component", "compiler-source"], plan=True)

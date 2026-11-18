@@ -109,6 +109,13 @@ def main():
         *["language/nim/" + name for name in ("build_producer.py", "pack_library.py", "wrnim_lower.nim",
                                               "wros_scene.nim", "panicoverride.nim", "entry.c")],
     ]
+    language_files["objectc"] = [
+        "bin/wrobjc", "include/wros/scene.h", "document/en/objectc.md", "document/zh/objectc.md",
+        "examples/objectc/body.m", "examples/objectc/xmake.lua",
+        *["language/objectc/" + name for name in ("base_object.m", "build_frontend.py", "build_runtime.py",
+                                                 "frontend_objectc.py", "runtime.py")],
+        *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/objectc").iterdir() if p.is_file()],
+    ]
     language_files["fortran"] = [
         "bin/wrfortran", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
         "document/en/fortran.md", "document/zh/fortran.md",
