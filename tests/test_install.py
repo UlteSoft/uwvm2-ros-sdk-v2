@@ -1,5 +1,7 @@
 """Verify selective retrieval and atomic publication using only committed Git objects."""
-import json,hashlib,sys,subprocess,tempfile,unittest
+import io,json,hashlib,sys,subprocess,tempfile,unittest
+import urllib.error
+from unittest.mock import patch
 from pathlib import Path
 root=Path(__file__).resolve().parents[1];sys.path.insert(0,str(root/"install"))
 from bootstrap import Source,install
@@ -8,6 +10,24 @@ class Installer(unittest.TestCase):
         tmp=root/".tmp";tmp.mkdir(exist_ok=True);self.tmp=tempfile.TemporaryDirectory(dir=tmp)
         self.prefix=Path(self.tmp.name); self.commit=subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip()
     def tearDown(self):self.tmp.cleanup()
+    def test_http_retry_keeps_the_pinned_selection(self):
+        source = Source(self.commit)
+        path = "install/revision.py"
+        with patch.object(source.http, "open", side_effect=[TimeoutError(), io.BytesIO(b"abc")]) as opened, \
+             patch("bootstrap.time.sleep"):
+            self.assertEqual(source.read(path, 3), b"abc")
+        self.assertEqual(source.requested, [path, path])
+        self.assertEqual(opened.call_args_list[0], opened.call_args_list[1])
+
+    def test_http_refusals_and_retry_bound(self):
+        for failure, attempts in [(TimeoutError(), 3), (urllib.error.HTTPError("", 403, "Forbidden", {}, None), 1)]:
+            with self.subTest(error=type(failure).__name__):
+                source = Source(self.commit)
+                with patch.object(source.http, "open", side_effect=failure) as opened, patch("bootstrap.time.sleep"):
+                    with self.assertRaisesRegex(ValueError, "could not retrieve install/revision.py"):
+                        source.read("install/revision.py", 8)
+                self.assertEqual(opened.call_count, attempts)
+
     def test_public_executable_names(self):
         from revision import COMPILER_COMMANDS
 

@@ -2,6 +2,7 @@
 """Install a language/platform selection from an immutable WROS SDK commit."""
 import argparse
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -10,6 +11,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
+import urllib.error
 import urllib.request
 
 REPO = "UlteSoft/uwvm2-ros-sdk-v2"
@@ -57,8 +60,21 @@ class Source:
             data=subprocess.check_output([*cmd,"blob",key])
         else:
             url="https://raw.githubusercontent.com/"+REPO+"/"+self.commit+"/"+path
-            with self.http.open(url, timeout=60) as response:
-                data=response.read(limit+1)
+            for attempt in range(3):
+                try:
+                    with self.http.open(url, timeout=60) as response:
+                        data=response.read(limit+1)
+                    break
+                except (OSError, http.client.IncompleteRead) as error:
+                    cause = error.reason if isinstance(error, urllib.error.URLError) else error
+                    transient = isinstance(cause, (TimeoutError, ConnectionError, http.client.IncompleteRead))
+                    if isinstance(error, urllib.error.HTTPError):
+                        transient = error.code in (408, 429, 500, 502, 503, 504)
+                        error.close()
+                    if not transient or attempt == 2:
+                        raise ValueError(f"could not retrieve {path}: {error}") from error
+                    time.sleep(2**attempt)
+                    self.requested.append(path)
         if len(data)>limit:raise ValueError("repository file exceeds bound: "+path)
         return data
 
