@@ -15,7 +15,9 @@
 #include "flang-rt/runtime/terminator.h"
 #include "flang-rt/runtime/type-code.h"
 #include "flang/Common/ISO_Fortran_binding_wrapper.h"
+#include <cstdint>
 #include <cstdlib>
+#include <limits>
 
 namespace Fortran::ISO {
 // Flang dimensions and byte strides must fit signed target pointer width.
@@ -31,6 +33,21 @@ static inline CFI_index_t AllocationExtent(CFI_index_t lower, CFI_index_t upper)
     return -1;
   }
   return distance;
+}
+
+// A host Flang can pass i64 bounds to a wasm32 C descriptor. Preserve a
+// failed bound until allocation can report it through STAT or ERRMSG.
+static inline void SetCompilerBounds(Fortran::runtime::Dimension &dimension,
+    std::int64_t lower, std::int64_t upper) {
+  using Limits = std::numeric_limits<CFI_index_t>;
+  if (upper < lower) {
+    dimension.SetLowerBound(1).SetExtent(0);
+  } else if (lower < Limits::min() || upper > Limits::max()) {
+    dimension.SetLowerBound(1).SetExtent(-1);
+  } else {
+    auto lo{static_cast<CFI_index_t>(lower)};
+    dimension.SetLowerBound(lo).SetExtent(AllocationExtent(lo, static_cast<CFI_index_t>(upper)));
+  }
 }
 
 static inline bool MultiplyAllocationSize(std::size_t &bytes, CFI_index_t extent) {

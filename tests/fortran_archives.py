@@ -87,6 +87,17 @@ def main():
                 *([] if checked else ["--runtime-disable-memtag"]), "--wasm-set-main-module-name", "main",
                 "--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main", "--ros-scene-interface",
                 "robot", "abi", "allow", "--run", app])
+    bad_src = out / "incompatible.f90"
+    bad_src.write_text("subroutine wrong_shape(i) bind(c)\ninteger(4), value :: i\nend subroutine\n")
+    bad_app = out / "wrong_caller.f90"
+    bad_app.write_text("program mismatch\ninterface\nsubroutine wrong_shape() bind(c)\n"
+                       "end subroutine\nend interface\ncall wrong_shape()\nend program\n")
+    bad_archive = out / "incompatible.a"
+    rejected = out / "wrong_caller.wasm"
+    run("build-incompatible-definition", [*flags, "--static", bad_src, "-o", bad_archive])
+    run("reject-incompatible-caller", [*flags, "--link-object", bad_archive, bad_app, "-o", rejected], False)
+    if rejected.exists() or b"incompatible WebAssembly function signature" not in (out / "reject-incompatible-caller.log").read_bytes():
+        raise RuntimeError("incompatible Fortran definition escaped the final linker check")
     if any(sha(Path(path)) != digest for path, digest in report["inputs"].items()):
         raise RuntimeError("Fortran archive inputs changed")
     report["complete"] = True

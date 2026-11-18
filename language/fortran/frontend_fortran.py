@@ -57,6 +57,21 @@ def write_bindings(work):
     (work / "wros_imports.c").write_text("\n".join(header) + "\n")
 
 
+def link_program(arguments, work, env):
+    """Reject LLD's synthetic runtime trap for an incompatible foreign definition."""
+    with tempfile.TemporaryFile(dir=work) as diagnostics:
+        result = subprocess.run(arguments, cwd=work, env={**env, "LC_ALL": "C"}, stderr=diagnostics)
+        diagnostics.seek(0)
+        mismatch = False
+        for line in diagnostics:
+            sys.stderr.buffer.write(line)
+            if b"wasm-ld: warning: function signature mismatch:" in line:
+                mismatch = True
+    result.check_returncode()
+    if mismatch:
+        raise ValueError("a linked definition has an incompatible WebAssembly function signature")
+
+
 def lower_unit(compiler, marker, toolchain, receipts, profile, fc, opts, source, work, i, release):
     """Keep every user function in the common LLVM optimization/MTE pipeline."""
     ir, bc, obj = [work / (str(i) + suffix) for suffix in (".ll", ".bc", ".o")]
@@ -245,8 +260,8 @@ def main():
             # The upstream descriptor work queue uses libc++'s std::variant.
             linker = cxx if descriptors else cc
             staged = work / "guest.wasm"
-            subprocess.run([*linker, "--reactor", "--export", "_start", *units, *stubs,
-                            *objects, runtime, "-o", staged], check=True, cwd=work, env=env)
+            link_program([*linker, "--reactor", "--export", "_start", *units, *stubs,
+                          *objects, runtime, "-o", staged], work, env)
             qualification.finish(admission, opts, staged, output)
         return 0
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as exc:

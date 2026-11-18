@@ -17,7 +17,29 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/TargetParser/Triple.h>
+#include <string>
 #include <string_view>
+
+/// @brief Select a checked runtime bridge when Flang models the bounds using
+/// its host's 64-bit subscript type and the guest C descriptor stores 32 bits.
+static bool selectDescriptorBounds(llvm::Module &module, unsigned pointerBits) {
+    for (const char *name : {"_FortranAPointerSetBounds", "_FortranAAllocatableSetBounds"}) {
+        auto *function = module.getFunction(name);
+        if (!function) continue;
+        auto *type = function->getFunctionType();
+        if (!function->isDeclaration() || type->isVarArg() || !type->getReturnType()->isVoidTy() ||
+            type->getNumParams() != 4 || !type->getParamType(0)->isPointerTy() ||
+            type->getParamType(0)->getPointerAddressSpace() != 0 ||
+            !type->getParamType(1)->isIntegerTy(32) ||
+            type->getParamType(2) != type->getParamType(3)) return false;
+        if (type->getParamType(2)->isIntegerTy(pointerBits)) continue;
+        if (pointerBits != 32 || !type->getParamType(2)->isIntegerTy(64)) return false;
+        const std::string bridge = std::string{name} + "I64";
+        if (module.getNamedValue(bridge)) return false;
+        function->setName(bridge);
+    }
+    return true;
+}
 
 int main(int argc, char **argv) {
     if (argc != 5) return 2;
@@ -38,6 +60,10 @@ int main(int argc, char **argv) {
     if (triple.str() != expected || module->getDataLayout().getPointerSizeInBits() != (width == "32" ? 32u : 64u)
         || !module->getModuleInlineAsm().empty()) {
         llvm::errs() << "unexpected Flang target layout or module assembly\n";
+        return 1;
+    }
+    if (!selectDescriptorBounds(*module, width == "32" ? 32 : 64)) {
+        llvm::errs() << "unsupported Flang array-bound ABI\n";
         return 1;
     }
     // Only compiler-generated IR can enter this stage. Enforce the same

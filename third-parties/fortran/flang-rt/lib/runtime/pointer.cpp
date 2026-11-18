@@ -50,6 +50,14 @@ void RTDEF(PointerSetBounds)(Descriptor &pointer, int zeroBasedDim,
   // The byte strides are computed when the pointer is allocated.
 }
 
+#ifdef __wasm__
+void RTDEF(PointerSetBoundsI64)(Descriptor &descriptor, int zeroBasedDim,
+    std::int64_t lower, std::int64_t upper) {
+  INTERNAL_CHECK(zeroBasedDim >= 0 && zeroBasedDim < descriptor.rank());
+  ISO::SetCompilerBounds(descriptor.GetDimension(zeroBasedDim), lower, upper);
+}
+#endif
+
 // TODO: PointerSetCoBounds
 
 void RTDEF(PointerSetDerivedLength)(

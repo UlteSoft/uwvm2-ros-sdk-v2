@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "tools/wasm/memtag"))
 from build_producer import checked, prepare
 from build_sysroots import diagnostics_overlay
 
-from flang_identity import (ABI_PATCH, ADDRESS_KIND_PATCH, ASSUMED_EXTENT_PATCH, GLOBALS_HEADER_PATCH,
+from flang_identity import (ABI_PATCH, ADDRESS_KIND_PATCH, ASSUMED_EXTENT_PATCH, CFI_LAYOUT_PATCH, GLOBALS_HEADER_PATCH,
                             LLVM_RECIPE_SHA256, identity, llvm_recipe_digest)
 
 
@@ -44,7 +44,7 @@ def main():
         # LLVM resolves sibling projects as llvm/../flang and llvm/../clang.
         # Apply the LLVM-side change last so that llvm is a physical directory
         # inside the final overlay alongside the fully patched siblings.
-        for patch in (ABI_PATCH, ASSUMED_EXTENT_PATCH, ADDRESS_KIND_PATCH, GLOBALS_HEADER_PATCH):
+        for patch in (ABI_PATCH, ASSUMED_EXTENT_PATCH, ADDRESS_KIND_PATCH, CFI_LAYOUT_PATCH, GLOBALS_HEADER_PATCH):
             source = diagnostics_overlay(source, patch, work)
         if not (source / "llvm" / "..").samefile(source):
             raise ValueError("LLVM would resolve sibling projects outside the final Flang source overlay")

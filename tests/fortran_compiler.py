@@ -97,6 +97,21 @@ def main():
             expected = 111 * (width // 8)
             if not re.search(rf"\bret i32 {expected}\b", ir.read_text()):
                 raise RuntimeError("LOC, MALLOC or SIZEOF disagrees with the target pointer width")
+    desc_source = args.output / "array.f90"
+    desc_source.write_text("subroutine store_first(a)\ninteger :: a(:)\na(1)=123\nend subroutine\n")
+    for width in (32, 64):
+        name = f"cfi-descriptor-{width}"
+        ir = args.output / (name + ".ll")
+        command = [args.flang, "-fc1", "-triple", f"wasm{width}-unknown-wasip1", "-emit-llvm",
+                   "-debug-info-kind=standalone", "-O0", desc_source, "-o", ir]
+        proc = subprocess.run(command, cwd=args.output, capture_output=True, timeout=60)
+        (args.output / (name + ".log")).write_bytes(proc.stderr)
+        record["cases"].append(dict(name=name, code=proc.returncode))
+        receipt.write_text(json.dumps(record, indent=2) + "\n")
+        proc.check_returncode()
+        layout = f"ptr, i{width}, i32, i8, i8, i8, i8, [1 x [3 x i{width}]]"
+        if layout not in ir.read_text():
+            raise RuntimeError("element size or CFI array dimensions disagree with the target pointer width")
     if sha(args.flang) != record["compiler"]:
         raise ValueError("Flang changed during qualification")
     record["complete"] = True

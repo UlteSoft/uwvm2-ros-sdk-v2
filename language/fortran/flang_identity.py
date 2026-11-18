@@ -13,6 +13,8 @@ ASSUMED_EXTENT_PATCH = {"path": "third-parties/fortran/llvm23-flang-assumed-size
                        "sha256": "2f6cbd70a3ec9d742b9827d36133f1681f566378140afaa846022ef3921cf472"}
 ADDRESS_KIND_PATCH = {"path": "third-parties/fortran/llvm23-flang-wasm32-address-kind.patch",
                       "sha256": "f1245bb1f3ebac4dcc00ef7c2e9fb4826001fdc83625f6c94a29bd8ca286d1f1"}
+CFI_LAYOUT_PATCH = {"path": "third-parties/fortran/llvm23-flang-target-cfi-layout.patch",
+                    "sha256": "8b82a92db84ee9ca3333df2b033975e9abcc73b81f8d398c64e80b35fe66e5d8"}
 MULTI_TARGET_DEVELOPMENT_FLANG = "4756550cedf51ed844b32436270d89ad73b590a3c13b504b3ac8db9935cc8702"
 
 
@@ -26,7 +28,8 @@ def identity(binary):
     return dict(format="wros-flang-wasm-producer", llvm_revision=LLVM_REVISION,
                 llvm_recipe_sha256=LLVM_RECIPE_SHA256, patch_sha256=ABI_PATCH["sha256"],
                 globals_header_sha256=GLOBALS_HEADER_PATCH["sha256"], extent_sha256=ASSUMED_EXTENT_PATCH["sha256"],
-                address_kind_sha256=ADDRESS_KIND_PATCH["sha256"], compiler_sha256=digest(binary), targets=["WebAssembly"])
+                address_kind_sha256=ADDRESS_KIND_PATCH["sha256"], cfi_layout_sha256=CFI_LAYOUT_PATCH["sha256"],
+                compiler_sha256=digest(binary), targets=["WebAssembly"])
 
 
 def require_compiler(binary):

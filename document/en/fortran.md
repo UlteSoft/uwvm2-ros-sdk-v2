@@ -23,7 +23,7 @@ python3 language/fortran/prepare.py \
 
 The source recipe configures LLVM's WebAssembly backend, then checks both guest widths and verifies that the built compiler rejects native x86 object generation before installation. It writes a host-tool receipt beside the executable. The IR helper records its source, executable and SDK code-generator digests. Toolchain preparation requires a trusted local builder. Building these host tools is separate from compiling a guest.
 
-The Flang receipt binds the upstream archive, ordered code generator patches and the Flang build patches. Assumed-size arrays retain full variable debug information with the index width of the selected Wasm target. The address-sized intrinsics LOC, MALLOC and SIZEOF use the pointer width of the selected target. This also sets ISO_C_BINDING’s C_SIZE_T and C_INTPTR_T to four bytes on wasm32 and eight on wasm64. The standalone build includes the full LLVM intrinsic type declaration when compiling without precompiled headers.
+The Flang receipt binds the upstream archive, ordered code generator patches and the Flang build patches. Assumed-size arrays retain full variable debug information with the index width of the selected Wasm target. The address-sized intrinsics LOC, MALLOC and SIZEOF use the pointer width of the selected target. This also sets ISO_C_BINDING’s C_SIZE_T and C_INTPTR_T to four bytes on wasm32 and eight on wasm64. The compiler and its debug information use target-width C descriptor fields for the element size, lower bounds, extents and byte strides. The final link rejects inconsistent procedure signatures. The standalone build includes the full LLVM intrinsic type declaration when compiling without precompiled headers.
 
 ## Compile a program
 

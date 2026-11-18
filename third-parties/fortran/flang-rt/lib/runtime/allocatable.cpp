@@ -120,6 +120,16 @@ void RTDEF(AllocatableSetBounds)(Descriptor &descriptor, int zeroBasedDim,
   }
 }
 
+#ifdef __wasm__
+void RTDEF(AllocatableSetBoundsI64)(Descriptor &descriptor, int zeroBasedDim,
+    std::int64_t lower, std::int64_t upper) {
+  INTERNAL_CHECK(zeroBasedDim >= 0 && zeroBasedDim < descriptor.rank());
+  if (descriptor.IsAllocatable() && !descriptor.IsAllocated()) {
+    ISO::SetCompilerBounds(descriptor.GetDimension(zeroBasedDim), lower, upper);
+  }
+}
+#endif
+
 void RTDEF(AllocatableSetDerivedLength)(
     Descriptor &descriptor, int which, SubscriptValue x) {
   if (descriptor.IsAllocatable() && !descriptor.IsAllocated()) {

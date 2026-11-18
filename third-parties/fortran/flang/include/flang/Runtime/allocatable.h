@@ -65,6 +65,10 @@ void RTDECL(AllocatableApplyMold)(
 // deallocated allocatable.
 void RTDECL(AllocatableSetBounds)(
     Descriptor &, int zeroBasedDim, SubscriptValue lower, SubscriptValue upper);
+#ifdef __wasm__
+void RTDECL(AllocatableSetBoundsI64)(
+    Descriptor &, int zeroBasedDim, std::int64_t lower, std::int64_t upper);
+#endif
 
 // The upper cobound is ignored for the last codimension.
 void RTDECL(AllocatableSetCoBounds)(Descriptor &, int zeroBasedCoDim,

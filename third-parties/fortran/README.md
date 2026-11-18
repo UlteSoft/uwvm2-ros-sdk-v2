@@ -8,6 +8,8 @@ The SDK compiles `numeric.cpp` and `complex-powi.cpp` from source with its selec
 
 For Wasm/WASI, the retained numerical runtime routes its fatal arithmetic diagnostic to a guest trap. The upstream stderr formatting path would acquire file-descriptor imports, including at program shutdown.
 
+Flang's runtime model can express descriptor bounds as signed 64-bit values when a 64-bit host targets wasm32. The IR adapter selects a guest bridge for that signature. The runtime checks occupied bounds against the guest descriptor width before narrowing them, and preserves an invalid extent for allocation status handling. Empty intervals retain extent zero.
+
 For descriptor-based array operations, the SDK also retains the upstream allocation, assignment, copy, derived-type, work-queue, type-information, pointer and ISO C interoperability sources. Its WebAssembly build uses the upstream compute work-queue variant. It omits the FILE-based descriptor dump procedures and uses guest-local runtime defaults. The SDK checks array extents, byte-stride multiplication and the pointer-validation footer size before an allocation. The normal Fortran status and error-message paths remain available for recoverable failures. See [the guest runtime adapter](../../language/fortran/compute_platform.cpp) and [the executable descriptor regression](../../tests/fortran_descriptors.py).
 
 The array runtime includes the upstream `sum`, `reduction`, `transformational`, integer/real `dot-product` and integer/real `matmul` translation units and their shared headers. The SDK compiles the units referenced by the input objects for the selected Wasm profile. These additional files retain the upstream license.

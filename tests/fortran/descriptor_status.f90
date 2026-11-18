@@ -30,6 +30,17 @@ program descriptor_status
   call test(rc==0.and..not.associated(owner))
   ! These shapes are not representable at the selected guest pointer width.
   ! No large allocation is necessary to exercise the checked shape path.
+  if (bit_size(wide) == 32) then
+    ! Occupied bounds must survive conversion into a CFI_index_t. These
+    ! would become the small valid bounds 1:2 if converted before checking.
+    allocate(matrix(4294967297_8:4294967298_8,1),stat=rc)
+    call test(rc/=0.and..not.allocated(matrix))
+    ! An empty interval canonicalizes to extent zero before the width check.
+    allocate(matrix(-4294967296_8:-4294967297_8,1),stat=rc)
+    call test(rc==0.and.allocated(matrix).and.size(matrix)==0)
+    deallocate(matrix,stat=rc)
+    call test(rc==0)
+  end if
   wide = huge(wide) / int(n, c_intptr_t) + 1
   allocate(matrix(wide,2),stat=rc)
   call test(rc/=0.and..not.allocated(matrix))
