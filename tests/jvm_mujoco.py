@@ -18,14 +18,16 @@ def main():
     for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output", "toolchain", "sysroots", "bundle"):
         parser.add_argument("--" + field, required=True, type=Path)
     parser.add_argument("--language", required=True, choices=("java", "kotlin"))
+    parser.add_argument("--sdk",type=Path,default=ROOT,help="installed synchronous-aot source package for this language")
     args = parser.parse_args()
+    sdk = args.sdk.resolve()
     sys.path.insert(0, str(args.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
 
     java = args.language == "java"
     ext = "java" if java else "kt"
     controller = ROOT / "tests/mujoco/jvm" / ("Controller." + ext)
-    compiler = ROOT / "bin" / ("wr" + args.language)
+    compiler = sdk / "bin" / ("wr" + args.language)
 
     def compile_guest(wasm, width, deadline, mode, count, run):
         prefix = b"".join(suite.u64(1) for _ in range(6))
@@ -61,11 +63,11 @@ def main():
     for key,value in (("source-root",args.vm_source),("runtime",args.runtime),("openssl-root",args.openssl_root),
                       ("mujoco",args.mujoco),("output",args.output)):
         argv.extend(["--"+key,str(value.resolve())])
-    sources = ROOT / "language/jvm"
+    sources = sdk / "language/jvm"
     suite.main(argv, compile_guest=compile_guest,guest_name=args.language,guest_widths=(32,),
                guest_inputs=(controller, Path(__file__), compiler, args.sysroots.resolve(), sources/"Admit.java",
                              sources/"jvm_frontend.py", sources/"contracts.h", sources/"java/wros/scene/Driver.java",
-                             ROOT/"language"/args.language/"host-inputs.json", ROOT/"include/wros/scene.h",
+                             sdk/"language"/args.language/"host-inputs.json", sdk/"include/wros/scene.h",
                              args.toolchain.resolve()/"bin/clang", args.toolchain.resolve()/"bin/wasm-ld"))
 
     # A signal capability can be opened but cannot authorize a driver's typed operations.
