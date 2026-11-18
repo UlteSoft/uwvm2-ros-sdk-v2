@@ -145,6 +145,12 @@
       "sha256": "cc4bac62f879db904500ff38a7682dff76f9197766d76b22b35f808426c0d0f4"
     },
     {
+      "path": "tools/wasm/memtag/patches/llvm-23.1.5-wasm-core-wasi-targets.patch",
+      "bytes": 4653,
+      "mode": 420,
+      "sha256": "9b6aabce6a335a00d2a032cd9f8be778205a6c3819e56997861b61dd5609a115"
+    },
+    {
       "path": "tools/wasm/memtag/patches/llvm-wasm-memtag-mc-address-width.patch",
       "bytes": 11275,
       "mode": 420,
@@ -224,9 +230,9 @@
     },
     {
       "path": "tools/wasm/memtag/source-lock.json",
-      "bytes": 6666,
+      "bytes": 6862,
       "mode": 420,
-      "sha256": "e8afd40a4cbb0c9550a0a13849c9089ca27e12ed1fede2ac859fa440ea4598a5"
+      "sha256": "7a303e9943d48ce3430142f03b1c17026e7a840e7f419046ef1b6ba170a1436f"
     }
   ]
 }

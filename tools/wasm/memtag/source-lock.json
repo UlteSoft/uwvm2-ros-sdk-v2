@@ -68,6 +68,10 @@
         {
           "path": "tools/wasm/memtag/patches/lld-managed-tls-lit.patch",
           "sha256": "4e7f20fbe978df3b79a0fe210927d85e41fa1d0362e8339d3e97d4a53c619947"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-23.1.5-wasm-core-wasi-targets.patch",
+          "sha256": "9b6aabce6a335a00d2a032cd9f8be778205a6c3819e56997861b61dd5609a115"
         }
       ],
       "status": "awaiting-stable-build-qualification",
