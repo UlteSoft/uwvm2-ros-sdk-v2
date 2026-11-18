@@ -106,7 +106,7 @@ def main():
     ])
     shared_jvm = [p.relative_to(ROOT).as_posix() for name in ("language/jvm", "third-parties/jvm")
                   for p in (ROOT / name).rglob("*") if p.is_file() and "__pycache__" not in p.parts]
-    package("jvm/synchronous", [*shared_jvm, "include/wros/scene.h", "document/en/jvm.md", "document/zh/jvm.md"])
+    package("jvm/synchronous", [*shared_jvm, "install/private_exports.py", "include/wros/scene.h", "document/en/jvm.md", "document/zh/jvm.md"])
     for language in ("java", "kotlin"):
         examples = sorted((ROOT / "examples" / language / "synchronous-aot").iterdir())
         package("jvm/" + language, ["bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",

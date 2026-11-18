@@ -7,6 +7,12 @@
       "sha256": "87f7bc8b749000acbbdee27a465c95453e97ae37e1598e8cb43ca4104c86be43"
     },
     {
+      "path": "examples/java/synchronous-aot/Exchange.java",
+      "bytes": 1311,
+      "mode": 420,
+      "sha256": "ab246f749fad7f431400df229e6856d61ea29bee6e9a3371df57ae2fa7b6074b"
+    },
+    {
       "path": "examples/java/synchronous-aot/GuardApplication.java",
       "bytes": 682,
       "mode": 420,
@@ -32,9 +38,9 @@
     },
     {
       "path": "language/java/xmake/adapter.lua",
-      "bytes": 1318,
+      "bytes": 1464,
       "mode": 420,
-      "sha256": "fccb26c0616c0302d2c1c9ef276f3898a87c431f630ad0b5079993aa32dcde16"
+      "sha256": "54cf14baff3d015d99d201fc0ef743d90086b75b52e9ab89ba670f89babe139c"
     }
   ]
 }

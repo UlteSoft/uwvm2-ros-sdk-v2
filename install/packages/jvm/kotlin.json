@@ -7,6 +7,12 @@
       "sha256": "d4d90b90bd470277f545a63a252019c140691f9d42afaca5f1976361f54593e7"
     },
     {
+      "path": "examples/kotlin/synchronous-aot/Exchange.kt",
+      "bytes": 1154,
+      "mode": 420,
+      "sha256": "555521947bf07490a02ed2f9ad00c8ce99aeb225c97ac17fdf3ef472f8e031da"
+    },
+    {
       "path": "examples/kotlin/synchronous-aot/GuardApplication.kt",
       "bytes": 546,
       "mode": 420,
@@ -32,9 +38,9 @@
     },
     {
       "path": "language/kotlin/xmake/adapter.lua",
-      "bytes": 1316,
+      "bytes": 1462,
       "mode": 420,
-      "sha256": "c735a0193b7cafad24d1e1ae547cb4b85ce18e04185970ca0098dd8822534a28"
+      "sha256": "62975038aebbc0ffd511043b78a89dd525d30cd25660eca986724a17accbed19"
     }
   ]
 }

@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/jvm.md",
-      "bytes": 6163,
+      "bytes": 9447,
       "mode": 420,
-      "sha256": "41ac7017399eb5c138bc55ba37c61c0886920982316ca1c7441aa9012b56941b"
+      "sha256": "d4641098d1f416fa559dffed5fad77f138d57510005521fd9094aac718dc697e"
     },
     {
       "path": "document/zh/jvm.md",
-      "bytes": 5010,
+      "bytes": 7794,
       "mode": 420,
-      "sha256": "458abb9ac5523276abed5a4b91bb9f4bafb7860a5c2dace4f627114d2fe9376e"
+      "sha256": "0d802897bfe74b7fe35d2ad2b46118cae0a2791789b462dda2c6fa36f6d08af9"
     },
     {
       "path": "include/wros/scene.h",
@@ -19,10 +19,16 @@
       "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
     },
     {
-      "path": "language/jvm/Admit.java",
-      "bytes": 9134,
+      "path": "install/private_exports.py",
+      "bytes": 2459,
       "mode": 420,
-      "sha256": "c3445cc9e6558571a9f4690abc9609e93d225a8c7bbec8d1dff69d38c099a3b5"
+      "sha256": "ec4e946a29cbfa55647f366c6a9b06c27b6b63ec4fc3d6fbd2e6bb8f2a0d5b71"
+    },
+    {
+      "path": "language/jvm/Admit.java",
+      "bytes": 9229,
+      "mode": 420,
+      "sha256": "498cbd15054a8cd4e136c08b8fd7551962ca3d0b9b962cfe458a802592db79de"
     },
     {
       "path": "language/jvm/Translate.java",
@@ -55,6 +61,12 @@
       "sha256": "ebb8f8e94a7b50a68332d2726c4baaaed0926b596d282f6c7aa44222d9dfca30"
     },
     {
+      "path": "language/jvm/java/wros/scene/MessageFrame.java",
+      "bytes": 2366,
+      "mode": 420,
+      "sha256": "6fe00635563a0919bdb6e17a1987226e4102d1e2ef90c06cd714de24449d9a52"
+    },
+    {
       "path": "language/jvm/java/wros/scene/Scene.java",
       "bytes": 226,
       "mode": 420,
@@ -62,9 +74,15 @@
     },
     {
       "path": "language/jvm/jvm_frontend.py",
-      "bytes": 7496,
+      "bytes": 8158,
       "mode": 420,
-      "sha256": "5c302ff72c9ec7ffbfe3ebc1a1fcc83cf446b8ddbd30bae09644f04322a9ac25"
+      "sha256": "1224a13bef05554450282f9a5e596044c0ce6e10cd013426c83944a4a9669169"
+    },
+    {
+      "path": "language/jvm/operations.py",
+      "bytes": 4074,
+      "mode": 420,
+      "sha256": "9f053e21ddb021efbb967de814690e0bad9ea425967aeb4dd43a9708d8b175bd"
     },
     {
       "path": "language/jvm/prepare_host.py",

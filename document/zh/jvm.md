@@ -38,3 +38,19 @@ Java 使用 `wrjava`、`.java`；Kotlin 可用 `@file:JvmName("Main")` 指定 JV
 `result(long sequence, byte[] payload, long[] outcome)` 需要至少覆盖所选响应上限的字节数组，以及两个结果字。成功时写入驱动状态、实际字节数和响应内容。拒绝时保留调用方数组内容。方法本身返回 VM 操作状态。`describe(long[4])` 提供阶段、序号、状态、效果未知位。`disconnect()` 断开传输，`close()` 释放本地能力。部署器持有驱动生命周期和 TLS 身份，包装层每次使用后清零自己的消息暂存区。
 
 运行 `tests/jvm_mujoco.py --language java` 或 `--language kotlin` 并提供 VM 源码、运行时、TLS 库、官方 MuJoCo 3.4.0、编译器、sysroot 清单、构建宿主包和全新的输出位置。夹具从真正的 JVM 语言程序构建闭环控制器，对照原生物理步进，还检查越界指令拒绝和接收端崩溃状态。
+
+### 按操作选择 ROS 导入
+
+每个允许导入的操作传一次 `--ros-operation <目录名称>`。Xmake 写法为 `add_wros_operations("capability.open", "capability.close", "guard.create", "guard.trigger", "guard.take")`。显式列表也限制类型化 Guard 和 Driver 最终能导入的 ROS 操作。编译器链接后检查真正的 Wasm 导入，未用的操作可被消除。运行时仍须满足 VM 的接口可见性、资源授权和提供方策略。
+
+编译器据此生成 `wros.scene.Calls`。点号和下划线分隔的后续词转换为首字母大写，例如 `guard.trigger` 对应 `guardTrigger`。核对所装版本的 `share/abi/ros.json` 可以找到准确的名称、请求、应答、用途及约束。`Calls.abi()` 返回 ABI 值。`Calls(inputCapacity, outputCapacity)` 的实例私有保存能力令牌。`capabilityOpen(byte[] alias)` 打开能力，`capabilityClose()` 关闭。对于 VM 允许零令牌的操作，可以直接使用尚未打开能力的实例。
+
+160 个消息操作的方法签名均为 `(byte[] request, byte[] reply, long[] written)`，返回 VM 状态码。请求内容须遵照各自的 wire schema，空消息传零长度数组，长度输出传一个元素的数组。包装层将请求复制到有界暂存区，只调用一次宿主，成功后发布应答并在返回前清零暂存区。两个权限报告操作查询未支持的整个类别时，状态 95 还可附带标明未支持的页面。查询不存在的精确函数时没有该页面。拒绝时调用方的应答与长度均保持原值。容量不足时 VM 可以只报告所需长度。有序号或效果未知的请求是否重试须由应用判断。两个暂存区的合计配置上限为 16 MiB，实际可用容量还取决于应用对象及其他堆开销。
+
+`examples/java/synchronous-aot/Exchange.java` 和 `examples/kotlin/synchronous-aot/Exchange.kt` 演示不同操作独立授权、参数错误在触发前拒绝、有界结果和事件计数恰为一次。其他协议的字段见 ABI 目录；某个操作可编译导入与特定厂商、设备、提供方的语义验收分别记录。
+
+### 私有线性内存与模块调用
+
+产物只导出 `_start` 函数。编译器要求模块自有一个非共享的 wasm32 线性内存，最大为 4,096 页，并移除 LLD 自动生成的内存导出。GC 堆、栈及暂存消息都留在模块内。构建记录分别保存链接原始产物和最终 Wasm 的摘要。
+
+VM 的六个 `module.call.*` 操作使用另行登记的交换内存。有些消息需要等到后续确认、取消或撤权才能清零。当前同步 JVM 线路没有提供这种交换内存，也没有为 GC 缓冲区提供跨调用租约。即使路由已登记并授权，使用此堆提交消息仍会得到状态 95。

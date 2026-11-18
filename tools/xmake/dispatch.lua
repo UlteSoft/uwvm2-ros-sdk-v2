@@ -74,9 +74,13 @@ function configure(target, entry)
     local build_receipt = boolean(target, "build_receipt", false)
     assert(not build_receipt or kind == "binary", "Deployment build receipts require a linked Wasm binary")
     local exports = table.wrap(target:values("wros.exports"))
+    local operations = table.wrap(target:values("wros.operations"))
+    assert(language == "lua" or language == "java" or language == "kotlin" or #operations == 0,
+           "add_wros_operations requires a target with selectable ROS imports")
     local lua_operations = table.wrap(target:values("wros.lua_operations"))
     assert(language == "lua" or #lua_operations == 0, "add_wros_lua_operations requires a Lua target")
     local lua_abi = boolean(target, "lua_abi", false)
+    if language == "lua" then table.join2(lua_operations, operations) end
     local lua_seed = target:values("wros.lua_seed")
     if lua_seed then
         assert(language == "lua" and lua_seed:match("^%d+$") and tonumber(lua_seed) <= 4294967295,
@@ -97,7 +101,7 @@ function configure(target, entry)
     assert(path.extension(name) == extension, "Target filename must end in " .. extension)
     target:set("filename", name)
     local request = {root = root, adapter = adapter, program = program, kind = kind, arch = arch, build_receipt = build_receipt,
-        core = core, eh = eh, mte = mte, mte_flag = mte_flag, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, lua_seed = lua_seed, lua_operations = lua_operations, std = std, implementation = implementation}
+        core = core, eh = eh, mte = mte, mte_flag = mte_flag, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, lua_seed = lua_seed, lua_operations = lua_operations, operations = operations, std = std, implementation = implementation}
     if implementation.validate then implementation.validate(target, request) end
     target:data_set("wros.request", request)
 end

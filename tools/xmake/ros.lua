@@ -70,6 +70,10 @@ function add_wros_lua_operations(...)
     add_values("wros.lua_operations", ...)
 end
 
+function add_wros_operations(...)
+    add_values("wros.operations", ...)
+end
+
 function set_wros_jvm_main(class_name)
     set_values("wros.jvm_main", class_name)
 end

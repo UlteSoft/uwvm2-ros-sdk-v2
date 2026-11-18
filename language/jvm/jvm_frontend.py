@@ -9,6 +9,7 @@ import tempfile
 import subprocess
 import sys
 from pathlib import Path
+from operations import render
 
 HERE = Path(__file__).resolve().parent
 
@@ -23,6 +24,8 @@ def compile_guest(opts, language, work):
     vendor=sdk/"third-parties/jvm"
     sources=opts.sources
     sys.path.insert(0,str(sdk/"install"))
+    from artifacts import read_bounded
+    from private_exports import keep_private_memory
     from compiler import compiler_environment, make_command
     from frontend import audit
     from imports import inspect
@@ -30,6 +33,7 @@ def compile_guest(opts, language, work):
 
     for name in ("tmp", "host", "app", "runtime", "generated"):
         (work / name).mkdir()
+    bridge, methods = render(sdk/"share/abi/ros.json", opts.ros_operation, work)
     host = opts.bundle.resolve()
     host_manifest=HERE.parent / language / "host-inputs.json"
     manifest=json.loads(host_manifest.read_text())
@@ -57,14 +61,14 @@ def compile_guest(opts, language, work):
     run("host-translator", javac + ["-cp", cp, "-d", work/"host", s/"Translate.java", s/"Admit.java",
         vendor/"java/org/teavm/backend/c/CTarget.java", vendor/"java/org/teavm/backend/c/generate/ClassGenerator.java"])
     run("guest-runtime", javac + ["-cp",cp,"-d",work/"runtime",vendor/"java/org/teavm/runtime/GC.java",
-        vendor/"java/org/teavm/runtime/Allocator.java",s/"java/wros/scene/Driver.java",s/"java/wros/scene/Guard.java", s/"java/wros/scene/Scene.java"])
+        vendor/"java/org/teavm/runtime/Allocator.java",s/"java/wros/scene/MessageFrame.java",*bridge,s/"java/wros/scene/Driver.java",s/"java/wros/scene/Guard.java", s/"java/wros/scene/Scene.java"])
     app_cp = str(work/"runtime") + ":" + cp
     if language == "java":
         run("application", javac + ["--source","21","--target","21","-cp",app_cp,"-d",work/"app",*sources])
     else:
         run("application", java + ["-cp",cp,"org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
             "-jvm-target","17","-no-stdlib","-no-reflect","-classpath",app_cp,"-d",work/"app",*sources])
-    run("check-bytecode",java+["-cp",str(work/"host")+":"+cp,"Admit",work/"app",opts.main_class])
+    run("check-bytecode",java+["-cp",str(work/"host")+":"+cp,"Admit",work/"app",opts.main_class,*methods])
     input_cp = str(work/"runtime") + ":" + str(work/"app") + ":" + cp
     host_cp = str(vendor/"resources") + ":" + str(work/"host") + ":" + input_cp
     run("aot", java + ["-cp",host_cp,"Translate","C",work/"generated",input_cp,opts.main_class])
@@ -78,14 +82,18 @@ def compile_guest(opts, language, work):
         "-Wl,--stack-first,-z,stack-size=131072,--max-memory=268435456,--no-entry,--export=_start",
         "-o", str(result)], verify=True)
     run("wasm",argv, dict(compiler_environment(toolchain),TMPDIR=str(work/"tmp")))
-    guest = result.read_bytes()
+    linked = read_bounded(result)
+    guest = keep_private_memory(linked, {"_start"}, max_pages=4096)
+    result.write_bytes(guest)
     audit(guest,Profile())
     supported = {("uwvm_ros_v2", n) for n in ("abi", "capability.open", "capability.close", "guard.create", "guard.trigger", "guard.take", "driver.connect", "driver.submit", "driver.result", "driver.describe", "driver.disconnect")}
+    if opts.ros_operation:
+        supported = {("uwvm_ros_v2", name) for name in opts.ros_operation}
     supported.add(("wasi_snapshot_preview1", "clock_time_get"))
     if any((i["module"], i["name"]) not in supported for i in inspect(guest)):
         raise ValueError("unexpected host import for the synchronous JVM profile")
     receipt={"profile":"synchronous-aot","import_surface":inspect(guest),"compiler_identity":identity,"guest_sha256":sha(result),
-             "steps":log,"sources":{str(f):sha(f) for f in sources},"host_manifest_sha256":sha(host_manifest)}
+             "linked_sha256":hashlib.sha256(linked).hexdigest(),"steps":log,"sources":{str(f):sha(f) for f in sources},"host_manifest_sha256":sha(host_manifest)}
     if opts.work:
         (work/"results.json").write_text(json.dumps(receipt,indent=2)+"\n")
     with tempfile.NamedTemporaryFile(dir=opts.output.parent,suffix=".wasm",delete=False) as temp:
@@ -105,6 +113,7 @@ def main(language):
         parser.add_argument("--"+name,required=True,type=Path)
     parser.add_argument("--work",type=Path,help="keep compiler logs in a new directory")
     parser.add_argument("--main-class",required=True)
+    parser.add_argument("--ros-operation",action="append",default=[],help="admit precisely this ROS op and generate its Calls method; repeat for more")
     parser.add_argument("-o","--output",required=True,type=Path)
     mode=parser.add_mutually_exclusive_group()
     mode.add_argument("--mte",action="store_true")

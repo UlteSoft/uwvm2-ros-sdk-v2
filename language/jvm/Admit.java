@@ -10,7 +10,7 @@ import org.objectweb.asm.*;
 
 /** Validate application bytecode before it joins the synchronous guest runtime. */
 public final class Admit {
-    private static final Set<String> CALLS = Set.of(
+    private static final Set<String> CALLS = new HashSet<>(Set.of(
         "java/lang/Object.<init>()V", "java/lang/Object.getClass()Ljava/lang/Class;",
         "java/lang/AssertionError.<init>()V", "java/lang/IllegalStateException.<init>(Ljava/lang/String;)V",
         "java/lang/System.gc()V", "java/lang/System.nanoTime()J", "java/lang/System.currentTimeMillis()J",
@@ -21,9 +21,9 @@ public final class Admit {
         "wros/scene/Scene.abi()I", "wros/scene/Guard.<init>()V", "wros/scene/Guard.open([B)I",
         "wros/scene/Guard.create()I", "wros/scene/Guard.trigger()I",
         "wros/scene/Guard.take([J)I", "wros/scene/Guard.close()I"
-    );
+    ));
     private static final Set<String> BUILTINS = Set.of("java/lang/Object", "java/lang/String", "java/lang/Class",
-        "java/lang/AssertionError", "java/lang/IllegalStateException", "wros/scene/Guard", "wros/scene/Scene", "wros/scene/Driver");
+        "java/lang/AssertionError", "java/lang/IllegalStateException", "wros/scene/Guard", "wros/scene/Scene", "wros/scene/Driver", "wros/scene/Calls");
     private static void refuse(String reason) { throw new IllegalArgumentException("unsupported synchronous JVM feature: " + reason); }
     private static void annotation(String type) { if (type.startsWith("Lorg/teavm/")) refuse(type); }
     private static final String ENTRY = "main([Ljava/lang/String;)V";
@@ -72,6 +72,7 @@ public final class Admit {
     }
 
     public static void main(String[] args) throws Exception {
+        for (int i=2;i<args.length;i++) CALLS.add(args[i]);
         Map<String, Members> app = new HashMap<>();
         try (var stream = Files.walk(Path.of(args[0]))) {
             var paths = stream.filter(p -> p.toString().endsWith(".class")).limit(4097).toList();
