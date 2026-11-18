@@ -1,0 +1,10 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
+@@ -19,6 +19,7 @@
+ #include "llvm/IR/GlobalVariable.h"
+ #include "llvm/IR/IRBuilder.h"
+ #include "llvm/IR/Instructions.h"
++#include "llvm/IR/IntrinsicInst.h"
+ #include "llvm/IR/IntrinsicsWebAssembly.h"
+ #include "llvm/IR/Module.h"
+ #include "llvm/Pass.h"

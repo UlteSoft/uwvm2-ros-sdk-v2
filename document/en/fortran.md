@@ -23,6 +23,8 @@ python3 language/fortran/prepare.py \
 
 The source recipe configures LLVM's WebAssembly backend, then checks both guest widths and verifies that the built compiler rejects native x86 object generation before installation. It writes a host-tool receipt beside the executable. The IR helper records its source, executable and SDK code-generator digests. Toolchain preparation requires a trusted local builder. Building these host tools is separate from compiling a guest.
 
+The Flang receipt binds the upstream archive, ordered code generator patches and the two Flang build patches. The standalone build includes the full LLVM intrinsic type declaration when compiling without precompiled headers.
+
 ## Compile a program
 
 ```fortran
@@ -54,7 +56,7 @@ Pass a buffer address to an i64 ROS import with `wr_address(c_loc(buffer))` from
 | `-pthread`, `--threads` | Request a threaded closure. Each requested configuration requires a matching supplied sysroot. |
 | `-O0…-O3`, `-Os`, `-Oz`, `-g` | Select code generation and optional debug information. The default optimization is `-O3`. |
 | `--link-object FILE` | Add an SDK-produced Wasm relocatable object or static archive. Repeat for each input. |
-| `--flang FILE`, `--mte-tool FILE` | Select exact host tools. Qualification also accepts one explicitly pinned development build of Flang. |
+| `--flang FILE`, `--mte-tool FILE` | Select exact host tools. Flang must match the receipt for the WebAssembly-only build. |
 | `SOURCE… -o FILE` | Compile input files in module dependency order and publish the audited Wasm. |
 
 Stack or global accesses can be optimized according to the selected target and the compiler's proofs. Flang 23 has no dedicated Fortran source directive for WasmMTE. The SDK preserves sanitizer attributes and metadata already present in IR. The included C/C++ runtime uses the same target profile. The managed-stack producer promotes register-only values and registers fixed linear stack ranges with the VM. A bound on one subscript can prove that access safe while the underlying object still needs a distinct tag from its physical neighbors. The current producer requires statically bounded stack allocation and a matching release on each supported exit. Dynamic stack arrays and non-local exits that it cannot match produce a compilation diagnostic. A no-EH build can compile a bounded numerical callee that passes its results back to C. When a Fortran procedure keeps a linear stack object across an external call whose unwind behavior is unknown, strict no-EH compilation rejects it. In the EH profile the compiler releases that frame’s objects before rethrowing an escaping exception.

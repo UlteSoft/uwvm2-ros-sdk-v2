@@ -194,7 +194,7 @@ def main():
         profile = Profile(bits, wasm_version="1.0" if opts.core == "mvp" else "3.0",
                           threads=opts.threads, mte=opts.mte, exceptions="eh" if eh else "noeh")
         admission = qualification.admit("fortran", opts, profile, {"flang": compiler, "marker": marker})
-        require_compiler(compiler, opts.flang is not None)
+        require_compiler(compiler)
         require_marker(marker, toolchain)
         with tempfile.TemporaryDirectory(dir=output.parent) as scratch:
             work = Path(scratch)

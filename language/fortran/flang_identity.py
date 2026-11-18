@@ -1,23 +1,34 @@
-"""Identify a prepared WebAssembly-only Flang or the explicit ABI validation producer."""
+"""Verify the source recipe and identity of the WebAssembly-only Flang producer."""
+import hashlib
 import json
 from compiler import digest
 
 LLVM_REVISION = "392dfff97d29b59d77e5cac6d4b6ef2585fe7117"
+LLVM_RECIPE_SHA256 = "1e5f3492b5f042ddaa5ea52f4a8ab3cb26782742dc6ce5b2ca17cad5df7b66de"
 ABI_PATCH = {"path": "third-parties/fortran/llvm23-wasm-abi.patch",
              "sha256": "72f1bccd7366c2f624473f5418113e5275a4fa3762e08a013e1e98be1d144ff8"}
-VALIDATION_FLANG = "4756550cedf51ed844b32436270d89ad73b590a3c13b504b3ac8db9935cc8702"
+GLOBALS_HEADER_PATCH = {"path": "third-parties/fortran/llvm23-globals-intrinsic-header.patch",
+                       "sha256": "31a4c2be6a0e8dfa14eb48777d9678ccb55bdbad6312826f9c2e0b91d0c9be63"}
+MULTI_TARGET_DEVELOPMENT_FLANG = "4756550cedf51ed844b32436270d89ad73b590a3c13b504b3ac8db9935cc8702"
+
+
+def llvm_recipe_digest(entry):
+    """Bind the upstream archive and the ordered patches used to build Flang."""
+    fields = {key: entry[key] for key in ("revision", "archive_sha256", "patches")}
+    return hashlib.sha256(json.dumps(fields, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
 def identity(binary):
     return dict(format="wros-flang-wasm-producer", llvm_revision=LLVM_REVISION,
-                patch_sha256=ABI_PATCH["sha256"], compiler_sha256=digest(binary),
-                targets=["WebAssembly"])
+                llvm_recipe_sha256=LLVM_RECIPE_SHA256, patch_sha256=ABI_PATCH["sha256"],
+                globals_header_sha256=GLOBALS_HEADER_PATCH["sha256"],
+                compiler_sha256=digest(binary), targets=["WebAssembly"])
 
 
-def require_compiler(binary, explicitly_selected):
+def require_compiler(binary):
     expected = identity(binary)
-    if explicitly_selected and expected["compiler_sha256"] == VALIDATION_FLANG:
-        return
+    if expected["compiler_sha256"] == MULTI_TARGET_DEVELOPMENT_FLANG:
+        raise ValueError("the multi-target development Flang cannot be used by this SDK")
     record = binary.with_name(binary.name + ".json")
     if not record.is_file() or record.stat().st_size > 1024 or json.loads(record.read_bytes()) != expected:
         raise ValueError("unrecognized Flang; build the WebAssembly-only compiler with build_flang.py")

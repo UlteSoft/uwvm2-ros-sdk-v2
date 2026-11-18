@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "tools/wasm/memtag"))
 from build_producer import checked, prepare
 from build_sysroots import diagnostics_overlay
 
-from flang_identity import ABI_PATCH, LLVM_REVISION, identity
+from flang_identity import ABI_PATCH, GLOBALS_HEADER_PATCH, LLVM_RECIPE_SHA256, identity, llvm_recipe_digest
 
 
 def main():
@@ -36,10 +36,11 @@ def main():
             raise ValueError("--work must be a dedicated build directory")
         work.mkdir(parents=True, exist_ok=True)
         entry = json.loads((ROOT / "tools/wasm/memtag/source-lock.json").read_bytes())["sources"]["llvm-23.1.5"]
-        if entry["revision"] != LLVM_REVISION:
+        if llvm_recipe_digest(entry) != LLVM_RECIPE_SHA256:
             raise ValueError("Flang target patch needs requalification with the selected LLVM source")
         source = prepare(entry, args.source_work.resolve(), None)
         source = diagnostics_overlay(source, ABI_PATCH, work)
+        source = diagnostics_overlay(source, GLOBALS_HEADER_PATCH, work)
         build = work / "build"
         log = work / "build.log"
         config = {"CMAKE_BUILD_TYPE": "Release", "CMAKE_CXX_COMPILER": bootstrap / "bin/clang++",

@@ -23,6 +23,8 @@ python3 language/fortran/prepare.py \
 
 编译配方只选择 LLVM 的 WebAssembly 后端。安装之前，它要求编译器生成两种地址宽度的 Wasm 对象，并检查生成原生 x86 对象的请求会失败。IR 辅助工具的记录绑定了源码、宿主工具和 SDK 代码生成器的摘要。这些步骤在受信任的本地构建机上执行。
 
+Flang 构建记录绑定了上游归档、按顺序应用的代码生成器补丁和两个 Flang 构建补丁。关闭预编译头构建时，源码会显式包含 LLVM 内建指令的完整类型声明。
+
 ## 编译应用
 
 ```fortran
@@ -54,7 +56,7 @@ bin/wrf --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" \
 | `-pthread`、`--threads` | 选择线程配置，依赖相应的线程版 sysroot。 |
 | `-O0…-O3`、`-Os`、`-Oz`、`-g` | 选择优化级别和调试符号；默认优化级别为 `-O3`。 |
 | `--link-object FILE` | 链接由 SDK 编译的 Wasm 对象或静态库，可多次指定。 |
-| `--flang FILE`、`--mte-tool FILE` | 指定宿主工具。验证流程允许显式选取一个固定摘要的开发版 Flang。 |
+| `--flang FILE`、`--mte-tool FILE` | 指定宿主工具。Flang 必须与仅含 WebAssembly 后端的构建记录匹配。 |
 | `SOURCE… -o FILE` | 按依赖顺序提供 Fortran 文件，将通过导入审核的产物写入指定路径。 |
 
 Flang 23 没有专门控制 WasmMTE 的 Fortran 源码指令。SDK 保留 IR 上已有的 sanitizer 属性与元数据，附带的 C/C++ 数值运行库使用同一个目标配置编译。受管栈实现把能留在寄存器的值提升出去，对仍占线性栈的固定对象向 VM 登记。证明单个下标访问安全后，这块栈空间仍可能需要与物理近邻使用不同的标签。当前实现要求栈分配大小在编译时有界，并能在各条受支持的退出路径释放。对于动态栈数组和无法配对释放的非局部退出，编译器会报错。no-EH 可以编译使用固定大小局部数组并向 C 返回结果的数值过程。如果 Fortran 过程持有线性栈对象，并调用异常行为未知的外部函数，严格 no-EH 编译会拒绝。EH 配置允许编译器在异常离开该栈帧时先释放对象，再传播异常。

@@ -8,7 +8,7 @@ import sys
 
 from separate_compilation import ROOT, cgroup_record, sha
 sys.path.insert(0, str(ROOT / "language/fortran"))
-from flang_identity import VALIDATION_FLANG, require_compiler
+from flang_identity import MULTI_TARGET_DEVELOPMENT_FLANG, require_compiler
 from artifacts import sections
 
 
@@ -36,9 +36,9 @@ def main():
     parser.add_argument("--output", required=True, type=lambda p: Path(p).resolve())
     args = parser.parse_args()
     record = dict(complete=False, cgroup=cgroup_record(), cases=[], compiler=sha(args.flang))
-    if record["compiler"] != args.approved_sha256 or record["compiler"] == VALIDATION_FLANG:
+    if record["compiler"] != args.approved_sha256 or record["compiler"] == MULTI_TARGET_DEVELOPMENT_FLANG:
         raise ValueError("qualification requires an approved WebAssembly-only Flang")
-    require_compiler(args.flang, False)
+    require_compiler(args.flang)
     args.output.mkdir(parents=True, exist_ok=False)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     source = args.output / "probe.f90"

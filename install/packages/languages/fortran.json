@@ -20,15 +20,15 @@
     },
     {
       "path": "document/en/fortran.md",
-      "bytes": 12487,
+      "bytes": 12697,
       "mode": 420,
-      "sha256": "84bef0b1cff9c0e8199c03476c1ec35ebadd152422a595173467afdb9a337665"
+      "sha256": "dfba348eff7ea43b9bd9e8bd8c02cae8cb6c0f75ea6dcfea2d56f9410e8d5839"
     },
     {
       "path": "document/zh/fortran.md",
-      "bytes": 11084,
+      "bytes": 11286,
       "mode": 420,
-      "sha256": "82b2aca40787f57a70580906dec416518ac40e8dcdfe6e9e221bad8398f753f1"
+      "sha256": "99f7801dcf99ab8bf8b33567fbef8ad6dd60608a5054ab02d924dfd228268e1d"
     },
     {
       "path": "examples/fortran/body.f90",
@@ -50,9 +50,9 @@
     },
     {
       "path": "language/fortran/build_flang.py",
-      "bytes": 5240,
+      "bytes": 5373,
       "mode": 420,
-      "sha256": "d8084da4f1630a791509c4b3057cee6bad03911127f2f56b81379914a9608951"
+      "sha256": "e03fa34e3ed0e0d1e73dbe26c1f4c1ac1f785ea06924ea43dec507204898b5f0"
     },
     {
       "path": "language/fortran/compute_platform.cpp",
@@ -68,15 +68,15 @@
     },
     {
       "path": "language/fortran/flang_identity.py",
-      "bytes": 1107,
+      "bytes": 1871,
       "mode": 420,
-      "sha256": "85527d1b034f5e815a65ab34e7fc3fb1555b5ecc9859b980fae622766237b254"
+      "sha256": "c174767863af2a13d05d7c35007f462ae4cacf1e6a2213cd3376ed8c6ac152c8"
     },
     {
       "path": "language/fortran/frontend_fortran.py",
-      "bytes": 13397,
+      "bytes": 13373,
       "mode": 420,
-      "sha256": "70b0aefbf220b0b060e221d999dca27fa425bf6befc3da4d585a506a7493f524"
+      "sha256": "70ab2a4bfa4be8d9ef6ff9bcf716069f8067cadccbb0429776d41115e1d4e784"
     },
     {
       "path": "language/fortran/mark_mte.cpp",
@@ -104,9 +104,9 @@
     },
     {
       "path": "third-parties/fortran/README.md",
-      "bytes": 2358,
+      "bytes": 2552,
       "mode": 420,
-      "sha256": "595df815f48f05d6c1c7161eef93c20a43f3cd4e270552ef57da55d8abc268b2"
+      "sha256": "d9c695c0e1fe4ec36e7f98205fd0bed5daabb03ad3654b3b476c888d873fa3db"
     },
     {
       "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/allocator-registry.h",
@@ -623,6 +623,12 @@
       "bytes": 7698,
       "mode": 420,
       "sha256": "88af09e3f1723b836bde18ed53329b5ea42437ad5c9ac9d78d2284006e62edf1"
+    },
+    {
+      "path": "third-parties/fortran/llvm23-globals-intrinsic-header.patch",
+      "bytes": 383,
+      "mode": 420,
+      "sha256": "31a4c2be6a0e8dfa14eb48777d9678ccb55bdbad6312826f9c2e0b91d0c9be63"
     },
     {
       "path": "third-parties/fortran/llvm23-wasm-abi.patch",
