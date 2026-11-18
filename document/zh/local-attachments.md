@@ -23,6 +23,11 @@ VM 检查内核对象类型，并确认双方处于同一单调时钟域。部�
 [宿主所有权登记](https://github.com/UlteSoft/wasmros-deployer/blob/main/document/zh/host-identities.md)。
 复用身份不能代替驱动能力授权；宿主身份协调、设备独占和 ROSv2 权限分别管理。
 
+部署层现提供[确切设备归属与内核过滤](https://github.com/UlteSoft/wasmros-deployer/blob/main/document/zh/device-isolation.md)。
+VM 基础策略拒绝物理设备打开。同设备别名共用类型、主次设备号组成的归属键，原管理器
+退出不会允许另一管理器接管。这不会给 SDK 平台代码授予宿主设备 FD，也不能证明热插拔
+后的物理身份或执行器安全状态。完整 native 生命周期仍需联动，选择平台并不启用它。
+
 命名空间描述符是宿主登记参数，不改变 Wasm 调用的载体 ABI。不需要宿主权限的
 计算继续留在 Wasm 中；受控的外部行为使用 ROSv2 接口。不要用通用 WASIp1
 套接字或进程内原生预加载绕过驱动授权。

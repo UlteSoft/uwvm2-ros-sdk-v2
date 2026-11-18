@@ -33,6 +33,14 @@ Managers must share the [host ownership registry](https://github.com/UlteSoft/wa
 Reusing an identity is not a substitute for a driver capability. This host
 coordination is separate from device exclusivity and ROSv2 grants.
 
+The deployment layer now has [exact device ownership and kernel filtering](https://github.com/UlteSoft/wasmros-deployer/blob/main/document/en/device-isolation.md).
+Its VM baseline denies physical device opens. Device aliases share the same
+type/major/minor ownership key; another manager cannot take over after the
+original exits. These controls do not grant SDK platform code a host device FD,
+and cannot establish physical identity after hotplug or safe actuator state.
+The full native-provider lifecycle still requires integration; an SDK platform
+selection does not enable it.
+
 The namespace descriptor is a host registration detail and does not change the
 Wasm carrier ABI. Keep all computation that needs no host authority inside Wasm.
 Use ROSv2 imports for permitted external effects; do not route driver access
