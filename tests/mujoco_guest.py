@@ -28,6 +28,7 @@ def main():
     p.add_argument("--sysroots64", type=Path, help="matching wasm64 sysroot for dual-width toolchains")
     p.add_argument("--language", choices=("c", "cpp", "nim", "objectc", "lua", "rs", "tinygo", "fortran", "csharp"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
+    p.add_argument("--installed-sdk", type=Path, help="compile the controller using a trusted installed SDK")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
     p.add_argument("--toolchain64", type=Path, help="base compiler prefix for a distinct wasm64 sysroot")
     p.add_argument("--objc-clang", type=Path)
@@ -40,6 +41,9 @@ def main():
     p.add_argument("--dotnet", type=Path, help="pinned host .NET SDK for the C# numeric component")
     p.add_argument("--mono-compiler", type=Path, help="pinned host Mono LLVMOnly compiler")
     a = p.parse_args()
+    if a.installed_sdk and a.candidate_mte:
+        p.error("the installed SDK simulation requires a qualified compiler")
+    compiler_root = a.installed_sdk.resolve(strict=True) if a.installed_sdk else ROOT
     if any((path is not None) != (a.language == "csharp") for path in (a.dotnet, a.mono_compiler)):
         p.error("--dotnet and --mono-compiler are required together for C#")
     if a.flang and a.language != "fortran":
@@ -58,7 +62,7 @@ def main():
     sys.path.insert(0, str(a.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
     source = ROOT / "tests/mujoco" / ("controller." + {"csharp": "c", "cpp": "c", "objectc": "c", "tinygo": "go", "fortran": "f90"}.get(a.language, a.language))
-    compiler = ROOT / "bin" / {"c": "wrc", "csharp": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
+    compiler = compiler_root / "bin" / {"c": "wrc", "csharp": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
     sysroots = {32: a.sysroots32.resolve()}
     if 64 in widths:
         sysroots[64] = a.sysroots64.resolve()
@@ -120,7 +124,7 @@ def main():
         if a.language == "csharp":
             obj = wasm.parent / "direction.o"
             if not obj.exists():
-                run("csharp-numeric-aot", [sys.executable, ROOT / "bin/wrcs", "--dotnet", a.dotnet.resolve(),
+                run("csharp-numeric-aot", [sys.executable, compiler_root / "bin/wrcs", "--dotnet", a.dotnet.resolve(),
                     "--mono-compiler", a.mono_compiler.resolve(), "--toolchain", toolchains[width],
                     "--sysroots", sysroots[width], *(["--legacy-mte"] if a.candidate_mte else []),
                     "--entry", "SimulatedJoint.Direction", "-c", ROOT / "tests/mujoco/controller.cs", "-o", obj])
@@ -142,7 +146,7 @@ def main():
         args += ["--" + key, str(value.resolve())]
     producers = [path for path in (a.flang, a.producer) if path]
     if a.language == "csharp":
-        producers.extend((ROOT / "bin/wrcs", ROOT / "tests/mujoco/controller.cs",
+        producers.extend((compiler_root / "bin/wrcs", ROOT / "tests/mujoco/controller.cs",
                           *(ROOT / "language/csharp" / file for file in ("inputs.sha256", "Admit.cs", "leaf.cpp", "numeric.py", "host.py"))))
     if a.language == "rs":
         producers.extend((a.rustroot / "bin/rustc", ROOT / "language/rust/scene.rs", ROOT / "tools/wasm/tag_ir.cpp"))
