@@ -20,15 +20,15 @@
     },
     {
       "path": "document/en/fortran.md",
-      "bytes": 15127,
+      "bytes": 15327,
       "mode": 420,
-      "sha256": "3dd266649de9fa1f4082b879b515373ae32ee2997b95aba759b771d135951945"
+      "sha256": "1525ae8ca816b107b57ea3bdb0ddd4511f42588020ccda572b96d01329306070"
     },
     {
       "path": "document/zh/fortran.md",
-      "bytes": 13502,
+      "bytes": 13691,
       "mode": 420,
-      "sha256": "abe133630c8796df0504379a93b60288902f294899ee35076ee4a3b45de8a3ca"
+      "sha256": "54a7c902a9f39d6b18c3926a985e7cb1214ec6978c8024d7f7386f83a3177927"
     },
     {
       "path": "examples/fortran/body.f90",
@@ -68,9 +68,9 @@
     },
     {
       "path": "language/fortran/build_flang.py",
-      "bytes": 5430,
+      "bytes": 6285,
       "mode": 420,
-      "sha256": "b947ad33e7e043f9d37cbeda11053e0e94e89d1beaa71242f69b246cff562be0"
+      "sha256": "9da12059503e3b753dc979bfa4b913b8e6cb5bb8c6dfe5981b53d4acfcaec4e9"
     },
     {
       "path": "language/fortran/clock.c",
@@ -92,9 +92,9 @@
     },
     {
       "path": "language/fortran/flang_identity.py",
-      "bytes": 2113,
+      "bytes": 2357,
       "mode": 420,
-      "sha256": "d1be91fddc5b1386d2381b4f41201133c6edc02f10ead78e29fcccb55c7fd44f"
+      "sha256": "c807fed9aeac78303d5d0afeae88f09f11d50c7875e4239f67ce280c2be6f39e"
     },
     {
       "path": "language/fortran/frontend_fortran.py",
@@ -128,9 +128,9 @@
     },
     {
       "path": "third-parties/fortran/README.md",
-      "bytes": 2791,
+      "bytes": 2972,
       "mode": 420,
-      "sha256": "384d798856b9b60faf10dcf25377507e9b4bc874a863deb99317cf0c8dbff777"
+      "sha256": "af96bc6e1d3d89cc9b0566c7b176da7543570fedc2df2e513d398c95a3bdeb55"
     },
     {
       "path": "third-parties/fortran/flang-rt/include/flang-rt/runtime/allocator-registry.h",
@@ -653,6 +653,12 @@
       "bytes": 533,
       "mode": 420,
       "sha256": "2f6cbd70a3ec9d742b9827d36133f1681f566378140afaa846022ef3921cf472"
+    },
+    {
+      "path": "third-parties/fortran/llvm23-flang-wasm32-address-kind.patch",
+      "bytes": 723,
+      "mode": 420,
+      "sha256": "f1245bb1f3ebac4dcc00ef7c2e9fb4826001fdc83625f6c94a29bd8ca286d1f1"
     },
     {
       "path": "third-parties/fortran/llvm23-globals-intrinsic-header.patch",

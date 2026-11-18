@@ -2,6 +2,7 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -14,7 +15,7 @@ sys.path.insert(0, str(ROOT / "tools/wasm/memtag"))
 from build_producer import checked, prepare
 from build_sysroots import diagnostics_overlay
 
-from flang_identity import (ABI_PATCH, ASSUMED_EXTENT_PATCH, GLOBALS_HEADER_PATCH,
+from flang_identity import (ABI_PATCH, ADDRESS_KIND_PATCH, ASSUMED_EXTENT_PATCH, GLOBALS_HEADER_PATCH,
                             LLVM_RECIPE_SHA256, identity, llvm_recipe_digest)
 
 
@@ -40,8 +41,13 @@ def main():
         if llvm_recipe_digest(entry) != LLVM_RECIPE_SHA256:
             raise ValueError("Flang target patch needs requalification with the selected LLVM source")
         source = prepare(entry, args.source_work.resolve(), None)
-        for patch in (ABI_PATCH, GLOBALS_HEADER_PATCH, ASSUMED_EXTENT_PATCH):
+        # LLVM resolves sibling projects as llvm/../flang and llvm/../clang.
+        # Apply the LLVM-side change last so that llvm is a physical directory
+        # inside the final overlay alongside the fully patched siblings.
+        for patch in (ABI_PATCH, ASSUMED_EXTENT_PATCH, ADDRESS_KIND_PATCH, GLOBALS_HEADER_PATCH):
             source = diagnostics_overlay(source, patch, work)
+        if not (source / "llvm" / "..").samefile(source):
+            raise ValueError("LLVM would resolve sibling projects outside the final Flang source overlay")
         build = work / "build"
         log = work / "build.log"
         config = {"CMAKE_BUILD_TYPE": "Release", "CMAKE_CXX_COMPILER": bootstrap / "bin/clang++",
@@ -66,13 +72,18 @@ def main():
         binary = build / "bin/flang"
         with tempfile.TemporaryDirectory(dir=work) as td:
             probe = Path(td) / "probe.f90"
-            probe.write_text("function answer() bind(c)\ninteger(4) answer\nanswer=42\nend function\n")
+            probe.write_text("function answer() bind(c)\ninteger(4) answer\nanswer=kind(sizeof(1))\nend function\n")
             for bits in (32, 64):
                 obj = Path(td) / f"w{bits}.o"
                 checked([str(binary), "-fc1", "-triple", f"wasm{bits}-unknown-wasip1",
                          "-emit-obj", str(probe), "-o", str(obj)], log)
                 if obj.read_bytes()[:8] != b"\0asm\1\0\0\0":
                     raise ValueError("Flang did not generate a Wasm object")
+                ir = Path(td) / f"w{bits}.ll"
+                checked([str(binary), "-fc1", "-triple", f"wasm{bits}-unknown-wasip1",
+                         "-emit-llvm", "-O3", str(probe), "-o", str(ir)], log)
+                if not re.search(rf"\bret i32 {bits // 8}\b", ir.read_text()):
+                    raise ValueError("Flang C_SIZEOF result kind disagrees with the target pointer width")
             native_obj = Path(td) / "native.o"
             native = subprocess.run([binary, "-fc1", "-triple", "x86_64-unknown-linux-gnu",
                 "-emit-obj", probe, "-o", native_obj], capture_output=True)

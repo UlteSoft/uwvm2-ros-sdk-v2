@@ -2,6 +2,7 @@
 import argparse
 import json
 from pathlib import Path
+import re
 import resource
 import subprocess
 import sys
@@ -74,6 +75,28 @@ def main():
         if (f"@llvm.fake.use(i{width} -1)" not in text or "!DISubrange(" not in text or
                 "emissionKind: FullDebug" not in text):
             raise RuntimeError("incorrect debug index for assumed-size Fortran array")
+    kind_source = args.output / "address_kind.f90"
+    kind_source.write_text(
+        "integer(4) function address_kinds(x) bind(c)\n"
+        "  integer(4), target :: x\n"
+        "  address_kinds=100*kind(sizeof(x)) + 10*kind(loc(x)) + kind(malloc(1))\n"
+        "end function\n"
+    )
+    for width in (32, 64):
+        # The C address kinds are independent of Fortran's default INTEGER.
+        for default_kind in (4, 8):
+            name = f"address-kinds-{width}-default-{default_kind}"
+            ir = args.output / (name + ".ll")
+            command = [args.flang, "-fc1", "-triple", f"wasm{width}-unknown-wasip1",
+                       f"-fdefault-integer-{default_kind}", "-emit-llvm", "-O3", kind_source, "-o", ir]
+            proc = subprocess.run(command, cwd=args.output, capture_output=True, timeout=60)
+            (args.output / (name + ".log")).write_bytes(proc.stderr)
+            record["cases"].append(dict(name=name, code=proc.returncode))
+            receipt.write_text(json.dumps(record, indent=2) + "\n")
+            proc.check_returncode()
+            expected = 111 * (width // 8)
+            if not re.search(rf"\bret i32 {expected}\b", ir.read_text()):
+                raise RuntimeError("LOC, MALLOC or SIZEOF disagrees with the target pointer width")
     if sha(args.flang) != record["compiler"]:
         raise ValueError("Flang changed during qualification")
     record["complete"] = True

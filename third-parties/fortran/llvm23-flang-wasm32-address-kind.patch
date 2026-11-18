@@ -1,0 +1,14 @@
+--- a/flang/lib/Frontend/CompilerInvocation.cpp
++++ b/flang/lib/Frontend/CompilerInvocation.cpp
+@@ -1742,6 +1742,11 @@
+   success &= parseVectorLibArg(invoc.getCodeGenOpts(), args, diags);
+   success &= parseSemaArgs(invoc, args, diags);
+   success &= parseDialectArgs(invoc, args, diags);
++  // LOC, MALLOC and SIZEOF return an address-sized integer. ISO_C_BINDING
++  // derives C_SIZE_T and C_INTPTR_T from this kind, even with a different
++  // default Fortran INTEGER kind.
++  if (llvm::Triple(invoc.getTargetOpts().triple).getArch() == llvm::Triple::wasm32)
++    invoc.getDefaultKinds().set_subscriptIntegerKind(4);
+   success &= parseOpenMPArgs(invoc, args, diags);
+   success &= parseDiagArgs(invoc, args, diags);
+ 
