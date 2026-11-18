@@ -49,7 +49,8 @@ def check(tool_bin, source, work):
     owner = zero.with_name("memtag-stack-owner.ll")
     dynamic = zero.with_name("memtag-unsupported-dynamic.ll")
     unwinding = zero.with_name("memtag-unsupported-unwind.ll")
-    for path in (owner, dynamic, unwinding):
+    phi = zero.with_name("memtag-global-phi.ll")
+    for path in (owner, dynamic, unwinding, phi):
         hashes[path.name] = digest(path)
     result["tools"] = {name: digest(tool_bin / name) for name in ("clang", "clang++", "llc", "FileCheck", "llvm-mc")}
 
@@ -100,7 +101,9 @@ def check(tool_bin, source, work):
         proc = subprocess.run(args, capture_output=True, timeout=120)
         (work / (name + ".producer.log")).write_bytes(proc.stderr)
         diagnostic = ("statically bounded" if fixture == dynamic else "non-local exit").encode()
-        passed = proc.returncode != 0 and b"strict WasmMTE" in proc.stderr and diagnostic in proc.stderr
+        function = b"in function variable " if fixture == dynamic else b"in function exceptional "
+        passed = (proc.returncode != 0 and b"strict WasmMTE" in proc.stderr and
+                  diagnostic in proc.stderr and function in proc.stderr)
         result["cases"].append(dict(name=name, producer=args, producer_exit=proc.returncode, passed=passed))
         save()
         if not passed:
@@ -112,6 +115,8 @@ def check(tool_bin, source, work):
     for bits, address in ((32, addr32), (64, addr64)):
         stop = "-stop-after=wasm-stack-tagging"
         features = "-mattr=+memtag,+atomics,+bulk-memory"
+        run(bits, "global-phi", phi, ["-O3", features, "-stop-after=WebAssembly-globals-tagging"], ".mir", "CHECK")
+        run(bits, "global-phi-object", phi, ["-O3", features, "-verify-machineinstrs", "-filetype=obj"], ".o")
         run(bits, "generations", generations, [features, stop], ".mir", "CHECK")
         run(bits, "owners", owner, [features, stop], ".mir", "CHECK")
         run(bits, "owner-object", owner, [features, "-filetype=obj"], ".o")

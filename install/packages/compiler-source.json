@@ -74,9 +74,9 @@
     },
     {
       "path": "tools/wasm/memtag/check_stack_tagging.py",
-      "bytes": 6813,
+      "bytes": 7241,
       "mode": 420,
-      "sha256": "506d12f301b9d16281bfb15ffdd681a397b08a3564cc4e7aa8e0174788536233"
+      "sha256": "f9dcda6ecde72c265b14fddb15b0562ac9c1ea51d3bac9967808fcd728aedfc2"
     },
     {
       "path": "tools/wasm/memtag/measure_release.py",
@@ -95,6 +95,12 @@
       "bytes": 2282,
       "mode": 420,
       "sha256": "8b50f35c011f9a1ecc1f25869c362a55e8e026ac1afffd2eada7e3d852e6194a"
+    },
+    {
+      "path": "tools/wasm/memtag/memtag-global-phi.ll",
+      "bytes": 1642,
+      "mode": 420,
+      "sha256": "3f8a8447e16f6457ec7ed6e00cda60c80e3423e8d691c353628db8ec1b55e98c"
     },
     {
       "path": "tools/wasm/memtag/memtag-lifetime-generations.ll",
@@ -205,10 +211,22 @@
       "sha256": "e2b39bffc73b0a2787e9b635d24aec891419316d9058c9870106e3ba949111fb"
     },
     {
+      "path": "tools/wasm/memtag/patches/llvm-wasm-phi-repeated-incoming.patch",
+      "bytes": 1562,
+      "mode": 420,
+      "sha256": "ae051f88975bdd7e75ef069b0c477521fc2b2738e61ab7c722ed2ce5cd002c0a"
+    },
+    {
       "path": "tools/wasm/memtag/patches/llvm-wasm-readonly-objects.patch",
       "bytes": 3193,
       "mode": 420,
       "sha256": "ce7e22270ee7b45279ef16e4ff4cadbab56e0655f198aa9fa674026410d537c9"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/llvm-wasm-stack-diagnostic-location.patch",
+      "bytes": 2582,
+      "mode": 420,
+      "sha256": "dc276810df38441194f29ce35b889fbc7276c2b070f01316745e293dbae24710"
     },
     {
       "path": "tools/wasm/memtag/patches/llvm-wasm-stack-generations.patch",
@@ -266,9 +284,9 @@
     },
     {
       "path": "tools/wasm/memtag/source-lock.json",
-      "bytes": 7250,
+      "bytes": 7640,
       "mode": 420,
-      "sha256": "3e49d2f34c6bbe596ab3ba9f816c693ba22ba727f8af8ccbcf734d2838879b45"
+      "sha256": "d8111e14c6677de4fd9686238a293a46cda8c3699840dfe28d66aa89a1ab43e1"
     }
   ]
 }
