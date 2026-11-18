@@ -1,6 +1,6 @@
 # 用 Fortran 开发 Wasm 应用
 
-`bin/wrfortran` 将 Fortran 的 `PROGRAM` 编译为 Wasm 可执行文件。它接受固定格式与自由格式源码，支持有依赖顺序的模块、ISO C 互操作，以及随 SDK 编译的 Flang 数值运行库。入口为 `_start`，数据保存在模块自己的线性内存中。当前还缺少通用外部文件 I/O、coarray 和依赖完整描述符运行库的功能。
+`bin/wrfortran` 将 Fortran 的 `PROGRAM` 编译为 Wasm 可执行文件。它接受固定格式与自由格式源码，支持有依赖顺序的模块、ISO C 互操作，以及随 SDK 编译的 Flang 数值运行库。入口为 `_start`，数据保存在模块自己的线性内存中。计算运行库支持可分配数组、指针分配和 ISO C 描述符。通用外部文件 I/O 和 coarray 程序还需要额外运行库。
 
 ## 准备编译器
 
@@ -34,6 +34,8 @@ bin/wrfortran --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" \
 
 `wros_scene` 根据随 SDK 安装的 ROSv2 ABI 生成 Fortran 声明，显式按值传递指定宽度的 Wasm 整数。上例导入 `uwvm_ros_v2.abi`。部署时必须在 VM 中向该模块开放此接口，声明导入本身不会授予权限。
 
+要将缓冲区地址传给 ROS 导入的 i64 参数，使用 `wros_scene` 的 `wr_address(c_loc(buffer))`。为缓冲区声明 `target`，并从 `iso_c_binding` 导入 `c_loc`。该转换保留指针的所有标签位，将 wasm32 地址按无符号值扩展至 64 位。有符号整数转换可能将第 31 位复制到高 32 位。wasm64 直接保留全部 64 位。
+
 | 参数 | 作用 |
 | --- | --- |
 | `--toolchain DIR` | 指定 Wasm 编译器、链接器和 LLVM 工具目录。 |
@@ -48,6 +50,44 @@ bin/wrfortran --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" \
 | `--flang FILE`、`--mte-tool FILE` | 指定宿主工具。验证流程允许显式选取一个固定摘要的开发版 Flang。 |
 | `SOURCE… -o FILE` | 按依赖顺序提供 Fortran 文件，将通过导入审核的产物写入指定路径。 |
 
-Flang 23 没有专门控制 WasmMTE 的 Fortran 源码指令。SDK 保留 IR 上已有的 sanitizer 属性与元数据，编译器可以根据安全证明优化标记操作。附带的 C/C++ 数值运行库使用同一个目标配置编译。
+Flang 23 没有专门控制 WasmMTE 的 Fortran 源码指令。SDK 保留 IR 上已有的 sanitizer 属性与元数据，附带的 C/C++ 数值运行库使用同一个目标配置编译。受管栈实现把能留在寄存器的值提升出去，对仍占线性栈的固定对象向 VM 登记。证明单个下标访问安全后，这块栈空间仍可能需要与物理近邻使用不同的标签。当前实现要求栈分配大小在编译时有界，并能在各条受支持的退出路径释放。对于动态栈数组和无法配对释放的非局部退出，编译器会报错。no-EH 可以编译使用固定大小局部数组并向 C 返回结果的数值过程。如果 Fortran 过程持有线性栈对象，并调用异常行为未知的外部函数，严格 no-EH 编译会拒绝。EH 配置允许编译器在异常离开该栈帧时先释放对象，再传播异常。
 
 验证程序会在真实 VM 的解释器和 AOT 中分别执行，检查已授权与未授权的 ROS 导入、跨翻译单元数组、按引用修改标量、ISO C 类型宽度和上游数值运行库调用。反汇编检查定位在最终模块的 Fortran 函数中。[验证脚本](../../tests/fortran_aot.py)、[Fortran 测试源码](../../tests/fortran/body.f90)。
+
+跨语言栈测试先用 C 编译器生成带 SDK 校验信息的 Wasm 对象，再将其链接进实际的 Fortran 程序。Fortran 使用 ISO C 绑定，在两个数组存活时记录其地址的整数表示，并分别读取数组元素。C 验证两者的物理距离为 16 字节，核对计算结果，并在运行时启用 MTE 时检查标签不同。测试覆盖 wasm32 和 wasm64、解释器与 AOT，以及运行时 MTE 开关。为每个待测位宽提供启用 MTE 的 sysroot 清单。默认验证 wasm32、wasm64 的 no-EH 配置。使用 `--address-width 32 --exception-model eh` 可验证 wasm32 的 EH 配置。输出目录须使用新路径。[测试命令与参数](../../tests/fortran_stack_neighbors.py)
+
+同一测试使用 `--storage static-and-heap` 和匹配的 EH sysroot，可检查 Fortran 模块变量与两个独立的 `ALLOCATABLE` 数组。程序通过获准的 ROS ABI 查询取得数组长度，在 Fortran 中分配、逐元素赋值，将两个存活数组的地址传给 C，再在 Fortran 中释放。C 根据分配器的实际容量计算两个区域的物理间距，并在释放后读取影子标签。此用例覆盖逐元素赋值和省略 `STAT=` 的分配。下方的描述符用例覆盖整数组赋值与带状态的分配。[应用源码](../../tests/fortran/storage_neighbors.f90) · [存储检查](../../tests/fortran/storage_neighbors.c)
+
+## 使用 xmake
+
+按相同的完整提交号安装语言和平台，使用安装器返回的开发目录。以下命令选择宇树平台和 Fortran。
+
+```sh
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language fortran --prefix "$PREFIX"
+export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/fortran/development"
+```
+
+设置 `WROS_TOOLCHAIN` 和 `WROS_SYSROOTS`，将以下项目文件与 `application.f90` 放在同一目录，先执行 `xmake f -p wasm-wasip1 -a wasm32`，再执行 `xmake robot`。
+
+```lua
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+target("robot")
+    set_kind("binary")
+    set_language("fortran")
+    set_ros_platform("unitree")
+    set_wros_profile({core = "3.0", mte = true, eh = true})
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_files("application.f90")
+target_end()
+```
+
+多个 Fortran 源文件请按模块依赖顺序列出。安装包附有[完整项目](../../examples/fortran/xmake.lua)和[数组处理示例](../../examples/fortran/body.f90)。`add_deps` 可链接经过 SDK 校验的 C 或 C++ 静态库。运行调用 `wr_abi()` 的示例时，需要向模块开放相应查询。[xmake 参考手册](xmake.md) 说明所需环境变量、目标设置及本地运行方法。
+
+## 数组与 C 描述符
+
+应用可使用 `ALLOCATE(..., STAT=rc, ERRMSG=msg)`、`MOVE_ALLOC`、整数组赋值和 `DEALLOCATE(..., STAT=rc)`。前端根据输入对象引用的符号选取随附的 Flang 描述符过程，采用应用的地址宽度、异常模式和 MTE 配置编译，并与数值运行库、应用一起检查目标对象。数组库不依赖来宾文件描述符、网络套接字或环境变量。
+
+申请内存前，运行库检查分配上下界、字节步幅及释放校验字段的大小能否用目标有符号指针范围表示。带 `STAT=` 的不可表示分配返回失败状态。零长度分配产生已分配、元素数为零的数组。C 端使用互操作头文件时，传入 `-I "$UWVM_ROS_SDK_ROOT/third-parties/fortran/flang/include"` 并包含 `"flang/ISO_Fortran_binding.h"`。
+
+描述符测试包含 Fortran 指针别名、成功及失败的分配、错误信息、所有权转移、空数组、整数组赋值，以及 C 端独立建立的二维描述符。最终模块唯一的导入为 `uwvm_ros_v2.abi`。[测试入口](../../tests/fortran_descriptors.py) · [Fortran 应用](../../tests/fortran/descriptor_status.f90) · [C 调用](../../tests/fortran/descriptor_status.c)

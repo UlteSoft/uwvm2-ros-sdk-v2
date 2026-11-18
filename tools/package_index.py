@@ -117,9 +117,10 @@ def main():
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/objectc").iterdir() if p.is_file()],
     ]
     language_files["fortran"] = [
+        "examples/fortran/body.f90", "examples/fortran/xmake.lua",
         "bin/wrfortran", "bin/wrc", "bin/wrcc", "include/wros/scene.h",
         "document/en/fortran.md", "document/zh/fortran.md",
-        *["language/fortran/" + name for name in ("build_flang.py", "entry.c", "flang_identity.py",
+        *["language/fortran/" + name for name in ("build_flang.py", "compute_platform.cpp", "entry.c", "flang_identity.py",
                                                    "frontend_fortran.py", "mark_mte.cpp", "prepare.py")],
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/fortran").rglob("*") if p.is_file()],
     ]

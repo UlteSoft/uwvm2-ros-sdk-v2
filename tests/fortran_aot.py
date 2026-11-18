@@ -7,7 +7,7 @@ import re
 import resource
 import subprocess
 import sys
-from separate_compilation import Profile, cgroup_record, inspect, sha
+from separate_compilation import Profile, cgroup_record, inspect, sha, candidate_arguments, candidate_command
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -19,11 +19,20 @@ def main():
     parser.add_argument("--sysroots", required=True, action="append", type=Path)
     parser.add_argument("--no-mte", action="store_true", help="exercise the complete untagged profile")
     parser.add_argument("--threads", action="store_true", help="validate the available wasm32 shared-memory profile")
+    parser.add_argument("--address-width", type=int, choices=(32, 64), help="exercise only the selected width")
+    parser.add_argument("--exception-model", choices=("eh", "noeh"), help="exercise only the selected ABI")
+    candidate_arguments(parser)
     opt = parser.parse_args()
     tc, fc, marker, vm, work = (p.resolve() for p in
         (opt.toolchain, opt.flang, opt.mte_tool, opt.runtime, opt.output))
+    if opt.threads and opt.address_width == 64:
+        parser.error("the threaded test profile requires wasm32")
+    widths = [opt.address_width] if opt.address_width else ([32] if opt.threads else [32, 64])
+    models = [opt.exception_model] if opt.exception_model else ["eh", "noeh"]
     receipts = [p.resolve() for p in opt.sysroots]
-    state = dict(complete=False, cgroup=cgroup_record(), cases=[], modules={})
+    available_profiles = [target["guest_profile"] for path in receipts
+                          for target in json.loads(path.read_bytes())["targets"]]
+    state = dict(complete=False, cgroup=cgroup_record(), address_widths=widths, exception_models=models, cases=[], modules={})
     work.mkdir(parents=True, exist_ok=False)
     (work / "tmp").mkdir()
     os.environ["TMPDIR"] = str(work / "tmp")
@@ -41,7 +50,7 @@ def main():
         (work / "results.json").write_text(json.dumps(state, indent=2) + "\n")
 
     def run(name, argv, error=None):
-        argv = list(map(str, argv))
+        argv = candidate_command(argv, opt.candidate_mte)
         process = subprocess.run(argv, cwd=work, capture_output=True, timeout=180)
         (work / (name + ".stderr")).write_bytes(process.stderr)
         (work / (name + ".stdout")).write_bytes(process.stdout)
@@ -62,8 +71,8 @@ def main():
     decoded = run("inspect-attribute", [tc / "bin/llvm-dis", bitcode, "-o", "-"])
     if b"disable_sanitizer_instrumentation" not in decoded or b"sanitize_memtag" in decoded:
         raise RuntimeError("marker overrode an explicit LLVM sanitizer attribute")
-    for bits in ((32,) if opt.threads else (32, 64)):
-        for eh in ("eh", "noeh"):
+    for bits in widths:
+        for eh in models:
             name = f"wasm{bits}-{eh}"
             profile = Profile(bits, exceptions=eh, mte=not opt.no_mte, threads=opt.threads)
             flags = ["--toolchain", tc, *(arg for receipt in receipts for arg in ("--sysroots", receipt)), "--target", f"wasm{bits}",
@@ -90,9 +99,10 @@ def main():
             if opt.no_mte:
                 if b"memtag." in assembly:
                     raise RuntimeError(name + ": MTE instruction in plain target")
-            elif (b"memtag.random" not in body.group(1) or body.group(1).count(b"memtag.hintstore") < 2
-                  or body.group(1).count(b"memtag.store") < 2):
-                raise RuntimeError(name + ": required Fortran stack-tagging instructions missing")
+            elif (body.group(1).count(b"memtag.claim") < 2 or
+                  body.group(1).count(b"memtag.release") < 2 or
+                  b"memtag.randomstore" in body.group(1) or b"memtag.hint" in body.group(1)):
+                raise RuntimeError(name + ": required Fortran stack-owner claims and releases missing")
             identity = sha(output)
             state["modules"][name] = dict(sha256=identity, imports=imports,
                                           verified_function="_QQmain", profile=profile.to_dict())
@@ -102,8 +112,14 @@ def main():
                 run(name + "-hidden-" + engine, [*start, "--run", output], "ROS scene interface is hidden")
                 run(name + "-" + engine, [*start, "--ros-scene-create", "robot", "--ros-scene-bind", "robot",
                     "main", "--ros-scene-interface", "robot", "abi", "allow", "--run", output])
-            if len(receipts) > 1:
-                run(name + "-mixed-refused", [*cmd, "--mte" if opt.no_mte else "--no-mte",
+            opposite = Profile(bits, exceptions=eh, mte=opt.no_mte, threads=opt.threads)
+            if opposite.to_dict() in available_profiles:
+                mixed = [arg for arg in cmd if arg not in ("--mte", "--no-mte")]
+                # The default target is tagged. The candidate test adapter will
+                # select its development producer when running that target.
+                if not opt.no_mte:
+                    mixed.append("--no-mte")
+                run(name + "-mixed-refused", [*mixed,
                     fixtures / "body.f90", "--link-object", obj, "-o", output], "guest profile mismatch")
             run(name + "-module-refused", [*cmd, missing, "-o", output], "missing_module")
             if sha(output) != identity:
