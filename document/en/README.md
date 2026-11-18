@@ -219,3 +219,5 @@ python3 tests/mujoco_guest.py --language lua \
 The test covers C, C++, Fortran, Lua, Nim and Objective-C on wasm32 and wasm64. Rust no_std and TinyGo use their supported wasm32 profiles. Pass `--rustroot` for Rust, `--goroot` and `--tinygoroot` for TinyGo, and `--producer` for Nim. The Objective-C route also requires `--objc-clang`, `--objc-runtime32` and `--objc-runtime64`. Fortran accepts `--flang`. The suite checks native agreement after 128 physics steps, rejection of an out-of-range command, and the reported state after a receiver crash in both VM engines. Inspect `results.json` for the executable and input digests, applied policy, backend, effects and native reference. A test of a development producer can explicitly pass `--candidate-mte`. It runs with instrumentation and does not produce a signed toolchain qualification.
 
 The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
+
+[JavaScript interpreter and ROS operations](js.md)

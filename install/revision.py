@@ -4,7 +4,7 @@ import json
 
 
 BINDINGS = {"d": "d", "c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
-DEVELOPMENT = ("c", "cpp", "fortran", "lua", "objectc", "rs", "tinygo", "nim")
+DEVELOPMENT = ("c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim")
 
 # Command spellings are part of the per-commit SDK contract. A command name
 # can be reserved before its language has an installable compiler package.

@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+"""Compile an embedded JavaScript application and its QuickJS interpreter to one core Wasm module."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "install"))
+from artifacts import read_bounded
+from imports import inspect
+
+UNITS = ("quickjs", "libregexp", "libunicode", "cutils", "dtoa")
+SPECIAL = {"abi": ([], "ABI"), "capability.open": (["i32", "i64", "i64", "i64"], "OPEN"),
+           "capability.close": (["i64"], "CLOSE")}
+COMMON_ARGS = ["i64", "i32", "i64", "i64", "i64", "i64", "i64"]
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def selection(names):
+    catalog = json.loads((ROOT / "share/abi/ros.json").read_bytes())
+    signatures = {row["name"]: row["wasm_signature"] for row in catalog["operations"]}
+    flags, methods = [], []
+    for name in sorted(names):
+        if name not in signatures or not re.fullmatch(r"[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*", name):
+            raise ValueError("unknown ROSv2 operation: " + name)
+        params = SPECIAL[name][0] if name in SPECIAL else COMMON_ARGS
+        if signatures[name] != {"parameters": params, "results": ["i32"]}:
+            raise ValueError("unsupported operation signature: " + name)
+        if name in SPECIAL:
+            flags.append("#define WROS_JS_" + SPECIAL[name][1] + " 1")
+        else:
+            partial = int(name in ("permission.report", "module.permission.report"))
+            methods.append('    {"%s", wr_%s, %d},' % (name, name.replace(".", "_"), partial))
+    return "\n".join([*flags, "static const Method methods[] = {", *methods, "    {NULL, NULL, 0}", "};", ""])
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("script", type=Path)
+    parser.add_argument("-o", "--output", required=True, type=Path)
+    parser.add_argument("--target", choices=["wasm32"], default="wasm32")
+    parser.add_argument("--toolchain", type=Path)
+    parser.add_argument("--sysroots", type=Path, action="append")
+    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--ros-operation", action="append", default=[])
+    parser.add_argument("--ros-abi", action="store_true", help="include wros.abi()")
+    parser.add_argument("--build-receipt", action="store_true")
+    args = parser.parse_args()
+    operations = set(args.ros_operation)
+    if args.ros_abi:
+        operations.add("abi")
+    methods = selection(operations)
+    if args.output.suffix != ".wasm" or args.script.resolve() == args.output.resolve():
+        raise ValueError("choose a distinct .wasm output")
+    with args.script.open("rb") as stream:
+        script = stream.read(1024 * 1024 + 1)
+    if len(script) > 1024 * 1024 or b"\x00" in script:
+        raise ValueError("expected up to 1 MiB of UTF-8 JavaScript source")
+    script.decode("utf-8")
+    # The pinned installation verifies these files. Snapshot the bytes used by
+    # this particular build and bind them to the optional application receipt.
+    source = ROOT / "third-parties/quickjs"
+    with tempfile.TemporaryDirectory(dir=args.output.parent) as scratch:
+        stage = Path(scratch).resolve()
+        inputs = {}
+        for path in [ROOT / "language/js/entry.c", *sorted(source.glob("*.h")), *[source / (n + ".c") for n in UNITS]]:
+            data = read_bounded(path)
+            inputs[path.relative_to(ROOT).as_posix()] = sha(data)
+            (stage / path.name).write_bytes(data)
+        literal = "\n".join('"' + "".join("\\%03o" % c for c in script[i:i+128]) + '"'
+                            for i in range(0, len(script), 128)) or '""'
+        (stage / "application.inc").write_text("static const char application[] =\n" + literal + ";\n")
+        (stage / "operations.inc").write_text(methods)
+        wasm = stage / "body.wasm"
+        cmd = [sys.executable, ROOT / "bin/wrc", "--target", "wasm32", "--core", "3.0", "--eh", "-O3", "-g",
+               "--mte" if args.mte else "--no-mte", "--reactor", "--export", "_start", "--build-receipt",
+               "-I", stage, "-D", 'CONFIG_VERSION="2026-06-04"', "-D", "_GNU_SOURCE"]
+        if args.toolchain:
+            cmd.extend(["--toolchain", args.toolchain])
+        for receipt in args.sysroots or []:
+            cmd.extend(["--sysroots", receipt])
+        cmd.extend([*[stage / (n + ".c") for n in UNITS], stage / "entry.c", "-o", wasm])
+        subprocess.run(cmd, check=True)
+        data = read_bounded(wasm)
+        actual = {(i["module"], i["name"]) for i in inspect(data)}
+        expected = {("uwvm_ros_v2", name) for name in operations} | {("wasi_snapshot_preview1", "clock_time_get")}
+        if actual != expected:
+            raise ValueError("unexpected final QuickJS imports: " + repr(sorted(actual)))
+        backend = Path(str(wasm) + ".wros-build.json")
+        body = backend.read_bytes()
+        evidence = json.loads(body)
+        if (evidence.get("artifact_sha256") != sha(data) or evidence["profile"]["mte"] != args.mte or
+                args.mte and evidence.get("mode") != "strict"):
+            raise ValueError("interpreter module and C compiler receipt disagree")
+        if args.build_receipt:
+            note = stage / "javascript.json"
+            note.write_text(json.dumps(dict(language="js", interpreter="QuickJS", script_sha256=sha(script),
+                sources=inputs, operations=sorted(operations), wasm_sha256=sha(data), backend_build_sha256=sha(body)),
+                indent=2) + "\n")
+            os.replace(note, str(args.output) + ".wros-js.json")
+            os.replace(backend, str(args.output) + ".wros-build.json")
+        os.replace(wasm, args.output)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, OSError, subprocess.SubprocessError) as error:
+        sys.exit("wrjs: " + str(error))

@@ -1,0 +1,172 @@
+{
+  "files": [
+    {
+      "path": "bin/wrc",
+      "bytes": 183,
+      "mode": 493,
+      "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
+    },
+    {
+      "path": "bin/wrjs",
+      "bytes": 5959,
+      "mode": 493,
+      "sha256": "82f835be6a556e31fad068ca73316807867bea7ca00764533f313a0d5637f4ef"
+    },
+    {
+      "path": "document/en/js.md",
+      "bytes": 3063,
+      "mode": 420,
+      "sha256": "909389e8205bad621629e9a2f56b69767ea3c1eef4bc0af9372e93eb01a12e92"
+    },
+    {
+      "path": "document/zh/js.md",
+      "bytes": 2446,
+      "mode": 420,
+      "sha256": "28f4d44bd8d94aa7484396400030ea4bad8131118479c541664e525cfdace1c0"
+    },
+    {
+      "path": "examples/js/body.js",
+      "bytes": 610,
+      "mode": 420,
+      "sha256": "570102d7d3cfe4e25def57878d361bb4c8f7c50b2db053e43345e4e960c558e7"
+    },
+    {
+      "path": "examples/js/xmake.lua",
+      "bytes": 504,
+      "mode": 420,
+      "sha256": "b24cd521e2fca101822ee7b5c453dd2f3871c6f37c7c5cb526b2d85784419cbc"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/js/entry.c",
+      "bytes": 7338,
+      "mode": 420,
+      "sha256": "a293e9f663492cf32bcaec6eec6d61e113ba7e5c6b1ded97ccf8f81312775d21"
+    },
+    {
+      "path": "language/js/xmake/adapter.lua",
+      "bytes": 1164,
+      "mode": 420,
+      "sha256": "d8e27f2d0c1436e076ad80b7f3c459561eecf3ad520329895a59d76f7f6c557b"
+    },
+    {
+      "path": "third-parties/quickjs/LICENSE",
+      "bytes": 1130,
+      "mode": 420,
+      "sha256": "598fd7fc928e4350abce36e337ba5a1346923c5c692f5be92c3d8e29ddd7c18d"
+    },
+    {
+      "path": "third-parties/quickjs/README.md",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "cf50592981b3eb7f8863acff42d823ac4257c97bd7e0a036772fbb2efb19cdb6"
+    },
+    {
+      "path": "third-parties/quickjs/cutils.c",
+      "bytes": 18632,
+      "mode": 420,
+      "sha256": "b266be9ac0d1ce82c7fade36861ef9b59740f8fd2fa43d52b9efae78a4b9062f"
+    },
+    {
+      "path": "third-parties/quickjs/cutils.h",
+      "bytes": 11277,
+      "mode": 420,
+      "sha256": "ae45698aa4f479dad164a573cabd22de01aa42377440ee8e7e81ca6366a95f25"
+    },
+    {
+      "path": "third-parties/quickjs/dtoa.c",
+      "bytes": 46182,
+      "mode": 420,
+      "sha256": "9a920871bbcc0d17196e51b665475b0d44fa869cb61cc3871a6aa9d8720466ce"
+    },
+    {
+      "path": "third-parties/quickjs/dtoa.h",
+      "bytes": 3491,
+      "mode": 420,
+      "sha256": "344d75304dc6de080c2899caec86607f5879ee7d2d970df9adf8d3e72107e9ed"
+    },
+    {
+      "path": "third-parties/quickjs/libregexp-opcode.h",
+      "bytes": 3317,
+      "mode": 420,
+      "sha256": "0f634a4b026c030013cf3048f377c0a031a4ed039f771a15afc6eba4927af966"
+    },
+    {
+      "path": "third-parties/quickjs/libregexp.c",
+      "bytes": 123594,
+      "mode": 420,
+      "sha256": "dcc1a0d7919921a08b80f00e85a1901e111df8d9cd2544592db10f22340e9813"
+    },
+    {
+      "path": "third-parties/quickjs/libregexp.h",
+      "bytes": 2921,
+      "mode": 420,
+      "sha256": "2362311b8693975d869f5cf746340062b8d2346cb732607c328b3ccf2f6a1b18"
+    },
+    {
+      "path": "third-parties/quickjs/libunicode-table.h",
+      "bytes": 265653,
+      "mode": 420,
+      "sha256": "649b072c3fee26d5fa778cd140a23bfdd0ff34f532b4b21ce263b7a979cce5bc"
+    },
+    {
+      "path": "third-parties/quickjs/libunicode.c",
+      "bytes": 63822,
+      "mode": 420,
+      "sha256": "591413a857aa7cd17c6ae000d4d381d3978f67bd33a1279856933ebe82da2eda"
+    },
+    {
+      "path": "third-parties/quickjs/libunicode.h",
+      "bytes": 6066,
+      "mode": 420,
+      "sha256": "7aa9cf58be71e877162fbbf169680995c7a853f3d08760cf309f48ae456bff2a"
+    },
+    {
+      "path": "third-parties/quickjs/list.h",
+      "bytes": 3366,
+      "mode": 420,
+      "sha256": "4ee9eda6f7eb739a1860fd7c3239943d808619b0464a42c8552d6c695afbbfe8"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs-atom.h",
+      "bytes": 8544,
+      "mode": 420,
+      "sha256": "c40bd3c96ba87b09463189a96b80252cfe220641f9b796df4f4e1a080ef35d41"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs-opcode.h",
+      "bytes": 16650,
+      "mode": 420,
+      "sha256": "2e0a108da1769e4c10a5bd4aff2753d618929317ebce084b1b76f81ac83924ee"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs.c",
+      "bytes": 2026822,
+      "mode": 420,
+      "sha256": "13c18837b29fd7b63b3c4f99ef1c9bfae080625cd273a1bbca4fd2de4d41500c"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs.h",
+      "bytes": 53142,
+      "mode": 420,
+      "sha256": "971c141dca08ae46cd29380db91902edab3ca08abebfbd73f82331ddfbcfd2d2"
+    },
+    {
+      "path": "third-parties/quickjs/unicode_gen_def.h",
+      "bytes": 8029,
+      "mode": 420,
+      "sha256": "8c2916d8df39bc3066eb59ec21e345e7d5412df078641ae7abdab54bee627506"
+    },
+    {
+      "path": "third-parties/quickjs/wasm-quickjs-call-storage.patch",
+      "bytes": 9274,
+      "mode": 420,
+      "sha256": "36143996a79e3e0da294a34e0c64a10a22c18794a0c8a330d1c0ee478659309f"
+    }
+  ]
+}

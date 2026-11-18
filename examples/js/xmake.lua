@@ -1,0 +1,13 @@
+set_project("robot")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("robot")
+    set_kind("binary")
+    set_language("js")
+    set_ros_platform(os.getenv("WROS_PLATFORM") or "unitree")
+    set_wros_profile({core = "3.0", mte = true, eh = true, build_receipt = true})
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_wros_operations("capability.open", "capability.close", "guard.create", "guard.trigger", "guard.take")
+    add_files("body.js")
+target_end()
