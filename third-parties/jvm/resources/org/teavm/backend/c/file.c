@@ -1,0 +1,1 @@
+/* The synchronous guest profile excludes native files and calendars. */

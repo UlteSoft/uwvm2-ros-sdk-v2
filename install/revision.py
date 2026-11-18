@@ -17,7 +17,7 @@ def main():
     parser.add_argument("platform")
     parser.add_argument("language")
     parser.add_argument("--revision-help", action="store_true")
-    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source"),
+    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot"),
                         default="development")
     args = parser.parse_args()
     if args.revision_help:
@@ -29,7 +29,12 @@ def main():
     if args.language not in LANGUAGES:
         parser.error("unknown language: " + args.language)
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
-    if args.component == "bindings":
+    if args.component == "synchronous-aot":
+        if args.language not in ("java", "kotlin"):
+            parser.error("the synchronous-aot component requires java or kotlin")
+        packages.extend(("protocol", "frontend", "jvm/synchronous", "jvm/" + args.language,
+                         "xmake/common", "xmake/platforms/" + args.platform))
+    elif args.component == "bindings":
         binding = BINDINGS.get(args.language)
         if binding is None:
             parser.error("no raw bindings are published for this language")

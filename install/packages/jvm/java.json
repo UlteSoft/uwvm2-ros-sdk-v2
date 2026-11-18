@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "bin/wrjava",
+      "bytes": 199,
+      "mode": 493,
+      "sha256": "87f7bc8b749000acbbdee27a465c95453e97ae37e1598e8cb43ca4104c86be43"
+    },
+    {
+      "path": "examples/java/synchronous-aot/GuardApplication.java",
+      "bytes": 691,
+      "mode": 420,
+      "sha256": "a845ba12da3cb01c8a6b4f4459b2e8cddae918ae6f071c9609c181bc7a18ab7f"
+    },
+    {
+      "path": "examples/java/synchronous-aot/Main.java",
+      "bytes": 199,
+      "mode": 420,
+      "sha256": "b821c215f8b2fabe29850b805d0b1d0c7e29b390251f2300a757110d830580e9"
+    },
+    {
+      "path": "examples/java/synchronous-aot/xmake.lua",
+      "bytes": 418,
+      "mode": 420,
+      "sha256": "3b4885f9975b38752adead6ee3427d07e81c0369644d7e05670d639193d0438b"
+    },
+    {
+      "path": "language/java/host-inputs.json",
+      "bytes": 51111,
+      "mode": 420,
+      "sha256": "580c518181bb7668167c54707421b5c52a1d3e3d84e05d1bf4d67119e078e1de"
+    },
+    {
+      "path": "language/java/xmake/adapter.lua",
+      "bytes": 1318,
+      "mode": 420,
+      "sha256": "fccb26c0616c0302d2c1c9ef276f3898a87c431f630ad0b5079993aa32dcde16"
+    }
+  ]
+}

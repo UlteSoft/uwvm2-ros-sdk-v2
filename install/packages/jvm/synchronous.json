@@ -1,0 +1,172 @@
+{
+  "files": [
+    {
+      "path": "document/en/jvm.md",
+      "bytes": 3523,
+      "mode": 420,
+      "sha256": "e25b6a3eb7afeabaaebb1a507c3ec4fc836812d8ba37ce3674dcc24fbacacf2b"
+    },
+    {
+      "path": "document/zh/jvm.md",
+      "bytes": 2650,
+      "mode": 420,
+      "sha256": "30700b3853b91ea558c1f452c76cb8489eabef691cf97f09878aeb15b3ba44d6"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/jvm/Admit.java",
+      "bytes": 6299,
+      "mode": 420,
+      "sha256": "6b34b022962f61792a0fb296c21fa82a21994fe0c8b3a3482c2bcbcaa859ee56"
+    },
+    {
+      "path": "language/jvm/Translate.java",
+      "bytes": 1654,
+      "mode": 420,
+      "sha256": "9e72da876287a08998827ad1d511b2b84d77a5767bffffdf026c4378f1e2c450"
+    },
+    {
+      "path": "language/jvm/contracts.h",
+      "bytes": 342,
+      "mode": 420,
+      "sha256": "f4ba43ceb57d3a6509e3966dc62fca070d90802285af6d53cdaeb1fff818b280"
+    },
+    {
+      "path": "language/jvm/guest.c",
+      "bytes": 320,
+      "mode": 420,
+      "sha256": "a155cba67595214b32ff78180d0df7ae8c54e0f39f9e1fbaa003748d18ed8df6"
+    },
+    {
+      "path": "language/jvm/java/wros/scene/Guard.java",
+      "bytes": 3150,
+      "mode": 420,
+      "sha256": "70fac81b22c417d02ff9ac88ab6df254b8ad3b5f8243ec52bd4a8896c6ad73d9"
+    },
+    {
+      "path": "language/jvm/java/wros/scene/Scene.java",
+      "bytes": 226,
+      "mode": 420,
+      "sha256": "a1f5bc176c9cefcde3fe8fb228d3041dc77ae06d90c6b91f87635c3d417646b8"
+    },
+    {
+      "path": "language/jvm/jvm_frontend.py",
+      "bytes": 7290,
+      "mode": 420,
+      "sha256": "ff98da20b9899bda67161181513e3909454c68d853d0fb1c23ac46e09a69c899"
+    },
+    {
+      "path": "third-parties/jvm/LICENSE",
+      "bytes": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "third-parties/jvm/README.md",
+      "bytes": 627,
+      "mode": 420,
+      "sha256": "1eac6bc81f2e0d8313549c3efc6a3783c07c96ae0958eaff36097055d166c4bc"
+    },
+    {
+      "path": "third-parties/jvm/UPSTREAM.json",
+      "bytes": 5911,
+      "mode": 420,
+      "sha256": "df36dd55e5f1632307005cfd454e38e1943bc1e8a0ae9f510ce63dbb2beb7e2c"
+    },
+    {
+      "path": "third-parties/jvm/java/org/teavm/backend/c/CTarget.java",
+      "bytes": 43402,
+      "mode": 420,
+      "sha256": "10d7d37bb0405fbd4be4067b250af28ffe259205af5fc8b5a97cace1e0a4f485"
+    },
+    {
+      "path": "third-parties/jvm/java/org/teavm/backend/c/generate/ClassGenerator.java",
+      "bytes": 60934,
+      "mode": 420,
+      "sha256": "4ea82fcf80a7b014b65d653b71d7a9b7cc100b975e1177db8c3f843bca905ace"
+    },
+    {
+      "path": "third-parties/jvm/java/org/teavm/runtime/Allocator.java",
+      "bytes": 2753,
+      "mode": 420,
+      "sha256": "6525f6056992545bbcc3c608aaf53da6cb454d339046dc2f62a6eabdd52400fd"
+    },
+    {
+      "path": "third-parties/jvm/java/org/teavm/runtime/GC.java",
+      "bytes": 61838,
+      "mode": 420,
+      "sha256": "6502c27d146cf2dd727e806c9c1831e4fab3cbd204f52747ce16ba83fcee47c8"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/core.c",
+      "bytes": 2785,
+      "mode": 420,
+      "sha256": "b0cd4ec65f2a7ae320dd56b5b60b4240206bc65a90b297ad70f26349b49f06f9"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/core.h",
+      "bytes": 7794,
+      "mode": 420,
+      "sha256": "f8e61991af82561a59c2a3bff9e8773606186a1f8bd8df1f38a67273bb60e81f"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/date.c",
+      "bytes": 73,
+      "mode": 420,
+      "sha256": "a2733a44b0ac449b89aab1ac6033ccac9bd4b6213110a13f7c19449689cbf7a4"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/definitions.h",
+      "bytes": 1379,
+      "mode": 420,
+      "sha256": "0f8f4570a4c6fe2663e6487d310f9bc95180f8904adc87c3eceb0114021bcb5b"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/exceptions.h",
+      "bytes": 2526,
+      "mode": 420,
+      "sha256": "e4c41686d1196802fd2fcc6bea299e9cf6584d2c9b121ca7b14600bfcbc9f808"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/fiber.c",
+      "bytes": 131,
+      "mode": 420,
+      "sha256": "2aa98339295d7a5e6cfef793004b1ebe779c71eacb66813e5ba373997a67d4b3"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/file.c",
+      "bytes": 73,
+      "mode": 420,
+      "sha256": "a2733a44b0ac449b89aab1ac6033ccac9bd4b6213110a13f7c19449689cbf7a4"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/log.c",
+      "bytes": 267,
+      "mode": 420,
+      "sha256": "514cf4005650916492b7fb8cc6e975d527b1d366c706b3dbd2ff59ee72daa690"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/memory.c",
+      "bytes": 6821,
+      "mode": 420,
+      "sha256": "f6fa2db9ac5818c7311bd8f74724cf3b04b2c1960e2825bc977e79e5a6a02add"
+    },
+    {
+      "path": "third-parties/jvm/resources/org/teavm/backend/c/time.c",
+      "bytes": 514,
+      "mode": 420,
+      "sha256": "acabef1d6822a740f86c41508e5f8ffaa9b5b1d133408ac62bdf0f3994413650"
+    },
+    {
+      "path": "third-parties/jvm/teavm-wros.patch",
+      "bytes": 60859,
+      "mode": 420,
+      "sha256": "4b5367fd22f4a170861623931fdedf149576a26ee566b7a43990e9556378a04f"
+    }
+  ]
+}

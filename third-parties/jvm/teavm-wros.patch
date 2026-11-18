@@ -1,0 +1,1871 @@
+--- a/core/src/main/java/org/teavm/backend/c/CTarget.java
++++ b/core/src/main/java/org/teavm/backend/c/CTarget.java
+@@ -859,12 +859,10 @@
+ 
+     private void generateFiberStart(ClassGenerationContext context, CodeWriter writer) {
+         NameProvider names = context.getContext().getNames();
+-        MethodReference startRef = new MethodReference(Fiber.class, "startMain", String[].class, void.class);
+-        MethodReference processRef = new MethodReference(EventQueue.class, "process", void.class);
+-        context.importMethod(startRef, true);
+-        context.importMethod(processRef, true);
+-        writer.println(names.forMethod(startRef) + "(teavm_parseArguments(argc, argv));");
+-        writer.println(names.forMethod(processRef) + "();");
++        MethodReference entry = new MethodReference(controller.getEntryPoint(), "main",
++                ValueType.parse(String[].class), ValueType.VOID);
++        context.importMethod(entry, true);
++        writer.println(names.forMethod(entry) + "(teavm_parseArguments(0, NULL));");
+     }
+ 
+     class FiberIntrinsic implements Intrinsic {
+--- a/core/src/main/java/org/teavm/backend/c/generate/ClassGenerator.java
++++ b/core/src/main/java/org/teavm/backend/c/generate/ClassGenerator.java
+@@ -130,6 +130,9 @@
+     }
+ 
+     public void prepare(ListableClassHolderSource classes) {
++        // The C launcher and its special functions allocate both native argument and character arrays.
++        addType(ValueType.parse(String[].class));
++        addType(ValueType.parse(char[].class));
+         for (String className : classes.getClassNames()) {
+             ClassHolder cls = classes.get(className);
+             prepareClass(cls);
+--- a/core/src/main/java/org/teavm/runtime/GC.java
++++ b/core/src/main/java/org/teavm/runtime/GC.java
+@@ -27,6 +27,15 @@
+ @Unmanaged
+ @StaticInit
+ public final class GC {
++    @Import(name="wros_jvm_alloc") private static native Address wrosAlloc(int bytes);
++    @Import(name="wros_jvm_enqueue") private static native boolean wrosEnqueue(Address p);
++    @Import(name="wros_jvm_marked") private static native boolean wrosMarked(Address p);
++    @Import(name="wros_jvm_pop") private static native Address wrosPop();
++    @Import(name="wros_jvm_sweep") private static native void wrosSweep();
++    @Import(name="wros_jvm_freebytes") private static native int wrosFreeBytes();
++
++    @Import(name="wros_jvm_unsupported") private static native void unsupportedDirectBuffer();
++
+     private GC() {
+     }
+ 
+@@ -80,22 +89,11 @@
+     public static native void outOfMemory();
+ 
+     public static int getFreeMemory() {
+-        return freeMemory;
++        return wrosFreeBytes();
+     }
+ 
+     static {
+-        currentChunk = heapAddress().toStructure();
+-        currentChunk.classReference = 0;
+-        currentChunk.size = (int) availableBytes();
+-        currentChunkLimit = currentChunk.toAddress().add(currentChunk.size);
+-        currentChunkPointer = gcStorageAddress().toStructure();
+-        currentChunkPointer.value = currentChunk;
+-        freeChunks = 1;
+-        totalChunks = 1;
+-        firstDirectBuffer = null;
+-
+-        int regionCount = getRegionCount();
+-        Address.fill(cardTable(), CARD_VALID, regionCount);
++
+     }
+ 
+     private static int getRegionCount() {
+@@ -108,17 +106,13 @@
+     }
+ 
+     public static RuntimeObject alloc(int size) {
+-        FreeChunk current = currentChunk;
+-        Address next = current.toAddress().add(size);
+-        if (!next.add(Structure.sizeOf(FreeChunk.class)).isLessThan(currentChunkLimit)) {
+-            getNextChunk(size);
+-            current = currentChunk;
+-            next = current.toAddress().add(size);
+-        }
+-        currentChunk = next.toStructure();
+-        freeMemory -= size;
+-        MemoryTrace.allocate(current.toAddress(), size);
+-        return current.toAddress().toStructure();
++        Address object = wrosAlloc(size);
++        if (object == null) {
++            collectGarbage();
++            object = wrosAlloc(size);
++            if (object == null) outOfMemory();
++        }
++        return object.toStructure();
+     }
+ 
+     private static void getNextChunk(int size) {
+@@ -163,14 +157,23 @@
+ 
+     @Export(name = "teavm_gc_collect")
+     public static void collectGarbage() {
+-        fixHeap();
+-        collectGarbageImpl(0);
++        firstWeakReference = null;
++        markFromStaticFields();
++        markFromClasses();
++        markFromStack();
++        while (true) {
++            Address addr = wrosPop();
++            if (addr == null) break;
++            markObjectData(addr.toStructure());
++        }
++        processReferences();
++        processDirectBuffers();
++        wrosSweep();
+     }
+ 
+     @Export(name = "teavm_gc_collectFull")
+     public static void collectGarbageFull() {
+-        fixHeap();
+-        collectGarbageFullImpl(0);
++        collectGarbage();
+     }
+ 
+     private static void collectGarbageFullImpl(int size) {
+@@ -250,19 +253,12 @@
+ 
+     @Export(name = "teavm_gc_fixHeap")
+     public static void fixHeap() {
+-        if (freeChunks > 0) {
+-            currentChunk.classReference = 0;
+-            currentChunk.size = (int) (currentChunkLimit.toLong() - currentChunk.toAddress().toLong());
+-        }
++        // This nonmoving collector maintains a valid heap after each allocation.
+     }
+ 
+     @Export(name = "teavm_gc_tryShrink")
+     public static void tryShrink() {
+-        long availableBytes = availableBytes();
+-        long occupiedMemory = availableBytes - freeMemory;
+-        if (occupiedMemory < availableBytes / 4) {
+-            collectGarbageFull();
+-        }
++        collectGarbage();
+     }
+ 
+     private static void mark() {
+@@ -389,12 +385,7 @@
+     }
+ 
+     private static void mark(RuntimeObject object) {
+-        if (object == null || isMarked(object)) {
+-            return;
+-        }
+-        MarkQueue.init();
+-        enqueueMark(object);
+-        doProcessMarkQueue();
++        if (object != null) wrosEnqueue(object.toAddress());
+     }
+ 
+     private static boolean doMarkOldGeneration(RuntimeObject object) {
+@@ -513,15 +504,7 @@
+     }
+ 
+     private static boolean enqueueMark(RuntimeObject object) {
+-        if (object == null) {
+-            return false;
+-        }
+-        if (!isMarked(object)) {
+-            doEnqueueMark(object);
+-            return true;
+-        } else {
+-            return (object.classReference & RuntimeObject.GC_OLD_GENERATION) == 0;
+-        }
++        return object != null && wrosEnqueue(object.toAddress());
+     }
+ 
+     private static void doEnqueueMark(RuntimeObject object) {
+@@ -557,34 +540,11 @@
+     }
+ 
+     private static void makeInvalid(RuntimeObject object) {
+-        long offset = object.toAddress().toLong() - heapAddress().toLong();
+-        Address cardTableItem = cardTable().add(offset / regionSize());
+-        cardTableItem.putByte((byte) (cardTableItem.getByte() & ~CARD_VALID));
++        // Single-generation collection has no card invalidation.
+     }
+ 
+     private static void processDirectBuffers() {
+-        var buffer = firstDirectBuffer;
+-        RuntimeBuffer prevBuffer = null;
+-        while (buffer != null) {
+-            var next = buffer.nextRef;
+-            if ((buffer.classReference & RuntimeObject.GC_MARKED) == 0) {
+-                freeBufferContent(buffer);
+-            } else {
+-                if (prevBuffer == null) {
+-                    firstDirectBuffer = buffer;
+-                } else {
+-                    prevBuffer.nextRef = buffer;
+-                }
+-                prevBuffer = buffer;
+-            }
+-            buffer = next;
+-        }
+-
+-        if (prevBuffer == null) {
+-            firstDirectBuffer = null;
+-        } else {
+-            prevBuffer.nextRef = null;
+-        }
++        if (firstDirectBuffer != null) unsupportedDirectBuffer();
+     }
+ 
+     private static void freeBufferContent(RuntimeBuffer buffer) {
+@@ -1551,8 +1511,7 @@
+     }
+ 
+     private static boolean isMarked(RuntimeObject object) {
+-        return (object.classReference & RuntimeObject.GC_MARKED) != 0
+-                || (!isFullGC && (object.classReference & RuntimeObject.GC_OLD_GENERATION) != 0);
++        return object != null && wrosMarked(object.toAddress());
+     }
+ 
+     static class Region extends Structure {
+--- a/core/src/main/java/org/teavm/runtime/Allocator.java
++++ b/core/src/main/java/org/teavm/runtime/Allocator.java
+@@ -35,6 +35,9 @@
+ 
+     public static Address allocateArray(RuntimeClass tag, int size) {
+         int itemSize = (tag.itemType.flags & RuntimeClass.PRIMITIVE) != 0 ? tag.itemType.size : Address.sizeOf();
++        if (size < 0 || itemSize <= 0 || (long) itemSize * size > 16777184L) {
++            GC.outOfMemory();
++        }
+         int sizeInBytes = Address.align(Address.fromInt(Structure.sizeOf(RuntimeArray.class)), itemSize).toInt();
+         sizeInBytes += itemSize * size;
+         sizeInBytes = Address.align(Address.fromInt(sizeInBytes), Address.sizeOf()).toInt();
+--- a/core/src/main/resources/org/teavm/backend/c/core.c
++++ b/core/src/main/resources/org/teavm/backend/c/core.c
+@@ -29,7 +29,7 @@
+ }
+ 
+ void teavm_beforeInit() {
+-    srand((unsigned int) time(NULL));
++    srand(1);
+ 
+     #if TEAVM_UNIX
+         setlocale (LC_ALL, "");
+@@ -61,12 +61,14 @@
+ TeaVM_Class* teavm_charArrayClass;
+ 
+ void teavm_initClasses() {
+-    teavm_beforeClasses = (char*) teavm_classReferences[0];
+-    for (int i = 1; i < teavm_classReferencesCount; ++i) {
+-        char* c = (char*) teavm_classReferences[i];
+-        if (c < teavm_beforeClasses) teavm_beforeClasses = c;
++    if (teavm_classReferencesCount <= 0 || (uint32_t)teavm_classReferencesCount > 0x3fffffff)
++        __builtin_trap();
++    for (int32_t i = 0; i < teavm_classReferencesCount; ++i) {
++        TeaVM_Class *cls = teavm_classReferences[i];
++        if (cls == NULL || cls->wros_identity != 0) __builtin_trap();
++        cls->wros_identity = (uint32_t)i + 1;
+     }
+-    teavm_beforeClasses -= 4096;
++
+     int32_t classHeader = TEAVM_PACK_CLASS(teavm_classClass) | (int32_t) INT32_C(0x80000000);
+     for (int i = 0; i < teavm_classReferencesCount; ++i) {
+         teavm_classReferences[i]->parent.header = classHeader;
+--- a/core/src/main/resources/org/teavm/backend/c/core.h
++++ b/core/src/main/resources/org/teavm/backend/c/core.h
+@@ -51,6 +51,7 @@
+         TeaVM_FieldDescriptors* fieldDescriptors;
+         TeaVM_StaticFieldDescriptors* staticFieldDescriptors;
+     #endif
++    uint32_t wros_identity;
+ } TeaVM_Class;
+ 
+ typedef struct TeaVM_Service {
+@@ -75,8 +76,22 @@
+ extern void teavm_throwNullPointerException();
+ extern void teavm_throwArrayIndexOutOfBoundsException();
+ 
+-#define TEAVM_PACK_CLASS(cls) ((int32_t) ((uintptr_t) ((char*) (cls) - teavm_beforeClasses) >> 3))
+-#define TEAVM_UNPACK_CLASS(cls) ((TeaVM_Class*) (teavm_beforeClasses + ((cls) << 3)))
++extern TeaVM_Class* teavm_classReferences[];
++extern int32_t teavm_classReferencesCount;
++static inline int32_t wros_pack_class(void *p) {
++    TeaVM_Class *cls = p;
++    uint32_t id = cls->wros_identity;
++    if (id == 0 || id > (uint32_t)teavm_classReferencesCount || teavm_classReferences[id - 1] != cls)
++        __builtin_trap();
++    return (int32_t)id;
++}
++static inline TeaVM_Class *wros_unpack_class(int32_t word) {
++    uint32_t id=(uint32_t)word&0x3fffffff;
++    if (!id || id > (uint32_t)teavm_classReferencesCount) __builtin_trap();
++    return teavm_classReferences[id-1];
++}
++#define TEAVM_PACK_CLASS(cls) wros_pack_class(cls)
++#define TEAVM_UNPACK_CLASS(cls) wros_unpack_class(cls)
+ #define TEAVM_CLASS_OF(obj) (TEAVM_UNPACK_CLASS(((TeaVM_Object*) (obj))->header))
+ #define TEAVM_AS(ptr, type) ((type*) (ptr))
+ 
+@@ -197,10 +212,7 @@
+ extern void teavm_initClasses();
+ 
+ 
+-inline static void teavm_gc_writeBarrier(void* object) {
+-    intptr_t offset = (intptr_t) ((char*) object - (char*) teavm_gc_heapAddress) / teavm_gc_regionSize;
+-    ((char*) teavm_gc_cardTable)[offset] = 0;
+-}
++inline static void teavm_gc_writeBarrier(void *object) { (void)object; /* Full, single-generation collection. */ }
+ 
+ extern void* teavm_fillArray(void* array, ...);
+ extern void* teavm_fillBooleanArray(void* array, ...);
+--- a/core/src/main/resources/org/teavm/backend/c/date.c
++++ b/core/src/main/resources/org/teavm/backend/c/date.c
+@@ -1,192 +1 @@
+-#include "date.h"
+-#include "definitions.h"
+-
+-#ifndef _XOPEN_SOURCE
+-#define _XOPEN_SOURCE
+-#endif
+-
+-#ifndef __USE_XOPEN
+-#define __USE_XOPEN
+-#endif
+-
+-#ifndef _GNU_SOURCE
+-#define _GNU_SOURCE
+-#endif
+-
+-#if TEAVM_WINDOWS
+-    #define timegm _mkgmtime
+-    #define localtime_r(a, b) localtime_s(b, a)
+-#endif
+-
+-static time_t teavm_epochStart;
+-static struct tm teavm_epochStartTm;
+-static char teavm_date_formatBuffer[512];
+-static char* teavm_date_defaultFormat = "%a %b %d %H:%M:%S %Z %Y";
+-
+-void teavm_date_init() {
+-    struct tm epochStart = {
+-        .tm_year = 70,
+-        .tm_mon = 0,
+-        .tm_mday = 1,
+-        .tm_hour = 0,
+-        .tm_min = 0,
+-        .tm_sec = 0,
+-        .tm_isdst = -1
+-    };
+-    teavm_epochStart = timegm(&epochStart);
+-    localtime_r(&teavm_epochStart, &teavm_epochStartTm);
+-}
+-
+-inline static int64_t teavm_date_timestamp(struct tm *t) {
+-    time_t result = mktime(t);
+-    return (int64_t) (1000 * difftime(result, teavm_epochStart));
+-}
+-
+-int64_t teavm_date_timeToTimestamp(time_t t) {
+-    return (int64_t) (1000 * difftime(t, teavm_epochStart));
+-}
+-
+-time_t teavm_date_timestampToTime(int64_t timestamp) {
+-    int64_t seconds = (timestamp / 1000);
+-    struct tm t = {
+-        .tm_year = 70,
+-        .tm_mon = 0,
+-        .tm_mday = 1,
+-        .tm_hour = (int) (seconds / 3600),
+-        .tm_min = (int) ((seconds / 60) % 60),
+-        .tm_sec = (int) (seconds % 60),
+-        .tm_isdst = -1
+-    };
+-    return timegm(&t) + timestamp % 1000;
+-}
+-
+-inline static struct tm* teavm_date_decompose(int64_t timestamp, struct tm *t) {
+-    *t = teavm_epochStartTm;
+-    int64_t seconds = (timestamp / 1000);
+-    t->tm_sec += (int) (seconds % 60);
+-    t->tm_min += (int) ((seconds / 60) % 60);
+-    t->tm_hour += (int) (seconds / 3600);
+-    mktime(t);
+-    return t;
+-}
+-
+-int64_t teavm_date_create(int32_t year, int32_t month, int32_t day, int32_t hour, int32_t minute, int32_t second) {
+-    struct tm t = {
+-        .tm_year = year,
+-        .tm_mon = month,
+-        .tm_mday = day,
+-        .tm_hour = hour,
+-        .tm_min = minute,
+-        .tm_sec = second,
+-        .tm_isdst = -1
+-    };
+-    return teavm_date_timestamp(&t);
+-}
+-
+-int64_t teavm_date_createUtc(int32_t year, int32_t month, int32_t day, int32_t hour, int32_t minute, int32_t second) {
+-    struct tm t = {
+-        .tm_year = year,
+-        .tm_mon = month,
+-        .tm_mday = day,
+-        .tm_hour = hour,
+-        .tm_min = minute,
+-        .tm_sec = second,
+-        .tm_isdst = -1
+-    };
+-    time_t result = timegm(&t);
+-    return (int64_t) (1000 * difftime(result, teavm_epochStart));
+-}
+-
+-int64_t teavm_date_parse(char* s) {
+-    #if TEAVM_UNIX
+-        struct tm t;
+-        strptime(s, teavm_date_defaultFormat, &t);
+-        time_t result = mktime(&t);
+-        return (int64_t) (1000 * difftime(result, teavm_epochStart));
+-    #else
+-        return 0;
+-    #endif
+-}
+-
+-int32_t teavm_date_getYear(int64_t time) {
+-    struct tm t;
+-    return (int32_t) teavm_date_decompose(time, &t)->tm_year;
+-}
+-
+-int64_t teavm_date_setYear(int64_t time, int32_t year) {
+-    struct tm t;
+-    teavm_date_decompose(time, &t)->tm_year = year;
+-    return teavm_date_timestamp(&t);
+-}
+-
+-int32_t teavm_date_getMonth(int64_t time) {
+-    struct tm t;
+-    return (int32_t) teavm_date_decompose(time, &t)->tm_mon;
+-}
+-
+-int64_t teavm_date_setMonth(int64_t time, int32_t month) {
+-    struct tm t;
+-    teavm_date_decompose(time, &t)->tm_mon = month;
+-    return teavm_date_timestamp(&t);
+-}
+-
+-int32_t teavm_date_getDate(int64_t time) {
+-    struct tm t;
+-    return (int32_t) teavm_date_decompose(time, &t)->tm_mday;
+-}
+-
+-int64_t teavm_date_setDate(int64_t time, int32_t date) {
+-    struct tm t;
+-    teavm_date_decompose(time, &t)->tm_mday = date;
+-    return teavm_date_timestamp(&t);
+-}
+-
+-int32_t teavm_date_getDay(int64_t time) {
+-    struct tm t;
+-    return (int32_t) teavm_date_decompose(time, &t)->tm_wday;
+-}
+-
+-int32_t teavm_date_getHours(int64_t time) {
+-    struct tm t;
+-    return (int32_t) teavm_date_decompose(time, &t)->tm_hour;
+-}
+-
+-int64_t teavm_date_setHours(int64_t time, int32_t hours) {
+-    struct tm t;
+-    teavm_date_decompose(time, &t)->tm_hour = hours;
+-    return teavm_date_timestamp(&t);
+-}
+-
+-int32_t teavm_date_getMinutes(int64_t time) {
+-    struct tm t;
+-    return (int32_t) teavm_date_decompose(time, &t)->tm_min;
+-}
+-
+-int64_t teavm_date_setMinutes(int64_t time, int32_t minutes) {
+-    struct tm t;
+-    teavm_date_decompose(time, &t)->tm_min = minutes;
+-    return teavm_date_timestamp(&t);
+-}
+-
+-int32_t teavm_date_getSeconds(int64_t time) {
+-    struct tm t;
+-    return (int32_t) teavm_date_decompose(time, &t)->tm_sec;
+-}
+-
+-int64_t teavm_date_setSeconds(int64_t time, int32_t seconds) {
+-    struct tm t;
+-    teavm_date_decompose(time, &t)->tm_sec = seconds;
+-    return teavm_date_timestamp(&t);
+-}
+-
+-char* teavm_date_format(int64_t time) {
+-    struct tm t;
+-    t = teavm_epochStartTm;
+-    int64_t seconds = (time / 1000);
+-    t.tm_sec += (int) (seconds % 60);
+-    t.tm_min += (int) ((seconds / 60) % 60);
+-    t.tm_hour += (int) (seconds / 3600);
+-    mktime(&t);
+-    strftime(teavm_date_formatBuffer, 512, teavm_date_defaultFormat, &t);
+-    return teavm_date_formatBuffer;
+-}+/* The synchronous guest profile excludes native files and calendars. */
+--- a/core/src/main/resources/org/teavm/backend/c/definitions.h
++++ b/core/src/main/resources/org/teavm/backend/c/definitions.h
+@@ -25,7 +25,7 @@
+ 
+ #ifdef __GNUC__
+     #undef TEAVM_UNIX
+-    #define TEAVM_UNIX 1
++    #define TEAVM_UNIX 0
+     #include <stdalign.h>
+ #endif
+ 
+@@ -69,4 +69,4 @@
+ 
+ #ifndef TEAVM_OBFUSCATED
+     #define TEAVM_OBFUSCATED 0
+-#endif+#endif
+--- a/core/src/main/resources/org/teavm/backend/c/exceptions.h
++++ b/core/src/main/resources/org/teavm/backend/c/exceptions.h
+@@ -28,7 +28,7 @@
+                 switch (teavm_exceptionHandler) {
+     #define TEAVM_END_TRY \
+                     default: \
+-                        longjmp(teavm_shadowStack.header.jmpTarget->buffer, teavm_exceptionHandler); \
++                        __builtin_trap(); \
+                         break; \
+                 } \
+             } \
+@@ -36,7 +36,7 @@
+ 
+     #define TEAVM_JUMP_TO_FRAME(frame, id) \
+         teavm_stackTop = (TeaVM_StackFrame*) (frame); \
+-        longjmp(teavm_stackTop->jmpTarget->buffer, id)
++        __builtin_trap()
+ 
+ 
+     #if TEAVM_UNIX
+@@ -46,7 +46,7 @@
+         #define TEAVM_UNREACHABLE __assume(0);
+     #endif
+     #ifndef TEAVM_UNREACHABLE
+-        #define TEAVM_UNREACHABLE return;
++        #define TEAVM_UNREACHABLE __builtin_trap();
+     #endif
+ 
+     inline static void* teavm_nullCheck(void* o) {
+--- a/core/src/main/resources/org/teavm/backend/c/fiber.c
++++ b/core/src/main/resources/org/teavm/backend/c/fiber.c
+@@ -1,95 +1,3 @@
+-#include "fiber.h"
+-#include "definitions.h"
+-#include <stddef.h>
+-#include <locale.h>
+-#include <time.h>
+-
+-#if TEAVM_UNIX
+-    #include <signal.h>
+-#endif
+-#if TEAVM_WINDOWS
+-    #include <Windows.h>
+-    #include <synchapi.h>
+-#endif
+-
+-#if TEAVM_UNIX
+-    static timer_t teavm_queueTimer;
+-#endif
+-#if TEAVM_WINDOWS
+-    static HANDLE teavm_queueTimer;
+-#endif
+-
+-void teavm_initFiber() {
+-
+-    #if TEAVM_UNIX
+-        setlocale (LC_ALL, "");
+-
+-        struct sigaction sigact;
+-        sigact.sa_flags = 0;
+-        sigact.sa_handler = NULL;
+-        sigaction(SIGRTMIN, &sigact, NULL);
+-
+-        sigset_t signals;
+-        sigemptyset(&signals);
+-        sigaddset(&signals, SIGRTMIN);
+-        sigprocmask(SIG_BLOCK, &signals, NULL);
+-
+-        struct sigevent sev;
+-        sev.sigev_notify = SIGEV_SIGNAL;
+-        sev.sigev_signo = SIGRTMIN;
+-        timer_create(CLOCK_REALTIME, &sev, &teavm_queueTimer);
+-    #endif
+-
+-    #if TEAVM_WINDOWS
+-        LARGE_INTEGER perf = { .QuadPart  = 0 };
+-        QueryPerformanceFrequency(&perf);
+-        teavm_perfFrequency = perf.QuadPart;
+-        QueryPerformanceCounter(&perf);
+-        teavm_perfInitTime = perf.QuadPart;
+-
+-        teavm_queueTimer = CreateEvent(NULL, TRUE, FALSE, TEXT("TeaVM_eventQueue"));
+-
+-        SYSTEMTIME unixEpochStart = {
+-            .wYear = 1970,
+-            .wMonth = 1,
+-            .wDayOfWeek = 3,
+-            .wDay = 1
+-        };
+-        FILETIME fileTimeStart;
+-        SystemTimeToFileTime(&unixEpochStart, &fileTimeStart);
+-        teavm_unixTimeOffset = fileTimeStart.dwLowDateTime | ((uint64_t) fileTimeStart.dwHighDateTime << 32);
+-    #endif
+-}
+-
+-
+-#if TEAVM_UNIX
+-    void teavm_waitFor(int64_t timeout) {
+-        struct itimerspec its = {0};
+-        its.it_value.tv_sec = timeout / 1000;
+-        its.it_value.tv_nsec = (timeout % 1000) * 1000000L;
+-        timer_settime(teavm_queueTimer, 0, &its, NULL);
+-
+-        sigset_t signals;
+-        sigemptyset(&signals);
+-        sigaddset(&signals, SIGRTMIN);
+-        siginfo_t actualSignal;
+-        sigwaitinfo(&signals, &actualSignal);
+-    }
+-
+-    void teavm_interrupt() {
+-        struct itimerspec its = {0};
+-        timer_settime(teavm_queueTimer, 0, &its, NULL);
+-        raise(SIGRTMIN);
+-    }
+-#endif
+-
+-#if TEAVM_WINDOWS
+-    void teavm_waitFor(int64_t timeout) {
+-        WaitForSingleObject(teavm_queueTimer, (DWORD) timeout);
+-        ResetEvent(teavm_queueTimer);
+-    }
+-
+-    void teavm_interrupt() {
+-        SetEvent(teavm_queueTimer);
+-    }
+-#endif
++void teavm_initFiber(void) {}
++void teavm_waitFor(int64_t t) { __builtin_trap(); }
++void teavm_interrupt(void) { __builtin_trap(); }
+--- a/core/src/main/resources/org/teavm/backend/c/file.c
++++ b/core/src/main/resources/org/teavm/backend/c/file.c
+@@ -1,685 +1 @@
+-#include "definitions.h"
+-#include "file.h"
+-#include "string.h"
+-#include "time.h"
+-#include "date.h"
+-#include <stdlib.h>
+-#include <errno.h>
+-
+-#if TEAVM_UNIX
+-#include <unistd.h>
+-#include <sys/stat.h>
+-#include <sys/types.h>
+-#include <fcntl.h>
+-#include <stdio.h>
+-#include <dirent.h>
+-#include <utime.h>
+-#include <pwd.h>
+-#include <string.h>
+-
+-int32_t teavm_file_homeDirectory(char16_t** result) {
+-    struct passwd *pw = getpwuid(getuid());
+-    int32_t length;
+-    *result = teavm_mbToChar16(pw->pw_dir, &length);
+-    return length;
+-}
+-
+-int32_t teavm_file_workDirectory(char16_t** result) {
+-    long pathMax;
+-    size_t size;
+-    char *buf;
+-    int32_t length;
+-
+-    pathMax = pathconf(".", _PC_PATH_MAX);
+-    if (pathMax == -1) {
+-        size = 1024;
+-    } else if (pathMax > 10240) {
+-        size = 10240;
+-    } else {
+-        size = pathMax;
+-    }
+-
+-    buf = malloc(size);
+-
+-    while (1) {
+-        if (getcwd(buf, size) != buf) {
+-            if (errno != ERANGE) {
+-                *result = teavm_mbToChar16(strerror(errno), &length);
+-                return -1 - length;
+-            }
+-        } else {
+-            *result = teavm_mbToChar16(buf, &length);
+-            free(buf);
+-            return length;
+-        }
+-        size *= 2;
+-        char* newBuf = realloc(buf, size);
+-        if (newBuf == NULL) {
+-            *result = teavm_mbToChar16("Out of memory", &length);
+-            free(buf);
+-            return -1 - length;
+-        }
+-        buf = newBuf;
+-    }
+-}
+-
+-int32_t teavm_file_tempDirectory(char16_t** result) {
+-  static const char16_t string[] = u"/tmp";
+-  char16_t* copy = malloc(sizeof(string));
+-  *result = copy;
+-  int32_t i = 0;
+-  while (string[i] != 0) {
+-    copy[i] = string[i];
+-    i++;
+-  }
+-  return i;
+-}
+-
+-int32_t teavm_file_isFile(char16_t* name, int32_t nameSize) {
+-    struct stat s;
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int statResult = stat(mbName, &s);
+-    free(mbName);
+-    if (statResult != 0) {
+-        return 0;
+-    }
+-
+-    return !S_ISDIR(s.st_mode);
+-}
+-
+-int32_t teavm_file_isDir(char16_t* name, int32_t nameSize) {
+-    struct stat s;
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int statResult = stat(mbName, &s);
+-    free(mbName);
+-    if (statResult != 0) {
+-        return 0;
+-    }
+-
+-    return S_ISDIR(s.st_mode);
+-}
+-
+-int32_t teavm_file_exists(char16_t* name, int32_t nameSize) {
+-    struct stat s;
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int statResult = stat(mbName, &s);
+-    free(mbName);
+-    return statResult == 0;
+-}
+-
+-int32_t teavm_file_canRead(char16_t* name, int32_t nameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int result = access(mbName, R_OK);
+-    free(mbName);
+-    return result == 0;
+-}
+-
+-int32_t teavm_file_canWrite(char16_t* name, int32_t nameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int result = access(mbName, W_OK);
+-    free(mbName);
+-    return result == 0;
+-}
+-
+-int32_t teavm_file_setReadonly(char16_t* name, int32_t nameSize, int32_t readonly) {
+-    struct stat s;
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int statResult = stat(mbName, &s);
+-    if (statResult != 0) {
+-        free(mbName);
+-        return 0;
+-    }
+-
+-    mode_t mode = s.st_mode;
+-    if (readonly) {
+-        mode &= ~S_IWUSR;
+-    } else {
+-        mode |= S_IWUSR;
+-    }
+-    int result = chmod(mbName, mode);
+-    free(mbName);
+-    return result == 0;
+-}
+-
+-TeaVM_StringList* teavm_file_listFiles(char16_t* name, int32_t nameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    DIR* dir = opendir(mbName);
+-    free(mbName);
+-    if (dir == NULL) {
+-        return NULL;
+-    }
+-
+-    TeaVM_StringList *strings = teavm_appendString(NULL, NULL, 0);
+-
+-    while (1) {
+-        struct dirent* entry = readdir(dir);
+-        if (entry == NULL) {
+-            break;
+-        }
+-
+-        int32_t len;
+-        char16_t* name = teavm_mbToChar16(entry->d_name, &len);
+-        if (name == NULL) {
+-            teavm_disposeStringList(strings);
+-            return NULL;
+-        }
+-
+-        strings = teavm_appendString(strings, name, len);
+-    }
+-
+-    closedir(dir);
+-    return strings;
+-}
+-
+-int32_t teavm_file_createDirectory(char16_t* name, int32_t nameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int result = mkdir(mbName, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+-    free(mbName);
+-    return result == 0;
+-}
+-
+-int32_t teavm_file_createFile(char16_t* name, int32_t nameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int result = open(mbName, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+-    free(mbName);
+-    if (result >= 0) {
+-        close(result);
+-        return 0;
+-    } else if (errno == EEXIST) {
+-        return 1;
+-    } else {
+-        return 2;
+-    }
+-}
+-
+-int32_t teavm_file_delete(char16_t* name, int32_t nameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int result = remove(mbName);
+-    free(mbName);
+-    return result == 0;
+-}
+-
+-int32_t teavm_file_rename(char16_t* name, int32_t nameSize, char16_t* newName, int32_t newNameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    char* newMbName = teavm_char16ToMb(newName, newNameSize);
+-    int result = rename(mbName, newMbName);
+-    free(mbName);
+-    free(newMbName);
+-    return result == 0;
+-}
+-
+-int64_t teavm_file_lastModified(char16_t* name, int32_t nameSize) {
+-    struct stat s;
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int statResult = stat(mbName, &s);
+-    free(mbName);
+-    if (statResult != 0) {
+-        return 0;
+-    }
+-
+-    return teavm_date_timeToTimestamp(s.st_mtime);
+-}
+-
+-int32_t teavm_file_setLastModified(char16_t* name, int32_t nameSize, int64_t lastModified) {
+-    struct stat s;
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    int statResult = stat(mbName, &s);
+-    if (statResult != 0) {
+-        free(mbName);
+-        return 0;
+-    }
+-
+-    struct utimbuf newTime;
+-    newTime.actime = s.st_atime;
+-    newTime.modtime = teavm_date_timestampToTime(lastModified);
+-
+-    return utime(mbName, &newTime) == 0;
+-}
+-
+-int32_t teavm_file_length(char16_t* name, int32_t nameSize) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    FILE* file = fopen(mbName, "r");
+-    free(mbName);
+-
+-    if (file == NULL) {
+-        return 0;
+-    }
+-
+-    if (fseek(file, 0, SEEK_END) != 0) {
+-        fclose(file);
+-        return 0;
+-    }
+-
+-    long result = ftell(file);
+-    fclose(file);
+-    if (result < 0) {
+-        return 0;
+-    }
+-    return (int32_t) result;
+-}
+-
+-int64_t teavm_file_open(char16_t* name, int32_t nameSize, int32_t mode) {
+-    char* mbName = teavm_char16ToMb(name, nameSize);
+-    char* modeString;
+-    switch (mode) {
+-        case 1:
+-            modeString = "r";
+-            break;
+-        case 2:
+-            modeString = "w";
+-            break;
+-        case 3:
+-            modeString = "w+";
+-            break;
+-        case 6:
+-            modeString = "a";
+-            break;
+-        case 7:
+-            modeString = "a+";
+-            break;
+-        default:
+-            modeString = "";
+-            break;
+-    }
+-    FILE* file = fopen(mbName, modeString);
+-    if (file == NULL) {
+-        return 0;
+-    }
+-
+-    return (int64_t) (intptr_t) file;
+-}
+-
+-int32_t teavm_file_close(int64_t file) {
+-    FILE* handle = (FILE*) file;
+-    return fclose(handle) == 0;
+-}
+-
+-int32_t teavm_file_flush(int64_t file) {
+-    FILE* handle = (FILE*) file;
+-    return fflush(handle) == 0;
+-}
+-
+-int32_t teavm_file_seek(int64_t file, int32_t where, int32_t offset) {
+-    FILE* handle = (FILE*) file;
+-    int whence;
+-    switch (where) {
+-        case 0:
+-            whence = SEEK_SET;
+-            break;
+-        case 1:
+-            whence = SEEK_CUR;
+-            break;
+-        case 2:
+-            whence = SEEK_END;
+-            break;
+-    }
+-    return fseek(handle, offset, whence) == 0;
+-}
+-
+-int32_t teavm_file_tell(int64_t file) {
+-    FILE* handle = (FILE*) file;
+-    return (int32_t) ftell(handle);
+-}
+-
+-int32_t teavm_file_read(int64_t file, int8_t* data, int32_t offset, int32_t size) {
+-    FILE* handle = (FILE*) file;
+-    return (int32_t) fread(data + offset, 1, size, handle);
+-}
+-
+-int32_t teavm_file_write(int64_t file, int8_t* data, int32_t offset, int32_t size) {
+-    FILE* handle = (FILE*) file;
+-    return (int32_t) fwrite(data + offset, 1, size, handle);
+-}
+-
+-int32_t teavm_file_truncate(int64_t file, int32_t size) {
+-    FILE* handle = (FILE*) file;
+-    return (int32_t) !ftruncate(fileno(handle), size);
+-}
+-
+-int32_t teavm_file_isWindows() {
+-    return 0;
+-}
+-
+-int32_t teavm_file_canonicalize(char16_t* path, int32_t pathSize, char16_t** result) {
+-    return 0;
+-}
+-
+-#endif
+-
+-#if TEAVM_WINDOWS
+-#include <Windows.h>
+-
+-static int32_t teavm_readEnv(char16_t** result, WCHAR const * name) {
+-    DWORD size = GetEnvironmentVariableW(name, 0, 0);
+-    char16_t *javaChars = size ? malloc(sizeof(char16_t) * size) : 0;
+-    *result = javaChars;
+-    return size ? GetEnvironmentVariableW(name, javaChars, size) : 0;
+-}
+-
+-int32_t teavm_file_homeDirectory(char16_t** result) {
+-    return teavm_readEnv(result, L"USERPROFILE");
+-}
+-
+-int32_t teavm_file_tempDirectory(char16_t** result) {
+-    return teavm_readEnv(result, L"TMP");
+-}
+-
+-int32_t teavm_file_workDirectory(char16_t** result) {
+-    DWORD size = GetCurrentDirectoryW(0, 0);
+-    char16_t *javaChars = malloc(sizeof(char16_t) * size);
+-    *result = javaChars;
+-    return GetCurrentDirectoryW(size, javaChars);
+-}
+-
+-static WCHAR* teavm_file_convertPath(char16_t* string, int32_t size) {
+-    WCHAR *copy = malloc(sizeof(WCHAR) * (size + 1));
+-    for (size_t i = 0; i != size; i++) {
+-        char16_t c = string[i];
+-        copy[i] = c == '/' ? '\\' : c;
+-    }
+-    copy[size] = 0;
+-    return copy;
+-}
+-
+-static DWORD teavm_file_getAttributes(char16_t* name, int32_t nameSize) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    int attributes = GetFileAttributesW(nativeName);
+-    free(nativeName);
+-    return attributes;
+-}
+-
+-int32_t teavm_file_isFile(char16_t* name, int32_t nameSize) {
+-    DWORD attributes = teavm_file_getAttributes(name, nameSize);
+-    return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY);
+-}
+-
+-int32_t teavm_file_isDir(char16_t* name, int32_t nameSize) {
+-    DWORD attributes = teavm_file_getAttributes(name, nameSize);
+-    return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY);
+-}
+-
+-int32_t teavm_file_exists(char16_t* name, int32_t nameSize) {
+-    DWORD attributes = teavm_file_getAttributes(name, nameSize);
+-    return attributes != INVALID_FILE_ATTRIBUTES;
+-}
+-
+-static int32_t teavm_file_checkExistingFileAccess(char16_t* name, int32_t nameSize, DWORD desiredAccess) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    #if TEAVM_WINDOWS_UWP
+-        HANDLE fileHandle = CreateFile2(nativeName, desiredAccess, FILE_SHARE_READ, OPEN_EXISTING, NULL);
+-    #else
+-        HANDLE fileHandle = CreateFileW(nativeName, desiredAccess, FILE_SHARE_READ, 0, OPEN_EXISTING,
+-                FILE_ATTRIBUTE_NORMAL, 0);
+-    #endif
+-    int32_t result = fileHandle != INVALID_HANDLE_VALUE;
+-    if (fileHandle != INVALID_HANDLE_VALUE) {
+-        CloseHandle(fileHandle);
+-    }
+-    return result;
+-}
+-
+-int32_t teavm_file_canRead(char16_t* name, int32_t nameSize) {
+-    return teavm_file_checkExistingFileAccess(name, nameSize, GENERIC_READ);
+-}
+-
+-int32_t teavm_file_canWrite(char16_t* name, int32_t nameSize) {
+-    return teavm_file_checkExistingFileAccess(name, nameSize, GENERIC_WRITE);
+-}
+-
+-int32_t teavm_file_createDirectory(char16_t* name, int32_t nameSize) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    int32_t result = CreateDirectoryW(nativeName, NULL);
+-    free(nativeName);
+-    return result;
+-}
+-
+-int32_t teavm_file_createFile(char16_t* name, int32_t nameSize) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    #if TEAVM_WINDOWS_UWP
+-        HANDLE fileHandle = CreateFile2(nativeName, GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING, NULL);
+-    #else
+-        HANDLE fileHandle = CreateFileW(nativeName, GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+-    #endif
+-    int32_t result = 2;
+-    free(nativeName);
+-
+-    if (fileHandle != INVALID_HANDLE_VALUE) {
+-        result = GetLastError() == ERROR_ALREADY_EXISTS ? 1 : 0;
+-        CloseHandle(fileHandle);
+-    }
+-    return result;
+-}
+-
+-int32_t teavm_file_delete(char16_t* name, int32_t nameSize) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    int attributes = GetFileAttributesW(nativeName);
+-    int32_t result;
+-    if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+-        result = RemoveDirectoryW(nativeName);
+-    } else {
+-        result = DeleteFileW(nativeName);
+-    }
+-    free(nativeName);
+-    return result;
+-}
+-
+-int32_t teavm_file_rename(char16_t* name, int32_t nameSize, char16_t* newName, int32_t newNameSize) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    WCHAR* nativeNewName = teavm_file_convertPath(newName, newNameSize);
+-    int32_t result = MoveFileExW(nativeName, nativeNewName, 0);
+-    free(nativeName);
+-    free(nativeNewName);
+-    return result;
+-}
+-
+-int32_t teavm_file_setReadonly(char16_t* name, int32_t nameSize, int32_t readonly) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    int attributes = GetFileAttributesW(nativeName);
+-    if (attributes == INVALID_FILE_ATTRIBUTES) {
+-        free(nativeName);
+-        return 0;
+-    }
+-    if (readonly) {
+-        attributes |= FILE_ATTRIBUTE_READONLY;
+-    } else {
+-        attributes &= ~FILE_ATTRIBUTE_READONLY;
+-    }
+-    BOOL status = SetFileAttributesW(nativeName, attributes);
+-    free(nativeName);
+-    return status;
+-}
+-
+-int64_t teavm_file_lastModified(char16_t* name, int32_t nameSize) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    FILETIME modified;
+-    #if TEAVM_WINDOWS_UWP
+-        HANDLE fileHandle = CreateFile2(nativeName, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, NULL);
+-    #else
+-        HANDLE fileHandle = CreateFileW(nativeName, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+-    #endif
+-	free(nativeName);
+-	if (fileHandle == INVALID_HANDLE_VALUE) {
+-		return 0;
+-	}
+-
+-    BOOL status = GetFileTime(fileHandle, NULL, NULL, &modified);
+-	CloseHandle(fileHandle);
+-
+-    if (!status) {
+-        return 0;
+-    }
+-    int64_t t = modified.dwLowDateTime | ((uint64_t) modified.dwHighDateTime << 32);
+-    return (t - teavm_unixTimeOffset) / 10000;
+-}
+-
+-int32_t teavm_file_setLastModified(char16_t* name, int32_t nameSize, int64_t lastModified) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-
+-    #if TEAVM_WINDOWS_UWP
+-        HANDLE fileHandle = CreateFile2(nativeName, GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING, NULL);
+-    #else
+-        HANDLE fileHandle = CreateFileW(nativeName, GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+-    #endif
+-	free(nativeName);
+-	if (fileHandle == INVALID_HANDLE_VALUE) {
+-		return 0;
+-	}
+-
+-	FILETIME modified;
+-    int64_t t = lastModified * 10000 + teavm_unixTimeOffset;
+-
+-    modified.dwLowDateTime = (DWORD) (t & 0xFFFFFFFF);
+-    modified.dwHighDateTime = (DWORD) ((t >> 32) & 0xFFFFFFFF);
+-    BOOL status = SetFileTime(fileHandle, NULL, NULL, &modified);
+-	CloseHandle(fileHandle);
+-    return status;
+-}
+-
+-int32_t teavm_file_length(char16_t* name, int32_t nameSize) {
+-    WIN32_FILE_ATTRIBUTE_DATA fileAttributeData;
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    int attributes = GetFileAttributesExW(nativeName, GetFileExInfoStandard, &fileAttributeData);
+-    free(nativeName);
+-    return fileAttributeData.nFileSizeLow;
+-}
+-
+-int64_t teavm_file_open(char16_t* name, int32_t nameSize, int32_t mode) {
+-    int32_t readable = (mode & 1) != 0;
+-    int32_t writable = (mode & 2) != 0;
+-    int32_t append = (mode & 4) != 0;
+-
+-    DWORD creationDisposition = writable ? OPEN_ALWAYS : OPEN_EXISTING;
+-    DWORD desiredAccess = (readable ? GENERIC_READ : 0) | (writable ? GENERIC_WRITE : 0);
+-
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    #if TEAVM_WINDOWS_UWP
+-        HANDLE fileHandle = CreateFile2(nativeName, desiredAccess, FILE_SHARE_READ, creationDisposition, NULL);
+-    #else
+-        HANDLE fileHandle = CreateFileW(nativeName, desiredAccess, 0, 0, creationDisposition,
+-         FILE_ATTRIBUTE_NORMAL, 0);
+-    #endif
+-    free(nativeName);
+-
+-	if (fileHandle == INVALID_HANDLE_VALUE) {
+-		return 0;
+-	}
+-
+-	if (writable) {
+-		if (append) {
+-			SetFilePointer(fileHandle, 0, 0, FILE_END);
+-		} else {
+-			SetFilePointer(fileHandle, 0, 0, FILE_BEGIN);
+-			SetEndOfFile(fileHandle);
+-		}
+-	}
+-
+-    return (int64_t) fileHandle;
+-}
+-
+-int32_t teavm_file_close(int64_t file) {
+-    return file ? CloseHandle((HANDLE) file) : 0;
+-}
+-
+-int32_t teavm_file_flush(int64_t file) {
+-    return FlushFileBuffers((HANDLE) file);
+-}
+-
+-int32_t teavm_file_seek(int64_t file, int32_t where, int32_t offset) {
+-  return SetFilePointer((HANDLE) file, offset, 0, where) != INVALID_SET_FILE_POINTER;
+-}
+-
+-int32_t teavm_file_tell(int64_t file) {
+-  return SetFilePointer((HANDLE) file, 0, 0, 1);
+-}
+-
+-int32_t teavm_file_read(int64_t file, int8_t* data, int32_t offset, int32_t size) {
+-  DWORD numRead = 0;
+-  DWORD result = ReadFile((HANDLE) file, data + offset, size, &numRead, 0);
+-  return result ? numRead : 0;
+-}
+-
+-int32_t teavm_file_write(int64_t file, int8_t* data, int32_t offset, int32_t size) {
+-  DWORD numWritten = 0;
+-  DWORD result = WriteFile((HANDLE) file, data + offset, size, &numWritten, 0);
+-  return result ? numWritten : 0;
+-}
+-
+-int32_t teavm_file_truncate(int64_t file, int32_t size) {
+-  if (SetFilePointer((HANDLE) file, size, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
+-    return 0;
+-  }
+-  return SetEndOfFile((HANDLE) file);
+-}
+-
+-int32_t teavm_file_isWindows() {
+-    return 1;
+-}
+-
+-static TeaVM_StringList* teavm_file_addToList(TeaVM_StringList* strings, char16_t* data) {
+-    int32_t size = (int32_t) wcslen(data);
+-    WCHAR* copy = malloc(size * sizeof(char16_t));
+-    memcpy(copy, data, size * sizeof(char16_t));
+-    return teavm_appendString(strings, copy, size);
+-}
+-
+-TeaVM_StringList* teavm_file_listFiles(char16_t* name, int32_t nameSize) {
+-    WCHAR* nativeName = teavm_file_convertPath(name, nameSize);
+-    WCHAR* pattern = malloc((nameSize + 3) * sizeof(WCHAR));
+-    memcpy(pattern, nativeName, nameSize * sizeof(WCHAR));
+-    free(nativeName);
+-    pattern[nameSize] = '\\';
+-    pattern[nameSize + 1] = '*';
+-    pattern[nameSize + 2] = 0;
+-
+-    WIN32_FIND_DATAW fileData;
+-    HANDLE handle = FindFirstFileW(pattern, &fileData);
+-    free(pattern);
+-    if (handle == INVALID_HANDLE_VALUE) {
+-        if (GetLastError() == ERROR_FILE_NOT_FOUND) {
+-            return teavm_appendString(NULL, NULL, 0);
+-        }
+-        return NULL;
+-    }
+-
+-    TeaVM_StringList *strings = teavm_appendString(NULL, NULL, 0);
+-    strings = teavm_file_addToList(strings, fileData.cFileName);
+-
+-    while (1) {
+-        BOOL success = FindNextFileW(handle, &fileData);
+-        if (!success) {
+-             if (GetLastError() == ERROR_NO_MORE_FILES) {
+-                break;
+-            } else {
+-                teavm_disposeStringList(strings);
+-                return NULL;
+-            }
+-        }
+-
+-        strings = teavm_file_addToList(strings, fileData.cFileName);
+-    }
+-
+-    FindClose(handle);
+-    return strings;
+-}
+-
+-int32_t teavm_file_canonicalize(char16_t* path, int32_t pathSize, char16_t** result) {
+-    WCHAR* nativeName = teavm_file_convertPath(path, pathSize);
+-    WCHAR buffer[256];
+-    WCHAR* longBuffer;
+-    DWORD actualSize = GetLongPathNameW(nativeName, buffer, 256);
+-    longBuffer = malloc(sizeof(WCHAR) * actualSize);
+-    if (actualSize == 0) {
+-        free(nativeName);
+-        return -1;
+-    }
+-    if (actualSize >= 256) {
+-        actualSize = GetLongPathNameW(nativeName, longBuffer, actualSize);
+-    } else {
+-        memcpy(longBuffer, buffer, actualSize * 2);
+-    }
+-    free(nativeName);
+-    *result = longBuffer;
+-    return actualSize;
+-}
+-
+-#endif
++/* The synchronous guest profile excludes native files and calendars. */
+--- a/core/src/main/resources/org/teavm/backend/c/log.c
++++ b/core/src/main/resources/org/teavm/backend/c/log.c
+@@ -1,104 +1,5 @@
+-#include "log.h"
+-#include "definitions.h"
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <inttypes.h>
+-#include <wchar.h>
+-
+-#if TEAVM_WINDOWS
+-    #include <Windows.h>
+-#endif
+-
+-#if !TEAVM_CUSTOM_LOG
+-    static char16_t* teavm_utf16ToUtf32(char16_t* source, char32_t* target) {
+-        char16_t c = *source;
+-        if ((c & 0xFC00) == 0xD800) {
+-            char16_t n = *(source + 1);
+-            if ((n & 0xFC00) == 0xDC00) {
+-                *target = (((c & ~0xFC00) << 10) | (n & ~0xFC00)) + 0x10000;
+-                return source + 2;
+-            }
+-        }
+-        *target = c;
+-        return source + 1;
+-    }
+-
+-    void teavm_printString(char16_t* s) {
+-        #if !TEAVM_WINDOWS_LOG
+-            #if TEAVM_WINDOWS
+-                fprintf(stderr, "%ls", s);
+-            #else
+-                int32_t cap = 128;
+-                wchar_t* buf = malloc(sizeof(wchar_t) * cap);
+-                wchar_t* out = buf;
+-                int32_t sz = 0;
+-                while (*s != '\0') {
+-                    s = teavm_utf16ToUtf32(s, out++);
+-                    if (++sz == cap) {
+-                        cap *= 2;
+-                        buf = realloc(buf, sizeof(wchar_t) * cap);
+-                        out = buf + sz;
+-                    }
+-                }
+-                *out = '\0';
+-                fprintf(stderr, "%ls", buf);
+-                free(buf);
+-            #endif
+-        #else
+-            OutputDebugStringW(s);
+-        #endif
+-    }
+-
+-    void teavm_printWString(wchar_t* s) {
+-        #if !TEAVM_WINDOWS_LOG
+-            fprintf(stderr, "%ls", s);
+-        #else
+-            OutputDebugStringW(s);
+-        #endif
+-    }
+-
+-    void teavm_printInt(int32_t i) {
+-        #if !TEAVM_WINDOWS_LOG
+-            fprintf(stderr, "%" PRId32, i);
+-        #else
+-            wchar_t str[10];
+-            swprintf(str, 10, L"%d", i);
+-            OutputDebugStringW(str);
+-        #endif
+-    }
+-
+-    #if !TEAVM_WINDOWS_LOG
+-        void teavm_logCodePoint(int32_t c) {
+-            putwchar(c);
+-        }
+-    #else
+-        void teavm_logCodePoint(int32_t c) {
+-            char16_t buffer[2] = { (char16_t) c, 0 };
+-            OutputDebugStringW(buffer);
+-        }
+-    #endif
+-#endif
+-
+-static int32_t teavm_logCharBuffer;
+-static int teavm_logCharBufferRemaining;
+-static int teavm_logCharBufferSize;
+-
+-void teavm_logchar(int32_t c) {
+-    if (teavm_logCharBufferRemaining > 0) {
+-        teavm_logCharBuffer = teavm_logCharBuffer << 6 | (c & 0x3F);
+-        if (--teavm_logCharBufferRemaining == 0) {
+-            teavm_logCodePoint(teavm_logCharBuffer);
+-        }
+-    } else if ((c & 0x80) == 0) {
+-        teavm_logCodePoint(c);
+-    } else if ((c & 0xE0) == 0xC0) {
+-        teavm_logCharBuffer = c & 0x1F;
+-        teavm_logCharBufferRemaining = 1;
+-    } else if ((c & 0xF0) == 0xE0) {
+-        teavm_logCharBuffer = c & 0x0F;
+-        teavm_logCharBufferRemaining = 2;
+-    } else if ((c & 0xF8) == 0xF0) {
+-        teavm_logCharBuffer = c & 0x07;
+-        teavm_logCharBufferRemaining = 3;
+-    }
+-}+void teavm_printString(char16_t*) { __builtin_trap(); }
++void teavm_printWString(wchar_t*) { __builtin_trap(); }
++void teavm_printInt(int32_t) { __builtin_trap(); }
++void teavm_logchar(int32_t) { __builtin_trap(); }
++void teavm_logCodePoint(int32_t) { __builtin_trap(); }--- a/core/src/main/resources/org/teavm/backend/c/memory.c
++++ b/core/src/main/resources/org/teavm/backend/c/memory.c
+@@ -26,171 +26,124 @@
+ int64_t teavm_gc_availableBytes;
+ int64_t teavm_gc_minAvailableBytes;
+ int64_t teavm_gc_maxAvailableBytes;
+-static int64_t teavm_gc_pageSize;
+-
+-#if TEAVM_UNIX
+-    static void* teavm_virtualAlloc(int64_t size) {
+-        return mmap(NULL, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+-    }
+-
+-    static void teavm_virtualCommit(void* address, int64_t size) {
+-        mprotect(address, size, PROT_READ | PROT_WRITE);
+-    }
+-
+-    static void teavm_virtualUncommit(void* address, int64_t size) {
+-        mprotect(address, size, PROT_NONE);
+-    }
+-
+-    static int64_t teavm_pageSize() {
+-        return sysconf(_SC_PAGE_SIZE);
+-    }
+-#endif
+-
+-#if TEAVM_WINDOWS
+-    static void* teavm_virtualAlloc(int64_t size) {
+-        #if TEAVM_WINDOWS_UWP
+-            return VirtualAllocFromApp(
+-                    NULL,
+-                    size,
+-                    MEM_RESERVE,
+-                    PAGE_NOACCESS
+-            );
+-        #else
+-            return VirtualAlloc(
+-                    NULL,
+-                    size,
+-                    MEM_RESERVE,
+-                    PAGE_NOACCESS
+-            );
+-        #endif
+-    }
+-
+-    static void teavm_virtualCommit(void* address, int64_t size) {
+-        #if TEAVM_WINDOWS_UWP
+-            VirtualAllocFromApp(
+-                    address,
+-                    size,
+-                    MEM_COMMIT,
+-                    PAGE_READWRITE
+-            );
+-        #else
+-            VirtualAlloc(
+-                    address,
+-                    size,
+-                    MEM_COMMIT,
+-                    PAGE_READWRITE
+-            );
+-        #endif
+-    }
+-
+-    static void teavm_virtualUncommit(void* address, int64_t size) {
+-        VirtualFree(address, size, MEM_DECOMMIT);
+-    }
+-
+-    static int64_t teavm_pageSize() {
+-        SYSTEM_INFO systemInfo;
+-        GetSystemInfo(&systemInfo);
+-        return systemInfo.dwPageSize;
+-    }
+-#endif
+-
+-static int64_t teavm_pageCount(int64_t size) {
+-    return (int64_t) ((size + teavm_gc_pageSize - 1) / teavm_gc_pageSize * teavm_gc_pageSize);
+-}
+-
+-static int32_t teavm_gc_calculateWorkSize(int64_t heapSize) {
+-    return (int32_t) (heapSize / 16);
+-}
+-
+-static int32_t teavm_gc_calculateRegionsSize(int64_t heapSize) {
+-    return (int32_t) (heapSize / teavm_gc_regionSize) + 1;
+-}
+-
+-void teavm_gc_resizeHeap(int64_t newSize) {
+-    if (newSize == teavm_gc_availableBytes) {
+-        return;
+-    }
+-
+-    teavm_gc_heapResized(newSize);
+-
+-    int32_t workSize = teavm_gc_calculateWorkSize(newSize);
+-    int32_t regionsSize = teavm_gc_calculateRegionsSize(newSize);
+-
+-    int64_t newSizeAligned = teavm_pageCount(newSize);
+-    int64_t oldSizeAligned = teavm_pageCount(teavm_gc_availableBytes);
+-    int64_t newWorkSizeAligned = teavm_pageCount(workSize);
+-    int64_t oldWorkSizeAligned = teavm_pageCount(teavm_gc_gcStorageSize);
+-    int64_t newRegionsSizeAligned = teavm_pageCount(regionsSize * 2);
+-    int64_t oldRegionsSizeAligned = teavm_pageCount(teavm_gc_regionMaxCount * 2);
+-    int64_t newCardTableSizeAligned = teavm_pageCount(regionsSize);
+-    int64_t oldCardTableSizeAligned = teavm_pageCount(teavm_gc_regionMaxCount);
+-
+-    if (newSize > teavm_gc_availableBytes) {
+-        if (newSizeAligned > oldSizeAligned) {
+-            teavm_virtualCommit((char*) teavm_gc_heapAddress + oldSizeAligned, newSizeAligned - oldSizeAligned);
++#include <stdint.h>
++#include <string.h>
++#include <stdlib.h>
++struct java_block {
++    struct java_block *bucket_next;
++    struct java_block *work_next;
++    void *data;
++    size_t bytes;
++    unsigned marked;
++};
++static struct java_block *buckets[2048], *work;
++static size_t heap_cap, charged, allocated_count, reclaimed_count;
++static size_t bucket(void *p) {
++    return ((uintptr_t)p >> 4) % 2048;
++}
++static struct java_block *lookup(void *p) {
++    for (struct java_block *b=buckets[bucket(p)]; b; b=b->bucket_next) {
++        if (b->data == p) return b;
++    }
++    return NULL;
++}
++void *wros_jvm_alloc(int32_t bytes) {
++    if (bytes < 8 || (size_t)bytes > heap_cap) return NULL;
++    size_t charge = (((size_t)bytes + 15) & ~(size_t)15) + sizeof(struct java_block);
++    if (charge > heap_cap - charged) return NULL;
++    struct java_block *b = calloc(1,sizeof(*b));
++    if (!b) return NULL;
++    b->data = calloc(1,bytes);
++    if (!b->data) { free(b); return NULL; }
++    #ifdef __WASM_MEMTAG__
++    if (__builtin_wasm_memtag_status(0) && !__builtin_wasm_memtag_extract(0,b->data)) __builtin_trap();
++#endif
++    size_t i=bucket(b->data);
++    b->bucket_next=buckets[i]; buckets[i]=b; b->bytes=bytes;
++    charged+=charge;
++    ++allocated_count;
++    return b->data;
++}
++int32_t wros_jvm_enqueue(void *p) {
++    struct java_block *b=lookup(p);
++    if (!b || b->marked) return 0;
++    b->marked=1;
++    b->work_next=work;
++    work=b;
++    return 1;
++}
++int32_t wros_jvm_marked(void *p) {
++    struct java_block *b=lookup(p);
++    return p && (!b || b->marked);
++}
++void *wros_jvm_pop(void) {
++    if (!work) return NULL;
++    struct java_block *b=work;
++    work=b->work_next;
++    b->work_next=NULL;
++    return b->data;
++}
++#include <malloc.h>
++#ifdef __WASM_MEMTAG__
++static uintptr_t physical(void *ptr) { return (uintptr_t)__builtin_wasm_memtag_untag(0, ptr); }
++static unsigned check_java_owners(void) {
++    unsigned seen=0;
++    unsigned active=!!__builtin_wasm_memtag_status(0);
++    for (size_t bucket_a=0; bucket_a<2048; ++bucket_a) {
++        for (struct java_block *a=buckets[bucket_a]; a; a=a->bucket_next) {
++            uintptr_t first=physical(a->data), size=malloc_usable_size(a->data);
++            if (size<a->bytes || first+size<first) __builtin_trap();
++            unsigned tag=__builtin_wasm_memtag_extract(0,a->data);
++            if (!!tag!=active) __builtin_trap();
++            for (size_t bucket_b=0; bucket_b<2048; ++bucket_b) {
++                for (struct java_block *b=buckets[bucket_b]; b; b=b->bucket_next) {
++                    uintptr_t next=physical(b->data);
++                    if (next<=first || next-first<size || next-first-size>64) continue;
++                    if (active && tag==__builtin_wasm_memtag_extract(0,b->data)) __builtin_trap();
++                    ++seen;
++                }
++            }
+         }
+-        if (newWorkSizeAligned > oldWorkSizeAligned) {
+-            teavm_virtualCommit((char*) teavm_gc_gcStorageAddress + oldWorkSizeAligned,
+-                    newWorkSizeAligned - oldWorkSizeAligned);
++    }
++    return seen;
++}
++#endif
++
++void wros_jvm_sweep(void) {
++    if (work) __builtin_trap();
++    for (size_t i=0; i<2048; ++i) {
++        struct java_block **head = &buckets[i];
++        while (*head) {
++            struct java_block *b=*head;
++            if (b->marked) {
++                b->marked=0;
++                head=&b->bucket_next;
++            } else {
++                *head=b->bucket_next;
++                const size_t bytes=b->bytes;
++                volatile unsigned char *d=b->data;
++                for (size_t n=0; n<bytes; ++n) d[n]=0;
++                #ifdef __WASM_MEMTAG__
++                uintptr_t retired = physical(b->data);
++#endif
++                free(b->data);
++#ifdef __WASM_MEMTAG__
++                if (__builtin_wasm_memtag_extract(0, __builtin_wasm_memtag_load(0, (void *)retired))) __builtin_trap();
++#endif
++                free(b);
++                charged-=((bytes+15)&~(size_t)15)+sizeof(*b);
++                ++reclaimed_count;
++            }
+         }
+-        if (newRegionsSizeAligned > oldRegionsSizeAligned) {
+-            teavm_virtualCommit((char*) teavm_gc_regionsAddress + oldRegionsSizeAligned,
+-                newRegionsSizeAligned - oldRegionsSizeAligned);
+-        }
+-        if (newCardTableSizeAligned > oldCardTableSizeAligned) {
+-            teavm_virtualCommit((char*) teavm_gc_cardTable + oldCardTableSizeAligned,
+-                newCardTableSizeAligned - oldCardTableSizeAligned);
+-        }
+-    } else {
+-        if (newSizeAligned < oldSizeAligned) {
+-            teavm_virtualUncommit((char*) teavm_gc_heapAddress + newSizeAligned, oldSizeAligned - newSizeAligned);
+-        }
+-        if (newWorkSizeAligned < oldWorkSizeAligned) {
+-            teavm_virtualUncommit((char*) teavm_gc_gcStorageAddress + newWorkSizeAligned,
+-                    oldWorkSizeAligned - newWorkSizeAligned);
+-        }
+-        if (newRegionsSizeAligned < oldRegionsSizeAligned) {
+-            teavm_virtualUncommit((char*) teavm_gc_regionsAddress + newRegionsSizeAligned,
+-                oldRegionsSizeAligned - newRegionsSizeAligned);
+-        }
+-        if (newCardTableSizeAligned < oldCardTableSizeAligned) {
+-            teavm_virtualUncommit((char*) teavm_gc_cardTable + newCardTableSizeAligned,
+-                oldCardTableSizeAligned - newCardTableSizeAligned);
+-        }
+-    }
+-
+-    teavm_gc_gcStorageSize = workSize;
+-    teavm_gc_regionMaxCount = regionsSize;
+-    teavm_gc_availableBytes = newSize;
+-}
+-
+-void teavm_initHeap(int64_t minHeap, int64_t maxHeap) {
+-    teavm_gc_pageSize = teavm_pageSize();
+-    int32_t workSize = teavm_gc_calculateWorkSize(maxHeap);
+-    int32_t regionsSize = teavm_gc_calculateRegionsSize(maxHeap);
+-
+-    teavm_gc_heapAddress = teavm_virtualAlloc(teavm_pageCount(maxHeap));
+-    teavm_gc_gcStorageAddress = teavm_virtualAlloc(teavm_pageCount(workSize));
+-    teavm_gc_regionsAddress = teavm_virtualAlloc(teavm_pageCount(regionsSize * 2));
+-    teavm_gc_cardTable = teavm_virtualAlloc(teavm_pageCount(regionsSize));
+-
+-    #if TEAVM_MEMORY_TRACE
+-        int64_t heapMapSize = maxHeap / sizeof(void*);
+-        teavm_gc_heapMap = teavm_virtualAlloc(teavm_pageCount(heapMapSize));
+-        teavm_virtualCommit(teavm_gc_heapMap, teavm_pageCount(heapMapSize));
+-        memset(teavm_gc_heapMap, 0, heapMapSize);
+-        teavm_gc_markMap = teavm_virtualAlloc(teavm_pageCount(heapMapSize));
+-        teavm_virtualCommit(teavm_gc_markMap, teavm_pageCount(heapMapSize));
+-    #endif
+-
+-    teavm_gc_minAvailableBytes = minHeap;
+-    teavm_gc_maxAvailableBytes = maxHeap;
+-    teavm_gc_gcStorageSize = 0;
+-    teavm_gc_regionMaxCount = 0;
+-    teavm_gc_availableBytes = 0;
+-    teavm_gc_resizeHeap(minHeap);
+-}
+-
++    }
++}
++int32_t wros_jvm_freebytes(void) { return (int32_t)(heap_cap-charged); }
++
++void teavm_initHeap(int64_t min, int64_t max) {
++    if (min<0 || min>max || max>INT32_MAX || heap_cap) __builtin_trap();
++    heap_cap=max; teavm_gc_availableBytes=max; teavm_gc_maxAvailableBytes=max; teavm_gc_minAvailableBytes=min;
++}
++void teavm_gc_resizeHeap(int64_t n) { __builtin_trap(); }
+ typedef struct TeaVM_StaticGcRootDescriptor {
+     void*** roots;
+     int count;
+@@ -208,6 +161,7 @@
+ 
+ 
+ void teavm_registerStaticGcRoots(void*** roots, int count) {
++    if (count < 0 || teavm_gc_staticRoots || (uint32_t) count > INT32_MAX/sizeof(void**) - 1u - (uint32_t)teavm_staticGcRootDataSize) __builtin_trap();
+     if (count == 0) {
+         return;
+     }
+@@ -215,6 +169,7 @@
+     TeaVM_StaticGcRootDescriptorTable* builder = teavm_staticGcRootsBuilder;
+     if (builder == NULL || builder->size == 256) {
+         builder = malloc(sizeof(TeaVM_StaticGcRootDescriptorTable));
++        if (!builder) __builtin_trap();
+         builder->size = 0;
+         builder->next = teavm_staticGcRootsBuilder;
+         teavm_staticGcRootsBuilder = builder;
+@@ -229,6 +184,7 @@
+ void teavm_initStaticGcRoots() {
+     teavm_gc_staticRoots = malloc(sizeof(void**) * (teavm_staticGcRootDataSize + 1));
+ 
++    if (!teavm_gc_staticRoots) __builtin_trap();
+     void*** target = teavm_gc_staticRoots;
+     *target++ = (void**) (intptr_t) teavm_staticGcRootDataSize;
+     TeaVM_StaticGcRootDescriptorTable* builder = teavm_staticGcRootsBuilder;
+@@ -243,4 +199,7 @@
+         free(builder);
+         builder = next;
+     }
+-}
++    teavm_staticGcRootsBuilder = NULL;
++}
++
++void wros_jvm_unsupported(void) { __builtin_trap(); }
+--- a/core/src/main/resources/org/teavm/backend/c/time.c
++++ b/core/src/main/resources/org/teavm/backend/c/time.c
+@@ -1,78 +1,14 @@
+ #include "time.h"
+-#include "definitions.h"
+-#include <time.h>
+-#include <math.h>
++#include <stdint.h>
++#include <wasi/api.h>
+ 
+-#if TEAVM_WINDOWS
+-    #include <Windows.h>
+-#endif
++void teavm_initTime(void) {}
+ 
+-#if TEAVM_WINDOWS
+-    int64_t teavm_unixTimeOffset;
+-    int64_t teavm_perfFrequency, teavm_perfInitTime;
+-#endif
+-
+-void teavm_initTime() {
+-    #if TEAVM_WINDOWS
+-        SYSTEMTIME unixEpochStart = {
+-            .wYear = 1970,
+-            .wMonth = 1,
+-            .wDayOfWeek = 3,
+-            .wDay = 1
+-        };
+-        FILETIME fileTimeStart;
+-        SystemTimeToFileTime(&unixEpochStart, &fileTimeStart);
+-        teavm_unixTimeOffset = fileTimeStart.dwLowDateTime | ((uint64_t) fileTimeStart.dwHighDateTime << 32);
+-    #endif
++static uint64_t read_clock(__wasi_clockid_t clock) {
++    __wasi_timestamp_t ns = 0;
++    if (__wasi_clock_time_get(clock, 1, &ns)) __builtin_trap();
++    return ns;
+ }
+-
+-#if TEAVM_UNIX
+-    int64_t teavm_currentTimeMillis() {
+-        struct timespec time;
+-        clock_gettime(CLOCK_REALTIME, &time);
+-
+-        return time.tv_sec * INT64_C(1000) + (int64_t) round(time.tv_nsec / 1000000);
+-    }
+-    int64_t teavm_currentTimeNano() {
+-        struct timespec time;
+-        clock_gettime(CLOCK_REALTIME, &time);
+-
+-        return time.tv_sec * INT64_C(1000000000) + (int64_t) round(time.tv_nsec);
+-    }
+-#endif
+-
+-#if TEAVM_WINDOWS
+-    int64_t teavm_currentTimeMillis() {
+-        SYSTEMTIME time;
+-        FILETIME fileTime;
+-        GetSystemTime(&time);
+-        SystemTimeToFileTime(&time, &fileTime);
+-        uint64_t current = fileTime.dwLowDateTime | ((uint64_t) fileTime.dwHighDateTime << 32);
+-        return (int64_t) ((current - teavm_unixTimeOffset) / 10000);
+-    }
+-
+-    int64_t teavm_currentTimeNano() {
+-        LARGE_INTEGER perf = { .QuadPart = 0 };
+-        QueryPerformanceCounter(&perf);
+-        int64_t dt = perf.QuadPart - teavm_perfInitTime;
+-        return dt * INT64_C(1000000000) / teavm_perfFrequency;
+-    }
+-#endif
+-
+-
+-#if TEAVM_WINDOWS
+-    #undef gmtime_r
+-    #undef localtime_r
+-    #define gmtime_r(a, b) gmtime_s(b, a)
+-    #define localtime_r(a, b) localtime_s(b, a)
+-#endif
+-
+-int32_t teavm_timeZoneOffset() {
+-    struct tm tm;
+-    time_t t = time(NULL);
+-    localtime_r(&t, &tm);
+-    time_t local = mktime(&tm);
+-    gmtime_r(&t, &tm);
+-    time_t utc = mktime(&tm);
+-    return (int32_t) (difftime(utc, local) / 60);
+-}
++int64_t teavm_currentTimeMillis(void) { return (int64_t)(read_clock(__WASI_CLOCKID_REALTIME)/UINT64_C(1000000)); }
++int64_t teavm_currentTimeNano(void) { return (int64_t)read_clock(__WASI_CLOCKID_MONOTONIC); }
++int32_t teavm_timeZoneOffset(void) { return 0; }

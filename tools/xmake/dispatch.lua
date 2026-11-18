@@ -12,7 +12,7 @@ end
 
 local function selection(root)
     local variant = path.filename(root)
-    assert(variant == "development" or variant == "compiler-source", "Select an installed development or compiler-source directory")
+    assert(variant == "development" or variant == "compiler-source" or variant == "synchronous-aot", "Select an installed Wasm development directory")
     local langdir = path.directory(root)
     local platdir = path.directory(langdir)
     local commit = path.filename(path.directory(platdir))
@@ -48,6 +48,7 @@ function configure(target, entry)
     local program = path.join(root, "bin", adapter.program)
     assert(os.isfile(program), "Missing installed compiler frontend: " .. program)
     assert(not target:values("wros.unknown"), "Unknown WROS profile field: " .. tostring(target:values("wros.unknown")))
+    assert(not target:values("wros.jvm_main") or language == "java" or language == "kotlin", "set_wros_jvm_main requires a JVM language")
     local core = target:values("wros.core") or "3.0"
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
     local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs")

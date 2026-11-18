@@ -1,0 +1,13 @@
+set_project("robot")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("robot")
+    set_kind("binary")
+    set_language("kotlin")
+    set_ros_platform(os.getenv("WROS_PLATFORM") or "unitree")
+    set_wros_profile({core = "3.0", mte = "legacy", eh = true})
+    set_wros_jvm_main("example.Main")
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_files("Main.kt")
+target_end()

@@ -12,7 +12,7 @@ toolchain_end()
 
 rule("wros.source")
     set_extensions(".c", ".cc", ".cpp", ".cxx", ".C", ".lua", ".go", ".mod", ".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn",
-                   ".rs", ".java", ".cs", ".ts", ".nim", ".m", ".d", ".o", ".a")
+                   ".rs", ".java", ".kt", ".cs", ".ts", ".nim", ".m", ".d", ".o", ".a")
 rule_end()
 
 rule("wros.application")
@@ -68,4 +68,8 @@ end
 
 function add_wros_lua_operations(...)
     add_values("wros.lua_operations", ...)
+end
+
+function set_wros_jvm_main(class_name)
+    set_values("wros.jvm_main", class_name)
 end

@@ -106,3 +106,5 @@ Use `set_language("fortran")` and add the Fortran sources for a numerical progra
 ### Rust no_std
 
 Rust targets use `set_language("rs")` and one crate root such as `add_files("src/lib.rs")`. Set `WROS_RUSTROOT` to the pinned Rust host prefix. The adapter defaults to Wasm32 Core 3.0, panic=abort, a single thread and MTE. Use `WROS_SYSROOTS_NO_MTE` with `set_wros_profile({mte=false})` for the matching untagged profile. Optimization levels through `fastest` and debug symbols map to the Rust driver. See the [Rust guide](rust.md).
+
+The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).

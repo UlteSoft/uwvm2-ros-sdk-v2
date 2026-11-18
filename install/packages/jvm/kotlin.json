@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "bin/wrkotlin",
+      "bytes": 201,
+      "mode": 493,
+      "sha256": "d4d90b90bd470277f545a63a252019c140691f9d42afaca5f1976361f54593e7"
+    },
+    {
+      "path": "examples/kotlin/synchronous-aot/GuardApplication.kt",
+      "bytes": 553,
+      "mode": 420,
+      "sha256": "b2472b1bdc72aaa371a88d47ae7318335441dc86ffeadd04dd60b2fe4b66bc5f"
+    },
+    {
+      "path": "examples/kotlin/synchronous-aot/Main.kt",
+      "bytes": 142,
+      "mode": 420,
+      "sha256": "7baf11cf7f67d9688c331eaea097cffb27dcff3cde7f58e6929f89579f3dc5a9"
+    },
+    {
+      "path": "examples/kotlin/synchronous-aot/xmake.lua",
+      "bytes": 418,
+      "mode": 420,
+      "sha256": "9fa3084cf07011e9acbe6e55088ba82dd4fae44b0ecf4fdd234bc44240fbbc15"
+    },
+    {
+      "path": "language/kotlin/host-inputs.json",
+      "bytes": 52575,
+      "mode": 420,
+      "sha256": "f9529a37acab9ed9e2fc99201d443d93ef10212a5b9b9d15a4b313cb228c8e62"
+    },
+    {
+      "path": "language/kotlin/xmake/adapter.lua",
+      "bytes": 1320,
+      "mode": 420,
+      "sha256": "3ceeb869028feea71c3b4f3bdba1e4c41e48667346cc0d9eb5f26476016809c2"
+    }
+  ]
+}

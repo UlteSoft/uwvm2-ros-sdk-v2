@@ -1,0 +1,92 @@
+{
+  "project": "TeaVM",
+  "commit": "b3a245b7d9034ff35cdfab2def057a3d4f256efb",
+  "version": "0.13.1",
+  "license": "Apache-2.0",
+  "upstream_files": [
+    {
+      "file": "java/org/teavm/backend/c/CTarget.java",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/java/org/teavm/backend/c/CTarget.java",
+      "upstream_sha256": "75341ce9756cc1df3880e41b6543b0000c06110b3ff32a45c4d284297079f002",
+      "patched_sha256": "10d7d37bb0405fbd4be4067b250af28ffe259205af5fc8b5a97cace1e0a4f485"
+    },
+    {
+      "file": "java/org/teavm/backend/c/generate/ClassGenerator.java",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/java/org/teavm/backend/c/generate/ClassGenerator.java",
+      "upstream_sha256": "f10870cc1c1b95e080381b8929fcc627c55407bc47a514e4c28cc522bb2b4b24",
+      "patched_sha256": "4ea82fcf80a7b014b65d653b71d7a9b7cc100b975e1177db8c3f843bca905ace"
+    },
+    {
+      "file": "java/org/teavm/runtime/GC.java",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/java/org/teavm/runtime/GC.java",
+      "upstream_sha256": "3c2e4ec760f015ad165fa6a9d6eaebf228b297ecc1080edc596689a1e68bc9e4",
+      "patched_sha256": "6502c27d146cf2dd727e806c9c1831e4fab3cbd204f52747ce16ba83fcee47c8"
+    },
+    {
+      "file": "java/org/teavm/runtime/Allocator.java",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/java/org/teavm/runtime/Allocator.java",
+      "upstream_sha256": "eb31fbbd80f7043be277c12806abdc8381d511b9a97c92e8e1828a08ff561211",
+      "patched_sha256": "6525f6056992545bbcc3c608aaf53da6cb454d339046dc2f62a6eabdd52400fd"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/core.c",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/core.c",
+      "upstream_sha256": "78980bbe7863cffcb6b5cdbc8b39354620ee2eb9bfa7d16b0728398383a200d0",
+      "patched_sha256": "b0cd4ec65f2a7ae320dd56b5b60b4240206bc65a90b297ad70f26349b49f06f9"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/core.h",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/core.h",
+      "upstream_sha256": "55a7ad99dab270c484c0896de93e76ac90331495c1d470fc46a12da1c4fd72a0",
+      "patched_sha256": "f8e61991af82561a59c2a3bff9e8773606186a1f8bd8df1f38a67273bb60e81f"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/date.c",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/date.c",
+      "upstream_sha256": "0211a1cf726df605af4096db42a07d3c160d2377d3bb6717ec5b77a1610ccccd",
+      "patched_sha256": "a2733a44b0ac449b89aab1ac6033ccac9bd4b6213110a13f7c19449689cbf7a4"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/definitions.h",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/definitions.h",
+      "upstream_sha256": "b4b4ad1dbf9b6a69d05f78e3a935501e5881e78e81756f5c27eacbdd0d69e36b",
+      "patched_sha256": "0f8f4570a4c6fe2663e6487d310f9bc95180f8904adc87c3eceb0114021bcb5b"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/exceptions.h",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/exceptions.h",
+      "upstream_sha256": "616815d6de27553b95972cd9ebb02260e97a56314a9ad2d33d0b87e3530dff4c",
+      "patched_sha256": "e4c41686d1196802fd2fcc6bea299e9cf6584d2c9b121ca7b14600bfcbc9f808"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/fiber.c",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/fiber.c",
+      "upstream_sha256": "22ee89513ccd5d850c3cb2fbb37f877d23cb7393801ee4694ce24c257ede3399",
+      "patched_sha256": "2aa98339295d7a5e6cfef793004b1ebe779c71eacb66813e5ba373997a67d4b3"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/file.c",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/file.c",
+      "upstream_sha256": "49c8a5f152eefffbe2832b607fcd40b225936fc593d1a0d53fb81ed700a30538",
+      "patched_sha256": "a2733a44b0ac449b89aab1ac6033ccac9bd4b6213110a13f7c19449689cbf7a4"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/log.c",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/log.c",
+      "upstream_sha256": "6cf0956f04a28c190393f7b1137a14602174deaaf086acc6a3dca30b2e0ee884",
+      "patched_sha256": "514cf4005650916492b7fb8cc6e975d527b1d366c706b3dbd2ff59ee72daa690"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/memory.c",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/memory.c",
+      "upstream_sha256": "09051ac8ef766497e7d611923f9576dd2e9661d21e314e2849fae0de634a1709",
+      "patched_sha256": "f6fa2db9ac5818c7311bd8f74724cf3b04b2c1960e2825bc977e79e5a6a02add"
+    },
+    {
+      "file": "resources/org/teavm/backend/c/time.c",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/resources/org/teavm/backend/c/time.c",
+      "upstream_sha256": "5446322d20daaae74b47face0c81dd08ffd334d1fcde263d89fb49cc154c3f87",
+      "patched_sha256": "acabef1d6822a740f86c41508e5f8ffaa9b5b1d133408ac62bdf0f3994413650"
+    }
+  ]
+}

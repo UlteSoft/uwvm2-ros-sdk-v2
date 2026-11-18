@@ -86,9 +86,19 @@ def main():
         platform_adapter(name, languages)
     for language in registry["languages"]:
         path = "share/language/" + language + ".json"
-        write_json(path, {"id": language, "development_package": language in DEVELOPMENT})
+        metadata = {"id": language, "development_package": language in DEVELOPMENT}
+        if language in ("java","kotlin"):
+            metadata["optional_components"] = ["synchronous-aot"]
+        write_json(path, metadata)
         package("metadata/" + language, [path])
 
+    shared_jvm = [p.relative_to(ROOT).as_posix() for name in ("language/jvm", "third-parties/jvm")
+                  for p in (ROOT / name).rglob("*") if p.is_file() and "__pycache__" not in p.parts]
+    package("jvm/synchronous", [*shared_jvm, "include/wros/scene.h", "document/en/jvm.md", "document/zh/jvm.md"])
+    for language in ("java", "kotlin"):
+        examples = sorted((ROOT / "examples" / language / "synchronous-aot").iterdir())
+        package("jvm/" + language, ["bin/wr" + language, f"language/{language}/xmake/adapter.lua",
+                                   f"language/{language}/host-inputs.json", *(p.relative_to(ROOT).as_posix() for p in examples)])
     policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py", "qualification.py", "local_release.py")]
     package("frontend", [*policy, "share/qualification/memory-neighbors.json", "bin/wrar", "install/archiver.py", "document/en/memtag.md", "document/zh/memtag.md",
                          "document/en/memory-qualification.md", "document/zh/memory-qualification.md"])

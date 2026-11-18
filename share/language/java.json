@@ -1,4 +1,7 @@
 {
   "id": "java",
-  "development_package": false
+  "development_package": false,
+  "optional_components": [
+    "synchronous-aot"
+  ]
 }

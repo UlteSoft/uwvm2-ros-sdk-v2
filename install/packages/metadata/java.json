@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/java.json",
-      "bytes": 51,
+      "bytes": 105,
       "mode": 420,
-      "sha256": "5cd1e9f6fa8b68b9f8482cf058fb7a993ab44f64aca2de57a5589f4148034b86"
+      "sha256": "8131d0fd6534e273b81bc0480651c57d92ded173e4c9c7905d71e202e156e439"
     }
   ]
 }
