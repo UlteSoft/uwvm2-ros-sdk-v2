@@ -187,6 +187,23 @@ def main():
         run("xmake-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm" + str(a.address_bits)])
         run("xmake-build", [a.xmake.absolute(), "-j1", "seeded"])
         run("xmake-run", [a.xmake.absolute(), "run", "seeded"])
+        guard_operations = ("capability.open", "capability.close", "guard.create", "guard.trigger", "guard.take")
+        select = "add_wros_lua_operations(" + ", ".join(json.dumps(op) for op in guard_operations) + ")"
+        project.write_text(project.read_text().replace('add_files("app.lua")', select + '\n  add_files("app.lua")'))
+        app.write_bytes((sdk / "examples/lua/guard.lua").read_bytes())
+        run("xmake-guard-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm" + str(a.address_bits)])
+        run("xmake-guard-build", [a.xmake.absolute(), "-j1", "seeded"])
+        artifact, = (a.output / "build").rglob("seeded.wasm")
+        if {(v["module"], v["name"]) for v in inspect(artifact.read_bytes())} != {("uwvm_ros_v2", op) for op in guard_operations}:
+            raise ValueError("incorrect imports in installed Xmake guard build")
+        policy = ["--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main"]
+        for op in guard_operations:
+            policy += ["--ros-scene-interface", "robot", op, "allow"]
+        policy += ["--ros-scene-grant", "robot", "signal", "guard", "signal", "local", "guard.create,guard.trigger,guard.take"]
+        for engine in ("int", "aot"):
+            run("xmake-guard-" + engine, [a.runtime, *Profile(a.address_bits).uwvm_feature_flags(),
+                "--runtime-" + engine, "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
+                "--wasm-set-main-module-name", "main", *policy, "--run", artifact])
         project.write_text(project.read_text().replace("lua_seed=37", "lua_seed=4294967296"))
         run("xmake-invalid-seed", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm" + str(a.address_bits)], False)
     authentic = signed.read_bytes()
