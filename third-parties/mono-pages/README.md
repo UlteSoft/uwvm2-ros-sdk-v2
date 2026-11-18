@@ -1,0 +1,5 @@
+# Mono WASI page manager test source
+
+The archive contains 15 source files from the .NET runtime at commit 573461dc897731c11d6166574b77a8c3aabba220. It contains the Wasm page manager, the headers reached by the single-thread WASI translation unit, and the two upstream CMake configuration templates. Each archive entry is an unmodified Git blob. The SHA-256 of the xz file is fb336d94f589ad4a5a2b3b074ce485bac3694c458261ad8581ff30bf1881312c. The .NET license and third-party notices are included alongside it. Its WASI pthread declarations retain their original license header. The wasi-libc licenses and musl copyright notice are included with the WASI prefix. [Upstream source](https://github.com/dotnet/runtime/tree/573461dc897731c11d6166574b77a8c3aabba220/src/mono)
+
+The separate patch defers the initial reservation to an allocation request, checks the signed byte increment accepted by sbrk, retries a small request at its actual size under a memory cap, and clips free ranges to the known pages. The test compiles the unmodified and patched versions from the same archive. The SDK installer does not distribute the component as a C# runtime.

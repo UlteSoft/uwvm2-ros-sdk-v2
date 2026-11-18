@@ -1,0 +1,70 @@
+--- a/src/mono/mono/utils/mono-wasm-pagemgr.c
++++ b/src/mono/mono/utils/mono-wasm-pagemgr.c
+@@ -62,7 +62,7 @@
+ 
+ static inline uint32_t
+ page_count_from_size (size_t size) {
+-	return ((size + MWPM_PAGE_SIZE - 1) / MWPM_PAGE_SIZE);
++	return size == 0 ? 0 : 1 + ((size - 1) / MWPM_PAGE_SIZE);
+ }
+ 
+ static inline uint32_t
+@@ -230,9 +230,10 @@
+ 	// Pad the allocation with an extra page, this will create waste bytes at the
+ 	//  start and end we can use to align the resulting allocation. We will try
+ 	//  to recover the waste if possible
+-	uint64_t bytes = (page_count + 1) * MWPM_PAGE_SIZE;
++	uint64_t bytes = ((uint64_t)page_count + 1) * MWPM_PAGE_SIZE;
+ 	uint32_t recovered_bytes = 0;
+-	if (bytes >= UINT32_MAX)
++	/* sbrk takes a signed increment, including on wasm32. */
++	if (bytes > INTPTR_MAX)
+ 		return NULL;
+ 
+ 	// We know that on WASM, sbrk grows the heap as necessary in order to return,
+@@ -298,6 +299,8 @@
+ 
+ 	// g_print ("mwpm allocated %u bytes (%u pages) starting at @%u (%u recovered)\n", (uint32_t)bytes, page_count, (uint32_t)allocation, recovered_bytes);
+ 	transition_page_states (MWPM_MARK_NEW_PAGES, first_page_index, page_count);
++	if (first_controlled_page_index == UINT32_MAX)
++		first_controlled_page_index = first_page_index;
+ 	print_stats ();
+ 	last_controlled_page_index = last_page_index;
+ 	return result;
+@@ -408,9 +411,6 @@
+ 	// Set the entire page table to 'unknown state'. As we acquire pages from sbrk, we will
+ 	//  set those respective ranges in the table to a known state.
+ 	memset (page_table, MWPM_EXTERNAL, sizeof(page_table));
+-	void *first_controlled_page_address = acquire_new_pages_initialized (MWPM_MINIMUM_PAGE_COUNT);
+-	g_assert (first_controlled_page_address);
+-	first_controlled_page_index = first_page_from_address (first_controlled_page_address);
+ }
+ 
+ static inline void
+@@ -445,6 +445,10 @@
+ 			allocation_page_count = MWPM_MINIMUM_PAGE_COUNT;
+ 		// Ensure we have space for the whole allocation
+ 		void *start_of_new_pages = acquire_new_pages_initialized (allocation_page_count);
++		/* Under a small memory maximum the preferred batch may not fit.
++		 * Retry the requested extent before reporting allocation failure. */
++		if (!start_of_new_pages && page_count < allocation_page_count)
++			start_of_new_pages = acquire_new_pages_initialized (page_count);
+ 		if (start_of_new_pages) {
+ 			// FIXME: Scan backwards from the new allocation to look for free pages
+ 			//  before it that we can use to reduce fragmentation
+@@ -482,7 +486,14 @@
+ 	mono_os_mutex_lock (&mutex);
+ 	uint32_t first_page = first_page_from_address (base),
+ 		page_count = page_count_from_size (size);
+-	free_pages_initialized (first_page, page_count);
++	/* An empty range or a range outside every controlled mapping is a no-op.
++	 * Intersect first so a range crossing the end cannot wrap page indices. */
++	if (page_count && first_page <= last_controlled_page_index && first_controlled_page_index != UINT32_MAX) {
++		uint32_t count = MIN (page_count, last_controlled_page_index - first_page + 1);
++		uint32_t skip = first_page < first_controlled_page_index ? first_controlled_page_index - first_page : 0;
++		if (skip < count)
++			free_pages_initialized (first_page + skip, count - skip);
++	}
+ 	mono_os_mutex_unlock (&mutex);
+ #ifdef MWPM_LOGGING
+ 	g_print ("mwpm freed %u bytes at %u\n", size, (uint32_t)base);
