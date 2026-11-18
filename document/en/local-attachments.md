@@ -44,5 +44,14 @@ ownership lifecycle remain incomplete. Cross-identity attachment tests use a
 test provisioner in a disposable Linux kernel. These tests do not establish
 universal vendor compatibility or physical safety certification.
 
+The deployer now provides [Rust provisioning primitives](https://github.com/UlteSoft/wasmros-deployer/blob/main/document/en/attachment-provisioning.md)
+for fresh reciprocal keys, sealed identity descriptors, exact process/clock
+pinning and a fixed external-adapter bootstrap. These objects are consumed by
+the host and isolated adapter only. They add no Wasm import, WASIp1 socket grant
+or native driver implementation to an SDK platform extension. An original
+vendor binary or shared library still needs an admitted external adapter; it
+does not automatically implement the WROS encrypted carrier. The current test
+receiver is a harmless parameter-query fixture, not a supported vendor driver.
+
 See the VM's [driver attachment contract](https://github.com/UlteSoft/uwvm2-ros/blob/main/documents/runtime/ros-driver-attachment.md)
 and [model attachment contract](https://github.com/UlteSoft/uwvm2-ros/blob/main/documents/runtime/ros-model-attachment.md).
