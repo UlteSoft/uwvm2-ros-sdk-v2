@@ -2,6 +2,8 @@
 
 `bin/wrf` compiles a Fortran `PROGRAM` to a Wasm executable. It supports fixed-form and free-form input, ordered Fortran modules, ISO C interoperability and the numerical procedures linked from the vendored Flang runtime. The program starts at `_start` in its own guest memory. Its compute runtime supports allocatable arrays, pointer allocation and ISO C descriptors. General external Fortran I/O and coarray programs still require additional runtime support.
 
+The pinned LLVM WebAssembly backend rejects Fortran `COMMON` blocks at object generation. Upstream ROS dependencies such as the BLAS and CBLAS test programs bundled with libswiftnav use this storage feature and external formatted I/O. Their test executables require both capabilities. A successfully compiled numerical subroutine in the same source tree qualifies that subroutine alone.
+
 ## Prepare the host tools
 
 For an existing reviewed toolchain and sysroot, the ordinary development package suffices. To build the tools themselves, select the compiler sources for the same SDK commit. The installer reports the path containing the language frontend and shared source recipes.

@@ -20,15 +20,15 @@
     },
     {
       "path": "document/en/fortran.md",
-      "bytes": 15523,
+      "bytes": 15911,
       "mode": 420,
-      "sha256": "b9267c746a7dc7262ae6c869ee288caa4a6ae48e67baa2f5b1d84d9ba4c3c43f"
+      "sha256": "0aa495326a624ade407ba7f073102de10ef68b70ffc25dc721ed2c9bebb5050a"
     },
     {
       "path": "document/zh/fortran.md",
-      "bytes": 13877,
+      "bytes": 14236,
       "mode": 420,
-      "sha256": "0996186264429e84535a1ff18907aefd4aca53396390539969ca14c2eba02aee"
+      "sha256": "9628c75c765e31ed6928cf9629391cfdc1f9b2182ff67b6bc98357fc700970b9"
     },
     {
       "path": "examples/fortran/body.f90",
