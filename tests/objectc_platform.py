@@ -91,14 +91,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ("runtime", "vm-source", "peer-library", "toolchain", "objc-clang", "objc-runtime", "sysroots", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
-    parser.add_argument("--platform", action="append", help="Defaults to every foundation listing objectc")
+    parser.add_argument("--platform", action="append", help="Defaults to every common robot platform foundation")
     parser.add_argument("--mte", choices=("strict", "candidate"), default="strict")
     opts = parser.parse_args()
     group = cgroup_record()
     assert int(group["memory_max"]) == 68719476736 and int(group["swap_max"]) == 0
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     bank = ROOT / "share/targets.json"
-    platforms = [name for name, languages in json.loads(bank.read_text())["platforms"].items() if "objectc" in languages]
+    platforms = list(json.loads(bank.read_text())["platforms"])
     selected = opts.platform or platforms
     assert all(name in platforms for name in selected)
     root = opts.vm_source.resolve()

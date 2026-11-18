@@ -41,13 +41,17 @@ def main():
     assert not any(path.startswith("platform/") and not path.startswith("platform/unitree/") for path in files)
     assert not any(path.startswith("language/") and not path.startswith("language/objectc/") for path in files)
     assert not any(path.startswith("third-parties/sources/") for path in files)
+    portable = Source(options.commit, options.repository.resolve())
+    install(portable, "agilex", "objectc", out/"portable", [])
+    assert "platform/agilex/xmake/platform.lua" in portable.requested
+    assert "platform/unitree/xmake/platform.lua" not in portable.requested
     skipped = Source(options.commit, options.repository.resolve())
     try:
-        install(skipped, "agilex", "objectc", out/"unavailable", [])
+        install(skipped, "unknown-platform", "objectc", out/"unavailable", [])
     except ValueError as exc:
-        assert "no development route" in str(exc) and skipped.requested == ["install/revision.py"]
+        assert "unknown platform" in str(exc) and skipped.requested == ["install/revision.py"]
     else:
-        raise AssertionError("unlisted platform installed")
+        raise AssertionError("unknown platform installed")
     demo = out/"project"
     shutil.copytree(sdk/"examples/objectc", demo)
     script = demo/"xmake.lua"

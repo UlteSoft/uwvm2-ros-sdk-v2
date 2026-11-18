@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/objectc.md",
-      "bytes": 5537,
+      "bytes": 5542,
       "mode": 420,
-      "sha256": "6da6b5798610c155a7471a0c1f2c3025b26aa63e0a87175a508426e72cc6de8c"
+      "sha256": "c60a609bd93530e6a4b5b86e7c7f0c83635873e3fa24ccbc03037fd9f83143c7"
     },
     {
       "path": "document/zh/objectc.md",
-      "bytes": 4645,
+      "bytes": 4635,
       "mode": 420,
-      "sha256": "e557cd8d13f3ceca7e6e664349b5103b3abb1b7b58f41afc36f7e0c9acc945e3"
+      "sha256": "ee2eac70313068f1c5cc1f683fc56a0984aa2d3a14a2ad6c0fc5fe50618c838f"
     },
     {
       "path": "examples/objectc/body.m",
