@@ -54,7 +54,7 @@ def main():
         process = subprocess.run(argv, cwd=work, capture_output=True, timeout=180)
         (work / (name + ".stderr")).write_bytes(process.stderr)
         (work / (name + ".stdout")).write_bytes(process.stdout)
-        state["cases"].append(dict(name=name, argv=argv, code=process.returncode, expected_error=error))
+        state["cases"].append(dict(name=name, argv=argv, code=process.returncode, expected_error=error, expected_success=error is None))
         save()
         if (process.returncode != 0) != (error is not None) or (error and error.encode() not in process.stderr):
             raise RuntimeError(f"{name}: " + process.stderr.decode(errors="replace")[-2000:])

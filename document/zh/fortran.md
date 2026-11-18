@@ -4,6 +4,13 @@
 
 ## 准备编译器
 
+若已具备审阅过的工具链和 sysroot，安装普通开发包即可。自行构建编译器时，必须在同一 SDK 提交上选择编译器源码组件。安装器会输出包含 Fortran 前端和共享构建脚本的目录。
+
+```sh
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language fortran \
+  --prefix "$PREFIX" -- --component compiler-source
+```
+
 宿主机的引导工具目录需要包含能编译宿主程序的 Clang、Clang++ 和 LLD。WROS 编译器目录需要包含支持 WasmMTE 的代码生成器、链接器、`llvm-config`、LLVM 开发头文件和静态库。在 SDK 根目录执行：
 
 ```sh
@@ -91,3 +98,9 @@ target_end()
 申请内存前，运行库检查分配上下界、字节步幅及释放校验字段的大小能否用目标有符号指针范围表示。带 `STAT=` 的不可表示分配返回失败状态。零长度分配产生已分配、元素数为零的数组。C 端使用互操作头文件时，传入 `-I "$UWVM_ROS_SDK_ROOT/third-parties/fortran/flang/include"` 并包含 `"flang/ISO_Fortran_binding.h"`。
 
 描述符测试包含 Fortran 指针别名、成功及失败的分配、错误信息、所有权转移、空数组、整数组赋值，以及 C 端独立建立的二维描述符。最终模块唯一的导入为 `uwvm_ros_v2.abi`。[测试入口](../../tests/fortran_descriptors.py) · [Fortran 应用](../../tests/fortran/descriptor_status.f90) · [C 调用](../../tests/fortran/descriptor_status.c)
+
+## 验收本地编译器发布
+
+默认 MTE 模式要求可信本地机构签发与目标配置匹配的发布凭据。在干净的 SDK 源码检出目录中，运行共享验收脚本并指定 `--language fortran --target wasm32 --eh -O3 -g`。若有实际完成验证的 wasm64 sysroot，也可选择 wasm64。除已批准的 SDK 提交、后端、VM 和 sysroot 摘要外，分别用 `--approved-flang-sha256` 和 `--approved-marker-sha256` 指定 `TOOLCHAIN/bin/flang` 与 `TOOLCHAIN/bin/wros-flang-mte` 的摘要。脚本会运行双引擎和 Fortran 存储操作，并检查 Flang 能生成两种位宽的 Wasm 对象且拒绝生成原生对象。仅用于显式开发验证的 Flang 不满足发布验收条件。
+
+Fortran 前端使用 C 和 C++ 前端构建语言运行库与 ROS 导入适配器。应为同一 VM、编译器、sysroot、`-O3 -g` 及 EH 配置生成 C、C++ 两份凭据，与 Fortran 凭据一同打包并由本地发布机构签名。生产开发环境必须配置该签名包及信任策略。[共享发布流程](../../tools/wasm/memtag/README.md) · [验收脚本](../../tools/wasm/memtag/qualify_local_c.py) · [签名安装测试](../../tests/local_release_wsea.py)

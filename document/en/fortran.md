@@ -4,6 +4,13 @@
 
 ## Prepare the host tools
 
+For an existing reviewed toolchain and sysroot, the ordinary development package suffices. To build the tools themselves, select the compiler sources for the same SDK commit. The installer reports the path containing the language frontend and shared source recipes.
+
+```sh
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language fortran \
+  --prefix "$PREFIX" -- --component compiler-source
+```
+
 Use an SDK code generator with WasmMTE support and a matching sysroot build receipt. The host bootstrap prefix below contains native Clang, Clang++ and LLD. The SDK prefix contains its Wasm compiler, linker, `llvm-config`, development headers and static LLVM libraries. From the SDK root, run:
 
 ```sh
@@ -91,3 +98,9 @@ Fortran applications can use `ALLOCATE(..., STAT=rc, ERRMSG=msg)`, `MOVE_ALLOC`,
 The runtime checks allocation bounds, byte strides and the size of the deallocation footer against the target's signed pointer range before allocating. An unrepresentable allocation with `STAT=` returns a failure code. A zero-size allocation produces an allocated array with zero elements. With the C interoperability header, compile C callers with `-I "$UWVM_ROS_SDK_ROOT/third-parties/fortran/flang/include"` and include `"flang/ISO_Fortran_binding.h"`.
 
 The descriptor regression checks a Fortran pointer alias, successful and failed allocations, a status message, moved ownership, zero extents, whole-array assignment and an independently established rank-two C descriptor. The resulting application imports only `uwvm_ros_v2.abi`. [Test driver](../../tests/fortran_descriptors.py) · [Fortran application](../../tests/fortran/descriptor_status.f90) · [C caller](../../tests/fortran/descriptor_status.c)
+
+## Qualify a local compiler release
+
+The default MTE mode requires a locally trusted, signed release for the requested guest profile. From a clean SDK source checkout, run the shared qualification recipe with `--language fortran --target wasm32 --eh -O3 -g` (or select a measured wasm64 closure). Supply the approved hashes of `TOOLCHAIN/bin/flang` and `TOOLCHAIN/bin/wros-flang-mte` with `--approved-flang-sha256` and `--approved-marker-sha256`, alongside the approved SDK commit, backend, VM and sysroot digests. The recipe runs both guest engines, checks Fortran storage operations, and verifies that Flang accepts both Wasm widths and rejects native object emission. The explicit development Flang does not satisfy release qualification.
+
+Generate C and C++ release rows for the same VM, compiler, sysroot, `-O3 -g` and EH profile. The Fortran frontend uses those frontends for its language runtime and ROS import adapters. Bundle all three rows and sign the bundle using your local release authority. Production development installs require the signed bundle and trust configuration. [Shared release procedure](../../tools/wasm/memtag/README.md) · [Qualification command](../../tools/wasm/memtag/qualify_local_c.py) · [Signed installation test](../../tests/local_release_wsea.py)

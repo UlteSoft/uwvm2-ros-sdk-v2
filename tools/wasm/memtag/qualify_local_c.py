@@ -1,4 +1,4 @@
-"""Run the registered C, C++ or embedded Lua managed-memory tests before emitting an unsigned local WSEA release."""
+"""Run guest-language managed-memory tests before emitting an unsigned local WSEA release."""
 import argparse
 import hashlib
 import json
@@ -20,6 +20,8 @@ def verify_checkout(commit, language):
     scopes = ("bin", "tests", "install", "include", "share/abi", "share/qualification", "tools/wasm/memtag")
     if language == "objectc":
         scopes += ("language/objectc", "third-parties/objectc", "examples/objectc")
+    if language == "fortran":
+        scopes += ("language/fortran", "third-parties/fortran", "examples/fortran")
     if language == "nim":
         scopes += ("language/nim", "third-parties/nim", "examples/nim")
     if language == "lua":
@@ -58,10 +60,12 @@ def main():
                    help="SHA-256 of the canonical Objective-C compiler, runtime receipt and archive digest map")
     p.add_argument("--nim-producer", type=lambda s: Path(s).resolve())
     p.add_argument("--approved-nim-producer-sha256")
+    p.add_argument("--approved-flang-sha256", help="approved WebAssembly-only TOOLCHAIN/bin/flang")
+    p.add_argument("--approved-marker-sha256", help="approved TOOLCHAIN/bin/wros-flang-mte")
     p.add_argument("--sdk-commit", required=True, help="independently approved full Git commit")
     for key in ("producer", "vm", "sysroots"):
         p.add_argument("--approved-" + key + "-sha256", required=True)
-    p.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran"), default="c")
     p.add_argument("--target", choices=("wasm32", "wasm64"), required=True)
     p.add_argument("-O", choices=("2", "3"), default="2")
     p.add_argument("-g", action="store_true")
@@ -100,6 +104,14 @@ def main():
         if a.O != "3" or not a.g or not a.eh:
             p.error("Nim qualification currently exercises -O3 -g with the EH sysroot")
         external["producer"] = a.nim_producer
+    if a.language == "fortran":
+        flang = a.toolchain / "bin/flang"
+        marker = a.toolchain / "bin/wros-flang-mte"
+        if (a.O != "3" or not a.g or not a.eh or not flang.is_file() or not marker.is_file() or
+                qualification.digest(flang) != a.approved_flang_sha256 or
+                qualification.digest(marker) != a.approved_marker_sha256):
+            p.error("Fortran qualification requires -O3 -g, EH, the approved Flang and its matching marker")
+        external.update(flang=flang, marker=marker)
     vm_digest = qualification.digest(a.runtime)
     names = ("clang", "wasm-ld", "llc", "llvm-objdump", "llvm-ar", "FileCheck")
     binaries = {name: qualification.digest(a.toolchain / "bin" / name) for name in names}
@@ -145,6 +157,17 @@ def main():
                                                 "--objc-clang", a.objc_clang, "--objc-runtime", a.objc_runtime,
                                                 "--mode", "candidate", "--eh" if a.eh else "--no-eh",
                                                 "--output", a.output / "objectc"]))
+    if a.language == "fortran":
+        language_flags = [*base, "--flang", flang, "--address-width", str(bits), "--sysroots", a.sysroots, "--candidate-mte"]
+        tests.append(("fortran-compiler", "fortran_compiler.py", ["--flang", flang, "--approved-sha256", a.approved_flang_sha256,
+                                                                 "--output", a.output / "fortran-compiler"]))
+        tests.append(("fortran-abi", "fortran_aot.py", [*language_flags, "--mte-tool", marker, "--exception-model", "eh",
+                                                       "--output", a.output / "fortran-abi"]))
+        for name, storage in (("fortran-stack", "stack"), ("fortran-storage", "static-and-heap")):
+            tests.append((name, "fortran_stack_neighbors.py", [*language_flags, "--exception-model", "eh", "--storage", storage,
+                                                               "--output", a.output / name]))
+        tests.append(("fortran-descriptors", "fortran_descriptors.py",
+                      [*language_flags, "--output", a.output / "fortran-descriptors"]))
     for label, script, arguments in tests:
         proc = subprocess.run([sys.executable, "-I", "-B", "-c",
                                "import runpy,sys; p=sys.argv.pop(1); sys.path.insert(0,p);"
@@ -171,7 +194,9 @@ def main():
         stages = ("compile", "disassemble", "int", "aot", "int-runtime-off", "aot-runtime-off")
         if not all(f"libcxx-{bits}-{stage}" in names for stage in stages):
             raise ValueError("missing C++ allocation execution evidence")
-    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim", "objectc": "objectc"}[a.language]
+    if a.language == "fortran":
+        results["fortran"] = qualification.canonical({name: proof for name, proof in results.items() if name.startswith("fortran-")})
+    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim", "objectc": "objectc", "fortran": "fortran"}[a.language]
     row = dict(language=a.language, profile=profile.to_dict(), settings={"optimization": a.O, "debug": a.g},
                inputs=measured, vm_sha256=vm_digest, sdk_commit=a.sdk_commit,
                source_lock_sha256=qualification.digest(lock), producer_programs_sha256=qualification.canonical(binaries),

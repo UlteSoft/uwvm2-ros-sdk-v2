@@ -16,24 +16,24 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ("unsigned", "toolchain", "sysroots", "runtime", "cosign", "vm-source", "output", "authority-work"):
         parser.add_argument("--" + key, type=lambda path: Path(path).resolve(), required=True)
-    parser.add_argument("--xmake", type=Path, help="exercise the seeded Lua build using this operator-provided Xmake")
+    parser.add_argument("--xmake", type=Path, help="exercise an installed language project using this operator-provided Xmake")
     parser.add_argument("--objc-clang", type=Path)
     parser.add_argument("--objc-runtime", type=Path)
     parser.add_argument("--producer", type=Path, help="WROS Nim lowering binary")
     parser.add_argument("--repository", type=Path, default=ROOT)
     parser.add_argument("--sdk-commit", required=True)
     parser.add_argument("--address-bits", type=int, choices=(32, 64), default=32)
-    parser.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc"), default="c")
+    parser.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran"), default="c")
     parser.add_argument("--eh", action="store_true", help="use the default EH-enabled frontend configuration")
     a = parser.parse_args()
     if (a.producer is not None) != (a.language == "nim"):
         parser.error("--producer is required for Nim")
-    if a.language in ("nim", "lua") and not a.eh:
-        parser.error("the embedded Lua interpreter uses native Wasm EH")
+    if a.language in ("nim", "lua", "fortran") and not a.eh:
+        parser.error("this language release requires the EH sysroot")
     if a.language == "objectc" and (not a.objc_clang or not a.objc_runtime):
         parser.error("supply --objc-clang and --objc-runtime for Objective-C")
-    if a.xmake and a.language not in ("lua", "nim", "objectc"):
-        parser.error("--xmake exercises the seeded Lua path")
+    if a.xmake and a.language not in ("lua", "nim", "objectc", "fortran"):
+        parser.error("--xmake requires a published example project for this language")
     if not a.output.is_relative_to(ROOT / ".tmp"):
         parser.error("use a new SDK .tmp directory")
     if not a.authority_work.is_relative_to(a.vm_source / ".tmp"):
@@ -89,9 +89,17 @@ def main():
                  "--certificate", ca["certificate"], "--crl", ca["crl"], "--module-id", module_id, "--module-version", "1",
                  "--algorithm", "Ed25519", "--not-before", stamp(-60), "--not-after", stamp(3600), "--output", signed])
     wasm = a.output / "app.wasm"
-    front = sdk / "bin" / {"c": "wrc", "cpp": "wrcc", "lua": "wrlua", "nim": "wrnim", "objectc": "wrobjc"}[a.language]
-    app = a.output / ("app.m" if a.language == "objectc" else "app." + a.language)
+    front = sdk / "bin" / {"c": "wrc", "cpp": "wrcc", "lua": "wrlua", "nim": "wrnim", "objectc": "wrobjc", "fortran": "wrf"}[a.language]
+    suffix = {"objectc": "m", "fortran": "f90"}.get(a.language, a.language)
+    app = a.output / ("app." + suffix)
     def application(value):
+        if a.language == "fortran":
+            return ("program sampling\nuse iso_c_binding, only: c_int\nimplicit none\n"
+                    "interface\nsubroutine fail() bind(c,name=\"abort\")\nend subroutine\nend interface\n"
+                    "integer(c_int), allocatable :: sample(:)\ninteger :: rc\n"
+                    "allocate(sample(4),stat=rc)\nif(rc/=0) call fail()\n"
+                    f"sample={value}\nif(sample(4)/={value}) call fail()\n"
+                    "deallocate(sample,stat=rc)\nif(rc/=0) call fail()\nend program\n")
         if a.language == "objectc":
             return ('__attribute__((objc_root_class)) @interface Sample { Class isa; } + (unsigned)value; @end\n'
                     f'@implementation Sample + (unsigned)value {{ return {value}; }} @end\n'
@@ -111,6 +119,8 @@ def main():
     elif a.language == "objectc":
         build.extend(["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", a.objc_runtime.resolve(),
                       "--eh" if a.eh else "--no-eh", "--reactor", "--export", "_start", "-O3", "-g"])
+    elif a.language == "fortran":
+        build.extend(["--eh", "-O3", "-g"])
     elif a.language != "lua":
         build.extend(([] if a.eh else ["--no-eh"]) + ["--reactor", "--export", "_start"])
     build += ["--build-receipt", app, "-o", wasm]
@@ -155,7 +165,9 @@ def main():
         if {(v["module"], v["name"]) for v in inspect(wasm.read_bytes())} != expected_imports:
             raise ValueError("standalone language fixture has unexpected imports")
         linkage = 'extern "C" ' if a.language == "cpp" else ""
-        if a.language == "nim":
+        if a.language == "fortran":
+            app.write_text((sdk / "examples/fortran/body.f90").read_text())
+        elif a.language == "nim":
             app.write_text("import wros_scene\ndoAssert wr_abi()==2\n")
         else:
             app.write_text('#include <wros/scene.h>\n' + linkage +
@@ -187,7 +199,15 @@ def main():
                                        "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable", "--run", wasm])
     else:
         run("unapproved-optimization", [*build, "-O0"], False)
-    if a.xmake and a.language == "objectc":
+    if a.xmake and a.language == "fortran":
+        env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
+                   WROS_VM=str(a.runtime), WROS_RUN_QUERIES="abi", XMAKE_GLOBALDIR=str(a.output / "xmake-global"))
+        (a.output / "xmake.lua").write_text((sdk / "examples/fortran/xmake.lua").read_text())
+        (a.output / "body.f90").write_text((sdk / "examples/fortran/body.f90").read_text())
+        run("xmake-configure", [a.xmake.absolute(), "f", "-c", "-y", "-p", "wasm-wasip1", "-a", "wasm"+str(a.address_bits)])
+        run("xmake-build", [a.xmake.absolute(), "-j1", "robot"])
+        run("xmake-run", [a.xmake.absolute(), "run", "robot"])
+    elif a.xmake and a.language == "objectc":
         env.update(UWVM_ROS_SDK_ROOT=str(sdk), WROS_TOOLCHAIN=str(a.toolchain), WROS_SYSROOTS=str(a.sysroots),
                    WROS_OBJC_CLANG=str(a.objc_clang.resolve()), WROS_OBJC_RUNTIME=str(a.objc_runtime.resolve()),
                    WROS_VM=str(a.runtime), WROS_RUN_QUERIES="abi,realtime-clock", XMAKE_GLOBALDIR=str(a.output / "xmake-global"))
