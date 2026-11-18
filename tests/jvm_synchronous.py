@@ -25,6 +25,7 @@ def main():
     assert int(cgroup["memory_max"])==68719476736 and int(cgroup["swap_max"])==0
     out=opts.output.resolve(); out.mkdir(parents=True,exist_ok=False)
     (out/"tmp").mkdir()
+    os.environ["TMPDIR"]=str(out/"tmp")
     report=dict(complete=False,cgroup=cgroup,commit=opts.commit,cases=[],selections={},guests={})
     def save(): (out/"results.json").write_text(json.dumps(report,indent=2)+"\n")
     for lang,suffix in (("java","java"),("kotlin","kt")):
