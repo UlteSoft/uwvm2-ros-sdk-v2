@@ -93,9 +93,17 @@ def main():
             metadata["command_name"] = COMPILER_COMMANDS[language]
         if language in ("java","kotlin"):
             metadata["optional_components"] = ["synchronous-aot"]
+        if language == "csharp":
+            metadata["optional_components"] = ["numeric-aot"]
         write_json(path, metadata)
         package("metadata/" + language, [path])
 
+    package("csharp/numeric", [
+        "bin/" + COMPILER_COMMANDS["csharp"], "language/csharp/numeric.py", "language/csharp/host.py",
+        "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
+        "language/csharp/xmake/adapter.lua", "examples/csharp/numeric-aot/Filter.cs",
+        "examples/csharp/numeric-aot/xmake.lua", "document/en/csharp.md", "document/zh/csharp.md",
+    ])
     shared_jvm = [p.relative_to(ROOT).as_posix() for name in ("language/jvm", "third-parties/jvm")
                   for p in (ROOT / name).rglob("*") if p.is_file() and "__pycache__" not in p.parts]
     package("jvm/synchronous", [*shared_jvm, "include/wros/scene.h", "document/en/jvm.md", "document/zh/jvm.md"])

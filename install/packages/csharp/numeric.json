@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "path": "bin/wrcs",
+      "bytes": 192,
+      "mode": 493,
+      "sha256": "f9c6a917db220affdc1737ff2a5a4e81a9c115bebc33c0793c112750799316a8"
+    },
+    {
+      "path": "document/en/csharp.md",
+      "bytes": 5313,
+      "mode": 420,
+      "sha256": "c900d8f98628701875c1070ea4bc504d1466b473b80ebaed0806592de640884b"
+    },
+    {
+      "path": "document/zh/csharp.md",
+      "bytes": 6184,
+      "mode": 420,
+      "sha256": "19b35d49af4af6bc6e85f9fbd39509b8a023e836e573e40cc8148ad1635fd88b"
+    },
+    {
+      "path": "examples/csharp/numeric-aot/Filter.cs",
+      "bytes": 127,
+      "mode": 420,
+      "sha256": "d9191e670675bdf36775214a65f0ed785acec4552d8e528526357a730f06eb00"
+    },
+    {
+      "path": "examples/csharp/numeric-aot/xmake.lua",
+      "bytes": 402,
+      "mode": 420,
+      "sha256": "e18c15ac09a3e8fa7caafad6b9f6afa9148f3ef68a1967a9e0b00d2a24e3b5fe"
+    },
+    {
+      "path": "language/csharp/Admit.cs",
+      "bytes": 5414,
+      "mode": 420,
+      "sha256": "3f0fadb7f7ac80d2e7644a2af109e46d6acd2b2d758fd262aee55571de91dce6"
+    },
+    {
+      "path": "language/csharp/host.py",
+      "bytes": 1913,
+      "mode": 420,
+      "sha256": "7f8c0e2f3e4ab4954ee29c1715bb53a678d54862a1760ad651f59a428831e4ec"
+    },
+    {
+      "path": "language/csharp/inputs.sha256",
+      "bytes": 66552,
+      "mode": 420,
+      "sha256": "9fa42c68b6245eb5373459e4617d18b5d508ec493ec37dc7f8f8f7ef9e3bdf73"
+    },
+    {
+      "path": "language/csharp/leaf.cpp",
+      "bytes": 3742,
+      "mode": 420,
+      "sha256": "336cb7a35b0c5046c3b87d541bf773ca7dff14031883a0d3de141a56e0d85910"
+    },
+    {
+      "path": "language/csharp/numeric.py",
+      "bytes": 7415,
+      "mode": 420,
+      "sha256": "1bea7bc85579427d0b32d21257827de632444007c8ba97b39c1bea61f6586db6"
+    },
+    {
+      "path": "language/csharp/xmake/adapter.lua",
+      "bytes": 1457,
+      "mode": 420,
+      "sha256": "43cfc709ff98b362f120fcbb922fb80a2a14cc5b185ea8fe988384c2e7dc7ef4"
+    }
+  ]
+}

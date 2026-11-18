@@ -1,0 +1,13 @@
+set_project("motor_filter")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("filter")
+    set_kind("binary")
+    set_language("csharp")
+    set_ros_platform(os.getenv("WROS_PLATFORM") or "unitree")
+    set_wros_profile({mte = "legacy"})
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_wros_exports("Filter.Scale")
+    add_files("Filter.cs")
+target_end()
