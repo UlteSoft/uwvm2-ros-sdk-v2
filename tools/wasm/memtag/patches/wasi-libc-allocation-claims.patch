@@ -1,0 +1,255 @@
+--- a/dlmalloc/src/malloc.c
++++ b/dlmalloc/src/malloc.c
+@@ -4571,6 +4571,10 @@
+   return 0;
+ }
+ 
++#if defined(__wasilibc_dlmalloc_enable_memtag) && (MSPACES || ONLY_MSPACES)
++#error "the tagged WROS allocator supports the SDK global heap only"
++#endif
++
+ #if !ONLY_MSPACES
+ 
+ #if __wasilibc_unmodified_upstream // Forward declaration of try_init_allocator.
+@@ -4579,21 +4583,16 @@
+ #endif
+ 
+ #if defined(__wasilibc_dlmalloc_enable_memtag)
+-/* Zero is reserved for allocator metadata and retired allocations. A fresh
+-   active allocation must therefore use a nonzero tag. The execution-disabled
+-   case must not loop on memtag.extract (which correctly returns zero then).
+-   Retagging after reuse is still probabilistic; this is not a generation ID. */
++/* Register the entire, granule-aligned usable extent under the malloc
++   lock. The VM chooses and commits a nonzero tag distinct from the active
++   neighbors of this actual address. claimz also clears bytes when the
++   operator disables checking at run time. */
++#if !__has_builtin(__builtin_wasm_memtag_claim) || !__has_builtin(__builtin_wasm_memtag_claimz) || !__has_builtin(__builtin_wasm_memtag_release)
++#error "the tagged allocator requires WebAssembly memory lifetime instructions"
++#endif
+ static void* memtag_new_allocation(void* mem, size_t bytes, int zero) {
+-  if (__builtin_wasm_memtag_status(0) != 0) {
+-    do {
+-      mem = __builtin_wasm_memtag_random(0, mem);
+-    } while (__builtin_wasm_memtag_extract(0, mem) == 0);
+-  }
+-  if (zero)
+-    __builtin_wasm_memtag_storez(0, mem, bytes);
+-  else
+-    __builtin_wasm_memtag_store(0, mem, bytes);
+-  return mem;
++  return zero ? __builtin_wasm_memtag_claimz(0, mem, bytes)
++              : __builtin_wasm_memtag_claim(0, mem, bytes);
+ }
+ #endif
+ 
+@@ -4796,7 +4795,7 @@
+       if (RTCHECK(ok_address(fm, p) && ok_inuse(p))) {
+         size_t psize = chunksize(p);
+ #if defined(__wasilibc_dlmalloc_enable_memtag)
+-        mem = __builtin_wasm_memtag_untagstore(0, mem, psize - CHUNK_OVERHEAD);
++        mem = __builtin_wasm_memtag_release(0, mem, psize - CHUNK_OVERHEAD);
+ #endif
+         mchunkptr next = chunk_plus_offset(p, psize);
+         if (!pinuse(p)) {
+@@ -4913,6 +4912,7 @@
+ 
+ /* ------------ Internal support for realloc, memalign, etc -------------- */
+ 
++#if !defined(__wasilibc_dlmalloc_enable_memtag)
+ /* Try to realloc; always in-place */
+ static mchunkptr try_realloc_chunk(mstate m, mchunkptr p, size_t nb, [[maybe_unused]] void* oldmemptr)
+ {
+@@ -4925,9 +4925,6 @@
+       size_t rsize = oldsize - nb;
+       if (rsize >= MIN_CHUNK_SIZE) {      /* split off remainder */
+         mchunkptr r = chunk_plus_offset(p, nb);
+-#ifdef __wasilibc_dlmalloc_enable_memtag
+-        __builtin_wasm_memtag_store(0, r, rsize);
+-#endif
+         set_inuse(m, p, nb);
+         set_inuse(m, r, rsize);
+         dispose_chunk(m, r, rsize);
+@@ -4940,10 +4937,6 @@
+         size_t newtopsize = newsize - nb;
+ 
+         mchunkptr newtop = chunk_plus_offset(p, nb);
+-#ifdef __wasilibc_dlmalloc_enable_memtag
+-        void* oldtop = chunk_plus_offset(oldmemptr, oldsize-CHUNK_OVERHEAD);
+-        __builtin_wasm_memtag_store(0, oldtop, nb-oldsize);
+-#endif
+         set_inuse(m, p, nb);
+         newtop->head = newtopsize |PINUSE_BIT;
+         m->top = newtop;
+@@ -4956,10 +4949,6 @@
+       if (oldsize + dvs >= nb) {
+         size_t dsize = oldsize + dvs - nb;
+         if (dsize >= MIN_CHUNK_SIZE) {
+-#ifdef __wasilibc_dlmalloc_enable_memtag
+-          void* oldtop = chunk_plus_offset(oldmemptr, oldsize-CHUNK_OVERHEAD);
+-          __builtin_wasm_memtag_store(0, oldtop, nb-oldsize);
+-#endif
+           mchunkptr r = chunk_plus_offset(p, nb);
+           mchunkptr n = chunk_plus_offset(r, dsize);
+           set_inuse(m, p, nb);
+@@ -4970,10 +4959,6 @@
+         }
+         else { /* exhaust dv */
+           size_t newsize = oldsize + dvs;
+-#ifdef __wasilibc_dlmalloc_enable_memtag
+-          void* oldtop = chunk_plus_offset(oldmemptr, oldsize-CHUNK_OVERHEAD);
+-          __builtin_wasm_memtag_store(0, oldtop, dvs);
+-#endif
+           set_inuse(m, p, newsize);
+           m->dvsize = 0;
+           m->dv = 0;
+@@ -4987,18 +4972,10 @@
+         size_t rsize = oldsize + nextsize - nb;
+         unlink_chunk(m, next, nextsize);
+         if (rsize < MIN_CHUNK_SIZE) {
+-#ifdef __wasilibc_dlmalloc_enable_memtag
+-          void* oldtop = chunk_plus_offset(oldmemptr, oldsize-CHUNK_OVERHEAD);
+-          __builtin_wasm_memtag_store(0, oldtop, nextsize);
+-#endif
+           size_t newsize = oldsize + nextsize;
+           set_inuse(m, p, newsize);
+         }
+         else {
+-#ifdef __wasilibc_dlmalloc_enable_memtag
+-          void* oldtop = chunk_plus_offset(oldmemptr, oldsize-CHUNK_OVERHEAD);
+-          __builtin_wasm_memtag_store(0, oldtop, nb-oldsize);
+-#endif
+           mchunkptr r = chunk_plus_offset(p, nb);
+           set_inuse(m, p, nb);
+           set_inuse(m, r, rsize);
+@@ -5013,6 +4990,7 @@
+   }
+   return newp;
+ }
++#endif
+ 
+ static void* internal_memalign(mstate m, size_t alignment, size_t bytes) {
+   void* mem = 0;
+@@ -5365,7 +5343,73 @@
+ 
+ #if !ONLY_MSPACES
+ 
++#if defined(__wasilibc_dlmalloc_enable_memtag)
++/* Each published allocation has an exact base and extent in the VM.
++   Shrinking under the malloc lock releases the exact old lifetime and
++   claims the retained prefix after returning its tail to the free list.
++   Growth obtains a new allocation before disturbing the original one. */
++static void* memtag_resize(void* oldmem, size_t bytes, int in_place) {
++  if (oldmem == 0)
++    return in_place ? 0 : dlmalloc(bytes);
++  if (bytes >= MAX_REQUEST) {
++    MALLOC_FAILURE_ACTION;
++    return 0;
++  }
++#ifdef REALLOC_ZERO_BYTES_FREES
++  if (bytes == 0 && !in_place) {
++    dlfree(oldmem);
++    return 0;
++  }
++#endif
++  void* tagged = __builtin_wasm_memtag_load(0, oldmem);
++  if (tagged != oldmem)
++    __dlmalloc_memtag_verbose_abort(in_place ? 2 : 1, oldmem, tagged);
++  mchunkptr p = mem2chunk(__builtin_wasm_memtag_untag(0, oldmem));
++  if (PREACTION(gm))
++    return 0;
++  if (!RTCHECK(ok_address(gm, p) && ok_inuse(p))) {
++    POSTACTION(gm);
++    USAGE_ERROR_ACTION(gm, p);
++    return 0;
++  }
++  size_t oldsize = chunksize(p);
++  mchunkptr next = chunk_plus_offset(p, oldsize);
++  if (!RTCHECK(ok_next(p, next) && ok_pinuse(next))) {
++    POSTACTION(gm);
++    USAGE_ERROR_ACTION(gm, p);
++    return 0;
++  }
++  size_t needed = request2size(bytes);
++  if (needed <= oldsize) {
++    size_t tail = oldsize - needed;
++    if (tail >= MIN_CHUNK_SIZE) {
++      void* backing = __builtin_wasm_memtag_release(0, oldmem, oldsize - CHUNK_OVERHEAD);
++      mchunkptr remainder = chunk_plus_offset(p, needed);
++      set_inuse(gm, p, needed);
++      set_inuse(gm, remainder, tail);
++      dispose_chunk(gm, remainder, tail);
++      oldmem = memtag_new_allocation(backing, needed - CHUNK_OVERHEAD, 0);
++    }
++    POSTACTION(gm);
++    return oldmem;
++  }
++  POSTACTION(gm);
++  if (in_place)
++    return 0;
++  void* replacement = dlmalloc(bytes);
++  if (replacement != 0) {
++    size_t usable = oldsize - CHUNK_OVERHEAD;
++    memcpy(replacement, oldmem, usable < bytes ? usable : bytes);
++    dlfree(oldmem);
++  }
++  return replacement;
++}
++#endif
++
+ void* dlrealloc(void* oldmem, size_t bytes) {
++#if defined(__wasilibc_dlmalloc_enable_memtag)
++  return memtag_resize(oldmem, bytes, 0);
++#else
+   void* mem = 0;
+   if (oldmem == 0) {
+     mem = dlmalloc(bytes);
+@@ -5380,13 +5424,6 @@
+ #endif /* REALLOC_ZERO_BYTES_FREES */
+   else {
+     void* oldmemtemp = oldmem;
+-#if defined(__wasilibc_dlmalloc_enable_memtag)
+-    void* oldmemtag = __builtin_wasm_memtag_load(0, oldmem);
+-    if (oldmemtag != oldmem) {
+-      __dlmalloc_memtag_verbose_abort(1, oldmem, oldmemtag);
+-    }
+-    oldmem = __builtin_wasm_memtag_untag(0, oldmem);
+-#endif
+     size_t nb = request2size(bytes);
+     mchunkptr oldp = mem2chunk(oldmem);
+ #if ! FOOTERS
+@@ -5417,9 +5454,13 @@
+     }
+   }
+   return mem;
++#endif
+ }
+ 
+ void* dlrealloc_in_place(void* oldmem, size_t bytes) {
++#if defined(__wasilibc_dlmalloc_enable_memtag)
++  return memtag_resize(oldmem, bytes, 1);
++#else
+   void* mem = 0;
+   if (oldmem != 0) {
+     if (bytes >= MAX_REQUEST) {
+@@ -5427,13 +5468,6 @@
+     }
+     else {
+     void* oldmemtemp = oldmem;
+-#if defined(__wasilibc_dlmalloc_enable_memtag)
+-      void* oldmemtag = __builtin_wasm_memtag_load(0, oldmem);
+-      if (oldmemtag != oldmem) {
+-        __dlmalloc_memtag_verbose_abort(2, oldmem, oldmemtag);
+-      }
+-      oldmem = __builtin_wasm_memtag_untag(0, oldmem);
+-#endif
+       size_t nb = request2size(bytes);
+       mchunkptr oldp = mem2chunk(oldmem);
+ #if ! FOOTERS
+@@ -5456,6 +5490,7 @@
+     }
+   }
+   return mem;
++#endif
+ }
+ 
+ void* dlmemalign(size_t alignment, size_t bytes) {

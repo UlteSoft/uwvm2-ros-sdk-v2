@@ -1,0 +1,16 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
+@@ -250,6 +250,13 @@
+     if (auto *Intrinsic = dyn_cast<IntrinsicInst>(&I);
+         Intrinsic && Intrinsic->getIntrinsicID() == Intrinsic::eh_typeid_for)
+       return;
++    // An explicit untag of a bare symbol asks only for its numerical address.
++    // Looking up the allocation tag where an absolute linker value happens to
++    // point is unnecessary. Leave all actual data references materialized.
++    if (auto *II = dyn_cast<IntrinsicInst>(&I);
++        II && II->getIntrinsicID() == Intrinsic::wasm_memtag_untag &&
++        isa<GlobalVariable>(II->getArgOperand(1)))
++      return;
+     if (auto *CB = dyn_cast<CallBase>(&I);
+         CB && CB->getCalledFunction() == MemtagLoad)
+       return;

@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from check_owner_assembly import check as check_owner_assembly
 
 
 def digest(path):
@@ -30,8 +31,8 @@ def check(tool_bin, source, work):
     llc, filecheck = tool_bin / "llc", tool_bin / "FileCheck"
     test_dir = source / "llvm/test/CodeGen/WebAssembly"
     fixtures = [test_dir / (base + ".ll") for base in
-                ("memtag-proven-safe", "memtag-dynamic-alloca", "memtag-addr32", "memtag-addr64")]
-    safe, dynamic, addr32, addr64 = fixtures
+                ("memtag-addr32", "memtag-addr64")]
+    addr32, addr64 = fixtures
     inventory = json.loads((source.parent / "source-inventory.json").read_text())
     hashes = result["fixtures"]
     for path in fixtures:
@@ -41,9 +42,16 @@ def check(tool_bin, source, work):
             raise ValueError("prepared LLVM regression fixture has changed: " + key)
     zero = Path(__file__).resolve().with_name("memtag-adjacent-zero.ll")
     hashes[zero.name] = digest(zero)
+    generations = zero.with_name("memtag-lifetime-generations.ll")
+    hashes[generations.name] = digest(generations)
     attributes = zero.with_name("memtag-source-attributes.c")
     hashes[attributes.name] = digest(attributes)
-    result["tools"] = {name: digest(tool_bin / name) for name in ("clang", "clang++", "llc", "FileCheck")}
+    owner = zero.with_name("memtag-stack-owner.ll")
+    dynamic = zero.with_name("memtag-unsupported-dynamic.ll")
+    unwinding = zero.with_name("memtag-unsupported-unwind.ll")
+    for path in (owner, dynamic, unwinding):
+        hashes[path.name] = digest(path)
+    result["tools"] = {name: digest(tool_bin / name) for name in ("clang", "clang++", "llc", "FileCheck", "llvm-mc")}
 
     def run(bits, name, fixture, flags, suffix, prefix=None, driver=None):
         """Fail independently on the producer, empty output, object header, or FileCheck."""
@@ -83,13 +91,32 @@ def check(tool_bin, source, work):
         case.update(passed=True, output_sha256=digest(product))
         save()
 
+    def reject(bits, fixture):
+        name = f"wasm{bits}-{fixture.stem}"
+        product = work / (name + ".o")
+        product.unlink(missing_ok=True)
+        args = [str(llc), f"-mtriple=wasm{bits}-unknown-unknown", "-mattr=+memtag",
+                "-verify-each", "-filetype=obj", str(fixture), "-o", str(product)]
+        proc = subprocess.run(args, capture_output=True, timeout=120)
+        (work / (name + ".producer.log")).write_bytes(proc.stderr)
+        diagnostic = ("statically bounded" if fixture == dynamic else "non-local exit").encode()
+        passed = proc.returncode != 0 and b"strict WasmMTE" in proc.stderr and diagnostic in proc.stderr
+        result["cases"].append(dict(name=name, producer=args, producer_exit=proc.returncode, passed=passed))
+        save()
+        if not passed:
+            raise RuntimeError(name + " did not produce the required unsupported-storage diagnostic")
+
+    save()
+    result["cases"].extend(check_owner_assembly(tool_bin / "llvm-mc", work / "owner-assembly"))
     save()
     for bits, address in ((32, addr32), (64, addr64)):
         stop = "-stop-after=wasm-stack-tagging"
         features = "-mattr=+memtag,+atomics,+bulk-memory"
-        run(bits, "proof", safe, [features, stop], ".mir", "CHECK")
-        run(bits, "dynamic", dynamic, [stop], ".mir", "CHECK")
-        run(bits, "dynamic-object", dynamic, ["-filetype=obj"], ".o")
+        run(bits, "generations", generations, [features, stop], ".mir", "CHECK")
+        run(bits, "owners", owner, [features, stop], ".mir", "CHECK")
+        run(bits, "owner-object", owner, [features, "-filetype=obj"], ".o")
+        for fixture in (dynamic, unwinding):
+            reject(bits, fixture)
         run(bits, "zero", zero, [features, stop], ".mir", "CHECK")
         run(bits, "zero-unfused", zero, [features, "-wasm-memtag-fuse-zero-init=false", stop], ".mir", "UNFUSED")
         run(bits, "zero-assembly", zero, [features, "-asm-verbose=false"], ".s", "ASM")

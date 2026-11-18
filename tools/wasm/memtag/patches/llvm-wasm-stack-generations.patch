@@ -1,0 +1,407 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyStackTagging.cpp
+@@ -10,6 +10,7 @@
+ #include "llvm/Analysis/OptimizationRemarkEmitter.h"
+ #include "llvm/Analysis/PostDominators.h"
+ #include "llvm/Analysis/StackSafetyAnalysis.h"
++#include "llvm/IR/CFG.h"
+ #include "llvm/IR/Constants.h"
+ #include "llvm/IR/Function.h"
+ #include "llvm/IR/IRBuilder.h"
+@@ -26,6 +27,7 @@
+ #include "llvm/Transforms/Utils/Local.h"
+ #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+ #include "llvm/Transforms/Utils/MemoryTaggingSupport.h"
++#include "llvm/Transforms/Utils/PromoteMemToReg.h"
+ 
+ using namespace llvm;
+ 
+@@ -46,10 +48,6 @@
+ 
+   void restoreAllocaTag(AllocaInst *AI, Instruction *InsertBefore, uint64_t Size,
+                    Function *StoreTagDecl, Type *ArgOp0Type);
+-
+-  Instruction *insertBaseTaggedPointer(
+-      const MapVector<AllocaInst *, memtag::AllocaInfo> &Allocas,
+-      const DominatorTree *DT);
+ 
+   bool runOnFunction(Function &) override;
+ 
+@@ -109,32 +107,6 @@
+   IRBuilder<> IRB(InsertBefore);
+   IRB.CreateCall(StoreTagDecl,
+                  {IRB.getInt32(0), AI, ConstantInt::get(ArgOp0Type, Size)});
+-}
+-
+-Instruction *WebAssemblyStackTagging::insertBaseTaggedPointer(
+-    const MapVector<AllocaInst *, memtag::AllocaInfo> &AllocasToInstrument,
+-    const DominatorTree *DT) {
+-  BasicBlock *PrologueBB = nullptr;
+-  // Try sinking IRG as deep as possible to avoid hurting shrink wrap.
+-  for (auto &I : AllocasToInstrument) {
+-    const memtag::AllocaInfo &Info = I.second;
+-    AllocaInst *AI = Info.AI;
+-    if (!PrologueBB) {
+-      PrologueBB = AI->getParent();
+-      continue;
+-    }
+-    PrologueBB = DT->findNearestCommonDominator(PrologueBB, AI->getParent());
+-  }
+-  assert(PrologueBB);
+-
+-  IRBuilder<> IRB(&PrologueBB->front());
+-  Function *RdTag = Intrinsic::getOrInsertDeclaration(
+-      F->getParent(), Intrinsic::wasm_memtag_random);
+-  Instruction *Base =
+-      IRB.CreateCall(RdTag, {IRB.getInt32(0),
+-                             ::llvm::ConstantPointerNull::get(IRB.getPtrTy())});
+-  Base->setName("basetag");
+-  return Base;
+ }
+ 
+ // Dynamic allocations are not described by StackInfoBuilder's static object
+@@ -231,6 +203,153 @@
+     Retire(Exit, FrameBottom);
+ }
+ 
++// Preserve the generation at which an address is passed, stored, converted,
++// or derived while live. The SSA value for an earlier such use is never
++// recovered from the current allocation tag. For pure address arithmetic
++// hoisted to a definitely dead region, materialize the arithmetic at its first
++// non-preparatory use. This permits a loop-invariant GEP to serve each lifetime.
++static void tagLifetimes(memtag::AllocaInfo &Info, DominatorTree &DT,
++                         Type *IntPtrTy, uint64_t Size, Function *SetTag) {
++  AllocaInst *AI = Info.AI;
++  Function *F = AI->getFunction();
++  Module *M = F->getParent();
++  SmallVector<AllocaInst *, 2> Registers;
++  IRBuilder<> Entry(&*F->getEntryBlock().getFirstInsertionPt());
++  Type *Ptr = AI->getType();
++  auto *Current = Entry.CreateAlloca(Ptr, nullptr, "memtag.current");
++  Registers.push_back(Current);
++
++  enum { Dead = 1, Live = 2 };
++  DenseMap<BasicBlock *, unsigned> Incoming;
++  DenseMap<BasicBlock *, SmallVector<IntrinsicInst *, 2>> Events;
++  for (auto *I : Info.LifetimeStart)
++    Events[I->getParent()].push_back(I);
++  for (auto *I : Info.LifetimeEnd)
++    Events[I->getParent()].push_back(I);
++  for (auto &[BB, Markers] : Events)
++    llvm::sort(Markers, [](auto *A, auto *B) { return A->comesBefore(B); });
++  auto After = [](IntrinsicInst *I) -> unsigned {
++    return I->getIntrinsicID() == Intrinsic::lifetime_start ? Live : Dead;
++  };
++  SmallVector<BasicBlock *, 8> Work{&F->getEntryBlock()};
++  Incoming[Work.back()] = Dead;
++  while (!Work.empty()) {
++    auto *BB = Work.pop_back_val();
++    auto E = Events.find(BB);
++    unsigned Out = E == Events.end() ? Incoming.lookup(BB) : After(E->second.back());
++    for (auto *Succ : successors(BB)) {
++      unsigned &In = Incoming[Succ];
++      if (Out & ~In) {
++        In |= Out;
++        Work.push_back(Succ);
++      }
++    }
++  }
++  auto StateBefore = [&](Instruction *Pos) {
++    BasicBlock *BB = Pos->getParent();
++    unsigned State = Incoming.lookup(BB);
++    if (auto E = Events.find(BB); E != Events.end())
++      for (auto *Mark : E->second) {
++        if (!Mark->comesBefore(Pos))
++          break;
++        State = After(Mark);
++      }
++    return State;
++  };
++
++  // A PHI receives its incoming pointer on its incoming edge. Snapshot the
++  // original uses before creating any stores, loads, or cloned GEPs.
++  struct Binding {
++    Use *Operand;
++    Instruction *At;
++    Value *Address;
++  };
++  SmallVector<Binding, 8> Bindings;
++  SmallVector<Value *, 8> Prepare{AI};
++  bool NeedsPending = false;
++  while (!Prepare.empty()) {
++    Value *Address = Prepare.pop_back_val();
++    for (Use &U : Address->uses()) {
++      auto *I = cast<Instruction>(U.getUser());
++      if (isa<LifetimeIntrinsic>(I))
++        continue;
++      auto *Phi = dyn_cast<PHINode>(I);
++      Instruction *At = Phi ? Phi->getIncomingBlock(U)->getTerminator() : I;
++      unsigned State = StateBefore(At);
++      if (!(State & Live) && U.getOperandNo() == 0 &&
++          (isa<GetElementPtrInst>(I) || isa<BitCastInst>(I))) {
++        Prepare.push_back(I);
++        continue;
++      }
++      Bindings.push_back({&U, At, Address});
++      NeedsPending |= (State & Dead) != 0;
++    }
++  }
++
++  // A program may pass an address out before its lifetime begins. Reserve
++  // that generation before the first such use, and the next one at retirement.
++  // A start reached without an intervening end must still draw a fresh tag.
++  auto *Random = Intrinsic::getOrInsertDeclaration(M, Intrinsic::wasm_memtag_random);
++  auto *RandomStore = Intrinsic::getOrInsertDeclaration(
++      M, Intrinsic::wasm_memtag_randomstore, {IntPtrTy});
++  Value *Length = ConstantInt::get(IntPtrTy, Size);
++  AllocaInst *Active = nullptr;
++  if (NeedsPending) {
++    Active = Entry.CreateAlloca(Entry.getInt1Ty(), nullptr, "memtag.active");
++    Registers.push_back(Active);
++    IRBuilder<> Init(AI->getNextNode());
++    Init.CreateStore(Init.CreateCall(Random, {Init.getInt32(0), AI}), Current);
++    Init.CreateStore(Init.getFalse(), Active);
++  }
++  for (auto *Start : Info.LifetimeStart) {
++    IRBuilder<> B(Start->getNextNode());
++    Value *Tag;
++    unsigned State = StateBefore(Start);
++    if (NeedsPending && (State & Dead)) {
++      Tag = B.CreateLoad(Ptr, Current);
++      if (State & Live) {
++        // At an ambiguous join, a repeated start on the already-live path
++        // starts a new generation; a reserved outside pointer remains valid
++        // on the dead path.
++        auto *New = B.CreateCall(Random, {B.getInt32(0), AI});
++        Tag = B.CreateSelect(B.CreateLoad(B.getInt1Ty(), Active), New, Tag);
++      }
++      B.CreateCall(SetTag, {B.getInt32(0), Tag, Length});
++    } else {
++      Tag = B.CreateCall(RandomStore, {B.getInt32(0), AI, Length});
++    }
++    if (NeedsPending)
++      B.CreateStore(B.getTrue(), Active);
++    B.CreateStore(Tag, Current);
++  }
++  if (NeedsPending)
++    for (auto *End : Info.LifetimeEnd) {
++      IRBuilder<> B(End->getNextNode());
++      B.CreateStore(B.CreateCall(Random, {B.getInt32(0), AI}), Current);
++      B.CreateStore(B.getFalse(), Active);
++    }
++
++  for (auto &[Operand, At, Address] : Bindings) {
++    IRBuilder<> B(At);
++    Value *PtrValue = B.CreateLoad(Ptr, Current);
++    SmallVector<Instruction *, 4> Derivation;
++    for (Value *Step = Address; Step != AI;) {
++      auto *I = cast<Instruction>(Step);
++      Derivation.push_back(I);
++      Step = I->getOperand(0);
++    }
++    for (Instruction *I : llvm::reverse(Derivation)) {
++      Instruction *Copy = I->clone();
++      Copy->setOperand(0, PtrValue);
++      B.Insert(Copy);
++      PtrValue = Copy;
++    }
++    Operand->set(PtrValue);
++  }
++  // These are compiler registers. They must never be addressable Wasm slots.
++  PromoteMemToReg(Registers, DT);
++}
++
+ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
+   if (!Fn.hasFnAttribute(Attribute::SanitizeMemTag))
+     return false;
+@@ -281,17 +400,9 @@
+   if (AllocasToInstrument.empty()) {
+     return true;
+   }
+-  Instruction *Base = nullptr;
+-  bool usehint = false;
+-  if (1 < AllocasToInstrument.size()) {
+-    Base = insertBaseTaggedPointer(AllocasToInstrument, DT);
+-    usehint = true;
+-  }
+-  uint64_t NextTag = 0;
+   LLVMContext &Ctx = Fn.getContext();
+-  Type *Int32Type = llvm::Type::getInt32Ty(Ctx);
+-  Type *Int64Type = llvm::Type::getInt64Ty(Ctx);
+-  Type *IntPtrType = iswasm32 ? Int32Type : Int64Type;
++  Type *Int32Type = Type::getInt32Ty(Ctx);
++  Type *IntPtrType = iswasm32 ? Int32Type : Type::getInt64Ty(Ctx);
+ 
+   // Lifetime end restores the original alloca pointer's stack allocation tag.
+   // Emit this explicitly: a VM must not infer stack-vs-heap semantics from
+@@ -303,11 +414,6 @@
+   for (auto &I : AllocasToInstrument) {
+     memtag::AllocaInfo &Info = I.second;
+     memtag::alignAndPadAlloca(Info, kTagGranuleSize);
+-    uint64_t Tag = NextTag;
+-    if (iswasm32) {
+-      Tag = static_cast<uint32_t>(Tag);
+-    }
+-    ++NextTag;
+     AllocaInst *AI = Info.AI;
+     IRBuilder<> IRB(Info.AI->getNextNode());
+ 
+@@ -317,10 +423,8 @@
+     // statement if return_twice functions are called.
+     bool SupportedLifetime =
+         memtag::isSupportedLifetime(Info, DT, LI) && !SInfo.CallsReturnTwice;
+-    if (SupportedLifetime) {
+-      bool combineStore{canCombineStore(Info, AI, DT)};
+-      Function *StoreTagDecl = nullptr;
+-      Intrinsic::ID SelectedIntrinsicID;
++    if (!Info.LifetimeStart.empty()) {
++      bool combineStore = SupportedLifetime && canCombineStore(Info, AI, DT);
+       // Fuse only an immediately adjacent, complete non-volatile initialization.
+       // No load, call, partial clear or lifetime transition may move across it.
+       // The *storez operation retains the clear even when runtime MTE is off.
+@@ -335,45 +439,21 @@
+             MS->getDest()->stripPointerCasts() == AI &&
+             Length->getZExtValue() == *AI->getAllocationSize(*DL))
+           ZeroInit = MS;
+-        SelectedIntrinsicID = usehint
+-            ? (ZeroInit ? Intrinsic::wasm_memtag_hintstorez
+-                        : Intrinsic::wasm_memtag_hintstore)
+-            : (ZeroInit ? Intrinsic::wasm_memtag_randomstorez
+-                        : Intrinsic::wasm_memtag_randomstore);
+-      } else {
+-        SelectedIntrinsicID = usehint ? Intrinsic::wasm_memtag_hint
+-                                      : Intrinsic::wasm_memtag_random;
+-        StoreTagDecl = Intrinsic::getOrInsertDeclaration(
+-            F->getParent(), Intrinsic::wasm_memtag_store, {IntPtrType});
+-      }
+-
+-      SmallVector<Type *, 2> SelectedStoreSignatureTypes;
++      }
++      uint64_t Size = alignTo(*AI->getAllocationSize(*DL), kTagGranuleSize);
+       if (combineStore) {
+-        SelectedStoreSignatureTypes.push_back(IntPtrType);
+-      }
+-      if (usehint) {
+-        SelectedStoreSignatureTypes.push_back(IntPtrType);
+-      }
+-      uint64_t Size = *Info.AI->getAllocationSize(*DL);
+-      Size = alignTo(Size, kTagGranuleSize);
+-
+-      auto *RandomOrHintMayStoreTagDecl = Intrinsic::getOrInsertDeclaration(
+-          F->getParent(), SelectedIntrinsicID, SelectedStoreSignatureTypes);
+-
+-      SmallVector<Value *, 5> TagCallArguments{ConstantInt::get(Int32Type, 0),
+-                                               Info.AI};
+-      if (combineStore) {
+-        TagCallArguments.push_back(ConstantInt::get(IntPtrType, Size));
+-      }
+-      if (usehint) {
+-        TagCallArguments.push_back(Base);
+-        TagCallArguments.push_back(ConstantInt::get(IntPtrType, Tag));
+-      }
+-      if (combineStore) {
++        // A fixed offset from one frame seed aliases periodically in the
++        // finite tag field. Draw independently at each executing lifetime
++        // start, including starts in loops. Keep the adjacent zeroing fusion.
++        Intrinsic::ID Op = ZeroInit ? Intrinsic::wasm_memtag_randomstorez
++                                    : Intrinsic::wasm_memtag_randomstore;
++        auto *RandomStore = Intrinsic::getOrInsertDeclaration(
++            F->getParent(), Op, {IntPtrType});
+         IntrinsicInst *Start = Info.LifetimeStart.front();
+         IRBuilder<> IRBStart(Start->getNextNode());
+-        CallInst *TagPCall =
+-            IRBStart.CreateCall(RandomOrHintMayStoreTagDecl, TagCallArguments);
++        CallInst *TagPCall = IRBStart.CreateCall(
++            RandomStore, {IRBStart.getInt32(0), AI,
++                          ConstantInt::get(IntPtrType, Size)});
+         if (Info.AI->hasName())
+           TagPCall->setName(Info.AI->getName() + ".tag");
+ 
+@@ -392,53 +472,26 @@
+         Start->eraseFromParent();
+         End->eraseFromParent();
+       } else {
+-        auto *TagPCall =
+-            IRB.CreateCall(RandomOrHintMayStoreTagDecl, TagCallArguments);
+-
+-        if (Info.AI->hasName())
+-          TagPCall->setName(Info.AI->getName() + ".tag");
+-
+-        Info.AI->replaceUsesWithIf(TagPCall, [&](const Use &U) {
+-          return !isa<LifetimeIntrinsic>(U.getUser());
+-        });
+-
+-        TagPCall->setOperand(1, Info.AI);
+-
+-        for (IntrinsicInst *Start : Info.LifetimeStart) {
+-          IRBuilder<> IRB2(Start->getNextNode());
+-          IRB2.CreateCall(StoreTagDecl,
+-                          {ConstantInt::get(Int32Type, 0), TagPCall,
+-                           ConstantInt::get(IntPtrType, Size)});
+-        }
++        tagLifetimes(Info, *DT, IntPtrType, Size, RestoreStackTagDecl);
+         auto TagEnd = [&](Instruction *Node) {
+           restoreAllocaTag(AI, Node, Size, RestoreStackTagDecl, IntPtrType);
+         };
+-        memtag::forAllReachableExits(*DT, *PDT, *LI, Info, SInfo.RetVec,
+-                                     TagEnd);
++        if (SupportedLifetime) {
++          memtag::forAllReachableExits(*DT, *PDT, *LI, Info, SInfo.RetVec,
++                                       TagEnd);
++        } else {
++          for (auto *End : Info.LifetimeEnd)
++            TagEnd(End);
++          for (auto *Exit : SInfo.RetVec)
++            TagEnd(Exit);
++        }
+       }
+     } else {
+       uint64_t Size = *Info.AI->getAllocationSize(*DL);
+-      Intrinsic::ID SelectedStoreIntrinsicID =
+-          usehint ? Intrinsic::wasm_memtag_hintstore
+-                  : Intrinsic::wasm_memtag_randomstore;
+-      SmallVector<Type *, 2> SelectedStoreSignatureTypes{IntPtrType};
+-      if (usehint) {
+-        SelectedStoreSignatureTypes.push_back(IntPtrType);
+-      }
+-      auto *RandomOrHintStoreTagDecl = Intrinsic::getOrInsertDeclaration(
+-          F->getParent(), SelectedStoreIntrinsicID,
+-          SelectedStoreSignatureTypes);
+-
+-      SmallVector<Value *, 5> StoreTagCallArguments{
+-          ConstantInt::get(Int32Type, 0), Info.AI,
+-          ConstantInt::get(IntPtrType, Size)};
+-      if (usehint) {
+-        StoreTagCallArguments.push_back(Base);
+-        StoreTagCallArguments.push_back(ConstantInt::get(IntPtrType, Tag));
+-      }
+-
+-      auto *TagPCall =
+-          IRB.CreateCall(RandomOrHintStoreTagDecl, StoreTagCallArguments);
++      auto *RandomStore = Intrinsic::getOrInsertDeclaration(
++          F->getParent(), Intrinsic::wasm_memtag_randomstore, {IntPtrType});
++      auto *TagPCall = IRB.CreateCall(
++          RandomStore, {IRB.getInt32(0), AI, ConstantInt::get(IntPtrType, Size)});
+       if (Info.AI->hasName())
+         TagPCall->setName(Info.AI->getName() + ".tag");
+       Info.AI->replaceAllUsesWith(TagPCall);
+@@ -453,8 +506,6 @@
+       for (auto *II : Info.LifetimeEnd)
+         II->eraseFromParent();
+     }
+-
+-    memtag::annotateDebugRecords(Info, static_cast<unsigned long>(Tag));
+   }
+ 
+   return true;
+--- a/llvm/test/CodeGen/WebAssembly/memtag-proven-safe.ll
++++ b/llvm/test/CodeGen/WebAssembly/memtag-proven-safe.ll
+@@ -41,7 +41,7 @@
+ ; CHECK: call void @llvm.wasm.memtag.store
+ 
+ ; CHECK-LABEL: define {{.*}}@unsafe_before_lifetime(
+-; CHECK: %buf.tag = call ptr @llvm.wasm.memtag.random
++; CHECK: %{{[^ ]+}} = call ptr @llvm.wasm.memtag.random
+ ; CHECK: call void @llvm.wasm.memtag.store
+ 
+ ; CHECK-LABEL: define {{.*}}@unsafe_unknown_call(

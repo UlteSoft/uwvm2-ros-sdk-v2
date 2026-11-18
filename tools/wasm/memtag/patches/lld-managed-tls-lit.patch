@@ -1,0 +1,24 @@
+diff --git a/lld/test/wasm/memtag-tls.s b/lld/test/wasm/memtag-tls.s
+--- a/lld/test/wasm/memtag-tls.s
++++ b/lld/test/wasm/memtag-tls.s
+@@ -1,9 +1,17 @@
+ # RUN: llvm-mc -filetype=obj -triple=wasm32-unknown-unknown %s -o %t.o
+-# RUN: wasm-ld --shared-memory --max-memory=131072 --no-entry --no-gc-sections %t.o -o %t.wasm
++# RUN: not wasm-ld --shared-memory --max-memory=131072 --no-entry --no-gc-sections %t.o -o %t.bad 2>&1 | FileCheck %s --check-prefix=DENY
++# RUN: not wasm-ld --require-managed-tls --allow-legacy-tagged-tls --no-entry %t.o -o %t.bad 2>&1 | FileCheck %s --check-prefix=CONFLICT
++# RUN: wasm-ld -r %t.o -o %t.partial
++# RUN: not wasm-ld --shared-memory --max-memory=131072 --no-entry --no-gc-sections %t.partial -o %t.bad 2>&1 | FileCheck %s --check-prefix=DENY
++# RUN: wasm-ld --shared-memory --max-memory=131072 --no-entry --gc-sections %t.o -o %t.dead.wasm
++# RUN: wasm-ld --allow-legacy-tagged-tls --shared-memory --max-memory=131072 --no-entry --no-gc-sections %t.o -o %t.wasm
+ # RUN: llvm-objdump -d --no-show-raw-insn --no-leading-addr %t.wasm | FileCheck %s
+ 
+-# Per-thread initialization must tag the resolved TLS base plus each symbol's
+-# offset. randomstore (not randomstorez) preserves copied initializer bytes.
++# DENY: --require-managed-tls: live tagged thread-local object {{first|second}} requires a dedicated TLS allocation and retirement contract
++# CONFLICT: --require-managed-tls is incompatible with --allow-legacy-tagged-tls
++
++# An explicitly requested legacy image retains the historical tag writes and
++# preserves the initializer bytes. The strict default rejects this live layout.
+ .globaltype __tls_base, i32
+ .memtag first
+ .section .tdata.first,"T",@

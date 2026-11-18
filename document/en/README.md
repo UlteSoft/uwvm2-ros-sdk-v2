@@ -1,5 +1,7 @@
 # WROS SDK developer guide
 
+[WasmMTE detection guarantees](memtag.md)
+
 For driver/model security and the division between Wasm and deployment authority,
 read [Local driver and model attachments](local-attachments.md).
 
@@ -27,7 +29,7 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 
 The bootstrap requests the selected revision's small Python hook and package manifests. It fetches payload files individually, verifies SHA-256 and length, and publishes the complete selection by directory rename. Shared payloads use a digest cache. A revision hook is executable code from the selected commit. Select a trusted commit and run as the developing user. For offline use add `--local-repository /path/to/sdk`. The `requested_paths` field lists every Git object path requested by the bootstrap.
 
-The stable operations are `plan`, `install` and `revision-help`. Pass revision-specific options after `--`. Select `--component protocol` for the language-neutral contract and platform source references, or `--component compiler-source` for the C/C++ compiler and sysroot build inputs. The latter includes pinned source archives and patches. The ordinary development selection excludes those archives. The minimum Python version also applies to the preinstalled bootstrap.
+The stable operations are `plan`, `install` and `revision-help`. Pass revision-specific options after `--`. Select `--component protocol` for the language-neutral contract and platform source references, or `--component compiler-source` to install the shared Wasm LLVM backend and sysroot build inputs alongside the selected language. C, C++, Fortran, Lua, Rust and TinyGo use this backend. The package includes the pinned backend source archives and patches. Language-specific compiler and runtime prerequisites are documented in each language guide. The ordinary development selection excludes those archives. The minimum Python version also applies to the preinstalled bootstrap.
 
 For an existing compiler integration, pass `-- --component bindings` to install only the selected raw declarations, the licence, and the selected language and platform metadata. C and C++ share a header. This revision also publishes Rust and AssemblyScript declarations. This component fetches no compiler, compiler sources or full ABI catalogue. The original bootstrap can discover it with `revision-help` at this commit.
 

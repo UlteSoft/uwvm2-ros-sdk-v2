@@ -1,0 +1,198 @@
+--- a/libc-bottom-half/cloudlibc/src/libc/sys/select/pselect.c
++++ b/libc-bottom-half/cloudlibc/src/libc/sys/select/pselect.c
+@@ -7,6 +7,7 @@
+ #include <wasi/api.h>
+ #include <errno.h>
+ #include <poll.h>
++#include <stdlib.h>
+ 
+ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
+             fd_set *restrict errorfds, const struct timespec *restrict timeout,
+@@ -27,7 +28,19 @@
+   if (errorfds == NULL)
+     errorfds = &empty;
+ 
+-  struct pollfd poll_fds[readfds->__nfds + writefds->__nfds + errorfds->__nfds];
++  if (readfds->__nfds > FD_SETSIZE || writefds->__nfds > FD_SETSIZE ||
++      errorfds->__nfds > FD_SETSIZE) {
++    errno = EINVAL;
++    return -1;
++  }
++  size_t capacity = readfds->__nfds + writefds->__nfds + errorfds->__nfds;
++  struct pollfd local[16];
++  struct pollfd *poll_fds = local;
++  if (capacity > sizeof(local) / sizeof(local[0])) {
++    poll_fds = malloc(capacity * sizeof(*poll_fds));
++    if (poll_fds == NULL)
++      return -1;
++  }
+   size_t poll_nfds = 0;
+ 
+   // Combine the event bits when the same file descriptor appears in more than
+@@ -60,6 +73,8 @@
+   }
+ 
+   if (ppoll(poll_fds, poll_nfds, timeout, sigmask) < 0) {
++    if (poll_fds != local)
++      free(poll_fds);
+     return -1;
+   }
+ 
+@@ -69,6 +84,8 @@
+   // descriptor from the result sets.
+   for (size_t i = 0; i < poll_nfds; ++i) {
+     if ((poll_fds[i].revents & POLLNVAL) != 0) {
++      if (poll_fds != local)
++        free(poll_fds);
+       errno = EBADF;
+       return -1;
+     }
+@@ -90,5 +107,7 @@
+     }
+   }
+ 
++  if (poll_fds != local)
++    free(poll_fds);
+   return readfds->__nfds + writefds->__nfds + errorfds->__nfds;
+ }
+--- a/libc-bottom-half/sources/ppoll.c
++++ b/libc-bottom-half/sources/ppoll.c
+@@ -2,6 +2,8 @@
+ #include <errno.h>
+ #include <poll.h>
+ #include <stdbool.h>
++#include <stdint.h>
++#include <stdlib.h>
+ #include <wasi/api.h>
+ #include <wasi/descriptor_table.h>
+ #include <wasi/file_utils.h>
+@@ -11,11 +13,10 @@
+ #endif
+ 
+ #if defined(__wasip1__)
+-static int ppoll_impl(struct pollfd *fds, size_t nfds,
+-                      const struct timespec *timeout) {
+-  // Construct events for poll().
+-  size_t maxevents = 2 * nfds + 1;
+-  __wasi_subscription_t subscriptions[maxevents];
++static int poll_with_buffers(struct pollfd *fds, size_t nfds,
++                             const struct timespec *timeout,
++                             __wasi_subscription_t *subscriptions,
++                             __wasi_event_t *events) {
+   size_t nsubscriptions = 0;
+ 
+   for (size_t i = 0; i < nfds; ++i) {
+@@ -68,7 +69,6 @@
+ 
+   // Execute poll().
+   size_t nevents;
+-  __wasi_event_t events[nsubscriptions];
+   __wasi_errno_t error =
+       __wasi_poll_oneoff(subscriptions, events, nsubscriptions, &nevents);
+   if (error != 0) {
+@@ -133,6 +133,38 @@
+       ++retval;
+   }
+   return retval;
++}
++
++static int ppoll_impl(struct pollfd *fds, size_t nfds,
++                      const struct timespec *timeout) {
++  // Every descriptor can require one read and one write subscription.
++  // Account for the optional clock separately before either multiplication.
++  size_t clock = timeout != NULL;
++  size_t max_count = SIZE_MAX / sizeof(__wasi_subscription_t);
++  if (SIZE_MAX / sizeof(__wasi_event_t) < max_count)
++    max_count = SIZE_MAX / sizeof(__wasi_event_t);
++  if (nfds > (max_count - clock) / 2) {
++    errno = ENOMEM;
++    return -1;
++  }
++  size_t count = nfds * 2 + clock;
++  if (count <= 17) {
++    __wasi_subscription_t subscriptions[17];
++    __wasi_event_t events[17];
++    return poll_with_buffers(fds, nfds, timeout, subscriptions, events);
++  }
++  __wasi_subscription_t *subscriptions = malloc(count * sizeof(*subscriptions));
++  if (!subscriptions)
++    return -1;
++  __wasi_event_t *events = malloc(count * sizeof(*events));
++  if (!events) {
++    free(subscriptions);
++    return -1;
++  }
++  int rc = poll_with_buffers(fds, nfds, timeout, subscriptions, events);
++  free(events);
++  free(subscriptions);
++  return rc;
+ }
+ 
+ #elif defined(__wasip2__)
+--- a/libc-top-half/musl/src/stdio/vfprintf.c
++++ b/libc-top-half/musl/src/stdio/vfprintf.c
+@@ -204,19 +204,19 @@
+ #endif
+ 
+ #if defined(__wasilibc_printscan_no_long_double)
+-static int fmt_fp(FILE *f, long_double y, int w, int p, int fl, int t, int ps)
++typedef long_double fmt_float_t;
+ #else
+-static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t, int ps)
+-#endif
+-{
+-	int max_mant_dig = (ps==BIGLPRE) ? LDBL_MANT_DIG : DBL_MANT_DIG;
+-	int max_exp = (ps==BIGLPRE) ? LDBL_MAX_EXP : DBL_MAX_EXP;
+-	/* One slot for 29 bits left of radix point, a slot for every 29-21=8
+-	 * bits right of the radix point, and one final zero slot. */
+-	int max_mant_slots = 1 + (max_mant_dig-29+7)/8 + 1;
+-	int max_exp_slots = (max_exp+max_mant_dig+28+8)/9;
+-	int bufsize = max_mant_slots + max_exp_slots;
+-	uint32_t big[bufsize];
++typedef long double fmt_float_t;
++#endif
++
++/* One slot for 29 bits left of the radix point, one for every 8
++ * bits right of it and one final zero slot. */
++#define FP_MANT_SLOTS(m) (1 + ((m) - 29 + 7) / 8 + 1)
++#define FP_BUFFER_SLOTS(m,e) (FP_MANT_SLOTS(m) + ((e) + (m) + 28 + 8) / 9)
++
++static int fmt_fp_buffer(FILE *f, fmt_float_t y, int w, int p, int fl, int t,
++                         uint32_t *big, int bufsize, int max_mant_slots)
++{
+ 	uint32_t *a, *d, *r, *z;
+ 	int e2=0, e, i, j, l;
+ 	char buf[9+LDBL_MANT_DIG/4], *s;
+@@ -297,7 +297,7 @@
+ 	if (y) y *= 0x1p28, e2-=28;
+ 
+ 	if (e2<0) a=r=z=big;
+-	else a=r=z=big+sizeof(big)/sizeof(*big) - max_mant_slots - 1;
++	else a=r=z=big+bufsize - max_mant_slots - 1;
+ 
+ 	do {
+ 		*z = y;
+@@ -450,6 +450,23 @@
+ 	pad(f, ' ', w, pl+l, fl^LEFT_ADJ);
+ 
+ 	return MAX(w, pl+l);
++}
++/* Keep the larger binary128 frame off the ordinary double path. */
++static __attribute__((noinline)) int fmt_fp_long(FILE *f, fmt_float_t y,
++                                                  int w, int p, int fl, int t)
++{
++	uint32_t big[FP_BUFFER_SLOTS(LDBL_MANT_DIG, LDBL_MAX_EXP)];
++	return fmt_fp_buffer(f, y, w, p, fl, t, big, sizeof big / sizeof *big,
++	                     FP_MANT_SLOTS(LDBL_MANT_DIG));
++}
++
++static int fmt_fp(FILE *f, fmt_float_t y, int w, int p, int fl, int t, int ps)
++{
++	if (ps == BIGLPRE)
++		return fmt_fp_long(f, y, w, p, fl, t);
++	uint32_t big[FP_BUFFER_SLOTS(DBL_MANT_DIG, DBL_MAX_EXP)];
++	return fmt_fp_buffer(f, y, w, p, fl, t, big, sizeof big / sizeof *big,
++	                     FP_MANT_SLOTS(DBL_MANT_DIG));
+ }
+ #endif
+ 

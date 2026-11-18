@@ -1,0 +1,148 @@
+--- a/clang/include/clang/Basic/BuiltinsWebAssembly.def
++++ b/clang/include/clang/Basic/BuiltinsWebAssembly.def
+@@ -240,5 +240,11 @@
+ TARGET_BUILTIN(__builtin_wasm_table_fill, "vv*iv*1i", "t", "reference-types")
+ TARGET_BUILTIN(__builtin_wasm_table_copy, "vv*v*iii", "t", "reference-types")
+ 
++BUILTIN(__builtin_wasm_memtag_claim, "v*Iiv*z", "n")
++BUILTIN(__builtin_wasm_memtag_claimz, "v*Iiv*z", "n")
++BUILTIN(__builtin_wasm_memtag_reserve, "v*Iiv*z", "n")
++BUILTIN(__builtin_wasm_memtag_activate, "v*Iiv*z", "n")
++BUILTIN(__builtin_wasm_memtag_release, "v*Iiv*z", "n")
++
+ #undef BUILTIN
+ #undef TARGET_BUILTIN
+--- a/clang/lib/CodeGen/TargetBuiltins/WebAssembly.cpp
++++ b/clang/lib/CodeGen/TargetBuiltins/WebAssembly.cpp
+@@ -784,6 +784,46 @@
+         CGM.getIntrinsic(Intrinsic::wasm_memtag_randomstorez, B16->getType());
+     return Builder.CreateCall(Callee, {Index, Ptr, B16});
+   }
++  case WebAssembly::BI__builtin_wasm_memtag_claim: {
++    Value *MemoryIndex = EmitScalarExpr(E->getArg(0));
++    Value *Ptr = EmitScalarExpr(E->getArg(1));
++    Value *Length = EmitScalarExpr(E->getArg(2));
++    Function *Callee =
++        CGM.getIntrinsic(Intrinsic::wasm_memtag_claim, Length->getType());
++    return Builder.CreateCall(Callee, {MemoryIndex, Ptr, Length});
++  }
++  case WebAssembly::BI__builtin_wasm_memtag_claimz: {
++    Value *MemoryIndex = EmitScalarExpr(E->getArg(0));
++    Value *Ptr = EmitScalarExpr(E->getArg(1));
++    Value *Length = EmitScalarExpr(E->getArg(2));
++    Function *Callee =
++        CGM.getIntrinsic(Intrinsic::wasm_memtag_claimz, Length->getType());
++    return Builder.CreateCall(Callee, {MemoryIndex, Ptr, Length});
++  }
++  case WebAssembly::BI__builtin_wasm_memtag_reserve: {
++    Value *MemoryIndex = EmitScalarExpr(E->getArg(0));
++    Value *Ptr = EmitScalarExpr(E->getArg(1));
++    Value *Length = EmitScalarExpr(E->getArg(2));
++    Function *Callee =
++        CGM.getIntrinsic(Intrinsic::wasm_memtag_reserve, Length->getType());
++    return Builder.CreateCall(Callee, {MemoryIndex, Ptr, Length});
++  }
++  case WebAssembly::BI__builtin_wasm_memtag_activate: {
++    Value *MemoryIndex = EmitScalarExpr(E->getArg(0));
++    Value *Ptr = EmitScalarExpr(E->getArg(1));
++    Value *Length = EmitScalarExpr(E->getArg(2));
++    Function *Callee =
++        CGM.getIntrinsic(Intrinsic::wasm_memtag_activate, Length->getType());
++    return Builder.CreateCall(Callee, {MemoryIndex, Ptr, Length});
++  }
++  case WebAssembly::BI__builtin_wasm_memtag_release: {
++    Value *MemoryIndex = EmitScalarExpr(E->getArg(0));
++    Value *Ptr = EmitScalarExpr(E->getArg(1));
++    Value *Length = EmitScalarExpr(E->getArg(2));
++    Function *Callee =
++        CGM.getIntrinsic(Intrinsic::wasm_memtag_release, Length->getType());
++    return Builder.CreateCall(Callee, {MemoryIndex, Ptr, Length});
++  }
+   case WebAssembly::BI__builtin_wasm_memtag_add: {
+     Value *Index = EmitScalarExpr(E->getArg(0));
+     Value *Ptr = EmitScalarExpr(E->getArg(1));
+--- a/llvm/include/llvm/IR/IntrinsicsWebAssembly.td
++++ b/llvm/include/llvm/IR/IntrinsicsWebAssembly.td
+@@ -447,6 +447,26 @@
+ def int_wasm_memtag_randomstorez :
+   DefaultAttrsIntrinsic<[llvm_ptr_ty], [llvm_i32_ty, llvm_ptr_ty, llvm_anyint_ty], [IntrHasSideEffects, IntrWriteMem]>;
+ 
++def int_wasm_memtag_claim :
++  Intrinsic<[llvm_ptr_ty], [llvm_i32_ty, llvm_ptr_ty, llvm_anyint_ty],
++                        [IntrHasSideEffects, IntrConvergent, ImmArg<ArgIndex<0>>]>;
++
++def int_wasm_memtag_claimz :
++  Intrinsic<[llvm_ptr_ty], [llvm_i32_ty, llvm_ptr_ty, llvm_anyint_ty],
++                        [IntrHasSideEffects, IntrConvergent, ImmArg<ArgIndex<0>>]>;
++
++def int_wasm_memtag_reserve :
++  Intrinsic<[llvm_ptr_ty], [llvm_i32_ty, llvm_ptr_ty, llvm_anyint_ty],
++                        [IntrHasSideEffects, IntrConvergent, ImmArg<ArgIndex<0>>]>;
++
++def int_wasm_memtag_activate :
++  Intrinsic<[llvm_ptr_ty], [llvm_i32_ty, llvm_ptr_ty, llvm_anyint_ty],
++                        [IntrHasSideEffects, IntrConvergent, ImmArg<ArgIndex<0>>]>;
++
++def int_wasm_memtag_release :
++  Intrinsic<[llvm_ptr_ty], [llvm_i32_ty, llvm_ptr_ty, llvm_anyint_ty],
++                        [IntrHasSideEffects, IntrConvergent, ImmArg<ArgIndex<0>>]>;
++
+ def int_wasm_memtag_add :
+   DefaultAttrsIntrinsic<[llvm_ptr_ty], [llvm_i32_ty, llvm_ptr_ty, llvm_anyint_ty, llvm_anyint_ty], [IntrNoMem]>;
+ 
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyInstrMemtag.td
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyInstrMemtag.td
+@@ -151,6 +151,53 @@
+                     "memtag.randomstorez\t$tableidx",
+                     0xff2f>;
+ 
++let hasSideEffects = 1, mayLoad = 1, mayStore = 1 in
++defm MEMTAG_CLAIM_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
++                    (outs), (ins i32imm:$memidx),
++                    [(set rc:$dst,
++                        (int_wasm_memtag_claim (i32 imm:$memidx), rc:$src, rc:$length))],
++                    "memtag.claim\t$dst, $src, $memidx, $length",
++                    "memtag.claim\t$memidx",
++                    0xff40>;
++
++let hasSideEffects = 1, mayLoad = 1, mayStore = 1 in
++defm MEMTAG_CLAIMZ_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
++                    (outs), (ins i32imm:$memidx),
++                    [(set rc:$dst,
++                        (int_wasm_memtag_claimz (i32 imm:$memidx), rc:$src, rc:$length))],
++                    "memtag.claimz\t$dst, $src, $memidx, $length",
++                    "memtag.claimz\t$memidx",
++                    0xff41>;
++
++let hasSideEffects = 1, mayLoad = 1, mayStore = 1 in
++defm MEMTAG_RESERVE_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
++                    (outs), (ins i32imm:$memidx),
++                    [(set rc:$dst,
++                        (int_wasm_memtag_reserve (i32 imm:$memidx), rc:$src, rc:$length))],
++                    "memtag.reserve\t$dst, $src, $memidx, $length",
++                    "memtag.reserve\t$memidx",
++                    0xff42>;
++
++let hasSideEffects = 1, mayLoad = 1, mayStore = 1 in
++defm MEMTAG_ACTIVATE_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
++                    (outs), (ins i32imm:$memidx),
++                    [(set rc:$dst,
++                        (int_wasm_memtag_activate (i32 imm:$memidx), rc:$src, rc:$length))],
++                    "memtag.activate\t$dst, $src, $memidx, $length",
++                    "memtag.activate\t$memidx",
++                    0xff43>;
++
++let hasSideEffects = 1, mayLoad = 1, mayStore = 1 in
++defm MEMTAG_RELEASE_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
++                    (outs), (ins i32imm:$memidx),
++                    [(set rc:$dst,
++                        (int_wasm_memtag_release (i32 imm:$memidx), rc:$src, rc:$length))],
++                    "memtag.release\t$dst, $src, $memidx, $length",
++                    "memtag.release\t$memidx",
++                    0xff44>;
++
++
++
+ defm MEMTAG_ADD_A#B: I<(outs rc:$dst), (ins i32imm:$tableidx, rc:$src, rc:$addroffset, rc:$tagoffset),
+                     (outs), (ins i32imm:$tableidx),
+                     [(set rc:$dst,

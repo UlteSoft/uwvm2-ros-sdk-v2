@@ -1,0 +1,61 @@
+--- a/clang/lib/CodeGen/SanitizerMetadata.cpp
++++ b/clang/lib/CodeGen/SanitizerMetadata.cpp
+@@ -120,6 +120,16 @@
+ 
+   reportGlobal(GV, D.getLocation(), QualName, D.getType(), getNoSanitizeMask(D),
+                IsDynInit);
++
++  // Only an actual source variable owns an independently taggable read-only
++  // range. String literals, ABI descriptors and linker tables also use LLVM
++  // constants, but have separate layout and pooling contracts. Preserve source
++  // ownership without depending on debug info or the IR symbol's spelling.
++  if (CGM.getTriple().isWasm() && GV->isTagged() && !D.isImplicit() &&
++      D.getIdentifier() && GV->hasInitializer() && !GV->hasSection() &&
++      !GV->isThreadLocal() && GV->getAddressSpace() == 0)
++    GV->setMetadata("wasm.memtag.object",
++                    llvm::MDNode::get(CGM.getLLVMContext(), {}));
+ }
+ 
+ void SanitizerMetadata::disableSanitizerForGlobal(llvm::GlobalVariable *GV) {
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp
+@@ -40,10 +40,11 @@
+          "Missing sanitizer metadata, but symbol is apparently tagged.");
+   GlobalValue::SanitizerMetadata Meta = G.getSanitizerMetadata();
+ 
+-  // For now, don't instrument constant data, as it'll be in .rodata anyway. It
+-  // may be worth instrumenting these in future to stop them from being used as
+-  // gadgets.
+-  if (G.getName().starts_with("llvm.") || G.isConstant()) {
++  // A compiler-owned constant may be a pooled string, a type-identity token
++  // or part of a linker table. Only source objects own padding and a tag.
++  if (G.getName().starts_with("llvm.") ||
++      (G.isConstant() && (!G.getMetadata("wasm.memtag.object") ||
++                          G.hasSection() || G.isThreadLocal()))) {
+     Meta.Memtag = false;
+     G.setSanitizerMetadata(Meta);
+     return false;
+--- a/llvm/lib/CodeGen/AsmPrinter/AsmPrinter.cpp
++++ b/llvm/lib/CodeGen/AsmPrinter/AsmPrinter.cpp
+@@ -2814,14 +2814,14 @@
+   // non-constant globals into constants. So now, clang only tells us whether
+   // it would *like* a global to be tagged, but we still make the decision here.
+   //
+-  // For now, don't instrument constant data, as it'll be in .rodata anyway. It
+-  // may be worth instrumenting these in future to stop them from being used as
+-  // gadgets.
+-  // Wasm's linker initializes a fresh tagged TLS object set for each thread.
+-  // Keep native targets' existing TLS policy unchanged.
++  // Wasm source-owned read-only objects use tagged linear storage. Compiler
++  // metadata, pooled literals and the native targets' existing read-only policy
++  // retain their layout. Wasm mutable TLS uses its per-thread tagged template.
++  bool IsWasm = G.getParent()->getTargetTriple().isWasm();
+   if (G.getName().starts_with("llvm.") ||
+-      (G.isThreadLocal() && !G.getParent()->getTargetTriple().isWasm()) ||
+-      G.isConstant())
++      (G.isThreadLocal() && !IsWasm) ||
++      (G.isConstant() && (!IsWasm || G.isThreadLocal() ||
++                          !G.getMetadata("wasm.memtag.object"))))
+     return false;
+ 
+   // Globals can be placed implicitly or explicitly in sections. There's two

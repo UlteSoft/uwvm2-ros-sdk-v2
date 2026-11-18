@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/memtag"
 
 
-def exported_index(module):
+def exported_index(module, exported="benchmark"):
     data = module.read_bytes()
     if inspect(data):
         raise ValueError("unexpected guest import")
@@ -34,9 +34,9 @@ def exported_index(module):
         if section == 7:
             for _ in range(body.count()):
                 name, kind, index = body.name(), body.byte(), body.uint()
-                if name == "benchmark" and kind == 0:
+                if name == exported and kind == 0:
                     return index
-    raise ValueError("missing benchmark export")
+    raise ValueError("missing function export: " + exported)
 
 
 def checksum(count):

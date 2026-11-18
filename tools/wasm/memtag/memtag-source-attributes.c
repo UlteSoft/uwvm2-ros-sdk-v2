@@ -3,12 +3,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void observe(void *);
+void observe(void *) __attribute__((nothrow));
 
 // ON-LABEL: ordinary:
-// ON: memtag.{{(random|hint)}}
+// ON: memtag.claim 0
 // ON: call observe
-// ON: memtag.store 0
+// ON: memtag.release 0
 // ON-LABEL: locally_uninstrumented:
 // ON-NOT: memtag.
 // ON: call observe

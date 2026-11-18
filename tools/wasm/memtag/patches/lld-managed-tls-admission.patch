@@ -1,0 +1,96 @@
+diff --git a/clang/lib/Driver/ToolChains/WebAssembly.cpp b/clang/lib/Driver/ToolChains/WebAssembly.cpp
+--- a/clang/lib/Driver/ToolChains/WebAssembly.cpp
++++ b/clang/lib/Driver/ToolChains/WebAssembly.cpp
+@@ -12,6 +12,7 @@
+ #include "clang/Driver/CommonArgs.h"
+ #include "clang/Driver/Compilation.h"
+ #include "clang/Driver/Driver.h"
++#include "clang/Driver/SanitizerArgs.h"
+ #include "clang/Options/Options.h"
+ #include "llvm/Config/llvm-config.h" // for LLVM_VERSION_STRING
+ #include "llvm/Option/ArgList.h"
+@@ -111,6 +112,10 @@
+   const ToolChain &ToolChain = getToolChain();
+   const char *Linker = Args.MakeArgString(getLinkerPath(Args));
+   ArgStringList CmdArgs;
++  // Let LLD decide against the final live symbol set, including archive and
++  // LTO inputs. A relocatable object has no thread arena or lifetime yet.
++  if (ToolChain.getSanitizerArgs(Args).hasMemTag())
++    CmdArgs.push_back("--require-managed-tls");
+ 
+   CmdArgs.push_back("-m");
+   if (ToolChain.getTriple().isArch64Bit())
+diff --git a/lld/wasm/Options.td b/lld/wasm/Options.td
+--- a/lld/wasm/Options.td
++++ b/lld/wasm/Options.td
+@@ -220,6 +220,11 @@
+   HelpText<"Export the module's memory with the default name of \"memory\"">;
+ def export_memory_with_name: JJ<"export-memory=">,
+   HelpText<"Export the module's memory with the passed name">;
++
++def require_managed_tls: FF<"require-managed-tls">,
++  HelpText<"Require managed lifetimes for live tagged multithreaded TLS objects (default)">;
++def allow_legacy_tagged_tls: FF<"allow-legacy-tagged-tls">,
++  HelpText<"Allow legacy per-object TLS tags without managed allocation lifetimes">;
+ 
+ def shared_memory: FF<"shared-memory">,
+   HelpText<"Use shared linear memory">;
+diff --git a/lld/wasm/Writer.h b/lld/wasm/Writer.h
+--- a/lld/wasm/Writer.h
++++ b/lld/wasm/Writer.h
+@@ -11,6 +11,7 @@
+ 
+ namespace lld::wasm {
+ 
++bool validateManagedTLS();
+ void writeResult();
+ 
+ } // namespace lld::wasm
+diff --git a/lld/wasm/Driver.cpp b/lld/wasm/Driver.cpp
+--- a/lld/wasm/Driver.cpp
++++ b/lld/wasm/Driver.cpp
+@@ -1526,7 +1526,15 @@
+   if (errorCount())
+     return;
+ 
+-  // Write the result to the file.
++  // All input objects, including LTO results, have been resolved and live
++  // symbols are final. Refuse before opening or emitting the output file.
++  if (args.hasArg(OPT_require_managed_tls) && args.hasArg(OPT_allow_legacy_tagged_tls)) {
++    error("--require-managed-tls is incompatible with --allow-legacy-tagged-tls");
++    return;
++  }
++  if (!args.hasArg(OPT_allow_legacy_tagged_tls) && !ctx.arg.relocatable &&
++      ctx.arg.isMultithreaded() && !validateManagedTLS())
++    return;
+   writeResult();
+ }
+ 
+diff --git a/lld/wasm/Writer.cpp b/lld/wasm/Writer.cpp
+--- a/lld/wasm/Writer.cpp
++++ b/lld/wasm/Writer.cpp
+@@ -2163,6 +2163,24 @@
+   fileSize += header.size();
+ }
+ 
++// Current wasi-libc can place TLS inside a tagged heap allocation or a user
++// stack. The linker cannot infer parent ownership, nor prove retire-on-join,
++// detach and failed spawn. Refuse when the final image actually needs this
++// contract. This must not depend on __wasm_init_tls being live or on !isPic.
++bool validateManagedTLS() {
++  for (InputFile *file : ctx.objectFiles)
++    for (Symbol *sym : file->getSymbols())
++      if (auto *data = dyn_cast<DefinedData>(sym))
++        if (data->isLive() && !data->isDiscarded() && data->segment &&
++            data->isTLS() && data->isMemtag() && data->getSize()) {
++          error("--require-managed-tls: live tagged thread-local object " +
++                toString(*data) + " requires a dedicated TLS allocation and "
++                "retirement contract");
++          return false;
++        }
++  return true;
++}
++
+ void writeResult() { Writer().run(); }
+ 
+ } // namespace lld::wasm

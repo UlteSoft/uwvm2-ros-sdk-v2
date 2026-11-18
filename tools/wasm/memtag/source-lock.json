@@ -7,9 +7,11 @@
     ],
     "wire": "packed-v1",
     "optimizations": [
-      "stack-safety-bounds-lifetime-and-escape-proof",
+      "register-only-stack-promotion",
+      "managed-fixed-stack-lifetimes",
       "adjacent-complete-zero-initialization"
-    ]
+    ],
+    "allocation_policy": "managed-neighborhood"
   },
   "sources": {
     "llvm-23.1.5": {
@@ -26,6 +28,46 @@
         {
           "path": "tools/wasm/memtag/patches/llvm-23.1.5-memtag.patch",
           "sha256": "cc4bac62f879db904500ff38a7682dff76f9197766d76b22b35f808426c0d0f4"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-untag-symbol.patch",
+          "sha256": "422b0c9f3e6ddc78e9983aed1da44f9ad7ec1e89512c3fb4bf9b6f9dc398a272"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-stack-generations.patch",
+          "sha256": "c9ceb02d7d5a6142456222a0b29e3e48d7b924c8822935304f1437e5f61f3c83"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-owner-instructions.patch",
+          "sha256": "9d82fb7cd6e1ef856a2ed3e04b0ecd909ca13f7ce445a45e6912526de1b060d6"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-memtag-mc-address-width.patch",
+          "sha256": "72146b5fb216e7e35123456818b815aed0159abd9a991bbd2d1cf12bb1e451d1"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-owner-target-immediates.patch",
+          "sha256": "e2b39bffc73b0a2787e9b635d24aec891419316d9058c9870106e3ba949111fb"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-owner-stack.patch",
+          "sha256": "613497881f3be42011ee1b8e2041d63ebc41202bfe7d2a600dc28fb649be142c"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/llvm-wasm-readonly-objects.patch",
+          "sha256": "ce7e22270ee7b45279ef16e4ff4cadbab56e0655f198aa9fa674026410d537c9"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/lld-wasm-only-drivers.patch",
+          "sha256": "6bc09b65e970d01aae0631ab5d88882ca4b18ec7d8f083042739b212c54a1bad"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/lld-managed-tls-admission.patch",
+          "sha256": "f2c54cf7cd6cc9bc79afd85d1927452877685b0af42897867c6bc959eb661b25"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/lld-managed-tls-lit.patch",
+          "sha256": "4e7f20fbe978df3b79a0fe210927d85e41fa1d0362e8339d3e97d4a53c619947"
         }
       ],
       "status": "awaiting-stable-build-qualification",
@@ -45,6 +87,18 @@
         {
           "path": "tools/wasm/memtag/patches/wasi-libc-sdk34-memtag.patch",
           "sha256": "e05b3405fa9f068a579fa41e53274d8beb7667e8d274dac1d9034e06c375fc6a"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/wasi-libc-absolute-page-size.patch",
+          "sha256": "5114c15bef19b2fe8c75b52af2209f2f6c69204de7d69a88c285d1f103674f76"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/wasi-libc-allocation-claims.patch",
+          "sha256": "bff29d71196566d4bed2ca1c4334177ae45fa52f85c9896c7787149d5a2b372c"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/wasi-libc-bounded-scratch.patch",
+          "sha256": "20e05b4e91ac78b9cdc93dfc1b9e4723747c830bde8e7eae1538abc7bcf6b943"
         }
       ],
       "status": "awaiting-stable-build-qualification",
@@ -68,6 +122,18 @@
         {
           "path": "tools/wasm/memtag/patches/wasi-libc-sdk34-memory64.patch",
           "sha256": "c440d4f750d532fd2999e7305de3072be397d40c205bc194a62c430f03cdce3e"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/wasi-libc-absolute-page-size.patch",
+          "sha256": "5114c15bef19b2fe8c75b52af2209f2f6c69204de7d69a88c285d1f103674f76"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/wasi-libc-allocation-claims.patch",
+          "sha256": "bff29d71196566d4bed2ca1c4334177ae45fa52f85c9896c7787149d5a2b372c"
+        },
+        {
+          "path": "tools/wasm/memtag/patches/wasi-libc-bounded-scratch.patch",
+          "sha256": "20e05b4e91ac78b9cdc93dfc1b9e4723747c830bde8e7eae1538abc7bcf6b943"
         }
       ],
       "status": "awaiting-stable-build-qualification",

@@ -8,6 +8,15 @@ class Installer(unittest.TestCase):
         tmp=root/".tmp";tmp.mkdir(exist_ok=True);self.tmp=tempfile.TemporaryDirectory(dir=tmp)
         self.prefix=Path(self.tmp.name); self.commit=subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip()
     def tearDown(self):self.tmp.cleanup()
+    def test_shared_compiler_source_selection(self):
+        for language in ("c", "cpp", "fortran", "lua", "rs", "tinygo"):
+            with self.subTest(language=language):
+                source = Source(self.commit, root)
+                plan = install(source, "kuka", language, self.prefix, ["--component", "compiler-source"], plan=True)
+                self.assertIn("compiler-source", plan["packages"])
+                self.assertEqual([p for p in plan["packages"] if p.startswith("languages/")],
+                                 ["languages/" + language])
+                self.assertTrue(all(p.startswith("install/") for p in source.requested))
     def test_selective_and_retry(self):
         source=Source(self.commit,root)
         plan=install(source,"unitree","c",self.prefix,[],True)

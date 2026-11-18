@@ -1,0 +1,47 @@
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyInstrMemtag.td
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyInstrMemtag.td
+@@ -155,7 +155,7 @@
+ defm MEMTAG_CLAIM_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
+                     (outs), (ins i32imm:$memidx),
+                     [(set rc:$dst,
+-                        (int_wasm_memtag_claim (i32 imm:$memidx), rc:$src, rc:$length))],
++                        (int_wasm_memtag_claim (i32 timm:$memidx), rc:$src, rc:$length))],
+                     "memtag.claim\t$dst, $src, $memidx, $length",
+                     "memtag.claim\t$memidx",
+                     0xff40, is64>;
+@@ -164,7 +164,7 @@
+ defm MEMTAG_CLAIMZ_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
+                     (outs), (ins i32imm:$memidx),
+                     [(set rc:$dst,
+-                        (int_wasm_memtag_claimz (i32 imm:$memidx), rc:$src, rc:$length))],
++                        (int_wasm_memtag_claimz (i32 timm:$memidx), rc:$src, rc:$length))],
+                     "memtag.claimz\t$dst, $src, $memidx, $length",
+                     "memtag.claimz\t$memidx",
+                     0xff41, is64>;
+@@ -173,7 +173,7 @@
+ defm MEMTAG_RESERVE_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
+                     (outs), (ins i32imm:$memidx),
+                     [(set rc:$dst,
+-                        (int_wasm_memtag_reserve (i32 imm:$memidx), rc:$src, rc:$length))],
++                        (int_wasm_memtag_reserve (i32 timm:$memidx), rc:$src, rc:$length))],
+                     "memtag.reserve\t$dst, $src, $memidx, $length",
+                     "memtag.reserve\t$memidx",
+                     0xff42, is64>;
+@@ -182,7 +182,7 @@
+ defm MEMTAG_ACTIVATE_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
+                     (outs), (ins i32imm:$memidx),
+                     [(set rc:$dst,
+-                        (int_wasm_memtag_activate (i32 imm:$memidx), rc:$src, rc:$length))],
++                        (int_wasm_memtag_activate (i32 timm:$memidx), rc:$src, rc:$length))],
+                     "memtag.activate\t$dst, $src, $memidx, $length",
+                     "memtag.activate\t$memidx",
+                     0xff43, is64>;
+@@ -191,7 +191,7 @@
+ defm MEMTAG_RELEASE_A#B: I<(outs rc:$dst), (ins i32imm:$memidx, rc:$src, rc:$length),
+                     (outs), (ins i32imm:$memidx),
+                     [(set rc:$dst,
+-                        (int_wasm_memtag_release (i32 imm:$memidx), rc:$src, rc:$length))],
++                        (int_wasm_memtag_release (i32 timm:$memidx), rc:$src, rc:$length))],
+                     "memtag.release\t$dst, $src, $memidx, $length",
+                     "memtag.release\t$memidx",
+                     0xff44, is64>;

@@ -60,8 +60,6 @@ def main():
                 parser.error("a development package has not been published for this language")
             if args.language not in PLATFORM_LANGUAGES[args.platform]:
                 parser.error("this platform has no development route for the requested language")
-            if args.component == "compiler-source" and args.language not in ("c", "cpp", "fortran"):
-                parser.error("no compiler source package for this language")
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
             if args.component == "compiler-source":
                 packages.append("compiler-source")

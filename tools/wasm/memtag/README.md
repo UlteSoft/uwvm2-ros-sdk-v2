@@ -29,35 +29,52 @@ separate acceptance tests.
 
 ## Proof-based tag elision
 
-The WebAssembly stack-tagging pass consumes LLVM `StackSafetyGlobalInfo`.
-A static stack object can omit tag generation and retirement only when the
-analysis proves all reachable accesses are within the object and within its
-lifetime. The proof follows derived pointers and known noninterposable callees.
-Unknown indirect calls, escaped or returned pointers, uncertain indices, and
-accesses outside a lifetime retain instrumentation. Proving one access safe
-cannot justify stripping tags from all other accesses to that object.
+The strict stack pass promotes eligible function-local values to SSA registers.
+An object that still has an address in linear memory keeps its own allocation
+record, even if the compiler can prove that accesses through its local pointer
+stay in bounds. Such a proof says nothing about accesses through pointers to
+other live objects. Two aliases of one object carry the same tag.
 
-This optimization does not disable VM linear-memory bounds checks or grant
-host permissions. Dynamic allocations and objects without a complete proof
-remain instrumented. LLVM optimization is not a proof that an entire application
-has no bugs, and probabilistic tag equality is not a deterministic detection.
-Managed references may rely on their language/GC type rules; a managed object
-that carries a linear-memory address must preserve its memory identity and tag.
+The compiler claims a fixed-size object when it becomes live and releases the
+exact extent at retirement. When its address has to be published earlier, a
+reservation holds the tag until activation. The compiler carries active pointers
+along control-flow edges. An escaped pointer keeps the tag of the lifetime in
+which it was issued. Strict stack lowering diagnoses unsupported dynamic sizes
+and escaping nonlocal exits.
 
-The maintained patch includes `memtag-proven-safe.ll` regressions for memory32
-and memory64, safe bounded operations, unknown calls, escaped pointers, and
-lifetime violations. This coverage exercises an existing optimization; adding
-these tests does not by itself represent a code-generation speed improvement.
+At allocation time the VM checks the final layout of the backing memory. In
+the managed profile, distinct live or reserved extents separated by up to and
+including 64 bytes must differ in tag. The VM chooses uniformly from the colors
+still available after checking both sides. Zero marks unowned storage. Wasm32
+has 15 nonzero colors and software wasm64 has 255. Physical four-bit checks
+also require different low nibbles. Distant allocations and successive uses of
+an address can share a tag. Subobjects sharing a granule need additional layout
+or bounds protection. Language runtimes that allocate many objects in a single
+pool need to register the separate objects for this guarantee to apply.
 
-Each producer build runs the pinned stack-safety, dynamic-allocation and
-address-instruction regressions with its own `llc` and `FileCheck`. Additional
-checks cover complete adjacent zero initialization, partial or volatile
-clears, runtime lengths, nonzero values, intervening calls or loads, an
-unrelated allocation and a second lifetime. The suite inspects transformed
-IR and assembly for both address widths and checks dynamic Wasm object
-emission. Standalone reproduction uses `check_stack_tagging.py --tool-bin
-<producer-bin> --source <prepared-llvm-source> --work <evidence-directory>`.
+Run `tests/memtag_stack_generations.py --toolchain <directory> --runtime <vm>
+--work <new-directory>` in the qualification cgroup to exercise this lowering.
+It checks 17 simultaneously live allocations on wasm32 and 257 on wasm64,
+loop re-entry, merged control flow, and pointers published before lifetime
+start. Both VM engines run the same module with tagging enabled and disabled.
+The observer compares retired pointers as values and checks memory through
+the currently live pointer.
+
+The producer build checks both address widths with LLVM's instruction selector,
+assembler, and FileCheck. It verifies actual typed operands and machine encoding
+for allocation instructions, retained instrumentation on addressable stack
+objects, register promotion, and the diagnostics for unsupported storage.
+Additional cases distinguish a complete zero initializer from partial or
+volatile stores, runtime lengths, and intervening calls. Reproduce these
+checks with `check_stack_tagging.py --tool-bin <producer-bin> --source
+<prepared-llvm-source> --work <evidence-directory>`.
 The prepared source must retain the inventory written by the source build.
+
+For a threaded final link, Wasm LLD rejects live tagged TLS objects while
+the guest runtime lacks a dedicated per-thread allocation and retirement
+contract. A relocatable link preserves the symbol flags for the final check.
+The explicit standalone linker option `--allow-legacy-tagged-tls` selects the
+older TLS policy. The Wasm-only tool build includes the Wasm linker driver.
 
 ## Rebuild order after a producer change
 

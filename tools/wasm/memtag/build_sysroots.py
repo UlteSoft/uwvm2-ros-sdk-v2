@@ -14,6 +14,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 from build_producer import SDK, HERE, digest, prepare, checked, inventory
 
 sys.path.insert(0, str(SDK / "install"))
@@ -29,15 +30,32 @@ def source_tree(entry, supplied, work, cache):
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
     if revision != entry["revision"]:
         raise ValueError("source checkout does not match the stable revision")
-    patches = entry["patches"]
-    if len(patches) != 1 or digest(SDK / patches[0]["path"]) != patches[0]["sha256"]:
-        raise ValueError("prepared checkout needs one exact, locked combined patch")
-    actual = subprocess.check_output(["git", "--no-pager", "diff", "--no-ext-diff", "HEAD"], cwd=source)
-    if hashlib.sha256(actual).hexdigest() != patches[0]["sha256"]:
-        raise ValueError("source checkout changes differ from the maintained patch")
-    extra = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard"], cwd=source, text=True)
-    if extra.strip():
-        raise ValueError("unrecorded files in source checkout: " + extra)
+    # Build the expected Git index from the release and each locked patch in
+    # order. Compare the checkout against that index, including added files.
+    # The checkout's index and object database remain available to its owner.
+    work.mkdir(parents=True, exist_ok=True)
+    objects = subprocess.check_output(
+        ["git", "rev-parse", "--path-format=absolute", "--git-path", "objects"], cwd=source, text=True).strip()
+    with tempfile.TemporaryDirectory(dir=work) as temporary:
+        sandbox = Path(temporary)
+        (sandbox / "objects").mkdir()
+        environment = dict(os.environ, GIT_INDEX_FILE=str(sandbox / "index"),
+                           GIT_OBJECT_DIRECTORY=str(sandbox / "objects"),
+                           GIT_ALTERNATE_OBJECT_DIRECTORIES=objects)
+
+        def git(*args):
+            return subprocess.run(["git", *args], cwd=source, env=environment, check=True, capture_output=True)
+
+        git("read-tree", entry["revision"])
+        for patch in entry["patches"]:
+            filename = SDK / patch["path"]
+            if digest(filename) != patch["sha256"]:
+                raise ValueError("source patch hash mismatch: " + patch["path"])
+            git("apply", "--cached", "--whitespace=nowarn", str(filename))
+        git("update-index", "--really-refresh")
+        git("diff-files", "--quiet", "--no-ext-diff", "--")
+        if git("ls-files", "--others", "-z").stdout:
+            raise ValueError("unrecorded files in the supplied source checkout")
     return source
 
 
@@ -94,6 +112,20 @@ def diagnostics_overlay(source, entry, work):
     return root
 
 
+def require_allocation_policy(assembly, policy, bits):
+    """Require actual managed lifetime lowering from this recipe's stack probe."""
+    if policy != "managed-neighborhood":
+        raise ValueError("unsupported source-lock allocation policy: " + str(policy))
+    ops = re.findall(r"(?m)^\s*memtag\.([a-z0-9_]+)\b", assembly)
+    lifetime = [op for op in ops if op in {"claim", "claimz", "reserve", "activate", "release"}]
+    # This probe has one escaping local, a single straight-line path and one
+    # return. There must be exactly one completed lifetime on that path.
+    paired = lifetime in (["claim", "release"], ["claimz", "release"], ["reserve", "activate", "release"])
+    if (not paired or
+            any(op.startswith(("random", "hint")) or op in ("store", "storez", "untagstore", "untagstorez") for op in ops)):
+        raise ValueError(f"producer lacks managed-neighborhood stack acquire/release for wasm{bits}")
+
+
 def build(args):
     if args.jobs < 1:
         raise ValueError("--jobs must be positive")
@@ -128,15 +160,15 @@ def build(args):
     # Even the non-instrumented sysroot must come from a capable producer.
     # An escaping local forces observable Wasm tag code at both target widths.
     probe = "extern void observe(void *); void example(void) { char region[64]; observe(region); }"
+    lock = json.loads((HERE / "source-lock.json").read_text())
+    policy = lock["producer"]["allocation_policy"]
     capability = {}
     for bits in sorted({profile.address_bits for profile in profiles.values()}):
         command = [str(compiler), "--no-default-config", f"--target=wasm{bits}-wasip1",
                    "-O3", "-g", "-x", "c", "-S", "-fsanitize=memtag", "-o", "-", "-"]
         assembly = subprocess.run(command, input=probe, capture_output=True, text=True, check=True).stdout
-        if not re.search(r"(?m)^\s*memtag\.(random|hint)(storez?)?\b", assembly):
-            raise ValueError(f"compiler did not emit WasmMTE instructions for wasm{bits}")
+        require_allocation_policy(assembly, policy, bits)
         capability[str(bits)] = hashlib.sha256(assembly.encode()).hexdigest()
-    lock = json.loads((HERE / "source-lock.json").read_text())
     llvm = source_tree(lock["sources"]["llvm-23.1.5"], args.llvm_source, work, args.source_cache)
     libc = source_tree(lock["sources"]["wasi-libc-sdk34"], args.libc_source, work, args.source_cache)
     runtimes = diagnostics_overlay(llvm, lock["runtime_diagnostics"]["llvm"], work)
@@ -150,7 +182,7 @@ def build(args):
     record = {"schema": "uwvm-memtag-sysroot-build-v1", "qualified": False, "status": "building",
               "compiler_version": version, "compiler_sha256": digest(compiler), "sources": lock["sources"],
               "mte": args.mte, "wasm_version": args.wasm_version, "producer_mte_codegen": capability,
-              "runtime_diagnostics": lock["runtime_diagnostics"],
+              "runtime_diagnostics": lock["runtime_diagnostics"], "producer_allocation_policy": policy,
               "targets": [], "commands": []}
     # Ninja does not treat the compiler executable as an object dependency.
     # Replacing clang at the same pathname must never reuse objects from the
