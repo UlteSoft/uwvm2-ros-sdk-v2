@@ -28,6 +28,11 @@ provide this property. The VM still authenticates the exact process incarnation,
 per-packet credentials and TLS identity. Neither endpoint needs ptrace access to
 the other user's process.
 
+Deployment also reserves host identities before starting or recovering workloads.
+Managers must share the [host ownership registry](https://github.com/UlteSoft/wasmros-deployer/blob/main/document/en/host-identities.md).
+Reusing an identity is not a substitute for a driver capability. This host
+coordination is separate from device exclusivity and ROSv2 grants.
+
 The namespace descriptor is a host registration detail and does not change the
 Wasm carrier ABI. Keep all computation that needs no host authority inside Wasm.
 Use ROSv2 imports for permitted external effects; do not route driver access
