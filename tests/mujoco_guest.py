@@ -1,5 +1,6 @@
 """Build the controller from SDK source and compare an external TLS MuJoCo receiver with native stepping."""
 import argparse
+import json
 from pathlib import Path
 import struct
 import sys
@@ -9,27 +10,54 @@ sys.path.insert(0, str(ROOT / "install"))
 from guest_profile import Profile
 
 
+def fortran_settings(request, target_offset, count, mode):
+    """Emit initialized, guest-owned bytes in portable signed ISO C integer kinds."""
+    signed = [str(b if b < 128 else b - 256) for b in request]
+    rows = [", ".join(signed[i:i+16]) for i in range(0, len(signed), 16)]
+    return ("module simulation\n  use iso_c_binding, only: c_int8_t\n  implicit none\n"
+            f"  integer, parameter :: steps={count}, target_offset={target_offset}\n"
+            f"  logical, parameter :: success=.{str(mode == 'success').lower()}., crash=.{str(mode == 'crash').lower()}.\n"
+            f"  integer(c_int8_t), target :: request({len(signed)})=[integer(c_int8_t) :: &\n    "
+            + ", &\n    ".join(rows) + "]\nend module\n")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output", "toolchain", "sysroots32", "sysroots64"):
+    for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output", "toolchain", "sysroots32"):
         p.add_argument("--" + field, required=True, type=Path)
-    p.add_argument("--language", choices=("c", "cpp", "nim", "objectc", "lua"), default="c")
+    p.add_argument("--sysroots64", type=Path, help="matching wasm64 sysroot for dual-width toolchains")
+    p.add_argument("--language", choices=("c", "cpp", "nim", "objectc", "lua", "rs", "tinygo", "fortran"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
     p.add_argument("--toolchain64", type=Path, help="base compiler prefix for a distinct wasm64 sysroot")
     p.add_argument("--objc-clang", type=Path)
     p.add_argument("--objc-runtime32", type=Path)
     p.add_argument("--objc-runtime64", type=Path)
+    p.add_argument("--flang", type=Path, help="Fortran compiler from the selected toolchain")
+    p.add_argument("--rustroot", type=Path, help="pinned Rust compiler installation")
+    p.add_argument("--goroot", type=Path, help="pinned Go installation for TinyGo")
+    p.add_argument("--tinygoroot", type=Path, help="pinned TinyGo installation")
     a = p.parse_args()
+    if a.flang and a.language != "fortran":
+        p.error("--flang applies to Fortran")
+    if (a.rustroot is not None) != (a.language == "rs"):
+        p.error("--rustroot is required for Rust")
+    if any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
+        p.error("--goroot and --tinygoroot are required for TinyGo")
+    widths = (32,) if a.language in ("rs", "tinygo") else (32, 64)
+    if 64 in widths and not a.sysroots64:
+        p.error("a matching --sysroots64 is required for this language")
     if a.language == "objectc" and not all((a.objc_clang, a.objc_runtime32, a.objc_runtime64)):
         p.error("supply the Objective-C frontend and both runtime directories")
     if (a.producer is not None) != (a.language == "nim"):
         p.error("--producer is required for Nim")
     sys.path.insert(0, str(a.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
-    source = ROOT / "tests/mujoco" / ("controller." + (a.language if a.language in ("nim","lua") else "c"))
-    compiler = ROOT / "bin" / {"c": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua"}[a.language]
-    sysroots = {32: a.sysroots32.resolve(), 64: a.sysroots64.resolve()}
+    source = ROOT / "tests/mujoco" / ("controller." + {"cpp": "c", "objectc": "c", "tinygo": "go", "fortran": "f90"}.get(a.language, a.language))
+    compiler = ROOT / "bin" / {"c": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "fortran": "wrfortran", "rs": "wrrust", "tinygo": "wrtinygo"}[a.language]
+    sysroots = {32: a.sysroots32.resolve()}
+    if 64 in widths:
+        sysroots[64] = a.sysroots64.resolve()
 
     toolchains = {32: a.toolchain.resolve(), 64: (a.toolchain64 or a.toolchain).resolve()}
     objc_inputs = ([a.objc_clang.resolve(), *[lib.resolve()/name for lib in (a.objc_runtime32,a.objc_runtime64)
@@ -44,7 +72,7 @@ def main():
         request = suite.u64(1) + suite.u64(deadline) + suite.blob(payload)
         directory = wasm.parent / (wasm.stem + "-source")
         directory.mkdir()
-        app = directory / ("controller.m" if a.language == "objectc" else "controller." + a.language)
+        app = directory / ("controller." + {"objectc": "m", "fortran": "f90", "tinygo": "go"}.get(a.language, a.language))
         app.write_bytes(source.read_bytes())
         options = ["-O3", "-g", "--reactor", "--export", "_start"]
         if a.language == "nim":
@@ -63,6 +91,23 @@ def main():
             literal = "".join(f"\\{b:03}" for b in request)
             app.write_text(f'local template = "{literal}"\nlocal steps = {count}\n'
                            f'local mode = "{mode}"\nlocal target_offset = {24+len(prefix)+8}\n' + source.read_text())
+        if a.language == "fortran":
+            app.write_text(fortran_settings(request, 24+len(prefix)+8, count, mode) + source.read_text())
+            options = ["--eh", "-O3", "-g", *(["--flang", a.flang.resolve()] if a.flang else [])]
+        if a.language == "rs":
+            options = ["--rustroot", a.rustroot.resolve(), "-O3", "-g"]
+            (directory / "simulation.rs").write_text(
+                f"const STEPS:u64={count};\nconst TARGET:usize={24+len(prefix)+8};\n"
+                f"const SUCCESS:bool={str(mode=='success').lower()};\nconst CRASH:bool={str(mode=='crash').lower()};\n"
+                f"const TEMPLATE:[u8;{len(request)}]=[" + ",".join(map(str, request)) + "];\n")
+        if a.language == "tinygo":
+            options = ["--goroot", a.goroot.resolve(), "--tinygoroot", a.tinygoroot.resolve()]
+            (directory / "go.mod").write_text("module example.local/mujoco\n\ngo 1.24\n\nrequire wros.local/scene v0.0.0\n"
+                + "replace wros.local/scene => " + json.dumps(str(ROOT / "language/tinygo/scene")) + "\n")
+            (directory / "settings.go").write_text(f"package main\nconst steps={count}\nconst targetOffset={24+len(prefix)+8}\n"
+                f"const success={str(mode=='success').lower()}\nconst crash={str(mode=='crash').lower()}\n"
+                + "var template=[...]byte{" + ",".join(map(str, request)) + "}\n")
+            app = directory
         header = directory / "simulation.h"
         header.write_text(f"#define STEPS {count}\n#define TARGET_OFFSET {24+len(prefix)+8}\n"
                           f"#define SUCCESS {int(mode=='success')}\n#define CRASH {int(mode=='crash')}\n"
@@ -70,7 +115,7 @@ def main():
         run(wasm.stem + "-compile", [sys.executable, compiler, "--target", f"wasm{width}", "--toolchain", toolchains[width],
                                     "--sysroots", sysroots[width], *(["--legacy-mte"] if a.candidate_mte else []),
                                     *options, app, "-o", wasm])
-        controls = Profile(width).uwvm_feature_flags()
+        controls = Profile(width, exceptions="noeh" if a.language == "rs" else "eh").uwvm_feature_flags()
         if a.language == "objectc":
             controls += ["--wasip1-single-create", "main", "--wasip1-single-enable", "main",
                          "--wasip1-single-interface", "main", "clock_time_get_wasm64" if width == 64 else "clock_time_get", "allow",
@@ -81,10 +126,16 @@ def main():
     for key, value in (("source-root", a.vm_source), ("runtime", a.runtime), ("openssl-root", a.openssl_root),
                        ("mujoco", a.mujoco), ("output", a.output)):
         args += ["--" + key, str(value.resolve())]
-    suite.main(args, compile_guest=compile_guest, guest_name=a.language,
-               guest_inputs=(source, Path(__file__), compiler, *([a.producer] if a.producer else []), *sysroots.values(), *objc_inputs,
+    producers = [path for path in (a.flang, a.producer) if path]
+    if a.language == "rs":
+        producers.extend((a.rustroot / "bin/rustc", ROOT / "language/rust/scene.rs", ROOT / "tools/wasm/tag_ir.cpp"))
+    if a.language == "tinygo":
+        producers.extend((a.goroot / "bin/go", a.tinygoroot / "bin/tinygo", ROOT / "language/tinygo/scene/scene_wros.go",
+                          ROOT / "tools/wasm/tag_ir.cpp"))
+    suite.main(args, compile_guest=compile_guest, guest_name=a.language, guest_widths=widths,
+               guest_inputs=(source, Path(__file__), compiler, *producers, *sysroots.values(), *objc_inputs,
                              *([ROOT / "language/lua/scene.hpp", ROOT / "language/lua/entry.cpp", ROOT / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),
-                             *[tc/"bin"/tool for tc in set(toolchains.values()) for tool in ("clang","wasm-ld")], ROOT / "include/wros/scene.h"))
+                             *[tc/"bin"/tool for tc in {toolchains[w] for w in widths} for tool in ("clang","wasm-ld")], ROOT / "include/wros/scene.h"))
 
 
 if __name__ == "__main__":

@@ -94,3 +94,16 @@ SDK 的登记范围可扩展到国内和国际厂商。纯算法留在 Wasm，�
 ### 支持的 Wasm 格式
 
 SDK 构建和运行 WebAssembly **核心模块**，可按项目选择 Core 功能级别。SDK 拒绝 WASI Preview 2、Preview 3 目标、Component Model 二进制、组件类型元数据和组件 ABI 的导入与导出。单独编译的对象及静态库的每个成员都遵守同一规则。应用通过 ROSv2 核心模块接口访问宿主，使用 Preview 1 的时钟或环境变量仍需 VM 单独授权。选择 Core 3.0 只控制 Wasm 功能级别。
+
+## 运行外置驱动仿真
+
+在源码目录运行 `tests/mujoco_guest.py`，会从指定语言的控制器源码构建 Wasm，在真实 VM 上运行，并通过认证的 TLS 会话连接外置 MuJoCo 人形机器人接收端。需要提供 VM 测试源码、VM 可执行文件、配套的 OpenSSL 和含模型的官方 MuJoCo 发行包。每次选择新的输出目录。
+
+```sh
+python3 tests/mujoco_guest.py --language lua \
+  --vm-source "$VM_SOURCE" --runtime "$VM" --openssl-root "$OPENSSL" \
+  --mujoco "$MUJOCO" --toolchain "$TOOLCHAIN" \
+  --sysroots32 "$SYSROOTS32" --sysroots64 "$SYSROOTS64" --output "$OUT"
+```
+
+C、C++、Fortran、Lua、Nim 和 Objective-C 可选择双位宽测试。Rust no_std 和 TinyGo 当前测试 wasm32。Rust 指定 `--rustroot`，TinyGo 指定 `--goroot` 和 `--tinygoroot`，Nim 指定 `--producer`。Objective-C 还需 `--objc-clang`、`--objc-runtime32` 和 `--objc-runtime64`。Fortran 可指定 `--flang`。解释器和 AOT 都会执行三种场景，分别验证 128 步与原生仿真的一致性、越限指令被拒和接收端崩溃后的状态。各次使用的二进制与输入摘要、授权、后端、执行结果和原生参考值均记录在 `results.json`。使用开发工具链时可显式传入 `--candidate-mte`，此时保留插装，单次仿真不产生签名工具链资格。

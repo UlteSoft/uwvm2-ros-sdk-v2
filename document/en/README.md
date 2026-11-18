@@ -97,3 +97,16 @@ Every published language compiler must support WasmMTE. Tagging is enabled by de
 ### Supported Wasm format
 
 The SDK builds and runs WebAssembly **core modules** at the selected core feature level. It rejects WASI Preview 2 and Preview 3 targets, Component Model binaries, component-type metadata, and component ABI imports and exports. The same rule applies to separately compiled objects and every member of a guest static archive. SDK programs use the ROSv2 core imports. A selected Preview 1 clock or environment import still requires its own VM permission. A Core 3.0 feature selection does not select a WASI version.
+
+## Run the external driver simulation
+
+From a source checkout, `tests/mujoco_guest.py` compiles a controller in the selected language, runs it on the real VM and connects it to an external MuJoCo humanoid receiver over authenticated TLS. Provide the VM test sources, its executable, the matching OpenSSL build and the official MuJoCo distribution including the model. Use a fresh output directory on each run.
+
+```sh
+python3 tests/mujoco_guest.py --language lua \
+  --vm-source "$VM_SOURCE" --runtime "$VM" --openssl-root "$OPENSSL" \
+  --mujoco "$MUJOCO" --toolchain "$TOOLCHAIN" \
+  --sysroots32 "$SYSROOTS32" --sysroots64 "$SYSROOTS64" --output "$OUT"
+```
+
+The test covers C, C++, Fortran, Lua, Nim and Objective-C on wasm32 and wasm64. Rust no_std and TinyGo use their supported wasm32 profiles. Pass `--rustroot` for Rust, `--goroot` and `--tinygoroot` for TinyGo, and `--producer` for Nim. The Objective-C route also requires `--objc-clang`, `--objc-runtime32` and `--objc-runtime64`. Fortran accepts `--flang`. The suite checks native agreement after 128 physics steps, rejection of an out-of-range command, and the reported state after a receiver crash in both VM engines. Inspect `results.json` for the executable and input digests, applied policy, backend, effects and native reference. A test of a development producer can explicitly pass `--candidate-mte`. It runs with instrumentation and does not produce a signed toolchain qualification.
