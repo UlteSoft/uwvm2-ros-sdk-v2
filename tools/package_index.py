@@ -78,6 +78,10 @@ def main():
     registry = json.loads((ROOT / "share/targets.json").read_text())
     render_inventory(registry)
     package("license", ["LICENSE"])
+    package("migration/resources", [
+        "tools/migration/package_manifest.py", "tools/migration/package_resources.py",
+        "include/wros/package_resources.h", "document/en/migration.md", "document/zh/migration.md",
+    ])
     for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",
                         "as": "language/assemblyscript/scene.ts"}.items():
         package("bindings/" + key, [source])
@@ -91,6 +95,8 @@ def main():
         metadata = {"id": language, "development_package": language in DEVELOPMENT}
         if language in COMPILER_COMMANDS:
             metadata["command_name"] = COMPILER_COMMANDS[language]
+        if language in ("c", "cpp"):
+            metadata["optional_components"] = ["migration"]
         if language in ("java","kotlin"):
             metadata["optional_components"] = ["synchronous-aot"]
         if language == "csharp":

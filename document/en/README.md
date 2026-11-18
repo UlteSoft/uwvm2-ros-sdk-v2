@@ -2,6 +2,9 @@
 
 [Nim application development](nim.md)
 
+[Migrate ROS package resources](migration.md)
+
+
 [WasmMTE detection guarantees](memtag.md)
 - [Qualify and sign a local memory-tagging toolchain](memory-qualification.md)
 

@@ -29,7 +29,7 @@ def main():
     parser.add_argument("platform")
     parser.add_argument("language")
     parser.add_argument("--revision-help", action="store_true")
-    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot", "numeric-aot"),
+    parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot", "numeric-aot", "migration"),
                         default="development")
     args = parser.parse_args()
     if args.revision_help:
@@ -60,10 +60,14 @@ def main():
         packages.extend(("license", "bindings/" + binding))
     else:
         packages.append("protocol")
-        if args.component in ("development", "compiler-source"):
+        if args.component in ("development", "compiler-source", "migration"):
             if args.language not in DEVELOPMENT:
                 parser.error("a development package has not been published for this language")
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
+            if args.component == "migration":
+                if args.language not in ("c", "cpp"):
+                    parser.error("the migration resource component currently requires c or cpp")
+                packages.append("migration/resources")
             if args.component == "compiler-source":
                 packages.append("compiler-source")
                 if args.language == "nim":

@@ -1,5 +1,8 @@
 {
   "id": "cpp",
   "development_package": true,
-  "command_name": "wrcc"
+  "command_name": "wrcc",
+  "optional_components": [
+    "migration"
+  ]
 }
