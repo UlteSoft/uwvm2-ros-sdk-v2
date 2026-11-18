@@ -19,7 +19,8 @@ local function selection(root)
     if expected then
         assert(variant == expected, "Select the installed " .. expected .. " component for " .. language)
     else
-        assert(variant == "development" or variant == "compiler-source", "Select an installed Wasm development directory")
+        local migration = variant == "migration" and (language == "c" or language == "cpp")
+        assert(variant == "development" or variant == "compiler-source" or migration, "Select an installed Wasm development directory")
     end
     local platdir = path.directory(langdir)
     local commit = path.filename(path.directory(platdir))

@@ -1,5 +1,8 @@
 {
   "id": "c",
   "development_package": true,
-  "command_name": "wrc"
+  "command_name": "wrc",
+  "optional_components": [
+    "migration"
+  ]
 }

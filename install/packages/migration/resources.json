@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "path": "document/en/migration.md",
+      "bytes": 2811,
+      "mode": 420,
+      "sha256": "e111d924bda5e3df80e29b9c6395e4f9ae957c0c4bf540ee33d7ad89956c9645"
+    },
+    {
+      "path": "document/zh/migration.md",
+      "bytes": 2532,
+      "mode": 420,
+      "sha256": "cce9c9f63fc45ec7a5b1d7fc4799ab70ff5377bd87196bb483f3086e91c6f9b5"
+    },
+    {
+      "path": "include/wros/package_resources.h",
+      "bytes": 3607,
+      "mode": 420,
+      "sha256": "0a3cdc4a00c8b21beccde044d7fa6741840cbeb67e167574405cb8218f07d4ce"
+    },
+    {
+      "path": "tools/migration/package_manifest.py",
+      "bytes": 4646,
+      "mode": 420,
+      "sha256": "89da3bf2211cb0454552d60f337c98952987a6ba3052eeea8fcd8bfeb4b441c2"
+    },
+    {
+      "path": "tools/migration/package_resources.py",
+      "bytes": 6510,
+      "mode": 420,
+      "sha256": "8abe44fe1e91cc09cec9e0fd87b821cf50849a630811c960641713b7c5bf13f0"
+    }
+  ]
+}
