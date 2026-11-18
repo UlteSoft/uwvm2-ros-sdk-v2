@@ -1,0 +1,124 @@
+{
+  "files": [
+    {
+      "path": "bin/wrobjc",
+      "bytes": 201,
+      "mode": 493,
+      "sha256": "ae2142f4b020ac4adb46d83356517661898b0f91a6978995f309e0001d9678ed"
+    },
+    {
+      "path": "document/en/objectc.md",
+      "bytes": 5542,
+      "mode": 420,
+      "sha256": "c60a609bd93530e6a4b5b86e7c7f0c83635873e3fa24ccbc03037fd9f83143c7"
+    },
+    {
+      "path": "document/zh/objectc.md",
+      "bytes": 4635,
+      "mode": 420,
+      "sha256": "ee2eac70313068f1c5cc1f683fc56a0984aa2d3a14a2ad6c0fc5fe50618c838f"
+    },
+    {
+      "path": "examples/objectc/body.m",
+      "bytes": 300,
+      "mode": 420,
+      "sha256": "855029f6d0eba62b3bc43f328731819b3eced6ade1b6c7223031b22ad239e75f"
+    },
+    {
+      "path": "examples/objectc/xmake.lua",
+      "bytes": 389,
+      "mode": 420,
+      "sha256": "a6f438fdab0c1b065673cec874b5c657661f126423868384ea13a614b6297912"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/objectc/base_object.m",
+      "bytes": 277,
+      "mode": 420,
+      "sha256": "752103cfb3866b6ab2a28ebc1da09a0855fd33dd4702824f3b1cabd9e175f097"
+    },
+    {
+      "path": "language/objectc/build_frontend.py",
+      "bytes": 3676,
+      "mode": 420,
+      "sha256": "cbd6a2089eca688891928916f104112c3b9569900fa704dbefd60e569f601325"
+    },
+    {
+      "path": "language/objectc/build_runtime.py",
+      "bytes": 4757,
+      "mode": 420,
+      "sha256": "cbc6960a5b796588283d250f2c1bea3f3a04b00e6c69bb511a77fd3c12bbf797"
+    },
+    {
+      "path": "language/objectc/frontend_objectc.py",
+      "bytes": 5707,
+      "mode": 420,
+      "sha256": "fe21f718154592475d5616607538799a0aeb559b5a981a872e780d15b3471c58"
+    },
+    {
+      "path": "language/objectc/runtime.py",
+      "bytes": 4159,
+      "mode": 420,
+      "sha256": "ae7ba6e7b9e72d86a6746cf65d99130ac80438ef16bbbc8f93246ea0c47b62de"
+    },
+    {
+      "path": "language/objectc/xmake/adapter.lua",
+      "bytes": 264,
+      "mode": 420,
+      "sha256": "0a8e1c5b51687d9722cf94ca2ca7d43cb5f66edb0e0d50d3ffe1bb232b068f6a"
+    },
+    {
+      "path": "third-parties/objectc/LICENSE-libobjc2",
+      "bytes": 1059,
+      "mode": 420,
+      "sha256": "56b923b1db99c7975c4e4ad4847381b32d3c9401fb2c8270b41fb6d31d6014fb"
+    },
+    {
+      "path": "third-parties/objectc/LICENSE-robin-map",
+      "bytes": 1102,
+      "mode": 420,
+      "sha256": "11f2c685ba565a31aef1219f63a7a8845602c97bff70016b9e3278dfe51a2ec5"
+    },
+    {
+      "path": "third-parties/objectc/README.md",
+      "bytes": 1075,
+      "mode": 420,
+      "sha256": "47122f2362dc2ce8a8f904e668dbd08f40c9a2b0a4a2e0df4e53bd1796a304a7"
+    },
+    {
+      "path": "third-parties/objectc/libobjc2-a21ae931.tar.gz",
+      "bytes": 222707,
+      "mode": 420,
+      "sha256": "b5e34d8c8066765be58dbc95b4328b363a6bb5146ae860a96ed9f022826198c7"
+    },
+    {
+      "path": "third-parties/objectc/libobjc2-wasm.patch",
+      "bytes": 19071,
+      "mode": 420,
+      "sha256": "fd83707326d0f95cf99bcc51127de8199bed8534e93689f5b94667efc0548f1e"
+    },
+    {
+      "path": "third-parties/objectc/objc-CGObjCGNU.cpp.patch",
+      "bytes": 666,
+      "mode": 420,
+      "sha256": "15bae521e401be1c9dba468ffd2cdf8e8efb2f971fc40aa600c7e96c7d493b85"
+    },
+    {
+      "path": "third-parties/objectc/objc-Clang.cpp.patch",
+      "bytes": 615,
+      "mode": 420,
+      "sha256": "2e0cfc76b534984af0548e3a685c1519f7259baf0cbb7ab98dee576a6d035058"
+    },
+    {
+      "path": "third-parties/objectc/robin-map-1.4.0.tar.gz",
+      "bytes": 70352,
+      "mode": 420,
+      "sha256": "7930dbf9634acfc02686d87f615c0f4f33135948130b8922331c16d90a03250c"
+    }
+  ]
+}

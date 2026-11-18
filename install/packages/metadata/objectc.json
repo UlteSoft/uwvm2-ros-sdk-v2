@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/objectc.json",
-      "bytes": 54,
+      "bytes": 53,
       "mode": 420,
-      "sha256": "90cd2217cf855b01646367dfef078fb1ef1e1b039719c278614d1775d49bdc07"
+      "sha256": "2b438cfdf058c7981f867aad01f58cb7cc32e613bfda81a4918c616d08f7ce16"
     }
   ]
 }

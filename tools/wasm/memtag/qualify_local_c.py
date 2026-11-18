@@ -18,6 +18,8 @@ def git(*args):
 def verify_checkout(commit, language):
     """Bind executed helpers and inputs to Git blobs even with skip-worktree entries."""
     scopes = ("bin", "tests", "install", "include", "share/abi", "share/qualification", "tools/wasm/memtag")
+    if language == "objectc":
+        scopes += ("language/objectc", "third-parties/objectc", "examples/objectc")
     if language == "nim":
         scopes += ("language/nim", "third-parties/nim", "examples/nim")
     if language == "lua":
@@ -50,17 +52,23 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for key in ("toolchain", "runtime", "sysroots", "output"):
         p.add_argument("--" + key, type=lambda s: Path(s).resolve(), required=True)
+    p.add_argument("--objc-clang", type=lambda s: Path(s).resolve())
+    p.add_argument("--objc-runtime", type=lambda s: Path(s).resolve())
+    p.add_argument("--approved-objc-inputs-sha256",
+                   help="SHA-256 of the canonical Objective-C compiler, runtime receipt and archive digest map")
     p.add_argument("--nim-producer", type=lambda s: Path(s).resolve())
     p.add_argument("--approved-nim-producer-sha256")
     p.add_argument("--sdk-commit", required=True, help="independently approved full Git commit")
     for key in ("producer", "vm", "sysroots"):
         p.add_argument("--approved-" + key + "-sha256", required=True)
-    p.add_argument("--language", choices=("c", "cpp", "lua", "nim"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc"), default="c")
     p.add_argument("--target", choices=("wasm32", "wasm64"), required=True)
     p.add_argument("-O", choices=("2", "3"), default="2")
     p.add_argument("-g", action="store_true")
     p.add_argument("--eh", action="store_true", help="also exercise exact owner retirement across native Wasm exceptions")
     a = p.parse_args()
+    if a.language == "objectc" and (a.O != "3" or not a.g):
+        p.error("the Objective-C language qualification uses -O3 -g")
     if a.language == "lua" and (a.O != "3" or not a.g or not a.eh):
         p.error("the embedded Lua interpreter uses -O3 -g and the EH sysroot")
     if not a.output.is_relative_to(ROOT / ".tmp"):
@@ -79,6 +87,13 @@ def main():
     from guest_profile import Profile
 
     external = {}
+    if a.language == "objectc":
+        if not a.objc_clang or not a.objc_runtime:
+            p.error("Objective-C qualification needs --objc-clang and --objc-runtime")
+        external = {"objc_frontend": a.objc_clang, "objc_runtime": a.objc_runtime / "runtime.json",
+                    "objc_archive": a.objc_runtime / "libobjc.a"}
+        if qualification.canonical({k: qualification.digest(v) for k, v in external.items()}) != a.approved_objc_inputs_sha256:
+            p.error("Objective-C frontend or runtime differs from the approved build")
     if a.language == "nim":
         if not a.nim_producer or qualification.digest(a.nim_producer) != a.approved_nim_producer_sha256:
             p.error("Nim requires the independently approved private producer")
@@ -125,6 +140,11 @@ def main():
     if a.language == "lua":
         tests.append(("lua", "lua_interpreter.py", [*base, "--sysroots", a.sysroots, "--candidate-mte",
                                                    "--address-bits", str(bits), "--output", a.output / "lua"]))
+    if a.language == "objectc":
+        tests.append(("objectc", "objectc.py", [*base, "--target", a.target, "--sysroots", a.sysroots,
+                                                "--objc-clang", a.objc_clang, "--objc-runtime", a.objc_runtime,
+                                                "--mode", "candidate", "--eh" if a.eh else "--no-eh",
+                                                "--output", a.output / "objectc"]))
     for label, script, arguments in tests:
         proc = subprocess.run([sys.executable, "-I", "-B", "-c",
                                "import runpy,sys; p=sys.argv.pop(1); sys.path.insert(0,p);"
@@ -151,7 +171,7 @@ def main():
         stages = ("compile", "disassemble", "int", "aot", "int-runtime-off", "aot-runtime-off")
         if not all(f"libcxx-{bits}-{stage}" in names for stage in stages):
             raise ValueError("missing C++ allocation execution evidence")
-    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim"}[a.language]
+    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim", "objectc": "objectc"}[a.language]
     row = dict(language=a.language, profile=profile.to_dict(), settings={"optimization": a.O, "debug": a.g},
                inputs=measured, vm_sha256=vm_digest, sdk_commit=a.sdk_commit,
                source_lock_sha256=qualification.digest(lock), producer_programs_sha256=qualification.canonical(binaries),

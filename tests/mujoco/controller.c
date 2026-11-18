@@ -10,9 +10,25 @@ static uint64_t response[64];
 static uint64_t address(const void *p) { return (uintptr_t)p; }
 typedef uint32_t operation(uint64_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
+#ifdef __OBJC__
+// All SDK driver operations pass through actual Objective-C message dispatch.
+__attribute__((objc_root_class))
+@interface JointDriver { Class isa; }
++ (uint32_t)call:(operation *)op input:(const void *)input length:(uint64_t)length;
+@end
+@implementation JointDriver
++ (uint32_t)call:(operation *)op input:(const void *)input length:(uint64_t)length {
+    return op(handle, 0, address(input), length, address(response), sizeof(response), address(&used));
+}
+@end
+static uint32_t invoke(operation *op, const void *input, uint64_t length) {
+    return [JointDriver call:op input:input length:length];
+}
+#else
 static uint32_t invoke(operation *op, const void *input, uint64_t length) {
     return op(handle, 0, address(input), length, address(response), sizeof(response), address(&used));
 }
+#endif
 
 static uint32_t poll(operation *op, const void *input, uint64_t length) {
     for (unsigned attempt = 0; attempt < 10000000; ++attempt) {

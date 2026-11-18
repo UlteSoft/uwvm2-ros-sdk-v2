@@ -3,8 +3,8 @@ import argparse
 import json
 
 
-BINDINGS = {"c": "c", "cpp": "c", "rs": "rs", "as": "as", "nim": "nim"}
-DEVELOPMENT = ("c", "cpp", "fortran", "lua", "rs", "tinygo", "nim")
+BINDINGS = {"c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
+DEVELOPMENT = ("c", "cpp", "fortran", "lua", "objectc", "rs", "tinygo", "nim")
 
 # BEGIN generated target inventory (tools/package_index.py)
 LANGUAGES = "as c c_ffi_bridge cpp csharp d fortran fsharp go haskell java js kotlin lua moonbit nim objectc odin php py r rs ruby swift tinygo typescript vbnet wat zig".split()

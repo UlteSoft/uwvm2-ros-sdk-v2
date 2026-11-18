@@ -31,7 +31,7 @@ python3 install/bootstrap.py revision-help --commit "$REV" --language cpp --plat
 
 固定命令为 `plan`、`install` 和 `revision-help`。后续版本的参数放在 `--` 后面。指定 `--local-repository` 可以离线读取本地 Git 对象。引导器先读取所选 commit 的 Python 脚本和必要的小清单，再逐文件校验大小和 SHA-256。所有成员校验通过才发布安装目录。相同摘要的文件可以复用，输出的 requested_paths 可用于核对传输范围。版本脚本是所选提交中的可执行代码。
 
-`--component protocol` 安装通用协议及指定平台的来源记录。`--component compiler-source` 在安装选定语言的同时取得共享 Wasm LLVM 后端及 sysroot 的固定源码和补丁。C、C++、Fortran、Lua、Rust 和 TinyGo 均可选择这个组件，各语言前端、标准库及运行时依赖见对应语言指南。常规开发安装只取对应开发文件。
+`--component protocol` 安装通用协议及指定平台的来源记录。`--component compiler-source` 在安装选定语言的同时取得共享 Wasm LLVM 后端及 sysroot 的固定源码和补丁。C、C++、Fortran、Lua、Objective-C、Rust 和 TinyGo 均可选择这个组件，各语言前端、标准库及运行时依赖见对应语言指南。常规开发安装只取对应开发文件。
 
 已有编译环境时，可使用 `-- --component bindings` 单独安装所选语言的原始声明、许可证以及所选语言和平台的元数据。C 和 C++ 共用头文件，本修订还提供 Rust 和 AssemblyScript 的声明。此模式仅请求这些文件。首个 commit 的安装入口也可通过 `revision-help` 发现新选项。
 
@@ -89,7 +89,7 @@ SDK 的登记范围可扩展到国内和国际厂商。纯算法留在 Wasm，�
 
 发布的每个语言编译器都必须支持 WasmMTE，默认启用。可用 `--no-mte` 关闭整个目标的插桩，并使用对应的 sysroot。C/C++ 可以通过 `no_sanitize("memtag")` 等源码属性局部改变插桩。源码作者的显式选择和编译器经边界、生命周期分析后自动省略标签，是两种独立机制。
 
-[TinyGo](tinygo.md) · [Fortran](fortran.md) · [Rust](rust.md)
+[TinyGo](tinygo.md) · [Fortran](fortran.md) · [Rust](rust.md) · [Objective-C](objectc.md)
 
 ### 支持的 Wasm 格式
 

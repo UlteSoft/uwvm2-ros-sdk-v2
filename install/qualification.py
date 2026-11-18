@@ -23,7 +23,7 @@ from artifacts import NOTE, read_bounded, sections, unique_object, validate_prof
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = Path("share/qualification/memory-neighbors.json")
-LANGUAGES = {"c", "cpp", "lua", "fortran", "rs", "tinygo", "nim"}
+LANGUAGES = {"c", "cpp", "lua", "fortran", "rs", "tinygo", "nim", "objectc"}
 COMMON = ("install/qualification.py", "install/local_release.py", "install/artifacts.py", "install/compiler.py", "install/guest_profile.py",
           "install/imports.py", "install/frontend.py", "install/archiver.py", "bin/wrar", "share/abi/ros.json")
 SDK_INPUTS = {
@@ -32,10 +32,11 @@ SDK_INPUTS = {
     "lua": ("bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp", "language/lua/scene.hpp", "third-parties/lua"),
     "fortran": ("bin/wrfortran", "bin/wrcc", "bin/wrc", "include/wros/scene.h", "language/fortran", "third-parties/fortran"),
     "rs": ("bin/wrrust", "tools/wasm/tag_ir.cpp", "language/rust", "third-parties/rust"),
+    "objectc": ("bin/wrobjc", "include/wros/scene.h", "language/objectc", "third-parties/objectc"),
     "nim": ("bin/wrnim", "bin/wrc", "language/nim", "include/wros/scene.h", "third-parties/nim/nim-2.2.4-lib.tar.xz"),
     "tinygo": ("bin/wrtinygo", "tools/wasm/tag_ir.cpp", "language/tinygo"),
 }
-EXTERNAL = {"nim": {"producer"}, "c": set(), "cpp": set(), "lua": set(), "fortran": {"flang", "marker"},
+EXTERNAL = {"objectc": {"objc_frontend", "objc_runtime", "objc_archive"}, "nim": {"producer"}, "c": set(), "cpp": set(), "lua": set(), "fortran": {"flang", "marker"},
             "rs": {"rustc", "host_cxx"}, "tinygo": {"go", "tinygo", "host_cxx"}}
 PROOFS = {"compiler-stack", "global-layout", "aggregate-pointers", "heap", "language", "vm-int", "vm-aot"}
 MAX_RECEIPT_BYTES = 1024 * 1024
