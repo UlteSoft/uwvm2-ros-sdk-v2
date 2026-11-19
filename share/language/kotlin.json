@@ -1,7 +1,8 @@
 {
   "id": "kotlin",
-  "development_package": false,
+  "development_package": true,
   "command_name": "wrkt",
+  "development_scope": "synchronous-wasm32-aot",
   "optional_components": [
     "synchronous-aot"
   ]

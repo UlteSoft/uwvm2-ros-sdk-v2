@@ -34,7 +34,7 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | C# | `csharp` | `wrcs` |
 | [Visual Basic](vbnet.md) | `vbnet` | `wrvb` |
 
-Java and Kotlin are available with the `synchronous-aot` selection. The default C# installation compiles freestanding integer methods. The full CLR development package is pending. [C# compiler guide](csharp.md) Check `revision-help` at the selected commit for the command and use `plan` to check package availability. The archive utility is `wrar`. Previous installations retain the names from their pinned commit.
+Java and Kotlin install their synchronous AOT frontend by default and accept an approved local site. The default C# installation compiles freestanding integer methods. The full CLR development package is pending. [C# compiler guide](csharp.md) Check `revision-help` at the selected commit for the command and use `plan` to check package availability. The archive utility is `wrar`. Previous installations retain the names from their pinned commit.
 
 ## Install a pinned selection
 
@@ -234,6 +234,6 @@ python3 tests/mujoco_guest.py --language d --installed-sdk "$SDK" --address-bits
 
 For a signed TinyGo site, use the Unitree TinyGo development directory as `SDK` and replace `--language d` with `--language tinygo`. The fixture builds the Go controller with the installed `wrtg` and verifies its build receipt against the VM before running each scenario.
 
-The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
+The Java and Kotlin synchronous AOT package uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
 [JavaScript interpreter and ROS operations](js.md)

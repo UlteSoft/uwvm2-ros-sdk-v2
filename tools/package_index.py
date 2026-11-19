@@ -104,7 +104,8 @@ def main():
         if language in ("c", "cpp"):
             metadata["optional_components"] = ["migration"]
         if language in ("java","kotlin"):
-            metadata["optional_components"] = ["synchronous-aot"]
+            metadata.update(development_package=True, development_scope="synchronous-wasm32-aot",
+                            optional_components=["synchronous-aot"])
         if language in ("csharp", "vbnet"):
             metadata.update(development_package=True, development_scope="freestanding-i32-method",
                             optional_components=["numeric-aot"])

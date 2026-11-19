@@ -48,6 +48,7 @@ def compile_guest(opts, language, work):
     java = [host / "jdk21/bin/java", "-Xint", "-XX:-CreateCoredumpOnCrash", "-XX:ActiveProcessorCount=1", "-Xms48m", "-Xmx768m",
             "-Djava.io.tmpdir=" + str(work/"tmp")]
     env = dict(PATH=os.defpath, HOME=str(work/"tmp"), TMPDIR=str(work/"tmp"), LC_ALL="C.UTF-8", TZ="UTC")
+    env["LD_LIBRARY_PATH"] = os.pathsep.join(str(host / part) for part in ("lib/host-runtime", "jdk21/lib/server", "jdk21/lib"))
     s = HERE
     log = []
     def run(name, argv, environ=env):
@@ -110,7 +111,7 @@ def compile_guest(opts, language, work):
 def main(language):
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ("toolchain","sysroots","bundle"):
-        parser.add_argument("--"+name,required=True,type=Path)
+        parser.add_argument("--"+name,type=Path)
     parser.add_argument("--work",type=Path,help="keep compiler logs in a new directory")
     parser.add_argument("--main-class",required=True)
     parser.add_argument("--ros-operation",action="append",default=[],help="admit precisely this ROS op and generate its Calls method; repeat for more")
@@ -121,20 +122,31 @@ def main(language):
     mode.add_argument("--legacy-mte",action="store_true")
     parser.add_argument("sources",nargs="+",type=Path)
     opts=parser.parse_args()
-    if not opts.legacy_mte:
-        parser.error("synchronous-aot has no signed strict or MTE-off release; explicitly select --legacy-mte for the instrumented source profile")
+    if opts.no_mte:
+        parser.error("no signed strict or MTE-off release is available for the uninstrumented JVM profile")
+    if opts.legacy_mte and not all((opts.toolchain, opts.sysroots, opts.bundle)):
+        parser.error("--legacy-mte requires explicit --toolchain, --sysroots and --bundle")
     if not re.fullmatch(r"[A-Za-z_$][A-Za-z_$0-9]*(?:\.[A-Za-z_$][A-Za-z_$0-9]*)*",opts.main_class):
         parser.error("invalid JVM class name")
     if opts.output.suffix!=".wasm" or not opts.output.parent.is_dir():
         parser.error("expected a .wasm output with an existing parent")
     suffix=".java" if language=="java" else ".kt"
     try:
+        if not opts.legacy_mte:
+            from release import authorize, local_release
+            _, tc, sysroot, host = authorize(local_release.site_config(HERE.parents[1]), language)
+            for name, selected in (("toolchain", tc), ("sysroots", sysroot), ("bundle", host)):
+                supplied = getattr(opts, name)
+                if supplied is not None and supplied.resolve(strict=True) != selected:
+                    raise ValueError("explicit " + name + " differs from the signed JVM site")
+                setattr(opts, name, selected)
         opts.sources=[p.resolve(strict=True) for p in opts.sources]
         if len(opts.sources) > 256 or any(
                 not p.is_file() or p.suffix != suffix or p.stat().st_size > 16 * 1024 * 1024
                 for p in opts.sources):
             raise ValueError("expected bounded source files for the selected language")
-        print("warning: explicitly selected unsigned synchronous JVM AOT with WasmMTE instrumentation",file=sys.stderr)
+        if opts.legacy_mte:
+            print("warning: explicitly selected unsigned synchronous JVM AOT with WasmMTE instrumentation",file=sys.stderr)
         if opts.work:
             work=opts.work.resolve()
             work.mkdir(exist_ok=False)

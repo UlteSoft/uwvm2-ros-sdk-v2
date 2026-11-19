@@ -1,8 +1,8 @@
 # Java 与 Kotlin 同步 AOT
 
-可选组件 `synchronous-aot` 将应用、可达类库与回收器编译到一个 wasm32 core 模块。仅构建宿主运行 JDK 21、Kotlin 编译器和 TeaVM 0.13.1。VM 内执行的产物是 Wasm。此组件尚无已签署的受管近邻资格。默认构建、关闭 MTE、wasm64 与线程均被拒绝，显式 `--legacy-mte` 生成带 WasmMTE 的程序并打印提示。
+Java 和 Kotlin 的默认开发包可将同步应用及其可达类编译为单个 wasm32 core 模块。JDK 21、Kotlin 编译器和 TeaVM 0.13.1 在构建宿主上运行。默认构建要求本现场 WSEA 签署的对应语言内存资格，范围为单线程、EH、`-O3 -g` 与 16 MiB 非移动托管堆。显式选择 `--legacy-mte` 可测量未签署的候选版本。无插装制品、wasm64 和线程仍需独立验收。
 
-使用完整 SDK 提交、平台和语言运行固定入口安装脚本，在 `--` 后传入 `--component synchronous-aot`。安装目录结尾为 `<平台>/<java或kotlin>/synchronous-aot`。该目录包含所选语言、对应 Xmake 适配、共享 AOT 与运行时源码、示例和宿主输入哈希。使用旧 SDK 固定的 Linux x86-64 JVM 宿主包，依据 `language/<语言>/host-inputs.json` 逐文件校验。Java 使用的类路径仅包括清单中的 JAR，不依赖 Kotlin 编译器。另需匹配的 LLVM 及 wasm32 单线程 EH sysroot。
+按完整提交、平台及语言安装 SDK，默认目录以 `<平台>/<java或kotlin>/development` 为结尾。显式候选构建仍可选择 `synchronous-aot` 组件。通过授权的现场安装会核对 JDK、目标编译器、sysroot 及回收器摘要。
 
 可以从 Ubuntu OpenJDK 21.0.10+7-Ubuntu-125.10、与清单匹配的系统库和 Maven 依赖生成单语言宿主包。脚本优先读取本地 Maven 缓存，也支持从 `--jars DIR` 指定的平铺目录取包。显式使用 `--fetch-missing-jars` 时只从 Maven Central 下载本语言清单内缺少的 JAR。所有文件的长度与 SHA-256 校验成功后才发布输出目录。以下路径对应已验证的 Linux x86-64 宿主。
 
@@ -60,3 +60,23 @@ VM 的六个 `module.call.*` 操作使用另行登记的交换内存。有些消
 24 种带能力引用的请求提供第四个参数为 `Calls[]` 的重载。按请求中的字段顺序传入已打开的实例，数组中的每个引用和实际存在的可选引用也占一项。原始请求中的能力字段须留零，资源 ID、长度和其余字段按协议填写。包装层先复制请求，按所选 schema 验证字段，只在私有暂存区中填入令牌，随后调用一次 VM。调用方原数组中的占位符始终为零。缺少或多传引用、占位符非零时返回 22；传入已关闭的实例时返回 9。VM 再分别检查每个引用的用途、绑定资源和当前授权。
 
 Schedule 示例使用两个独立授权建立仿真 ROS 时钟和定时器，推进时间后读取定时器错过的周期数，并检查用 guard 代替时钟权限时的拒绝结果。
+
+## 验收并安装本地编译器
+
+将匹配的宿主工具包置于 `$TOOLCHAIN/libexec/wros/jvm/java` 和 `$TOOLCHAIN/libexec/wros/jvm/kotlin`，准备已审阅的 wasm32/EH C 后端发布记录及其规范化摘要。在固定提交源码中运行以下命令。
+
+```sh
+python3 tools/wasm/memtag/qualify_jvm.py --toolchain "$TOOLCHAIN" --sysroots "$SYSROOT" \
+  --vm "$VM" --c-release "$C_RELEASE" --approved-c-release-sha256 "$C_RELEASE_SHA256" --output "$NEW_WORK"
+```
+
+先审阅 `ownership/results.json`，再使用 `wros.sdk.memory.release` 身份签署 `releases.wasm`。测试分别编译两种语言，使 240 个对象及其数组经历回收后仍可遍历，检查近邻标签及已回收对象的五个粒度，并在 VM 开关 MTE 两种情况下运行。声明包含同一 C 后端及两种语言各自的证据。采用 SDK 的 WSEA 流程签署并准备本地现场配置。[本地发布签署](memory-qualification.md)
+
+```sh
+python3 install/bootstrap.py install --commit "$SDK_COMMIT" --language java --platform unitree \
+  --prefix "$PREFIX" --site-profile "$SITE_JSON"
+SDK="$PREFIX/$SDK_COMMIT/unitree/java/development"
+"$SDK/bin/wrjava" --main-class example.Main "$SDK/examples/java/synchronous-aot/Main.java" -o body.wasm
+```
+
+Kotlin 选择 `--language kotlin`、`wrkt` 和 `Main.kt`。每次构建都验证 WSEA 选择与完整宿主包。编译现场授权不授予运行时 ROS 权限。

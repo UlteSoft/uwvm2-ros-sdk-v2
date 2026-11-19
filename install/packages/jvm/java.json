@@ -32,9 +32,9 @@
     },
     {
       "path": "examples/java/synchronous-aot/xmake.lua",
-      "bytes": 418,
+      "bytes": 402,
       "mode": 420,
-      "sha256": "3b4885f9975b38752adead6ee3427d07e81c0369644d7e05670d639193d0438b"
+      "sha256": "f84a8714accbe5fc46a371a34df3f49b1660601b5df63442550e3000d67f137f"
     },
     {
       "path": "language/java/host-inputs.json",
@@ -44,9 +44,9 @@
     },
     {
       "path": "language/java/xmake/adapter.lua",
-      "bytes": 1464,
+      "bytes": 1555,
       "mode": 420,
-      "sha256": "54cf14baff3d015d99d201fc0ef743d90086b75b52e9ab89ba670f89babe139c"
+      "sha256": "1f93ef74c743c28d7390940ffc339d89b313e6e915eb329eac10b1bfbe6033ac"
     }
   ]
 }

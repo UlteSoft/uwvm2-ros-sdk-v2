@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/jvm.md",
-      "bytes": 10479,
+      "bytes": 11517,
       "mode": 420,
-      "sha256": "b01359cf9149cdb76759f3b6bf46b72318550fc1814b29be2b2e3457ea6ea834"
+      "sha256": "3c044ece8b684de1fea45797ab0d817d4c409f705cadc57acaa0fd0a1062f367"
     },
     {
       "path": "document/zh/jvm.md",
-      "bytes": 8644,
+      "bytes": 9817,
       "mode": 420,
-      "sha256": "47f64dce1024b5bdc72a2cf29fa6b07277ac72e4f823760c412a1bd7ffc45694"
+      "sha256": "995b2d0e647d04a87c7a873c3e743fc5d371a4bf367437bbe6f6d92e749a2bbd"
     },
     {
       "path": "include/wros/scene.h",
@@ -80,9 +80,9 @@
     },
     {
       "path": "language/jvm/jvm_frontend.py",
-      "bytes": 8158,
+      "bytes": 8990,
       "mode": 420,
-      "sha256": "1224a13bef05554450282f9a5e596044c0ce6e10cd013426c83944a4a9669169"
+      "sha256": "9cf33f376c8597519fb9195c41a8631d6d84483c5f1a35053c1fbd5b2d8c2378"
     },
     {
       "path": "language/jvm/operations.py",
@@ -101,6 +101,12 @@
       "bytes": 2007,
       "mode": 420,
       "sha256": "09501348ef3cb5b80572260979009ce480bfeb36c085052c097ef60afbbfb8d1"
+    },
+    {
+      "path": "language/jvm/release.py",
+      "bytes": 5438,
+      "mode": 420,
+      "sha256": "3d0d78b5536e97b6a0faebc3d739413b1f44c75aa3e86a1e27af2fa98f3403d2"
     },
     {
       "path": "third-parties/jvm/LICENSE",

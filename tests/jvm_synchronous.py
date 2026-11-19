@@ -36,10 +36,7 @@ def main():
             source=Source(opts.commit,opts.repository.resolve())
             result=install(source,"unitree",lang,out/"install",options)
             return Path(result["directory"]),source.requested
-        try: retrieve([])
-        except (ValueError,RuntimeError): pass
-        else: raise AssertionError("full language incorrectly registered")
-        sdk,requested=retrieve(["--component","synchronous-aot"])
+        sdk,requested=retrieve([])
         other="java" if lang=="kotlin" else "kotlin"
         command = {"java": "wrjava", "kotlin": "wrkt"}
         assert "bin/"+command[lang] in requested and "language/"+lang+"/xmake/adapter.lua" in requested
@@ -47,6 +44,8 @@ def main():
         assert not any(p.startswith(("language/"+other+"/","examples/"+other+"/")) or p=="bin/"+command[other] for p in requested)
         report["selections"][lang]=requested
         project=out/(lang+"-project");shutil.copytree(sdk/"examples"/lang/"synchronous-aot",project)
+        script=project/"xmake.lua"
+        script.write_text(script.read_text().replace('core = "3.0", eh = true', 'core = "3.0", mte = "legacy", eh = true'))
         env=dict(os.environ,TMPDIR=str(out/"tmp"),XMAKE_GLOBALDIR=str(out/(lang+"-xmake")),UWVM_ROS_SDK_ROOT=str(sdk),
                  WROS_TOOLCHAIN=str(opts.toolchain.resolve()),WROS_SYSROOTS=str(opts.sysroots.resolve()),
                  WROS_JVM_BUNDLE=str(opts.bundle.resolve()),WROS_VM=str(opts.vm.resolve()),PYTHONDONTWRITEBYTECODE="1")

@@ -32,9 +32,9 @@
     },
     {
       "path": "examples/kotlin/synchronous-aot/xmake.lua",
-      "bytes": 418,
+      "bytes": 402,
       "mode": 420,
-      "sha256": "9fa3084cf07011e9acbe6e55088ba82dd4fae44b0ecf4fdd234bc44240fbbc15"
+      "sha256": "d574e7fb9887f0b7ef90d21787e1cbe4164d2fbc2765475c8f7ad948ad717f93"
     },
     {
       "path": "language/kotlin/host-inputs.json",
@@ -44,9 +44,9 @@
     },
     {
       "path": "language/kotlin/xmake/adapter.lua",
-      "bytes": 1462,
+      "bytes": 1553,
       "mode": 420,
-      "sha256": "62975038aebbc0ffd511043b78a89dd525d30cd25660eca986724a17accbed19"
+      "sha256": "e80e3f4a972e7e3dc040cf1996659c114be5352c74b91421db3b95aa4fccfd00"
     }
   ]
 }

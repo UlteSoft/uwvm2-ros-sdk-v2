@@ -50,7 +50,7 @@ def main():
         if args.language not in ("csharp", "vbnet"):
             parser.error("the numeric-aot component requires csharp or vbnet")
         packages.extend(("protocol", "frontend", args.language + "/numeric", "xmake/common", "xmake/platforms/" + args.platform))
-    elif args.component == "synchronous-aot":
+    elif args.component == "synchronous-aot" or (args.component == "development" and args.language in ("java", "kotlin")):
         if args.language not in ("java", "kotlin"):
             parser.error("the synchronous-aot component requires java or kotlin")
         packages.extend(("protocol", "frontend", "jvm/synchronous", "jvm/" + args.language,

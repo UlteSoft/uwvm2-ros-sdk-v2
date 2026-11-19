@@ -283,6 +283,12 @@
       "sha256": "e05b3405fa9f068a579fa41e53274d8beb7667e8d274dac1d9034e06c375fc6a"
     },
     {
+      "path": "tools/wasm/memtag/qualify_jvm.py",
+      "bytes": 3003,
+      "mode": 420,
+      "sha256": "82a37886452abde4d5fd50ed1b63931fe93f10d8203e916147841dcc4d2bc808"
+    },
+    {
       "path": "tools/wasm/memtag/qualify_local_c.py",
       "bytes": 16320,
       "mode": 420,

@@ -1,8 +1,8 @@
 # Synchronous Java and Kotlin AOT
 
-The optional `synchronous-aot` component compiles an application’s JVM classes and their reachable class-library code to a single wasm32 core module. The host runs JDK 21, the Kotlin frontend when selected, and TeaVM 0.13.1. The guest runs on uwvm2-ros. This component has no signed managed-neighbor release. The compiler requires an explicit `--legacy-mte` and enables WasmMTE in the compiler and guest allocator. Default development selection, default strict compilation, MTE-off, wasm64 and pthreads are unavailable for these languages.
+The Java and Kotlin development selections compile a synchronous application and its reachable classes to a single wasm32 core module. JDK 21, the Kotlin compiler and TeaVM 0.13.1 run on the build host. The default requires a locally WSEA-signed ownership release for the selected language. It covers a single-thread EH build at `-O3 -g` with a 16 MiB non-moving managed heap. A source build can explicitly select `--legacy-mte` to measure an unsigned candidate. Uninstrumented code generation, wasm64 and threads require separate qualification.
 
-Install one platform and language at a full SDK commit. Use the fixed bootstrap invocation in the installation guide and pass `--component synchronous-aot` after the bootstrap’s `--`. The installed path ends in `<platform>/<java-or-kotlin>/synchronous-aot`. The selected package contains its language frontend and Xmake adapter, the shared guarded runtime sources, pinned host identities, examples and this guide. Verify the existing Linux x86-64 SDK1 JVM build-host bundle with the selected `language/<language>/host-inputs.json`. Only named JARs enter the compiler classpath. Java excludes the Kotlin compiler and runtime JARs. LLVM and the independently matched strong-MTE sysroot are supplied by the developer.
+Install a full SDK commit for the selected language and platform. The default directory ends in `<platform>/<java-or-kotlin>/development`. The optional `synchronous-aot` component remains available for explicit candidate builds. An approved site selects the JDK, target compiler, sysroot and collector by digest.
 
 Prepare a build-host bundle from Ubuntu OpenJDK 21.0.10+7-Ubuntu-125.10, matching system libraries and the selected Maven inputs. The helper reads a local Maven cache or an optional flat `--jars DIR`. Add `--fetch-missing-jars` to fetch only missing entries in this language’s pinned manifest. Every byte is checked before the new directory is published. The Linux x86-64 JDK and system library paths below apply to the qualified host.
 
@@ -23,7 +23,7 @@ Select `kotlin` to provision the Kotlin compiler. Java requires 29 pinned JARs a
 
 Kotlin uses `wrkt` and `.kt` sources. `--main-class` selects the JVM class containing `static void main(String[])`. Kotlin can name the class with `@file:JvmName("Main")`. Optional `--work` keeps command logs, hashes and final imports in a new directory. Compilation fixes `-O3 -g`, single-thread Core 3.0, the wasm32 EH sysroot, 16 MiB of Java allocations and 256 MiB maximum linear memory. Application bytecode goes through a closed call and instruction check before TeaVM. The ELF host compiler never becomes a guest artifact.
 
-Use `examples/<language>/synchronous-aot/xmake.lua` with `UWVM_ROS_SDK_ROOT` pointing at the selected install and the three build-input variables above. `set_wros_jvm_main("example.Main")` names the entry class, `set_language` selects the frontend and `add_files` selects source. The entry declaration applies to JVM applications. Xmake requires `set_optimize("fastest")`, `set_symbols("debug")`, `mte = "legacy"`, Core 3.0 and the single-thread EH profile.
+Use the packaged Xmake example with `UWVM_ROS_SDK_ROOT` set to the installed selection. Its default requests the signed profile. `set_wros_jvm_main("example.Main")` selects the entry class. A candidate project sets `mte = "legacy"` and provides `WROS_TOOLCHAIN`, `WROS_SYSROOTS` and `WROS_JVM_BUNDLE`.
 
 The included samples use `wros.scene.Scene.abi()` and the explicitly granted guard operations. `Guard.open(byte[])`, `create()`, `trigger()`, `take(long[])` and `close()` return the VM status. The output array for take contains one word. A guard needs capability open/close plus guard create/trigger/take and the matching scene grant. No handles transfer implicitly. The guest may use independently granted realtime and monotonic clocks through WASIp1’s read-only clock call.
 
@@ -60,3 +60,23 @@ The VM's six `module.call.*` operations use an independently registered exchange
 For the 24 operation schemas containing capability references, a second method takes a fourth argument of type `Calls[]`. Supply explicitly opened instances in wire-field order, including each element of a repeated or present optional field. Put zero in each capability slot of the request. Leave resource IDs, sizes and the rest of the wire record intact. The compiler derives the field positions from the selected schema. The binding copies the request, checks its shape, writes the tokens only into its private scratch and calls the VM once. The original array retains zero in the capability slots. A missing or extra source or a nonzero placeholder returns status 22. A closed source returns status 9. The VM checks each referenced capability's purpose, resource and current grants.
 
 The Schedule example creates a simulated ROS clock and a timer using separate grants. It advances the clock and observes missed timer periods, including rejection with a guard in the clock slot.
+
+## Qualify and install the local compiler
+
+Prepare the exact host packages under `$TOOLCHAIN/libexec/wros/jvm/java` and `$TOOLCHAIN/libexec/wros/jvm/kotlin`. Use a previously reviewed wasm32/EH C backend release. Its canonical release-row digest and VM digest identify the approved backend. Run the following command from the pinned SDK source.
+
+```sh
+python3 tools/wasm/memtag/qualify_jvm.py --toolchain "$TOOLCHAIN" --sysroots "$SYSROOT" \
+  --vm "$VM" --c-release "$C_RELEASE" --approved-c-release-sha256 "$C_RELEASE_SHA256" --output "$NEW_WORK"
+```
+
+Review `ownership/results.json` before signing `releases.wasm` under the existing `wros.sdk.memory.release` identity. The executable tests compile each language, traverse 240 objects and their arrays after collection, inspect nearby tags and five retired granules, and check VM behavior with MTE on and off. The bundle contains the exact C release and separate Java and Kotlin evidence. Sign it and create a local site profile using the SDK's WSEA procedure. [Local release signing](memory-qualification.md)
+
+```sh
+python3 install/bootstrap.py install --commit "$SDK_COMMIT" --language java --platform unitree \
+  --prefix "$PREFIX" --site-profile "$SITE_JSON"
+SDK="$PREFIX/$SDK_COMMIT/unitree/java/development"
+"$SDK/bin/wrjava" --main-class example.Main "$SDK/examples/java/synchronous-aot/Main.java" -o body.wasm
+```
+
+Use `--language kotlin`, `wrkt` and `Main.kt` for Kotlin. Each installed compiler rechecks its WSEA selection and complete host bundle before accepting an application. Site admission grants no runtime ROS permissions.
