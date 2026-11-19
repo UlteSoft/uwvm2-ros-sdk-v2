@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/zig.json",
-      "bytes": 77,
+      "bytes": 125,
       "mode": 420,
-      "sha256": "3db18069dc2f6a450a969b08ed9ad6d56616f5c06cf37c301d1de300270ba2d1"
+      "sha256": "331cf523955a356ef9edc6bb6d0d70517f8cced50e6c2db59f3fa16bbe50976e"
     }
   ]
 }

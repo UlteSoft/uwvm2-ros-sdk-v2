@@ -38,4 +38,4 @@
 | typescript | [common/typescript](common/typescript/) | [extension/typescript](extension/typescript/) | [migration/typescript](migration/typescript/) |
 | vbnet | [common/vbnet](common/vbnet/) | [extension/vbnet](extension/vbnet/) | [migration/vbnet](migration/vbnet/) |
 | wat | — | — | — |
-| zig | — | — | — |
+| zig | [common/zig](common/zig/) | [extension/zig](extension/zig/) | [migration/zig](migration/zig/) |

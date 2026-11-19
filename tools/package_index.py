@@ -142,6 +142,8 @@ def main():
             metadata["optional_components"] = ["migration"]
         if language == "go":
             metadata.update(development_scope="register-only-wasm32", optional_components=["compiler-source"])
+        if language == "zig":
+            metadata.update(development_scope="freestanding-zig-core3")
         if language == "ruby":
             metadata.update(development_scope="embedded-mruby-core3", optional_components=["compiler-source", "migration"])
         if language in ("java","kotlin"):
@@ -261,6 +263,10 @@ def main():
         "bin/wrrs", "tools/wasm/tag_ir.cpp", "language/rust/scene.rs", "language/rust/toolchain-inputs.json", "language/rust/check_site.py",
         "document/en/rust.md", "document/zh/rust.md", "examples/rs/body.rs", "examples/rs/xmake.lua",
         *["third-parties/rust/" + name for name in ("rust-src-1.98.0.tar.xz", "COPYRIGHT", "LICENSE-APACHE", "LICENSE-MIT")],
+    ]
+    language_files["zig"] = [
+        "bin/wrzig", "document/en/zig.md", "document/zh/zig.md",
+        *["language/zig/" + name for name in ("release.py", "driver.py", "check_site.py", "prepare.py", "mark_mte.cpp")],
     ]
     if set(language_files) != set(DEVELOPMENT):
         raise ValueError("developer payloads must match the revision hook")

@@ -31,6 +31,7 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | Nim | `nim` | `wrnim` |
 | [Python / CPython](python.md) | `py` | `wrpy` |
 | [Ruby / mruby](ruby.md) | `ruby` | `wrrb` |
+| [Standalone Zig](zig.md) | `zig` | `wrzig` |
 | Lua | `lua` | `wrlua` |
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [TypeScript](typescript.md) | `typescript` | `wrts` |

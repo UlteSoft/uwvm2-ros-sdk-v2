@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/kuka/common/zig/body.zig",
+      "bytes": 157,
+      "mode": 420,
+      "sha256": "8e4434f24fe3ac6fbf848e4995019c528e96b31e21baa65cb997b29a99463c9f"
+    },
+    {
+      "path": "examples/platform/kuka/common/zig/xmake.lua",
+      "bytes": 441,
+      "mode": 420,
+      "sha256": "ced51515096c04b5252adb56f27e45fa895795525dc0ac8038c70b413da34147"
+    },
+    {
+      "path": "examples/platform/kuka/extension/zig/body.zig",
+      "bytes": 797,
+      "mode": 420,
+      "sha256": "b971cd4711d0bdaf7fdacedd9b5826fb977521c24ce204f8b195960d5e9d4948"
+    },
+    {
+      "path": "examples/platform/kuka/extension/zig/xmake.lua",
+      "bytes": 465,
+      "mode": 420,
+      "sha256": "920b52276b30247ae3b0d152bd71ff8df943768087bd86b1e7fbef12bb7333ac"
+    },
+    {
+      "path": "examples/platform/kuka/migration/zig/body.zig",
+      "bytes": 388,
+      "mode": 420,
+      "sha256": "0955f623f6e1eaf822115974a34713d3e3d1ddcd70bd823df44fda0b25e766ad"
+    },
+    {
+      "path": "examples/platform/kuka/migration/zig/xmake.lua",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "b058400e9f1cc927193526eb2c1af3b3e77824a2b4e282b8389c1eb5ab802ea3"
+    }
+  ]
+}

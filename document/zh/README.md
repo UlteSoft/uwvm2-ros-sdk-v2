@@ -30,6 +30,7 @@
 | Nim | `nim` | `wrnim` |
 | [Python / CPython](python.md) | `py` | `wrpy` |
 | [Ruby / mruby](ruby.md) | `ruby` | `wrrb` |
+| [独立 Zig](zig.md) | `zig` | `wrzig` |
 | Lua | `lua` | `wrlua` |
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [TypeScript](typescript.md) | `typescript` | `wrts` |

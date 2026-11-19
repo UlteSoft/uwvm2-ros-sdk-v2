@@ -26,9 +26,9 @@
     },
     {
       "path": "tools/xmake/dispatch.lua",
-      "bytes": 11965,
+      "bytes": 11996,
       "mode": 420,
-      "sha256": "4327ffe8f78ad691a0c1479ea37fa9f28bbf5043ccc85bd91b08588d02797f88"
+      "sha256": "8e5e9e113a513eb0b2cbac1dbf0d41f6a5beb69dc39b7613470cd1062ea982f2"
     },
     {
       "path": "tools/xmake/platform_driver_test.py",

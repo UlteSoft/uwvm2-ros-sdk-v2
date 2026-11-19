@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/fourier/common/zig/body.zig",
+      "bytes": 157,
+      "mode": 420,
+      "sha256": "8e4434f24fe3ac6fbf848e4995019c528e96b31e21baa65cb997b29a99463c9f"
+    },
+    {
+      "path": "examples/platform/fourier/common/zig/xmake.lua",
+      "bytes": 447,
+      "mode": 420,
+      "sha256": "c0918448d3b45af60ec93904b5023174e5df0717536be7633885f930262197cc"
+    },
+    {
+      "path": "examples/platform/fourier/extension/zig/body.zig",
+      "bytes": 797,
+      "mode": 420,
+      "sha256": "b971cd4711d0bdaf7fdacedd9b5826fb977521c24ce204f8b195960d5e9d4948"
+    },
+    {
+      "path": "examples/platform/fourier/extension/zig/xmake.lua",
+      "bytes": 471,
+      "mode": 420,
+      "sha256": "1fcd38d39f532551d7bf5ae126814dafb364b4bd82141f39036eb2aee1349130"
+    },
+    {
+      "path": "examples/platform/fourier/migration/zig/body.zig",
+      "bytes": 388,
+      "mode": 420,
+      "sha256": "0955f623f6e1eaf822115974a34713d3e3d1ddcd70bd823df44fda0b25e766ad"
+    },
+    {
+      "path": "examples/platform/fourier/migration/zig/xmake.lua",
+      "bytes": 420,
+      "mode": 420,
+      "sha256": "02ba4dbb7b4e8fc93c885fff1c697f1e97b5d93c041ca3a78b5fb5c0bdf1aa39"
+    }
+  ]
+}

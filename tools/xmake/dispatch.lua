@@ -148,7 +148,7 @@ function build(target)
     local sources = qualified_inputs(target, request)
     local output = target:targetfile()
     os.mkdir(path.directory(output))
-    if request.adapter.family == "c" or request.adapter.id == "fortran" or request.adapter.id == "lua" or request.adapter.id == "js" or request.adapter.id == "typescript" or request.adapter.id == "py" or request.adapter.id == "nim" then
+    if request.adapter.family == "c" or request.adapter.id == "fortran" or request.adapter.id == "lua" or request.adapter.id == "js" or request.adapter.id == "typescript" or request.adapter.id == "py" or request.adapter.id == "nim" or request.adapter.id == "zig" then
         local toolchain = os.getenv("WROS_TOOLCHAIN")
         request.site = not toolchain and not request.sysroots and
                        os.isfile(path.join(request.root, "share/qualification/site-profile.json"))

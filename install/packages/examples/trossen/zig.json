@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/trossen/common/zig/body.zig",
+      "bytes": 157,
+      "mode": 420,
+      "sha256": "8e4434f24fe3ac6fbf848e4995019c528e96b31e21baa65cb997b29a99463c9f"
+    },
+    {
+      "path": "examples/platform/trossen/common/zig/xmake.lua",
+      "bytes": 447,
+      "mode": 420,
+      "sha256": "5450ea0d6e67263801a49fa5764b1cc188691a504fd1f19305f9225ef7113572"
+    },
+    {
+      "path": "examples/platform/trossen/extension/zig/body.zig",
+      "bytes": 797,
+      "mode": 420,
+      "sha256": "b971cd4711d0bdaf7fdacedd9b5826fb977521c24ce204f8b195960d5e9d4948"
+    },
+    {
+      "path": "examples/platform/trossen/extension/zig/xmake.lua",
+      "bytes": 471,
+      "mode": 420,
+      "sha256": "93a02c2125b90289a835b330a1752fd38d4f65c01f17f4969d2cd0bc7088f3e2"
+    },
+    {
+      "path": "examples/platform/trossen/migration/zig/body.zig",
+      "bytes": 388,
+      "mode": 420,
+      "sha256": "0955f623f6e1eaf822115974a34713d3e3d1ddcd70bd823df44fda0b25e766ad"
+    },
+    {
+      "path": "examples/platform/trossen/migration/zig/xmake.lua",
+      "bytes": 420,
+      "mode": 420,
+      "sha256": "0c3ceb88d3fa71bc81a3c4a5fb88c7f74436b2a99f258ac3e755f3a8c911e2e1"
+    }
+  ]
+}

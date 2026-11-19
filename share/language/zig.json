@@ -1,5 +1,6 @@
 {
   "id": "zig",
-  "development_package": false,
-  "command_name": "wrzig"
+  "development_package": true,
+  "command_name": "wrzig",
+  "development_scope": "freestanding-zig-core3"
 }

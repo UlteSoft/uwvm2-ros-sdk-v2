@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/nvidia/common/zig/body.zig",
+      "bytes": 157,
+      "mode": 420,
+      "sha256": "8e4434f24fe3ac6fbf848e4995019c528e96b31e21baa65cb997b29a99463c9f"
+    },
+    {
+      "path": "examples/platform/nvidia/common/zig/xmake.lua",
+      "bytes": 445,
+      "mode": 420,
+      "sha256": "38ed1eb7fb1205cf19a6c329ed4a065a6d06a9379f61873d3f1ab7130548cf7e"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/zig/body.zig",
+      "bytes": 797,
+      "mode": 420,
+      "sha256": "b971cd4711d0bdaf7fdacedd9b5826fb977521c24ce204f8b195960d5e9d4948"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/zig/xmake.lua",
+      "bytes": 469,
+      "mode": 420,
+      "sha256": "68276bf7667d09f67c353d96a50118f1e8ca6ca2107d2616c3053d9e76d18a1e"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/zig/body.zig",
+      "bytes": 388,
+      "mode": 420,
+      "sha256": "0955f623f6e1eaf822115974a34713d3e3d1ddcd70bd823df44fda0b25e766ad"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/zig/xmake.lua",
+      "bytes": 418,
+      "mode": 420,
+      "sha256": "b5ce265a3adc57a4d58ab8e6a177cd4751f1e665a214edec154239cf0619765f"
+    }
+  ]
+}
