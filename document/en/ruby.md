@@ -56,6 +56,7 @@ and run `xmake build`. Set `WROS_VM` to the trusted VM's absolute path and
 run `xmake test -j1` for the two engine tests. A platform extension test
 uses an isolated idle peer and checks that both permission denials send no
 packet. See [platform examples](platform-examples.md) and [Xmake](xmake.md).
+Run `xmake f -a wasm64` before building a project against a signed memory64 site.
 
 The source tree includes a Go2 controller for the official MuJoCo fixture.
 Use the same signed Unitree SDK installation with
