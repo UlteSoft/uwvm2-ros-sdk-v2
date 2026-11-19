@@ -257,6 +257,20 @@
           "sha256": "7c3cd057e0411ee6c4508cb258efc01a2322f6f7d8261ead36b4558e242b3d8f"
         }
       ]
+    },
+    "go-register-producer": {
+      "version": "1.24.2",
+      "release_url": "https://go.dev/dl/#go1.24.2",
+      "checks": [
+        {
+          "path": "third-parties/go/go1.24.2.src.tar.gz",
+          "sha256": "9dc77ffadc16d837a1bf32d99c624cb4df0647cee7b119edd9e7b1bcc05f2e00"
+        },
+        {
+          "path": "language/go/release.json",
+          "sha256": "bc869aa98fba5e6985cbce78afc8c828616e9d71e941f46756f5def5ea7c0e95"
+        }
+      ]
     }
   },
   "languages": {
@@ -374,6 +388,12 @@
         "wasi-libc",
         "quickjs"
       ]
+    },
+    "go": {
+      "components": [
+        "go-register-producer"
+      ],
+      "note": "Standard Go 1.24.2 optimized SSA for a fixed-width register-only guest. The developer selection includes a Wasm-only host compiler."
     }
   },
   "separate_review": [],

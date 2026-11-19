@@ -103,6 +103,8 @@ def main():
             metadata["command_name"] = COMPILER_COMMANDS[language]
         if language in ("c", "cpp"):
             metadata["optional_components"] = ["migration"]
+        if language == "go":
+            metadata.update(development_scope="register-only-wasm32", optional_components=["compiler-source"])
         if language in ("java","kotlin"):
             metadata.update(development_package=True, development_scope="synchronous-wasm32-aot",
                             optional_components=["synchronous-aot"])
@@ -186,6 +188,15 @@ def main():
                                                    "frontend_fortran.py", "mark_mte.cpp", "prepare.py")],
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/fortran").rglob("*") if p.is_file()],
     ]
+    language_files["go"] = [
+        "bin/wrgo", "language/go/check_site.py", "language/go/driver.py", "language/go/registers.py", "language/go/release.json",
+        "language/go/linux-amd64/producer.xz", "language/go/LICENSE", "examples/go/controller.go", "examples/go/xmake.lua",
+        "document/en/go.md", "document/zh/go.md",
+        *[f"examples/shared/{kind}/go/{name}" for kind in ("common", "extension", "migration")
+          for name in ("controller.go", "xmake.lua")],
+    ]
+    package("go-producer-source", ["third-parties/go/go1.24.2.src.tar.gz", "language/go/LICENSE",
+            *["language/go/producer/" + path for path in ("build.py", "main.go", "proof.go")]])
     language_files["tinygo"] = [
         "bin/wrtg", "tools/wasm/tag_ir.cpp", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
         *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json", "check_site.py",

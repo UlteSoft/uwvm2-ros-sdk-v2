@@ -4,7 +4,7 @@ import json
 
 
 BINDINGS = {"d": "d", "c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
-DEVELOPMENT = ("c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim", "d", "typescript")
+DEVELOPMENT = ("go", "c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim", "d", "typescript")
 
 # Command spellings are part of the per-commit SDK contract. A command name
 # can be reserved before its language has an installable compiler package.
@@ -73,7 +73,7 @@ def main():
                 if args.language == "cpp":
                     packages.append("migration/tf2-buffer")
             if args.component == "compiler-source":
-                packages.append("compiler-source")
+                packages.append("go-producer-source" if args.language == "go" else "compiler-source")
                 if args.language == "nim":
                     packages.append("nim-producer-source")
     print(json.dumps({"variant": args.component, "packages": packages}))
