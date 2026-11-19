@@ -59,7 +59,9 @@ def main():
             unpack(work, only_library=True)
             entry = work / "wros_entry.nim"
             # A private main file provides the SDK's standalone panic handler.
-            entry.write_text("include " + json.dumps(str(source), ensure_ascii=False) + "\n")
+            # Preserve Nim line positions in the C backend when emitting DWARF.
+            line_directives = "{.lineDir: on.}\n" if opt.g else ""
+            entry.write_text(line_directives + "include " + json.dumps(str(source), ensure_ascii=False) + "\n")
             shutil.copyfile(ROOT / "language/nim/panicoverride.nim", work / "panicoverride.nim")
             cache = work / "generated"
             cache.mkdir()

@@ -15,3 +15,11 @@ bin/wrnim app.nim --producer /absolute/build/wrnim-lower --toolchain "$WROS_TOOL
 `import wros_scene` 提供通用 ROSv2 接口。参数使用固定宽度整数，通过 `wrAddress` 提交客体地址并指定线性内存索引。每项宿主操作仍由 VM 单独授权。可使用 `examples/nim/body.nim` 验证编译和 ROSv2 ABI 查询。SDK 拒绝 WASI Preview 2/3、组件模型接口，以及 Nim 构建清单中的外部原生对象和链接依赖。厂商原生驱动由部署器在 VM 进程外管理。
 
 站点管理员将已审核的 Nim 编译前端放在 `TOOLCHAIN/bin/wrnim-lower`。安装时通过 `--site-profile FILE` 指定配置。安装后执行 `bin/wrnim app.nim -o app.wasm --build-receipt` 即可使用已审核的编译器和 sysroot。xmake 项目读取同一份安装配置。
+
+## 在 UWVM 中调试应用
+
+编译时传入 `-g`，或在 Xmake 中使用 `set_symbols("debug")`。Nim 的 C 后端生成源码行号指令，Clang 将行号写入 Wasm 的 DWARF。可以在原始 `.nim` 文件的可执行行设置断点。调试器使用另一份源码时，通过 DAP 的 `sourceMap` 将记录中的绝对路径映射到本地路径。
+
+使用 `-O3` 时，调试器在优化后保留的位置之间单步。列号和变量表示来自生成的 C。局部变量可能被重命名或优化掉。Nim 自身的运行时栈跟踪和行跟踪保持关闭。
+
+签名发布会校验编译驱动。升级驱动后，先用确切的 SDK 与前端重新验收，再签署相应的发布声明。

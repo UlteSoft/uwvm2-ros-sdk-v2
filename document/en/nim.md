@@ -15,3 +15,11 @@ The default requires a reviewed MTE profile. An explicitly selected `--legacy-mt
 `import wros_scene` exposes the common ROSv2 operations using fixed-width integers. Pass guest addresses through `wrAddress` with the correct linear memory index. SDK bindings confer no runtime grant. Compile and run `examples/nim/body.nim` with the ROSv2 ABI query enabled to check the toolchain. The SDK rejects WASI Preview 2/3 and Component Model interfaces. Native libraries and object link inputs from a Nim build plan are rejected. The language route does not carry native vendor drivers.
 
 For a site installation, place the approved Nim producer at `TOOLCHAIN/bin/wrnim-lower`. Pass the signed site configuration to the installer with `--site-profile FILE`. Running `bin/wrnim app.nim -o app.wasm --build-receipt` then uses the approved producer and sysroot. The xmake adapter reads the same installation.
+
+## Debug an application in UWVM
+
+Build with `-g`, or use `set_symbols("debug")` in Xmake. The Nim C backend emits source line directives and Clang records them in the guest's DWARF. Set breakpoints on executable lines in the original `.nim` files. When the debugger uses a separate copy of the source, use DAP `sourceMap` to map the recorded absolute paths to local paths.
+
+With `-O3`, the debugger steps between the locations that remain after optimization. The column numbers and variable representations come from generated C. A local may be renamed or optimized out. Nim's runtime stack and line tracing options remain disabled.
+
+The compiler driver is part of the site release measurement. When upgrading the driver, qualify the exact SDK and producer before signing the corresponding release statement.

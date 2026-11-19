@@ -8,21 +8,21 @@
     },
     {
       "path": "bin/wrnim",
-      "bytes": 4252,
+      "bytes": 4417,
       "mode": 493,
-      "sha256": "5ef86935a71e7916ed3608617b895f5681cce1579c9132e2a82ae795cf9136cf"
+      "sha256": "d5a5c130ac04b0c9623548f21daa6e5af0f02496a26cf3d4111a4f6e3ddc8ba7"
     },
     {
       "path": "document/en/nim.md",
-      "bytes": 2167,
+      "bytes": 2977,
       "mode": 420,
-      "sha256": "fbe1d1ce606e1277686b579a9ec8852041d00b2a64f6e804833f185ecf9f6fbd"
+      "sha256": "69d633cd428b4faaa6720bf1bac7bf1ccbcc158f8f523fd7dd25accec346cc3e"
     },
     {
       "path": "document/zh/nim.md",
-      "bytes": 1910,
+      "bytes": 2616,
       "mode": 420,
-      "sha256": "85f69b870672ff6c5b13d13a349029fc53789b31ab540e6847aca72b6580ab32"
+      "sha256": "e3bfab08ca8056ee686eb6aeffd455f8c31b246cff1a6a8ce7370d69669da663"
     },
     {
       "path": "examples/nim/body.nim",
