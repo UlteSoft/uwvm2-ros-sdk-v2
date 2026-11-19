@@ -13,6 +13,17 @@ func Gain(x, scale, bias int32) int32 { return x*scale + bias }
 func Subtract(left, right uint64) uint64 { return left-right }
 func Before(a,b int64) bool { return a < b }
 func Mask(a,b uint32) uint32 { return (a^b) | (a&b) }
+func Clamp(x int32) int32 {
+    if x < -2 { return -2 }
+    if x > 6 { return 6 }
+    return x
+}
+func Calibrated(x, bias int64, invert bool) int64 {
+    out := x+bias
+    if invert { out = bias-x } else { out *= 3 }
+    return out+7
+}
+func Valid(armed, fresh, stopped bool) bool { return armed && fresh && !stopped }
 func Start() uint32 { return 0 }
 """
 CONSUMER = """(module
@@ -20,18 +31,33 @@ CONSUMER = """(module
  (import "algorithm" "Subtract" (func $sub (param i64 i64) (result i64)))
  (import "algorithm" "Before" (func $before (param i64 i64) (result i32)))
  (import "algorithm" "Mask" (func $mask (param i32 i32) (result i32)))
+ (import "algorithm" "Clamp" (func $clamp (param i32) (result i32)))
+ (import "algorithm" "Calibrated" (func $calibrate (param i64 i64 i32) (result i64)))
+ (import "algorithm" "Valid" (func $valid (param i32 i32 i32) (result i32)))
  (func (export "_start")
   (if (i32.ne (call $gain (i32.const 2147483647) (i32.const 2) (i32.const 3)) (i32.const 1)) (then unreachable))
   (if (i64.ne (call $sub (i64.const 4) (i64.const 6)) (i64.const -2)) (then unreachable))
   (if (i32.eqz (call $before (i64.const -2) (i64.const 1))) (then unreachable))
-  (if (i32.ne (call $mask (i32.const 10) (i32.const 6)) (i32.const 14)) (then unreachable))))"""
+  (if (i32.ne (call $mask (i32.const 10) (i32.const 6)) (i32.const 14)) (then unreachable))
+  (if (i32.ne (call $clamp (i32.const -2147483648)) (i32.const -2)) (then unreachable))
+  (if (i32.ne (call $clamp (i32.const 3)) (i32.const 3)) (then unreachable))
+  (if (i32.ne (call $clamp (i32.const 2147483647)) (i32.const 6)) (then unreachable))
+  (if (i64.ne (call $calibrate (i64.const 4) (i64.const 11) (i32.const 0)) (i64.const 52)) (then unreachable))
+  (if (i64.ne (call $calibrate (i64.const 4) (i64.const 11) (i32.const 1)) (i64.const 14)) (then unreachable))
+  (if (i64.ne (call $calibrate (i64.const 9223372036854775807) (i64.const 0) (i32.const 0))
+                  (i64.const -9223372036854775804)) (then unreachable))
+  (if (i32.ne (call $valid (i32.const 3) (i32.const 2) (i32.const 0)) (i32.const 1)) (then unreachable))
+  (if (call $valid (i32.const 0) (i32.const 1) (i32.const 0)) (then unreachable))
+  (if (call $valid (i32.const 1) (i32.const 0) (i32.const 0)) (then unreachable))
+  (if (call $valid (i32.const 1) (i32.const 1) (i32.const 9)) (then unreachable))))"""
 NEGATIVE = {
     "pointer": "func Bad(p *int32) int32 { return *p }",
     "slice": "func Bad(p []int32) int32 { return p[0] }",
     "global": "var mutable int32",
     "heap": "func Bad() *int32 { return new(int32) }",
     "goroutine": "func Bad() int32 { go func(){}(); return 1 }",
-    "conditional": "func Bad(x uint32) uint32 { if x>2 { return x*x }; return x }",
+    "loop": "func Bad(x uint32) uint32 { for x > 0 { x-- }; return x }",
+    "runtime-panic": "func Bad(x uint32) uint32 { if x > 0 { panic(\"sensor\") }; return x }",
     "directive": "//go:noinline\nfunc Bad() uint32 { return 1 }",
     "bad-type": "func Bad() uint32 { return false }",
     "import": 'import "unsafe"',

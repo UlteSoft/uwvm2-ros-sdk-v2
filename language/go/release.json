@@ -1,10 +1,10 @@
 {
   "source_sha256": "9dc77ffadc16d837a1bf32d99c624cb4df0647cee7b119edd9e7b1bcc05f2e00",
   "bootstrap_sha256": "68097bd680839cbc9d464a0edce4f7c333975e27a90246890e9f1078c7e702ad",
-  "binary_sha256": "ddf472173722321022062896a38dd0d5d4de880df8cb34c4d81244c648b32e01",
+  "binary_sha256": "a93e43198dc1c47deda7c8b79bcc32a45139b66ae2a004ff069fb0889be296da",
   "inputs": {
     "main.go": "7e037a7c4bfccf0907d9ecafebeb03388ce4bdc126eb47ff2f5f085d1b6b4a6b",
-    "proof.go": "19f7331bc4080471e07655b26cf4ee5d1002d83624a5a9afc51d02df7c570b63",
+    "proof.go": "df6e3f494764787f61fd2929f1cc3dc9fa929322d0375237ce97da021ef1cf5e",
     "build.py": "9ed91e714d43a6e3c4e4a8c1f266a7e4008ddb5b21b849d9135cbe2677436b21"
   },
   "format": "wros-go-scalar-producer",
@@ -13,7 +13,7 @@
   "bootstrap_url": "https://go.dev/dl/go1.24.2.linux-amd64.tar.gz",
   "host": "linux-amd64",
   "target": "wasm32",
-  "binary_bytes": 16011412,
-  "compressed_bytes": 5169092,
-  "compressed_sha256": "cf5d5be550814e4b6b55be0b2b1f1899d66ed2a18d312b75b2f38f517029ca1f"
+  "binary_bytes": 16019604,
+  "compressed_bytes": 4702408,
+  "compressed_sha256": "4896681cfdcb9b4f15882bc2f576d3e06c72620c11a4fb5b98361802642b7480"
 }

@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/go.md",
-      "bytes": 3416,
+      "bytes": 4292,
       "mode": 420,
-      "sha256": "23e0d61ad84e09fa6ef47cdd381904af91ec590f49ab0c8ddae6a1171219ed97"
+      "sha256": "7d712e34ff03acd0a8af0600cdb98cbb6f8639e5bf87df9383d7534658e71edf"
     },
     {
       "path": "document/zh/go.md",
-      "bytes": 3177,
+      "bytes": 3942,
       "mode": 420,
-      "sha256": "c2095cc3dbc8ea0f1093f1281db1d0d011e700a0273cb5e3aed54a651ede930d"
+      "sha256": "63759283030572288e6a7bf91850a9da392abd307bb0dfede737828d095836cf"
     },
     {
       "path": "examples/go/controller.go",
@@ -86,21 +86,21 @@
     },
     {
       "path": "language/go/linux-amd64/producer.xz",
-      "bytes": 5169092,
+      "bytes": 4702408,
       "mode": 420,
-      "sha256": "cf5d5be550814e4b6b55be0b2b1f1899d66ed2a18d312b75b2f38f517029ca1f"
+      "sha256": "4896681cfdcb9b4f15882bc2f576d3e06c72620c11a4fb5b98361802642b7480"
     },
     {
       "path": "language/go/registers.py",
-      "bytes": 7833,
+      "bytes": 14049,
       "mode": 420,
-      "sha256": "a324e3e2ddc3e7ab7fa4526db262396c6d0300b22ff4cd8a2ec340930b82c377"
+      "sha256": "8085c60819567a8d486efadc6f11d6df67810184b6f0552633f8db3910b6818d"
     },
     {
       "path": "language/go/release.json",
       "bytes": 923,
       "mode": 420,
-      "sha256": "bc869aa98fba5e6985cbce78afc8c828616e9d71e941f46756f5def5ea7c0e95"
+      "sha256": "34b48b03a2be4357e2f9e964b154aa2c5b37ebd96356557f36ec2be643c156f0"
     },
     {
       "path": "language/go/xmake/adapter.lua",
