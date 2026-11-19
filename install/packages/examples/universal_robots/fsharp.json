@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/universal_robots/README.en.md",
+      "bytes": 2895,
+      "mode": 420,
+      "sha256": "f923df39d52eee0bac20dc00f23b494643fc9081b51fe3b9cf67938132367578"
+    },
+    {
+      "path": "examples/platform/universal_robots/README.zh.md",
+      "bytes": 2836,
+      "mode": 420,
+      "sha256": "a9902487a0cd46d3b12f43bbdd1fbfbe73713ab762007b0aaaa2d2a7e1d747d1"
+    },
+    {
+      "path": "examples/platform/universal_robots/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/universal_robots/common/fsharp/xmake.lua",
+      "bytes": 530,
+      "mode": 420,
+      "sha256": "bd75c224403fcec4e96ab8a7b6ba2f07dcdc703026919155f0979f9e92e35e5d"
+    },
+    {
+      "path": "examples/platform/universal_robots/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/universal_robots/extension/fsharp/xmake.lua",
+      "bytes": 598,
+      "mode": 420,
+      "sha256": "a2c156c9a2ce2bae8fb805082015fd6315f188ebd935e7b4ac23488ab1a6ab31"
+    },
+    {
+      "path": "examples/platform/universal_robots/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/universal_robots/migration/fsharp/README.md",
+      "bytes": 256,
+      "mode": 420,
+      "sha256": "368e56b47279ffcfb795a8652b0f821370a92607fc18122d4b51e0408b03b793"
+    },
+    {
+      "path": "examples/platform/universal_robots/migration/fsharp/README.zh.md",
+      "bytes": 254,
+      "mode": 420,
+      "sha256": "0d0637ee01499d1f07c106287103add696c40af14df19cd9310bbc2f2758e1f8"
+    },
+    {
+      "path": "examples/platform/universal_robots/migration/fsharp/xmake.lua",
+      "bytes": 544,
+      "mode": 420,
+      "sha256": "c205c3979aed7dd535e052f4df481c3ae65cf980966f7b481aa933c224c09f98"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/kuka/README.en.md",
+      "bytes": 2871,
+      "mode": 420,
+      "sha256": "596d41971d07ec8f76c7a9f82d9ba2c2b3a9e3d140b75b8fcf5c7209c99bb2c6"
+    },
+    {
+      "path": "examples/platform/kuka/README.zh.md",
+      "bytes": 2812,
+      "mode": 420,
+      "sha256": "83ca7649c63ab9693618616b2fa07998a0830b8eaf0276a1981c47db5b6b1d55"
+    },
+    {
+      "path": "examples/platform/kuka/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/kuka/common/fsharp/xmake.lua",
+      "bytes": 506,
+      "mode": 420,
+      "sha256": "2a549eaa1d78d21a7f610a08dd01abef7138abb7833fac2d028e9b2e838da988"
+    },
+    {
+      "path": "examples/platform/kuka/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/kuka/extension/fsharp/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "55c8a17e58043474eb9439d8234130596cc78268f6651ec79957cc31bffa9892"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fsharp/README.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "f1a1a7dd68b6287af4af8f25f389702f8c80a2b2fcdb924c61cb7b0f520ca7dd"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fsharp/README.zh.md",
+      "bytes": 242,
+      "mode": 420,
+      "sha256": "4bd26c373e9ca51610420231d990a7f848aa3baf81ce3374da0afcbdf94ffbcc"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fsharp/xmake.lua",
+      "bytes": 532,
+      "mode": 420,
+      "sha256": "0ff3cd0b30cb89d010866fa7de1487cbf250ca21e894ff9306bc86ed8c048a7a"
+    }
+  ]
+}

@@ -13,6 +13,8 @@ import artifacts
 from frontend import audit
 from guest_profile import Profile
 from imports import inspect
+sys.path.insert(0, str(ROOT / "tools/xmake"))
+from run_guest import require_test_entry
 
 CORE = artifacts.MAGIC
 COMPONENT = b"\0asm\x0d\x00\x01\x00"
@@ -80,6 +82,20 @@ class CoreAbi(unittest.TestCase):
             path.write_bytes(b"!<arch>\n" + member("ok.o", clean) + member("unused.o", bad))
             with self.assertRaisesRegex(ValueError, "prohibited"):
                 artifacts.stage_inputs([path], Path(td), PROFILE.to_dict(), DIGEST, DIGEST, Path(td))
+
+    def test_execution_requires_guest_code(self):
+        """@brief Count only modules with local executable test entry points."""
+        typ = section(1, bytes.fromhex("01 60 00 00"))
+        funcs = section(3, bytes.fromhex("01 00"))
+        code = section(10, bytes.fromhex("01 02 00 0b"))
+        export = section(7, b"\x01" + name("_start") + b"\x00\x00")
+        imported = section(2, b"\x01" + name("uwvm_ros_v2") + name("abi") + b"\x00\x00")
+        require_test_entry(CORE + typ + funcs + export + code)
+        require_test_entry(CORE + typ + funcs + section(8, b"\x00") + code)
+        for module in (CORE, CORE + typ + funcs + code, CORE + typ + imported + export,
+                       CORE + typ + imported + funcs + section(8, b"\x00") + code):
+            with self.assertRaisesRegex(ValueError, "module-defined"):
+                require_test_entry(module)
 
     def test_core_remains_usable(self):
         audit(fn_import("uwvm_ros_v2", "abi"), PROFILE)

@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/deep_robotics/README.en.md",
+      "bytes": 2889,
+      "mode": 420,
+      "sha256": "cec79f5a94ed39298553d5ef91d93424b2ae23c05869f3af8dc88f5fa7b7bba9"
+    },
+    {
+      "path": "examples/platform/deep_robotics/README.zh.md",
+      "bytes": 2830,
+      "mode": 420,
+      "sha256": "3a745762aa78e84125bbe9372f44d0ea01ecb3a6ef6c73b8f30f1a093fab984b"
+    },
+    {
+      "path": "examples/platform/deep_robotics/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/deep_robotics/common/fsharp/xmake.lua",
+      "bytes": 524,
+      "mode": 420,
+      "sha256": "d308cbc9844ce9610f9cc2d0d4e635ef92446ee5fc913a8d3576606ed041d61b"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/fsharp/xmake.lua",
+      "bytes": 592,
+      "mode": 420,
+      "sha256": "35e4988a21c082528024ebd9f52c95ddf6d6a248031dc9dae24b515d7418b4f4"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/fsharp/README.md",
+      "bytes": 253,
+      "mode": 420,
+      "sha256": "6b9c53a885fa971a14e9d91e659a12a4f7f7433a0aa5ec11223ca4b8655c61cd"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/fsharp/README.zh.md",
+      "bytes": 251,
+      "mode": 420,
+      "sha256": "797193edf042fe692331bdaafe819410b3ef83d71a6ac771f23b8adae04f897a"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/fsharp/xmake.lua",
+      "bytes": 541,
+      "mode": 420,
+      "sha256": "8349e2ddc9cab85daf8d86e66d45486ce9f59d94a4eb61b9d543be8dbb162d94"
+    }
+  ]
+}

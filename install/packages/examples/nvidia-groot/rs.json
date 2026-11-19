@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/README.en.md",
+      "bytes": 2887,
+      "mode": 420,
+      "sha256": "d1c279b50c0a9cafb1d15ae6b062f9f19ef6eb204b4a6f98c4bc022171c81832"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/README.zh.md",
+      "bytes": 2828,
+      "mode": 420,
+      "sha256": "36a8d3fcce88b4bbf822552f3f67b04fd55d98fdcf879b88df05e954abc19f78"
     },
     {
       "path": "examples/platform/nvidia-groot/common/rs/body.rs",

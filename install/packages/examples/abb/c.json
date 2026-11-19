@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/abb/README.en.md",
+      "bytes": 2869,
+      "mode": 420,
+      "sha256": "d27e724a9b895f96ebee3d2b60b193bb6b2cf3ac9519bfe6ba687c3af1e500d3"
+    },
+    {
+      "path": "examples/platform/abb/README.zh.md",
+      "bytes": 2810,
+      "mode": 420,
+      "sha256": "88121cfe0c39eb303c0ddb104003a0c06494155b236cc867ecb75e648d5da214"
     },
     {
       "path": "examples/platform/abb/common/c/body.c",
@@ -67,6 +79,12 @@
       "sha256": "c52b18ee454e5fd6ba7055c15d4fd5c861bcde09964dac260c6a360ee2c07b78"
     },
     {
+      "path": "examples/platform/abb/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/abb/migration/c/upstream.lock",
       "bytes": 235,
       "mode": 420,
@@ -74,9 +92,9 @@
     },
     {
       "path": "examples/platform/abb/migration/c/xmake.lua",
-      "bytes": 1091,
+      "bytes": 1072,
       "mode": 420,
-      "sha256": "9fba989e05db7a170345bc78f780ddafd32ca6166f8f973ba853339e7d8869ae"
+      "sha256": "45bf73c00a1c4b3804df8e64848fbd34a3e88c68019177caf3852a21e0631e7a"
     }
   ]
 }

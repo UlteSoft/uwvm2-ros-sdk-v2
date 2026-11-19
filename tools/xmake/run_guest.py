@@ -7,10 +7,41 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "install"))
 from guest_profile import Profile
-from artifacts import read_bounded
+from artifacts import read_bounded, sections
 from frontend import audit
 import subprocess
 import tempfile
+
+
+
+def require_test_entry(data):
+    """@brief Require a module-defined entry before counting a VM run as a guest test.
+
+    @details The import audit admits only function imports. Function indices start
+    with these imports, followed by the functions declared by the guest. The VM
+    validates section ordering, function signatures and bodies on instantiation.
+    """
+    imported = 0
+    defined = 0
+    entries = []
+    for offset, _, _, body in sections(data):
+        kind = data[offset]
+        if kind == 2:
+            imported = body.count()
+        elif kind == 3:
+            defined = body.count()
+        elif kind == 7:
+            for _ in range(body.count()):
+                name, export_kind, index = body.name(), body.byte(), body.uint()
+                if name == "_start":
+                    if export_kind != 0:
+                        raise ValueError("the test entry _start must export a function")
+                    entries.append(index)
+        elif kind == 8:
+            entries.append(body.uint())
+            body.end()
+    if not entries or any(index < imported or index >= imported + defined for index in entries):
+        raise ValueError("the test requires a module-defined _start or start function")
 
 
 def main():
@@ -65,6 +96,8 @@ def main():
     try:
         content = read_bounded(args.module)
         audit(content, profile)
+        if args.engine:
+            require_test_entry(content)
     except (OSError, ValueError) as error:
         parser.error(str(error))
     # The file can be replaced after validation. Give the VM the exact audited bytes.

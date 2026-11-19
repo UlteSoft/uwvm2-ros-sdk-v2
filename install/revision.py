@@ -3,7 +3,7 @@ import argparse
 import json
 
 
-PROJECT_LANGUAGES = "c cpp csharp d fortran java js kotlin lua nim objectc py rs tinygo typescript vbnet".split()
+PROJECT_LANGUAGES = "c cpp csharp d fortran fsharp go java js kotlin lua nim objectc py rs tinygo typescript vbnet".split()
 BINDINGS = {"d": "d", "c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
 DEVELOPMENT = ("go", "c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim", "d", "typescript", "py")
 

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/abb/README.en.md",
+      "bytes": 2869,
+      "mode": 420,
+      "sha256": "d27e724a9b895f96ebee3d2b60b193bb6b2cf3ac9519bfe6ba687c3af1e500d3"
+    },
+    {
+      "path": "examples/platform/abb/README.zh.md",
+      "bytes": 2810,
+      "mode": 420,
+      "sha256": "88121cfe0c39eb303c0ddb104003a0c06494155b236cc867ecb75e648d5da214"
     },
     {
       "path": "examples/platform/abb/common/py/body.py",

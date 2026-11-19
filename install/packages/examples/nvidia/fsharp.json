@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "e2a93afe0f1cfa7a3c4aa2daf9ace541b27186d75e5887993456835e928edceb"
+    },
+    {
+      "path": "examples/platform/nvidia/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "70ab39b707f6f6eed04aadc4a1269cd88b1d258eb8de7955b89aa4837f016236"
+    },
+    {
+      "path": "examples/platform/nvidia/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/nvidia/common/fsharp/xmake.lua",
+      "bytes": 510,
+      "mode": 420,
+      "sha256": "bfd1fd6350c3d7ebf5296be57fca7159050a65850e7ab6dfa7e45fe8f067a4fa"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/fsharp/xmake.lua",
+      "bytes": 578,
+      "mode": 420,
+      "sha256": "8fb664a67a370155a85f83c2030164f84d22e5313de8964d9f8df9c9f1f65b3c"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "021a165d49e3cdbbe18c0ea55b8b55ce35005c7d5d2804a1fe1f82d153a5480a"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "001235639c1894a0b2752d49201edb4d80cba5160d957e0a00313b3fa9275df4"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/fsharp/xmake.lua",
+      "bytes": 534,
+      "mode": 420,
+      "sha256": "3d6a8623623e86abb322bab29d9addcf88c4cbe68f7716a8f570997fd3139d31"
+    }
+  ]
+}

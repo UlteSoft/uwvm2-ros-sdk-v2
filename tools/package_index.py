@@ -131,7 +131,8 @@ def main():
                       for p in sorted((platform_examples / case / language).glob("*")) if p.is_file()]
             if not inputs:
                 raise ValueError(f"missing examples for {name}/{language}")
-            package(f"examples/{name}/{language}", [*inputs, "document/en/platform-examples.md",
+            package(f"examples/{name}/{language}", [*inputs, f"examples/platform/{name}/README.en.md",
+                    f"examples/platform/{name}/README.zh.md", "document/en/platform-examples.md",
                     "document/zh/platform-examples.md", "document/source/ros-abi.dox", "document/source/Doxyfile"])
     for language in registry["languages"]:
         path = "share/language/" + language + ".json"

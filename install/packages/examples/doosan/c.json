@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/doosan/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "2b005cf01f97b40ec42f2aadf75b72f75c30677007471930e667d32ce529cbd2"
+    },
+    {
+      "path": "examples/platform/doosan/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "6e90ae286978488f636db4af827423233a52f392871954255982fdcf22c49d00"
     },
     {
       "path": "examples/platform/doosan/common/c/body.c",
@@ -67,6 +79,12 @@
       "sha256": "8ee1456c21a7bb21c7f881fbd6bb9d16f0df3dc4e0e39f8c6cfcc6e8b76becfc"
     },
     {
+      "path": "examples/platform/doosan/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/doosan/migration/c/upstream.lock",
       "bytes": 234,
       "mode": 420,
@@ -74,9 +92,9 @@
     },
     {
       "path": "examples/platform/doosan/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "de0f4e24dcc132e2535d135596cbc9d77c08790c1a2295bf6a877576f3177d7e"
+      "sha256": "b3a76fdf8d59f54da9acbb29f310b36d33dd9e61f44ad73ff3941e34fc103724"
     }
   ]
 }

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/README.en.md",
+      "bytes": 2893,
+      "mode": 420,
+      "sha256": "ac45f32bac79da981919fdfe1e425827b2b99cb6cb6bc55857f8abbfe8e8f832"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/README.zh.md",
+      "bytes": 2834,
+      "mode": 420,
+      "sha256": "4a8736f3b800791697e756c21e68555f2a7b7bce4d0f4d2ecfa7c4e11336581b"
     },
     {
       "path": "examples/platform/boston_dynamics/common/c/body.c",
@@ -56,27 +68,39 @@
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/README.md",
-      "bytes": 479,
+      "bytes": 854,
       "mode": 420,
-      "sha256": "8e7d96386c3a4485e829ea0b75f84a0bbe7184be848316a858ce354e90f5d5f1"
+      "sha256": "2ae11702d71014fef337eee03b81c88b5e14bd141d09e3ab4b4dd0b4485c61b1"
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/README.zh.md",
-      "bytes": 480,
+      "bytes": 759,
       "mode": 420,
-      "sha256": "0fec516e3bb306132f3bedc0cd1b582c46e9b739eb0052663690e76d2fd24f6b"
+      "sha256": "a3b511ed288832225a297c64e2934f75872fc391a789dfa0dd552cc3614c24ac"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/upstream.lock",
-      "bytes": 232,
+      "bytes": 270,
       "mode": 420,
-      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+      "sha256": "a1aa1c3b2f1fd3f3c744c1cfafc2817993518a5a10692e9cebff6c2e8a35612e"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/c/vendor-package.xml",
+      "bytes": 358,
+      "mode": 420,
+      "sha256": "a27afefacfdbadf8cb1bcb64be78ee0a90d135d4dc97044a544e172760b3fd6d"
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/xmake.lua",
-      "bytes": 1103,
+      "bytes": 1084,
       "mode": 420,
-      "sha256": "d252459b6dff5a4237ad275b01179f2e6bdbf584505323d7abddc109d5aa82a6"
+      "sha256": "62849919615152a20a0d3430a6541028bd93c6540fd6debe28d32bfbe1ce04f3"
     }
   ]
 }

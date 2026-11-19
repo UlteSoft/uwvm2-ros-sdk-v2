@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/README.en.md",
+      "bytes": 2895,
+      "mode": 420,
+      "sha256": "d025005ae83d291c3537f0c008c0850f3bc03b7f217542718c0dd6b936d596bc"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/README.zh.md",
+      "bytes": 2836,
+      "mode": 420,
+      "sha256": "26059dd911cc51bdd6040f053f0dd92cd98185523ae5b094563d9ba4ed243612"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/common/fsharp/xmake.lua",
+      "bytes": 530,
+      "mode": 420,
+      "sha256": "90832385c92067e5cde1630e9103d7164ebcf11ebbb3973a02041c9bc3624690"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/extension/fsharp/xmake.lua",
+      "bytes": 598,
+      "mode": 420,
+      "sha256": "8ad3dda338fee84263f5bedfd8a827a77f7075c0790dace8a765450140850501"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/README.md",
+      "bytes": 256,
+      "mode": 420,
+      "sha256": "05b950bd3f0381364ab95a2bc54503be87bb56f08c86931b8f55485d7646f9e6"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/README.zh.md",
+      "bytes": 254,
+      "mode": 420,
+      "sha256": "f92deb6122563baeb13e07c33a3ef8737b81dfde24c78afafa506fa0a0c316da"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/xmake.lua",
+      "bytes": 544,
+      "mode": 420,
+      "sha256": "b2f772e471e91f59ef4a7b30b22ee1f5f946c9d49f4c5ecce5e1fe886c716637"
+    }
+  ]
+}

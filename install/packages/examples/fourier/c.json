@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/fourier/README.en.md",
+      "bytes": 2877,
+      "mode": 420,
+      "sha256": "a615f1e5e5fc8cb85abb7639b7ce56e8b68b8a8ca0fbda48939a92081eb06e3a"
+    },
+    {
+      "path": "examples/platform/fourier/README.zh.md",
+      "bytes": 2818,
+      "mode": 420,
+      "sha256": "e0dcedde14dbb8e0a2d85c7615445bd994ffc5f5eee797067ab07f071b802b9b"
     },
     {
       "path": "examples/platform/fourier/common/c/body.c",
@@ -56,27 +68,39 @@
     },
     {
       "path": "examples/platform/fourier/migration/c/README.md",
-      "bytes": 471,
+      "bytes": 832,
       "mode": 420,
-      "sha256": "0aebdf3a4522739e8731fa43dabde5dd456c5761a411dad4c291e218499640c3"
+      "sha256": "583b57dafe23cf722d647c1b2c94499bf45fffc1c660b8140b206e07f4af5329"
     },
     {
       "path": "examples/platform/fourier/migration/c/README.zh.md",
-      "bytes": 472,
+      "bytes": 737,
       "mode": 420,
-      "sha256": "fba53e03034ae68e477e98baa16eceaf8a57686a9618a11876f48969a0fcb204"
+      "sha256": "92bc9ab43d81947321d6db2421acee227ed30e47d291b4a42a3fe5d272c863a8"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
     },
     {
       "path": "examples/platform/fourier/migration/c/upstream.lock",
-      "bytes": 232,
+      "bytes": 248,
       "mode": 420,
-      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+      "sha256": "2a4b60ff1e33959bc6a2c816b2f77f5bc0a48486f47f4a136b8048dc6d6bdab0"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/vendor-package.xml",
+      "bytes": 342,
+      "mode": 420,
+      "sha256": "fe51595058372a3968fb9a5a01bb77dc13dd0ac8b3fb35e77409f625ec0f5280"
     },
     {
       "path": "examples/platform/fourier/migration/c/xmake.lua",
-      "bytes": 1095,
+      "bytes": 1076,
       "mode": 420,
-      "sha256": "028d5e10bc8b6af778e90fa51f7501af055c9b1d1fca7fd5f0f124dfe15c4851"
+      "sha256": "1eda7d155baabb6103e53557ca84f4a7681a8855a0ba378c43b74d584d007c18"
     }
   ]
 }

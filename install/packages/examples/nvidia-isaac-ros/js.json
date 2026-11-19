@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/README.en.md",
+      "bytes": 2895,
+      "mode": 420,
+      "sha256": "482dfeaf10c62be92b5e2e1a546b97bbcdd2ad13d050f84d900c91e7f0eaa30a"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/README.zh.md",
+      "bytes": 2836,
+      "mode": 420,
+      "sha256": "5a3f38134294dccf14d114a9959e90ad53b85925e4e735793c5ff63509c9e70d"
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/common/js/body.js",

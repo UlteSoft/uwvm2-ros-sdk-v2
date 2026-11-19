@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/kinova/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "b268f2a2bc64ba804c7426abe26b9e0431308fcce9667522830c9d864b1cb6b7"
+    },
+    {
+      "path": "examples/platform/kinova/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "8f2a76fa2302b4286fbd734580892fd5fe00bffd7d5184bf10a79a5eceed5a36"
     },
     {
       "path": "examples/platform/kinova/common/c/body.c",
@@ -56,27 +68,33 @@
     },
     {
       "path": "examples/platform/kinova/migration/c/README.md",
-      "bytes": 470,
+      "bytes": 516,
       "mode": 420,
-      "sha256": "b697da21d1c9047a46245d80a4b429d65b2b9cc736a24dffcd2911532166783d"
+      "sha256": "b26bd660af11c7a5da7c32af7e0069b05747be384173b571531c19c434d0db1d"
     },
     {
       "path": "examples/platform/kinova/migration/c/README.zh.md",
-      "bytes": 471,
+      "bytes": 517,
       "mode": 420,
-      "sha256": "9b85ef8c7143dff2ba64fbb3e339636645bf72610237efc560be13735ce8544b"
+      "sha256": "11985badb654fb4ac022f1379b5c59c958902e9d19846d219875e46d48f547d9"
+    },
+    {
+      "path": "examples/platform/kinova/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
     },
     {
       "path": "examples/platform/kinova/migration/c/upstream.lock",
-      "bytes": 232,
+      "bytes": 267,
       "mode": 420,
-      "sha256": "c409af58ed98d1638b6884fe714d6d142ce661e4d86e44e447640397e2c2b691"
+      "sha256": "3b678b1864d0d3edf587c8af273446ecbafd6e52e1a9137438d75ef09c1e9670"
     },
     {
       "path": "examples/platform/kinova/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "996369776ed3457eeeab3ab44fa367b17b55db13696e4261fa64a653537be1d6"
+      "sha256": "6ad35e2d43ca31bc2061a5787534a1ee941c457dd98191a02247023e98d10689"
     }
   ]
 }

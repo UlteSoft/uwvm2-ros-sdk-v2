@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/kinova/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "b268f2a2bc64ba804c7426abe26b9e0431308fcce9667522830c9d864b1cb6b7"
+    },
+    {
+      "path": "examples/platform/kinova/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "8f2a76fa2302b4286fbd734580892fd5fe00bffd7d5184bf10a79a5eceed5a36"
+    },
+    {
+      "path": "examples/platform/kinova/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/kinova/common/fsharp/xmake.lua",
+      "bytes": 510,
+      "mode": 420,
+      "sha256": "edb6e88dbaf91dacb2516d9e4b44714856886129bc7a2557bbe985276f2b3636"
+    },
+    {
+      "path": "examples/platform/kinova/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/kinova/extension/fsharp/xmake.lua",
+      "bytes": 578,
+      "mode": 420,
+      "sha256": "a32469daffead7d754303e7a3a6ff0d578016028f27ec2af187e2780aba8e779"
+    },
+    {
+      "path": "examples/platform/kinova/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/kinova/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "0799aa9fe15f576d6691f9fcde7e000f98db4ce865f01b0a3579563a9147bd40"
+    },
+    {
+      "path": "examples/platform/kinova/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "cee8af7b5032257f6b27870f927e262ac80de627dd6bd6edc4e53aa1bb852cd9"
+    },
+    {
+      "path": "examples/platform/kinova/migration/fsharp/xmake.lua",
+      "bytes": 534,
+      "mode": 420,
+      "sha256": "df02394f14d709ba3f0b1f37192c7089877926c01d85750518e88d849489db59"
+    }
+  ]
+}

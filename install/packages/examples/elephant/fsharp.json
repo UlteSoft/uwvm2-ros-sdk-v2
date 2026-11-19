@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/elephant/README.en.md",
+      "bytes": 2879,
+      "mode": 420,
+      "sha256": "33643720d11e0b32392a6866f9f07ed8f509cf2e0dea87fc263d250be481042a"
+    },
+    {
+      "path": "examples/platform/elephant/README.zh.md",
+      "bytes": 2820,
+      "mode": 420,
+      "sha256": "552bf9c64977b6dffd912d9140744b94efa04ec7f1997d0c75d49709d3a96f04"
+    },
+    {
+      "path": "examples/platform/elephant/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/elephant/common/fsharp/xmake.lua",
+      "bytes": 514,
+      "mode": 420,
+      "sha256": "efe101f787537e8aa7ceb9182b8439e0e19ce0519e602b66cf32b28918ddc592"
+    },
+    {
+      "path": "examples/platform/elephant/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/elephant/extension/fsharp/xmake.lua",
+      "bytes": 582,
+      "mode": 420,
+      "sha256": "b9ac8e7518729108cc38c6f14cbfb89bcbc4890a971ded97920eb7d44375e616"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fsharp/README.md",
+      "bytes": 248,
+      "mode": 420,
+      "sha256": "7771c416c670780f177eddaa7f6e8e15fcf998c5c3bec3900c2fe26082363f14"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fsharp/README.zh.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "25c6d6ef1781f92c8838d8b31b758f3c39ecd8f4827a208ac4b378bbb62a9cf3"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fsharp/xmake.lua",
+      "bytes": 536,
+      "mode": 420,
+      "sha256": "cb397a7573bd9baf6e1d7f9ff9739304ba6623e27a517471df6299b5a5dc02f5"
+    }
+  ]
+}

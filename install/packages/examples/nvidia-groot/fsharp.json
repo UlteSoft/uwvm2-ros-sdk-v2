@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/README.en.md",
+      "bytes": 2887,
+      "mode": 420,
+      "sha256": "d1c279b50c0a9cafb1d15ae6b062f9f19ef6eb204b4a6f98c4bc022171c81832"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/README.zh.md",
+      "bytes": 2828,
+      "mode": 420,
+      "sha256": "36a8d3fcce88b4bbf822552f3f67b04fd55d98fdcf879b88df05e954abc19f78"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/fsharp/xmake.lua",
+      "bytes": 522,
+      "mode": 420,
+      "sha256": "7edd64a5ed89bbd12c073e86df653c640291a73950fd204afd4cd996fa6cd66b"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/fsharp/xmake.lua",
+      "bytes": 590,
+      "mode": 420,
+      "sha256": "38d738dee3b95e113964e83af5a08170aa17c2ba9c1ef876e6d28f20437f5f64"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/fsharp/README.md",
+      "bytes": 252,
+      "mode": 420,
+      "sha256": "ba84cb82ea67cc22c46ca959367d04130e3fe7e15d860b686f6f261c3581cfc4"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/fsharp/README.zh.md",
+      "bytes": 250,
+      "mode": 420,
+      "sha256": "0f9e5dcf01e57a80c026f711474fef8b90aef866b31c31d4891d66daa605515e"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/fsharp/xmake.lua",
+      "bytes": 540,
+      "mode": 420,
+      "sha256": "c5f19d299d74f7a41bc711f64400272699153ca8072b9d131ec76c6eb3f42c86"
+    }
+  ]
+}

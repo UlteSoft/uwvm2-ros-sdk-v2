@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/README.en.md",
+      "bytes": 2895,
+      "mode": 420,
+      "sha256": "482dfeaf10c62be92b5e2e1a546b97bbcdd2ad13d050f84d900c91e7f0eaa30a"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/README.zh.md",
+      "bytes": 2836,
+      "mode": 420,
+      "sha256": "5a3f38134294dccf14d114a9959e90ad53b85925e4e735793c5ff63509c9e70d"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/common/go/controller.go",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/common/go/xmake.lua",
+      "bytes": 434,
+      "mode": 420,
+      "sha256": "d76e9f0713d5d50975e945f1827c3bc3d237222b6d2ba19acc905a2302b79c83"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/go/controller.go",
+      "bytes": 642,
+      "mode": 420,
+      "sha256": "21d4f260ef5769166fe4f601ee7d33b562c0304ceb1f5e56f59d43331cb9dd80"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/go/xmake.lua",
+      "bytes": 440,
+      "mode": 420,
+      "sha256": "43d599c7a5e1ee70ba8a8fb360e425f591bfca75d61849a8202f8fc95627376f"
+    }
+  ]
+}

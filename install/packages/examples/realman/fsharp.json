@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/realman/README.en.md",
+      "bytes": 2877,
+      "mode": 420,
+      "sha256": "c8e005256400b621a1178c51c5c91bc0b7247f498dceca8dfe449b8c3c0f38a1"
+    },
+    {
+      "path": "examples/platform/realman/README.zh.md",
+      "bytes": 2818,
+      "mode": 420,
+      "sha256": "e0363c9c9f477aedc1b79ec2447c75a24d465770b008b1db0311c0ee14298eed"
+    },
+    {
+      "path": "examples/platform/realman/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/realman/common/fsharp/xmake.lua",
+      "bytes": 512,
+      "mode": 420,
+      "sha256": "03385421d5191123138f9e45238e998752fc8cf695dde5ab1e2ab06379b0867c"
+    },
+    {
+      "path": "examples/platform/realman/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/realman/extension/fsharp/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "d5c485bb93b28438d54ea0e59406c48dd5f39dde6748b0b599c08451c2968a47"
+    },
+    {
+      "path": "examples/platform/realman/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/realman/migration/fsharp/README.md",
+      "bytes": 247,
+      "mode": 420,
+      "sha256": "bbe6403809c76612a7135d933687d55334bf4f3e0a2c57c09af117ce0c51da92"
+    },
+    {
+      "path": "examples/platform/realman/migration/fsharp/README.zh.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "921d0bd7a6da06bed134df160ba2bf38d45a95162c40dec658525097f284de88"
+    },
+    {
+      "path": "examples/platform/realman/migration/fsharp/xmake.lua",
+      "bytes": 535,
+      "mode": 420,
+      "sha256": "0e1d7b9020c699d323dd3b969f269aabc8a89a4a9215365a3025ec51aab56ddf"
+    }
+  ]
+}

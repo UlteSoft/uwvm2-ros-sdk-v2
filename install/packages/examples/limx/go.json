@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/limx/README.en.md",
+      "bytes": 2871,
+      "mode": 420,
+      "sha256": "af855182e42befc819515a2d74c7167aaefb8ac61de453f71fca37517a3228b0"
+    },
+    {
+      "path": "examples/platform/limx/README.zh.md",
+      "bytes": 2812,
+      "mode": 420,
+      "sha256": "6695b91742d27e978f0652fb79f8a037526e6d53eb321d0c5af4f308a33f9dc1"
+    },
+    {
+      "path": "examples/platform/limx/common/go/controller.go",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+    },
+    {
+      "path": "examples/platform/limx/common/go/xmake.lua",
+      "bytes": 410,
+      "mode": 420,
+      "sha256": "2f45c0f2182511f2a0a85bba3a7bddeecf0540d8e0e236f234f0772aa09bbb18"
+    },
+    {
+      "path": "examples/platform/limx/migration/go/controller.go",
+      "bytes": 642,
+      "mode": 420,
+      "sha256": "21d4f260ef5769166fe4f601ee7d33b562c0304ceb1f5e56f59d43331cb9dd80"
+    },
+    {
+      "path": "examples/platform/limx/migration/go/xmake.lua",
+      "bytes": 416,
+      "mode": 420,
+      "sha256": "19f2d2112bf532b11f04d2cd67a17e86b2b64eaeb26b5482b4053ac3e36538bd"
+    }
+  ]
+}

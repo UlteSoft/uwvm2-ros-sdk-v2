@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/ubtech/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "2438671267d46beb2bbcd52eb1d12e151ac8aa47c143f6bf3ecf551d2bfa6884"
+    },
+    {
+      "path": "examples/platform/ubtech/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "91bdf88e138c2eda3212e647871993ed58632324473ce790e2ede2cfcde1a172"
     },
     {
       "path": "examples/platform/ubtech/common/fortran/body.f90",
@@ -50,9 +62,9 @@
     },
     {
       "path": "examples/platform/ubtech/migration/fortran/grid.f90",
-      "bytes": 514,
+      "bytes": 1404,
       "mode": 420,
-      "sha256": "66ce600e42ceff6354f29e276a8ddb61b234323ced1efc6e6fb7fc4043484190"
+      "sha256": "87658201e273b676a71b0a658871f84685de150abde9f21ca8fb8e70d9f2f364"
     },
     {
       "path": "examples/platform/ubtech/migration/fortran/xmake.lua",

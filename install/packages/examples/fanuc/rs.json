@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/fanuc/README.en.md",
+      "bytes": 2873,
+      "mode": 420,
+      "sha256": "fb162d2432eeb77f914e78697901daebde8a4cc41119117bafcc51cf829f24d7"
+    },
+    {
+      "path": "examples/platform/fanuc/README.zh.md",
+      "bytes": 2814,
+      "mode": 420,
+      "sha256": "22f838c738482abf5f01e73d9ede53c60e49558c9663a592d31f3cbbace2e2e9"
     },
     {
       "path": "examples/platform/fanuc/common/rs/body.rs",

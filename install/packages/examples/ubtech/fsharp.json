@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/ubtech/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "2438671267d46beb2bbcd52eb1d12e151ac8aa47c143f6bf3ecf551d2bfa6884"
+    },
+    {
+      "path": "examples/platform/ubtech/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "91bdf88e138c2eda3212e647871993ed58632324473ce790e2ede2cfcde1a172"
+    },
+    {
+      "path": "examples/platform/ubtech/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/ubtech/common/fsharp/xmake.lua",
+      "bytes": 510,
+      "mode": 420,
+      "sha256": "a38e3f93fdc470c8b17fd8e8fe62432b174594d1d88f4e56b746eb779544424e"
+    },
+    {
+      "path": "examples/platform/ubtech/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/ubtech/extension/fsharp/xmake.lua",
+      "bytes": 578,
+      "mode": 420,
+      "sha256": "949ee823a754993476cb848bdc98f846d6111466bab96a7ca83f257cd90b8c4c"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "f9116633d168b5f3bcf9a1f361c199c7e584e58bae8e9a2e9500a651d371fb2c"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "7a2378a112f0958b8852059527631eccd92f94c4f398e83a628eb63f7bf21f6c"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/fsharp/xmake.lua",
+      "bytes": 534,
+      "mode": 420,
+      "sha256": "37be66ff32c39b451934e4e56682c8837c28ef0ef8bb691a7e1e97ba748e40f2"
+    }
+  ]
+}

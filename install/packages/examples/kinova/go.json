@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/kinova/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "b268f2a2bc64ba804c7426abe26b9e0431308fcce9667522830c9d864b1cb6b7"
+    },
+    {
+      "path": "examples/platform/kinova/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "8f2a76fa2302b4286fbd734580892fd5fe00bffd7d5184bf10a79a5eceed5a36"
+    },
+    {
+      "path": "examples/platform/kinova/common/go/controller.go",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+    },
+    {
+      "path": "examples/platform/kinova/common/go/xmake.lua",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "89ae5236f61cd7984d8f0ccb0a314f2013b74f23f2a9d054f7ecc4a6b2e4f74e"
+    },
+    {
+      "path": "examples/platform/kinova/migration/go/controller.go",
+      "bytes": 642,
+      "mode": 420,
+      "sha256": "21d4f260ef5769166fe4f601ee7d33b562c0304ceb1f5e56f59d43331cb9dd80"
+    },
+    {
+      "path": "examples/platform/kinova/migration/go/xmake.lua",
+      "bytes": 420,
+      "mode": 420,
+      "sha256": "1ec7d30f1f53e2ca91dc468e799d6376293a7d77f783561cd9bc3586e2c1984d"
+    }
+  ]
+}

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/kuka/README.en.md",
+      "bytes": 2871,
+      "mode": 420,
+      "sha256": "596d41971d07ec8f76c7a9f82d9ba2c2b3a9e3d140b75b8fcf5c7209c99bb2c6"
+    },
+    {
+      "path": "examples/platform/kuka/README.zh.md",
+      "bytes": 2812,
+      "mode": 420,
+      "sha256": "83ca7649c63ab9693618616b2fa07998a0830b8eaf0276a1981c47db5b6b1d55"
     },
     {
       "path": "examples/platform/kuka/common/nim/body.nim",

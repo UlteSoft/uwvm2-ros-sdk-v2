@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/README.en.md",
+      "bytes": 2893,
+      "mode": 420,
+      "sha256": "ac45f32bac79da981919fdfe1e425827b2b99cb6cb6bc55857f8abbfe8e8f832"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/README.zh.md",
+      "bytes": 2834,
+      "mode": 420,
+      "sha256": "4a8736f3b800791697e756c21e68555f2a7b7bce4d0f4d2ecfa7c4e11336581b"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/fsharp/Robot.fs",
+      "bytes": 446,
+      "mode": 420,
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/fsharp/xmake.lua",
+      "bytes": 528,
+      "mode": 420,
+      "sha256": "2b4e6109bd37beca0f8bc7ad99b157b10e401ceb506991fa2d1b24ce600f3fdb"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/fsharp/xmake.lua",
+      "bytes": 596,
+      "mode": 420,
+      "sha256": "8e07981b40d580331843db21f21f2e9397426659e81bf23ca039bdff77ea901b"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/fsharp/README.md",
+      "bytes": 255,
+      "mode": 420,
+      "sha256": "7d7a240cff647bfbdbb3158fe24fceefae9e461503b555e32621943e6057cd8e"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/fsharp/README.zh.md",
+      "bytes": 253,
+      "mode": 420,
+      "sha256": "92f095c43b78b3d2911e6da49a199dcc24ea0f564fc516638f71bb5dd3581b41"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/fsharp/xmake.lua",
+      "bytes": 543,
+      "mode": 420,
+      "sha256": "51faca1ce0310e745391dba6edee3d0b1b7ec505f1ddbfa2c35225467bc38c95"
+    }
+  ]
+}

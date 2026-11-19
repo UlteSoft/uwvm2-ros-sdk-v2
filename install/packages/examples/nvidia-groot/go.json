@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/README.en.md",
+      "bytes": 2887,
+      "mode": 420,
+      "sha256": "d1c279b50c0a9cafb1d15ae6b062f9f19ef6eb204b4a6f98c4bc022171c81832"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/README.zh.md",
+      "bytes": 2828,
+      "mode": 420,
+      "sha256": "36a8d3fcce88b4bbf822552f3f67b04fd55d98fdcf879b88df05e954abc19f78"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/go/controller.go",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/go/xmake.lua",
+      "bytes": 426,
+      "mode": 420,
+      "sha256": "92eb5b3d57a63cd685ebda6b356b04f9b5df8da1d0824c7dd670d434be6fbd5e"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/go/controller.go",
+      "bytes": 642,
+      "mode": 420,
+      "sha256": "21d4f260ef5769166fe4f601ee7d33b562c0304ceb1f5e56f59d43331cb9dd80"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/go/xmake.lua",
+      "bytes": 432,
+      "mode": 420,
+      "sha256": "8bcb8ee0a1bec5528ce6bf0db5da1ac5ca18d708e45716c8e41c3c694ad5b6fa"
+    }
+  ]
+}

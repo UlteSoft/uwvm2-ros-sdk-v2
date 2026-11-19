@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/nvidia/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "e2a93afe0f1cfa7a3c4aa2daf9ace541b27186d75e5887993456835e928edceb"
+    },
+    {
+      "path": "examples/platform/nvidia/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "70ab39b707f6f6eed04aadc4a1269cd88b1d258eb8de7955b89aa4837f016236"
     },
     {
       "path": "examples/platform/nvidia/common/csharp/Robot.cs",

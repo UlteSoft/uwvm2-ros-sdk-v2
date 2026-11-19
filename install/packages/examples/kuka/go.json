@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/kuka/README.en.md",
+      "bytes": 2871,
+      "mode": 420,
+      "sha256": "596d41971d07ec8f76c7a9f82d9ba2c2b3a9e3d140b75b8fcf5c7209c99bb2c6"
+    },
+    {
+      "path": "examples/platform/kuka/README.zh.md",
+      "bytes": 2812,
+      "mode": 420,
+      "sha256": "83ca7649c63ab9693618616b2fa07998a0830b8eaf0276a1981c47db5b6b1d55"
+    },
+    {
+      "path": "examples/platform/kuka/common/go/controller.go",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+    },
+    {
+      "path": "examples/platform/kuka/common/go/xmake.lua",
+      "bytes": 410,
+      "mode": 420,
+      "sha256": "e25515a82d92a24137ca8295b368c37554d574856505d5523906ee48a6c6dd17"
+    },
+    {
+      "path": "examples/platform/kuka/migration/go/controller.go",
+      "bytes": 642,
+      "mode": 420,
+      "sha256": "21d4f260ef5769166fe4f601ee7d33b562c0304ceb1f5e56f59d43331cb9dd80"
+    },
+    {
+      "path": "examples/platform/kuka/migration/go/xmake.lua",
+      "bytes": 416,
+      "mode": 420,
+      "sha256": "c7cc151e971e624d3d2e17e848f07fec2ecc81085d812617633f7792090b1a95"
+    }
+  ]
+}

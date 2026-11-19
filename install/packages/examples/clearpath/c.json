@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/clearpath/README.en.md",
+      "bytes": 2881,
+      "mode": 420,
+      "sha256": "a5e1c06d95609a00d39f25f437b4f950af885f1273b93d062ab3bee3081025e3"
+    },
+    {
+      "path": "examples/platform/clearpath/README.zh.md",
+      "bytes": 2822,
+      "mode": 420,
+      "sha256": "0442962023aa802c2c793467ce8b766577f6fe2fde79f2db248beb21aae3e609"
     },
     {
       "path": "examples/platform/clearpath/common/c/body.c",
@@ -67,6 +79,12 @@
       "sha256": "7fbeccceae5fd2a4a35ec4c5afd5c44bb54bd5e1ca7858cbc78411f5db46aad6"
     },
     {
+      "path": "examples/platform/clearpath/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/clearpath/migration/c/upstream.lock",
       "bytes": 263,
       "mode": 420,
@@ -74,9 +92,9 @@
     },
     {
       "path": "examples/platform/clearpath/migration/c/xmake.lua",
-      "bytes": 1097,
+      "bytes": 1078,
       "mode": 420,
-      "sha256": "9688c02450a71033042e8bec0465a71a986e0f88ff41dac33b2e5e8bdc03a7b0"
+      "sha256": "a5f2bf73b8a5f2336f0eeaf573a286f5b807f6c47367db950eb478665d12933b"
     }
   ]
 }

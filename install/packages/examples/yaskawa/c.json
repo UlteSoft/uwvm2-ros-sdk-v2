@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/yaskawa/README.en.md",
+      "bytes": 2877,
+      "mode": 420,
+      "sha256": "e905f36854851b19fb672d49faf41a65866e2083ee3521964f536f42b74dd229"
+    },
+    {
+      "path": "examples/platform/yaskawa/README.zh.md",
+      "bytes": 2818,
+      "mode": 420,
+      "sha256": "cdfe003c004e74e4f53f6582c2ef442d9e2f3ac280af129f39d36e42566b2c4b"
     },
     {
       "path": "examples/platform/yaskawa/common/c/body.c",
@@ -67,6 +79,12 @@
       "sha256": "9076db45f64a7dffa0810f026f0b5c50bd9099135cc2d1b1c438f7dedb184a29"
     },
     {
+      "path": "examples/platform/yaskawa/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/yaskawa/migration/c/upstream.lock",
       "bytes": 246,
       "mode": 420,
@@ -74,9 +92,9 @@
     },
     {
       "path": "examples/platform/yaskawa/migration/c/xmake.lua",
-      "bytes": 1095,
+      "bytes": 1076,
       "mode": 420,
-      "sha256": "da5d6195d5ae0741b0992b3f5adda69243120711992383c1418fdd020146b65f"
+      "sha256": "b40715ddcfb9c42f53007c72d7f7271c304145f4c0695da8d3f07bd9d1b8f241"
     }
   ]
 }

@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 3482,
+      "bytes": 5579,
       "mode": 420,
-      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,21 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3011,
+      "bytes": 5086,
       "mode": 420,
-      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/agilex/README.en.md",
+      "bytes": 2875,
+      "mode": 420,
+      "sha256": "f5d3a943b76c8c32230c04eab081690a855ba9c2e5cd176de9c318ef6692f6c1"
+    },
+    {
+      "path": "examples/platform/agilex/README.zh.md",
+      "bytes": 2816,
+      "mode": 420,
+      "sha256": "94c2344203d701d74701eb48eee04f9d51286e1667167f09b321d276a0db8948"
     },
     {
       "path": "examples/platform/agilex/common/c/body.c",
@@ -67,6 +79,12 @@
       "sha256": "a6befa2d1703bc69d74dbb06373e4f3ff02d5a8148b8f5ce7202fc7794b274d9"
     },
     {
+      "path": "examples/platform/agilex/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/agilex/migration/c/upstream.lock",
       "bytes": 239,
       "mode": 420,
@@ -74,9 +92,9 @@
     },
     {
       "path": "examples/platform/agilex/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "3221ccdd53d5eb5963804a1e36b9209cfcc01c5e69d3642cc786570665dfc511"
+      "sha256": "6efcc2fddbd4c4eea37cfc20a8644b1f8a3c2fc29d33b7b9b5b37f004a3847b0"
     }
   ]
 }

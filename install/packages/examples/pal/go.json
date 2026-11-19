@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 5579,
+      "mode": 420,
+      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 5086,
+      "mode": 420,
+      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
+    },
+    {
+      "path": "examples/platform/pal/README.en.md",
+      "bytes": 2869,
+      "mode": 420,
+      "sha256": "9ad8ba57a53739465c13fb3024a7bf58af000e90e676332b6ddb1462f62c1728"
+    },
+    {
+      "path": "examples/platform/pal/README.zh.md",
+      "bytes": 2810,
+      "mode": 420,
+      "sha256": "f9f766a9c3d7d34a080b91b68a58ff33ecc7dfd132133ed41900b8e5ac7ae9a9"
+    },
+    {
+      "path": "examples/platform/pal/common/go/controller.go",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+    },
+    {
+      "path": "examples/platform/pal/common/go/xmake.lua",
+      "bytes": 408,
+      "mode": 420,
+      "sha256": "c7d9571b531db7de1cb8419f8ac81286c393243033f93681c2f5c1d7e96cbf51"
+    },
+    {
+      "path": "examples/platform/pal/migration/go/controller.go",
+      "bytes": 642,
+      "mode": 420,
+      "sha256": "21d4f260ef5769166fe4f601ee7d33b562c0304ceb1f5e56f59d43331cb9dd80"
+    },
+    {
+      "path": "examples/platform/pal/migration/go/xmake.lua",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "b77538b3699838b6d3775e8e5d5eb7f0a5584b7ac53cb90645d1d40d8094e75d"
+    }
+  ]
+}
