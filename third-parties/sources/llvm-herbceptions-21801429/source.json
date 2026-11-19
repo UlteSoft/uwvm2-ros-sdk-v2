@@ -1,0 +1,52 @@
+{
+  "format": "wros-llvm-source-delta",
+  "upstream": "https://github.com/trcrsired/llvm-project",
+  "commit": "218014296779772a4edbe63eff3fe6fe0ba92390",
+  "tree": "69a2c7cbcfb0371010a4b5a02d0f73e14eef23ed",
+  "base": {
+    "archive": "llvm-23.1.5.tar.xz",
+    "archive_sha256": "78661f16b2c412b6d05579d25ef1ab5fe5691208bcb1f4f5ab816fc1f7cdc661",
+    "upstream_commit": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
+    "root": "llvm-23.1.5",
+    "tree": "bc17e9c109b09e4a14d47d20b519483a00339d76"
+  },
+  "patch": {
+    "format": "git-binary-diff",
+    "compression": "xz",
+    "sha256": "c81193ac08e305199bfdbe8fc9c7f5716feda1c74fd04ce26e4f4250371b3ec5",
+    "size": 649560856,
+    "compressed_sha256": "3f24bb2ab4c5b801aa2ae850cbff97aec42b6cda78aa6600131a24e0516d3324",
+    "compressed_size": 81120132,
+    "parts": [
+      {
+        "name": "part-000",
+        "size": 16777216,
+        "sha256": "1e253369aa706cd66cc2fc5abf2fb5c848c1caeb70f5dd67ca444e6b946c0481"
+      },
+      {
+        "name": "part-001",
+        "size": 16777216,
+        "sha256": "c36b75291d1c0f593a41183a95bd6c429d45f7dbaf569d9fffcfe3d662f00c61"
+      },
+      {
+        "name": "part-002",
+        "size": 16777216,
+        "sha256": "77953f1d6753003bef3a1d1275fb45ea5da23d1079229dc3bf5030daaf574bde"
+      },
+      {
+        "name": "part-003",
+        "size": 16777216,
+        "sha256": "5199c995ef294acc6f4ccc50ff552fd4066c8bef98b06b2b5cb3ad2036f6c5db"
+      },
+      {
+        "name": "part-004",
+        "size": 14011268,
+        "sha256": "dbeda9656038e0177c72bbab8ea1bff9c4097615d92cddc542541d97452ece1f"
+      }
+    ]
+  },
+  "license": {
+    "path": "LICENSE.TXT",
+    "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+  }
+}
