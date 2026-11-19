@@ -44,11 +44,11 @@ def main():
     suite = json.loads((args.suite / "results.json").read_bytes())
     if suite["vm_sha256"] != sha(args.vm) or suite["test_sha256"] != sha(SDK / "tests/standard_go.py"):
         raise ValueError("suite uses a different VM or test revision")
-    required_artifacts = {"arithmetic", "consumer", "common", "extension", "migration"}
+    required_artifacts = {"arithmetic", "debug", "consumer", "common", "extension", "migration"}
     if set(suite["artifacts"]) != required_artifacts:
         raise ValueError("missing signed evidence inputs")
     by_name = {c["name"]: c for c in suite["cases"]}
-    for name in ("int-arithmetic", "aot-arithmetic", "compile-default", "reject-slice", "reject-heap",
+    for name in ("int-arithmetic", "aot-arithmetic", "compile-default", "compile-source-map", "reject-slice", "reject-heap",
                  "common-test", "migration-test", "extension-test", "int-deny", "aot-deny"):
         if (by_name[name]["exit"] == 0) != (not name.startswith("reject-") and not name.endswith("-deny")):
             raise ValueError("a required qualification test did not pass")
@@ -65,7 +65,7 @@ def main():
     row = dict(format="wros-go-register-site", language="go", inputs=compiler_inputs(SDK), vm_sha256=sha(args.vm),
                tests=dict(int=evidence(["int-arithmetic", "int-deny"]), aot=evidence(["aot-arithmetic", "aot-deny"]),
                           admission=evidence(sorted(n for n in by_name if n.startswith("reject-"))),
-                          xmake=evidence(["common-test", "extension-test", "migration-test"])))
+                          xmake=evidence(["compile-source-map", "common-test", "extension-test", "migration-test"])))
     unsigned = out / "release.wasm"
     unsigned.write_bytes(local_release.encode([row]))
     fixture = args.vm_source / "test/0073.ros-tests/support/source/security_wsea/algorithm_matrix.py"
@@ -109,8 +109,10 @@ def main():
         root = Path(installed["directory"])
         body = out / "body.wasm"
         run("signed-site-compile", [root / "bin/wrgo", root / "examples/shared/common/go/controller.go",
-                                   "-o", body, "--build-receipt"])
-        if json.loads(Path(str(body)+".wros-go.json").read_bytes())["site_release_sha256"] != canonical(row):
+                                   "-g", "-o", body, "--build-receipt"])
+        build_receipt = json.loads(Path(str(body)+".wros-go.json").read_bytes())
+        if (build_receipt["site_release_sha256"] != canonical(row)
+                or build_receipt["debug_metadata"] != "source-map-v3"):
             raise ValueError("guest receipt does not bind the signed release")
         guest_id = "wros.test.go.controller"
         signed_guest, guest_policy = sign("guest", guest_id, body)
