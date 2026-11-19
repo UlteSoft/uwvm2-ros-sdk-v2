@@ -28,7 +28,7 @@ def compile_guest(args, work, language="csharp"):
     host = work / "inputs/dotnet"
     compiler = work / "inputs/compiler"
     roslyn = host / "sdk" / SDK_VERSION / "Roslyn/bincore"
-    refs = host / "packs/Microsoft.NETCore.App.Ref" / REF_PACK / "ref/net9.0"
+    refs = host / "packs/Microsoft.NETCore.App.Ref" / REF_PACK / "ref/net10.0"
     host_refs = host / "shared/Microsoft.NETCore.App" / REF_PACK
     env = environment(work, tool)
 

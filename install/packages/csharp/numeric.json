@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/csharp.md",
-      "bytes": 9041,
+      "bytes": 9087,
       "mode": 420,
-      "sha256": "e5eb1514dc2838e8aec1e6aa58b18db2d9d07c768a632355310ca61600a02862"
+      "sha256": "286809428333201954ea032469a5048ca4b34e719ad21368ea9c2a1cf90aefe4"
     },
     {
       "path": "document/zh/csharp.md",
-      "bytes": 9458,
+      "bytes": 9259,
       "mode": 420,
-      "sha256": "426572a7d1143cb42cb6e2c5308dd16e59c34c9548cde266f25a0725dba1aa10"
+      "sha256": "bf87d23ba93d231350bbb65cbae211f1e0af2734e07fe7a60cfa51be08035338"
     },
     {
       "path": "examples/csharp/numeric-aot/Filter.cs",
@@ -68,15 +68,15 @@
     },
     {
       "path": "language/csharp/host.py",
-      "bytes": 1913,
+      "bytes": 1880,
       "mode": 420,
-      "sha256": "7f8c0e2f3e4ab4954ee29c1715bb53a678d54862a1760ad651f59a428831e4ec"
+      "sha256": "c0a6473aaf02714f632b88c1bd6c4e6983bec8a08e0b5678c774c2f519731c42"
     },
     {
       "path": "language/csharp/inputs.sha256",
-      "bytes": 66552,
+      "bytes": 61540,
       "mode": 420,
-      "sha256": "9fa42c68b6245eb5373459e4617d18b5d508ec493ec37dc7f8f8f7ef9e3bdf73"
+      "sha256": "31e617f008e14cd924592f29e3d172bfa93ebf98a3b856ff7804d0ac7c7871eb"
     },
     {
       "path": "language/csharp/leaf.cpp",
@@ -86,9 +86,21 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 9879,
+      "bytes": 9880,
       "mode": 420,
-      "sha256": "320894b62f331ab9f97d15e8371409057829d63abb6096feeb3c5707e43c04d5"
+      "sha256": "f2975fb37131c6631db3aee09129552cdf52c6586f91895237d85931b83731b1"
+    },
+    {
+      "path": "language/csharp/packages.json",
+      "bytes": 1282,
+      "mode": 420,
+      "sha256": "5adbd55c15d78a8c661042e4d9909846865be0be11f8ff9cb9a197fd635620c7"
+    },
+    {
+      "path": "language/csharp/prepare_host.py",
+      "bytes": 4353,
+      "mode": 420,
+      "sha256": "ec122b09f5eb60343cc616a409bd47e264d7e23c0ab391a1920f54c203cbe6a6"
     },
     {
       "path": "language/csharp/scalar.py",
@@ -104,9 +116,9 @@
     },
     {
       "path": "tests/csharp/README.md",
-      "bytes": 3161,
+      "bytes": 2832,
       "mode": 420,
-      "sha256": "a3896c7439472fb7e944924223a08e12761d2fc6cd8b3b2a2b0300cd831474af"
+      "sha256": "9a6cdfc4c9e61d30a08abcf389846933273151c84c12268fd4dfa0ca3656bb90"
     }
   ]
 }

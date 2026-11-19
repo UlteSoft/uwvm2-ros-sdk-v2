@@ -1,5 +1,7 @@
 # Build a Visual Basic Wasm module
 
+Install the pinned Microsoft .NET SDK 10.0.404 compiler files and the 10.0.15 Mono WASI packs with `python3 language/csharp/prepare_host.py --prefix /path/to/managed-tools`. An offline installation accepts `--cache DIR` containing the three official archives named in `language/csharp/packages.json`. Set `WROS_DOTNET` to the installed `dotnet` directory and `WROS_MONO` to its sibling `compiler` directory.
+
 Select the development package by immutable SDK commit. The examples use a Unitree installation. Set `UWVM_ROS_SDK_ROOT` to the directory printed by the installer. Set `WROS_DOTNET`, `WROS_MONO` and `WROS_TOOLCHAIN` to the reviewed .NET SDK, Mono LLVMOnly compiler and LLVM toolchain described in the [managed compiler setup](csharp.md).
 
 ```sh

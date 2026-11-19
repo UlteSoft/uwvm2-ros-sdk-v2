@@ -7,8 +7,8 @@ The numeric method checks 161 signed inputs. The second method takes the address
 ## Prerequisites
 
 - A Linux host with the SDK test cgroup, Python 3.11+, GNU C++, the WasmROS LLVM development tools and both uwvm2-ros engines.
-- A local .NET SDK 9.0.100-preview.6.24328.19 tree, including Microsoft.NETCore.App.Ref and Microsoft.NETCore.App.Runtime.Mono.wasi-wasm 9.0.0-preview.6.24327.7 installed under its packs directory.
-- A native Mono LLVMOnly cross compiler built for core wasm32 with standard Wasm exceptions from dotnet/runtime revision 573461dc897731c11d6166574b77a8c3aabba220, using the Mono LLVM host SDK 16.0.5-alpha.1.24204.1. The SDK1 recipe and its exact source and configuration are in the [pinned build instructions](https://github.com/UlteSoft/uwvm2-ros-sdk/blob/466ec1647ae8577bc2c16bd4f8df8162636817f4/src/language/dotnet/mono-native-eh/README.md).
+- A local .NET SDK 10.0.404 tree, including Microsoft.NETCore.App.Ref and Microsoft.NETCore.App.Runtime.Mono.wasi-wasm 10.0.15 installed under its packs directory.
+- The Microsoft.NETCore.App.Runtime.AOT.linux-x64.Cross.wasi-wasm 10.0.15 release package provides the Mono LLVMOnly compiler and its host libraries.
 - An LLVM extractor compatible with the emitted Mono bitcode. Its prefix must contain its matching host runtime libraries under lib and lib/x86_64-unknown-linux-gnu. The SDK LLVM prefix must contain the target Clang, wasm-ld, opt, llvm-config, llvm-objdump and development libraries.
 
 The input lock lists every managed and Mono host file selected for the test. The runner verifies these files and constructs an isolated input directory before executing the compilers. Each run records the other tool hashes, commands, guest hashes, VM results and the cgroup limits. A different host compiler build requires review before updating its digest.

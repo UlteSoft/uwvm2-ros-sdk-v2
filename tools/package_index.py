@@ -112,7 +112,7 @@ def main():
         write_json(path, metadata)
         package("metadata/" + language, [path])
 
-    mono_aot = ["install/private_exports.py", "language/csharp/numeric.py", "language/csharp/host.py",
+    mono_aot = ["language/csharp/prepare_host.py", "language/csharp/packages.json", "install/private_exports.py", "language/csharp/numeric.py", "language/csharp/host.py",
                 "language/csharp/Scene.cs", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py",
                 "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256"]
     for language, example in (("csharp", "Robot.cs"), ("vbnet", "Robot.vb")):

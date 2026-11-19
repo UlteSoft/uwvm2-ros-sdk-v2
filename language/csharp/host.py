@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 import shutil
 
-REF_PACK = "9.0.0-preview.6.24327.7"
-SDK_VERSION = "9.0.100-preview.6.24328.19"
+REF_PACK = "10.0.15"
+SDK_VERSION = "10.0.404"
 LOCK = Path(__file__).with_name("inputs.sha256")
 
 
@@ -43,4 +43,4 @@ def environment(work, tool):
                 DOTNET_ROOT=str(host), DOTNET_CLI_HOME=str(work), DOTNET_CLI_TELEMETRY_OPTOUT="1",
                 DOTNET_MULTILEVEL_LOOKUP="0", DOTNET_SKIP_FIRST_TIME_EXPERIENCE="1",
                 COMPlus_EnableDiagnostics="0", DOTNET_SYSTEM_GLOBALIZATION_INVARIANT="1",
-                MONO_PATH=os.pathsep.join(str(mono_runtime / x) for x in ("native", "lib/net9.0")))
+                MONO_PATH=os.pathsep.join(str(mono_runtime / x) for x in ("native", "lib/net10.0")))

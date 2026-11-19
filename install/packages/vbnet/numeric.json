@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/vbnet.md",
-      "bytes": 1798,
+      "bytes": 2207,
       "mode": 420,
-      "sha256": "0b93c0c0e8fa1c20a169a620fe3bfd0eb4e600f0c2dac5c760673ebe0575d3cc"
+      "sha256": "c217dbe307ebb17e2744b6e53065f64c09911bb9099c4a0860fb25af6005446a"
     },
     {
       "path": "document/zh/vbnet.md",
-      "bytes": 1650,
+      "bytes": 2042,
       "mode": 420,
-      "sha256": "b1ccb52373df2fcbe2081bc60688d0b5912bedc777ff32915a46b5fc187a220d"
+      "sha256": "b967451d025b207276173124653545c721db550dd24847bd55bd71af5263e1f9"
     },
     {
       "path": "examples/vbnet/scene-abi/Robot.vb",
@@ -56,15 +56,15 @@
     },
     {
       "path": "language/csharp/host.py",
-      "bytes": 1913,
+      "bytes": 1880,
       "mode": 420,
-      "sha256": "7f8c0e2f3e4ab4954ee29c1715bb53a678d54862a1760ad651f59a428831e4ec"
+      "sha256": "c0a6473aaf02714f632b88c1bd6c4e6983bec8a08e0b5678c774c2f519731c42"
     },
     {
       "path": "language/csharp/inputs.sha256",
-      "bytes": 66552,
+      "bytes": 61540,
       "mode": 420,
-      "sha256": "9fa42c68b6245eb5373459e4617d18b5d508ec493ec37dc7f8f8f7ef9e3bdf73"
+      "sha256": "31e617f008e14cd924592f29e3d172bfa93ebf98a3b856ff7804d0ac7c7871eb"
     },
     {
       "path": "language/csharp/leaf.cpp",
@@ -74,9 +74,21 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 9879,
+      "bytes": 9880,
       "mode": 420,
-      "sha256": "320894b62f331ab9f97d15e8371409057829d63abb6096feeb3c5707e43c04d5"
+      "sha256": "f2975fb37131c6631db3aee09129552cdf52c6586f91895237d85931b83731b1"
+    },
+    {
+      "path": "language/csharp/packages.json",
+      "bytes": 1282,
+      "mode": 420,
+      "sha256": "5adbd55c15d78a8c661042e4d9909846865be0be11f8ff9cb9a197fd635620c7"
+    },
+    {
+      "path": "language/csharp/prepare_host.py",
+      "bytes": 4353,
+      "mode": 420,
+      "sha256": "ec122b09f5eb60343cc616a409bd47e264d7e23c0ab391a1920f54c203cbe6a6"
     },
     {
       "path": "language/csharp/scalar.py",

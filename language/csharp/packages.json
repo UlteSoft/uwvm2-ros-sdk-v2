@@ -1,0 +1,23 @@
+[
+  {
+    "name": "dotnet-sdk-10.0.404-linux-x64.tar.gz",
+    "role": "sdk",
+    "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.404/dotnet-sdk-10.0.404-linux-x64.tar.gz",
+    "bytes": 243138887,
+    "sha512": "577d0eb17fec33d029104c5c63a1ab0accc3e28776274abef2218dbac5af18d2109b5406d26b31d76f5c245215e3ba0926a94c20246c672c41847c9e1eb1dc50"
+  },
+  {
+    "name": "microsoft.netcore.app.runtime.aot.linux-x64.cross.wasi-wasm.10.0.15.nupkg",
+    "role": "compiler",
+    "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.aot.linux-x64.cross.wasi-wasm/10.0.15/microsoft.netcore.app.runtime.aot.linux-x64.cross.wasi-wasm.10.0.15.nupkg",
+    "bytes": 7150409,
+    "sha512": "51bade543e9ff843f2e63fe821ffabe4fb5c4881a6f65738d5abaa27176a8d7ffc7f63407d036988c0a96b83640a5cd94d0d41b96c212ca0e04f4d7b0d674e91"
+  },
+  {
+    "name": "microsoft.netcore.app.runtime.mono.wasi-wasm.10.0.15.nupkg",
+    "role": "runtime",
+    "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.mono.wasi-wasm/10.0.15/microsoft.netcore.app.runtime.mono.wasi-wasm.10.0.15.nupkg",
+    "bytes": 25678230,
+    "sha512": "7572fc0326873c2d71a746ab5394edccbed2bd0cd578453ec7e711ad86f45bc3d732709357b8495d15cb9bdbcead6db370196ea9883aed94e71487fc6b6b0d40"
+  }
+]

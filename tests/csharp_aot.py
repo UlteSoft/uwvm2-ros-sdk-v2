@@ -45,7 +45,7 @@ def main():
     compiler = staging / "compiler"
     aot = compiler / "bin/mono-aot-cross"
     roslyn = host / "sdk" / SDK_VERSION / "Roslyn/bincore/csc.dll"
-    refs = host / "packs/Microsoft.NETCore.App.Ref" / REF_PACK / "ref/net9.0"
+    refs = host / "packs/Microsoft.NETCore.App.Ref" / REF_PACK / "ref/net10.0"
     runtime = args.runtime.resolve()
     extract = args.extract.resolve()
     src = fixtures / "Body.cs"

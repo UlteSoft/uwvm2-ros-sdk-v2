@@ -1,5 +1,7 @@
 # 用 Visual Basic 开发 Wasm 模块
 
+运行 `python3 language/csharp/prepare_host.py --prefix /path/to/managed-tools` 安装正式版 .NET SDK 10.0.404 的编译器文件和 10.0.15 Mono WASI 工具。离线安装使用 `--cache DIR` 指定缓存目录，三个官方包的文件名在 `language/csharp/packages.json` 中。将 `WROS_DOTNET` 设为安装后的 `dotnet` 目录，`WROS_MONO` 设为同级的 `compiler` 目录。
+
 通过 SDK 提交号安装所选平台的开发包。以下示例使用 Unitree。把安装器返回的目录设为 `UWVM_ROS_SDK_ROOT`。按[托管编译器配置](csharp.md)设置 `WROS_DOTNET`、`WROS_MONO`、`WROS_TOOLCHAIN`，分别指向经过核对的 .NET SDK、Mono LLVMOnly 编译器和 LLVM 工具链。
 
 ```sh

@@ -1,5 +1,7 @@
 # C# AOT validation
 
+Install the pinned Microsoft .NET SDK 10.0.404 compiler files and the 10.0.15 Mono WASI packs with `python3 language/csharp/prepare_host.py --prefix /path/to/managed-tools`. An offline installation accepts `--cache DIR` containing the three official archives named in `language/csharp/packages.json`. Set `WROS_DOTNET` to the installed `dotnet` directory and `WROS_MONO` to its sibling `compiler` directory.
+
 The standalone numeric regression compiles two C# methods to core wasm32 and execute them in both uwvm2-ros engines. Roslyn produces IL, Mono LLVMOnly produces LLVM bitcode, and the WasmROS LLVM backend produces the guest. The guest imports no host functions. It exercises signed integer arithmetic and the addresses of two simultaneous stack locals, with MTE enabled and explicitly disabled.
 
 The current test covers freestanding methods. A second managed assembly path allocates an array. It compiles to a Wasm object, and the linker reports the dependency on the missing runtime when building the guest. Application projects that use managed objects still require a Wasm-targeted CLR and object-lifetime support in its collector. The default C# development package installs the scalar compiler described below.
@@ -30,7 +32,7 @@ Install from the exact SDK commit with the stable bootstrap and choose a local o
 export UWVM_ROS_SDK_ROOT="$SDK_PREFIX/$SDK_COMMIT/unitree/csharp/development"
 ```
 
-The host inputs are .NET SDK 9.0.100-preview.6.24328.19, the Microsoft.NETCore.App.Ref and Mono WASI packs at 9.0.0-preview.6.24327.7, and the LLVMOnly cross compiler built from dotnet/runtime commit `573461dc897731c11d6166574b77a8c3aabba220`. The component stages exactly the files listed in `language/csharp/inputs.sha256` and checks every digest. The SDK1 repository documents how to build that pinned cross compiler. [Mono toolchain instructions](https://github.com/UlteSoft/uwvm2-ros-sdk/blob/466ec1647ae8577bc2c16bd4f8df8162636817f4/src/language/dotnet/mono-native-eh/README.md)
+The official Mono LLVMOnly cross compiler comes from Microsoft.NETCore.App.Runtime.AOT.linux-x64.Cross.wasi-wasm 10.0.15. The component checks each compiler, host runtime and reference assembly against the SDK input lock.
 
 ```sh
 "$UWVM_ROS_SDK_ROOT/bin/wrcs" --dotnet "$WROS_DOTNET" --mono-compiler "$WROS_MONO" \
