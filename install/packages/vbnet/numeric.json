@@ -56,9 +56,9 @@
     },
     {
       "path": "language/csharp/host.py",
-      "bytes": 1880,
+      "bytes": 2536,
       "mode": 420,
-      "sha256": "c0a6473aaf02714f632b88c1bd6c4e6983bec8a08e0b5678c774c2f519731c42"
+      "sha256": "c970d8c95b4e34e503c29ffba6607b80f82c8c45c4dac0424bd7c02e3a6892c3"
     },
     {
       "path": "language/csharp/inputs.sha256",
@@ -68,15 +68,15 @@
     },
     {
       "path": "language/csharp/leaf.cpp",
-      "bytes": 5195,
+      "bytes": 5536,
       "mode": 420,
-      "sha256": "644da6620586d13d12528ee04ff49132409cfed2736848a1558dde9e782b1547"
+      "sha256": "516ce09bdb6bb58a19e12d2f66a4a1a94e4b9e9d2b271575d90056184b9f13f1"
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 9880,
+      "bytes": 10735,
       "mode": 420,
-      "sha256": "f2975fb37131c6631db3aee09129552cdf52c6586f91895237d85931b83731b1"
+      "sha256": "dd146b168bcc7e0a1b5e7ba3dbf9f20afa1fe0b21c82b0d319ac2fdc2e852248"
     },
     {
       "path": "language/csharp/packages.json",
@@ -86,9 +86,9 @@
     },
     {
       "path": "language/csharp/prepare_host.py",
-      "bytes": 4353,
+      "bytes": 4489,
       "mode": 420,
-      "sha256": "ec122b09f5eb60343cc616a409bd47e264d7e23c0ab391a1920f54c203cbe6a6"
+      "sha256": "e6d56137f0be8bc85f8b08042f31921f38b49b856d0610db8c1aa2ef6dc56e0e"
     },
     {
       "path": "language/csharp/scalar.py",

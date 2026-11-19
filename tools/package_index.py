@@ -106,7 +106,7 @@ def main():
         if language in ("java","kotlin"):
             metadata.update(development_package=True, development_scope="synchronous-wasm32-aot",
                             optional_components=["synchronous-aot"])
-        if language in ("csharp", "vbnet"):
+        if language in ("csharp", "vbnet", "fsharp"):
             metadata.update(development_package=True, development_scope="freestanding-i32-method",
                             optional_components=["numeric-aot"])
         write_json(path, metadata)
@@ -115,10 +115,12 @@ def main():
     mono_aot = ["language/csharp/prepare_host.py", "language/csharp/packages.json", "install/private_exports.py", "language/csharp/numeric.py", "language/csharp/host.py",
                 "language/csharp/Scene.cs", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py",
                 "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256"]
-    for language, example in (("csharp", "Robot.cs"), ("vbnet", "Robot.vb")):
+    for language, example in (("csharp", "Robot.cs"), ("vbnet", "Robot.vb"), ("fsharp", "Robot.fs")):
         paths = [*mono_aot, "bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",
                  f"examples/{language}/scene-abi/{example}", f"examples/{language}/scene-abi/xmake.lua",
                  f"document/en/{language}.md", f"document/zh/{language}.md"]
+        if language == "fsharp":
+            paths.append("language/fsharp/inputs.sha256")
         if language == "csharp":
             paths.extend(["examples/csharp/numeric-aot/Filter.cs", "examples/csharp/numeric-aot/xmake.lua",
                           "tests/csharp/README.md"])

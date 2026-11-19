@@ -14,11 +14,24 @@ def sha(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def stage(work, dotnet, mono):
+def locked_inputs(language):
+    locks = [LOCK]
+    if language == "fsharp":
+        locks.append(LOCK.parent.parent / "fsharp/inputs.sha256")
+    entries = {}
+    for lock in locks:
+        for line in lock.read_text().splitlines():
+            digest, name = line.split("  ", 1)
+            if name in entries:
+                raise ValueError("duplicate managed compiler input: " + name)
+            entries[name] = digest
+    return entries
+
+
+def stage(work, dotnet, mono, language="csharp"):
     verified = {}
     roots = {"dotnet": dotnet, "compiler": mono}
-    for line in LOCK.read_text().splitlines():
-        expected, name = line.split("  ", 1)
+    for name, expected in locked_inputs(language).items():
         relative = Path(name)
         if relative.is_absolute() or ".." in relative.parts or name in verified:
             raise ValueError("unexpected compiler input path: " + name)
@@ -28,7 +41,9 @@ def stage(work, dotnet, mono):
             raise ValueError("managed compiler input differs: " + name)
         destination = work / "inputs" / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
-        if name == "dotnet/dotnet":
+        # Resolve the managed entry point from the private staging directory. Otherwise
+        # dotnet follows a linked fsc.dll to its original installation and probes there.
+        if name in ("dotnet/dotnet", f"dotnet/sdk/{SDK_VERSION}/FSharp/fsc.dll"):
             shutil.copy2(source, destination)
         else:
             destination.symlink_to(source)

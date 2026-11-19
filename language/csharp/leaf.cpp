@@ -70,7 +70,12 @@ int main(int argc, char** argv) {
         guest.addModuleFlag(llvm::Module::Warning, "Dwarf Version", 4);
         llvm::DIBuilder di(guest);
         auto* file = di.createFile(llvm::sys::path::filename(fileName), llvm::sys::path::parent_path(fileName));
-        di.createCompileUnit(llvm::dwarf::DW_LANG_C_sharp, file, "WasmROS Roslyn + Mono LLVMOnly", true, "-O3 -g", 0);
+        // This LLVM release has no DW_LANG code for F#. Preserve its actual
+        // source name and producer without identifying the source language as C#.
+        bool fsharp = fileName.ends_with_insensitive(".fs");
+        unsigned language = fsharp ? 0 : llvm::dwarf::DW_LANG_C_sharp;
+        di.createCompileUnit(language, file, fsharp ? "WasmROS F# + Mono LLVMOnly" : "WasmROS Roslyn + Mono LLVMOnly",
+                             true, "-O3 -g", 0);
         auto* integer = di.createBasicType("int", 32, llvm::dwarf::DW_ATE_signed);
         auto* signature = di.createSubroutineType(di.getOrCreateTypeArray({integer, integer}));
         auto* sp = di.createFunction(file, argv[5], "evaluate", file, line, signature, points == 1 ? line : 0, llvm::DINode::FlagZero,

@@ -34,6 +34,7 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | Java | `java` | `wrjava` |
 | Kotlin | `kotlin` | `wrkt` |
 | C# | `csharp` | `wrcs` |
+| [F#](fsharp.md) | `fsharp` | `wrfs` |
 | [Visual Basic](vbnet.md) | `vbnet` | `wrvb` |
 
 Java and Kotlin install their synchronous AOT frontend by default and accept an approved local site. The default C# installation compiles freestanding integer methods. The full CLR development package is pending. [C# compiler guide](csharp.md) Check `revision-help` at the selected commit for the command and use `plan` to check package availability. The archive utility is `wrar`. Previous installations retain the names from their pinned commit.

@@ -10,12 +10,11 @@ import tempfile
 import urllib.request
 import zipfile
 
-from host import LOCK, REF_PACK, sha
+from host import REF_PACK, locked_inputs, sha
 
 
-def materialize(prefix, cache=None):
-    inputs = {name: digest for digest, name in
-              (line.split("  ", 1) for line in LOCK.read_text().splitlines())}
+def materialize(prefix, cache=None, language="csharp"):
+    inputs = locked_inputs(language)
     if prefix.exists():
         if not all(sha(prefix / name) == digest for name, digest in inputs.items()):
             raise ValueError("existing managed compiler differs from the SDK input lock")
@@ -83,8 +82,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prefix", required=True, type=Path)
     parser.add_argument("--cache", type=Path, help="use the three official archives already in this directory")
+    parser.add_argument("--language", choices=("csharp", "vbnet", "fsharp"), default="csharp",
+                        help="include the official F# compiler when selecting fsharp")
     args = parser.parse_args()
     try:
-        materialize(args.prefix.absolute(), args.cache)
+        materialize(args.prefix.absolute(), args.cache, args.language)
     except (ValueError, OSError, KeyError, zipfile.BadZipFile, tarfile.TarError) as exc:
         parser.exit(1, str(exc) + "\n")

@@ -1,0 +1,15 @@
+5291a8080cec5ce08703a7e2b0da5ca3e1e61c9a1ead9a9c5384a4be1f4ccfa5  dotnet/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.dll
+33fff2acc52bf04fb8398afc33bf1ba1e8035e97d0ff37fd195ada6390b2b86a  dotnet/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Console.dll
+c580834c795c6309423f0b4641fb2687983cc869af43702edb4d4630f2daea96  dotnet/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Requests.dll
+8e8c426ddcdcb951424a59e2c941557665710893fe59909ca26fffc5bb4b537c  dotnet/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebClient.dll
+b8df2e8f15ba21a37176f1d7487f02450220da37cfccae02467b210c180e256e  dotnet/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Numerics.dll
+f0bb5a82e4f78a07499688319ba0bf5078758dddd5c6007028d65a18baeff45e  dotnet/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.dll
+f1ee8e34266c7dfad885ad381788abef8686847c74efcca695b24aeb58afbc10  dotnet/sdk/10.0.404/FSharp/FSharp.Compiler.Service.dll
+ea6ba620080b4e9f8dd336b1bdcb2ac89b6ea112a53578b206d080a41ebf43ff  dotnet/sdk/10.0.404/FSharp/FSharp.Core.dll
+633f70bace02772af45bdd3a166d665b64b98fd478b7dd942ed344b9af92a450  dotnet/sdk/10.0.404/FSharp/Microsoft.Build.Framework.dll
+35de0106d810cdca17e64e1211e1d50a91ad7a6cb469e4333aa8b5ffc1f8b4c0  dotnet/sdk/10.0.404/FSharp/Microsoft.Build.Utilities.Core.dll
+5f52071f7604351e34e8ce14dabc36d39d5c95239503bbe677d4956f9d12d090  dotnet/sdk/10.0.404/FSharp/Microsoft.NET.StringTools.dll
+f60b78d1d3ca2a3eada7fbafe3aa0f12803821b4828cdc7cfe88c24bb78a67bf  dotnet/sdk/10.0.404/FSharp/default.win32manifest
+05e1715f839789d1d660aa1abffd3cd158643b9e7cf70e457825bbca9a7251e1  dotnet/sdk/10.0.404/FSharp/fsc.deps.json
+3e9cac63f878ef77b87a5f53d6f27c137251bada9881cdf35da873cf5adc93f1  dotnet/sdk/10.0.404/FSharp/fsc.dll
+12d333300a00738202c7caf71f97ba8e6829b4cf6da468f7d93829b8d36a9943  dotnet/sdk/10.0.404/FSharp/fsc.runtimeconfig.json

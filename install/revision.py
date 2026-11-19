@@ -46,9 +46,9 @@ def main():
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")
-    elif args.component == "numeric-aot" or (args.component == "development" and args.language in ("csharp", "vbnet")):
-        if args.language not in ("csharp", "vbnet"):
-            parser.error("the numeric-aot component requires csharp or vbnet")
+    elif args.component == "numeric-aot" or (args.component == "development" and args.language in ("csharp", "vbnet", "fsharp")):
+        if args.language not in ("csharp", "vbnet", "fsharp"):
+            parser.error("the numeric-aot component requires csharp, fsharp or vbnet")
         packages.extend(("protocol", "frontend", args.language + "/numeric", "xmake/common", "xmake/platforms/" + args.platform))
     elif args.component == "synchronous-aot" or (args.component == "development" and args.language in ("java", "kotlin")):
         if args.language not in ("java", "kotlin"):

@@ -1,0 +1,112 @@
+{
+  "files": [
+    {
+      "path": "bin/wrfs",
+      "bytes": 200,
+      "mode": 493,
+      "sha256": "c85bab466ac2e68d61da6c13f2973b05e33e568a08a31de504623ecb0d08bfa6"
+    },
+    {
+      "path": "document/en/fsharp.md",
+      "bytes": 3550,
+      "mode": 420,
+      "sha256": "4db88542e65fadd4a29da73269a7d073e38da0da3f1981ce7e8cb39c54e0c66d"
+    },
+    {
+      "path": "document/zh/fsharp.md",
+      "bytes": 3336,
+      "mode": 420,
+      "sha256": "de849398d65fd5309d080ce94b1ae71994b45c595ea1d7d3dad8ae1cd4cbd015"
+    },
+    {
+      "path": "examples/fsharp/scene-abi/Robot.fs",
+      "bytes": 121,
+      "mode": 420,
+      "sha256": "d23ec8ee8553e6df71438503135ab6e50d269eba73b7368c387826ace9e3ec61"
+    },
+    {
+      "path": "examples/fsharp/scene-abi/xmake.lua",
+      "bytes": 391,
+      "mode": 420,
+      "sha256": "7865583456efb14d197450eb2f60c1752a0e25e4bbf9ae65b986e18bbee6a893"
+    },
+    {
+      "path": "install/private_exports.py",
+      "bytes": 2459,
+      "mode": 420,
+      "sha256": "ec4e946a29cbfa55647f366c6a9b06c27b6b63ec4fc3d6fbd2e6bb8f2a0d5b71"
+    },
+    {
+      "path": "language/csharp/Admit.cs",
+      "bytes": 8244,
+      "mode": 420,
+      "sha256": "1aa17f2b9883618ca5f8dd479c437cc85635b9aabc34e851ab2ee696365d27a8"
+    },
+    {
+      "path": "language/csharp/Scene.cs",
+      "bytes": 370,
+      "mode": 420,
+      "sha256": "3789a61e509d757446a787da330513ce558b4079cdddefa31145ceaffc51b0c2"
+    },
+    {
+      "path": "language/csharp/SceneEntry.cs",
+      "bytes": 3432,
+      "mode": 420,
+      "sha256": "fc0cb72418436c8416ee512bd7e3bcba397b78fd07f082f35b26e503b3fabc6f"
+    },
+    {
+      "path": "language/csharp/host.py",
+      "bytes": 2536,
+      "mode": 420,
+      "sha256": "c970d8c95b4e34e503c29ffba6607b80f82c8c45c4dac0424bd7c02e3a6892c3"
+    },
+    {
+      "path": "language/csharp/inputs.sha256",
+      "bytes": 61540,
+      "mode": 420,
+      "sha256": "31e617f008e14cd924592f29e3d172bfa93ebf98a3b856ff7804d0ac7c7871eb"
+    },
+    {
+      "path": "language/csharp/leaf.cpp",
+      "bytes": 5536,
+      "mode": 420,
+      "sha256": "516ce09bdb6bb58a19e12d2f66a4a1a94e4b9e9d2b271575d90056184b9f13f1"
+    },
+    {
+      "path": "language/csharp/numeric.py",
+      "bytes": 10735,
+      "mode": 420,
+      "sha256": "dd146b168bcc7e0a1b5e7ba3dbf9f20afa1fe0b21c82b0d319ac2fdc2e852248"
+    },
+    {
+      "path": "language/csharp/packages.json",
+      "bytes": 1282,
+      "mode": 420,
+      "sha256": "5adbd55c15d78a8c661042e4d9909846865be0be11f8ff9cb9a197fd635620c7"
+    },
+    {
+      "path": "language/csharp/prepare_host.py",
+      "bytes": 4489,
+      "mode": 420,
+      "sha256": "e6d56137f0be8bc85f8b08042f31921f38b49b856d0610db8c1aa2ef6dc56e0e"
+    },
+    {
+      "path": "language/csharp/scalar.py",
+      "bytes": 4629,
+      "mode": 420,
+      "sha256": "15e8025833faaef058d80c9a438cbd4f8aaae43f7d4fb7f66f4bb083f943d261"
+    },
+    {
+      "path": "language/fsharp/inputs.sha256",
+      "bytes": 1939,
+      "mode": 420,
+      "sha256": "861b76b49d8aca47106449f9a79fa1353ca524e77eb34a444c73fd7e658c4002"
+    },
+    {
+      "path": "language/fsharp/xmake/adapter.lua",
+      "bytes": 1559,
+      "mode": 420,
+      "sha256": "5761a8db5dc560a61c85e3493aba7a3f8c31f7be696a5dde8b5337905e03d80c"
+    }
+  ]
+}

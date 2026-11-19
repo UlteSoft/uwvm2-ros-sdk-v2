@@ -24,7 +24,7 @@ from scalar import prove_scalar, scene_program
 
 def compile_guest(args, work, language="csharp"):
     tool = args.toolchain.resolve(strict=True) / "bin"
-    stage(work, args.dotnet.resolve(strict=True), args.mono_compiler.resolve(strict=True))
+    stage(work, args.dotnet.resolve(strict=True), args.mono_compiler.resolve(strict=True), language)
     host = work / "inputs/dotnet"
     compiler = work / "inputs/compiler"
     roslyn = host / "sdk" / SDK_VERSION / "Roslyn/bincore"
@@ -50,7 +50,17 @@ def compile_guest(args, work, language="csharp"):
     if args.scene_entry:
         csc("Wros.Scene.Bindings.dll", [HERE / "Scene.cs"], references, "library")
         references.append(work / "Wros.Scene.Bindings.dll")
-    if language == "vbnet":
+    if language == "fsharp":
+        fsharp = host / "sdk" / SDK_VERSION / "FSharp"
+        # This directory contains only reviewed reference assemblies staged by host.stage.
+        references = [*sorted(refs.glob("*.dll")), fsharp / "FSharp.Core.dll"]
+        if args.scene_entry:
+            references.append(work / "Wros.Scene.Bindings.dll")
+        run("F# " + dll, [host / "dotnet", fsharp / "fsc.dll", "--nologo", "--noframework", "--targetprofile:netcore",
+            "--target:library", "--langversion:10.0", "--simpleresolution", "--deterministic+",
+            "--debug:portable", "--checksumalgorithm:SHA256", "--warnaserror+", "--optimize-", "--tailcalls-",
+            *["-r:" + str(ref) for ref in references], "--out:" + dll, *args.sources])
+    elif language == "vbnet":
         run("Visual Basic " + dll, [host / "dotnet", roslyn / "vbc.dll", "-nologo", "-noconfig",
             "-deterministic+", "-debug:portable", "-checksumalgorithm:SHA256", "-target:library",
             "-optimize+", "-optionstrict+", "-optionexplicit+", "-nostdlib", "-vbruntime-",
@@ -94,7 +104,7 @@ def compile_guest(args, work, language="csharp"):
     audit(guest, profile)
     if inspect(guest):
         raise ValueError("numeric component must have zero imports")
-    if language == "vbnet" or args.scene_entry or (not args.legacy_mte and not args.no_mte):
+    if language in ("vbnet", "fsharp") or args.scene_entry or (not args.legacy_mte and not args.no_mte):
         guest = prove_scalar(guest)
     if args.scene_entry:
         guest = scene_program(guest)
@@ -116,7 +126,8 @@ def compile_guest(args, work, language="csharp"):
 
 def main(language="csharp"):
     suffix, program, title = {"csharp": (".cs", "wrcs", "C#"),
-                              "vbnet": (".vb", "wrvb", "Visual Basic")}[language]
+                              "vbnet": (".vb", "wrvb", "Visual Basic"),
+                              "fsharp": (".fs", "wrfs", "F#")}[language]
     parser = argparse.ArgumentParser(prog=program, description=f"Compile a freestanding {title} integer method to Wasm.", allow_abbrev=False)
     for option in ("dotnet", "mono-compiler", "toolchain"):
         parser.add_argument("--" + option, type=Path, required=True)
@@ -134,8 +145,8 @@ def main(language="csharp"):
     parser.add_argument("-o", "--output", type=Path, required=True)
     parser.add_argument("sources", nargs="+", type=Path)
     args = parser.parse_args()
-    if language == "vbnet" and (args.compile_only or args.legacy_mte):
-        parser.error("Visual Basic produces final modules with a statically checked register-only policy")
+    if language in ("vbnet", "fsharp") and (args.compile_only or args.legacy_mte):
+        parser.error(title + " produces final modules with a statically checked register-only policy")
     if args.compile_only and not args.legacy_mte and not args.no_mte:
         parser.error("no signed strict C# release for relocatable objects; the scalar proof requires a final module")
     if args.scene_entry and args.compile_only:
