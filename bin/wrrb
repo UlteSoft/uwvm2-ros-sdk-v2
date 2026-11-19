@@ -64,7 +64,7 @@ def literal(name, data):
 
 
 def prepare(work, tagged):
-    """@brief Authenticate official sources and adapt parser lifetimes to Wasm's allocator."""
+    """@brief Authenticate official core sources and adapt parser lifetimes to Wasm's allocator."""
     archive = (ROOT / "third-parties/mruby" / (SOURCE_NAME + ".tar.gz")).read_bytes()
     if hashlib.sha256(archive).hexdigest() != SOURCE_SHA256:
         raise ValueError("mruby source archive differs from the selected release")
@@ -77,6 +77,7 @@ def prepare(work, tagged):
     if data.count(guard) != 1:
         raise ValueError("mruby parser stack configuration differs from the reviewed source")
     data = data.replace(guard, b"#define YYSTACK_USE_ALLOCA 0")
+    bigint = tree / "mrbgems/mruby-bigint/core/bigint.c"
     if tagged:
         # One parser invocation owns its allocations until the arena closes.
         # A retired AST value is never recycled as another live value in that arena.
@@ -88,9 +89,18 @@ def prepare(work, tagged):
             raise ValueError("mruby parser's AST reuse differs from the reviewed source")
         data = data.replace(free, b"  (void)p; (void)cons;").replace(
             reuse, b"  c = (struct mrb_ast_node*)parser_palloc(p, sizeof(struct mrb_ast_node));")
+        # The pinned release declares these functions inside its pool-enabled branch.
+        # Their callers and implementations are also compiled in the heap-only profile.
+        source = bigint.read_bytes()
+        declarations = re.findall(rb"/\* Forward declarations \*/\n(?:static void mpz_.*;\n)+\n", source)
+        after_pool = b"#endif\n\n/* Zero n limbs at p */"
+        if len(declarations) != 1 or source.count(after_pool) != 1:
+            raise ValueError("mruby bigint declarations differ from the reviewed source")
+        bigint.write_bytes(source.replace(declarations[0], b"").replace(
+            after_pool, b"#endif\n\n" + declarations[0] + b"/* Zero n limbs at p */"))
     parser.write_bytes(data)
     units = [file for file in sorted((tree / "src").glob("*.c")) if file.name != "mempool.c" or not tagged]
-    units.extend([parser.with_name("codegen.c"), parser])
+    units.extend([parser.with_name("codegen.c"), parser, bigint])
     if tagged:
         units.append(LANG / "pool.cpp")
     return tree, units
@@ -135,11 +145,15 @@ def main():
         (work / "mrblib.inc").write_text(literal("mrblib", core))
         flags = ["-std=gnu++20", "-O3", "-g", "-x", "c++", "-Wno-unused-command-line-argument",
                  "-DMRB_NO_STDIO", "-DMRB_NO_GEMS", "-DMRB_INT64", "-DMRB_NO_BOXING",
+                 "-DMRB_USE_BIGINT",
                  "-DMRB_USE_CXX_EXCEPTION", "-DMRB_USE_CXX_ABI", "-DMRB_USE_VM_SWITCH_DISPATCH",
                  "-DMRB_UTF8_STRING", f"-DMRB_HEAP_PAGE_SIZE={1 if a.mte else 1024}",
                  "-I" + str(source / "include"), "-I" + str(work / "include"),
                  "-I" + str(ROOT / "include"), "-I" + str(work),
                  "-ffile-prefix-map=" + str(work) + "=/wros/mruby", "-fdebug-compilation-dir=/wros/mruby"]
+        if a.mte:
+            # Give transient bigint operands their own tagged heap allocations.
+            flags.append("-DMRB_BIGINT_POOL_SIZE=0")
 
         cmd, backend = make_command(tc, a.sysroots, profile, "cpp", flags + ["-E"], verify=True)
         # The generator processes only the trusted upstream C++ symbol inventory.

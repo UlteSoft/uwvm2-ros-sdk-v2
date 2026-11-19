@@ -11,7 +11,7 @@ from separate_compilation import Profile, ROOT, cgroup_record, inspect, sha
 
 
 def main():
-    """@brief Check imports, Ruby allocation identities and exception propagation."""
+    """@brief Check imports, allocation identities, integer semantics and exception propagation."""
     parser = argparse.ArgumentParser(description=__doc__)
     for path in ("sdk", "vm", "output"):
         parser.add_argument("--" + path, required=True, type=Path)
@@ -26,6 +26,14 @@ def main():
         f"palette = {(1 << (4 if a.bits == 32 else 8)) - 1}\n"
         """
 mask = (1 << shift) - 1
+raise "wide hexadecimal literal" unless 0xffff_ffff == (1 << 32) - 1
+raise "wide decimal literal" unless 5_000_000_000 == 5 * 1_000_000_000
+raise "signed native boundary" unless -9_223_372_036_854_775_808 + (1 << 62) == -(1 << 62)
+raise "embedded bigint literal" unless 18_446_744_073_709_551_616 == 1 << 64
+large = 0x1_0000_0000_0000_0000_0000_0000_0000_0000
+raise "heap bigint literal" unless large == 1 << 128
+raise "heap bigint arithmetic" unless (large * large) >> 128 == large
+raise "negative heap bigint" unless -340282366920938463463374607431768211456 == -large
 objects = (0...512).map { Object.new }
 checked = 0
 4.times do |epoch|

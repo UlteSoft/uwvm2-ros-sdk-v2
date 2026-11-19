@@ -30,6 +30,9 @@ Ruby's GC objects use separate allocations from the selected tagged libc.
 The parser uses a heap stack and places its AST storage in individually
 allocated blocks that keep their ownership until the parser closes. The
 runtime checks tags according to the independently configured VM policy.
+Both address widths include mruby's multiple-precision integers for wide
+literals and arithmetic. MTE builds use tagged heap allocations for bigint
+scratch data.
 
 ## ROS calls and examples
 
