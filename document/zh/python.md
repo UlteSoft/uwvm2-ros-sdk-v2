@@ -41,3 +41,8 @@ Xmake 工程引入 `tools/xmake/ros.lua`，使用 `set_language("py")`、`set_ro
 MTE 配置关闭 pymalloc、mimalloc 和解释器对象空闲列表，独立分配的对象通过带标签的 libc 分配器管理。内联字段、静态常量、解释器栈内槽位需要按其所属对象分析。迁移示例比较 ROS 1 Noetic 的 `genpy` 与 ROS 2 Jazzy 的 Fast RTPS 对 `geometry_msgs/Twist` 的真实序列化。平台测试通过观察驱动对端收到的字节数验证拒绝发生在握手前。源码和许可可在仓内查阅。[CPython 3.14.8 官方发布](https://www.python.org/downloads/release/python-3148/)
 
 示例使用 `add_wros_tests("int", "aot")` 注册解释器和 AOT 两类测试。在示例目录设置 `WROS_VM` 为实际 VM 二进制，然后执行 `xmake build` 和 `xmake test`。平台扩展测试临时建立本机测试通道，核对父权限拒绝和子权限关闭两种情况下驱动对端收到的握手字节数均为零。
+
+运行[外置驱动仿真](README.md#运行外置驱动仿真)中的 Go2 控制器时，
+选择 `--language py` 和签名的 Unitree 开发安装。夹具为每个用例的 VM 冷启动和执行
+提供最多 360 秒。来宾使用单独授权的 ROSv2 稳态时钟为各条驱动请求设置期限。
+报告独立记录包含冷启动的 VM 耗时和原生物理仿真参考结果。

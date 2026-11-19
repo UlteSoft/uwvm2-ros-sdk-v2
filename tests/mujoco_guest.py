@@ -41,7 +41,7 @@ def main():
                    help="exercise one address width from the selected language toolchain")
     p.add_argument("--vendor-model", type=Path, help="a pinned platform MJCF manifest from the VM fixtures")
     p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
-    p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "py", "rs", "tinygo", "fortran", "csharp"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "py", "ruby", "rs", "tinygo", "fortran", "csharp"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
     p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D, Fortran, Nim, Objective-C, Rust and TinyGo sites supply their own tools and sysroots")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
@@ -65,6 +65,7 @@ def main():
     if a.installed_sdk and a.candidate_mte:
         p.error("the installed SDK simulation requires a qualified compiler")
     compiler_root = a.installed_sdk.resolve(strict=True) if a.installed_sdk else ROOT
+    embedded = a.language in ("py", "ruby")
     if any((path is not None) != (a.language == "csharp") for path in (a.dotnet, a.mono_compiler)):
         p.error("--dotnet and --mono-compiler are required together for C#")
     if a.flang and a.language != "fortran":
@@ -72,10 +73,10 @@ def main():
     widths = (32,) if a.language in ("rs", "tinygo", "csharp", "js", "d") else (32, 64)
     site = None
     explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64, a.goroot, a.tinygoroot, a.producer, a.rustroot, a.flang)
-    if a.language in ("d", "objectc", "tinygo", "nim", "rs", "fortran", "py") and a.installed_sdk and not any(explicit):
+    if (embedded or a.language in ("d", "objectc", "tinygo", "nim", "rs", "fortran")) and a.installed_sdk and not any(explicit):
         site = local_release.site_config(compiler_root)
-    if a.language == "py" and not site:
-        p.error("Python requires a signed installed C site and the matching CPython target")
+    if embedded and not site:
+        p.error(a.language + " requires a signed installed C site for this simulation")
     if not site and (a.rustroot is not None) != (a.language == "rs"):
         p.error("provide --rustroot for an explicit Rust toolchain")
     if not site and any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
@@ -89,7 +90,7 @@ def main():
             row = authorized(site)
         else:
             rows = local_release.verified_releases(site["trust"])
-            backend = "c" if a.language == "py" else a.language
+            backend = "c" if embedded else a.language
             row = select_site_release(rows, backend, site.get("release_sha256"))
         with a.runtime.open("rb") as stream:
             vm_digest = hashlib.file_digest(stream, "sha256").hexdigest()
@@ -125,9 +126,13 @@ def main():
         p.error("--producer is required for Nim")
     sys.path.insert(0, str(a.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
-    source = ROOT / "tests/mujoco" / ("controller." + {"csharp": "c", "cpp": "c", "objectc": "c", "tinygo": "go", "fortran": "f90"}.get(a.language, a.language))
-    compiler = compiler_root / "bin" / {"d": "wrd", "c": "wrc", "csharp": "wrc", "cpp": "wrcc", "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "js": "wrjs", "py": "wrpy", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
+    extension = {"csharp": "c", "cpp": "c", "objectc": "c", "tinygo": "go", "fortran": "f90", "ruby": "rb"}
+    source = ROOT / "tests/mujoco" / ("controller." + extension.get(a.language, a.language))
+    compiler = compiler_root / "bin" / {"d": "wrd", "c": "wrc", "csharp": "wrc", "cpp": "wrcc",
+                                       "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "js": "wrjs",
+                                       "py": "wrpy", "ruby": "wrrb", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
     manifests = list(map(Path, site["sysroots"])) if site else [path.resolve() for path in sysroots.values()]
+    steady_deadlines = embedded or a.language == "js"
 
     toolchains = {32: a.toolchain.resolve(), 64: (a.toolchain64 or a.toolchain).resolve()}
     objc_inputs = ([a.objc_clang.resolve(), *[lib.resolve()/name for lib in objc_runtimes.values()
@@ -142,7 +147,7 @@ def main():
         request = suite.u64(1) + suite.u64(deadline) + suite.blob(payload)
         directory = wasm.parent / (wasm.stem + "-source")
         directory.mkdir()
-        app = directory / ("controller." + {"objectc": "m", "fortran": "f90", "tinygo": "go", "csharp": "c"}.get(a.language, a.language))
+        app = directory / ("controller." + ("m" if a.language == "objectc" else extension.get(a.language, a.language)))
         app.write_bytes(source.read_bytes())
         options = ["-O3", "-g", "--reactor", "--export", "_start"]
         if a.language == "d":
@@ -159,7 +164,7 @@ def main():
                 + "var request* = [" + ",".join(str(b) + "'u8" for b in request) + "]\n")
         if a.language == "objectc" and not site:
             options += ["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", objc_runtimes[width].resolve()]
-        if a.language in ("js", "py"):
+        if steady_deadlines:
             operations = ("capability.open", "clock.create", "clock.read", "driver.connect", "driver.submit", "driver.result",
                           "driver.describe", "driver.disconnect")
             options = [arg for op in operations for arg in ("--ros-operation", op)]
@@ -170,6 +175,11 @@ def main():
         if a.language == "py":
             app.write_text(f"template = {request!r}\nsteps = {count}\n"
                            f"target_offset = {24+len(prefix)+8}\nmode = {mode!r}\n" + source.read_text())
+        if a.language == "ruby":
+            template = "".join(f"\\x{byte:02x}" for byte in request)
+            codes = "".join(f"\\x{byte:02x}" for byte in range(256))
+            app.write_text(f'BYTE_CODES = "{codes}"\nTEMPLATE = "{template}"\nSTEPS = {count}\n'
+                           f'TARGET_OFFSET = {24+len(prefix)+8}\nMODE = "{mode}"\n' + source.read_text())
         if a.language == "lua":
             operations = ("capability.open", "driver.connect", "driver.submit", "driver.result",
                           "driver.describe", "driver.disconnect")
@@ -230,6 +240,9 @@ def main():
                                         hashlib.sha256(receipt.read_bytes()).hexdigest()])
         guest_profile = profile if site else Profile(width, exceptions="noeh" if a.language == "rs" else "eh")
         controls = guest_profile.uwvm_feature_flags()
+        if embedded:
+            # The simulator exercises the controller after cold compilation.
+            controls += ["--runtime-memtag-mode", "sync", "--runtime-llvm-jit-policy", "fast-compile"]
         if a.language in ("js", "objectc", "py"):
             suffix = "_wasm64" if width == 64 else ""
             controls += ["--wasip1-single-create", "main", "--wasip1-single-enable", "main",
@@ -245,6 +258,8 @@ def main():
     for key, value in (("source-root", a.vm_source), ("runtime", a.runtime), ("openssl-root", a.openssl_root),
                        ("mujoco", a.mujoco), ("output", a.output)):
         args += ["--" + key, str(value.resolve())]
+    if a.language == "py":
+        args += ["--guest-startup-seconds", "360"]
     if a.vendor_model:
         args.extend(["--vendor-model",str(a.vendor_model.resolve()),"--vendor-assets",str(a.vendor_assets.resolve()),
                      "--platform-targets",str(ROOT/"share/targets.json"),"--audit-calls"])
@@ -267,7 +282,10 @@ def main():
         producers.extend(sorted((compiler_root / "language/py").glob("*.py")))
         producers.extend(sorted((compiler_root / "third-parties/cpython").glob("*")))
         producers.extend(sorted((compiler_root / "third-parties/cpython-runtime").glob("*")))
-    suite.main(args, guest_steady_deadlines=a.language in ("js", "py"),
+    if a.language == "ruby":
+        producers.extend(sorted(path for path in (compiler_root / "language/ruby").iterdir() if path.is_file()))
+        producers.extend(sorted((compiler_root / "third-parties/mruby").glob("*")))
+    suite.main(args, guest_steady_deadlines=steady_deadlines,
                compile_guest=compile_guest, guest_name=a.language, guest_widths=widths,
                guest_inputs=(source, Path(__file__), compiler, *producers, *manifests, *objc_inputs,
                              *([compiler_root / "language/lua/scene.hpp", compiler_root / "language/lua/entry.cpp", compiler_root / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),

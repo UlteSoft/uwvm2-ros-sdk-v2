@@ -43,3 +43,9 @@ The MTE build disables pymalloc, mimalloc and the interpreter's shared object fr
 The official upstream source and license ship alongside its locked SHA-256. The Python fixture checks real ROS 1 Noetic `genpy` and ROS 2 Jazzy Fast RTPS serialization of `geometry_msgs/Twist`. Its scope covers this message and encoding. The hardware fixture attempts an unauthorized connection and checks that the peer received zero bytes. See [CPython 3.14.8](https://www.python.org/downloads/release/python-3148/).
 
 The example Xmake targets register both interpreter and AOT executions with `add_wros_tests("int", "aot")`. Run `xmake build` followed by `xmake test` in the selected example directory with `WROS_VM` set to the actual VM executable. The extension test provisions only an ephemeral local test channel, exercises both parent-denied and child-disabled policies, and checks that neither wrote a handshake byte.
+
+For the Go2 controller in the [external driver simulation](README.md#run-the-external-driver-simulation),
+select `--language py` and a signed Unitree development installation.
+The fixture allows up to 360 seconds for cold VM startup and execution of each case.
+The guest reads a separate ROSv2 steady clock to set a deadline for each driver request.
+The report records cold VM elapsed time independently of the native physics reference.

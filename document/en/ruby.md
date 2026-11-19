@@ -56,3 +56,11 @@ and run `xmake build`. Set `WROS_VM` to the trusted VM's absolute path and
 run `xmake test -j1` for the two engine tests. A platform extension test
 uses an isolated idle peer and checks that both permission denials send no
 packet. See [platform examples](platform-examples.md) and [Xmake](xmake.md).
+
+The source tree includes a Go2 controller for the official MuJoCo fixture.
+Use the same signed Unitree SDK installation with
+`tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`.
+Supply the VM sources, executable, OpenSSL and vendor model specified in the
+[simulation instructions](README.md#run-the-external-driver-simulation).
+The controller obtains command deadlines through an explicitly granted
+ROSv2 steady clock. Its Wasm imports no WASI operations.

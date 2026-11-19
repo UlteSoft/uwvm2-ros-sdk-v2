@@ -48,3 +48,10 @@ GC 对象各自通过带标签的 libc 分配。解析器使用堆栈，AST 节�
 `xmake test -j1` 验证解释器和 AOT。扩展示例使用独立测试对端，检查两种
 拒权结果都没有发送数据。参见[平台示例](platform-examples.md)和
 [Xmake 使用说明](xmake.md)。
+
+源码目录提供官方 MuJoCo 夹具的 Go2 控制器。用同一份已签名的
+Unitree SDK 安装运行
+`tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`，
+并按[仿真说明](README.md#运行外置驱动仿真)提供 VM 源码、可执行文件、
+OpenSSL 和原厂模型。控制器从显式授权的 ROSv2 稳态时钟获取命令期限，
+生成的 Wasm 不导入 WASI 操作。
