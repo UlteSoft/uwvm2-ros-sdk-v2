@@ -104,9 +104,9 @@
     },
     {
       "path": "language/vbnet/xmake/adapter.lua",
-      "bytes": 1732,
+      "bytes": 1905,
       "mode": 420,
-      "sha256": "fc4a1be0355be139d15b769370513561bed486e38cd6709aa6c7c2a6c12b6904"
+      "sha256": "d8db8c8b9627e41dde54fa189a607966729348696c2b3eeb171d0f588f96c2ca"
     }
   ]
 }

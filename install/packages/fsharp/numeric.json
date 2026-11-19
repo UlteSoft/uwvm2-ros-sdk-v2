@@ -110,9 +110,9 @@
     },
     {
       "path": "language/fsharp/xmake/adapter.lua",
-      "bytes": 1704,
+      "bytes": 1877,
       "mode": 420,
-      "sha256": "241203da125e9fcaf4057541b403c1683c75455841f9befd7d87f3403ec62a6f"
+      "sha256": "94a35ddde822c931fa2a89f0389cb7bb3227060d029a2cc8928df9decd9a23d7"
     }
   ]
 }

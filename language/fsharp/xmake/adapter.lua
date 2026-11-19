@@ -19,8 +19,8 @@ end
 
 function build(target, request, sources)
     local args = {"--target", request.arch, request.eh and "--eh" or "--no-eh", request.mte_flag, request.operations[1] == "driver.connect" and "--driver-entry" or (#request.operations == 1 and "--scene-entry" or "--entry"),
-                  request.exports[1], "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
-                  "--dotnet", assert(os.getenv("WROS_DOTNET")), "--mono-compiler", assert(os.getenv("WROS_MONO")),
+                  request.exports[1], "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN to the qualified Wasm LLVM directory"),
+                  "--dotnet", assert(os.getenv("WROS_DOTNET"), "Set WROS_DOTNET to the prepared host dotnet directory"), "--mono-compiler", assert(os.getenv("WROS_MONO"), "Set WROS_MONO to the prepared host compiler directory"),
                   "-o", target:targetfile()}
     table.join2(args, sources)
     os.vrunv(request.program, args)

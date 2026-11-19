@@ -116,9 +116,9 @@
     },
     {
       "path": "language/csharp/xmake/adapter.lua",
-      "bytes": 2483,
+      "bytes": 2656,
       "mode": 420,
-      "sha256": "f81729ad50c8ef0fe5b619effdab635948f773d8c8b36c8440f631e53130d28d"
+      "sha256": "9e6522b927ae6acd5459b7646094d138466128b10ca0e7322eec22e6b06e4134"
     },
     {
       "path": "tests/csharp/README.md",

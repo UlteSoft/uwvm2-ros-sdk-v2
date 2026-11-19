@@ -27,9 +27,9 @@ function build(target, request, sources)
         os.mkdir(path.directory(output))
     end
     local args = {"--target", request.arch, request.mte_flag, request.operations[1] == "driver.connect" and "--driver-entry" or (#request.operations == 1 and "--scene-entry" or "--entry"), request.exports[1],
-                  "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
-                  "--dotnet", assert(os.getenv("WROS_DOTNET")),
-                  "--mono-compiler", assert(os.getenv("WROS_MONO")), "-o", output}
+                  "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN to the qualified Wasm LLVM directory"),
+                  "--dotnet", assert(os.getenv("WROS_DOTNET"), "Set WROS_DOTNET to the prepared host dotnet directory"),
+                  "--mono-compiler", assert(os.getenv("WROS_MONO"), "Set WROS_MONO to the prepared host compiler directory"), "-o", output}
     if request.kind == "static" then
         table.join2(args, {"-c", "--sysroots", assert(request.sysroots, "Set WROS_SYSROOTS for a C# object")})
     end

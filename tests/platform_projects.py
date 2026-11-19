@@ -62,6 +62,8 @@ def main():
     for name in ("vm", "xmake", "output"):
         p.add_argument("--" + name, type=Path, required=True)
     p.add_argument("--site", type=Path)
+    p.add_argument("--managed-host", type=Path, help="prefix created by prepare_host.py for the selected .NET language")
+    p.add_argument("--managed-toolchain", type=Path, help="qualified Wasm LLVM installation for .NET AOT")
     p.add_argument("--check-failure", action="store_true", help="also execute a deliberately failing local C assertion")
     a = p.parse_args()
     out = a.output.resolve()
@@ -77,6 +79,17 @@ def main():
         p.error("run in the designated 64 GiB test cgroup")
     env = {k:v for k,v in os.environ.items() if not k.startswith(("WROS_", "UWVM_", "XMAKE_"))}
     env.update(PATH="/usr/bin:/bin", WROS_VM=str(vm), TMPDIR=str(out), XMAKE_GLOBALDIR=str(out/"global"))
+    if a.language in ("csharp", "fsharp", "vbnet"):
+        if a.managed_host is None or a.managed_toolchain is None:
+            p.error("a managed example requires --managed-host and --managed-toolchain")
+        tools = {"WROS_DOTNET": a.managed_host / "dotnet", "WROS_MONO": a.managed_host / "compiler",
+                 "WROS_TOOLCHAIN": a.managed_toolchain}
+        for key, directory in tools.items():
+            if not directory.is_dir():
+                p.error(f"{key} directory is unavailable: {directory}")
+            env[key] = str(directory.resolve())
+    elif a.managed_host is not None or a.managed_toolchain is not None:
+        p.error("managed host parameters apply only to .NET languages")
     state = {"complete": False, "sdk_commit": a.commit, "vm_sha256": digest(vm), "cgroup": cgroup,
              "language": a.language, "site_sha256": digest(a.site) if a.site else None, "cases": []}
 
