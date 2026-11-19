@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--sysroots", type=lambda name: Path(name).resolve(), required=True, action="append")
     parser.add_argument("--sdk", type=Path, default=ROOT, help="SDK tree or selective development installation")
     parser.add_argument("--host-cxx", type=Path)
+    parser.add_argument("--profile", choices=("eh", "noeh"), help="qualify one signed tagged release")
     candidate_arguments(parser)
     args = parser.parse_args()
     work, sdk = args.output, args.sdk.resolve()
@@ -36,7 +37,7 @@ def main():
         argv = candidate_command(command, args.candidate_mte)
         result = subprocess.run(argv, cwd=work, capture_output=True, timeout=240)
         (work / (label + ".stderr")).write_bytes(result.stderr)
-        record["cases"].append(dict(name=label, argv=argv, exit=result.returncode))
+        record["cases"].append(dict(name=label, argv=argv, exit=result.returncode, expected_success=expect is None))
         save()
         valid = result.returncode == 0 if expect is None else result.returncode != 0 and expect.encode() in result.stderr
         if not valid:
@@ -50,6 +51,8 @@ def main():
         compiler += ["--sysroots", receipt]
     if args.host_cxx:
         compiler += ["--host-cxx", args.host_cxx]
+    if args.profile is not None:
+        compiler.append("--eh" if args.profile == "eh" else "--no-eh")
     base = [args.runtime, *Profile().uwvm_feature_flags(), "--runtime-memtag-mode", "sync",
             "--runtime-memtag-backend", "software", "--runtime-memtag-action", "crash",
             "--wasm-set-main-module-name", "main", "--runtime-llvm-jit-cache-path", "disable",
@@ -59,6 +62,8 @@ def main():
     (app / "mode_off.go").write_text("//go:build wros_nomte\n\npackage main\nconst tagged=false\n")
     cases = [("collector-eh", []), ("collector-noeh", ["--no-eh"]),
              ("nomte-eh", ["--no-mte"]), ("nomte-noeh", ["--no-mte", "--no-eh"])]
+    if args.profile is not None:
+        cases = [("collector-" + args.profile, [])]
     source.write_bytes((ROOT / "tests/tinygo/collector.go").read_bytes())
     for label, flags in cases:
         identity = json.loads(run(label + "-build", [*compiler, *flags]))

@@ -170,7 +170,7 @@ def main():
     ]
     language_files["tinygo"] = [
         "bin/wrtg", "tools/wasm/tag_ir.cpp", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
-        *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json",
+        *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json", "check_site.py",
             "scene/go.mod", "scene/scene_wros.go", "runtime/arch_tinygowasm.go", "runtime/gc_blocks.go",
             "runtime/runtime_tinygowasm.go", "runtime/runtime_wasip1.go", "runtime/wros_gc.go", "runtime/wros_gc.c")],
     ]

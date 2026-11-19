@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--eh", action="store_true", help="exercise the tagged exception-enabled sysroot")
     parser.add_argument("--goroot", type=Path)
     parser.add_argument("--tinygoroot", type=Path)
+    parser.add_argument("--host-cxx", type=Path)
     candidate_arguments(parser)
     args = parser.parse_args()
     if bool(args.goroot) != bool(args.tinygoroot):
@@ -125,7 +126,7 @@ def main():
         (project / "main.go").write_bytes(go_source.read_bytes())
         module = work / "tinygo.wasm"
         run("tinygo-compile", [ROOT / "bin/wrtg", project, "--eh" if args.eh else "--no-eh", "--sysroots", args.sysroots, "--toolchain", args.toolchain, "--goroot", args.goroot.resolve(),
-                               "--tinygoroot", args.tinygoroot.resolve(), "-o", module])
+                               "--tinygoroot", args.tinygoroot.resolve(), *(["--host-cxx", args.host_cxx] if args.host_cxx else []), "-o", module])
         execute("tinygo", 32, module)
     receipt["complete"] = all(sha(Path(p)) == d for p, d in receipt["inputs"].items())
     save()

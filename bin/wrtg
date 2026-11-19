@@ -20,6 +20,9 @@ from guest_profile import Profile
 import qualification
 
 LANGUAGE = SDK / "language/tinygo"
+sys.path.insert(0, str(LANGUAGE))
+import check_site
+import local_release
 GO_SHA = "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
 TINYGO_SHA = "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
 RUNTIME = {
@@ -95,7 +98,9 @@ def build(args, project, output, scratch):
     host_cxx = args.host_cxx or shutil.which("c++", path="/usr/bin:/bin")
     if not host_cxx:
         raise ValueError("host C++ compiler required to build the LLVM IR tool")
-    admission = qualification.admit("tinygo", args, profile, {"go": go / "bin/go", "tinygo": tinygo / "bin/tinygo", "host_cxx": host_cxx})
+    admission = qualification.admit("tinygo", args, profile,
+                                    {"go": go / "bin/go", "tinygo": tinygo / "bin/tinygo", "host_cxx": host_cxx},
+                                    selected_release=args.selected_release)
 
     def command(arguments):
         return make_command(tool, args.sysroots, profile, "c", arguments)[0]
@@ -164,18 +169,38 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("project", type=Path, help="directory containing go.mod and package main")
     parser.add_argument("-o", "--output", type=Path, required=True)
-    parser.add_argument("--goroot", type=Path, required=True)
-    parser.add_argument("--tinygoroot", type=Path, required=True)
-    parser.add_argument("--toolchain", type=Path, required=True, help="patched LLVM development prefix")
-    parser.add_argument("--sysroots", type=Path, required=True, action="append")
+    parser.add_argument("--goroot", type=Path)
+    parser.add_argument("--tinygoroot", type=Path)
+    parser.add_argument("--toolchain", type=Path, help="patched LLVM development prefix")
+    parser.add_argument("--sysroots", type=Path, action="append")
     parser.add_argument("--host-cxx", type=Path, help="native compiler for the SDK's build-time LLVM tool")
     parser.add_argument("--target", choices=("wasm32",), default="wasm32")
     parser.add_argument("--core", choices=("3.0",), default="3.0")
     qualification.arguments(parser)
-    parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--eh", action=argparse.BooleanOptionalAction)
     parser.add_argument("--print-identity", action="store_true", help="print producer, stages and final module SHA-256")
     args = parser.parse_args()
     try:
+        args.selected_release = None
+        explicit = (args.toolchain, args.sysroots, args.goroot, args.tinygoroot)
+        if not any(explicit):
+            site = local_release.site_config(SDK)
+            if site is None or qualification.switch(args) != "--mte" or args.host_cxx is not None:
+                raise ValueError("provide explicit producer paths or install a signed strict TinyGo site profile")
+            row = check_site.select(site)
+            args.selected_release = qualification.canonical(row)
+            args.toolchain = Path(site["toolchain"])
+            args.sysroots = list(map(Path, site["sysroots"]))
+            tools = check_site.inputs(args.toolchain)
+            args.goroot = tools["go"].parents[1]
+            args.tinygoroot = tools["tinygo"].parents[1]
+            args.host_cxx = tools["host_cxx"].resolve(strict=True)
+            if args.eh is None:
+                args.eh = row["profile"]["exceptions"] == "eh"
+        elif not all(explicit):
+            raise ValueError("provide --toolchain, --sysroots, --goroot and --tinygoroot together")
+        if args.eh is None:
+            args.eh = True
         project = args.project.resolve(strict=True)
         output = args.output.absolute()
         if not (project / "go.mod").is_file() or output.suffix != ".wasm":

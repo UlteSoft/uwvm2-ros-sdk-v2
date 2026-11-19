@@ -17,7 +17,7 @@ def main():
     sdk = args.sdk
     language = sdk.parent.name
     platform = sdk.parent.parent.name
-    if sdk.name != 'development' or language not in ('c', 'cpp', 'fortran', 'lua', 'nim'):
+    if sdk.name != 'development' or language not in ('c', 'cpp', 'fortran', 'lua', 'nim', 'tinygo'):
         parser.error('supply one installed development selection')
     out = args.output
     state = dict(complete=False, cgroup=cgroup_record(), language=language, platform=platform,
@@ -56,6 +56,13 @@ def main():
         script.append('target_end()')
         target('robot', 'binary', 'app.'+ext)
         script.extend(['add_deps("status")', 'set_wros_profile({build_receipt = true})'])
+    elif language == 'tinygo':
+        (out/'go.mod').write_text('module example.local/robot\n\ngo 1.24\n\nrequire wros.local/scene v0.0.0\n'
+                                  + 'replace wros.local/scene => ' + json.dumps(str(sdk/'language/tinygo/scene')) + '\n')
+        (out/'main.go').write_text('package main\nimport "wros.local/scene"\n'
+                                   'func main() { if scene.Abi() != 2 { panic("wrong ABI") } }\n')
+        target('robot','binary','go.mod')
+        script.append('set_wros_profile({build_receipt = true})')
     elif language == 'nim':
         shutil.copyfile(sdk/'examples/nim/body.nim', out/'body.nim')
         target('robot','binary','body.nim')

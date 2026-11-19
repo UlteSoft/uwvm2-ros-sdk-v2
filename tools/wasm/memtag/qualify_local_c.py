@@ -20,6 +20,8 @@ def verify_checkout(commit, language):
     scopes = ("bin", "tests", "install", "include", "share/abi", "share/qualification", "tools/wasm/memtag")
     if language == "objectc":
         scopes += ("language/objectc", "third-parties/objectc", "examples/objectc")
+    if language == "tinygo":
+        scopes += ("language/tinygo", "tools/wasm/tag_ir.cpp")
     if language == "fortran":
         scopes += ("language/fortran", "third-parties/fortran", "examples/fortran")
     if language == "nim":
@@ -58,6 +60,7 @@ def main():
     p.add_argument("--objc-runtime", type=lambda s: Path(s).resolve())
     p.add_argument("--approved-objc-inputs-sha256",
                    help="SHA-256 of the canonical Objective-C compiler, runtime receipt and archive digest map")
+    p.add_argument("--approved-tinygo-inputs-sha256", help="approved digest of Go, TinyGo and host C++ binary identities")
     p.add_argument("--nim-producer", type=lambda s: Path(s).resolve())
     p.add_argument("--approved-nim-producer-sha256")
     p.add_argument("--approved-flang-sha256", help="approved WebAssembly-only TOOLCHAIN/bin/flang")
@@ -65,7 +68,7 @@ def main():
     p.add_argument("--sdk-commit", required=True, help="independently approved full Git commit")
     for key in ("producer", "vm", "sysroots"):
         p.add_argument("--approved-" + key + "-sha256", required=True)
-    p.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran", "tinygo"), default="c")
     p.add_argument("--target", choices=("wasm32", "wasm64"), required=True)
     p.add_argument("-O", choices=("2", "3"), default="2")
     p.add_argument("-g", action="store_true")
@@ -112,6 +115,14 @@ def main():
                 qualification.digest(marker) != a.approved_marker_sha256):
             p.error("Fortran qualification requires -O3, EH, the approved Flang and its matching marker")
         external.update(flang=flang, marker=marker)
+    if a.language == "tinygo":
+        if a.target != "wasm32" or a.O != "3" or not a.g:
+            p.error("TinyGo qualification requires single-threaded wasm32 at -O3 -g")
+        sys.path.insert(0, str(ROOT / "language/tinygo"))
+        from check_site import inputs as tinygo_inputs
+        external = tinygo_inputs(a.toolchain)
+        if qualification.canonical({k: qualification.digest(v) for k, v in external.items()}) != a.approved_tinygo_inputs_sha256:
+            p.error("TinyGo requires the approved Go, TinyGo and host C++ compiler digests")
     vm_digest = qualification.digest(a.runtime)
     names = ("clang", "wasm-ld", "llc", "llvm-objdump", "llvm-ar", "FileCheck")
     binaries = {name: qualification.digest(a.toolchain / "bin" / name) for name in names}
@@ -136,16 +147,23 @@ def main():
     base = ["--toolchain", a.toolchain, "--runtime", a.runtime]
     settings = ["-O" + a.O, "--debug" if a.g else "--no-debug"]
     exception = ["--eh"] if a.eh else []
+    go_flags = []
+    if a.language == "tinygo":
+        go_flags = ["--goroot", external["go"].parents[1], "--tinygoroot", external["tinygo"].parents[1],
+                    "--host-cxx", external["host_cxx"].resolve(strict=True)]
     tests = [
         ("stack", "memtag_stack_generations.py", [*base, "--work", a.output / "stack"]),
         ("global", "memtag_global_pointer_origins.py", [*base, *settings, "--work", a.output / "global"]),
         ("aggregate", "memtag_aggregate_pointers.py", ["--llc", a.toolchain / "bin/llc",
             "--linker", a.toolchain / "bin/wasm-ld", "--runtime", a.runtime, "--output", a.output / "aggregate"]),
         ("heap", "memtag_heap_neighbors.py", [*base, *settings, "--candidate-mte", "--address-bits", str(bits),
-                                              "--sysroots", a.sysroots, *exception, "--output", a.output / "heap"]),
+                                              "--sysroots", a.sysroots, *exception, *go_flags, "--output", a.output / "heap"]),
         ("libc", "memtag_libc_scratch.py", [*base, *exception, "--address-bits", str(bits), "--sysroots", a.sysroots,
                                             "--output", a.output / "libc"]),
     ]
+    if a.language == "tinygo":
+        tests.append(("tinygo", "tinygo_mte.py", [*base, *go_flags, "--sysroots", a.sysroots, "--profile", profile.exceptions,
+                                                 "--candidate-mte", "--output", a.output / "tinygo"]))
     if a.language == "nim":
         tests.append(("nim", "nim_aot.py", [*base, "--sysroots" + str(bits), a.sysroots, "--producer", a.nim_producer,
                                             "--candidate-mte", "--output", a.output / "nim"]))
@@ -203,7 +221,7 @@ def main():
             raise ValueError("missing C++ allocation execution evidence")
     if a.language == "fortran":
         results["fortran"] = qualification.canonical({name: proof for name, proof in results.items() if name.startswith("fortran-")})
-    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim", "objectc": "objectc", "fortran": "fortran"}[a.language]
+    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim", "objectc": "objectc", "fortran": "fortran", "tinygo": "tinygo"}[a.language]
     row = dict(language=a.language, profile=profile.to_dict(), settings={"optimization": a.O, "debug": a.g},
                inputs=measured, vm_sha256=vm_digest, sdk_commit=a.sdk_commit,
                source_lock_sha256=qualification.digest(lock), producer_programs_sha256=qualification.canonical(binaries),

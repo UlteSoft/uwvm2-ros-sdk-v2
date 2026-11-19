@@ -108,3 +108,23 @@ a live linked list across collection, object tags, and actual reclamation.
 Its VM matrix includes authorized and denied ROS calls, extension parsing,
 and both VM engines. Qualification is scoped to these host releases and
 guest profiles.
+
+## Install a signed TinyGo development site
+
+Place the reviewed Go and TinyGo release roots at `TOOLCHAIN/libexec/wros/go` and
+`TOOLCHAIN/libexec/wros/tinygo`. Place the native C++ compiler used to build
+the LLVM marker at `TOOLCHAIN/libexec/wros/host-cxx`. These entries may link to
+local installations. Run `tools/wasm/memtag/qualify_local_c.py --language tinygo`
+against that toolchain, the VM and matching sysroot. Supply the SHA-256 of the
+canonical JSON map of the original Go executable, TinyGo executable and host
+C++ executable digests under the keys `go`, `tinygo` and `host_cxx` through
+`--approved-tinygo-inputs-sha256`. The release covers the chosen single-threaded
+wasm32 EH profile at `-O3 -g`. Separate runs qualify EH and no-EH.
+
+Sign the resulting release statement under the site's WSEA policy and install
+with `--language tinygo --site-profile /absolute/path/site.json`. With the Go
+module reference above, `wrtg PROJECT -o controller.wasm --build-receipt` uses
+the selected producer. Xmake accepts the same site installation without
+producer environment variables. The compiler verifies the producer components
+before compiling. Changing the signed release or a measured compiler input
+requires a new review.

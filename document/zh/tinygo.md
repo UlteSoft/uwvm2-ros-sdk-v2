@@ -65,3 +65,19 @@ LLVM 后端使用 `-O3 -g` 编译，并按静态证明省略部分安全栈访�
 此配置关闭 goroutine 调度器。等待、消息和设备访问使用显式授权的 ROS 接口。运行时的命令参数为空，无控制台。读取实时时钟与单调时钟时使用可审计的 WASIp1 时钟接口。供哈希表使用的非密码学种子不依赖宿主熵源。密码学熵源、描述符、套接字和其他 POSIX 导入受最终白名单约束。编译被拒时保留上次生成的文件。
 
 运行时回归程序检查堆内存复用、分配清零、链表跨回收存活、对象标签和实际回收数量。VM 测试分别覆盖两个执行引擎、ROS 授权与拒绝以及 MTE 扩展语法。验证范围限定于上述宿主发行包和客户配置。
+
+## 安装签名的 TinyGo 开发环境
+
+将经过审核的 Go 和 TinyGo 发行版根目录放在 `TOOLCHAIN/libexec/wros/go` 和
+`TOOLCHAIN/libexec/wros/tinygo`，将编译 LLVM 标记工具所用的本机 C++ 编译器
+放在 `TOOLCHAIN/libexec/wros/host-cxx`。这些路径可以链接到本机安装。
+通过 `tools/wasm/memtag/qualify_local_c.py --language tinygo` 对选定的工具链、
+VM 和 sysroot 做验收。用 `--approved-tinygo-inputs-sha256` 指定包含 `go`、
+`tinygo`、`host_cxx` 三个二进制 SHA-256 的规范 JSON 对象的 SHA-256。
+每次验收覆盖一个单线程 wasm32 配置，优化级别为 `-O3 -g`。EH 和 no-EH 分别验收。
+
+按照站点的 WSEA 策略签署验收声明。安装时选择 `--language tinygo` 和
+`--site-profile /绝对路径/site.json`。项目配置上述 Go 模块引用后，
+执行 `wrtg PROJECT -o controller.wasm --build-receipt` 即可构建。
+Xmake 可以直接使用该安装提供的工具路径。编译器在构建前校验工具链各组件。
+签名声明或经过度量的编译器输入发生变化后，需要重新审核。
