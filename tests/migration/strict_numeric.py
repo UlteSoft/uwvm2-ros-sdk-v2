@@ -23,7 +23,7 @@ def run(folder, name, argv, expect=0):
     return result.returncode
 
 
-def compare(folder, sources, sdk, vm, native):
+def compare(folder, sources, sdk, vm, native, denied_imports):
     """Require success and an observed guest trap for the changed-reference control."""
     recorded = {}
     for negative in (False, True):
@@ -39,8 +39,18 @@ def compare(folder, sources, sdk, vm, native):
             "--build-receipt", *sources, "-o", guest])
         receipt = Path(str(guest) + ".wros-build.json")
         info = json.loads(receipt.read_bytes())
-        if info["mode"] != "strict" or inspect(guest.read_bytes()):
-            raise ValueError("expected a strict build with zero Wasm host imports")
+        if info["mode"] != "strict":
+            raise ValueError("expected a strictly qualified build")
+        imports = inspect(guest.read_bytes())
+        policy = []
+        if imports:
+            policy = ["--wasm-set-main-module-name", "numeric_guest", "--wasip1-single-create", "numeric_guest",
+                      "--wasip1-single-enable", "numeric_guest"]
+            for item in imports:
+                if (item["module"] != "wasi_snapshot_preview1" or item["kind"] != 0 or
+                        denied_imports.get(item["name"]) != (item.get("params"), item.get("results"))):
+                    raise ValueError(f"unexpected host import {item!r}")
+                policy.extend(["--wasip1-single-interface", "numeric_guest", item["name"], "deny"])
         run(folder, label + "-verify", [sys.executable, "-B", sdk / "install/qualification.py",
             "--vm", vm, "--artifact", guest, "--receipt", receipt, "--approved-receipt-sha256", sha(receipt)])
         engines = {}
@@ -48,16 +58,16 @@ def compare(folder, sources, sdk, vm, native):
             name = label + "-" + engine
             rc = run(folder, name, [vm, *Profile().uwvm_feature_flags(), "--debug-fault-action", "exit",
                        "--runtime-" + engine, "--runtime-compile-threads", "0",
-                       "--runtime-llvm-jit-cache-path", "disable", "--run", guest], None if negative else 0)
+                       "--runtime-llvm-jit-cache-path", "disable", *policy, "--run", guest], None if negative else 0)
             if negative and "unreachable" not in (folder / (name + ".log")).read_text(errors="replace").lower():
                 raise ValueError(f"{name} failed without the expected guest trap")
             engines[engine] = rc
-        recorded[label] = dict(nativeExit=code, vmExits=engines, hostImports=[], wasmSha256=sha(guest),
+        recorded[label] = dict(nativeExit=code, vmExits=engines, hostImports=imports, vmPolicy=policy, wasmSha256=sha(guest),
                                strictBuildReceiptSha256=sha(receipt))
     return recorded
 
 
-def qualify(package, scope, runner, entries, absent, vectors, adapter, dependencies=None):
+def qualify(package, scope, runner, entries, absent, vectors, adapter, dependencies=None, denied_imports=None):
     fixture = runner.with_suffix(".cpp")
     p = argparse.ArgumentParser(description=__doc__)
     for key in ("corpus", "sdk", "vm", "output"):
@@ -117,7 +127,7 @@ def qualify(package, scope, runner, entries, absent, vectors, adapter, dependenc
                     (folder / "adapter.h").write_text(adapter(files, entrypoint))
                     put(folder, "driver.cpp", fixture.read_bytes())
                     sources = [folder / p for p in files if p.suffix == ".cpp"] + [folder / "driver.cpp"]
-                    cases = compare(folder, sources, args.sdk, args.vm, args.native_cxx)
+                    cases = compare(folder, sources, args.sdk, args.vm, args.native_cxx, denied_imports or {})
                     result["variants"][key] = dict(sources=pins, runs=cases)
                 obs.update(status="matched-qualified-source", variant=key)
         finally:

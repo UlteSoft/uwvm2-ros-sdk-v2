@@ -141,3 +141,30 @@ GoogleTest and both Wasm engines. The native trace observed 78 assertions.
 The display-time test performed its original formatting call with zero
 assertions. Both engines rejected an intentionally changed callback assertion
 count and the clock check with its resource grant removed.
+
+### Camera image encoding metadata
+
+A camera, an image decoder and a Wasm algorithm must agree on channel count
+and sample depth. Run the original ROS 1 or ROS 2 `sensor_msgs` header against
+known pixel layouts in the qualification cgroup:
+
+```sh
+python3 tests/migration/image_encodings.py --corpus "$ROS_CORPUS" \
+  --sdk "$INSTALLED_CPP" --vm "$QUALIFIED_VM" --output "$NEW_RESULTS"
+```
+
+The run examined 23 package snapshots and compiled 10 distinct header versions.
+Each version ran natively and in strict-MTE wasm32 interpreter and AOT modes.
+The cases cover 39 monochrome, RGB, alpha, Bayer and generic pixel layouts,
+including 12-channel inputs. Older headers explicitly recognize only one
+through four generic channels and must reject the 12-channel input. Both
+channel and depth queries must reject unknown formats. A deliberately
+wrong bit-depth reference must fail in native and both Wasm engines.
+
+Some ROS 1 headers rely on the caller to include the C declaration of
+`atoi`. The fixture supplies that declaration before the original header.
+Some newer headers use C++ regular expressions. Their linked libc++ may
+reference environment, clock and exit imports. The harness checks their
+signatures and denies each operation. All metadata computations run with
+zero granted host operations. Camera acquisition and pixel-buffer conversion
+require separate qualification.
