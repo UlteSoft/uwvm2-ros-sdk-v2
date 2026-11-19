@@ -31,6 +31,11 @@ func Rotate(value uint32) uint32 { return value << 27 | value >> 5 }
 func Narrow(value int64) int32 { return int32(value) }
 func Widen(value int32) uint64 { return uint64(value) }
 func UnsignedValue(value int32) uint32 { return uint32(value) }
+func ConvertCount(value uint32, shift int32) uint32 { return value >> uint32(shift) }
+func ConvertBranch(first int32, second uint32, choose bool) uint32 {
+    if choose { second = uint32(first) }
+    return second
+}
 func Start() uint32 { return 0 }
 """
 CONSUMER = """(module
@@ -48,6 +53,8 @@ CONSUMER = """(module
  (import "algorithm" "Narrow" (func $narrow (param i64) (result i32)))
  (import "algorithm" "Widen" (func $widen (param i32) (result i64)))
  (import "algorithm" "UnsignedValue" (func $unsigned (param i32) (result i32)))
+ (import "algorithm" "ConvertCount" (func $count (param i32 i32) (result i32)))
+ (import "algorithm" "ConvertBranch" (func $branch (param i32 i32 i32) (result i32)))
  (func (export "_start")
   (if (i32.ne (call $gain (i32.const 2147483647) (i32.const 2) (i32.const 3)) (i32.const 1)) (then unreachable))
   (if (i64.ne (call $sub (i64.const 4) (i64.const 6)) (i64.const -2)) (then unreachable))
@@ -72,7 +79,10 @@ CONSUMER = """(module
   (if (i32.ne (call $rotate (i32.const 32)) (i32.const 1)) (then unreachable))
   (if (i32.ne (call $narrow (i64.const 4294967297)) (i32.const 1)) (then unreachable))
   (if (i64.ne (call $widen (i32.const -1)) (i64.const -1)) (then unreachable))
-  (if (i32.ne (call $unsigned (i32.const -1)) (i32.const -1)) (then unreachable))))"""
+  (if (i32.ne (call $unsigned (i32.const -1)) (i32.const -1)) (then unreachable))
+  (if (call $count (i32.const -1) (i32.const -1)) (then unreachable))
+  (if (i32.ne (call $branch (i32.const -11) (i32.const 92) (i32.const 1)) (i32.const -11)) (then unreachable))
+  (if (i32.ne (call $branch (i32.const -11) (i32.const 92) (i32.const 0)) (i32.const 92)) (then unreachable))))"""
 NEGATIVE = {
     "pointer": "func Bad(p *int32) int32 { return *p }",
     "slice": "func Bad(p []int32) int32 { return p[0] }",

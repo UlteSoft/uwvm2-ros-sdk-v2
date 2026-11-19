@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/go.md",
-      "bytes": 5113,
+      "bytes": 5145,
       "mode": 420,
-      "sha256": "b3891487a0d84f32ca0f041343853c8fc2d0a71b3a3f67327633dde50480058a"
+      "sha256": "281248ab5cc2bd697d42201e1dc6ce0f8b976b10eb37522158e956832d7f5350"
     },
     {
       "path": "document/zh/go.md",
-      "bytes": 4745,
+      "bytes": 4778,
       "mode": 420,
-      "sha256": "a2a3c75a7c28a23732c3b1cf1888db693eb896edab5e17359e004142bdd98b3b"
+      "sha256": "9ac567ae5045eda21a9288b101e9ca1c8462992647475a48182522f72e40086d"
     },
     {
       "path": "examples/go/controller.go",
@@ -92,9 +92,9 @@
     },
     {
       "path": "language/go/registers.py",
-      "bytes": 21075,
+      "bytes": 21245,
       "mode": 420,
-      "sha256": "ee026d94ff0f54a82b467d336898bb6c0739e259c56b3cd34b98f1a9392d6089"
+      "sha256": "bf0d34f0b3e8cd0b508039120f730fbd7bf3cd6f1594b26c535e136cb92796e9"
     },
     {
       "path": "language/go/release.json",

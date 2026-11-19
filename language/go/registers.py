@@ -170,7 +170,7 @@ def lower(f, locations=None):
         base, amount = args
         if (t != operand or ids[base]["type"] == "bool" or v["type"] == "bool"
                 or register_type(ids[base]) != operand or register_type(ids[amount]) != count
-                or ids[amount]["type"] not in ("uint32", "uint64", "uint")
+                or ids[amount]["type"] == "bool"
                 or v.get("literal", 0) not in (0, 1)):
             raise ValueError("incorrect Go SSA shift signature")
         literal = ids[amount].get("literal", 0)
@@ -187,8 +187,10 @@ def lower(f, locations=None):
         const(operand, width - 1 if signed else 0)
         get(amount)
         const(count, width)
-        # Wasm masks a shift count. Test the original unsigned count, including
-        # its upper bits, before selecting a zero value or a saturated count.
+        # A sign-only cast can leave its original SSA type on the count. The
+        # Go frontend emits a distinct control path for negative-count panics,
+        # which the register-only profile does not admit. The pure shift here
+        # uses the count bits as unsigned, including bits a Wasm shift masks.
         code.extend(bytes([0x49 if count == I32 else 0x54, 0x1b]))
         if signed:
             code.append(instruction)
@@ -251,7 +253,7 @@ def lower(f, locations=None):
             const(t, 0 if negate else -1)
             get(args[0])
             code.append((0x6b if t == I32 else 0x7d) if negate else (0x73 if t == I32 else 0x85))
-        elif op in ("Copy", "Not") and len(args) == 1 and ids[args[0]]["type"] == v["type"]:
+        elif op in ("Copy", "Not") and len(args) == 1 and same_representation(ids[args[0]]["type"], v["type"]):
             get(args[0])
             if op == "Not":
                 if v["type"] != "bool":
@@ -266,7 +268,7 @@ def lower(f, locations=None):
         for value in rows:
             args = value.get("args", [])
             if (not args or len(args) != len(predecessors[ident]) or any(
-                    ids[arg]["type"] != value["type"] for arg in args)):
+                    not same_representation(ids[arg]["type"], value["type"]) for arg in args)):
                 raise ValueError("Go phi operands must match its predecessor edges and scalar type")
             reserve(value, TYPES[value["type"]])
 
