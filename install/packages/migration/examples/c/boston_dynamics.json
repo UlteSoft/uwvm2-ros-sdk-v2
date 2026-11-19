@@ -2,27 +2,39 @@
   "files": [
     {
       "path": "examples/platform/boston_dynamics/migration/c/README.md",
-      "bytes": 479,
+      "bytes": 854,
       "mode": 420,
-      "sha256": "8e7d96386c3a4485e829ea0b75f84a0bbe7184be848316a858ce354e90f5d5f1"
+      "sha256": "2ae11702d71014fef337eee03b81c88b5e14bd141d09e3ab4b4dd0b4485c61b1"
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/README.zh.md",
-      "bytes": 480,
+      "bytes": 759,
       "mode": 420,
-      "sha256": "0fec516e3bb306132f3bedc0cd1b582c46e9b739eb0052663690e76d2fd24f6b"
+      "sha256": "a3b511ed288832225a297c64e2934f75872fc391a789dfa0dd552cc3614c24ac"
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/upstream.lock",
-      "bytes": 232,
+      "bytes": 270,
       "mode": 420,
-      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+      "sha256": "a1aa1c3b2f1fd3f3c744c1cfafc2817993518a5a10692e9cebff6c2e8a35612e"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/c/vendor-package.xml",
+      "bytes": 358,
+      "mode": 420,
+      "sha256": "a27afefacfdbadf8cb1bcb64be78ee0a90d135d4dc97044a544e172760b3fd6d"
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/xmake.lua",
       "bytes": 1103,
       "mode": 420,
       "sha256": "d252459b6dff5a4237ad275b01179f2e6bdbf584505323d7abddc109d5aa82a6"
+    },
+    {
+      "path": "examples/shared/migration/c/stage_vendor.py",
+      "bytes": 2387,
+      "mode": 420,
+      "sha256": "67415c9b8c3c9afb32df5635b44c439bed8eb9f3126e00cf7a0f7aa952011a7c"
     }
   ]
 }

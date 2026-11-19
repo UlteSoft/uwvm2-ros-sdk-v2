@@ -100,7 +100,10 @@ def main():
             names = ["README.md", "README.zh.md", "xmake.lua"]
             if language == "c":
                 names.append("upstream.lock")
-            package(f"migration/examples/{language}/{platform}", [directory + name for name in names])
+            inputs = [directory + name for name in names]
+            if language == "c" and (ROOT / directory / "vendor-package.xml").is_file():
+                inputs.extend([directory + "vendor-package.xml", "examples/shared/migration/c/stage_vendor.py"])
+            package(f"migration/examples/{language}/{platform}", inputs)
     for platform in registry["platforms"]:
         for language in ("csharp", "vbnet", "fsharp"):
             managed_examples = ["document/en/managed-platform-examples.md", "document/zh/managed-platform-examples.md"]

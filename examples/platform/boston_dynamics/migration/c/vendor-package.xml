@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package format="3">
+  <name>wros_example_boston_dynamics</name>
+  <version>0.0.0</version>
+  <description>Local SDK example mapping for one original boston_dynamics resource.</description>
+  <maintainer email="sdk@example.invalid">SDK example</maintainer>
+  <license>See original resource license</license>
+</package>

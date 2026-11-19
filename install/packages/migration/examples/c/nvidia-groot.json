@@ -2,27 +2,39 @@
   "files": [
     {
       "path": "examples/platform/nvidia-groot/migration/c/README.md",
-      "bytes": 476,
+      "bytes": 854,
       "mode": 420,
-      "sha256": "a680c40d1d8adc95f0a774459fe92d808795da6f7ea093c8711f74808399b915"
+      "sha256": "258b7de8a72cca68748cd85379c65c2f3b8bfbab47599d7a3a5b6f5ffab1ea8a"
     },
     {
       "path": "examples/platform/nvidia-groot/migration/c/README.zh.md",
-      "bytes": 477,
+      "bytes": 759,
       "mode": 420,
-      "sha256": "99ff3ab4c7ca856fa20a710018dad03c724dfde5e711bbbcfd54e030f2f65287"
+      "sha256": "4cbc120dc986a4cf0e9ac9f104d5b0b735903ee90c3c060b82a396927b69cfa0"
     },
     {
       "path": "examples/platform/nvidia-groot/migration/c/upstream.lock",
-      "bytes": 232,
+      "bytes": 276,
       "mode": 420,
-      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+      "sha256": "2cec6a1d26e205ba7b658b925ee00838a052c2e86a0e1f047a7bda6dbfede67c"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/c/vendor-package.xml",
+      "bytes": 352,
+      "mode": 420,
+      "sha256": "2698aba2d2e9fc41d33f7e67526650a9f787d166612f668ac7c0336d45a56ef9"
     },
     {
       "path": "examples/platform/nvidia-groot/migration/c/xmake.lua",
       "bytes": 1100,
       "mode": 420,
       "sha256": "ecc45a24dcb86c91695fed1faeba2ddc6baff8e3c6c45b6685131d5c06ebc4ba"
+    },
+    {
+      "path": "examples/shared/migration/c/stage_vendor.py",
+      "bytes": 2387,
+      "mode": 420,
+      "sha256": "67415c9b8c3c9afb32df5635b44c439bed8eb9f3126e00cf7a0f7aa952011a7c"
     }
   ]
 }

@@ -1,5 +1,13 @@
-# fourier · C resource migration
+# fourier · Bounded vendor resource migration
 
-The offline build embeds the pinned ROS 2 IMU definition. Set `WROS_ROS_PACKAGE_ROOT` to `sensor_msgs` from the revision below to exercise `package://sensor_msgs/msg/Imu.msg`. The host verifies both hashes in `upstream.lock`. [Build and test](../../../../../document/en/platform-migration-examples.md).
+The default project uses the bundled ROS 2 IMU fixture. To use the original `config/config.yaml`, point `VENDOR_ROOT` to the locally supplied vendor repository at the pinned revision. This project supplies a ROS package manifest for this mapping. The original upstream software need not be a ROS package. Run these commands before building. [Build and test](../../../../../document/en/platform-migration-examples.md).
 
-[a941f14bb318d8d904505ed935ccbb97f24a70a4](https://github.com/ros2/common_interfaces/tree/a941f14bb318d8d904505ed935ccbb97f24a70a4)
+```sh
+python3 "$UWVM_ROS_SDK_ROOT/examples/shared/migration/c/stage_vendor.py" \
+  --project . --source-root "$VENDOR_ROOT" --output ./vendor-package
+export WROS_ROS_PACKAGE_ROOT="$PWD/vendor-package"
+xmake -j1
+xmake test -j1
+```
+
+[b434869719ae256d02d8285e88ea2b22c1515602](https://github.com/FFTAI/fourier_aurora_sdk/tree/b434869719ae256d02d8285e88ea2b22c1515602)

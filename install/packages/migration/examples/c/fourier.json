@@ -2,27 +2,39 @@
   "files": [
     {
       "path": "examples/platform/fourier/migration/c/README.md",
-      "bytes": 471,
+      "bytes": 832,
       "mode": 420,
-      "sha256": "0aebdf3a4522739e8731fa43dabde5dd456c5761a411dad4c291e218499640c3"
+      "sha256": "583b57dafe23cf722d647c1b2c94499bf45fffc1c660b8140b206e07f4af5329"
     },
     {
       "path": "examples/platform/fourier/migration/c/README.zh.md",
-      "bytes": 472,
+      "bytes": 737,
       "mode": 420,
-      "sha256": "fba53e03034ae68e477e98baa16eceaf8a57686a9618a11876f48969a0fcb204"
+      "sha256": "92bc9ab43d81947321d6db2421acee227ed30e47d291b4a42a3fe5d272c863a8"
     },
     {
       "path": "examples/platform/fourier/migration/c/upstream.lock",
-      "bytes": 232,
+      "bytes": 248,
       "mode": 420,
-      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+      "sha256": "2a4b60ff1e33959bc6a2c816b2f77f5bc0a48486f47f4a136b8048dc6d6bdab0"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/vendor-package.xml",
+      "bytes": 342,
+      "mode": 420,
+      "sha256": "fe51595058372a3968fb9a5a01bb77dc13dd0ac8b3fb35e77409f625ec0f5280"
     },
     {
       "path": "examples/platform/fourier/migration/c/xmake.lua",
       "bytes": 1095,
       "mode": 420,
       "sha256": "028d5e10bc8b6af778e90fa51f7501af055c9b1d1fca7fd5f0f124dfe15c4851"
+    },
+    {
+      "path": "examples/shared/migration/c/stage_vendor.py",
+      "bytes": 2387,
+      "mode": 420,
+      "sha256": "67415c9b8c3c9afb32df5635b44c439bed8eb9f3126e00cf7a0f7aa952011a7c"
     }
   ]
 }

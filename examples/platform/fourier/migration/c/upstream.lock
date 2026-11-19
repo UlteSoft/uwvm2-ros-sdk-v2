@@ -1,7 +1,7 @@
 [
   {
-    "uri": "package://sensor_msgs/msg/Imu.msg",
-    "sha256": "5800b7c2e6d3afed966ae229b1559f6e762c792ad34a88e55ad4288d8bbbd34b",
-    "manifest_sha256": "00cc932b8a1d2a9064c621bfacab56428a5175afe37269da38ba09361e8a4a5a"
+    "uri": "package://wros_example_fourier/config/config.yaml",
+    "sha256": "c45ec3d6a561b10c9d9cc852765eee906906f99ca2e7e9d0f0fe20006f3c4d83",
+    "manifest_sha256": "fe51595058372a3968fb9a5a01bb77dc13dd0ac8b3fb35e77409f625ec0f5280"
   }
 ]

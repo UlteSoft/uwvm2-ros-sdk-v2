@@ -1,7 +1,7 @@
 [
   {
-    "uri": "package://sensor_msgs/msg/Imu.msg",
-    "sha256": "5800b7c2e6d3afed966ae229b1559f6e762c792ad34a88e55ad4288d8bbbd34b",
-    "manifest_sha256": "00cc932b8a1d2a9064c621bfacab56428a5175afe37269da38ba09361e8a4a5a"
+    "uri": "package://wros_example_boston_dynamics/protos/bosdyn/api/robot_id.proto",
+    "sha256": "fc85f820d9b5f481adeb71df89e4d14f3f580a1d855af84d868ad1a29e535d02",
+    "manifest_sha256": "a27afefacfdbadf8cb1bcb64be78ee0a90d135d4dc97044a544e172760b3fd6d"
   }
 ]

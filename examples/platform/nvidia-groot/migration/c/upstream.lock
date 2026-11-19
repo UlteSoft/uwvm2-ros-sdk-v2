@@ -1,7 +1,7 @@
 [
   {
-    "uri": "package://sensor_msgs/msg/Imu.msg",
-    "sha256": "5800b7c2e6d3afed966ae229b1559f6e762c792ad34a88e55ad4288d8bbbd34b",
-    "manifest_sha256": "00cc932b8a1d2a9064c621bfacab56428a5175afe37269da38ba09361e8a4a5a"
+    "uri": "package://wros_example_nvidia_groot/demo_data/droid_sample/meta/modality.json",
+    "sha256": "9ccdf1c25a2422b62dfd23abc511010809d3d72595580914507c9013a9736861",
+    "manifest_sha256": "2698aba2d2e9fc41d33f7e67526650a9f787d166612f668ac7c0336d45a56ef9"
   }
 ]

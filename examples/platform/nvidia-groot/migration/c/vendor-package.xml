@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package format="3">
+  <name>wros_example_nvidia_groot</name>
+  <version>0.0.0</version>
+  <description>Local SDK example mapping for one original nvidia-groot resource.</description>
+  <maintainer email="sdk@example.invalid">SDK example</maintainer>
+  <license>See original resource license</license>
+</package>
