@@ -58,20 +58,24 @@ local function use_guest_rules()
     add_rules("wros.application")
 end
 
+--- @brief Select the installed language adapter and attach the Wasm build and test rules.
 function set_language(id)
     set_values("wros.language", id)
     use_guest_rules()
 end
 
+--- @brief Bind this target to the installed platform and its scoped guest build rules.
 function set_ros_platform(id)
     set_values("wros.platform", id)
     use_guest_rules()
 end
 
+--- @brief Select the exact installed SDK directory for this target.
 function set_wros_sdk(directory)
     set_values("wros.selection", directory)
 end
 
+--- @brief Apply supported compiler profile fields and report unknown fields during configuration.
 function set_wros_profile(profile)
     for key, value in pairs(profile) do
         if key == "core" or key == "eh" or key == "herbceptions" or key == "mte" or key == "std" or key == "lua_abi" or key == "lua_seed" or key == "build_receipt" then
@@ -106,10 +110,12 @@ function set_wros_test_policy(policy)
     set_values("wros.test_policy", policy)
 end
 
+--- @brief Declare guest functions or managed entry points to export from the compiled module.
 function add_wros_exports(...)
     add_values("wros.exports", ...)
 end
 
+--- @brief Select the ROS operations compiled into the embedded Lua runtime.
 function add_wros_lua_operations(...)
     add_values("wros.lua_operations", ...)
 end
@@ -119,14 +125,17 @@ function add_wros_python_modules(...)
     add_values("wros.py_modules", ...)
 end
 
+--- @brief Declare the ROS imports that the selected language frontend may generate.
 function add_wros_operations(...)
     add_values("wros.operations", ...)
 end
 
+--- @brief Choose the entry module among the TypeScript sources declared in this target.
 function set_wros_typescript_entry(file)
     set_values("wros.typescript_entry", file)
 end
 
+--- @brief Choose the fully qualified JVM class containing the application entry point.
 function set_wros_jvm_main(class_name)
     set_values("wros.jvm_main", class_name)
 end
