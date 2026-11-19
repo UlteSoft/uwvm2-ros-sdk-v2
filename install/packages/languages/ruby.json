@@ -38,9 +38,9 @@
     },
     {
       "path": "language/ruby/entry.cpp",
-      "bytes": 7443,
+      "bytes": 7565,
       "mode": 420,
-      "sha256": "4ca195391fab5c0c18202d2e61c37eba1587f783f67b5394b3e91884e5e19958"
+      "sha256": "f32e67536a80df7ee893f144100833774398433359924e56736160ad099c830f"
     },
     {
       "path": "language/ruby/pool.cpp",

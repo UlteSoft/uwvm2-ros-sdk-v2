@@ -173,7 +173,9 @@ mrb_value run(mrb_state *mrb, void *)
     mrb_define_module_function(mrb, module, "abi", abi, MRB_ARGS_NONE());
 #endif
 #ifdef WROS_RUBY_OPEN
-    mrb_define_class_under(mrb, module, "Capability", mrb->object_class);
+    auto *capability = mrb_define_class_under(mrb, module, "Capability", mrb->object_class);
+    MRB_SET_INSTANCE_TT(capability, MRB_TT_CDATA);
+    mrb_undef_class_method(mrb, capability, "new");
     mrb_define_module_function(mrb, module, "open", open_alias, MRB_ARGS_REQ(1));
 #endif
 #ifdef WROS_RUBY_CLOSE
