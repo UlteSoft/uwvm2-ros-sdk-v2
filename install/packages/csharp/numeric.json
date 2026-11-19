@@ -50,9 +50,9 @@
     },
     {
       "path": "language/csharp/Admit.cs",
-      "bytes": 7327,
+      "bytes": 7565,
       "mode": 420,
-      "sha256": "9cbf0a9f9f27a43db931171033226dbd3d68dbb212e6168a406655bb3a6fee52"
+      "sha256": "e368c32d0a9260d42f694546927257c2d30e5008d6e6a17c93263cdd8fc8ef06"
     },
     {
       "path": "language/csharp/Scene.cs",
@@ -86,9 +86,9 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 8856,
+      "bytes": 9879,
       "mode": 420,
-      "sha256": "a576eab3447288ab2b67e0dc74b45ac57718ac325e251618e931546b90948fe3"
+      "sha256": "320894b62f331ab9f97d15e8371409057829d63abb6096feeb3c5707e43c04d5"
     },
     {
       "path": "language/csharp/scalar.py",

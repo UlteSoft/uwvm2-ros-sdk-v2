@@ -105,20 +105,23 @@ def main():
             metadata["optional_components"] = ["migration"]
         if language in ("java","kotlin"):
             metadata["optional_components"] = ["synchronous-aot"]
-        if language == "csharp":
+        if language in ("csharp", "vbnet"):
             metadata.update(development_package=True, development_scope="freestanding-i32-method",
                             optional_components=["numeric-aot"])
         write_json(path, metadata)
         package("metadata/" + language, [path])
 
-    package("csharp/numeric", [
-        "install/private_exports.py", "bin/" + COMPILER_COMMANDS["csharp"], "language/csharp/numeric.py", "language/csharp/host.py",
-        "examples/csharp/scene-abi/Robot.cs", "examples/csharp/scene-abi/xmake.lua",
-        "language/csharp/Scene.cs", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py", "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
-        "language/csharp/xmake/adapter.lua", "examples/csharp/numeric-aot/Filter.cs",
-        "examples/csharp/numeric-aot/xmake.lua", "document/en/csharp.md", "document/zh/csharp.md",
-        "tests/csharp/README.md",
-    ])
+    mono_aot = ["install/private_exports.py", "language/csharp/numeric.py", "language/csharp/host.py",
+                "language/csharp/Scene.cs", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py",
+                "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256"]
+    for language, example in (("csharp", "Robot.cs"), ("vbnet", "Robot.vb")):
+        paths = [*mono_aot, "bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",
+                 f"examples/{language}/scene-abi/{example}", f"examples/{language}/scene-abi/xmake.lua",
+                 f"document/en/{language}.md", f"document/zh/{language}.md"]
+        if language == "csharp":
+            paths.extend(["examples/csharp/numeric-aot/Filter.cs", "examples/csharp/numeric-aot/xmake.lua",
+                          "tests/csharp/README.md"])
+        package(language + "/numeric", paths)
     shared_jvm = [p.relative_to(ROOT).as_posix() for name in ("language/jvm", "third-parties/jvm")
                   for p in (ROOT / name).rglob("*") if p.is_file() and "__pycache__" not in p.parts]
     package("jvm/synchronous", [*shared_jvm, "install/private_exports.py", "include/wros/scene.h", "document/en/jvm.md", "document/zh/jvm.md"])

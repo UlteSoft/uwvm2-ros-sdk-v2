@@ -22,7 +22,7 @@ from imports import inspect
 from scalar import prove_scalar, scene_program
 
 
-def compile_guest(args, work):
+def compile_guest(args, work, language="csharp"):
     tool = args.toolchain.resolve(strict=True) / "bin"
     stage(work, args.dotnet.resolve(strict=True), args.mono_compiler.resolve(strict=True))
     host = work / "inputs/dotnet"
@@ -50,12 +50,19 @@ def compile_guest(args, work):
     if args.scene_entry:
         csc("Wros.Scene.Bindings.dll", [HERE / "Scene.cs"], references, "library")
         references.append(work / "Wros.Scene.Bindings.dll")
-    csc(dll, args.sources, references, "library")
+    if language == "vbnet":
+        run("Visual Basic " + dll, [host / "dotnet", roslyn / "vbc.dll", "-nologo", "-noconfig",
+            "-deterministic+", "-debug:portable", "-checksumalgorithm:SHA256", "-target:library",
+            "-optimize+", "-optionstrict+", "-optionexplicit+", "-nostdlib", "-vbruntime-",
+            "-define:_MYTYPE=\"Empty\"", *["-reference:" + str(ref) for ref in references],
+            "-out:" + dll, *args.sources])
+    else:
+        csc(dll, args.sources, references, "library")
     csc("Admit.dll", [HERE / "Admit.cs", HERE / "SceneEntry.cs"], sorted(host_refs.glob("*.dll")), "exe")
     entry = args.scene_entry or args.entry
-    record = run("C# metadata", [host / "dotnet", "exec", "--runtimeconfig", roslyn / "csc.runtimeconfig.json",
+    record = run("managed metadata", [host / "dotnet", "exec", "--runtimeconfig", roslyn / "csc.runtimeconfig.json",
                                  "Admit.dll", dll, *entry.split("."), "WrosKernel.pdb",
-                                 *(["scene"] if args.scene_entry else [])]).strip().split(" ")
+                                 *(["scene"] if args.scene_entry else []), *(["vbnet"] if language == "vbnet" else [])]).strip().split(" ")
     row, digest, line, points, name = record
     if not row.isascii() or not row.isdecimal() or len(row) > 7:
         raise ValueError("invalid Mono method row")
@@ -87,7 +94,7 @@ def compile_guest(args, work):
     audit(guest, profile)
     if inspect(guest):
         raise ValueError("numeric component must have zero imports")
-    if args.scene_entry or (not args.legacy_mte and not args.no_mte):
+    if language == "vbnet" or args.scene_entry or (not args.legacy_mte and not args.no_mte):
         guest = prove_scalar(guest)
     if args.scene_entry:
         guest = scene_program(guest)
@@ -107,8 +114,10 @@ def compile_guest(args, work):
             pending.unlink(missing_ok=True)
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+def main(language="csharp"):
+    suffix, program, title = {"csharp": (".cs", "wrcs", "C#"),
+                              "vbnet": (".vb", "wrvb", "Visual Basic")}[language]
+    parser = argparse.ArgumentParser(prog=program, description=f"Compile a freestanding {title} integer method to Wasm.", allow_abbrev=False)
     for option in ("dotnet", "mono-compiler", "toolchain"):
         parser.add_argument("--" + option, type=Path, required=True)
     entry = parser.add_mutually_exclusive_group(required=True)
@@ -125,6 +134,8 @@ def main():
     parser.add_argument("-o", "--output", type=Path, required=True)
     parser.add_argument("sources", nargs="+", type=Path)
     args = parser.parse_args()
+    if language == "vbnet" and (args.compile_only or args.legacy_mte):
+        parser.error("Visual Basic produces final modules with a statically checked register-only policy")
     if args.compile_only and not args.legacy_mte and not args.no_mte:
         parser.error("no signed strict C# release for relocatable objects; the scalar proof requires a final module")
     if args.scene_entry and args.compile_only:
@@ -133,19 +144,19 @@ def main():
         parser.error("expected a global Class.Method entry")
     if args.compile_only != (args.sysroots is not None):
         parser.error("use -c and --sysroots together for a relocatable SDK object")
-    suffix = ".o" if args.compile_only else ".wasm"
-    if args.output.suffix != suffix or not args.output.parent.is_dir():
-        parser.error("expected a " + suffix + " output in an existing directory")
+    output_suffix = ".o" if args.compile_only else ".wasm"
+    if args.output.suffix != output_suffix or not args.output.parent.is_dir():
+        parser.error("expected a " + output_suffix + " output in an existing directory")
     try:
         args.sources = [src.resolve(strict=True) for src in args.sources]
         if (len(args.sources) > 128 or len(set(args.sources)) != len(args.sources) or
-                any(not src.is_file() or src.suffix != ".cs" for src in args.sources) or
+                any(not src.is_file() or src.suffix.lower() != suffix for src in args.sources) or
                 sum(src.stat().st_size for src in args.sources) > 16 * 1024 * 1024):
-            raise ValueError("expected up to 128 distinct C# files, at most 16 MiB total")
+            raise ValueError(f"expected up to 128 distinct {title} files, at most 16 MiB total")
         if args.legacy_mte:
             print("warning: using unsigned C# numeric AOT with WasmMTE enabled", file=sys.stderr)
-        with tempfile.TemporaryDirectory(prefix=".wrcs-", dir=args.output.parent.resolve()) as path:
-            compile_guest(args, Path(path))
+        with tempfile.TemporaryDirectory(prefix="." + program + "-", dir=args.output.parent.resolve()) as path:
+            compile_guest(args, Path(path), language)
     except (KeyError, OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
-        parser.exit(1, "wrcs: " + str(error) + "\n")
+        parser.exit(1, program + ": " + str(error) + "\n")
     return 0

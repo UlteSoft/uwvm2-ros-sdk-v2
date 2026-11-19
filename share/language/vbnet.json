@@ -1,5 +1,9 @@
 {
   "id": "vbnet",
-  "development_package": false,
-  "command_name": "wrvb"
+  "development_package": true,
+  "command_name": "wrvb",
+  "development_scope": "freestanding-i32-method",
+  "optional_components": [
+    "numeric-aot"
+  ]
 }

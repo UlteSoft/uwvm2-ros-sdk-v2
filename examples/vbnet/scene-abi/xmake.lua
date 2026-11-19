@@ -1,0 +1,13 @@
+set_project("vbnet_scene")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("robot")
+    set_kind("binary")
+    set_language("vbnet")
+    set_ros_platform(os.getenv("WROS_PLATFORM") or "unitree")
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_wros_exports("Robot.Start")
+    add_wros_operations("abi")
+    add_files("Robot.vb")
+target_end()

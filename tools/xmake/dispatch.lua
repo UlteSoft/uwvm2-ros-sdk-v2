@@ -14,10 +14,10 @@ local function selection(root)
     local variant = path.filename(root)
     local langdir = path.directory(root)
     local language = path.filename(langdir)
-    local components = {java = "synchronous-aot", kotlin = "synchronous-aot", csharp = "numeric-aot"}
+    local components = {java = "synchronous-aot", kotlin = "synchronous-aot", csharp = "numeric-aot", vbnet = "numeric-aot"}
     local expected = components[language]
     if expected then
-        assert(variant == expected or (language == "csharp" and variant == "development"), "Select the installed " .. expected .. " component for " .. language)
+        assert(variant == expected or (expected == "numeric-aot" and variant == "development"), "Select the installed " .. expected .. " component for " .. language)
     else
         local migration = variant == "migration" and (language == "c" or language == "cpp")
         assert(variant == "development" or variant == "compiler-source" or migration, "Select an installed Wasm development directory")
@@ -76,7 +76,7 @@ function configure(target, entry)
     assert(not build_receipt or kind == "binary", "Deployment build receipts require a linked Wasm binary")
     local exports = table.wrap(target:values("wros.exports"))
     local operations = table.wrap(target:values("wros.operations"))
-    assert(language == "lua" or language == "js" or language == "java" or language == "kotlin" or language == "csharp" or #operations == 0,
+    assert(language == "lua" or language == "js" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or #operations == 0,
            "add_wros_operations requires a target with selectable ROS imports")
     local lua_operations = table.wrap(target:values("wros.lua_operations"))
     assert(language == "lua" or #lua_operations == 0, "add_wros_lua_operations requires a Lua target")

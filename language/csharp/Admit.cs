@@ -66,7 +66,8 @@ static class Admit
             using var file = File.OpenRead(args[0]);
             using var image = new PEReader(file);
             var data = image.GetMetadataReader();
-            bool scene = args.Length == 5 && args[4] == "scene";
+            bool scene = Array.IndexOf(args, "scene", 4) >= 0;
+            bool vb = Array.IndexOf(args, "vbnet", 4) >= 0;
             var policy = scene ? SceneEntry.Policy(image, data, args[1], args[2]) : default;
             string selectedName = "";
             int selected = -1;
@@ -79,9 +80,11 @@ static class Admit
                     if (name == ".cctor") throw new Exception("static or module initializer needs the CLR");
                     if ((scene ? mh != policy : name != args[2]) || data.GetString(type.Name) != args[1] || !type.Namespace.IsNil ||
                         !type.GetDeclaringType().IsNil) continue;
-                    if ((type.Attributes & (TypeAttributes.Abstract | TypeAttributes.Sealed)) !=
-                        (TypeAttributes.Abstract | TypeAttributes.Sealed) || type.GetGenericParameters().Count != 0)
-                        throw new Exception("expected a non-generic static class");
+                    // VB uses a sealed class with Shared methods. It has no static-class modifier.
+                    var required = vb ? TypeAttributes.Sealed : TypeAttributes.Abstract | TypeAttributes.Sealed;
+                    if ((type.Attributes & required) != required || type.GetGenericParameters().Count != 0 ||
+                        (vb && type.GetFields().Count != 0))
+                        throw new Exception("expected a non-generic stateless method owner");
                     var signature = data.GetBlobReader(method.Signature);
                     // DEFAULT managed calling convention, one parameter, I4 result and I4 parameter.
                     if (selected >= 0 || method.GetGenericParameters().Count != 0 || (method.Attributes & (MethodAttributes.Static | MethodAttributes.MemberAccessMask)) !=
