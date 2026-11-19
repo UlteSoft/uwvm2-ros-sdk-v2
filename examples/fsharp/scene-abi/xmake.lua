@@ -1,3 +1,5 @@
+-- @file xmake.lua
+-- @brief Build the F# scene query with the selected SDK installation.
 set_project("fsharp_scene")
 includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
 

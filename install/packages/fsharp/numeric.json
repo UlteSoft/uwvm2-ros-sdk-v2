@@ -20,15 +20,15 @@
     },
     {
       "path": "examples/fsharp/scene-abi/Robot.fs",
-      "bytes": 121,
+      "bytes": 446,
       "mode": 420,
-      "sha256": "d23ec8ee8553e6df71438503135ab6e50d269eba73b7368c387826ace9e3ec61"
+      "sha256": "c209c08092c9d79275286bf76575921b25d7d4e01bf3f7fa1c0c0863e6820e1e"
     },
     {
       "path": "examples/fsharp/scene-abi/xmake.lua",
-      "bytes": 391,
+      "bytes": 481,
       "mode": 420,
-      "sha256": "7865583456efb14d197450eb2f60c1752a0e25e4bbf9ae65b986e18bbee6a893"
+      "sha256": "dea83750de9c6c85f14a3e78dda53e32d6aa978ba305a4500cf64ed485212e61"
     },
     {
       "path": "install/private_exports.py",
