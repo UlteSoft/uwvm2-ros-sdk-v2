@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "install"))
 from bootstrap import Source, install
 from imports import inspect
+sys.path.insert(0, str(ROOT / "tests"))
+from platform_projects import passed_engines
 
 
 def sha(path):
@@ -58,16 +60,15 @@ def qualify(args, platform, language, roots):
     run(case / "configure.log", [args.xmake, "f", "-c", "-y", "-a", "wasm32"], project, env)
     run(case / "build.log", [args.xmake, "-j1"], project, env)
     log = run(case / "run.log", [args.xmake, "test", "-j1", "-v"], project, env)
-    if not all("--engine " + engine in log for engine in ("int", "aot")):
-        raise ValueError("Xmake did not dispatch both guest engine tests: " + log[-1500:])
     target, = (project / "build").rglob("*.wasm")
+    engines = passed_engines(log, [target])
     imports = inspect(target.read_bytes())
     expected = [("uwvm_ros_v2", "abi")] if language == "fsharp" else []
     if [(row["module"], row["name"]) for row in imports] != expected:
         raise ValueError("unexpected module imports")
     record = {"platform": platform, "language": language, "site": selection.get("site_release_sha256"),
               "sha256": sha(target), "bytes": target.stat().st_size, "imports": imports,
-              "build": sha(case / "build.log"), "tests": sha(case / "run.log")}
+              "build": sha(case / "build.log"), "tests": sha(case / "run.log"), "engines": engines}
     if language == "c":
         pin = project / "upstream.lock" if platform in roots else sdk / "examples/shared/migration/c/imu.lock"
         record.update(input=json.loads(pin.read_bytes())[0], origin="local-package" if platform in roots else "bundled")

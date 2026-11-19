@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import shutil
 
-from platform_examples import ROOT, Source, install, inspect, run, sha
+from platform_examples import ROOT, Source, install, inspect, passed_engines, run, sha
 
 
 def main():
@@ -37,22 +37,31 @@ def main():
                 project = case / "src"
                 shutil.copytree(sdk / "examples/platform" / args.platform / area / language, project)
                 env = dict(os.environ, UWVM_ROS_SDK_ROOT=str(sdk), WROS_VM=str(args.vm), WROS_RUN_QUERIES="")
+                if area == "extension":
+                    probe = case / "trace"
+                    probe.mkdir()
+                    python = probe / "python3"
+                    python.write_bytes((ROOT / "tests/migration/trace_xmake_python.py").read_bytes())
+                    python.chmod(0o755)
+                    env["PATH"] = str(probe) + os.pathsep + env["PATH"]
+                    env["WROS_TEST_DRIVER_TRACE"] = str(case / "driver-invocations.jsonl")
                 run(case / "configure.log", [args.xmake, "f", "-c", "-y", "-a", "wasm32"], project, env)
                 # Xmake's test action builds the target before dispatching the two VM invocations.
                 log = run(case / "execute.log", [args.xmake, "test", "-j1", "-v"], project, env)
-                if not all("--engine " + e in log for e in ("int", "aot")) or "tests passed" not in log:
-                    raise ValueError("missing VM dispatch or test result")
                 target, = (project / "build").rglob("*.wasm")
+                engines = passed_engines(log, [target])
                 imports = [(row["module"], row["name"]) for row in inspect(target.read_bytes())]
                 expected = (["capability.open", "driver.connect", "driver.disconnect", "capability.close"]
                             if area == "extension" else ["abi"])
                 if imports != [("uwvm_ros_v2", op) for op in expected]:
                     raise ValueError("unexpected final import set")
-                if area == "extension" and "--driver-denial " + args.platform not in log:
-                    raise ValueError("missing platform driver permission fixture")
+                if area == "extension":
+                    calls = [json.loads(line) for line in (case / "driver-invocations.jsonl").read_text().splitlines()]
+                    if sorted(calls) != sorted([[engine, args.platform] for engine in ("int", "aot")]):
+                        raise ValueError("missing executed driver platform fixture")
                 report["cases"].append(dict(platform=args.platform, language=language, area=area,
                        sha256=sha(target), bytes=target.stat().st_size, imports=imports,
-                       engines=["int", "aot"], transcript=sha(case / "execute.log")))
+                       engines=engines, transcript=sha(case / "execute.log")))
                 print(args.platform, language, area, flush=True)
         report["complete"] = True
     finally:
