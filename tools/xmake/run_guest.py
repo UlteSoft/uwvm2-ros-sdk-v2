@@ -93,10 +93,13 @@ def main():
                       args.thread_mode == "threads", mte=not args.disable_tags, exceptions=args.exceptions)
     argv = [str(vm), *profile.uwvm_feature_flags(), "--wasm-set-main-module-name", "main"]
     if args.engine:
-        argv += ["--runtime-" + args.engine, "--runtime-compile-threads", "3" if args.engine == "aot" else "0",
+        workers = os.getenv("WROS_TEST_AOT_WORKERS", "0") if args.engine == "aot" else "0"
+        if not workers.isascii() or not workers.isdecimal():
+            parser.error("WROS_TEST_AOT_WORKERS must be a nonnegative decimal count")
+        argv += ["--runtime-" + args.engine, "--runtime-compile-threads", workers,
                  "--runtime-llvm-jit-cache-path", "disable", "--debug-fault-action", "exit"]
         if args.engine == "aot":
-            argv += ["--runtime-llvm-jit-full-policy", "legacy-light"]
+            argv += ["--runtime-llvm-jit-policy", "fast-compile"]
     if args.check_tags:
         argv += ["--runtime-memtag-mode", "sync"]
     elif args.disable_tags:

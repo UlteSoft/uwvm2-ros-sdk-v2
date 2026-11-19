@@ -90,6 +90,7 @@ SDK 目标拒绝透传原始编译或链接参数、宿主软件包、宿主库�
 | `UWVM_ROS_SDK_ROOT` | 含公共 xmake 入口的 SDK 安装目录。 |
 | `WROS_PLATFORM` | 随包 C 示例的目标平台，默认 `unitree`。其他项目可以直接调用 `set_ros_platform`。 |
 | `WROS_TOOLCHAIN`、`WROS_SYSROOTS` | C/C++ 与 Lua 构建所需的工具链目录和 sysroot 构建记录。缺少匹配的配置时编译失败。 |
+| `WROS_TEST_AOT_WORKERS` | `xmake test` 的额外 LLVM 工作线程数，默认 `0`。传入非负十进制整数可测试并行编译。功能测试使用 VM 的 fast-compile 策略，应用构建参数独立设置。 |
 | `WROS_SYSROOTS_NO_MTE` | 可指定关闭 MTE 的目标使用的构建记录。省略时 WROS_SYSROOTS 必须包含该配置。 |
 | `WROS_VM` | `xmake run` 使用的可信 uwvm2-ros 绝对路径。 |
 | `WROS_RUN_QUERIES` | 逗号分隔的本地测试授权，默认空。可选 `abi`、`realtime-clock`、`monotonic-clock`、`realtime-resolution` 和 `monotonic-resolution`。完整部署策略由部署器或 VM 命令行指定。 |

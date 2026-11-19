@@ -91,6 +91,7 @@ Raw C/compiler/linker flags, host packages, host library directories and framewo
 | `WROS_PLATFORM` | Platform selected by the bundled C example (default `unitree`). Other projects can call `set_ros_platform` directly. |
 | `WROS_TOOLCHAIN`, `WROS_SYSROOTS` | C/C++ and Lua toolchain prefix and exact sysroot receipt. A missing matching profile fails the build. |
 | `WROS_SYSROOTS_NO_MTE` | Optional receipt selected for targets with mte = false. If unset, WROS_SYSROOTS must contain the requested profile. |
+| `WROS_TEST_AOT_WORKERS` | Extra LLVM workers for `xmake test`. The default is `0`. Supply a nonnegative decimal count to test multi-worker compilation explicitly. The VM uses its fast-compile policy for these functional tests. Application build flags are independent. |
 | `WROS_VM` | Absolute path of the developer-selected VM for `xmake run`. |
 | `WROS_RUN_QUERIES` | Optional comma-separated local test grants. Allowed names are `abi`, `realtime-clock`, `monotonic-clock`, `realtime-resolution`, and `monotonic-resolution`. Empty by default. For a full deployment policy use the deployer or the VM CLI. |
 

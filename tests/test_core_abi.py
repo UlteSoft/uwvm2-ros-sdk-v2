@@ -143,6 +143,29 @@ class CoreAbi(unittest.TestCase):
             self.assertEqual(result.returncode, 143, result.stderr)
             self.assertIn(b"WROS aot test: VM signal 15", result.stderr)
 
+    def test_xmake_aot_worker_count(self):
+        """@brief Verify the serial default and the explicit parallel test selection."""
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            vm = base / "vm"
+            vm.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
+            vm.chmod(0o700)
+            guest = base / "guest.wasm"
+            guest.write_bytes(fn_export("_start"))
+            command = [sys.executable, ROOT / "tools/xmake/run_guest.py", guest,
+                       "wasm32", "3.0", "single", "--engine", "aot"]
+            env = {**os.environ, "WROS_VM": str(vm)}
+            env.pop("WROS_TEST_AOT_WORKERS", None)
+            for settings, count in ((env, "0"), ({**env, "WROS_TEST_AOT_WORKERS": "3"}, "3")):
+                result = subprocess.run(command, env=settings, capture_output=True, check=True, text=True)
+                args = result.stdout.splitlines()
+                self.assertEqual(args[args.index("--runtime-compile-threads") + 1], count)
+                self.assertEqual(args[args.index("--runtime-llvm-jit-policy") + 1], "fast-compile")
+            invalid = subprocess.run(command, env={**env, "WROS_TEST_AOT_WORKERS": "-1"},
+                                     capture_output=True)
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertEqual(invalid.stdout, b"")
+
 
 if __name__ == "__main__":
     unittest.main()
