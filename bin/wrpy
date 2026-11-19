@@ -114,7 +114,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("script", type=Path)
     parser.add_argument("-o", "--output", type=Path, required=True)
-    parser.add_argument("--target", choices=["wasm32"], default="wasm32")
+    parser.add_argument("--target", choices=["wasm32", "wasm64"], default=None)
     parser.add_argument("--toolchain", type=Path)
     parser.add_argument("--sysroots", type=Path, action="append")
     parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
@@ -171,7 +171,8 @@ def main():
         data = read_bounded(artifact)
         audit(data, profile)
         imports = sorted((i["module"], i["name"]) for i in inspect(data))
-        expected = ({("wasi_snapshot_preview1", n) for n in ("clock_res_get", "clock_time_get")} |
+        expected = ({("wasi_snapshot_preview1", n + ("_wasm64" if profile.address_bits == 64 else ""))
+                     for n in ("clock_res_get", "clock_time_get")} |
                     {("uwvm_ros_v2", n) for n in operations})
         if set(imports) != expected:
             raise ValueError("unexpected final CPython import inventory: " + repr(imports))

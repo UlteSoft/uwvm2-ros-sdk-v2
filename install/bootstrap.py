@@ -100,6 +100,8 @@ def configure_site(directory, language, data):
              "print(check_site(sys.stdin.buffer.read(),root,sys.argv[2]))")
     command = (["-c", check, str(directory), "c" if language in ("js", "typescript", "py") else language] if language not in ("nim", "objectc", "d", "tinygo", "rs", "go")
                else [str(directory / "language" / ("rust" if language == "rs" else language) / "check_site.py")])
+    if language == "py" and (directory / "language/py/check_site.py").is_file():
+        command = [str(directory / "language/py/check_site.py")]
     if language in ("java", "kotlin"):
         command = [str(directory / "language/jvm/release.py"), language]
     result = subprocess.run([sys.executable, "-I", "-B", *command],

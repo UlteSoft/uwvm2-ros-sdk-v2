@@ -220,10 +220,12 @@ def main():
         "bin/wrpy", "bin/wrc", "include/wros/scene.h", "document/en/python.md", "document/zh/python.md",
         "examples/py/body.py", "examples/py/xmake.lua",
         *["language/py/" + name for name in ("entry.c", "scene.h", "isolate.py", "build_interpreter.py",
-                                             "freeze_encodings.py", "runtime_paths.mk", "runtime_pack.py")],
-        *[p.relative_to(ROOT).as_posix() for tree in ("cpython", "cpython-runtime")
-          for p in (ROOT / "third-parties" / tree).iterdir() if p.is_file()],
+                                             "freeze_encodings.py", "runtime_paths.mk", "runtime_pack.py", "check_site.py")],
+        *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/cpython").iterdir() if p.is_file()],
     ]
+    for width in ("wasm32", "wasm64"):
+        stem = f"third-parties/cpython-runtime/{width}-wasip1-core3.0-eh-mte"
+        package("python-runtime/" + width, [stem + ".json", stem + ".tar.xz"])
     language_files["fortran"] = [
         "examples/fortran/body.f90", "examples/fortran/xmake.lua",
         "examples/fortran/static/body.f90", "examples/fortran/static/kernel.f90", "examples/fortran/static/xmake.lua",

@@ -8,21 +8,21 @@
     },
     {
       "path": "bin/wrpy",
-      "bytes": 10530,
+      "bytes": 10609,
       "mode": 493,
-      "sha256": "4f15cb71d7fd55914f7f08951b8cec610d517c37575cacb6796114b5325587b3"
+      "sha256": "d887978054b94f3e9af386d895b1d01a779f688c03734b28328b653add0f185f"
     },
     {
       "path": "document/en/python.md",
-      "bytes": 5750,
+      "bytes": 6316,
       "mode": 420,
-      "sha256": "5539da0d13cf4bb460d9f46583176d04eb06b7604dd6181e4c00a953d3246c9c"
+      "sha256": "569e53b8cc8580fcfa0c0c55f1766d8ed0c21b62ec23f4ebe46c596ecf52b00c"
     },
     {
       "path": "document/zh/python.md",
-      "bytes": 4575,
+      "bytes": 5101,
       "mode": 420,
-      "sha256": "6b0661f9f7c7578293c076197a2c0bd7deea2b79b91ded475a8c338c71e2ef61"
+      "sha256": "026e7e0fc5370ae8c64d99520c62d7ea25a6de6c240f4ab2a8490955d953302f"
     },
     {
       "path": "examples/py/body.py",
@@ -44,9 +44,15 @@
     },
     {
       "path": "language/py/build_interpreter.py",
-      "bytes": 6066,
+      "bytes": 6962,
       "mode": 420,
-      "sha256": "c4a592a019bd10247c36be1152a94c14a2348b4dbe1a89e9f91105e7db812969"
+      "sha256": "256a4733397bf48e366aed7df9311cfc4c61ee998f97946680979d166e9eda67"
+    },
+    {
+      "path": "language/py/check_site.py",
+      "bytes": 1176,
+      "mode": 420,
+      "sha256": "cfb5e6f64eab19947cb8f2cc8da19e5b03104ae84ec04f44115e25220290be67"
     },
     {
       "path": "language/py/entry.c",
@@ -86,21 +92,9 @@
     },
     {
       "path": "language/py/xmake/adapter.lua",
-      "bytes": 1697,
+      "bytes": 1716,
       "mode": 420,
-      "sha256": "36b5f4b17cf0359c1c9c7770b5b66572cccf1b188fd139c25f92d64dabce82fc"
-    },
-    {
-      "path": "third-parties/cpython-runtime/wasm32-wasip1-core3.0-eh-mte.json",
-      "bytes": 1188,
-      "mode": 420,
-      "sha256": "b1b9f19333c29806de6ea4a79b122f58b5e60079bb54dfbdbd307e015989c4c5"
-    },
-    {
-      "path": "third-parties/cpython-runtime/wasm32-wasip1-core3.0-eh-mte.tar.xz",
-      "bytes": 8960976,
-      "mode": 420,
-      "sha256": "17be07aea712a116897e4451beda250be762e32878def783f13f8d245616d07c"
+      "sha256": "de2bc3b97a21f90b3421186290aeb69bf5a7b4b2bfae5581c1ae76b0999ea159"
     },
     {
       "path": "third-parties/cpython/LICENSE",

@@ -5,8 +5,8 @@ end
 
 --- @brief Refuse target profiles outside the fixed CPython port.
 function validate(target, req)
-    assert(req.arch == "wasm32" and req.core == "3.0" and not req.threads and not req.std and #req.exports == 0,
-           "CPython requires a wasm32 Core 3.0 single-thread profile")
+    assert((req.arch == "wasm32" or req.arch == "wasm64") and req.core == "3.0" and not req.threads and not req.std and #req.exports == 0,
+           "CPython requires a Core 3.0 single-thread profile")
     assert(not target:get("includedirs") and not target:get("defines"), "CPython does not consume C options")
     assert(not target:get("optimize") or target:get("optimize") == "fastest", "CPython uses -O3")
     local symbols = table.wrap(target:get("symbols"))

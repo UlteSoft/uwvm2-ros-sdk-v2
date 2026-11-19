@@ -20,6 +20,7 @@ def main():
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--category", choices=("common", "migration", "extension"), action="append")
     parser.add_argument("--engine", choices=("aot", "int"), action="append")
+    parser.add_argument("--target", choices=("wasm32", "wasm64"), default="wasm32")
     a = parser.parse_args()
     root, vm, xmake, output = [p.resolve() for p in (a.installed, a.vm, a.xmake, a.output)]
     platform = root.parents[1].name
@@ -36,7 +37,7 @@ def main():
     def digest(path):
         with path.open("rb") as stream:
             return hashlib.file_digest(stream, "sha256").hexdigest()
-    results = dict(sdk_commit=revision, platform=platform, vm_sha256=digest(vm), steps=[], modules={})
+    results = dict(sdk_commit=revision, platform=platform, target=a.target, vm_sha256=digest(vm), steps=[], modules={})
     def save():
         (output / "results.json").write_text(json.dumps(results, indent=2) + "\n")
     def run(name, argv, cwd):
@@ -55,11 +56,12 @@ def main():
     for area in a.category or operations:
         work = output / area
         shutil.copytree(root / "examples/platform" / platform / area / "py", work)
-        run(area + "-configure", [xmake, "f", "-p", "wasm-wasip1", "-a", "wasm32", "-y"], work)
+        run(area + "-configure", [xmake, "f", "-p", "wasm-wasip1", "-a", a.target, "-y"], work)
         run(area + "-build", [xmake, "build", "-j1", area], work)
         wasm, = (work / "build").rglob(area + ".wasm")
         actual = sorted((i["module"], i["name"]) for i in inspect(wasm.read_bytes()))
-        expected = [("wasi_snapshot_preview1", op) for op in ("clock_time_get", "clock_res_get")]
+        suffix = "_wasm64" if a.target == "wasm64" else ""
+        expected = [("wasi_snapshot_preview1", op + suffix) for op in ("clock_time_get", "clock_res_get")]
         expected += [("uwvm_ros_v2", op) for op in operations[area]]
         if actual != sorted(expected):
             raise ValueError("unexpected " + area + " import inventory: " + repr(actual))

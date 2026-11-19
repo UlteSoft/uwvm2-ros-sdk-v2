@@ -45,6 +45,17 @@ def prepare_source(output, profile):
         header.write_text(before[:start] + """    /* Release transient objects through the tagged allocator. */
     (void)fl; (void)obj; (void)maxsize;
     return 0;""" + before[end:])
+    if profile.address_bits == 64:
+        # wasi-libc clockid_t is an opaque, pointer-width value. The generic
+        # CPython converter uses C int and rejects this width at compile time.
+        module = source / "Modules/timemodule.c"
+        before = module.read_text()
+        anchor = "#elif defined(__DragonFly__)\n    long clk_id = PyLong_AsLong(obj);\n#else\n    int clk_id = PyLong_AsInt(obj);"
+        if before.count(anchor) != 1 or before.count("(clockid_t)clk_id") != 4:
+            raise ValueError("CPython clock conversion differs from the reviewed memory64 implementation")
+        wasm = "#elif defined(__wasi__)\n    intptr_t clk_id = (intptr_t)PyLong_AsSsize_t(obj);\n"
+        module.write_text(before.replace(anchor, anchor.replace("#else\n", wasm + "#else\n"))
+                          .replace("(clockid_t)clk_id", "(clockid_t)(intptr_t)clk_id"))
     return source
 
 
@@ -97,7 +108,7 @@ def build(work, profile, cc, env, toolchain, jobs):
                  PKG_CONFIG_LIBDIR="/nonexistent", CFLAGS=shlex.join(flags), ac_cv_func_dlopen="no",
                  LDFLAGS="-Wl,-z,stack-size=8388608 -Wl,--max-memory=268435456 -Wl,--threads=1")
     machine = subprocess.check_output(["/usr/bin/cc", "-dumpmachine"], env=native_env, text=True).strip()
-    run([*configure, "--host=wasm32-unknown-wasip1", "--build=" + machine,
+    run([*configure, f"--host=wasm{profile.address_bits}-unknown-wasip1", "--build=" + machine,
          "--with-build-python=" + str(freezer), "--disable-wasm-pthreads", "--without-pymalloc",
          "--without-mimalloc", "--prefix=/wros/python"], target, setup)
     run(["/usr/bin/make", "-j" + str(jobs), "-f", "Makefile", "-f", LANG / "runtime_paths.mk",

@@ -32,6 +32,8 @@ def main():
     parser.add_argument("--revision-help", action="store_true")
     parser.add_argument("--component", choices=("development", "bindings", "protocol", "compiler-source", "synchronous-aot", "numeric-aot", "migration", "policy-review"),
                         default="development")
+    parser.add_argument("--python-target", choices=("wasm32", "wasm64"), action="append",
+                        help="fetch the CPython runtime archive for this pointer width (default wasm32)")
     args = parser.parse_args()
     if args.revision_help:
         help_text = parser.format_help()
@@ -44,6 +46,10 @@ def main():
         parser.error("unknown platform: " + args.platform)
     if args.language not in LANGUAGES:
         parser.error("unknown language: " + args.language)
+    if args.python_target and len(args.python_target) > 1:
+        parser.error("select one --python-target per installation")
+    if args.python_target is not None and (args.language != "py" or args.component not in ("development", "compiler-source")):
+        parser.error("--python-target requires the Python development or compiler-source component")
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")
@@ -69,6 +75,8 @@ def main():
             if args.language not in DEVELOPMENT:
                 parser.error("a development package has not been published for this language")
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
+            if args.language == "py":
+                packages.append("python-runtime/" + (args.python_target or ["wasm32"])[0])
             if args.component == "migration" and args.language in ("c", "cpp"):
                 packages.extend(("migration/resources", "migration/policy"))
                 if args.language == "c":

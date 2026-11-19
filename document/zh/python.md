@@ -1,6 +1,6 @@
 # 用 Python 开发 Wasm 机器人程序
 
-`wrpy` 将 CPython 3.14.8、Python 主程序和显式指定的模块链接为一个 WebAssembly Core 文件。目标 VM 内的解释器负责解析、导入和执行应用源码。CPython 版本与旧 SDK 一致。当前支持 wasm32、Core 3.0 和单线程，默认启用标准 EH 和 WasmMTE 插装。VM 独立决定运行时的 MTE 执行方式。
+`wrpy` 将 CPython 3.14.8、Python 主程序和显式指定的模块链接为一个 WebAssembly Core 文件。目标 VM 内的解释器负责解析、导入和执行应用源码。CPython 版本与旧 SDK 一致。开发配置默认采用 wasm32、Core 3.0 和单线程，启用标准 EH 与 WasmMTE 插装。签名的 wasm64 C 站点提供 64 位对象和线性内存地址。VM 独立决定运行时的 MTE 执行方式。
 
 ## 安装与编译
 
@@ -13,6 +13,8 @@ export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/py/development"
 "$UWVM_ROS_SDK_ROOT/bin/wrpy" main.py -o robot.wasm --build-receipt
 ```
 
+要开发 64 位程序，指定已签名的 wasm64 C 站点，并在安装命令末尾加上 `-- --python-target wasm64`。安装器只拉取该宽度的运行库。两个宽度并存时使用不同的安装前缀。Xmake 可执行 `xmake f -a wasm64`，直接调用编译器可传入 `--target wasm64`。
+
 安装程序按提交、语言和平台选择文件。SDK 核对目标解释器归档、构建配方、编译器和 libc 配置的摘要。完全匹配时，修改脚本只需重新链接。其他组合从仓内固定版本的 Python.org 源码构建。冷构建在 Linux 开发机上需要 GNU Make、shell、系统 C 编译器和 binutils，并在输出目录旁创建可执行临时目录。构建过程使用同版本主机工具生成启动编码，应用程序始终在 Wasm 内执行。
 
 | 参数 | 用途 |
@@ -20,7 +22,7 @@ export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/py/development"
 | `--ros-operation NAME` | 链入一个 ROSv2 导入，可重复指定。部署时还需启用接口并授予相应资源权限。 |
 | `--ros-abi` | 加入只读 ABI 查询 `wros.abi()`。 |
 | `--module NAME=FILE` | 内嵌一个 UTF-8 Python 模块。包名映射到相应的 `__init__.py`，支持相对导入。上限为 256 个模块、每个文件 1 MiB、合计 4 MiB。 |
-| `--target wasm32` | 选择已实现的地址宽度。 |
+| `--target wasm32`、`--target wasm64` | 选择线性地址宽度与相应的 Python 对象布局，省略时采用签名站点配置。 |
 | `--eh`、`--no-eh` | 选择匹配的 libc 配置，Python 语言异常可在两种配置中运行。 |
 | `--mte`、`--no-mte` | 默认开启 MTE。手动关闭时需显式提供相应的 `--toolchain` 与 `--sysroots`。 |
 | `--from-source`、`--jobs N` | 从固定源码重新构建解释器。并行数 1 至 32，默认 4。 |
@@ -30,7 +32,7 @@ Xmake 工程引入 `tools/xmake/ros.lua`，使用 `set_language("py")`、`set_ro
 
 ## 接口和权限
 
-基础程序导入 WASIp1 的 `clock_res_get` 和 `clock_time_get`。部署者可按应用需要授予时钟权限。解释器提供 CPython 语言核心、启动所需的冻结模块及 `math`、`_struct`、`array` 等内建模块。可内嵌纯 Python 依赖。需要本机扩展、POSIX 文件、网络、动态库、进程或宿主标准流的包需要移植。应用可以通过有明确语义的 ROSv2 接口接入外部资源。解释器使用固定的内部哈希种子，安全用途的随机值须来自获授权的服务。
+基础程序导入 WASIp1 的 `clock_res_get` 和 `clock_time_get`。64 位线性内存对应的 VM 函数名带 `_wasm64` 后缀。部署者可按应用需要授予时钟权限。解释器提供 CPython 语言核心、启动所需的冻结模块及 `math`、`_struct`、`array` 等内建模块。可内嵌纯 Python 依赖。需要本机扩展、POSIX 文件、网络、动态库、进程或宿主标准流的包需要移植。应用可以通过有明确语义的 ROSv2 接口接入外部资源。解释器使用固定的内部哈希种子，安全用途的随机值须来自获授权的服务。
 
 `wros.open(alias)` 成功时返回封装句柄，失败时返回整数状态码。`wros.close(handle)` 释放句柄。`wros.call(name, handle_or_None, request_bytes, output_capacity)` 返回状态码、响应字节或 `None`、以及写入长度。输入、输出各限 4 MiB，解释器在归还调用缓冲区前覆写其临时副本。应用持有的 Python 对象按语言本身的生命周期管理。平台子权限和上级驱动权限分别检查。
 

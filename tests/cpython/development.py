@@ -15,6 +15,7 @@ def main():
     for name in ("sdk", "vm", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--engine", choices=("int", "aot"), action="append")
+    parser.add_argument("--target", choices=("wasm32", "wasm64"), default="wasm32")
     a = parser.parse_args()
     sdk, vm, output = a.sdk.resolve(), a.vm.resolve(), a.output.resolve()
     output.mkdir()
@@ -37,11 +38,15 @@ def main():
             raise RuntimeError(label + ": " + test.stderr[-1700:].decode(errors="replace"))
     root = Path(__file__).resolve().parents[2]
     sources = output / "app.py"
-    sources.write_text("""import sys, wros, sensor
+    bits = int(a.target[4:])
+    sources.write_text(f"""import sys, time, wros, sensor
 from sensor.units import squared
 assert sum(squared(n) for n in range(15)) == 1015
 assert sensor.count == 1 and wros.abi() == 2
 assert sys.version_info[:3] == (3, 14, 8) and sys.implementation.name == 'cpython'
+assert sys.maxsize == (1 << ({bits} - 1)) - 1
+assert time.clock_gettime_ns(time.CLOCK_MONOTONIC) > 0
+assert time.get_clock_info('monotonic').resolution > 0
 try:
     import _socket
 except ImportError: pass
@@ -54,7 +59,8 @@ else: raise AssertionError('unexpected file creation')
     init, units = output / "__init__.py", output / "units.py"
     init.write_text("from .units import squared\ncount = 1\n")
     units.write_text("def squared(n): return n*n\n")
-    wrpy = [sys.executable, sdk / "bin/wrpy"]
+    suffix = "_wasm64" if bits == 64 else ""
+    wrpy = [sys.executable, sdk / "bin/wrpy", "--target", a.target]
     artifact, neighbors = output / "app.wasm", output / "neighbors.wasm"
     checked("compile", [*wrpy, sources, "--module", "sensor=" + str(init), "--module",
                          "sensor.units=" + str(units), "--ros-abi", "--build-receipt", "-o", artifact])
@@ -63,7 +69,14 @@ else: raise AssertionError('unexpected file creation')
     negative = output / "negative.py"
     negative.write_text("raise RuntimeError('intentional guest failure')\n")
     checked("compile-negative", [*wrpy, negative, "-o", failing])
-    raw = [("wasi_snapshot_preview1", name) for name in ("clock_time_get", "clock_res_get")]
+    operations = [r["name"] for r in json.loads((sdk / "share/abi/ros.json").read_bytes())["operations"]]
+    ops_source, all_ops = output / "operations.py", output / "operations.wasm"
+    ops_source.write_text("import wros\nassert callable(wros.call)\n")
+    selected = [arg for op in operations for arg in ("--ros-operation", op)]
+    checked("compile-operation-catalog", [*wrpy, ops_source, *selected, "-o", all_ops])
+    raw = [("wasi_snapshot_preview1", name + suffix) for name in ("clock_time_get", "clock_res_get")]
+    all_imports = [(r["module"], r["name"]) for r in inspect(all_ops.read_bytes())]
+    assert sorted(all_imports) == sorted([*raw, *(("uwvm_ros_v2", op) for op in operations)])
     for wasm, expected in ((artifact, [*raw, ("uwvm_ros_v2", "abi")]), (neighbors, raw)):
         assert {(r["module"], r["name"]) for r in inspect(wasm.read_bytes())} == set(expected)
         receipt = json.loads(Path(str(wasm) + ".wros-build.json").read_bytes())
@@ -74,11 +87,11 @@ else: raise AssertionError('unexpected file creation')
     assert before == digest(artifact)
     clocks = ["--wasip1-single-create", "main", "--wasip1-single-enable", "main"]
     for n in ("clock_time_get", "clock_res_get"):
-        clocks += ["--wasip1-single-interface", "main", n, "allow"]
+        clocks += ["--wasip1-single-interface", "main", n + suffix, "allow"]
     for n in ("realtime-clock", "monotonic-clock", "realtime-resolution", "monotonic-resolution"):
         clocks += ["--wasip1-single-grant", "main", n]
     for engine in a.engine or ("int", "aot"):
-        run = [vm, *Profile().uwvm_feature_flags(), "--wasm-set-main-module-name", "main", "--runtime-" + engine,
+        run = [vm, *Profile(address_bits=bits).uwvm_feature_flags(), "--wasm-set-main-module-name", "main", "--runtime-" + engine,
                "--runtime-compile-threads", "3", "--runtime-llvm-jit-cache-path", "disable",
                "--runtime-llvm-jit-full-policy", "legacy-light", "--runtime-memtag-mode", "sync",
                "--debug-fault-action", "exit", *clocks]
@@ -89,7 +102,7 @@ else: raise AssertionError('unexpected file creation')
             checked("unhandled-python-exception", [*run, "--run", failing], "unreachable")
         checked("neighbors-" + engine, [*run, "--run", neighbors])
     (output / "results.json").write_text(json.dumps(dict(vm_sha256=digest(vm),
-        wasm={p.name: digest(p) for p in (artifact, neighbors, failing)}, cases=cases), indent=2) + "\n")
+        operations=len(operations), wasm={p.name: digest(p) for p in (artifact, neighbors, failing, all_ops)}, cases=cases), indent=2) + "\n")
 
 
 if __name__ == "__main__":
