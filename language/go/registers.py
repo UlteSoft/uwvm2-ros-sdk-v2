@@ -15,6 +15,7 @@ for bits, wasmtype, first in [(32, I32, 0x6a), (64, I64, 0x7c)]:
 
 
 def uleb(n):
+    """@brief Encode one bounded unsigned core-Wasm field."""
     if not isinstance(n, int) or not 0 <= n <= 0xffffffff:
         raise ValueError("invalid unsigned Wasm field")
     out = bytearray()
@@ -26,6 +27,7 @@ def uleb(n):
 
 
 def sleb(n, bits):
+    """@brief Encode a signed constant using Go fixed-width wraparound."""
     n &= (1 << bits) - 1
     if n >= 1 << (bits - 1):
         n -= 1 << bits
@@ -40,14 +42,17 @@ def sleb(n, bits):
 
 
 def vector(entries):
+    """@brief Encode a counted vector of core-Wasm values."""
     return uleb(len(entries)) + b"".join(entries)
 
 
 def field(b):
+    """@brief Encode a length-delimited Wasm payload."""
     return uleb(len(b)) + b
 
 
 def function_type(params, result):
+    """@brief Encode the exact scalar signature of a guest or approved host function."""
     return b"\x60" + vector([bytes([t]) for t in params]) + vector([bytes([result])] if result else [])
 
 

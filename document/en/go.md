@@ -10,13 +10,14 @@ Use the full SDK commit for `$REV`. Select one platform such as `unitree`.
 python3 install/bootstrap.py install --commit "$REV" --platform unitree --language go --prefix "$PWD/sdk"
 ```
 
-Set `UWVM_ROS_SDK_ROOT` to the installation directory printed by the installer. It contains `bin/wrgo`, a Linux x86-64 compiler, the guest encoder, examples and the matching Xmake adapter. Normal installation fetches this language and the selected platform. The optional `--component compiler-source` includes the upstream source, license and producer build script. To rebuild the host compiler, supply the matching official Linux x86-64 Go bootstrap archive to `language/go/producer/build.py --source <source.tar.gz> --bootstrap <linux-amd64.tar.gz> --output <new-directory>`. Both inputs must match the fixed release hashes. [Official Go release archives](https://go.dev/dl/#go1.24.2)
+Set `UWVM_ROS_SDK_ROOT` to the installation directory printed by the installer. It contains `bin/wrgo`, a Linux x86-64 compiler, the guest encoder, examples and the matching Xmake adapter. Normal installation fetches this language and the selected platform. The optional `-- --component compiler-source` includes the upstream source, license and producer build script. To rebuild the host compiler, supply the matching official Linux x86-64 Go bootstrap archive to `language/go/producer/build.py --source <source.tar.gz> --bootstrap <linux-amd64.tar.gz> --output <new-directory>`. Both inputs must match the fixed release hashes. [Official Go release archives](https://go.dev/dl/#go1.24.2)
 
 ```sh
 cd "$UWVM_ROS_SDK_ROOT/examples/shared/common/go"
 "$UWVM_ROS_SDK_ROOT/bin/wrgo" controller.go -o controller.wasm --build-receipt
 xmake f -p wasm-wasip1 -a wasm32
 xmake
+WROS_VM=/absolute/path/to/uwvm2-ros xmake test -j1
 WROS_VM=/absolute/path/to/uwvm2-ros xmake run
 ```
 

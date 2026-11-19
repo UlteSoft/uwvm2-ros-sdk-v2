@@ -111,6 +111,8 @@ def main():
         if kind == "extension":
             for engine in ("int", "aot"):
                 run(engine + "-deny", vm(engine, module), success=False)
+                if "ROS scene interface is hidden" not in (work / (engine + "-deny.log")).read_text():
+                    raise ValueError("guest failed without the expected ROS permission denial")
     (work / "results.json").write_text(json.dumps(dict(scope="standard-Go register-only wasm32",
         vm_sha256=digest(args.vm), test_sha256=digest(Path(__file__)), artifacts=artifacts, compiler=json.loads((root / "language/go/release.json").read_bytes()),
         cases=rows), indent=2) + "\n")

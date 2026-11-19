@@ -19,6 +19,7 @@ LIMIT = 1 << 20
 
 
 def sha(data):
+    """@brief Return the SHA-256 of an in-memory build input."""
     return hashlib.sha256(data).hexdigest()
 
 

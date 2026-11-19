@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -33,6 +34,7 @@ def main():
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--commit", required=True)
     args = parser.parse_args()
+    os.umask(0o077)
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
     protected = args.authority_work.resolve()

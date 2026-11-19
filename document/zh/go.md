@@ -10,13 +10,14 @@
 python3 install/bootstrap.py install --commit "$REV" --platform unitree --language go --prefix "$PWD/sdk"
 ```
 
-将安装程序打印的目录设置为 `UWVM_ROS_SDK_ROOT`。目录含 `bin/wrgo`、Linux x86-64 主机编译器、Wasm 生成器、示例与 Xmake 适配器。默认安装只选取所需语言和平台，增加 `--component compiler-source` 可取得官方源码、许可证和构建脚本。重建时下载同版官方 Linux x86-64 启动工具链，运行 `language/go/producer/build.py --source <source.tar.gz> --bootstrap <linux-amd64.tar.gz> --output <新目录>`。脚本校验两份归档的固定摘要。[Go 官方发布归档](https://go.dev/dl/#go1.24.2)
+将安装程序打印的目录设置为 `UWVM_ROS_SDK_ROOT`。目录含 `bin/wrgo`、Linux x86-64 主机编译器、Wasm 生成器、示例与 Xmake 适配器。默认安装只选取所需语言和平台，增加 `-- --component compiler-source` 可取得官方源码、许可证和构建脚本。重建时下载同版官方 Linux x86-64 启动工具链，运行 `language/go/producer/build.py --source <source.tar.gz> --bootstrap <linux-amd64.tar.gz> --output <新目录>`。脚本校验两份归档的固定摘要。[Go 官方发布归档](https://go.dev/dl/#go1.24.2)
 
 ```sh
 cd "$UWVM_ROS_SDK_ROOT/examples/shared/common/go"
 "$UWVM_ROS_SDK_ROOT/bin/wrgo" controller.go -o controller.wasm --build-receipt
 xmake f -p wasm-wasip1 -a wasm32
 xmake
+WROS_VM=/absolute/path/to/uwvm2-ros xmake test -j1
 WROS_VM=/absolute/path/to/uwvm2-ros xmake run
 ```
 
