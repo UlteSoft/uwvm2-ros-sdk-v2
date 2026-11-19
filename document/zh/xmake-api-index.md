@@ -448,7 +448,7 @@
 
 Java/Kotlin 可选同步 AOT 组件使用 `set_wros_jvm_main(class_name)` 指定入口。详见 [JVM 编译与 Xmake 参数](jvm.md)。
 
-Lua、JavaScript、JVM 与 C# 工程可用 `add_wros_operations(...)` 选择 ROS 导入。C# 场景入口接受 `abi`。[C# 场景入口](csharp.md) · [JVM 编译选项](jvm.md)。
+Lua、JavaScript、TypeScript、Python、Ruby、JVM 和 .NET 工程可用 `add_wros_operations(...)` 选择 ROS 导入。C# 场景入口接受 `abi`。[C# 场景入口](csharp.md) · [JVM 编译选项](jvm.md)。
 
 ### `add_wros_python_modules(...)`
 

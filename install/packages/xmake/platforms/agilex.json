@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/agilex/xmake/platform.lua",
-      "bytes": 339,
+      "bytes": 347,
       "mode": 420,
-      "sha256": "bca293b213bb2dfb2404fb8163547d973477914077cb7e49cfa446053af734db"
+      "sha256": "75065a2527d847ee3d50dbf6b6edcdca2caa9160fd92c81d744780ab21099b61"
     }
   ]
 }

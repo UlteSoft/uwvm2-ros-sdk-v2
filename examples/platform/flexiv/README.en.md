@@ -32,7 +32,7 @@ Install the platform and language, run xmake build inside the project to emit Wa
 | py | [common/py](common/py/) | [extension/py](extension/py/) | [migration/py](migration/py/) |
 | r | — | — | — |
 | rs | [common/rs](common/rs/) | [extension/rs](extension/rs/) | [migration/rs](migration/rs/) |
-| ruby | — | — | — |
+| ruby | [common/ruby](common/ruby/) | [extension/ruby](extension/ruby/) | [migration/ruby](migration/ruby/) |
 | swift | — | — | — |
 | tinygo | [common/tinygo](common/tinygo/) | [extension/tinygo](extension/tinygo/) | [migration/tinygo](migration/tinygo/) |
 | typescript | [common/typescript](common/typescript/) | [extension/typescript](extension/typescript/) | [migration/typescript](migration/typescript/) |

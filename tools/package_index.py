@@ -142,6 +142,8 @@ def main():
             metadata["optional_components"] = ["migration"]
         if language == "go":
             metadata.update(development_scope="register-only-wasm32", optional_components=["compiler-source"])
+        if language == "ruby":
+            metadata.update(development_scope="embedded-mruby-core3", optional_components=["compiler-source", "migration"])
         if language in ("java","kotlin"):
             metadata.update(development_package=True, development_scope="synchronous-wasm32-aot",
                             optional_components=["synchronous-aot"])
@@ -226,6 +228,11 @@ def main():
     for width in ("wasm32", "wasm64"):
         stem = f"third-parties/cpython-runtime/{width}-wasip1-core3.0-eh-mte"
         package("python-runtime/" + width, [stem + ".json", stem + ".tar.xz"])
+    language_files["ruby"] = [
+        "bin/wrrb", "bin/wrc", "include/wros/scene.h", "language/ruby/entry.cpp", "language/ruby/pool.cpp",
+        "language/ruby/presym.rb", "language/ruby/check_site.py", "document/en/ruby.md", "document/zh/ruby.md",
+        "third-parties/mruby/mruby-4.0.0.tar.gz", "third-parties/mruby/LICENSE", "third-parties/mruby/README.md",
+    ]
     language_files["fortran"] = [
         "examples/fortran/body.f90", "examples/fortran/xmake.lua",
         "examples/fortran/static/body.f90", "examples/fortran/static/kernel.f90", "examples/fortran/static/xmake.lua",

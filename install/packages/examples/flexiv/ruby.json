@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/flexiv/common/ruby/body.rb",
+      "bytes": 211,
+      "mode": 420,
+      "sha256": "0f863858507068f20c4db58bb47eaba5a75267f21a62a827cb7cf005a50158bc"
+    },
+    {
+      "path": "examples/platform/flexiv/common/ruby/xmake.lua",
+      "bytes": 529,
+      "mode": 420,
+      "sha256": "a603f6aedc282534dbda7d60fc1143a6c629ae85a96da8bdfe297864b64c3165"
+    },
+    {
+      "path": "examples/platform/flexiv/extension/ruby/body.rb",
+      "bytes": 393,
+      "mode": 420,
+      "sha256": "c7777aea819ab6e8146b6da3a15fbf01041179d070a44c63dddee83822c1a33f"
+    },
+    {
+      "path": "examples/platform/flexiv/extension/ruby/xmake.lua",
+      "bytes": 603,
+      "mode": 420,
+      "sha256": "67324e4a20c521ea59c8512e0b979c8bbf7249205824b41f286f3d113e487e4b"
+    },
+    {
+      "path": "examples/platform/flexiv/migration/ruby/body.rb",
+      "bytes": 320,
+      "mode": 420,
+      "sha256": "aa19074a72dd5bdbff05ac2e17747fc5d9644656596d2514f405167ceb391748"
+    },
+    {
+      "path": "examples/platform/flexiv/migration/ruby/xmake.lua",
+      "bytes": 471,
+      "mode": 420,
+      "sha256": "3564fa8ba9a5152b4e41c7d3ec3868bc53ee451bd32bbd1294b5257d4ca84334"
+    }
+  ]
+}

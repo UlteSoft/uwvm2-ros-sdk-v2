@@ -101,6 +101,7 @@
       "nim",
       "odin",
       "rs",
+      "ruby",
       "swift",
       "tinygo",
       "zig"
@@ -113,7 +114,8 @@
       "js",
       "lua",
       "objectc",
-      "py"
+      "py",
+      "ruby"
     ],
     "boston_dynamics": [
       "as",
@@ -127,6 +129,7 @@
       "nim",
       "odin",
       "rs",
+      "ruby",
       "swift",
       "tinygo",
       "zig"
@@ -143,6 +146,7 @@
       "nim",
       "odin",
       "rs",
+      "ruby",
       "swift",
       "tinygo",
       "zig"
@@ -155,7 +159,8 @@
       "js",
       "lua",
       "objectc",
-      "py"
+      "py",
+      "ruby"
     ],
     "dobot": [
       "as",
@@ -463,7 +468,8 @@
       "js",
       "lua",
       "objectc",
-      "py"
+      "py",
+      "ruby"
     ],
     "nvidia": [
       "as",
@@ -474,6 +480,7 @@
       "go",
       "js",
       "rs",
+      "ruby",
       "tinygo",
       "typescript"
     ],
@@ -486,6 +493,7 @@
       "go",
       "js",
       "rs",
+      "ruby",
       "tinygo",
       "typescript"
     ],
@@ -498,6 +506,7 @@
       "go",
       "js",
       "rs",
+      "ruby",
       "tinygo",
       "typescript"
     ],
@@ -510,6 +519,7 @@
       "go",
       "js",
       "rs",
+      "ruby",
       "tinygo",
       "typescript"
     ],

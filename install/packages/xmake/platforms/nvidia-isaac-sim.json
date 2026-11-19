@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/nvidia-isaac-sim/xmake/platform.lua",
-      "bytes": 315,
+      "bytes": 335,
       "mode": 420,
-      "sha256": "ec9807700113e11f62bbaa512f9e50466f3da90bd0485c42bfcb30242180bd60"
+      "sha256": "672eb5a053b308f0b2947f290b1bdccbcb6fb7187d681f855458efc446f7b98e"
     }
   ]
 }

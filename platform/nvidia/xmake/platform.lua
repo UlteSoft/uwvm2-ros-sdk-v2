@@ -4,7 +4,8 @@ function describe()
         id = "nvidia",
         admission = "generic-driver",
         languages = {
-            "as", "c", "c_ffi_bridge", "cpp", "fortran", "go", "js", "rs", "tinygo", "typescript"
+            "as", "c", "c_ffi_bridge", "cpp", "fortran", "go", "js", "rs", "ruby", "tinygo",
+            "typescript"
         }
     }
 end

@@ -1,5 +1,10 @@
 {
   "id": "ruby",
-  "development_package": false,
-  "command_name": "wrrb"
+  "development_package": true,
+  "command_name": "wrrb",
+  "development_scope": "embedded-mruby-core3",
+  "optional_components": [
+    "compiler-source",
+    "migration"
+  ]
 }

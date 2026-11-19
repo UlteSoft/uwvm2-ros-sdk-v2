@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/deep_robotics/xmake/platform.lua",
-      "bytes": 294,
+      "bytes": 302,
       "mode": 420,
-      "sha256": "5083222b15777cf15d7707a74709a55d8e3e8386f43ded0af25caaec63c3d89f"
+      "sha256": "20c0896b3279d3c06c38129e06a29f18acd2c3d3e598ff508d772ca91c3af59c"
     }
   ]
 }

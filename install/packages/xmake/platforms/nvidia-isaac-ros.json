@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/nvidia-isaac-ros/xmake/platform.lua",
-      "bytes": 315,
+      "bytes": 335,
       "mode": 420,
-      "sha256": "e10e203a350387d2c405fecac8568dcdcbec457ffe2c6f5974f44de529a1f8e8"
+      "sha256": "7527e920bcc817d324b51d08d0b0303e3f2b60745ba8a9037f733a418b487a87"
     }
   ]
 }

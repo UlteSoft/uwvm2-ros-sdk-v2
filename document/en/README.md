@@ -26,11 +26,14 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | Objective-C | `objectc` | `wrobjc` |
 | Fortran | `fortran` | `wrf` |
 | Rust | `rs` | `wrrs` |
+| [Go](go.md) | `go` | `wrgo` |
 | TinyGo | `tinygo` | `wrtg` |
 | Nim | `nim` | `wrnim` |
 | [Python / CPython](python.md) | `py` | `wrpy` |
+| [Ruby / mruby](ruby.md) | `ruby` | `wrrb` |
 | Lua | `lua` | `wrlua` |
 | [JavaScript](js.md) | `js` | `wrjs` |
+| [TypeScript](typescript.md) | `typescript` | `wrts` |
 | [D BetterC](d.md) | `d` | `wrd` |
 | Java | `java` | `wrjava` |
 | Kotlin | `kotlin` | `wrkt` |

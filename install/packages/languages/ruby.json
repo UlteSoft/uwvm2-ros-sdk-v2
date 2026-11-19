@@ -1,0 +1,82 @@
+{
+  "files": [
+    {
+      "path": "bin/wrc",
+      "bytes": 183,
+      "mode": 493,
+      "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
+    },
+    {
+      "path": "bin/wrrb",
+      "bytes": 9372,
+      "mode": 493,
+      "sha256": "8cb422a82f643d12ad14b918f60adaa60e46f9fd32ac15d64536af9d765afea8"
+    },
+    {
+      "path": "document/en/ruby.md",
+      "bytes": 3074,
+      "mode": 420,
+      "sha256": "69e1254a392fa5a2bab5b8e028b5b9ae9fb17ce146c354aeefcd0715b2161288"
+    },
+    {
+      "path": "document/zh/ruby.md",
+      "bytes": 2807,
+      "mode": 420,
+      "sha256": "ebb96597bbf0ef99bc898463a29021d206596348b64db7b4815ea1824b4b1e41"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/ruby/check_site.py",
+      "bytes": 988,
+      "mode": 420,
+      "sha256": "dcef42e23badedbae5fcd05e117c95929336276eaf8881a0be32f839109156f3"
+    },
+    {
+      "path": "language/ruby/entry.cpp",
+      "bytes": 7418,
+      "mode": 420,
+      "sha256": "bd163fa6cc45af48f2d707266b845ef74f8d7c27826d96c6f4f3ba5ce3457598"
+    },
+    {
+      "path": "language/ruby/pool.cpp",
+      "bytes": 2440,
+      "mode": 420,
+      "sha256": "117edf20fcf9a3c57c3b2895fbf592913277f5ebd9b466988de163df615d0b91"
+    },
+    {
+      "path": "language/ruby/presym.rb",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "64116297f68aaf90617b766805ee2ac78dfe54a34e2e7ca08545524bc81502eb"
+    },
+    {
+      "path": "language/ruby/xmake/adapter.lua",
+      "bytes": 1410,
+      "mode": 420,
+      "sha256": "21f5e605fe88498ed4760791e6d62d00ff764407eb4f02dcf44449f5685e5659"
+    },
+    {
+      "path": "third-parties/mruby/LICENSE",
+      "bytes": 1061,
+      "mode": 420,
+      "sha256": "07dc3c033f3f0ee600f76ac52211a04cbb67e722f8da44767687e86151586170"
+    },
+    {
+      "path": "third-parties/mruby/README.md",
+      "bytes": 478,
+      "mode": 420,
+      "sha256": "c615a625a2959feb4b2ad6edd5eaa33a64b3bc2bbf7176dc02329264ed3438dc"
+    },
+    {
+      "path": "third-parties/mruby/mruby-4.0.0.tar.gz",
+      "bytes": 1348777,
+      "mode": 420,
+      "sha256": "e2ea271dbed14e9f2b33df773ae447b747dbc242ce2675022c0a57efea85a7b4"
+    }
+  ]
+}

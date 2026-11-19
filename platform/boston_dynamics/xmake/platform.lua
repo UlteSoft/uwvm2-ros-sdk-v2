@@ -5,7 +5,7 @@ function describe()
         admission = "generic-driver",
         languages = {
             "as", "c", "cpp", "d", "fortran", "go", "haskell", "moonbit", "nim", "odin", "rs",
-            "swift", "tinygo", "zig"
+            "ruby", "swift", "tinygo", "zig"
         }
     }
 end

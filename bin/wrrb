@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""@file wrrb
+@brief Build an embedded mruby application as a WebAssembly Core module.
+"""
+import argparse
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tarfile
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+LANG = ROOT / "language/ruby"
+RUBY_VERSION = "4.0.0"
+SOURCE_NAME = "mruby-" + RUBY_VERSION
+SOURCE_SHA256 = "e2ea271dbed14e9f2b33df773ae447b747dbc242ce2675022c0a57efea85a7b4"
+sys.path.insert(0, str(ROOT / "install"))
+import qualification
+from artifacts import read_bounded
+from compiler import compiler_environment, digest, make_command
+from frontend import audit
+from imports import inspect
+
+SPECIAL = {
+    "abi": ([], "ABI"),
+    "capability.open": (["i32", "i64", "i64", "i64"], "OPEN"),
+    "capability.close": (["i64"], "CLOSE"),
+}
+BUFFER_ARGS = ["i64", "i32", "i64", "i64", "i64", "i64", "i64"]
+
+
+def select_operations(names):
+    """@brief Resolve only exact ROSv2 names and check their Wasm types before C++ generation."""
+    catalogue = json.loads((ROOT / "share/abi/ros.json").read_bytes())
+    entries = {item["name"]: item["wasm_signature"] for item in catalogue["operations"]}
+    macros, functions = [], []
+    for name in sorted(names):
+        if name not in entries or not re.fullmatch(r"[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*", name):
+            raise ValueError("unknown ROSv2 operation: " + name)
+        parameters, label = SPECIAL.get(name, (BUFFER_ARGS, None))
+        if entries[name] != {"parameters": parameters, "results": ["i32"]}:
+            raise ValueError("operation has no mruby field adapter: " + name)
+        if label:
+            macros.append("#define WROS_RUBY_" + label)
+        else:
+            report = "true" if name in ("permission.report", "module.permission.report") else "false"
+            functions.append(f'    {{"{name}", wr_{name.replace(".", "_")}, {report}}},')
+    if functions:
+        macros.extend(["#define WROS_RUBY_CALL", "const method methods[] = {", *functions,
+                       "    {nullptr, nullptr, false}", "};"])
+    return "\n".join(macros) + "\n"
+
+
+def literal(name, data):
+    """@brief Encode counted bytes for the guest without executing application text at build time."""
+    rows = ['"' + "".join("\\%03o" % byte for byte in data[offset:offset + 128]) + '"'
+            for offset in range(0, len(data), 128)]
+    return "static const char " + name + "[] =\n" + ("\n".join(rows) or '""') + ";\n"
+
+
+def prepare(work, tagged):
+    """@brief Authenticate official sources and adapt parser lifetimes to Wasm's allocator."""
+    archive = (ROOT / "third-parties/mruby" / (SOURCE_NAME + ".tar.gz")).read_bytes()
+    if hashlib.sha256(archive).hexdigest() != SOURCE_SHA256:
+        raise ValueError("mruby source archive differs from the selected release")
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as source:
+        source.extractall(work, filter="data")
+    tree = work / SOURCE_NAME
+    parser = tree / "mrbgems/mruby-compiler/core/y.tab.c"
+    data = parser.read_bytes()
+    guard = b"#define YYSTACK_USE_ALLOCA 1"
+    if data.count(guard) != 1:
+        raise ValueError("mruby parser stack configuration differs from the reviewed source")
+    data = data.replace(guard, b"#define YYSTACK_USE_ALLOCA 0")
+    if tagged:
+        # One parser invocation owns its allocations until the arena closes.
+        # A retired AST value is never recycled as another live value in that arena.
+        free = b"  cons->cdr = p->cells;\n  p->cells = cons;"
+        reuse = (b"  if (p->cells) {\n    c = (struct mrb_ast_node*)p->cells;\n"
+                 b"    p->cells = p->cells->cdr;\n  }\n  else {\n"
+                 b"    c = (struct mrb_ast_node*)parser_palloc(p, sizeof(struct mrb_ast_node));\n  }")
+        if data.count(free) != 1 or data.count(reuse) != 1:
+            raise ValueError("mruby parser's AST reuse differs from the reviewed source")
+        data = data.replace(free, b"  (void)p; (void)cons;").replace(
+            reuse, b"  c = (struct mrb_ast_node*)parser_palloc(p, sizeof(struct mrb_ast_node));")
+    parser.write_bytes(data)
+    units = [file for file in sorted((tree / "src").glob("*.c")) if file.name != "mempool.c" or not tagged]
+    units.extend([parser.with_name("codegen.c"), parser])
+    if tagged:
+        units.append(LANG / "pool.cpp")
+    return tree, units
+
+
+def main():
+    """@brief Link the Wasm interpreter and exact host imports, then publish the audited module."""
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("script", type=Path)
+    p.add_argument("-o", "--output", type=Path, required=True)
+    p.add_argument("--target", choices=("wasm32", "wasm64"))
+    p.add_argument("--toolchain", type=Path)
+    p.add_argument("--sysroots", type=Path, action="append")
+    p.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    p.add_argument("--ros-operation", action="append", default=[])
+    p.add_argument("--ros-abi", action="store_true")
+    p.add_argument("--build-receipt", action="store_true")
+    a = p.parse_args()
+    if a.output.suffix != ".wasm" or a.output.resolve() == a.script.resolve():
+        p.error("choose a distinct .wasm output")
+    with a.script.open("rb") as stream:
+        script = stream.read((1 << 20) + 1)
+    if len(script) > 1 << 20 or b"\0" in script:
+        raise ValueError("expected up to 1 MiB of UTF-8 Ruby source")
+    script.decode("utf-8")
+    operations = set(a.ros_operation) | ({"abi"} if a.ros_abi else set())
+
+    a.core, a.eh, a.threads, a.O, a.g, a.legacy_mte = "3.0", True, False, "3", True, False
+    profile, release = qualification.frontend_profile(a, "c")
+    admission = qualification.admit("c", a, profile, selected_release=release)
+    tc = a.toolchain.resolve()
+    if not (tc / "bin/clang++").samefile(tc / "bin/clang"):
+        raise ValueError("mruby needs the C site's identical Clang C++ driver")
+    env = compiler_environment(tc)
+
+    with tempfile.TemporaryDirectory(dir=a.output.parent) as temporary:
+        work = Path(temporary).resolve()
+        source, units = prepare(work, a.mte)
+        (work / "operations.inc").write_text(select_operations(operations))
+        (work / "application.inc").write_text(literal("application", script))
+        core = b"\n".join(file.read_bytes() for file in sorted((source / "mrblib").glob("*.rb")))
+        (work / "mrblib.inc").write_text(literal("mrblib", core))
+        flags = ["-std=gnu++20", "-O3", "-g", "-x", "c++", "-Wno-unused-command-line-argument",
+                 "-DMRB_NO_STDIO", "-DMRB_NO_GEMS", "-DMRB_INT64", "-DMRB_NO_BOXING",
+                 "-DMRB_USE_CXX_EXCEPTION", "-DMRB_USE_CXX_ABI", "-DMRB_USE_VM_SWITCH_DISPATCH",
+                 "-DMRB_UTF8_STRING", f"-DMRB_HEAP_PAGE_SIZE={1 if a.mte else 1024}",
+                 "-I" + str(source / "include"), "-I" + str(work / "include"),
+                 "-I" + str(ROOT / "include"), "-I" + str(work),
+                 "-ffile-prefix-map=" + str(work) + "=/wros/mruby", "-fdebug-compilation-dir=/wros/mruby"]
+
+        cmd, backend = make_command(tc, a.sysroots, profile, "cpp", flags + ["-E"], verify=True)
+        # The generator processes only the trusted upstream C++ symbol inventory.
+        # The application's Ruby source is parsed only after the Wasm guest starts.
+        preprocessed = []
+        for unit in units:
+            path = work / (unit.name + ".ii")
+            subprocess.run([*cmd, "-DMRB_PRESYM_SCANNING", unit, "-o", path], env=env, check=True)
+            preprocessed.append(path)
+        subprocess.run(["/usr/bin/ruby", LANG / "presym.rb", source, work, *preprocessed],
+                       env=env, cwd=work, check=True)
+
+        artifact = work / "body.wasm"
+        link = [*flags, "-nostartfiles", "-Wl,--no-entry,--export=_start", "-Wl,-z,stack-size=4194304",
+                "-Wl,--max-memory=134217728", *map(str, units), str(LANG / "entry.cpp"),
+                "-x", "none", "-lc-printscan-long-double", "-o", str(artifact)]
+        command, _ = make_command(tc, a.sysroots, profile, "cpp", link)
+        subprocess.run(command, env=env, cwd=work, check=True)
+        data = read_bounded(artifact)
+        audit(data, profile)
+        imports = {(entry["module"], entry["name"]) for entry in inspect(data)}
+        if imports != {("uwvm_ros_v2", name) for name in operations}:
+            raise ValueError("unexpected mruby imports: " + repr(sorted(imports)))
+        if a.build_receipt:
+            receipt = {"interpreter": "mruby", "version": RUBY_VERSION, "source_sha256": SOURCE_SHA256,
+                       "script_sha256": hashlib.sha256(script).hexdigest(), "wasm_sha256": hashlib.sha256(data).hexdigest(),
+                       "runtime_sources": {file: digest(LANG / file) for file in ("entry.cpp", "pool.cpp", "presym.rb")},
+                       "frontend_sha256": digest(Path(__file__)), "imports": sorted(operations), "backend": backend}
+            note = work / "ruby.json"
+            note.write_text(json.dumps(receipt, indent=2) + "\n")
+            os.replace(note, str(a.output) + ".wros-ruby.json")
+        qualification.finish(admission, a, artifact, a.output)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, subprocess.SubprocessError, ValueError) as error:
+        sys.exit("wrrb: " + str(error))
