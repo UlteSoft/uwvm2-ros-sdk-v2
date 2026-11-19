@@ -1,0 +1,154 @@
+{
+  "files": [
+    {
+      "path": "bin/wrc",
+      "bytes": 183,
+      "mode": 493,
+      "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
+    },
+    {
+      "path": "bin/wrpy",
+      "bytes": 10237,
+      "mode": 493,
+      "sha256": "899b55142ed3d37b8546162ef22595f31fdc8afcd87ce301880718485f3b073c"
+    },
+    {
+      "path": "document/en/python.md",
+      "bytes": 5714,
+      "mode": 420,
+      "sha256": "1cf4f02973b04da79a03a9c25a7ef6eadf87284295621cda9fcd323fb2a4a671"
+    },
+    {
+      "path": "document/zh/python.md",
+      "bytes": 4542,
+      "mode": 420,
+      "sha256": "20b2f38ec91722ca6699d1fe79491109d0fc1925d4a7bc0bbdeee909191b1c48"
+    },
+    {
+      "path": "examples/py/body.py",
+      "bytes": 102,
+      "mode": 420,
+      "sha256": "cd856a9c6ff08e42793665fc8026619ceeb0c8d80e57617721fb65d02d60517d"
+    },
+    {
+      "path": "examples/py/xmake.lua",
+      "bytes": 575,
+      "mode": 420,
+      "sha256": "bbba34848e3c1a6d22a2c27f3dfa6fc134fdc7b757363d87cca0fa8c53a17eb3"
+    },
+    {
+      "path": "examples/shared/common/py/body.py",
+      "bytes": 102,
+      "mode": 420,
+      "sha256": "cd856a9c6ff08e42793665fc8026619ceeb0c8d80e57617721fb65d02d60517d"
+    },
+    {
+      "path": "examples/shared/common/py/xmake.lua",
+      "bytes": 575,
+      "mode": 420,
+      "sha256": "bbba34848e3c1a6d22a2c27f3dfa6fc134fdc7b757363d87cca0fa8c53a17eb3"
+    },
+    {
+      "path": "examples/shared/extension/py/body.py",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "0930affc0bf4cd64505596d0728580d8b570e55848b79faa21592d153ad8da9b"
+    },
+    {
+      "path": "examples/shared/extension/py/xmake.lua",
+      "bytes": 669,
+      "mode": 420,
+      "sha256": "6ec7d6233dad8561d3d8ec809c1ba143605b1d8fe4fa1ada0bca0be683e4b5f6"
+    },
+    {
+      "path": "examples/shared/migration/py/body.py",
+      "bytes": 648,
+      "mode": 420,
+      "sha256": "667479b1c370fcb410e8604962f9c6a4381d66f3f39bd2edacd797810692d9c1"
+    },
+    {
+      "path": "examples/shared/migration/py/xmake.lua",
+      "bytes": 538,
+      "mode": 420,
+      "sha256": "b0117606bc119928e769ba83c12931e8e4cff1d41798897cb5a1dd5ac2f3050a"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/py/build_interpreter.py",
+      "bytes": 6066,
+      "mode": 420,
+      "sha256": "c4a592a019bd10247c36be1152a94c14a2348b4dbe1a89e9f91105e7db812969"
+    },
+    {
+      "path": "language/py/entry.c",
+      "bytes": 2976,
+      "mode": 420,
+      "sha256": "02a43e8093642cf0719440f9b9c1e2adacd3a6e5be67bb1e4ff5db333c641c8f"
+    },
+    {
+      "path": "language/py/freeze_encodings.py",
+      "bytes": 2343,
+      "mode": 420,
+      "sha256": "291d090a6d1ef3d534063c770c5c1d9d94a5741e88c4af68b87ec943af4fee81"
+    },
+    {
+      "path": "language/py/isolate.py",
+      "bytes": 1812,
+      "mode": 420,
+      "sha256": "db4d1bbbf6a7a373566ce3e432669a36e725910e7348714d0ec7650f3c53757c"
+    },
+    {
+      "path": "language/py/runtime_pack.py",
+      "bytes": 3829,
+      "mode": 420,
+      "sha256": "500471e4b0102c3af2787703383c94651d7e471e135b194a16318d7f0174e506"
+    },
+    {
+      "path": "language/py/runtime_paths.mk",
+      "bytes": 705,
+      "mode": 420,
+      "sha256": "3709ad9df68d5838b1bb10ab2a1a6dc0b6d0221fd261c258fb856243e598e79b"
+    },
+    {
+      "path": "language/py/scene.h",
+      "bytes": 6298,
+      "mode": 420,
+      "sha256": "6cad33eb8da134537c3a38492c037f0158bb1ccb2622c5a9c517461734c335fd"
+    },
+    {
+      "path": "language/py/xmake/adapter.lua",
+      "bytes": 1697,
+      "mode": 420,
+      "sha256": "36b5f4b17cf0359c1c9c7770b5b66572cccf1b188fd139c25f92d64dabce82fc"
+    },
+    {
+      "path": "third-parties/cpython-runtime/wasm32-wasip1-core3.0-eh-mte.json",
+      "bytes": 1188,
+      "mode": 420,
+      "sha256": "b1b9f19333c29806de6ea4a79b122f58b5e60079bb54dfbdbd307e015989c4c5"
+    },
+    {
+      "path": "third-parties/cpython-runtime/wasm32-wasip1-core3.0-eh-mte.tar.xz",
+      "bytes": 8960976,
+      "mode": 420,
+      "sha256": "17be07aea712a116897e4451beda250be762e32878def783f13f8d245616d07c"
+    },
+    {
+      "path": "third-parties/cpython/LICENSE",
+      "bytes": 13804,
+      "mode": 420,
+      "sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231"
+    },
+    {
+      "path": "third-parties/cpython/Python-3.14.8.tar.xz",
+      "bytes": 24130644,
+      "mode": 420,
+      "sha256": "c2215904f02b175596dc49351585104f4bc20341e1c47378b26a2c274360ce73"
+    }
+  ]
+}

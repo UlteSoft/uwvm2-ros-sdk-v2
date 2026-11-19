@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""@file wrpy
+@brief Build a Python application and an isolated CPython interpreter into one core Wasm module.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+LANG = ROOT / "language/py"
+sys.path.insert(0, str(ROOT / "install"))
+sys.path.insert(0, str(LANG))
+import qualification
+from artifacts import read_bounded
+from compiler import compiler_environment, digest, make_command, select_closure
+from frontend import audit
+from imports import inspect
+from build_interpreter import build, LINK_LIBRARIES, SHA256, VERSION
+from isolate import declarations
+import runtime_pack
+
+SPECIAL = {"abi": ([], "ABI"), "capability.open": (["i32", "i64", "i64", "i64"], "OPEN"),
+           "capability.close": (["i64"], "CLOSE")}
+BUFFER_ARGS = ["i64", "i32", "i64", "i64", "i64", "i64", "i64"]
+LIMIT = 1024 * 1024
+MODULE = re.compile(r"[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*\Z", re.ASCII)
+
+
+def selection(names):
+    """@brief Emit declarations only for individually selected, registered, signature-checked ROSv2 imports."""
+    catalog = json.loads((ROOT / "share/abi/ros.json").read_bytes())
+    signatures = {row["name"]: row["wasm_signature"] for row in catalog["operations"]}
+    defines, methods = [], []
+    for name in sorted(names):
+        if name not in signatures or not re.fullmatch(r"[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*", name):
+            raise ValueError("unknown ROSv2 operation: " + name)
+        params = SPECIAL[name][0] if name in SPECIAL else BUFFER_ARGS
+        if signatures[name] != {"parameters": params, "results": ["i32"]}:
+            raise ValueError("unsupported operation signature: " + name)
+        if name in SPECIAL:
+            defines.append("#define WR_PY_" + SPECIAL[name][1])
+        else:
+            partial = int(name in ("permission.report", "module.permission.report"))
+            methods.append('    {"%s", wr_%s, %d},' % (name, name.replace(".", "_"), partial))
+    if methods:
+        defines += ["#define WR_PY_CALL", "static const WrMethod wr_methods[] = {", *methods, "    {NULL, NULL, 0}", "};"]
+    return "\n".join(defines) + "\n"
+
+
+def literal(name, data):
+    """@brief Encode exact UTF-8 bytes without introducing host-language string escapes."""
+    chunks = ['"' + "".join("\\%03o" % b for b in data[i:i + 128]) + '"' for i in range(0, len(data), 128)]
+    return "static const char " + name + "[] =\n" + ("\n".join(chunks) or '""') + ";\n"
+
+
+def sources(script, specs, output):
+    """@brief Snapshot bounded user source and create a guest-only importer for explicitly named modules."""
+    def read(path):
+        if path.resolve() == output.resolve():
+            raise ValueError("output aliases application input")
+        with path.open("rb") as stream:
+            data = stream.read(LIMIT + 1)
+        if len(data) > LIMIT or b"\0" in data:
+            raise ValueError("Python source must be UTF-8 text up to 1 MiB")
+        data.decode("utf-8")
+        return data
+    main = read(script)
+    modules, total = {}, len(main)
+    for spec in specs:
+        name, separator, filename = spec.partition("=")
+        if (not separator or not MODULE.fullmatch(name) or name in modules or
+                name.split(".")[0] in ("sys", "builtins", "wros", "_frozen_importlib", "__main__")):
+            raise ValueError("expected a unique import.name=source.py")
+        if len(modules) >= 256:
+            raise ValueError("at most 256 bundled Python modules are supported")
+        file = Path(filename)
+        data = read(file)
+        total += len(data)
+        if total > 4 * LIMIT:
+            raise ValueError("combined Python source exceeds 4 MiB")
+        modules[name] = (data, file.name == "__init__.py")
+    for name in modules:
+        parent = name.rpartition(".")[0]
+        if parent and (parent not in modules or not modules[parent][1]):
+            raise ValueError("missing bundled package __init__.py: " + parent)
+    loader = b""
+    if modules:
+        # The guest compiles sources at first import, using ordinary CPython
+        # module caching, package attributes and relative import resolution.
+        loader = ("import sys as _wr_sys, _frozen_importlib as _wr_imp\n"
+                  "class _WrModules:\n"
+                  "    table = " + repr(modules) + "\n"
+                  "    def find_spec(self, fullname, path=None, target=None):\n"
+                  "        if fullname in self.table:\n"
+                  "            return _wr_imp.ModuleSpec(fullname, self, is_package=self.table[fullname][1])\n"
+                  "    def create_module(self, spec): return None\n"
+                  "    def exec_module(self, module):\n"
+                  "        name = module.__spec__.name\n"
+                  "        exec(compile(self.table[name][0], '<wros:' + name + '>', 'exec'), module.__dict__)\n"
+                  "_wr_sys.meta_path.insert(0, _WrModules())\n").encode()
+    hashes = {"__main__": hashlib.sha256(main).hexdigest(),
+              **{k: hashlib.sha256(v[0]).hexdigest() for k, v in modules.items()}}
+    return literal("application", main) + literal("module_loader", loader), hashes
+
+
+def main():
+    """@brief Resolve the signed C profile, build and inspect exact guest bytes, then publish the result."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("script", type=Path)
+    parser.add_argument("-o", "--output", type=Path, required=True)
+    parser.add_argument("--target", choices=["wasm32"], default="wasm32")
+    parser.add_argument("--toolchain", type=Path)
+    parser.add_argument("--sysroots", type=Path, action="append")
+    parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--ros-operation", action="append", default=[])
+    parser.add_argument("--ros-abi", action="store_true")
+    parser.add_argument("--module", action="append", default=[], metavar="NAME=FILE")
+    parser.add_argument("--jobs", type=int, choices=range(1, 33), default=4)
+    parser.add_argument("--build-receipt", action="store_true")
+    parser.add_argument("--from-source", action="store_true", help="cold-build CPython from the pinned source")
+    parser.add_argument("--publish-runtime", type=Path, metavar="PACK", help="write a new target pack after a successful cold link")
+    args = parser.parse_args()
+    if args.publish_runtime and not args.from_source:
+        raise ValueError("--publish-runtime requires --from-source")
+    if args.output.suffix != ".wasm":
+        raise ValueError("output must have a .wasm extension")
+    args.core, args.threads, args.O, args.g, args.legacy_mte = "3.0", False, "3", True, False
+    profile, selected = qualification.frontend_profile(args, "c")
+    admission = qualification.admit("c", args, profile, selected_release=selected)
+    cc, build_info = make_command(args.toolchain, args.sysroots, profile, "c", [], verify=True)
+    if "-lunwind" in cc:
+        cc.remove("-lunwind")
+    _, _, _, sysroot, _ = select_closure(args.sysroots, profile, build_info["compiler_sha256"])
+    env = compiler_environment(args.toolchain)
+    operations = set(args.ros_operation) | ({"abi"} if args.ros_abi else set())
+    declarations_text = selection(operations)
+    application, script_hashes = sources(args.script, args.module, args.output)
+    with tempfile.TemporaryDirectory(dir=args.output.parent) as scratch:
+        work = Path(scratch).resolve()
+        expected_runtime = runtime_pack.identity(profile, build_info)
+        ready = None if args.from_source else runtime_pack.restore(work, profile, expected_runtime)
+        if ready:
+            include, generated, library = ready
+        else:
+            source, built = build(work, profile, cc, env, args.toolchain.resolve(), args.jobs)
+            include, generated, library = source / "Include", built, built / "libpython3.14.a"
+        target = work / "application"
+        target.mkdir()
+        (target / "application.inc").write_text(application)
+        (target / "operations.inc").write_text(declarations_text)
+        denials, wrappers = declarations(sysroot / "include" / profile.triple / "wasi/wasip1.h")
+        (target / "permissions.c").write_text(denials)
+        artifact = work / "body.wasm"
+        args_link = [*cc, "-O3", "-g", "-ffile-prefix-map=" + str(work) + "=/wros/build",
+                     "-I" + str(include), "-I" + str(generated), "-I" + str(target), "-I" + str(ROOT / "include"),
+                     "-nostartfiles", "-Wl,--no-entry", "-Wl,-z,stack-size=8388608", "-Wl,--max-memory=268435456",
+                     LANG / "entry.c", target / "permissions.c", library, *wrappers,
+                     *LINK_LIBRARIES, "-o", artifact]
+        subprocess.run(args_link, env=env, check=True)
+        data = read_bounded(artifact)
+        audit(data, profile)
+        imports = sorted((i["module"], i["name"]) for i in inspect(data))
+        expected = ({("wasi_snapshot_preview1", n) for n in ("clock_res_get", "clock_time_get")} |
+                    {("uwvm_ros_v2", n) for n in operations})
+        if set(imports) != expected:
+            raise ValueError("unexpected final CPython import inventory: " + repr(imports))
+        if args.publish_runtime:
+            runtime_pack.publish(source, built, args.publish_runtime, expected_runtime)
+        if args.build_receipt:
+            note = work / "python.json"
+            note.write_text(json.dumps(dict(interpreter="CPython", version=VERSION, sources=script_hashes,
+                source_archive_sha256=SHA256, interpreter_archive_sha256=digest(library),
+                backend=build_info, operations=sorted(operations), imports=imports,
+                wasm_sha256=hashlib.sha256(data).hexdigest()), indent=2) + "\n")
+            os.replace(note, str(args.output) + ".wros-py.json")
+        qualification.finish(admission, args, artifact, args.output)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, OSError, subprocess.SubprocessError) as error:
+        sys.exit("wrpy: " + str(error))

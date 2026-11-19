@@ -1,5 +1,5 @@
 {
   "id": "py",
-  "development_package": false,
+  "development_package": true,
   "command_name": "wrpy"
 }

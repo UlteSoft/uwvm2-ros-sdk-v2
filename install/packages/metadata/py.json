@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/py.json",
-      "bytes": 75,
+      "bytes": 74,
       "mode": 420,
-      "sha256": "c9450e552a3ef19d3446ab09412ef503d573ae8565330e40886c049d23b5a99e"
+      "sha256": "065042cfa5f8bb6f1624f9ec853cb3828a129764ab2331550fc9c725e7d651d5"
     }
   ]
 }
