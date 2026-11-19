@@ -20,6 +20,8 @@ def verify_checkout(commit, language):
     scopes = ("bin", "tests", "install", "include", "share/abi", "share/qualification", "tools/wasm/memtag")
     if language == "objectc":
         scopes += ("language/objectc", "third-parties/objectc", "examples/objectc")
+    if language == "rs":
+        scopes += ("language/rust", "third-parties/rust", "tools/wasm/tag_ir.cpp")
     if language == "tinygo":
         scopes += ("language/tinygo", "tools/wasm/tag_ir.cpp")
     if language == "fortran":
@@ -61,6 +63,9 @@ def main():
     p.add_argument("--approved-objc-inputs-sha256",
                    help="SHA-256 of the canonical Objective-C compiler, runtime receipt and archive digest map")
     p.add_argument("--approved-tinygo-inputs-sha256", help="approved digest of Go, TinyGo and host C++ binary identities")
+    p.add_argument("--approved-rust-inputs-sha256", help="approved digest of rustc and host C++ binary identities")
+    p.add_argument("--rust-plain-sysroots", type=lambda s: Path(s).resolve(), help="matching Rust opt-out sysroot receipt")
+    p.add_argument("--approved-rust-plain-sysroots-sha256")
     p.add_argument("--nim-producer", type=lambda s: Path(s).resolve())
     p.add_argument("--approved-nim-producer-sha256")
     p.add_argument("--approved-flang-sha256", help="approved WebAssembly-only TOOLCHAIN/bin/flang")
@@ -68,7 +73,7 @@ def main():
     p.add_argument("--sdk-commit", required=True, help="independently approved full Git commit")
     for key in ("producer", "vm", "sysroots"):
         p.add_argument("--approved-" + key + "-sha256", required=True)
-    p.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran", "tinygo"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran", "tinygo", "rs"), default="c")
     p.add_argument("--target", choices=("wasm32", "wasm64"), required=True)
     p.add_argument("-O", choices=("2", "3"), default="2")
     p.add_argument("-g", action="store_true")
@@ -94,6 +99,17 @@ def main():
     from guest_profile import Profile
 
     external = {}
+    if a.language == "rs":
+        if a.target != "wasm32" or a.O != "3" or not a.g or a.eh:
+            p.error("Rust qualification requires wasm32 Core 3.0 single-threaded panic=abort at -O3 -g")
+        sys.path.insert(0, str(ROOT / "language/rust"))
+        from check_site import inputs as rust_inputs
+        external = rust_inputs(a.toolchain)
+        if qualification.canonical({k: qualification.digest(v) for k, v in external.items()}) != a.approved_rust_inputs_sha256:
+            p.error("Rust frontend or host C++ compiler differs from the approved inputs")
+        if not a.rust_plain_sysroots or qualification.digest(a.rust_plain_sysroots) != a.approved_rust_plain_sysroots_sha256:
+            p.error("Rust qualification needs an approved plain control sysroot")
+
     if a.language == "objectc":
         if not a.objc_clang or not a.objc_runtime:
             p.error("Objective-C qualification needs --objc-clang and --objc-runtime")
@@ -144,6 +160,11 @@ def main():
             receipt.get("producer_allocation_policy") != sources["producer"]["allocation_policy"] or
             receipt.get("compiler_sha256") != binaries["clang"]):
         p.error("sysroot sources or compiler differ from this SDK release")
+    if a.language == "rs":
+        plain = json.loads(a.rust_plain_sysroots.read_text())
+        for key in ("sources", "runtime_diagnostics", "producer_allocation_policy", "compiler_sha256"):
+            if plain.get(key) != receipt[key]:
+                p.error("plain Rust control uses another compiler or source closure")
     # Threaded TLS qualification requires a separate concurrent lifecycle suite.
     bits = int(a.target[4:])
     profile = Profile(bits, mte=True, exceptions="eh" if a.eh else "noeh")
@@ -172,6 +193,11 @@ def main():
                       "--vm", a.runtime, "--toolchain", a.toolchain, "--sysroots", a.sysroots,
                       "--profile", f"wasm{bits}-{profile.exceptions}", "--feature-flag", "default",
                       "--candidate-mte", "--output", a.output / "herbceptions"]))
+    if a.language == "rs":
+        tests.append(("rs", "rust_core.py", [*base, "--rustroot", external["rustc"].parents[1],
+                                             "--host-cxx", external["host_cxx"], "--sysroots", a.sysroots,
+                                             "--plain-sysroots", a.rust_plain_sysroots, "--candidate-mte",
+                                             "--output", a.output / "rs"]))
     if a.language == "tinygo":
         tests.append(("tinygo", "tinygo_mte.py", [*base, *go_flags, "--sysroots", a.sysroots, "--profile", profile.exceptions,
                                                  "--candidate-mte", "--output", a.output / "tinygo"]))
@@ -216,7 +242,7 @@ def main():
         evidence = json.loads(log.read_text())
         cases = evidence.get("cases")
         if evidence.get("complete") is not True or not cases or any(
-                (step.get("code", step.get("exit")) == 0) != step.get("expected_success", True) for step in cases):
+                (step.get("code", step.get("exit")) == 0) != step.get("expected_success", step.get("expected", True)) for step in cases):
             raise ValueError("incomplete " + label + " execution evidence")
         results[label] = qualification.digest(log)
     if (qualification.measure_inputs(a.language, a, profile, external) != measured or qualification.digest(a.runtime) != vm_digest or
@@ -224,6 +250,9 @@ def main():
             any(qualification.digest(a.toolchain / "bin" / name) != before for name, before in binaries.items())):
         raise ValueError("qualification inputs changed")
     verify_checkout(a.sdk_commit, a.language)
+    if a.language == "rs":
+        if qualification.digest(a.rust_plain_sysroots) != a.approved_rust_plain_sysroots_sha256:
+            p.error("Rust plain control sysroot changed during qualification")
     if a.language == "cpp":
         heap = json.loads((a.output / "heap/results.json").read_text())
         names = {item["name"] for item in heap["cases"] if item["exit"] == 0}
@@ -232,7 +261,7 @@ def main():
             raise ValueError("missing C++ allocation execution evidence")
     if a.language == "fortran":
         results["fortran"] = qualification.canonical({name: proof for name, proof in results.items() if name.startswith("fortran-")})
-    language_proof = {"c": "libc", "cpp": "herbceptions", "lua": "lua", "nim": "nim", "objectc": "objectc", "fortran": "fortran", "tinygo": "tinygo"}[a.language]
+    language_proof = {"c": "libc", "cpp": "herbceptions", "lua": "lua", "nim": "nim", "objectc": "objectc", "fortran": "fortran", "tinygo": "tinygo", "rs": "rs"}[a.language]
     row = dict(language=a.language, profile=profile.to_dict(), settings={"optimization": a.O, "debug": a.g},
                inputs=measured, vm_sha256=vm_digest, sdk_commit=a.sdk_commit,
                source_lock_sha256=qualification.digest(lock), producer_programs_sha256=qualification.canonical(binaries),

@@ -4,14 +4,18 @@
 
 ## 安装与编译
 
-安装时指定语言 `rs` 和登记了该语言的平台，例如 `unitree`。准备匹配锁定清单的 Linux x86-64 Rust 1.98.0、带开发头文件和库的 SDK LLVM 23.1.5 WasmMTE 工具链，以及符合目标配置的 sysroot 构建收据。宿主 C++ 编译器用来构建 LLVM 工具，Rust 应用和运行库都生成 Wasm 代码。
+选择语言 `rs` 和登记的平台，例如 `unitree`。开发站点的签名记录绑定本 SDK 和 VM 验收过的工具链、sysroot、优化和调试参数。
 
 ```sh
-python3 install/bootstrap.py install --commit "$REV" --platform unitree --language rs --prefix "$PREFIX"
+python3 install/bootstrap.py install --commit "$REV" --platform unitree --language rs \
+  --prefix "$PREFIX" --site-profile "$SITE"
 SDK="$PREFIX/$REV/unitree/rs/development"
-"$SDK/bin/wrrs" app.rs --rustroot "$WROS_RUSTROOT" --toolchain "$WROS_TOOLCHAIN" \
-  --sysroots "$WROS_SYSROOTS" --no-eh -O3 -g -o robot.wasm
+"$SDK/bin/wrrs" "$SDK/examples/rs/body.rs" --build-receipt -o robot.wasm
 ```
+
+将锁定的 Rust 1.98.0 安装在 `TOOLCHAIN/libexec/wros/rust`，将用于编译 IR 插桩工具的宿主 C++ 编译器放在 `TOOLCHAIN/libexec/wros/rust-host/c++`。该站点选择 Linux x86-64 宿主、LLVM 23.1.5 WasmMTE 开发文件、目标 sysroot、VM 摘要和 `-O3 -g` 选项。安装时会验证签名记录以及 Rust 宿主库的摘要。详见[本地发布资格验证](memory-qualification.md)。
+
+站点维护者可使用 `tools/wasm/memtag/qualify_local_c.py --language rs --target wasm32 -O3 -g` 验收。除工具链、MTE sysroot 和 VM 的审核摘要外，还需提供 `--approved-rust-inputs-sha256`（由 `rustc` 和 `host_cxx` 摘要组成的规范化映射）、`--rust-plain-sysroots` 和 `--approved-rust-plain-sysroots-sha256`。关闭 MTE 的对照 sysroot 必须使用相同的编译器和源码。测试通过后用站点的 WSEA 信任策略签署生成的本地发布记录。
 
 下面的 `app.rs` 使用预先声明的 `wros_scene` crate。运行时需要在 VM 策略中授予此示例使用的 ABI 查询权限。
 
@@ -39,7 +43,7 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 | `--sysroots FILE` | 选择匹配的 sysroot 收据，可重复传入不同配置。 |
 | `--target wasm32 --core 3.0 --no-eh` | 当前支持的目标，也是此 Rust 前端的默认配置。 |
 | `--mte`、`--no-mte` | 为所有 crate 和最终 sysroot 选择统一的插桩配置，默认启用 MTE。 |
-| `-O0`、`-O1`、`-O2`、`-O3` | 在确定插桩策略后使用指定的 LLVM 优化级别，默认 `-O2`。 |
+| `-O0`、`-O1`、`-O2`、`-O3` | 在确定插桩策略后使用指定的 LLVM 优化级别，签名站点使用 `-O3`，显式选择工具链时默认 `-O2`。 |
 | `-g` | 为 guest 代码保留源码位置信息。 |
 | `--host-cxx FILE` | 选择构建 LLVM IR 工具的宿主 C++ 编译器，默认 `/usr/bin/c++`。 |
 | `--print-identity` | 输出目标配置、编译器和源码摘要、各 crate 的 IR 与对象摘要以及局部关闭插桩的声明清单。 |
@@ -49,4 +53,4 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 
 启用 MTE 时，`#[unsafe(link_section = ".wros.no_memtag")]` 向编译器申请证明。当前可证明的范围为单个基本块内的整数运算、比较、选择、整数转换和标量返回。证明只接受 Wasm 标量支持的整数宽度，最多 64 位。出现指针参数、宽整数、栈对象、内存读写或调用时保留插装。后端在降级过程中继续启用插装，以保护优化或 ABI 转换新引入的存储。可变静态对象即使使用 `__wros_no_memtag_` 前缀也保留标签。构建记录分别列出获准省略和保留插装的申请。应用、ROS 绑定和运行库在 LLVM 优化前执行同一规则。安全函数可以包含 `unsafe` 块，也可以调用封装裸指针的安全接口，函数签名和 Rust 引用类型都不足以证明访问安全。完全位于寄存器的值没有需要打标签的线性内存。需要关闭整个应用的插装时显式传入 `--no-mte`。
 
-使用 xmake 开发时设置 `set_language("rs")`，在 `add_files` 中指定 crate 根文件，并设置 `WROS_RUSTROOT`。本地 Rust 模块从该根文件声明。详见 [xmake 参考](xmake.md)。
+使用 xmake 开发时设置 `set_language("rs")`，在 `add_files` 中指定 crate 根文件，即可使用已安装的签名站点。进入 `examples/rs`，运行 `UWVM_ROS_SDK_ROOT="$SDK" xmake f -p wasm-wasip1 -a wasm32 -y` 和 `UWVM_ROS_SDK_ROOT="$SDK" xmake`。需要显式选择工具链时一并设置 `WROS_RUSTROOT`、`WROS_TOOLCHAIN` 和 `WROS_SYSROOTS`。本地 Rust 模块从该根文件声明。详见 [xmake 参考](xmake.md)。

@@ -2,27 +2,45 @@
   "files": [
     {
       "path": "bin/wrrs",
-      "bytes": 9086,
+      "bytes": 10400,
       "mode": 493,
-      "sha256": "ba10b33907149e9fdf91069530ba21d244155438f3122c9479f97cbfa493c12a"
+      "sha256": "93fa8ce67f38c737e2a16deaa874355f9ac46020ccf1820f84aeb84f83106113"
     },
     {
       "path": "document/en/rust.md",
-      "bytes": 4366,
+      "bytes": 5390,
       "mode": 420,
-      "sha256": "7adf3bf32fb1c86ee7557c30e7a1db1cbfcf44a41d6a1178486664194c32b285"
+      "sha256": "2e60ad4541b75e2fac5186c715840caac014d7e2427746ab96740b3f84121f5d"
     },
     {
       "path": "document/zh/rust.md",
-      "bytes": 4029,
+      "bytes": 5016,
       "mode": 420,
-      "sha256": "b04209bf1081f63d3db821630a8f1ed8d6c9bd7239c1da82d4648fce3fa22911"
+      "sha256": "bf144947af8ad1690a6b7961a5761eb18f82e952d9eb69b778229af4c36eecfd"
+    },
+    {
+      "path": "examples/rs/body.rs",
+      "mode": 420,
+      "bytes": 261,
+      "sha256": "1b61495c0b7c41b810affefedbb3a86433ffd2c1682ba4b5c20af4febea06b11"
+    },
+    {
+      "path": "examples/rs/xmake.lua",
+      "mode": 420,
+      "bytes": 342,
+      "sha256": "c79bc904bfcf31811b6d969d0b2dab3019382855f9d6ebbea77c13eb4d828afd"
     },
     {
       "path": "language/rs/xmake/adapter.lua",
-      "bytes": 1639,
+      "bytes": 1757,
       "mode": 420,
-      "sha256": "4c999426096f2347c90dd74cc1b6e2817d9c3be4208a7fd48780d98da9362e05"
+      "sha256": "506e1e560229b09ba9b722de73da2db8936023d484066107507db0dc92ff093b"
+    },
+    {
+      "path": "language/rust/check_site.py",
+      "mode": 420,
+      "bytes": 1904,
+      "sha256": "a926f396cc2506dc9009cde0fd5aa15676e6aa716590378441868227b6f39fef"
     },
     {
       "path": "language/rust/scene.rs",

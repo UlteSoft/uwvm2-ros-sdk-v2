@@ -11,18 +11,24 @@ end
 
 function build(target, req, sources)
     assert(#sources == 1 and #target:orderdeps() == 0, "Rust expects a single crate root with its Rust modules")
-    local args = {path.absolute(sources[1]), "--target", req.arch, "--core", req.core, "--no-eh",
-        "--rustroot", assert(os.getenv("WROS_RUSTROOT"), "Set WROS_RUSTROOT to the pinned rustc prefix"),
-        "--toolchain", assert(os.getenv("WROS_TOOLCHAIN"), "Set WROS_TOOLCHAIN"),
-        "--sysroots", assert(req.sysroots, "Set WROS_SYSROOTS to the matching build receipt"),
-        req.mte_flag}
-    local levels = {none = "0", fast = "1", faster = "2", fastest = "3"}
-    table.insert(args, "-O" .. assert(levels[target:get("optimize") or "faster"], "Unsupported Rust optimization"))
+    local args = {path.absolute(sources[1]), "--target", req.arch, "--core", req.core, "--no-eh", req.mte_flag}
+    local rust = os.getenv("WROS_RUSTROOT")
+    local tool = os.getenv("WROS_TOOLCHAIN")
+    local cxx = os.getenv("WROS_HOST_CXX")
+    if rust or tool or req.sysroots or cxx then
+        assert(rust and tool and req.sysroots, "Set WROS_RUSTROOT, WROS_TOOLCHAIN and WROS_SYSROOTS together")
+        table.join2(args, {"--rustroot", rust, "--toolchain", tool, "--sysroots", req.sysroots})
+        if cxx then table.join2(args, {"--host-cxx", cxx}) end
+    end
+    local optimize = target:get("optimize")
+    if optimize then
+        local levels = {none = "0", fast = "1", faster = "2", fastest = "3"}
+        table.insert(args, "-O" .. assert(levels[optimize], "Unsupported Rust optimization"))
+    end
     for _, symbol in ipairs(table.wrap(target:get("symbols"))) do
         assert(symbol == "debug", "Rust supports debug symbols")
         table.insert(args, "-g")
     end
-    if os.getenv("WROS_HOST_CXX") then table.join2(args, {"--host-cxx", os.getenv("WROS_HOST_CXX")}) end
     if req.build_receipt then table.insert(args, "--build-receipt") end
     os.vrunv(req.program, table.join(args, {"-o", target:targetfile()}))
 end

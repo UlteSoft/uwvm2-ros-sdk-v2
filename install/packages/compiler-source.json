@@ -326,9 +326,9 @@
     },
     {
       "path": "tools/wasm/memtag/qualify_local_c.py",
-      "bytes": 17057,
+      "bytes": 19226,
       "mode": 420,
-      "sha256": "628669fe012695d8e96fb2cd013e5d404df0c260ac2573f13c75a8cf424c19db"
+      "sha256": "c6416cc3195a9a76c82df4a22bc07eb894d28c68eb2413fb666f0d45d73abe54"
     },
     {
       "path": "tools/wasm/memtag/source-lock.json",
