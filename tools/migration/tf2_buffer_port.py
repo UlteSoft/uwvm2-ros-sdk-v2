@@ -49,6 +49,7 @@ def apply_port(tree, prefix, output, single_executor):
     unit = Path("src/buffer_core.cpp")
     edit(tree / header, header, HEADER, [
         ("#include <mutex>", '#include "tf2_single_executor_mutex.hpp"', 1),
+        ('#include "LinearMath/Transform.hpp"', '#include "tf2/LinearMath/Transform.hpp"', 1),
         ("std::mutex", "wros_tf2::single_executor_mutex", 4)] if single_executor else [])
     edit(tree / unit, unit, CORE, [
         ("std::mutex", "wros_tf2::single_executor_mutex", 17)] if single_executor else [])
