@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -19,6 +20,29 @@ def digest(path):
     """@brief Return the SHA-256 of the exact artifact supplied to the next stage."""
     with path.open("rb") as data:
         return hashlib.file_digest(data, "sha256").hexdigest()
+
+
+def passed_engines(log, modules):
+    """@brief Require an explicit final passing result for every built guest and engine.
+    @param log Output captured from the project's serial Xmake test invocation.
+    @param modules Guest modules produced by the materialized project. Its binary
+    target names are the Wasm filename stems.
+    @return Sorted target/engine names passing in the final Xmake report.
+    """
+    expected = {f"{module.stem}/{engine}" for module in modules for engine in ("int", "aot")}
+    if len(expected) != 2 * len(modules):
+        raise ValueError("ambiguous guest target names")
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", log)
+    _, header, report = plain.partition("report of tests:")
+    if not header:
+        raise ValueError("Xmake did not publish final per-engine results")
+    rows = re.findall(r"^\s*\[ *[0-9]+%\]:\s+(\S+)\s+(\S+)", report, re.MULTILINE)
+    if len(rows) != len(expected) or {name for name, _ in rows} != expected:
+        raise ValueError("Xmake's final tests differ from the expected guest/engine pairs")
+    failed = [name for name, status in rows if status != "passed"]
+    if failed:
+        raise ValueError("Xmake did not pass " + ", ".join(failed))
+    return sorted(expected)
 
 
 def main():
@@ -90,11 +114,7 @@ def main():
             if not modules:
                 raise RuntimeError(case+" produced no Wasm")
             log = run(case+"-test", [xmake,"test","-j1"], project)
-            for engine in ("int","aot"):
-                if "/"+engine not in log:
-                    raise RuntimeError(case+" did not register an "+engine+" test")
-            if "0 test(s) failed" not in log:
-                raise RuntimeError(case+" did not report a successful guest test suite")
+            state["cases"][-1]["passed_tests"] = passed_engines(log, modules)
             state["cases"][-1]["modules"] = {m.name:digest(m) for m in modules}
             save()
             if a.check_failure and kind == "common" and a.language == "c":
