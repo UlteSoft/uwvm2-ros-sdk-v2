@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 5579,
+      "bytes": 3871,
       "mode": 420,
-      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+      "sha256": "7f6f7b37ef237c8a9754e41d3e399e6d8a505d739803c01a692f9bda5d7b3917"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,21 +20,9 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 5086,
+      "bytes": 3331,
       "mode": 420,
-      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
-    },
-    {
-      "path": "examples/platform/clearpath/README.en.md",
-      "bytes": 2881,
-      "mode": 420,
-      "sha256": "a5e1c06d95609a00d39f25f437b4f950af885f1273b93d062ab3bee3081025e3"
-    },
-    {
-      "path": "examples/platform/clearpath/README.zh.md",
-      "bytes": 2822,
-      "mode": 420,
-      "sha256": "0442962023aa802c2c793467ce8b766577f6fe2fde79f2db248beb21aae3e609"
+      "sha256": "0d8844a6bdb12a56ef2f10ec8fae7981dbd20a0c59e0beef68a8d7f9719a418f"
     },
     {
       "path": "examples/platform/clearpath/common/fortran/body.f90",

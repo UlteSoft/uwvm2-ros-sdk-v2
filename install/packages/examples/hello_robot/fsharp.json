@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 5579,
+      "bytes": 3871,
       "mode": 420,
-      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+      "sha256": "7f6f7b37ef237c8a9754e41d3e399e6d8a505d739803c01a692f9bda5d7b3917"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,21 +20,9 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 5086,
+      "bytes": 3331,
       "mode": 420,
-      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
-    },
-    {
-      "path": "examples/platform/hello_robot/README.en.md",
-      "bytes": 2885,
-      "mode": 420,
-      "sha256": "db5090013a887d2a85bbd282d7b0128c14182255e989dd31b1a0f0340d2aa135"
-    },
-    {
-      "path": "examples/platform/hello_robot/README.zh.md",
-      "bytes": 2826,
-      "mode": 420,
-      "sha256": "86d51214cfc6db4a649614aa99c1c11ab4cf34e3d94d8d88dcb4afebcf58c4ff"
+      "sha256": "0d8844a6bdb12a56ef2f10ec8fae7981dbd20a0c59e0beef68a8d7f9719a418f"
     },
     {
       "path": "examples/platform/hello_robot/common/fsharp/Robot.fs",

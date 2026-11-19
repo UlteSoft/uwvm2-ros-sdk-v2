@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 5579,
+      "bytes": 3871,
       "mode": 420,
-      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+      "sha256": "7f6f7b37ef237c8a9754e41d3e399e6d8a505d739803c01a692f9bda5d7b3917"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,21 +20,9 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 5086,
+      "bytes": 3331,
       "mode": 420,
-      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
-    },
-    {
-      "path": "examples/platform/nvidia-isaac-sim/README.en.md",
-      "bytes": 2895,
-      "mode": 420,
-      "sha256": "d025005ae83d291c3537f0c008c0850f3bc03b7f217542718c0dd6b936d596bc"
-    },
-    {
-      "path": "examples/platform/nvidia-isaac-sim/README.zh.md",
-      "bytes": 2836,
-      "mode": 420,
-      "sha256": "26059dd911cc51bdd6040f053f0dd92cd98185523ae5b094563d9ba4ed243612"
+      "sha256": "0d8844a6bdb12a56ef2f10ec8fae7981dbd20a0c59e0beef68a8d7f9719a418f"
     },
     {
       "path": "examples/platform/nvidia-isaac-sim/common/kotlin/Main.kt",

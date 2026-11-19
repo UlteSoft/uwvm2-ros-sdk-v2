@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 5579,
+      "bytes": 3871,
       "mode": 420,
-      "sha256": "fc316d6428a287f79e0c95f9931fe0b31429f55b99dd8b91abe3881885cf7732"
+      "sha256": "7f6f7b37ef237c8a9754e41d3e399e6d8a505d739803c01a692f9bda5d7b3917"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,21 +20,9 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 5086,
+      "bytes": 3331,
       "mode": 420,
-      "sha256": "5a62978c99498eb67c1b467eaf19f5bafe279e4874472129a24ef3d7b578a4a8"
-    },
-    {
-      "path": "examples/platform/deep_robotics/README.en.md",
-      "bytes": 2889,
-      "mode": 420,
-      "sha256": "cec79f5a94ed39298553d5ef91d93424b2ae23c05869f3af8dc88f5fa7b7bba9"
-    },
-    {
-      "path": "examples/platform/deep_robotics/README.zh.md",
-      "bytes": 2830,
-      "mode": 420,
-      "sha256": "3a745762aa78e84125bbe9372f44d0ea01ecb3a6ef6c73b8f30f1a093fab984b"
+      "sha256": "0d8844a6bdb12a56ef2f10ec8fae7981dbd20a0c59e0beef68a8d7f9719a418f"
     },
     {
       "path": "examples/platform/deep_robotics/common/lua/body.lua",
