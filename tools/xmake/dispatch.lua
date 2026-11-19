@@ -16,11 +16,10 @@ local function selection(root)
     local language = path.filename(langdir)
     local components = {java = "synchronous-aot", kotlin = "synchronous-aot", csharp = "numeric-aot", vbnet = "numeric-aot", fsharp = "numeric-aot"}
     local expected = components[language]
+    local migration = variant == "migration"
     if expected then
-        local migration = variant == "migration" and (language == "csharp" or language == "vbnet" or language == "fsharp")
         assert(variant == expected or variant == "development" or migration, "Select the installed " .. expected .. " component for " .. language)
     else
-        local migration = variant == "migration" and (language == "c" or language == "cpp")
         assert(variant == "development" or variant == "compiler-source" or migration, "Select an installed Wasm development directory")
     end
     local platdir = path.directory(langdir)
