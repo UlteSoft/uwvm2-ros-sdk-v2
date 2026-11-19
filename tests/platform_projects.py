@@ -58,6 +58,8 @@ def main():
     p.add_argument("--language", required=True)
     p.add_argument("--case", dest="kinds", choices=("common", "extension", "migration"), action="append")
     p.add_argument("--component", default="development")
+    p.add_argument("--target", choices=("wasm32", "wasm64"), default="wasm32",
+                   help="the address width accepted by the selected language and site")
     p.add_argument("--commit", required=True)
     for name in ("vm", "xmake", "output"):
         p.add_argument("--" + name, type=Path, required=True)
@@ -91,7 +93,7 @@ def main():
     elif a.managed_host is not None or a.managed_toolchain is not None:
         p.error("managed host parameters apply only to .NET languages")
     state = {"complete": False, "sdk_commit": a.commit, "vm_sha256": digest(vm), "cgroup": cgroup,
-             "language": a.language, "site_sha256": digest(a.site) if a.site else None, "cases": []}
+             "language": a.language, "target": a.target, "site_sha256": digest(a.site) if a.site else None, "cases": []}
 
     def save():
         (out/"results.json").write_text(json.dumps(state, indent=2)+"\n")
@@ -127,7 +129,7 @@ def main():
             sample = sdk/"examples/platform"/platform/kind/a.language
             project = out/case
             shutil.copytree(sample, project)
-            run(case+"-configure", [xmake,"f","-p","wasm-wasip1","-a","wasm32","-y"], project)
+            run(case+"-configure", [xmake,"f","-p","wasm-wasip1","-a",a.target,"-y"], project)
             run(case+"-build", [xmake,"build","-j1"], project)
             modules = sorted((project/"build").rglob("*.wasm"))
             if not modules:
