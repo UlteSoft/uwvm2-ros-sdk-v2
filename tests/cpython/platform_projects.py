@@ -67,8 +67,11 @@ def main():
         for engine in a.engine or ("int", "aot"):
             name = area + "/" + engine
             text = run(area + "-" + engine, [xmake, "test", "-j1", name], work)
-            if name not in text or "tests passed" not in text:
-                raise ValueError("xmake did not execute the requested " + name + " test")
+            text = re.sub(r"\x1b\[[0-9;]*m", "", text)
+            report = text.rpartition("report of tests:")[2]
+            rows = re.findall(r"^\s*\[ *[0-9]+%\]:\s+(\S+)\s+(\S+)", report, flags=re.M)
+            if rows != [(name, "passed")]:
+                raise ValueError("xmake did not report the requested passing " + name + " test")
     results["complete"] = True
     save()
 

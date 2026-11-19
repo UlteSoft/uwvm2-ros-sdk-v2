@@ -28,6 +28,7 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | Rust | `rs` | `wrrs` |
 | TinyGo | `tinygo` | `wrtg` |
 | Nim | `nim` | `wrnim` |
+| [Python / CPython](python.md) | `py` | `wrpy` |
 | Lua | `lua` | `wrlua` |
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [D BetterC](d.md) | `d` | `wrd` |

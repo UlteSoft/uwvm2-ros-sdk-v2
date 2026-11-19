@@ -8,9 +8,9 @@
     },
     {
       "path": "bin/wrpy",
-      "bytes": 10237,
+      "bytes": 10530,
       "mode": 493,
-      "sha256": "899b55142ed3d37b8546162ef22595f31fdc8afcd87ce301880718485f3b073c"
+      "sha256": "4f15cb71d7fd55914f7f08951b8cec610d517c37575cacb6796114b5325587b3"
     },
     {
       "path": "document/en/python.md",

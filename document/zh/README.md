@@ -27,6 +27,7 @@
 | Rust | `rs` | `wrrs` |
 | TinyGo | `tinygo` | `wrtg` |
 | Nim | `nim` | `wrnim` |
+| [Python / CPython](python.md) | `py` | `wrpy` |
 | Lua | `lua` | `wrlua` |
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [D BetterC](d.md) | `d` | `wrd` |

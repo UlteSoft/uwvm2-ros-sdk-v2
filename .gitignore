@@ -11,3 +11,4 @@ __pycache__/
 *.core
 .xmake/
 /share/qualification/local-trust.json
+/share/qualification/site-profile.json
