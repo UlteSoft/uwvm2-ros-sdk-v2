@@ -44,9 +44,9 @@
     },
     {
       "path": "tools/xmake/run_guest.py",
-      "bytes": 6374,
+      "bytes": 6390,
       "mode": 420,
-      "sha256": "d80ba7ddfe288c55a7836ac168d8f2036df3c809359f2ed51f4b9b121c4eb7f7"
+      "sha256": "d8763676524da174f1a3182558fbbee23c0521d2656b4592e08f23272ac7614c"
     },
     {
       "path": "tools/xmake/site_archive.py",

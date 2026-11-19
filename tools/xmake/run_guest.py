@@ -45,7 +45,7 @@ def require_test_entry(data):
 
 
 
-def test_queries(project, operator):
+def resolve_test_queries(project, operator):
     """@brief Resolve the read-only grants for a local guest test.
     @param project Comma-separated queries declared by the project, or None.
     @param operator Optional local selection. An explicitly empty value denies all.
@@ -99,7 +99,7 @@ def main():
         argv += ["--runtime-memtag-mode", "sync"]
     # Only an operator running a local test can opt into these specific queries.
     try:
-        queries = test_queries(args.queries, os.getenv("WROS_RUN_QUERIES"))
+        queries = resolve_test_queries(args.queries, os.getenv("WROS_RUN_QUERIES"))
     except ValueError as error:
         parser.error(str(error))
     if args.driver_denial and "abi" in queries:
