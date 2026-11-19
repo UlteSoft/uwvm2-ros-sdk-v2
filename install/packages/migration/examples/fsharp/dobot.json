@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/dobot/migration/fsharp/xmake.lua",
-      "bytes": 533,
+      "bytes": 566,
       "mode": 420,
-      "sha256": "0cdf138f83ded060abfce6233a8016a180c360222d9a55f5e52a91d8976a70e9"
+      "sha256": "d4e24af1ac0564bfbdb3670d28d896754c55726e722c25a00e0f992066b3ca9a"
     }
   ]
 }

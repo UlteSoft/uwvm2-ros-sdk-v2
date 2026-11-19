@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/unitree/migration/fsharp/xmake.lua",
-      "bytes": 535,
+      "bytes": 568,
       "mode": 420,
-      "sha256": "2ef398c2b0e30f6aca6a89653e5d11fe8c0dfc8f9bba41597d488dbbc3bd3606"
+      "sha256": "25c1b2da64cd419b04f0605b9ca77b6b0b1e4062e7e63da65fa83b93eb1d8633"
     }
   ]
 }

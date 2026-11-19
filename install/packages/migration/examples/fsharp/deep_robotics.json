@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/deep_robotics/migration/fsharp/xmake.lua",
-      "bytes": 541,
+      "bytes": 574,
       "mode": 420,
-      "sha256": "8349e2ddc9cab85daf8d86e66d45486ce9f59d94a4eb61b9d543be8dbb162d94"
+      "sha256": "399536a051d2a5248ab2ffa1f8366f20a87ddd2651a3b4ebf50d2d453a859c34"
     }
   ]
 }

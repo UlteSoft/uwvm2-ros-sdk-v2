@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/kuka/migration/fsharp/xmake.lua",
-      "bytes": 532,
+      "bytes": 565,
       "mode": 420,
-      "sha256": "0ff3cd0b30cb89d010866fa7de1487cbf250ca21e894ff9306bc86ed8c048a7a"
+      "sha256": "99c59a61a3f267cbc9a2f0eeb499f9924633c9accd55f16c59edc8947d274d6e"
     }
   ]
 }

@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/booster/migration/fsharp/xmake.lua",
-      "bytes": 535,
+      "bytes": 568,
       "mode": 420,
-      "sha256": "b1620aeb2b991e6e16148a0a1a3d0e5766ae039ace873adb2a394cb218077449"
+      "sha256": "03f68845ef5d862faf843cc8a44d7f2a28a7125dfede859bb8f5fb43758e3fd7"
     }
   ]
 }

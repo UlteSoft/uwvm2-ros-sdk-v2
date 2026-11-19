@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/nvidia-groot/migration/fsharp/xmake.lua",
-      "bytes": 540,
+      "bytes": 573,
       "mode": 420,
-      "sha256": "c5f19d299d74f7a41bc711f64400272699153ca8072b9d131ec76c6eb3f42c86"
+      "sha256": "a49131aeffcff0c9a608f67f14fc385abb06eaea1a7413ad9dc78624ffa1ab31"
     }
   ]
 }

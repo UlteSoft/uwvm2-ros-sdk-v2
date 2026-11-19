@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/franka/migration/fsharp/xmake.lua",
-      "bytes": 534,
+      "bytes": 567,
       "mode": 420,
-      "sha256": "891d1dfef9a7e9f1f97135610eeb54ef5e7dfa077267cb27f621287f808f408f"
+      "sha256": "c8c7b6f9b1a9ce2cdc31cb5ae4577933780e949aae0cf4f18cc9ab4e6f02a632"
     }
   ]
 }

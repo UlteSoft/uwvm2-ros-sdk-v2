@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/fanuc/migration/fsharp/xmake.lua",
-      "bytes": 533,
+      "bytes": 566,
       "mode": 420,
-      "sha256": "1397a73524ff6ee7e838d2338792b08538a83bd11770dbda5e1af6819d3b29ca"
+      "sha256": "ad623ec93b5d3959e41097af5bafb5407a69bcc2f1719f21c4b0e433c139f594"
     }
   ]
 }

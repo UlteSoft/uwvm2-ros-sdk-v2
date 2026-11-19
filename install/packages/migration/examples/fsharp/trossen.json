@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/trossen/migration/fsharp/xmake.lua",
-      "bytes": 535,
+      "bytes": 568,
       "mode": 420,
-      "sha256": "831dbd75deac88a4965a4c624f6dc3f1eb192b99f6166eeef0d9d99be38ac0a2"
+      "sha256": "dc15cd71c7cb215719ce19178899d3fd5f63747025956df85e1257f6fbfc1c5f"
     }
   ]
 }

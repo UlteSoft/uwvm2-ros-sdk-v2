@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 4316,
+      "bytes": 4530,
       "mode": 420,
-      "sha256": "bf7201aa5648475f5b8905c4643e509bac1d6f15cbe877ef1cc363cf8a97a5c8"
+      "sha256": "748872fe5bc30d7989f70491d01cb17317f6a731d2aa057f59a0186b9ddb62c9"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,9 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3704,
+      "bytes": 3913,
       "mode": 420,
-      "sha256": "1e73e15030f45fd696d4c57b9f99a3041c6c8eb9fddbec9ee3e93a1cdec79bfe"
+      "sha256": "fd3657a1a26a45ae5eb1a52ad74fda64cc8295edf42500ad321986a3d895c25f"
     },
     {
       "path": "examples/platform/kuka/common/fsharp/Robot.fs",
@@ -68,9 +68,9 @@
     },
     {
       "path": "examples/platform/kuka/migration/fsharp/xmake.lua",
-      "bytes": 532,
+      "bytes": 565,
       "mode": 420,
-      "sha256": "0ff3cd0b30cb89d010866fa7de1487cbf250ca21e894ff9306bc86ed8c048a7a"
+      "sha256": "99c59a61a3f267cbc9a2f0eeb499f9924633c9accd55f16c59edc8947d274d6e"
     }
   ]
 }

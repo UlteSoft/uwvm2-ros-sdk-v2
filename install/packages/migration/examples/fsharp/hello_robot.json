@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/hello_robot/migration/fsharp/xmake.lua",
-      "bytes": 539,
+      "bytes": 572,
       "mode": 420,
-      "sha256": "649e725611fd5809f92ea3a9ffafd81d8509f591aba87edf29e3b3889bb14d30"
+      "sha256": "c99805eeb08b5b29592aa317282d3f00e2819fceae45a6d4412cfb979a109345"
     }
   ]
 }

@@ -44,6 +44,30 @@ def require_test_entry(data):
         raise ValueError("the test requires a module-defined _start or start function")
 
 
+
+def test_queries(project, operator):
+    """@brief Resolve the read-only grants for a local guest test.
+    @param project Comma-separated queries declared by the project, or None.
+    @param operator Optional local selection. An explicitly empty value denies all.
+    @return The project grants remaining after the local selection is applied.
+    """
+    allowed = {"abi", "realtime-clock", "monotonic-clock", "realtime-resolution", "monotonic-resolution"}
+
+    def parse(value):
+        queries = value.split(",") if value else []
+        if not set(queries) <= allowed:
+            raise ValueError("unknown test query; allowed values: " + ", ".join(sorted(allowed)))
+        return queries
+
+    if project is None:
+        return parse(operator)
+    requested = parse(project)
+    if operator is None:
+        return requested
+    limits = set(parse(operator))
+    return [q for q in requested if q in limits]
+
+
 def main():
     """@brief Execute the audited artifact in the requested VM with scoped test permissions."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -74,13 +98,13 @@ def main():
     if args.check_tags:
         argv += ["--runtime-memtag-mode", "sync"]
     # Only an operator running a local test can opt into these specific queries.
-    queries = (args.queries if args.queries is not None else os.getenv("WROS_RUN_QUERIES", "")).split(",")
+    try:
+        queries = test_queries(args.queries, os.getenv("WROS_RUN_QUERIES"))
+    except ValueError as error:
+        parser.error(str(error))
     if args.driver_denial and "abi" in queries:
         parser.error("the driver fixture owns its ROS environment")
-    if queries != [""]:
-        valid = {"abi", "realtime-clock", "monotonic-clock", "realtime-resolution", "monotonic-resolution"}
-        if any(q not in valid for q in queries):
-            parser.error("WROS_RUN_QUERIES accepts " + ", ".join(sorted(valid)))
+    if queries:
         if "abi" in queries:
             argv += ["--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main",
                      "--ros-scene-interface", "robot", "abi", "allow"]

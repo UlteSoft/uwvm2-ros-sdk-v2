@@ -36,6 +36,8 @@ From the full source checkout run doxygen document/source/Doxyfile. The generate
 
 For any language with a published migration project, append <code>-- --component migration</code> to the fixed-commit install command. This selects that language’s compiler and platform project. Pass the same signed site profile used for its development installation when the language requires one. C and C++ also install their ROS resource migration tools. After installation, use the directory reported by the command as UWVM_ROS_SDK_ROOT.
 
+When a test declares read-only queries, WROS_RUN_QUERIES can narrow that list. An empty value denies all queries. With the variable unset, the F# GoalStatus example requests only the ABI query for its local test.
+
 ## Browse examples by platform
 
 The source checkout contains an English and Chinese index under examples/platform for each platform, with links to the available projects and explicit gaps. A selective installation downloads projects for the chosen platform and language. [Browse examples by platform](https://github.com/UlteSoft/uwvm2-ros-sdk-v2/tree/main/examples/platform/README.en.md)

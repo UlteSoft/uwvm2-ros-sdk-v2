@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/yaskawa/migration/fsharp/xmake.lua",
-      "bytes": 535,
+      "bytes": 568,
       "mode": 420,
-      "sha256": "d89a442216f231bb2fd3f1b521aaaa1cffe402cb54e60287b0704cf200b26c37"
+      "sha256": "0ca5100d3cccd6d8aa0348933fa46f0527c5856ae6ae65c78f04e118b7de520b"
     }
   ]
 }

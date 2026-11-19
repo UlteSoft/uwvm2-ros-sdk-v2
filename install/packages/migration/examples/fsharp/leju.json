@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/leju/migration/fsharp/xmake.lua",
-      "bytes": 532,
+      "bytes": 565,
       "mode": 420,
-      "sha256": "aea6ce070ac5f4cbcaa95d59ce0a3df0142b368a43f4429ac7785a8bb605caa8"
+      "sha256": "1bed4d18a56aaa613a27ce653e98f4e1341a14666b5fc5fa096611034648a905"
     }
   ]
 }

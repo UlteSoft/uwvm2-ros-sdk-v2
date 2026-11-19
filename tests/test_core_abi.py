@@ -14,7 +14,7 @@ from frontend import audit
 from guest_profile import Profile
 from imports import inspect
 sys.path.insert(0, str(ROOT / "tools/xmake"))
-from run_guest import require_test_entry
+from run_guest import require_test_entry, test_queries
 
 CORE = artifacts.MAGIC
 COMPONENT = b"\0asm\x0d\x00\x01\x00"
@@ -82,6 +82,16 @@ class CoreAbi(unittest.TestCase):
             path.write_bytes(b"!<arch>\n" + member("ok.o", clean) + member("unused.o", bad))
             with self.assertRaisesRegex(ValueError, "prohibited"):
                 artifacts.stage_inputs([path], Path(td), PROFILE.to_dict(), DIGEST, DIGEST, Path(td))
+
+    def test_operator_can_narrow_project_queries(self):
+        """@brief Verify default, explicit denial and disjoint operator permissions."""
+        self.assertEqual(test_queries("abi", None), ["abi"])
+        self.assertEqual(test_queries("abi", ""), [])
+        self.assertEqual(test_queries("abi", "monotonic-clock"), [])
+        self.assertEqual(test_queries("abi", "abi,realtime-clock"), ["abi"])
+        self.assertEqual(test_queries(None, "monotonic-clock"), ["monotonic-clock"])
+        with self.assertRaises(ValueError):
+            test_queries("abi", "misspelling")
 
     def test_execution_requires_guest_code(self):
         """@brief Count only modules with local executable test entry points."""

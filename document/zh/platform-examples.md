@@ -36,6 +36,8 @@ Linux 测试程序建立私有 SOCK_SEQPACKET 套接字对，准备一次性密�
 
 对于已经发布移植工程的语言，在固定提交安装命令末尾添加 <code>-- --component migration</code>，即可选用该语言的编译器和所选平台的项目。需要签名工具链的语言使用与开发组件相同的站点配置。C 和 C++ 会额外安装 ROS 资源移植工具。将安装命令实际输出的目录设为 UWVM_ROS_SDK_ROOT。
 
+测试若已声明只读查询，WROS_RUN_QUERIES 可以进一步收紧其范围。显式设为空值会拒绝所有查询。未设置该变量时，F# GoalStatus 示例只为本地测试申请 ABI 查询。
+
 ## 按平台查看示例
 
 完整源码仓的 examples/platform 下有每个平台的中英文目录，列出可编辑工程和未提供示例的语言。选择安装只拉取所选平台和语言的工程。 [按平台查看示例](https://github.com/UlteSoft/uwvm2-ros-sdk-v2/tree/main/examples/platform/README.zh.md)

@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/robotis/migration/fsharp/xmake.lua",
-      "bytes": 535,
+      "bytes": 568,
       "mode": 420,
-      "sha256": "10bfd3c4061cc3a8ceddfe1dc1ca5a2e05666fb4703638012b648d703a335718"
+      "sha256": "9eff8f0719b01d336435dffdfe5c992e33134420dfc8149e88229095bd3b837c"
     }
   ]
 }
