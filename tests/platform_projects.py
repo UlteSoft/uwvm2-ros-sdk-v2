@@ -67,9 +67,10 @@ def main():
     for platform in platforms:
         args = [sys.executable, "-I", "-B", ROOT/"install/bootstrap.py", "install", "--local-repository", ROOT,
                 "--commit", a.commit, "--platform", platform, "--language", a.language,
-                "--prefix", out/"installed", "--component", a.component]
+                "--prefix", out/"installed"]
         if a.site:
-            args.extend(["--site-profile", a.site])
+            args.extend(["--site-profile", a.site.resolve(strict=True)])
+        args.extend(["--", "--component", a.component])
         result = json.loads(run(platform+"-install", args, out))
         if result["commit"] != a.commit:
             raise RuntimeError("unexpected installed revision")
