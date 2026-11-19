@@ -1,6 +1,6 @@
 # 使用 F# 开发 Core Wasm 模块
 
-`wrfs` 使用微软 .NET SDK 10.0.404 内的 F# 编译器编译 F# 10 源文件。Mono LLVMOnly 10.0.15 将生成的 CLI 方法编译为 LLVM 位码，再由 SDK 的 Wasm LLVM 工具链生成 wasm32 Core 3.0 并检查成品。目前支持独立整数函数，以及调用 u2rosv2 ABI 查询的应用。生成的模块单线程运行，无需 guest CLR、文件系统、套接字或 WASI 导入。
+`wrfs` 使用微软 .NET SDK 10.0.404 内的 F# 编译器编译 F# 10 源文件。Mono LLVMOnly 10.0.15 将生成的 CLI 方法编译为 LLVM 位码，再由 SDK 的 Wasm LLVM 工具链生成 wasm32 Core 3.0 并检查成品。目前支持独立整数函数、u2rosv2 ABI 查询与有界驱动连接。生成的模块单线程运行，无需 guest CLR、文件系统、套接字或 WASI 导入。
 
 ## 安装和编译
 
@@ -36,3 +36,7 @@ export WROS_TOOLCHAIN=/path/to/wasm-llvm
 方法检查支持整数局部变量、算术、比较与分支。托管初始化、堆分配、数组、CLR 辅助调用、外部副作用、异常处理及 F# 脚本需要另外的运行时。构建被拒绝时，可继续使用先前成功构建的输出。编译期间对 FSharp.Core 和 .NET 类型定义的引用不会为 guest 授予宿主权限。
 
 使用 xmake 时，将 `examples/fsharp/scene-abi` 复制到可写项目目录。保留上述四个环境变量，再执行 `xmake f -c -y -a wasm32` 和 `xmake`。通过 `add_wros_exports("Robot.Start")` 选择方法，通过 `add_wros_operations("abi")` 选择宿主操作。省略操作声明时编译独立整数函数。
+
+## 有界驱动连接
+
+使用 `wrfs --driver-entry Driver.Start` 编译调用入口。入口将 `Wros.Scene.DriverConnectionStatus("arm")` 的结果传给本地整数策略函数，别名必须是字符串字面量。Xmake 中使用 `add_wros_operations("driver.connect")`。生成的程序使用一页私有内存和四个有类型的导入管理能力及连接生命周期，同时受父驱动权限与平台子项约束。[驱动绑定与验证](managed-platform-examples.md)。

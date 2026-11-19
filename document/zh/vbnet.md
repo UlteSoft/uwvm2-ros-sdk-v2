@@ -14,3 +14,7 @@ python3 install/bootstrap.py install --commit "$REV" --platform unitree --langua
 Roslyn 将 VB 源码编译为程序集并生成可移植的 PDB，Mono AOT 生成 LLVM 位码。SDK 核对所选方法的 IL 和最终 Wasm 指令。数值入口 `--entry 类名.方法名` 导出 `evaluate(i32) -> i32`。使用全局非泛型的 `NotInheritable Class`，类中没有字段和静态初始化，公开的 `Shared Function` 接收和返回 `Integer`。支持位运算和整数比较。需要 CLR 的操作，包括需要检查溢出的整数运算，会在构建时报错。默认的 MTE 配置会验证该函数没有线性内存访问。`--no-mte` 仍使用同一个受限的方法模型。当前目标为单线程 wasm32 Core 3.0。
 
 示例通过 `Wros.Scene.Abi()` 读取 ABI，并把结果传给同一个类中的整数策略函数。成品只导入 `uwvm_ros_v2.abi`。使用 Xmake 时，复制示例目录，执行 `xmake f -c -y -a wasm32` 和 `xmake`。项目文件使用统一的 SDK 接口声明所需操作、源码和入口方法。
+
+## 有界驱动连接
+
+使用 `wrvb --driver-entry Driver.Start` 编译调用入口。入口将 `Wros.Scene.DriverConnectionStatus("arm")` 的结果传给本地整数策略函数，别名必须是字符串字面量。Xmake 中使用 `add_wros_operations("driver.connect")`。生成的程序使用一页私有内存和四个有类型的导入管理能力及连接生命周期，同时受父驱动权限与平台子项约束。[驱动绑定与验证](managed-platform-examples.md)。

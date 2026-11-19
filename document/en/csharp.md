@@ -59,3 +59,7 @@ For Xmake, declare the C# kernel with `set_kind("static")`, `add_wros_exports("F
 Copy `examples/csharp/scene-abi` or invoke `wrcs --scene-entry Robot.Start` with the same host tool flags as the scalar compiler. The SDK supplies the `Wros.Scene.Abi()` reference used by Roslyn. The parameterless public static entry must return the result of passing this query to a public static integer policy in the same class. The SDK verifies both managed call targets from the IL and runs the policy through Mono LLVMOnly. Returning zero from the policy completes startup. A nonzero result traps the guest. Xmake selects this entry with `add_wros_exports("Robot.Start")` and `add_wros_operations("abi")`.
 
 The final module exports only `_start`. It has no linear memory and its sole import is `uwvm_ros_v2.abi() -> i32`. The VM must bind the main module to a scene and expose the ABI query. A hidden interface prevents the guest from starting. Additional CLR calls or host operations fail compilation.
+
+## Scoped driver connection
+
+Use `wrcs --driver-entry Driver.Start` to lower an entry that returns the local integer policy applied to `Wros.Scene.DriverConnectionStatus("arm")`. A literal alias is required. Select the same binding in Xmake with `add_wros_operations("driver.connect")`. The guest uses one private page and four typed imports for the capability and connection lifetime. The parent driver permission and the platform child both apply. [Driver binding and verification](managed-platform-examples.md).

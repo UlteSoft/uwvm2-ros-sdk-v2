@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/fsharp.md",
-      "bytes": 3698,
+      "bytes": 4242,
       "mode": 420,
-      "sha256": "e3c0d099b4ac25e3ea8e501729da044dcda34dab7239e8b1e42c124f56b185a4"
+      "sha256": "fdeaf518e8be3cc6dce3677862b007036b7675ebdcb35933143a0790d347cb9f"
     },
     {
       "path": "document/zh/fsharp.md",
-      "bytes": 3476,
+      "bytes": 3958,
       "mode": 420,
-      "sha256": "132fbae2eaca586a56d662206540887c249f143aa4b53914b9bbd204477d01be"
+      "sha256": "2ddca96f28084248eff27e01820c565bb2965d8406a5add2a2e681990242f74d"
     },
     {
       "path": "examples/fsharp/scene-abi/Robot.fs",

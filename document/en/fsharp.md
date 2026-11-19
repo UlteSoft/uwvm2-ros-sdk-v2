@@ -1,6 +1,6 @@
 # F# core Wasm development
 
-`wrfs` compiles F# 10 source with Microsoft's F# compiler from .NET SDK 10.0.404. Mono LLVMOnly 10.0.15 compiles the emitted CLI method to LLVM bitcode. The SDK uses the Wasm LLVM producer to generate Wasm32 Core 3.0 and checks the final module before publishing it. The supported applications are freestanding integer kernels and a typed u2rosv2 ABI query. They run as one thread, without a guest CLR, filesystem, sockets or WASI imports.
+`wrfs` compiles F# 10 source with Microsoft's F# compiler from .NET SDK 10.0.404. Mono LLVMOnly 10.0.15 compiles the emitted CLI method to LLVM bitcode. The SDK uses the Wasm LLVM producer to generate Wasm32 Core 3.0 and checks the final module before publishing it. The supported applications are freestanding integer kernels, a typed u2rosv2 ABI query and a scoped driver connection. They run as one thread, without a guest CLR, filesystem, sockets or WASI imports.
 
 ## Install and build
 
@@ -36,3 +36,7 @@ Use a global F# module, one public integer policy and, for a scene application, 
 The method check admits integer locals, arithmetic, comparisons and branches. Managed initialization, heap allocation, arrays, runtime helpers, external side effects, handlers and F# scripts need a different runtime. A failure leaves a previously built output intact. Type checking against FSharp.Core and .NET reference assemblies gives the guest no access to the host APIs in those assemblies.
 
 For xmake, copy `examples/fsharp/scene-abi` into a writable project directory. Keep the four exported environment variables above, then run `xmake f -c -y -a wasm32` and `xmake`. The project selects the F# method with `add_wros_exports("Robot.Start")` and the host query with `add_wros_operations("abi")`. Omitting the operation selects a standalone integer kernel.
+
+## Scoped driver connection
+
+Use `wrfs --driver-entry Driver.Start` to lower an entry that returns the local integer policy applied to `Wros.Scene.DriverConnectionStatus("arm")`. A literal alias is required. Select the same binding in Xmake with `add_wros_operations("driver.connect")`. The guest uses one private page and four typed imports for the capability and connection lifetime. The parent driver permission and the platform child both apply. [Driver binding and verification](managed-platform-examples.md).

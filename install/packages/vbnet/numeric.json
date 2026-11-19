@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/vbnet.md",
-      "bytes": 2207,
+      "bytes": 2723,
       "mode": 420,
-      "sha256": "c217dbe307ebb17e2744b6e53065f64c09911bb9099c4a0860fb25af6005446a"
+      "sha256": "2d82cbfa62b937b11fb96ef46b60263e06843f932b71d312470de7656aad41eb"
     },
     {
       "path": "document/zh/vbnet.md",
-      "bytes": 2042,
+      "bytes": 2525,
       "mode": 420,
-      "sha256": "b967451d025b207276173124653545c721db550dd24847bd55bd71af5263e1f9"
+      "sha256": "440f7b25b689e5e2142ed8aab625e56d6e2e59481a2176d2529e7badf0593ab1"
     },
     {
       "path": "examples/vbnet/scene-abi/Robot.vb",

@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/csharp.md",
-      "bytes": 9087,
+      "bytes": 9603,
       "mode": 420,
-      "sha256": "286809428333201954ea032469a5048ca4b34e719ad21368ea9c2a1cf90aefe4"
+      "sha256": "bdd395ef7406e2d6cfa17ad065e68c178133cd3c118c9ec97055f7c91874aabf"
     },
     {
       "path": "document/zh/csharp.md",
-      "bytes": 9259,
+      "bytes": 9742,
       "mode": 420,
-      "sha256": "bf87d23ba93d231350bbb65cbae211f1e0af2734e07fe7a60cfa51be08035338"
+      "sha256": "6a6a510eeabce3e5eedec2ab1d11b6066d3cd9850e021088c8bc06933b21553b"
     },
     {
       "path": "examples/csharp/numeric-aot/Filter.cs",

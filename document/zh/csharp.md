@@ -72,3 +72,7 @@ Xmake 中将 C# 内核声明为 `set_kind("static")`，设置 `add_wros_exports(
 复制 `examples/csharp/scene-abi`，或使用与标量示例相同的宿主工具参数执行 `wrcs --scene-entry Robot.Start`。SDK 向 Roslyn 提供 `Wros.Scene.Abi()` 声明。无参数的公开静态入口将查询结果交给同一类的公开静态整数方法，再返回该方法的结果。编译器从 IL 核对这两个调用目标，以 Mono LLVMOnly 编译实际判断逻辑。返回零表示启动成功，其他值会使客体触发陷阱。Xmake 使用 `add_wros_exports("Robot.Start")` 和 `add_wros_operations("abi")`。
 
 最终模块仅导出 `_start`，没有线性内存，唯一导入是 `uwvm_ros_v2.abi() -> i32`。部署时 VM 必须给主模块绑定场景并暴露 ABI 查询。隐藏接口会阻止程序启动。额外的 CLR 调用或宿主操作在编译阶段被拒绝。
+
+## 有界驱动连接
+
+使用 `wrcs --driver-entry Driver.Start` 编译调用入口。入口将 `Wros.Scene.DriverConnectionStatus("arm")` 的结果传给本地整数策略函数，别名必须是字符串字面量。Xmake 中使用 `add_wros_operations("driver.connect")`。生成的程序使用一页私有内存和四个有类型的导入管理能力及连接生命周期，同时受父驱动权限与平台子项约束。[驱动绑定与验证](managed-platform-examples.md)。
