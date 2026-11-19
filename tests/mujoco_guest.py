@@ -177,8 +177,7 @@ def main():
                            f"target_offset = {24+len(prefix)+8}\nmode = {mode!r}\n" + source.read_text())
         if a.language == "ruby":
             template = "".join(f"\\x{byte:02x}" for byte in request)
-            codes = "".join(f"\\x{byte:02x}" for byte in range(256))
-            app.write_text(f'BYTE_CODES = "{codes}"\nTEMPLATE = "{template}"\nSTEPS = {count}\n'
+            app.write_text(f'TEMPLATE = "{template}"\nSTEPS = {count}\n'
                            f'TARGET_OFFSET = {24+len(prefix)+8}\nMODE = "{mode}"\n' + source.read_text())
         if a.language == "lua":
             operations = ("capability.open", "driver.connect", "driver.submit", "driver.result",

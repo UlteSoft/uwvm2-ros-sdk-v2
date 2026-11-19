@@ -50,9 +50,9 @@
     },
     {
       "path": "examples/platform/kuka/migration/ruby/body.rb",
-      "bytes": 320,
+      "bytes": 707,
       "mode": 420,
-      "sha256": "aa19074a72dd5bdbff05ac2e17747fc5d9644656596d2514f405167ceb391748"
+      "sha256": "ec2e1b82b7592779c029e52f179d5c36bb427a7c410c01e65f59aa91e37546ad"
     },
     {
       "path": "examples/platform/kuka/migration/ruby/xmake.lua",

@@ -3,9 +3,9 @@
 
 # @brief Encode one nonnegative integer as a little-endian wire word.
 def wire_u64(value)
-  bytes = ""
-  8.times do
-    bytes << BYTE_CODES.byteslice(value & 255, 1)
+  bytes = "\x00" * 8
+  8.times do |index|
+    bytes.setbyte(index, value & 255)
     value >>= 8
   end
   bytes
