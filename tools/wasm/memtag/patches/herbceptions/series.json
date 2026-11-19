@@ -10,7 +10,7 @@
     },
     {
       "path": "tools/wasm/memtag/patches/herbceptions/clang-syntax-abi.patch",
-      "sha256": "43275649b3022cadb3a2571bfc3d5096debb88b1fdaa2fdf401ef749f3b4eab8"
+      "sha256": "688207b65a4527f0b44097ea1e59653be82ea0644f7d200650ea1b31fcb9a894"
     },
     {
       "path": "tools/wasm/memtag/patches/herbceptions/libherbceptions-target.patch",

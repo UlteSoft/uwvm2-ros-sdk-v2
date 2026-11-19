@@ -146,9 +146,9 @@
     },
     {
       "path": "tools/wasm/memtag/patches/herbceptions/clang-syntax-abi.patch",
-      "bytes": 820680,
+      "bytes": 820667,
       "mode": 420,
-      "sha256": "43275649b3022cadb3a2571bfc3d5096debb88b1fdaa2fdf401ef749f3b4eab8"
+      "sha256": "688207b65a4527f0b44097ea1e59653be82ea0644f7d200650ea1b31fcb9a894"
     },
     {
       "path": "tools/wasm/memtag/patches/herbceptions/libcxxabi-herb-error-domain.patch",
@@ -172,7 +172,7 @@
       "path": "tools/wasm/memtag/patches/herbceptions/series.json",
       "bytes": 980,
       "mode": 420,
-      "sha256": "763167f97d9b246ac8d18a3b7ddcd820010de06d1cab328d31de8fbce6afe4e5"
+      "sha256": "4279cce406ef81885e887fd763d66aeaf38b64b65f5b3dbc92491dc1a3d4e221"
     },
     {
       "path": "tools/wasm/memtag/patches/libc-wros-runtime-diagnostics.patch",

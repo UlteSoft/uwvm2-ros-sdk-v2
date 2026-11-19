@@ -8339,18 +8339,18 @@ index 9de7e0a83579d55e5918c98aee6520f1915c9ea8..baa5c468db4082482e785aeabb8a2c97
    /// Compute a new LLVM record layout object for the given record.
    std::unique_ptr<CGRecordLayout> ComputeRecordLayout(const RecordDecl *D,
 diff --git a/clang/lib/Driver/ToolChains/Clang.cpp b/clang/lib/Driver/ToolChains/Clang.cpp
-index db7893c547ee7e639b66433cd1ebf9885aecc070..09d978e4bb19d29bde326e5183acaf777ebfd5fc 100644
+index db7893c547ee7e639b66433cd1ebf9885aecc070..18938a6835ccbeb857effbc436f49d7ad6957a62 100644
 --- a/clang/lib/Driver/ToolChains/Clang.cpp
 +++ b/clang/lib/Driver/ToolChains/Clang.cpp
 @@ -156,6 +156,12 @@ static bool addExceptionArgs(const ArgList &Args, types::ID InputType,
      return false;
    }
  
-+  // Herbception is an independent toggle from traditional exceptions:
-+  // -fherbceptions enables deterministic error returns, -fno-exceptions
-+  // disables traditional EH. Forward the flag to cc1.
-+  Args.AddLastArg(CmdArgs, options::OPT_fherbceptions,
-+                  options::OPT_fno_herbceptions);
++  // cc1 defaults to the conventional ABI and accepts the positive switch.
++  // Consume both driver options so the last explicit selection wins.
++  if (Args.hasFlag(options::OPT_fherbceptions, options::OPT_fno_herbceptions,
++                   false))
++    CmdArgs.push_back("-fherbceptions");
 +
    // See if the user explicitly enabled exceptions.
    bool EH = Args.hasFlag(options::OPT_fexceptions, options::OPT_fno_exceptions,
