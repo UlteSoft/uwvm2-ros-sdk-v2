@@ -41,7 +41,7 @@ func Limit(speed int32) int32 {
 
 MTE defaults on. Every emitted function must pass an instruction allowlist and preserve its initial SSA memory token at every return. The encoder verifies that each operand is available on every path that reaches its use. A branch-dependent assignment selects the value from the actual incoming edge. Wasm callers pass Go booleans as i32 values, with every nonzero value normalized to true on entry. The encoder emits no memory, loads, stores or indirect calls. This proves that the published function needs no tags. The same constraint applies to explicit `--no-mte`. No WASI imports, native guest programs, components or host Go compiler fallbacks are exposed. The optional build receipt records the exact input, producer and guest digests, imports and MTE policy.
 
-The output includes Wasm function names for the debugger. Go source lines and variable inspection require source metadata beyond this profile.
+The output includes Wasm function names for the debugger. Add `-g` to embed Source Map v3 from the Go compiler's optimized SSA positions, or use `set_symbols("debug")` on the Xmake target. This option records the absolute input path and original line and column coordinates. Generated instructions with no source position stay unmapped. Optimized statements can share a location. The map supplies no typed variable locations.
 
 Installations may additionally pass an operator-provided `--site-profile <file>`. It pins a specific WSEA-signed release for this scalar profile, the exact host compiler and encoder, both VM engine test receipts and an admission and Xmake receipt. Each build rechecks the signed statement. An ordinary commit-pinned installation needs no site statement.
 

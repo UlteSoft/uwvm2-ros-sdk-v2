@@ -20,9 +20,9 @@
     },
     {
       "path": "language/go/producer/proof.go",
-      "bytes": 3632,
+      "bytes": 4276,
       "mode": 420,
-      "sha256": "df6e3f494764787f61fd2929f1cc3dc9fa929322d0375237ce97da021ef1cf5e"
+      "sha256": "b4c0ae71b742e7f96b50d15ff50196efa742da54f0030c1c91509659b5f9f8d4"
     },
     {
       "path": "third-parties/go/go1.24.2.src.tar.gz",

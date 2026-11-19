@@ -108,6 +108,13 @@ def main():
     record = json.loads(Path(str(guest) + ".wros-go.json").read_bytes())
     assert record["mte_requested"] and record["linear_memories"] == 0 and not record["wasm_imports"]
     assert record["wasm_sha256"] == digest(guest) and record["source_sha256"] == digest(source)
+    debug = work / "algorithm-debug.wasm"
+    run("compile-source-map", [tool, source, "-g", "-o", debug, "--build-receipt"])
+    debug_record = json.loads(Path(str(debug) + ".wros-go.json").read_bytes())
+    assert debug_record["debug_metadata"] == "source-map-v3"
+    debug_bytes = debug.read_bytes()
+    guest_bytes = guest.read_bytes()
+    assert debug_bytes.startswith(guest_bytes) and b".debug_source_map" in debug_bytes[len(guest_bytes):]
     off = work / "off.wasm"
     run("explicit-no-mte", [tool, source, "--no-mte", "-o", off, "--build-receipt"])
     assert not json.loads(Path(str(off) + ".wros-go.json").read_bytes())["mte_requested"]
@@ -124,16 +131,22 @@ def main():
     run("compile-consumer", [args.wat2wasm, work / "calls.wat", "-o", consumer])
     for engine in ("int", "aot"):
         run(engine + "-arithmetic", vm(engine, consumer, ["--wasm-preload-library", guest, "algorithm"]))
-    artifacts = {"arithmetic": digest(guest), "consumer": digest(consumer)}
+    artifacts = {"arithmetic": digest(guest), "debug": digest(debug), "consumer": digest(consumer)}
     for kind in ("common", "extension", "migration"):
         project = work / kind
         shutil.copytree(root / "examples/shared" / kind / "go", project)
+        if kind == "common":
+            config = project / "xmake.lua"
+            config.write_text(config.read_text().replace('    set_kind("binary")',
+                                                          '    set_kind("binary")\n    set_symbols("debug")'))
         opts = dict(env, WROS_RUN_QUERIES="abi") if kind == "extension" else env
         run(kind + "-config", [args.xmake, "f", "-p", "wasm-wasip1", "-a", "wasm32"], cwd=project, environ=opts)
         run(kind + "-build", [args.xmake, "build"], cwd=project, environ=opts)
         run(kind + "-test", [args.xmake, "test", "-j1"], cwd=project, environ=opts)
         module, = project.rglob("controller.wasm")
         artifacts[kind] = digest(module)
+        if kind == "common":
+            assert b".debug_source_map" in module.read_bytes()
         if kind == "extension":
             for engine in ("int", "aot"):
                 run(engine + "-deny", vm(engine, module), success=False)

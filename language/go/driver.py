@@ -23,7 +23,7 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def build(source, output, *, tagged=True, ros_abi=False, receipt=False):
+def build(source, output, *, tagged=True, ros_abi=False, receipt=False, debug=False):
     """@brief Compile one Go source with the digest-bound host compiler.
     @param source File containing at most 1 MiB of Go source.
     @param output Local path for the validated core Wasm module.
@@ -31,6 +31,7 @@ def build(source, output, *, tagged=True, ros_abi=False, receipt=False):
     guests statically exclude memory and therefore require no tag instructions.
     @param ros_abi Whether to pass the authorized ROSv2 ABI to Start.
     @param receipt Publish a source, compiler and guest digest sidecar.
+    @param debug Embed authentic Go frontend positions and the original path.
     """
     if platform.system() != "Linux" or platform.machine() != "x86_64":
         raise ValueError("the published Go host compiler requires Linux x86-64")
@@ -72,7 +73,8 @@ def build(source, output, *, tagged=True, ros_abi=False, receipt=False):
         if len(ir) > 8 << 20:
             raise ValueError("Go proof exceeds 8 MiB")
         graph = [json.loads(line) for line in ir.splitlines()]
-        artifact = module(graph, ros_abi)
+        debug_source = (str(source.resolve()), body) if debug else None
+        artifact = module(graph, ros_abi, debug_source=debug_source)
         target = stage / "result.wasm"
         target.write_bytes(artifact)
         sidecar = Path(str(output) + ".wros-go.json")
@@ -83,6 +85,8 @@ def build(source, output, *, tagged=True, ros_abi=False, receipt=False):
                       exports=sorted(f["name"] for f in graph) + ["_start"])
         if site_release:
             record["site_release_sha256"] = site_release
+        if debug:
+            record["debug_metadata"] = "source-map-v3"
         if receipt:
             proof = stage / "build.json"
             proof.write_text(json.dumps(record, indent=2) + "\n")
@@ -101,8 +105,10 @@ def main():
     parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--ros-abi", action="store_true", help="pass the authorized ROSv2 ABI number to Start")
     parser.add_argument("--build-receipt", action="store_true")
+    parser.add_argument("-g", action="store_true", help="embed source positions and input path for the debugger")
     args = parser.parse_args()
     try:
-        build(args.source, args.output, tagged=args.mte, ros_abi=args.ros_abi, receipt=args.build_receipt)
+        build(args.source, args.output, tagged=args.mte, ros_abi=args.ros_abi,
+              receipt=args.build_receipt, debug=args.g)
     except (OSError, ValueError, KeyError, TypeError, lzma.LZMAError, subprocess.SubprocessError) as e:
         parser.exit(1, "wrgo: " + str(e) + "\n")

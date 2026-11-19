@@ -3,18 +3,26 @@ package ssa
 
 import (
 	"cmd/compile/internal/ir"
+	"cmd/internal/src"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
+type wrosSource struct {
+	Line   uint `json:"line"`
+	Column uint `json:"column"`
+}
+
 type wrosValue struct {
-	ID      int    `json:"id"`
-	Op      string `json:"op"`
-	Type    string `json:"type"`
-	Literal int64  `json:"literal,omitempty"`
-	Index   int    `json:"index,omitempty"`
-	Args    []int  `json:"args,omitempty"`
+	ID      int         `json:"id"`
+	Op      string      `json:"op"`
+	Type    string      `json:"type"`
+	Literal int64       `json:"literal,omitempty"`
+	Index   int         `json:"index,omitempty"`
+	Args    []int       `json:"args,omitempty"`
+	Source  *wrosSource `json:"source,omitempty"`
 }
 
 type wrosEdge struct {
@@ -29,6 +37,7 @@ type wrosBlock struct {
 	Succs    []wrosEdge  `json:"succs,omitempty"`
 	PredSize int         `json:"predecessors"`
 	Values   []wrosValue `json:"values"`
+	Source   *wrosSource `json:"source,omitempty"`
 }
 
 // @brief Export a bounded scalar SSA graph with exact parameter and edge identities.
@@ -48,6 +57,16 @@ func wrosWriteRegisters(f *Func) {
 	types := make([]string, len(params))
 	for i, p := range params {
 		types[i] = p.Type.String()
+	}
+	sourcePosition := func(position src.XPos) *wrosSource {
+		if !position.IsKnown() {
+			return nil
+		}
+		pos := f.Config.Ctxt().PosTable.Pos(position)
+		if filepath.Base(pos.AbsFilename()) != "input.go" || pos.RelLine() == 0 || pos.RelCol() == 0 {
+			return nil
+		}
+		return &wrosSource{Line: pos.RelLine(), Column: pos.RelCol()}
 	}
 	blocks := make([]wrosBlock, 0, len(f.Blocks))
 	total := 0
@@ -70,7 +89,7 @@ func wrosWriteRegisters(f *Func) {
 		if total > 1024 {
 			reject("instruction limit")
 		}
-		block := wrosBlock{ID: int(b.ID), Kind: b.Kind.String(), PredSize: len(b.Preds),
+		block := wrosBlock{ID: int(b.ID), Kind: b.Kind.String(), PredSize: len(b.Preds), Source: sourcePosition(b.Pos),
 			Values: make([]wrosValue, 0, len(b.Values))}
 		if controls != 0 {
 			block.Control = int(b.Controls[0].ID)
@@ -79,7 +98,8 @@ func wrosWriteRegisters(f *Func) {
 			block.Succs = append(block.Succs, wrosEdge{int(edge.Block().ID), edge.Index()})
 		}
 		for _, v := range b.Values {
-			s := wrosValue{ID: int(v.ID), Op: v.Op.String(), Type: v.Type.String(), Literal: v.AuxInt}
+			s := wrosValue{ID: int(v.ID), Op: v.Op.String(), Type: v.Type.String(), Literal: v.AuxInt,
+				Source: sourcePosition(v.Pos)}
 			if v.Op == OpArg {
 				n, ok := v.Aux.(*ir.Name)
 				if !ok {

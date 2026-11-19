@@ -1,4 +1,5 @@
 """@brief Lower checked Go compiler SSA to a core module containing only scalar operations."""
+import json
 import re
 from graphlib import TopologicalSorter
 
@@ -88,9 +89,10 @@ def control_flow(entry, rows):
     return blocks, predecessors, list(TopologicalSorter(predecessors).static_order())
 
 
-def lower(f):
+def lower(f, locations=None):
     """@brief Check one optimized Go function and encode its Wasm locals and operations.
     @param f A scalar function exported by the pinned standard Go compiler.
+    @param locations Optional list receiving source rows relative to the encoded body.
     @return A core function type and a length-prefixed body.
     @details Every operation is checked, including values unused by the return.
     The initial memory token must reach the return unchanged. No linear memory
@@ -115,6 +117,7 @@ def lower(f):
     local_ids = {}
     locals_ = []
     code = bytearray()
+    points = {}
     live_out = {}
     positions = {ident: index for index, ident in enumerate(order)}
     phis = {ident: [v for v in block["values"] if v["op"] == "Phi"]
@@ -125,6 +128,11 @@ def lower(f):
 
     def const(t, n):
         code.extend((b"\x41" if t == I32 else b"\x42") + sleb(n, 32 if t == I32 else 64))
+
+    def mark(position=None):
+        """@brief Attribute emitted bytes to an original Go position or a generated gap."""
+        if locations is not None:
+            points[len(code)] = position
 
     def reserve(v, t):
         local_ids[v["id"]] = len(params) + len(locals_)
@@ -204,6 +212,7 @@ def lower(f):
     code.extend(b"\x02\x40" * (len(order) - 1))
     for here, ident in enumerate(order):
         if here:
+            mark()
             code.append(0x0b)  # end the block targeting this position
         block = blocks[ident]
         kind = block["kind"]
@@ -229,33 +238,90 @@ def lower(f):
                 continue
             if any(a not in live for a in args):
                 raise ValueError("Go scalar operand does not dominate its use")
+            begin = len(code)
             emit_scalar(v, TYPES[v["type"]])
+            if locations is not None and begin < len(code):
+                # An existing argument is an SSA alias with no emitted code.
+                points[begin] = v.get("source")
             live.add(value_id)
         live_out[ident] = live
         if kind == "Ret":
             if ret is None:
                 raise ValueError("Go return lacks a scalar and its original memory token")
+            mark(block.get("source"))
             get(ret)
             if here < len(order) - 1:
                 code.append(0x0f)  # return
         elif kind == "Plain":
+            mark()
             jump(block["succs"][0], here, False)
         else:
             if terminator not in live or ids[terminator]["type"] != "bool":
                 raise ValueError("Go branch requires an available boolean")
+            mark(block.get("source"))
             get(terminator)
             code.extend(b"\x04\x40")
+            mark()
             jump(block["succs"][0], here, True)
             code.append(0x05)
             jump(block["succs"][1], here, True)
             code.append(0x0b)
-    return function_type(params, result), field(vector(locals_) + code + b"\x0b")
+    mark()
+    local_prefix = vector(locals_)
+    payload = local_prefix + code + b"\x0b"
+    if locations is not None:
+        expression = len(uleb(len(payload))) + len(local_prefix)
+        locations.extend((expression + offset, origin) for offset, origin in points.items())
+    return function_type(params, result), field(payload)
 
 
-def module(records, ros_abi):
+def source_map(path, source, points):
+    """@brief Encode genuine Go frontend positions with absolute Wasm byte offsets."""
+    lines = source.split(b"\n")
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+    def vlq(delta):
+        word = abs(delta) * 2 + int(delta < 0)
+        digits = []
+        while word >= 32:
+            digits.append(alphabet[(word & 31) | 32])
+            word >>= 5
+        digits.append(alphabet[word])
+        return "".join(digits)
+
+    mapped = []
+    previous = 0
+    line = column = 0
+    active = None
+    for offset, origin in points:
+        if origin is None:
+            if active is None:
+                continue
+            mapped.append(vlq(offset - previous))
+            active = None
+        else:
+            row, byte_column = origin["line"] - 1, origin["column"] - 1
+            if not 0 <= row < len(lines) or not 0 <= byte_column <= len(lines[row]):
+                raise ValueError("Go debug position outside the source snapshot")
+            left_text = lines[row][:byte_column].decode("utf-8")
+            col = len(left_text.encode("utf-16-le")) // 2
+            if active == (row, col):
+                continue
+            mapped.append(vlq(offset - previous) + "A" + vlq(row - line) + vlq(col - column))
+            line, column = row, col
+            active = (row, col)
+        previous = offset
+    if not mapped:
+        raise ValueError("Go frontend emitted no usable source positions")
+    return json.dumps({"version": 3, "sources": [path], "names": [], "mappings": ",".join(mapped)},
+                      ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+
+
+def module(records, ros_abi, *, debug_source=None):
     """@brief Encode a memory-free core Wasm module from checked Go SSA.
     @param records All compiler-emitted functions in one guest package.
     @param ros_abi Whether to import uwvm_ros_v2.abi as the sole host query.
+    @param debug_source Original path and source bytes for an optional source map.
     @return Core Wasm bytes. Start returns zero for success; other values trap.
     """
     if len(records) > 128:
@@ -268,7 +334,8 @@ def module(records, ros_abi):
     required = ["uint32"] if ros_abi else []
     if start["params"] != required or start["result"] != "uint32":
         raise ValueError("Start must return uint32 and accept " + ("one uint32 ABI argument" if ros_abi else "zero arguments"))
-    compiled = [lower(f) for f in records]
+    locations = [[] for _ in records] if debug_source is not None else [None] * len(records)
+    compiled = [lower(f, positions) for f, positions in zip(records, locations)]
     types = [function_type([], I32)] if ros_abi else []
     types.extend(t for t, _ in compiled)
     types.append(function_type([], None))
@@ -284,9 +351,18 @@ def module(records, ros_abi):
     sections = [(1, types)]
     if imports:
         sections.append((2, imports))
-    sections.extend([(3, [uleb(base + i) for i in range(len(bodies))]), (7, exports), (10, bodies)])
+    sections.extend([(3, [uleb(base + i) for i in range(len(bodies))]), (7, exports)])
     function_names = (["uwvm_ros_v2.abi"] if ros_abi else []) + names + ["_start"]
     symbols = vector([uleb(i) + field(name.encode("ascii")) for i, name in enumerate(function_names)])
-    return (b"\0asm\x01\0\0\0"
-            + b"".join(bytes([s]) + field(vector(entries)) for s, entries in sections)
-            + b"\0" + field(field(b"name") + b"\x01" + field(symbols)))
+    prefix = b"\0asm\x01\0\0\0" + b"".join(bytes([s]) + field(vector(entries)) for s, entries in sections)
+    code = vector(bodies)
+    result = prefix + b"\x0a" + field(code) + b"\0" + field(field(b"name") + b"\x01" + field(symbols))
+    if debug_source is not None:
+        first_body = len(prefix) + 1 + len(uleb(len(code))) + len(uleb(len(bodies)))
+        points = []
+        for body, function_locations in zip(bodies, locations):
+            points.extend((first_body + pc, origin) for pc, origin in function_locations)
+            first_body += len(body)
+        mapping = source_map(*debug_source, points)
+        result += b"\0" + field(field(b".debug_source_map") + mapping)
+    return result

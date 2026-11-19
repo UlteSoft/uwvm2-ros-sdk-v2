@@ -1,10 +1,10 @@
 {
   "source_sha256": "9dc77ffadc16d837a1bf32d99c624cb4df0647cee7b119edd9e7b1bcc05f2e00",
   "bootstrap_sha256": "68097bd680839cbc9d464a0edce4f7c333975e27a90246890e9f1078c7e702ad",
-  "binary_sha256": "a93e43198dc1c47deda7c8b79bcc32a45139b66ae2a004ff069fb0889be296da",
+  "binary_sha256": "0cfd6d73239645ce69376d13cefab6bf7f360c91ced7463f488d4d34bdfbdf12",
   "inputs": {
     "main.go": "7e037a7c4bfccf0907d9ecafebeb03388ce4bdc126eb47ff2f5f085d1b6b4a6b",
-    "proof.go": "df6e3f494764787f61fd2929f1cc3dc9fa929322d0375237ce97da021ef1cf5e",
+    "proof.go": "b4c0ae71b742e7f96b50d15ff50196efa742da54f0030c1c91509659b5f9f8d4",
     "build.py": "9ed91e714d43a6e3c4e4a8c1f266a7e4008ddb5b21b849d9135cbe2677436b21"
   },
   "format": "wros-go-scalar-producer",
@@ -14,6 +14,6 @@
   "host": "linux-amd64",
   "target": "wasm32",
   "binary_bytes": 16019604,
-  "compressed_bytes": 4702408,
-  "compressed_sha256": "4896681cfdcb9b4f15882bc2f576d3e06c72620c11a4fb5b98361802642b7480"
+  "compressed_bytes": 4704192,
+  "compressed_sha256": "6d3228b4db9934c05d2b0bd37e876b8893eb49f91bc6fc73b82acc27e1516fed"
 }

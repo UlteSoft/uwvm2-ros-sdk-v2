@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/go.md",
-      "bytes": 4292,
+      "bytes": 4575,
       "mode": 420,
-      "sha256": "7d712e34ff03acd0a8af0600cdb98cbb6f8639e5bf87df9383d7534658e71edf"
+      "sha256": "babb20250dbcbaf6a81fb8fffe0ef48d84bb63405b89e3f1f341fa9b1063d944"
     },
     {
       "path": "document/zh/go.md",
-      "bytes": 3942,
+      "bytes": 4249,
       "mode": 420,
-      "sha256": "63759283030572288e6a7bf91850a9da392abd307bb0dfede737828d095836cf"
+      "sha256": "e0db71bcce7e1b4514f36bd5062e5ee75d90292e488335641426828935590aa8"
     },
     {
       "path": "examples/go/controller.go",
@@ -80,33 +80,33 @@
     },
     {
       "path": "language/go/driver.py",
-      "bytes": 5249,
+      "bytes": 5654,
       "mode": 420,
-      "sha256": "8ab82d8e08155e46af9f195ef169b3a22fe6f8fbed8140dbccf7740434756ea8"
+      "sha256": "68667ee9ea0de842ac9f28f26f4af65b2b47915dff96939c7509f6a4332ad835"
     },
     {
       "path": "language/go/linux-amd64/producer.xz",
-      "bytes": 4702408,
+      "bytes": 4704192,
       "mode": 420,
-      "sha256": "4896681cfdcb9b4f15882bc2f576d3e06c72620c11a4fb5b98361802642b7480"
+      "sha256": "6d3228b4db9934c05d2b0bd37e876b8893eb49f91bc6fc73b82acc27e1516fed"
     },
     {
       "path": "language/go/registers.py",
-      "bytes": 14049,
+      "bytes": 17384,
       "mode": 420,
-      "sha256": "8085c60819567a8d486efadc6f11d6df67810184b6f0552633f8db3910b6818d"
+      "sha256": "3cfb0774556c78e57aeca32588d17e8818dbda8441fd7ef719d19de93d336d9b"
     },
     {
       "path": "language/go/release.json",
       "bytes": 923,
       "mode": 420,
-      "sha256": "34b48b03a2be4357e2f9e964b154aa2c5b37ebd96356557f36ec2be643c156f0"
+      "sha256": "f712fd072f33c24c55b95a498e35841a82188356e8c6d48c5ffc20ea3bd8c615"
     },
     {
       "path": "language/go/xmake/adapter.lua",
-      "bytes": 1508,
+      "bytes": 1732,
       "mode": 420,
-      "sha256": "c5075113b0f7c65a29e961342c58977ddaba428958907bf49525f7238eaac429"
+      "sha256": "e65ccfc7dccf0be2b6ca976fb5e5c7f05b7921b0ac98ba7eff993592c7bc4c90"
     }
   ]
 }
