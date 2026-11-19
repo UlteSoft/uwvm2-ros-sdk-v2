@@ -98,6 +98,7 @@ def main():
     run("compile-consumer", [args.wat2wasm, work / "calls.wat", "-o", consumer])
     for engine in ("int", "aot"):
         run(engine + "-arithmetic", vm(engine, consumer, ["--wasm-preload-library", guest, "algorithm"]))
+    artifacts = {"arithmetic": digest(guest), "consumer": digest(consumer)}
     for kind in ("common", "extension", "migration"):
         project = work / kind
         shutil.copytree(root / "examples/shared" / kind / "go", project)
@@ -106,11 +107,12 @@ def main():
         run(kind + "-build", [args.xmake, "build"], cwd=project, environ=opts)
         run(kind + "-test", [args.xmake, "test", "-j1"], cwd=project, environ=opts)
         module, = project.rglob("controller.wasm")
+        artifacts[kind] = digest(module)
         if kind == "extension":
             for engine in ("int", "aot"):
                 run(engine + "-deny", vm(engine, module), success=False)
     (work / "results.json").write_text(json.dumps(dict(scope="standard-Go register-only wasm32",
-        vm_sha256=digest(args.vm), compiler=json.loads((root / "language/go/release.json").read_bytes()),
+        vm_sha256=digest(args.vm), test_sha256=digest(Path(__file__)), artifacts=artifacts, compiler=json.loads((root / "language/go/release.json").read_bytes()),
         cases=rows), indent=2) + "\n")
 
 
