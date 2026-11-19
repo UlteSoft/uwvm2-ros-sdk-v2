@@ -36,6 +36,12 @@ func ConvertBranch(first int32, second uint32, choose bool) uint32 {
     if choose { second = uint32(first) }
     return second
 }
+func SignedScale(value int32) int32 { return value / 7 }
+func SignedBucket(value int32) int32 { return value % -37 }
+func WideScale(value int64) int64 { return value / 7 }
+func UnsignedBucket(value uint64) uint64 { return value % 18446744073709551615 }
+func Flip(value int64) int64 { return value / -1 }
+func RemainderUnit(value int64) int64 { return value % -1 }
 func Start() uint32 { return 0 }
 """
 CONSUMER = """(module
@@ -55,6 +61,12 @@ CONSUMER = """(module
  (import "algorithm" "UnsignedValue" (func $unsigned (param i32) (result i32)))
  (import "algorithm" "ConvertCount" (func $count (param i32 i32) (result i32)))
  (import "algorithm" "ConvertBranch" (func $branch (param i32 i32 i32) (result i32)))
+ (import "algorithm" "SignedScale" (func $scale32 (param i32) (result i32)))
+ (import "algorithm" "SignedBucket" (func $bucket32 (param i32) (result i32)))
+ (import "algorithm" "WideScale" (func $scale64 (param i64) (result i64)))
+ (import "algorithm" "UnsignedBucket" (func $bucket64 (param i64) (result i64)))
+ (import "algorithm" "Flip" (func $flip (param i64) (result i64)))
+ (import "algorithm" "RemainderUnit" (func $unit (param i64) (result i64)))
  (func (export "_start")
   (if (i32.ne (call $gain (i32.const 2147483647) (i32.const 2) (i32.const 3)) (i32.const 1)) (then unreachable))
   (if (i64.ne (call $sub (i64.const 4) (i64.const 6)) (i64.const -2)) (then unreachable))
@@ -82,7 +94,14 @@ CONSUMER = """(module
   (if (i32.ne (call $unsigned (i32.const -1)) (i32.const -1)) (then unreachable))
   (if (call $count (i32.const -1) (i32.const -1)) (then unreachable))
   (if (i32.ne (call $branch (i32.const -11) (i32.const 92) (i32.const 1)) (i32.const -11)) (then unreachable))
-  (if (i32.ne (call $branch (i32.const -11) (i32.const 92) (i32.const 0)) (i32.const 92)) (then unreachable))))"""
+  (if (i32.ne (call $branch (i32.const -11) (i32.const 92) (i32.const 0)) (i32.const 92)) (then unreachable))
+  (if (i32.ne (call $scale32 (i32.const -99)) (i32.const -14)) (then unreachable))
+  (if (i32.ne (call $bucket32 (i32.const -75)) (i32.const -1)) (then unreachable))
+  (if (i64.ne (call $scale64 (i64.const -99)) (i64.const -14)) (then unreachable))
+  (if (i64.ne (call $bucket64 (i64.const -1)) (i64.const 0)) (then unreachable))
+  (if (i64.ne (call $bucket64 (i64.const -2)) (i64.const -2)) (then unreachable))
+  (if (i64.ne (call $flip (i64.const -9223372036854775808)) (i64.const -9223372036854775808)) (then unreachable))
+  (if (i64.ne (call $unit (i64.const -9223372036854775808)) (i64.const 0)) (then unreachable))))"""
 NEGATIVE = {
     "pointer": "func Bad(p *int32) int32 { return *p }",
     "slice": "func Bad(p []int32) int32 { return p[0] }",
@@ -94,6 +113,8 @@ NEGATIVE = {
     "directive": "//go:noinline\nfunc Bad() uint32 { return 1 }",
     "bad-type": "func Bad() uint32 { return false }",
     "possibly-negative-shift": "func Bad(x uint32, count int32) uint32 { return x >> count }",
+    "nonconstant-divisor": "func Bad(x, y int64) int64 { return x / y }",
+    "zero-divisor": "func Bad(x uint64) uint64 { return x % 0 }",
     "import": 'import "unsafe"',
 }
 

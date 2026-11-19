@@ -7,6 +7,7 @@ I32, I64 = 0x7f, 0x7e
 TYPES = {"int32": I32, "uint32": I32, "int64": I64, "uint64": I64, "bool": I32}
 OPS = {}
 SHIFTS = {}
+CONSTANT_DIVISIONS = {}
 CONVERSIONS = {
     "Trunc64to32": (I64, I32, 0xa7),
     "SignExt32to64": (I32, I64, 0xac),
@@ -21,6 +22,9 @@ for bits, wasmtype, first in [(32, I32, 0x6a), (64, I64, 0x7c)]:
     for opname, offset in {"Eq": 0, "Neq": 1, "Less": 2, "LessU": 3, "Leq": 6, "LeqU": 7}.items():
         spelling = opname.rstrip("U") + str(bits) + ("U" if opname.endswith("U") else "")
         OPS[spelling] = (equal + offset, wasmtype, True)
+    for op, suffix, offset in (("Div", "", 3), ("Div", "u", 4),
+                               ("Mod", "", 5), ("Mod", "u", 6)):
+        CONSTANT_DIVISIONS[f"{op}{bits}{suffix}"] = (bits, wasmtype, first + offset, offset == 3)
     for count_bits, count_type in ((32, I32), (64, I64)):
         for op, instruction, signed in (("Lsh", first + 10, False), ("Rsh", first + 11, True),
                                         ("RshU", first + 12, False)):
@@ -168,31 +172,58 @@ def lower(f, locations=None):
         """@brief Lower shifts without dropping the unmasked Go count."""
         operand, count, width, instruction, signed = SHIFTS[v["op"]]
         base, amount = args
-        if (t != operand or ids[base]["type"] == "bool" or v["type"] == "bool"
+        literal = ids[amount].get("literal", 0)
+        bounded = ids[amount]["op"] in ("Const32", "Const64") and 0 <= literal < width
+        # The generic compiler's signed i32 division rewrite computes a signed
+        # i64 shift and carries the i32 result type on the shift itself.
+        narrow = t == I32 and v["op"] == "Rsh64x64" and bounded
+        if ((t != operand and not narrow) or ids[base]["type"] == "bool" or v["type"] == "bool"
                 or register_type(ids[base]) != operand or register_type(ids[amount]) != count
                 or ids[amount]["type"] == "bool"
                 or v.get("literal", 0) not in (0, 1)):
             raise ValueError("incorrect Go SSA shift signature")
-        literal = ids[amount].get("literal", 0)
-        bounded = ids[amount]["op"] in ("Const32", "Const64") and 0 <= literal < width
         get(base)
         get(amount)
         if count != operand:
             code.append(0xa7 if operand == I32 else 0xad)  # wrap or zero extend
         if bounded:
             code.append(instruction)
-            return
-        if not signed:
-            code.append(instruction)
-        const(operand, width - 1 if signed else 0)
-        get(amount)
-        const(count, width)
-        # A sign-only cast can leave its original SSA type on the count. The
-        # Go frontend emits a distinct control path for negative-count panics,
-        # which the register-only profile does not admit. The pure shift here
-        # uses the count bits as unsigned, including bits a Wasm shift masks.
-        code.extend(bytes([0x49 if count == I32 else 0x54, 0x1b]))
-        if signed:
+        else:
+            if not signed:
+                code.append(instruction)
+            const(operand, width - 1 if signed else 0)
+            get(amount)
+            const(count, width)
+            # A sign-only cast can leave its original SSA type on the count.
+            # The Go frontend emits a distinct control path for negative-count
+            # panics, which the register-only profile does not admit. Compare
+            # the complete unsigned count before Wasm masks or wraps it.
+            code.extend(bytes([0x49 if count == I32 else 0x54, 0x1b]))
+            if signed:
+                code.append(instruction)
+        if narrow:
+            code.append(0xa7)  # i32.wrap_i64
+
+    def emit_constant_division(v, t, args):
+        """@brief Prove the divisor is a nonzero literal and lower one integer operation."""
+        bits, operand, instruction, signed_quotient = CONSTANT_DIVISIONS[v["op"]]
+        divisor = ids[args[1]]
+        if (t != operand or v["type"] == "bool" or
+                any(ids[a]["type"] == "bool" or register_type(ids[a]) != operand for a in args)
+                or v.get("literal", 0) not in (0, 1)):
+            raise ValueError("incorrect Go SSA division signature")
+        mask = (1 << bits) - 1
+        literal = divisor.get("literal", 0) & mask
+        if divisor["op"] != f"Const{bits}" or literal == 0:
+            raise ValueError("Go division requires a nonzero constant divisor")
+        if signed_quotient and literal == mask:
+            # Go wraps MIN / -1 to MIN, while the Wasm signed quotient traps.
+            const(operand, 0)
+            get(args[0])
+            code.append(0x6b if operand == I32 else 0x7d)
+        else:
+            get(args[0])
+            get(args[1])
             code.append(instruction)
 
     def emit_scalar(v, t):
@@ -227,6 +258,8 @@ def lower(f, locations=None):
             code.append(instruction)
         elif op in SHIFTS and len(args) == 2:
             emit_shift(v, t, args)
+        elif op in CONSTANT_DIVISIONS and len(args) == 2:
+            emit_constant_division(v, t, args)
         elif op in ROTATIONS and len(args) == 2:
             operand, instruction = ROTATIONS[op]
             amount = register_type(ids[args[1]])

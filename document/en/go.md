@@ -4,6 +4,8 @@
 
 Shift counts at or above the operand width yield zero for left and logical right shifts. An arithmetic right shift fills with the sign bit. The range check uses the original count, including any bits ignored by a Wasm shift. Keep variable counts unsigned or explicitly convert them to unsigned for this profile. A source expression that requires Go runtime panic handling is outside the register-only profile. [Go integer operators](https://go.dev/ref/spec#Integer_operators)
 
+The register-only profile supports fixed-width signed and unsigned division and remainder with a nonzero compile-time integer constant. The quotient truncates toward zero. Dividing the minimum signed value by `-1` returns that minimum value and yields zero remainder. A runtime divisor that needs Go panic handling is outside this profile. [Go integer operators](https://go.dev/ref/spec#Integer_operators)
+
 ## Install and build
 
 Use the full SDK commit for `$REV`. Select one platform such as `unitree`.

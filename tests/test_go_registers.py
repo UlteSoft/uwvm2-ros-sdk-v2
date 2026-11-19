@@ -48,6 +48,21 @@ class GoRegisters(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "changes the memory token"):
             lower(graph)
 
+    def test_division_requires_a_nonzero_constant_in_operand_width(self):
+        for divisor in (dict(op="Arg", type="uint32"),
+                        dict(op="Const32", type="uint32", literal=0),
+                        dict(op="Const32", type="uint32", literal=1 << 32)):
+            graph = dict(name="Divide", params=["uint32", "uint32"], result="uint32", entry=0,
+                         blocks=[dict(id=0, kind="Ret", control=5, predecessors=0, values=[
+                             dict(id=1, op="InitMem", type="mem"),
+                             dict(id=2, op="Arg", type="uint32"),
+                             dict(id=3, **divisor),
+                             dict(id=4, op="Div32u", type="uint32", literal=1, args=[2, 3]),
+                             dict(id=5, op="MakeResult", type="uint32,mem", args=[4, 1]),
+                         ])])
+            with self.subTest(divisor=divisor), self.assertRaisesRegex(ValueError, "nonzero constant divisor"):
+                lower(graph)
+
     def test_duplicate_predecessor_ordinal(self):
         graph = diamond()
         graph["blocks"][1]["succs"][0]["index"] = 0

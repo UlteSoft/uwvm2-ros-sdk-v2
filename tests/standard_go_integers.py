@@ -1,4 +1,4 @@
-"""@brief Compare fixed-width shifts and conversions with an independent native Go build."""
+"""@brief Compare fixed-width integer operations with an independent native Go build."""
 import argparse
 import hashlib
 import json
@@ -18,7 +18,7 @@ def digest(path):
 
 
 def patterns():
-    """@brief Describe both operand widths, count widths, and right-shift fill policies."""
+    """@brief Describe shifts, conversions and division across the integer widths."""
     for width in (32, 64):
         for count_width in (32, 64):
             for kind, unsigned, operator in (("Left", False, "<<"), ("Signed", False, ">>"),
@@ -36,6 +36,17 @@ def patterns():
     yield "Rotate64", "uint64", None, "uint64", "x << 53 | x >> 11"
     yield "LeftConstant", "int64", None, "int64", "x << 19"
     yield "RightConstant", "uint32", None, "uint32", "x >> 17"
+    for width in (32, 64):
+        high_bit = 1 << (width - 1)
+        for prefix, divisors in (
+            ("int", (-high_bit, -37, -32, -2, -1, 1, 2, 7, 32, high_bit - 1)),
+            ("uint", (1, 2, 3, 7, 32, high_bit, high_bit + 1, 2 * high_bit - 1)),
+        ):
+            operand = prefix + str(width)
+            for ordinal, value in enumerate(divisors):
+                for name, operator in (("Quotient", "/"), ("Remainder", "%")):
+                    function = f"{name}{prefix.title()}{width}By{ordinal}"
+                    yield function, operand, None, operand, f"x {operator} ({value})"
 
 
 def main():
@@ -61,7 +72,8 @@ def main():
                TMPDIR=str(out))
     report = dict(complete=False, cgroup=str(cgroup), seed=SEED, commands=[],
                   reference="https://go.dev/ref/spec#Integer_operators",
-                  upstream_cases="https://github.com/golang/go/blob/go1.24.2/test/codegen/shift.go",
+                  upstream_cases=["https://github.com/golang/go/blob/go1.24.2/test/codegen/shift.go",
+                                  "https://github.com/golang/go/blob/go1.24.2/test/divmod.go"],
                   memory_events_before=(cgroup / "memory.events").read_text())
     result = out / "results.json"
 
@@ -94,6 +106,9 @@ def main():
         bits = width(operand)
         top, middle = (1 << bits) - 1, 1 << (bits - 1)
         values = (0, 1, 3, middle - 1, middle, middle + 1, top - 1, top)
+        if name.startswith(("Quotient", "Remainder")):
+            values += tuple(value & top for value in (-38, -37, -36, -33, -32, -31, -8, -7, -6,
+                                                       6, 7, 8, 31, 32, 33, 36, 37, 38))
         counts = (0, 1, bits - 1, bits, bits + 1, bits * 2, 0xffffffff, 1 << 32, (1 << 64) - 1)
         for sample in range(sample_count):
             x = values[sample % len(values)] if sample < 72 else rng.getrandbits(bits)
