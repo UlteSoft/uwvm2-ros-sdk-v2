@@ -32,6 +32,13 @@ rule("wros.application")
                       req.arch, req.core, req.threads and "threads" or "single", "--engine", engine,
                       "--exceptions", req.eh and "eh" or "noeh"}
         if req.mte then table.insert(args, "--check-tags") end
+        local queries = table.wrap(target:values("wros.test_queries"))
+        if #queries > 0 then table.join2(args, {"--queries", table.concat(queries, ",")}) end
+        local policy = target:values("wros.test_policy")
+        if policy then
+            assert(policy == "platform-driver-denial", "unknown WROS test fixture")
+            table.join2(args, {"--driver-denial", target:values("wros.platform")})
+        end
         os.vrunv("python3", args)
         return true
     end)
@@ -87,6 +94,16 @@ function add_wros_tests(...)
             set_values("wros.unknown", "unsupported VM test engine")
         end
     end
+end
+
+--- @brief Select the individual read-only VM grants for local guest tests.
+function set_wros_test_queries(...)
+    set_values("wros.test_queries", ...)
+end
+
+--- @brief Select a private socket fixture for testing the platform authorization boundary.
+function set_wros_test_policy(policy)
+    set_values("wros.test_policy", policy)
 end
 
 function add_wros_exports(...)

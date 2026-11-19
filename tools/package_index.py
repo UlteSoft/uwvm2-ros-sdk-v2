@@ -133,7 +133,7 @@ def main():
     policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py", "qualification.py", "local_release.py")]
     package("frontend", [*policy, "share/qualification/memory-neighbors.json", "bin/wrar", "install/archiver.py", "document/en/memtag.md", "document/zh/memtag.md",
                          "document/en/memory-qualification.md", "document/zh/memory-qualification.md"])
-    package("xmake/common", ["tools/xmake/site_archive.py", "tools/xmake/ros.lua", "tools/xmake/dispatch.lua", "tools/xmake/run_guest.py",
+    package("xmake/common", ["tools/xmake/site_archive.py", "tools/xmake/platform_driver_test.py", "tools/xmake/ros.lua", "tools/xmake/dispatch.lua", "tools/xmake/run_guest.py",
                              "document/en/xmake.md", "document/zh/xmake.md",
                              "document/en/xmake-api-index.md", "document/zh/xmake-api-index.md"])
     language_files = {
