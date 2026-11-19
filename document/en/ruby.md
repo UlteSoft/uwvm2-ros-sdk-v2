@@ -58,6 +58,11 @@ uses an isolated idle peer and checks that both permission denials send no
 packet. See [platform examples](platform-examples.md) and [Xmake](xmake.md).
 Run `xmake f -a wasm64` before building a project against a signed memory64 site.
 
+A source checkout includes `tests/migration/noetic_costmap_ruby.py` to check
+the installed migration example against Noetic's native index method. Supply
+a Ruby migration installation, the VM, the pinned upstream header and a C++
+compiler. The probe uses both VM engines and has zero host imports.
+
 The source tree includes a Go2 controller for the official MuJoCo fixture.
 Use the same signed Unitree SDK installation with
 `tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`.

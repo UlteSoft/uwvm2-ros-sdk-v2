@@ -50,6 +50,10 @@ GC 对象各自通过带标签的 libc 分配。解析器使用堆栈，AST 节�
 [Xmake 使用说明](xmake.md)。
 使用已签名的 memory64 站点构建工程时，先执行 `xmake f -a wasm64`。
 
+源码目录的 `tests/migration/noetic_costmap_ruby.py` 可用 Noetic 原生索引函数
+核对已安装的 Ruby 移植示例。提供 Ruby 移植安装目录、VM、固定版本的原版头文件和
+C++ 编译器即可。探针在两种 VM 引擎中运行，且没有宿主导入。
+
 源码目录提供官方 MuJoCo 夹具的 Go2 控制器。用同一份已签名的
 Unitree SDK 安装运行
 `tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`，
