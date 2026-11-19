@@ -149,6 +149,12 @@ def main():
         "examples/js/body.js", "examples/js/xmake.lua", "document/en/js.md", "document/zh/js.md",
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/quickjs").iterdir() if p.is_file()],
     ]
+    language_files["typescript"] = [
+        *[name for name in language_files["js"] if name.startswith(("bin/", "include/", "language/", "third-parties/"))],
+        "bin/wrts", "language/typescript/compile.cjs", "examples/typescript/main.ts", "examples/typescript/filter.ts",
+        "examples/typescript/xmake.lua", "document/en/typescript.md", "document/zh/typescript.md",
+        *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/typescript").iterdir() if p.is_file()],
+    ]
     language_files["d"] = [
         "bin/wrd", "include/wros/scene.h", "examples/d/body.d", "examples/d/xmake.lua",
         "document/en/d.md", "document/zh/d.md",

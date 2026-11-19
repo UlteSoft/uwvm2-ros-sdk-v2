@@ -232,6 +232,31 @@
           "sha256": "31e617f008e14cd924592f29e3d172bfa93ebf98a3b856ff7804d0ac7c7871eb"
         }
       ]
+    },
+    "typescript": {
+      "version": "5.9.3",
+      "release_url": "https://github.com/microsoft/TypeScript/releases/tag/v5.9.3",
+      "commit": "c63de15a992d37f0d6cec03ac7631872838602cb",
+      "checks": [
+        {
+          "path": "third-parties/typescript/release.json",
+          "sha256": "1581ad9a53c0c2e95847b9ab4d4b576dedc4d0d1db2c3ad5e5e8fe0f89e038bc"
+        },
+        {
+          "path": "third-parties/typescript/compiler.tar.gz",
+          "sha256": "ba1d0d8e90c248541000f417067c99e9f71ff93053e8703ff00215360f681508"
+        }
+      ]
+    },
+    "node-typescript": {
+      "version": "22.22.3",
+      "release_url": "https://nodejs.org/dist/v22.22.3/node-v22.22.3-linux-x64.tar.xz",
+      "checks": [
+        {
+          "path": "third-parties/typescript/node-linux-x64.xz",
+          "sha256": "7c3cd057e0411ee6c4508cb258efc01a2322f6f7d8261ead36b4558e242b3d8f"
+        }
+      ]
     }
   },
   "languages": {
@@ -339,6 +364,15 @@
         "dotnet",
         "llvm",
         "wasi-libc"
+      ]
+    },
+    "typescript": {
+      "components": [
+        "typescript",
+        "node-typescript",
+        "llvm",
+        "wasi-libc",
+        "quickjs"
       ]
     }
   },

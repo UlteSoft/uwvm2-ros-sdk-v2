@@ -22,6 +22,19 @@ rule("wros.application")
     on_build(function (target)
         import("dispatch", {rootdir = path.join(sdk, "tools/xmake"), anonymous = true}).build(target)
     end)
+    -- @brief Execute the built guest in the exact VM engine requested by add_wros_tests.
+    on_test(function (target, opt)
+        local engine = opt.name:match("/([^/]+)$") or opt.name
+        assert(engine == "int" or engine == "aot", "use add_wros_tests for Wasm execution tests")
+        local req = assert(target:data("wros.request"))
+        assert(req.kind == "binary", "a VM test requires an executable Wasm target")
+        local args = {path.join(req.root, "tools/xmake/run_guest.py"), path.absolute(target:targetfile()),
+                      req.arch, req.core, req.threads and "threads" or "single", "--engine", engine,
+                      "--exceptions", req.eh and "eh" or "noeh"}
+        if req.mte then table.insert(args, "--check-tags") end
+        os.vrunv("python3", args)
+        return true
+    end)
     on_run(function (target)
         import("core.base.option")
         assert(not option.get("arguments") and not target:get("runargs"), "Use the deployment VM for guest arguments")
@@ -62,6 +75,17 @@ function set_wros_profile(profile)
     end
 end
 
+--- @brief Register real per-engine tests for the current guest binary.
+-- Each case executes its own VM process and propagates the guest exit or trap.
+function add_wros_tests(...)
+    local engines = {...}
+    assert(#engines > 0, "select at least one of int and aot")
+    for _, engine in ipairs(engines) do
+        assert(engine == "int" or engine == "aot", "unsupported VM test engine")
+        add_tests(engine)
+    end
+end
+
 function add_wros_exports(...)
     add_values("wros.exports", ...)
 end
@@ -72,6 +96,10 @@ end
 
 function add_wros_operations(...)
     add_values("wros.operations", ...)
+end
+
+function set_wros_typescript_entry(file)
+    set_values("wros.typescript_entry", file)
 end
 
 function set_wros_jvm_main(class_name)

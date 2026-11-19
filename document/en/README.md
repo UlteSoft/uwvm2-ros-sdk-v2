@@ -239,3 +239,5 @@ For a signed TinyGo site, use the Unitree TinyGo development directory as `SDK` 
 The Java and Kotlin synchronous AOT package uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
 [JavaScript interpreter and ROS operations](js.md)
+
+[Compile a TypeScript application](typescript.md)
