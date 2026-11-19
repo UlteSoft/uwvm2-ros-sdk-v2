@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/jvm.md",
-      "bytes": 11517,
+      "bytes": 11584,
       "mode": 420,
-      "sha256": "3c044ece8b684de1fea45797ab0d817d4c409f705cadc57acaa0fd0a1062f367"
+      "sha256": "fa44cd1af6e52e051b86901c4318cc3181be023b429efca07f698d70ab328c7e"
     },
     {
       "path": "document/zh/jvm.md",
-      "bytes": 9817,
+      "bytes": 9920,
       "mode": 420,
-      "sha256": "995b2d0e647d04a87c7a873c3e743fc5d371a4bf367437bbe6f6d92e749a2bbd"
+      "sha256": "a37964b3d1f5f7a25cd7ce243972b284f6f7502fa2573e71ae8ebc503e774e0f"
     },
     {
       "path": "include/wros/scene.h",

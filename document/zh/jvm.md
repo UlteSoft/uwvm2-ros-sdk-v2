@@ -15,15 +15,16 @@ export WROS_JVM_BUNDLE="$BUILD_DIR/java-host"
 
 Kotlin 用户将 `java` 换成 `kotlin`。Java 选择 29 个 JAR，Kotlin 选择 36 个。已有的开发宿主包也可以按 `--jdk`、`--system-libs`、`--jars` 三个目录提供离线输入。
 
+按下文签署并安装编译现场后，可以直接编译源码。
+
 ```sh
-"$UWVM_ROS_SDK_ROOT/bin/wrkt" --legacy-mte --main-class example.Main \
-  --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --bundle "$WROS_JVM_BUNDLE" \
+"$UWVM_ROS_SDK_ROOT/bin/wrkt" --main-class example.Main \
   --work "$BUILD_DIR/kotlin-log" -o "$BUILD_DIR/body.wasm" Main.kt
 ```
 
 Java 使用 `wrjava`、`.java`；Kotlin 可用 `@file:JvmName("Main")` 指定 JVM 入口类名。`--work` 可选，目录须尚未存在，保留命令、日志、源码哈希及最终导入。前端固定采用 `-O3 -g`，Java 分配预算 16 MiB、线性内存上限 256 MiB。先检查应用字节码，再生成 C 并链接到 Wasm。
 
-项目示例见 `examples/<语言>/synchronous-aot/xmake.lua`。令 `UWVM_ROS_SDK_ROOT` 指向安装目录，并设置 `WROS_TOOLCHAIN`、`WROS_SYSROOTS`、`WROS_JVM_BUNDLE`。`set_wros_jvm_main("example.Main")` 指定入口，`set_language`、`add_files` 选择语言与源文件，设置 `set_optimize("fastest")`、`set_symbols("debug")`、Core 3.0、EH、无线程和 `mte = "legacy"`。
+项目示例见 `examples/<语言>/synchronous-aot/xmake.lua`。将 `UWVM_ROS_SDK_ROOT` 指向签名现场的安装目录。默认构建使用该现场的工具链。用 `set_wros_jvm_main("example.Main")` 选择入口，使用 `set_language` 和 `add_files` 选择语言和源码。仅当显式测试未签署的候选工具链时，设置 `mte = "legacy"`，并提供 `WROS_TOOLCHAIN`、`WROS_SYSROOTS` 和 `WROS_JVM_BUNDLE`。
 
 示例展示 ABI 查询及具有单独授权的 guard。`Guard.open(byte[])`、`create()`、`trigger()`、`take(long[])`、`close()` 返回 VM 状态码，take 的输出数组须有一个元素。授予资源别名和具体操作后才能使用。Java 实时和单调时钟分别申请 WASIp1 的只读时钟权限。
 
@@ -37,7 +38,7 @@ Java 使用 `wrjava`、`.java`；Kotlin 可用 `@file:JvmName("Main")` 指定 JV
 
 `result(long sequence, byte[] payload, long[] outcome)` 需要至少覆盖所选响应上限的字节数组，以及两个结果字。成功时写入驱动状态、实际字节数和响应内容。拒绝时保留调用方数组内容。方法本身返回 VM 操作状态。`describe(long[4])` 提供阶段、序号、状态、效果未知位。`disconnect()` 断开传输，`close()` 释放本地能力。部署器持有驱动生命周期和 TLS 身份，包装层每次使用后清零自己的消息暂存区。
 
-运行 `tests/jvm_mujoco.py --language java` 或 `--language kotlin` 并提供 VM 源码、运行时、TLS 库、官方 MuJoCo 3.4.0、编译器、sysroot 清单、构建宿主包和全新的输出位置。夹具从真正的 JVM 语言程序构建闭环控制器，对照原生物理步进，还检查越界指令拒绝和接收端崩溃状态。
+运行 `tests/jvm_mujoco.py --language java` 或 `--language kotlin`，用 `--sdk` 指定签名现场的安装目录，并提供 VM 源码、运行时、TLS 库、MuJoCo 3.4.0 和新的输出位置。测试宇树 Go2 时，通过 `--vendor-model`、`--vendor-assets` 提供固定版本的 MJCF 清单和原始模型资产。夹具比较 128 步控制后的原生与 Wasm 结果，还检查越界指令和外置驱动进程崩溃后的响应。
 
 ### 按操作选择 ROS 导入
 

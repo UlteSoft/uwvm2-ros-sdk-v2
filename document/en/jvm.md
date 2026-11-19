@@ -15,9 +15,10 @@ export WROS_JVM_BUNDLE="$BUILD_DIR/java-host"
 
 Select `kotlin` to provision the Kotlin compiler. Java requires 29 pinned JARs and Kotlin requires 36. An installed compiler bundle can also supply the `--jdk`, `--system-libs` and `--jars` inputs offline.
 
+Once the site has signed the release and installed the SDK as described below, compile directly from source.
+
 ```sh
-"$UWVM_ROS_SDK_ROOT/bin/wrjava" --legacy-mte --main-class example.Main \
-  --toolchain "$WROS_TOOLCHAIN" --sysroots "$WROS_SYSROOTS" --bundle "$WROS_JVM_BUNDLE" \
+"$UWVM_ROS_SDK_ROOT/bin/wrjava" --main-class example.Main \
   --work "$BUILD_DIR/java-log" -o "$BUILD_DIR/body.wasm" Main.java
 ```
 
@@ -37,7 +38,7 @@ The pinned build-host JVM runs interpreted with core dumps disabled. The guest a
 
 `result(long sequence, byte[] payload, long[] outcome)` requires a destination at least as large as the selected response limit and two outcome words. A successful call stores the driver status, the number of bytes received, and that many payload bytes. A rejected call preserves the caller's arrays. The method returns the VM operation status independently from the driver's status. `describe(long[4])` returns phase, sequence, status and the unknown-effect bit. Call `disconnect()` to detach the transport and `close()` to release the local capability. Provider lifetime and TLS identity belong to the deployment. The wrapper clears its own message staging buffers after use.
 
-Run `tests/jvm_mujoco.py --language java` or `--language kotlin` with the VM source, runtime, TLS library, official MuJoCo 3.4.0, compiler prefix, sysroot manifest, build host bundle and an empty output location. The fixture builds a closed-loop controller from actual JVM language source, compares native motion with the Wasm controller and checks the receiver's range rejection and crash diagnostics.
+Run `tests/jvm_mujoco.py --language java` or `--language kotlin` with `--sdk` pointing to the signed installation. Supply the VM source, runtime, TLS library, MuJoCo 3.4.0 and a new output location. For the Unitree Go2 test, supply the pinned MJCF manifest and its original assets with `--vendor-model` and `--vendor-assets`. The test compares 128 controller steps with native physics, checks range rejection and exercises a crash in the external driver process.
 
 ### Selecting ROS operations
 
