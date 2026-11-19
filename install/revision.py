@@ -47,15 +47,13 @@ def main():
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")
-    elif args.component == "migration" and args.language in ("csharp", "vbnet", "fsharp"):
-        packages.extend(("protocol", "frontend", args.language + "/numeric", "xmake/common", "xmake/platforms/" + args.platform))
-        if args.language == "fsharp":
-            packages.extend(("migration/examples/fsharp/common", "migration/examples/fsharp/" + args.platform))
-    elif args.component == "numeric-aot" or (args.component == "development" and args.language in ("csharp", "vbnet", "fsharp")):
+    elif args.component == "numeric-aot" or (args.component in ("development", "migration") and args.language in ("csharp", "vbnet", "fsharp")):
         if args.language not in ("csharp", "vbnet", "fsharp"):
             parser.error("the numeric-aot component requires csharp, fsharp or vbnet")
         packages.extend(("protocol", "frontend", args.language + "/numeric", "xmake/common", "xmake/platforms/" + args.platform))
-    elif args.component == "synchronous-aot" or (args.component == "development" and args.language in ("java", "kotlin")):
+        if args.component == "migration" and args.language == "fsharp":
+            packages.extend(("migration/examples/fsharp/common", "migration/examples/fsharp/" + args.platform))
+    elif args.component == "synchronous-aot" or (args.component in ("development", "migration") and args.language in ("java", "kotlin")):
         if args.language not in ("java", "kotlin"):
             parser.error("the synchronous-aot component requires java or kotlin")
         packages.extend(("protocol", "frontend", "jvm/synchronous", "jvm/" + args.language,
@@ -71,9 +69,7 @@ def main():
             if args.language not in DEVELOPMENT:
                 parser.error("a development package has not been published for this language")
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
-            if args.component == "migration":
-                if args.language not in ("c", "cpp"):
-                    parser.error("the migration resource component currently requires c or cpp")
+            if args.component == "migration" and args.language in ("c", "cpp"):
                 packages.extend(("migration/resources", "migration/policy"))
                 if args.language == "c":
                     packages.extend(("migration/examples/c/common", "migration/examples/c/" + args.platform))

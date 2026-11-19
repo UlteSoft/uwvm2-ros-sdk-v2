@@ -34,6 +34,8 @@ The grid examples implement the unsigned row-major cell index used by Noetic Cos
 
 From the full source checkout run doxygen document/source/Doxyfile. The generated C reference contains one entry per operation in share/abi/ros.json. Each entry describes its wire format, ordered request and result fields, applicable resource purpose, address operands and return contract. The output is under .tmp/doxygen/html. [ROSv2 source reference](../source/ros-abi.dox) · [xmake controls](xmake.md)
 
+For any language with a published migration project, append <code>-- --component migration</code> to the fixed-commit install command. This selects that language’s compiler and platform project. Pass the same signed site profile used for its development installation when the language requires one. C and C++ also install their ROS resource migration tools. After installation, use the directory reported by the command as UWVM_ROS_SDK_ROOT.
+
 ## Browse examples by platform
 
 The source checkout contains an English and Chinese index under examples/platform for each platform, with links to the available projects and explicit gaps. A selective installation downloads projects for the chosen platform and language. [Browse examples by platform](https://github.com/UlteSoft/uwvm2-ros-sdk-v2/tree/main/examples/platform/README.en.md)

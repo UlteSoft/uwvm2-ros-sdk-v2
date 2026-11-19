@@ -92,6 +92,25 @@ class Installer(unittest.TestCase):
                 self.assertLessEqual({p.name for p in (directory / "bin").iterdir()},
                                      {command, "wrar", "wrc", "wrcc"})
 
+    def test_migration_selects_each_published_project(self):
+        """@brief Verify that every editable migration resolves its guest compiler and package."""
+        from revision import PROJECT_LANGUAGES
+        for language in PROJECT_LANGUAGES:
+            with self.subTest(language=language):
+                source = Source(self.commit, root)
+                plan = install(source, "abb", language, self.prefix, ["--component", "migration"], plan=True)
+                packages = plan["packages"]
+                self.assertIn("examples/abb/" + language, packages)
+                self.assertIn("xmake/platforms/abb", packages)
+                if language in ("csharp", "fsharp", "vbnet"):
+                    self.assertIn(language + "/numeric", packages)
+                elif language in ("java", "kotlin"):
+                    self.assertIn("jvm/" + language, packages)
+                else:
+                    self.assertIn("languages/" + language, packages)
+                self.assertEqual("migration/resources" in packages, language in ("c", "cpp"))
+                self.assertTrue(all(p.startswith("install/") for p in source.requested))
+
     def test_shared_compiler_source_selection(self):
         for language in ("c", "cpp", "fortran", "lua", "objectc", "rs", "tinygo", "nim"):
             with self.subTest(language=language):
