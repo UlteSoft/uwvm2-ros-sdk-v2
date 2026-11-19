@@ -26,7 +26,7 @@ The default linker uses the locally authenticated C toolchain. The distributed C
 | `--from-source`, `--jobs N` | Rebuild the interpreter from pinned source. Limit the Make build to 1–32 jobs, default 4. |
 | `--build-receipt` | Emit the C backend receipt and a Python receipt identifying sources, runtime and actual imports next to the module. |
 
-Xmake projects include `tools/xmake/ros.lua`, call `set_language("py")`, select the installed platform, and pass one main script through `add_files("main.py")`. Add application modules using `add_wros_python_modules("robot=robot/__init__.py", "robot.math=robot/math.py")`. Declare operations with `add_wros_operations("abi")`. The install includes `examples/py/xmake.lua` and shared examples under `examples/shared/{common,extension,migration}/py`.
+Xmake projects include `tools/xmake/ros.lua`, call `set_language("py")`, select the installed platform, and pass one main script through `add_files("main.py")`. Add application modules using `add_wros_python_modules("robot=robot/__init__.py", "robot.math=robot/math.py")`. Declare operations with `add_wros_operations("abi")`. The install includes `examples/py/xmake.lua` and platform examples under `examples/platform/unitree/{common,extension,migration}/py` for a Unitree selection.
 
 ## Host boundary
 

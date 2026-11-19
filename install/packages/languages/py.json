@@ -14,15 +14,15 @@
     },
     {
       "path": "document/en/python.md",
-      "bytes": 5714,
+      "bytes": 5750,
       "mode": 420,
-      "sha256": "1cf4f02973b04da79a03a9c25a7ef6eadf87284295621cda9fcd323fb2a4a671"
+      "sha256": "5539da0d13cf4bb460d9f46583176d04eb06b7604dd6181e4c00a953d3246c9c"
     },
     {
       "path": "document/zh/python.md",
-      "bytes": 4542,
+      "bytes": 4575,
       "mode": 420,
-      "sha256": "20b2f38ec91722ca6699d1fe79491109d0fc1925d4a7bc0bbdeee909191b1c48"
+      "sha256": "6b0661f9f7c7578293c076197a2c0bd7deea2b79b91ded475a8c338c71e2ef61"
     },
     {
       "path": "examples/py/body.py",
@@ -35,42 +35,6 @@
       "bytes": 575,
       "mode": 420,
       "sha256": "bbba34848e3c1a6d22a2c27f3dfa6fc134fdc7b757363d87cca0fa8c53a17eb3"
-    },
-    {
-      "path": "examples/shared/common/py/body.py",
-      "bytes": 102,
-      "mode": 420,
-      "sha256": "cd856a9c6ff08e42793665fc8026619ceeb0c8d80e57617721fb65d02d60517d"
-    },
-    {
-      "path": "examples/shared/common/py/xmake.lua",
-      "bytes": 575,
-      "mode": 420,
-      "sha256": "bbba34848e3c1a6d22a2c27f3dfa6fc134fdc7b757363d87cca0fa8c53a17eb3"
-    },
-    {
-      "path": "examples/shared/extension/py/body.py",
-      "bytes": 373,
-      "mode": 420,
-      "sha256": "0930affc0bf4cd64505596d0728580d8b570e55848b79faa21592d153ad8da9b"
-    },
-    {
-      "path": "examples/shared/extension/py/xmake.lua",
-      "bytes": 669,
-      "mode": 420,
-      "sha256": "6ec7d6233dad8561d3d8ec809c1ba143605b1d8fe4fa1ada0bca0be683e4b5f6"
-    },
-    {
-      "path": "examples/shared/migration/py/body.py",
-      "bytes": 648,
-      "mode": 420,
-      "sha256": "667479b1c370fcb410e8604962f9c6a4381d66f3f39bd2edacd797810692d9c1"
-    },
-    {
-      "path": "examples/shared/migration/py/xmake.lua",
-      "bytes": 538,
-      "mode": 420,
-      "sha256": "b0117606bc119928e769ba83c12931e8e4cff1d41798897cb5a1dd5ac2f3050a"
     },
     {
       "path": "include/wros/scene.h",

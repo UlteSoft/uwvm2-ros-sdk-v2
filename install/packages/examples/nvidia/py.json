@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/nvidia/common/py/body.py",
+      "bytes": 102,
+      "mode": 420,
+      "sha256": "cd856a9c6ff08e42793665fc8026619ceeb0c8d80e57617721fb65d02d60517d"
+    },
+    {
+      "path": "examples/platform/nvidia/common/py/xmake.lua",
+      "bytes": 609,
+      "mode": 420,
+      "sha256": "5701f4df5f76ed14d30d7eecac15f6829d75b7e06b8335ce8012377d3cd7fa7e"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/py/body.py",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "0930affc0bf4cd64505596d0728580d8b570e55848b79faa21592d153ad8da9b"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/py/xmake.lua",
+      "bytes": 709,
+      "mode": 420,
+      "sha256": "e2b0aa4313053716e854b3c20445119ab0ef5ff0efe78f1e520a00bd401d0aba"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/py/body.py",
+      "bytes": 648,
+      "mode": 420,
+      "sha256": "667479b1c370fcb410e8604962f9c6a4381d66f3f39bd2edacd797810692d9c1"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/py/xmake.lua",
+      "bytes": 577,
+      "mode": 420,
+      "sha256": "805480023de105302506f17ef782d8782fd5394d0ca6f3ac7c3b40c429baf74b"
+    }
+  ]
+}

@@ -26,7 +26,7 @@ export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/py/development"
 | `--from-source`、`--jobs N` | 从固定源码重新构建解释器。并行数 1 至 32，默认 4。 |
 | `--build-receipt` | 输出 C 后端和 Python 两份构建记录，供核查源码、解释器和最终导入。 |
 
-Xmake 工程引入 `tools/xmake/ros.lua`，使用 `set_language("py")`、`set_ros_platform(...)` 与 `add_files("main.py")`。用 `add_wros_python_modules("robot=robot/__init__.py", "robot.math=robot/math.py")` 加入包和模块，用 `add_wros_operations("abi")` 选择宿主接口。安装目录的 `examples/py` 和 `examples/shared/{common,extension,migration}/py` 提供示例。
+Xmake 工程引入 `tools/xmake/ros.lua`，使用 `set_language("py")`、`set_ros_platform(...)` 与 `add_files("main.py")`。用 `add_wros_python_modules("robot=robot/__init__.py", "robot.math=robot/math.py")` 加入包和模块，用 `add_wros_operations("abi")` 选择宿主接口。安装目录的 `examples/py` 和 当前所选平台的 `examples/platform/<平台>/{common,extension,migration}/py` 提供示例。
 
 ## 接口和权限
 

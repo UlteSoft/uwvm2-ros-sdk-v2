@@ -189,8 +189,6 @@ def main():
     language_files["py"] = [
         "bin/wrpy", "bin/wrc", "include/wros/scene.h", "document/en/python.md", "document/zh/python.md",
         "examples/py/body.py", "examples/py/xmake.lua",
-        *[p.relative_to(ROOT).as_posix() for area in ("common", "extension", "migration")
-          for p in (ROOT / "examples/shared" / area / "py").iterdir() if p.is_file()],
         *["language/py/" + name for name in ("entry.c", "scene.h", "isolate.py", "build_interpreter.py",
                                              "freeze_encodings.py", "runtime_paths.mk", "runtime_pack.py")],
         *[p.relative_to(ROOT).as_posix() for tree in ("cpython", "cpython-runtime")

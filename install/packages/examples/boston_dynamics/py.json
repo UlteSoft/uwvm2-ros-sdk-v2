@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/py/body.py",
+      "bytes": 102,
+      "mode": 420,
+      "sha256": "cd856a9c6ff08e42793665fc8026619ceeb0c8d80e57617721fb65d02d60517d"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/py/xmake.lua",
+      "bytes": 627,
+      "mode": 420,
+      "sha256": "c6d6bc5129d89c7944ca3bdcb35f8429cb93ce6afc13db159985e15cb4e5f0e2"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/py/body.py",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "0930affc0bf4cd64505596d0728580d8b570e55848b79faa21592d153ad8da9b"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/py/xmake.lua",
+      "bytes": 727,
+      "mode": 420,
+      "sha256": "076900f9f54840c0ad3dd400fcff986a8e1a2a93e3e4ffa8fd2cae048edbf983"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/py/body.py",
+      "bytes": 648,
+      "mode": 420,
+      "sha256": "667479b1c370fcb410e8604962f9c6a4381d66f3f39bd2edacd797810692d9c1"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/py/xmake.lua",
+      "bytes": 595,
+      "mode": 420,
+      "sha256": "6cfa3ea0bbbc5e1cea61bddd321f723fd2a99948f37b1e6b840603b672c45410"
+    }
+  ]
+}
