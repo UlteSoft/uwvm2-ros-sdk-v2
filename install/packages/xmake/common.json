@@ -38,9 +38,9 @@
     },
     {
       "path": "tools/xmake/ros.lua",
-      "bytes": 5073,
+      "bytes": 5109,
       "mode": 420,
-      "sha256": "31e02053fcca7b08587c8e9a6298ae7e3b22a02ccad242ce8cb4a38663bd91ce"
+      "sha256": "23188688cdb96dff9e17691db803d12b795908bd754bc5b3e85a8ee2f3b47764"
     },
     {
       "path": "tools/xmake/run_guest.py",

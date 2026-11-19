@@ -39,8 +39,8 @@ rule("wros.application")
             assert(policy == "platform-driver-denial", "unknown WROS test fixture")
             table.join2(args, {"--driver-denial", target:values("wros.platform")})
         end
-        os.vrunv("python3", args)
-        return true
+        local status = os.execv("python3", args, {try = true})
+        return status == 0
     end)
     on_run(function (target)
         import("core.base.option")
