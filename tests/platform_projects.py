@@ -93,6 +93,8 @@ def main():
             for engine in ("int","aot"):
                 if "/"+engine not in log:
                     raise RuntimeError(case+" did not register an "+engine+" test")
+            if "0 test(s) failed" not in log:
+                raise RuntimeError(case+" did not report a successful guest test suite")
             state["cases"][-1]["modules"] = {m.name:digest(m) for m in modules}
             save()
             if a.check_failure and kind == "common" and a.language == "c":
@@ -102,7 +104,7 @@ def main():
                     raise RuntimeError("missing local negative-control fixture")
                 sensor.write_text(code.replace("!= 407","!= 408",1))
                 log = run(case+"-failed-assertion", [xmake,"test","-j1","sensor/*"], project, fail=True)
-                if "failed" not in log.lower():
+                if "failed" not in log.lower() or "unreachable" not in log.lower():
                     raise RuntimeError("expected a failing guest assertion")
     state["complete"] = True
     save()

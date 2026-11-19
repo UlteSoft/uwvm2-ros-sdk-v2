@@ -13,7 +13,8 @@ SHARED = ROOT / "examples/shared"
 INDEX = ROOT / "examples/platform"
 LANGUAGES = set("c cpp csharp d fortran java js kotlin lua nim objectc rs tinygo typescript vbnet".split())
 # The .NET and C migration projects use independently maintained, platform-selected ROS fixtures.
-SEPARATE = {("migration", lang) for lang in ("c", "fsharp", "csharp", "vbnet")}
+SEPARATE = ({("migration", lang) for lang in ("c", "fsharp", "csharp", "vbnet")} |
+            {("extension", lang) for lang in ("fsharp", "csharp", "vbnet")})
 DRIVER = ("capability.open", "driver.connect", "capability.close")
 C_OPTIONS = {"c", "cpp", "objectc", "d", "fortran", "js", "lua", "nim", "tinygo", "typescript", "java", "kotlin"}
 
