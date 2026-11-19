@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/leju/extension/fsharp/Driver.fs",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "254938a8b636f1b4b0ba8570396f96f0ee1260d5df11e414574b31e22b842dfa"
+    },
+    {
+      "path": "examples/platform/leju/extension/fsharp/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "1ced467265ffd075d75cf0e19cc1de5f4c3873d7743e16eab82a7c8faf5f0b0a"
+    }
+  ]
+}

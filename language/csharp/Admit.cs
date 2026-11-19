@@ -80,7 +80,9 @@ static class Admit
             var data = image.GetMetadataReader();
             bool scene = Array.IndexOf(args, "scene", 4) >= 0;
             bool vb = Array.IndexOf(args, "vbnet", 4) >= 0;
-            var policy = scene ? SceneEntry.Policy(image, data, args[1], args[2]) : default;
+            bool driver = Array.IndexOf(args, "driver", 4) >= 0;
+            string alias = "";
+            var policy = scene ? SceneEntry.Policy(image, data, args[1], args[2], driver, out alias) : default;
             string selectedName = "";
             int selected = -1;
             foreach (var th in data.TypeDefinitions) {
@@ -131,7 +133,7 @@ static class Admit
                 digest = Convert.ToHexString(pdb.GetBlobBytes(document.Hash)).ToLowerInvariant();
                 firstLine = point.StartLine;
             }
-            Console.WriteLine($"{selected} {digest} {firstLine} {visible} {selectedName}");
+            Console.WriteLine($"{selected} {digest} {firstLine} {visible} {selectedName} {alias}");
             return 0;
         } catch (Exception error) {
             Console.Error.WriteLine(error.Message);

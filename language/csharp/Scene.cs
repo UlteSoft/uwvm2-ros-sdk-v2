@@ -6,5 +6,9 @@ namespace Wros
     {
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
         public static extern int Abi();
+
+        /// @brief Attempt one driver connection on the literal alias, releasing the local handle before returning.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        public static extern int DriverConnectionStatus(string alias);
     }
 }

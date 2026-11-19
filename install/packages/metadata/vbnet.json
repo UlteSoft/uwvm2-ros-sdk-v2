@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/vbnet.json",
-      "bytes": 177,
+      "bytes": 194,
       "mode": 420,
-      "sha256": "2012b5266244db54df7c247c9c274b2883481d1890ef4281cb70b9ca5872eb66"
+      "sha256": "6466078f211c9c5aab79c44be6504463dc9b987174e681eb77e5026d85fe2262"
     }
   ]
 }

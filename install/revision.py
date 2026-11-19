@@ -46,9 +46,10 @@ def main():
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")
-    elif args.component == "migration" and args.language == "fsharp":
-        packages.extend(("protocol", "frontend", "fsharp/numeric", "xmake/common", "xmake/platforms/" + args.platform,
-                         "migration/examples/fsharp/common", "migration/examples/fsharp/" + args.platform))
+    elif args.component == "migration" and args.language in ("csharp", "vbnet", "fsharp"):
+        packages.extend(("protocol", "frontend", args.language + "/numeric", "xmake/common", "xmake/platforms/" + args.platform))
+        if args.language == "fsharp":
+            packages.extend(("migration/examples/fsharp/common", "migration/examples/fsharp/" + args.platform))
     elif args.component == "numeric-aot" or (args.component == "development" and args.language in ("csharp", "vbnet", "fsharp")):
         if args.language not in ("csharp", "vbnet", "fsharp"):
             parser.error("the numeric-aot component requires csharp, fsharp or vbnet")
@@ -81,6 +82,8 @@ def main():
                 packages.append("compiler-source")
                 if args.language == "nim":
                     packages.append("nim-producer-source")
+    if args.language in ("csharp", "fsharp", "vbnet") and args.component in ("development", "numeric-aot", "migration"):
+        packages.append("examples/managed/" + args.platform + "/" + args.language)
     print(json.dumps({"variant": args.component, "packages": packages}))
 
 

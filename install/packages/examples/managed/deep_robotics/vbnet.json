@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/vbnet/xmake.lua",
+      "bytes": 600,
+      "mode": 420,
+      "sha256": "8bfab32fae9460f74f66e29879ce1db3aed1cccf684610e23d216176495cd7b8"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/vbnet/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "ee42bb993ccb59a282681710cd2d380c94cbb933f789a35b9b7167f658cb3455"
+    }
+  ]
+}

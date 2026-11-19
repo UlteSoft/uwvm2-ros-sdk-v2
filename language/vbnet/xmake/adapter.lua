@@ -6,8 +6,8 @@ function validate(target, request)
     assert(request.kind == "binary" and request.arch == "wasm32" and request.core == "3.0" and request.eh and not request.threads,
            "Visual Basic AOT requires a final wasm32 Core 3.0 single-thread module")
     assert(request.mte_flag ~= "--legacy-mte", "Select the checked Visual Basic profile")
-    assert(#request.operations == 0 or (#request.operations == 1 and request.operations[1] == "abi"),
-           "The Visual Basic scene entry accepts only the abi operation")
+    assert(#request.operations == 0 or (#request.operations == 1 and (request.operations[1] == "abi" or request.operations[1] == "driver.connect")),
+           "The Visual Basic scene entry accepts abi or a driver.connect binding")
     assert(#request.exports == 1 and request.exports[1]:match("^[%a_][%w_]*%.[%a_][%w_]*$"),
            "Select a Class.Method with add_wros_exports")
     local symbols = table.wrap(target:get("symbols"))
@@ -18,7 +18,7 @@ function validate(target, request)
 end
 
 function build(target, request, sources)
-    local args = {"--target", request.arch, request.mte_flag, #request.operations == 1 and "--scene-entry" or "--entry",
+    local args = {"--target", request.arch, request.mte_flag, request.operations[1] == "driver.connect" and "--driver-entry" or (#request.operations == 1 and "--scene-entry" or "--entry"),
                   request.exports[1], "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
                   "--dotnet", assert(os.getenv("WROS_DOTNET")), "--mono-compiler", assert(os.getenv("WROS_MONO")),
                   "-o", target:targetfile()}

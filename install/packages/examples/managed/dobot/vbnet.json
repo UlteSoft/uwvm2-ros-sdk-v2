@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/dobot/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/dobot/extension/vbnet/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "51a884e751d0eb141bb4a62f2f97f83fc4c8eebe050f685bb442fac477ef49f4"
+    },
+    {
+      "path": "examples/platform/dobot/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/dobot/migration/vbnet/xmake.lua",
+      "bytes": 564,
+      "mode": 420,
+      "sha256": "69d5b9cfd0da820994b9406e6709ac0eb1fe398fe8644c42b9442c06f1cfde07"
+    }
+  ]
+}

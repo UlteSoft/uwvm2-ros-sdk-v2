@@ -100,6 +100,14 @@ def main():
             if language == "c":
                 names.append("upstream.lock")
             package(f"migration/examples/{language}/{platform}", [directory + name for name in names])
+    for platform in registry["platforms"]:
+        for language in ("csharp", "vbnet", "fsharp"):
+            managed_examples = ["document/en/managed-platform-examples.md", "document/zh/managed-platform-examples.md"]
+            areas = ("extension",) if language == "fsharp" else ("extension", "migration")
+            for area in areas:
+                folder = ROOT / "examples/platform" / platform / area / language
+                managed_examples.extend(p.relative_to(ROOT).as_posix() for p in folder.iterdir() if p.is_file())
+            package("examples/managed/" + platform + "/" + language, managed_examples)
     for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",
                         "as": "language/assemblyscript/scene.ts"}.items():
         package("bindings/" + key, [source])
@@ -121,12 +129,12 @@ def main():
                             optional_components=["synchronous-aot"])
         if language in ("csharp", "vbnet", "fsharp"):
             metadata.update(development_package=True, development_scope="freestanding-i32-method",
-                            optional_components=["numeric-aot", "migration"] if language == "fsharp" else ["numeric-aot"])
+                            optional_components=["numeric-aot", "migration"])
         write_json(path, metadata)
         package("metadata/" + language, [path])
 
     mono_aot = ["language/csharp/prepare_host.py", "language/csharp/packages.json", "install/private_exports.py", "language/csharp/numeric.py", "language/csharp/host.py",
-                "language/csharp/Scene.cs", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py",
+                "language/csharp/Scene.cs", "language/csharp/driver_binding.py", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py",
                 "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256"]
     for language, example in (("csharp", "Robot.cs"), ("vbnet", "Robot.vb"), ("fsharp", "Robot.fs")):
         paths = [*mono_aot, "bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",
@@ -148,7 +156,7 @@ def main():
     policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py", "qualification.py", "local_release.py")]
     package("frontend", [*policy, "share/qualification/memory-neighbors.json", "bin/wrar", "install/archiver.py", "document/en/memtag.md", "document/zh/memtag.md",
                          "document/en/memory-qualification.md", "document/zh/memory-qualification.md"])
-    package("xmake/common", ["tools/xmake/site_archive.py", "tools/xmake/ros.lua", "tools/xmake/dispatch.lua", "tools/xmake/run_guest.py",
+    package("xmake/common", ["tools/xmake/site_archive.py", "tools/xmake/ros.lua", "tools/xmake/dispatch.lua", "tools/xmake/run_guest.py", "tools/xmake/platform_driver_test.py",
                              "document/en/xmake.md", "document/zh/xmake.md",
                              "document/en/xmake-api-index.md", "document/zh/xmake-api-index.md"])
     language_files = {
