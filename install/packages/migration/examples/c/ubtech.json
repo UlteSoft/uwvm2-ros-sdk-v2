@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/ubtech/migration/c/xmake.lua",
-      "bytes": 1129,
+      "bytes": 1094,
       "mode": 420,
-      "sha256": "189b1c7ab6a5c6a7d4228656716826b2966b82ff54ba6f9b58eb51eedae30bec"
+      "sha256": "2e7b3763180e909dea17caaf0f49ef922b903f767886725bd6c182ea05c0b9d2"
     }
   ]
 }

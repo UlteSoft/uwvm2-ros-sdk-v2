@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/ufactory/migration/c/xmake.lua",
-      "bytes": 1131,
+      "bytes": 1096,
       "mode": 420,
-      "sha256": "f17a26ebfae8e7548d7008907285670c50806299300947a702a4c136c349faa1"
+      "sha256": "a7973b410c8d355e9da6fd4ff4bd29149bfeff435d0e6a9fe2eec0eba9dbf3f3"
     }
   ]
 }

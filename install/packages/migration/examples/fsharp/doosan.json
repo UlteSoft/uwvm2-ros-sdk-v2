@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/doosan/migration/fsharp/xmake.lua",
-      "bytes": 618,
+      "bytes": 583,
       "mode": 420,
-      "sha256": "be4c68cea5780b0bce30f6014f1acaf7b17c6d25473d7eabd900364d0a70c6c4"
+      "sha256": "00c9340aa2f676207e6d5a077e99b5a8de646c2511fb0eb9701feb67f75f63d0"
     }
   ]
 }

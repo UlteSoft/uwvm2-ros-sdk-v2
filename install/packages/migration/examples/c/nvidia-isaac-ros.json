@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/xmake.lua",
-      "bytes": 1139,
+      "bytes": 1104,
       "mode": 420,
-      "sha256": "ea689065b602d8ce9879a915284404eaefa4ed5f33a51e23f4e530adf13d1bb9"
+      "sha256": "cf1860bd32cd8202c645ecf0454d5a9b22b66de2f6722e023a09b3ad5b625277"
     }
   ]
 }

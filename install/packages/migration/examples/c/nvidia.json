@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/nvidia/migration/c/xmake.lua",
-      "bytes": 1129,
+      "bytes": 1094,
       "mode": 420,
-      "sha256": "4869b90de795a9fcc45c677b1b09474c6796c074c06bf3898dcc26d1d25e2521"
+      "sha256": "57c88a13bfa6aa8c6f43b1c4761abedf7f3230d77a13c1b3625470d457e7474e"
     }
   ]
 }

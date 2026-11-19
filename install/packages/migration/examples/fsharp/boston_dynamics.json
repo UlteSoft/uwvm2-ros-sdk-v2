@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/boston_dynamics/migration/fsharp/xmake.lua",
-      "bytes": 627,
+      "bytes": 592,
       "mode": 420,
-      "sha256": "f1aea5489f70e5234743255a494025b2b5b9a4a86d0206f0c0996330ba35b06c"
+      "sha256": "a604a72d6f0ed64d21907759136f30f969bc8eb6f908b940ad5960c162a48c89"
     }
   ]
 }

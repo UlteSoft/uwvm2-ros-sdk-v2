@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/agibot/migration/fsharp/xmake.lua",
-      "bytes": 618,
+      "bytes": 583,
       "mode": 420,
-      "sha256": "5c867db44eea477370e33f3f6eeff65a5ba199a00e33c4aa71c652e1de3f8d4a"
+      "sha256": "f33eab4db05d8ed41f01299899664453c5a6765ef646f7ebb910def385035116"
     }
   ]
 }

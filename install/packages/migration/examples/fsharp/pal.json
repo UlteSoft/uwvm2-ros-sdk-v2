@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/pal/migration/fsharp/xmake.lua",
-      "bytes": 615,
+      "bytes": 580,
       "mode": 420,
-      "sha256": "7955391554c6593ee6b7cf9b140dbcab449bbc37a7069a7555f2eaf7f99790b0"
+      "sha256": "e24e74fd6e47ef853480197fce96a7306cb1ecc219d5d89988c4b91de6dfe660"
     }
   ]
 }

@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/realman/migration/fsharp/xmake.lua",
-      "bytes": 619,
+      "bytes": 584,
       "mode": 420,
-      "sha256": "fd417bada2e7398c66e5205b220d3c74d8994a75b5d4b190babeaa0d7e7830c1"
+      "sha256": "76ddecfcfa97a5f0bfff73d5bc22be84545ab32aa4b924c3aca4536985690ed2"
     }
   ]
 }

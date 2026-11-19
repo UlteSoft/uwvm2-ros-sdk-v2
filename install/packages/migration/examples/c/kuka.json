@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/kuka/migration/c/xmake.lua",
-      "bytes": 1127,
+      "bytes": 1092,
       "mode": 420,
-      "sha256": "212eedead0a58596da00bced851d4cbdd1552c18b9df32464b5c6ba42b413cd4"
+      "sha256": "6418e57484266a07c0d1102a9406cbd5328b88e01bceef86688b3f616f04897b"
     }
   ]
 }

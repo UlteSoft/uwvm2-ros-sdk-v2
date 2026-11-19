@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/yaskawa/migration/c/xmake.lua",
-      "bytes": 1130,
+      "bytes": 1095,
       "mode": 420,
-      "sha256": "7b14eae8065568f8c93efd53ed859d274e75000465a9de610bb16c282919275b"
+      "sha256": "da5d6195d5ae0741b0992b3f5adda69243120711992383c1418fdd020146b65f"
     }
   ]
 }

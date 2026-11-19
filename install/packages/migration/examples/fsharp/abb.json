@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/abb/migration/fsharp/xmake.lua",
-      "bytes": 615,
+      "bytes": 580,
       "mode": 420,
-      "sha256": "962ac48a63e8031aedc1106f523605a0efe5a4774fef4ca289ee0a6b588d6c63"
+      "sha256": "73ee951d17aa4a528eca4a5cd296dd6009c793f0fbcc23abab7e8cc0504aff9f"
     }
   ]
 }

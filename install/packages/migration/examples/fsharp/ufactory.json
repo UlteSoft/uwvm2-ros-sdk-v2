@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/ufactory/migration/fsharp/xmake.lua",
-      "bytes": 620,
+      "bytes": 585,
       "mode": 420,
-      "sha256": "baa5d79c9969d594e883054a2bb58184a9c9d8450786e6c97a93a68fa3ca664a"
+      "sha256": "7b20c30bc4b93f66cac2bad8219c46ea90e16ef2b1d5b39ade14373cb5704aff"
     }
   ]
 }

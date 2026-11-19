@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/elephant/migration/fsharp/xmake.lua",
-      "bytes": 620,
+      "bytes": 585,
       "mode": 420,
-      "sha256": "d7bc5913214b2c21f4ba67d656320d461c16656d80a2fb6d5e72cbf47c8af311"
+      "sha256": "bac15ca83bb8e851e3429c51353467515d9913727185decf0cea17bbb4a455a5"
     }
   ]
 }

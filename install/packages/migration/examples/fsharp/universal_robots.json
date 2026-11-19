@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/universal_robots/migration/fsharp/xmake.lua",
-      "bytes": 628,
+      "bytes": 593,
       "mode": 420,
-      "sha256": "7f602db1e4c39175c1f548f53a04e2b83f4747d502536d5e1de9f903ac0e7e31"
+      "sha256": "1900668abb032d7aef8c358a473011d69de36bb0673bc41c612cc3c7c9fa074a"
     }
   ]
 }

@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/xmake.lua",
-      "bytes": 628,
+      "bytes": 593,
       "mode": 420,
-      "sha256": "99c4bd8f8dd8c11b4b897a9570c66cc307d70ee76cb3a7b192341afec199e66e"
+      "sha256": "f7867a98056f3347762744232f96776c5966ecc266d3aa333aab35cff0964af4"
     }
   ]
 }

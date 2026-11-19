@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/abb/migration/c/xmake.lua",
-      "bytes": 1126,
+      "bytes": 1091,
       "mode": 420,
-      "sha256": "df3c81a028035378c8b6dc865cb026ada49ea25d04d081da469db4fa5220ba45"
+      "sha256": "9fba989e05db7a170345bc78f780ddafd32ca6166f8f973ba853339e7d8869ae"
     }
   ]
 }

@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/agilex/migration/fsharp/xmake.lua",
-      "bytes": 618,
+      "bytes": 583,
       "mode": 420,
-      "sha256": "85fff067d945bef492a57b092b2c2d8fa32d9d95803c4a033cfb88aed6ac4233"
+      "sha256": "db78507f8d5b6ad2c121ede387a5083b7c7e5820c886899a4926d07a84c9be0b"
     }
   ]
 }

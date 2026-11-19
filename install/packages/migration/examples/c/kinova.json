@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/kinova/migration/c/xmake.lua",
-      "bytes": 1129,
+      "bytes": 1094,
       "mode": 420,
-      "sha256": "7181088510ca9bbb85706480572c985b6627c495fb97bf113af0f37a6aedbc8f"
+      "sha256": "996369776ed3457eeeab3ab44fa367b17b55db13696e4261fa64a653537be1d6"
     }
   ]
 }

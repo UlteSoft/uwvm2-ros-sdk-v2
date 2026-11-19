@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/flexiv/migration/c/xmake.lua",
-      "bytes": 1129,
+      "bytes": 1094,
       "mode": 420,
-      "sha256": "ade339b66a98d2998b87d2a6a36c04c269b1bfa3be407b6249635bbe12dea939"
+      "sha256": "8beea5b5973a937a3d43862293a1a612dfbdbaf1a6b4a9ea8fbe833ee2be8a2f"
     }
   ]
 }

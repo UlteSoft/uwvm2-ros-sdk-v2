@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/robotis/migration/c/xmake.lua",
-      "bytes": 1130,
+      "bytes": 1095,
       "mode": 420,
-      "sha256": "5540df80c69c5271848f996258867fdd4d1e6b5cd2a174a9dcab471d1a1fe71d"
+      "sha256": "2afe1d0c80e704ada95a230fedbd66e6b4188d8087ab3c8a79cd951b9641a204"
     }
   ]
 }

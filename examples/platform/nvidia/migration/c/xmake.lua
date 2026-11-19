@@ -1,7 +1,7 @@
 -- @file xmake.lua
 -- @brief Build a source-level ROS migration example and execute its Wasm assertions.
 set_project("wros_migration")
-local sdk = assert(os.getenv("UWVM_ROS_SDK_ROOT"), "Select an installed SDK")
+local sdk = os.getenv("UWVM_ROS_SDK_ROOT")
 includes(path.join(sdk, "tools/xmake/ros.lua"))
 
 local source = path.join(sdk, "examples/shared/migration/c")

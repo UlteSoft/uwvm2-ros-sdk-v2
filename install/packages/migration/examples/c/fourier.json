@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/fourier/migration/c/xmake.lua",
-      "bytes": 1130,
+      "bytes": 1095,
       "mode": 420,
-      "sha256": "82d1a0274d475d3c90e83fc3225bf783e0cfe82c793314d182b5e84abd9c5cea"
+      "sha256": "028d5e10bc8b6af778e90fa51f7501af055c9b1d1fca7fd5f0f124dfe15c4851"
     }
   ]
 }

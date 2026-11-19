@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/limx/migration/c/xmake.lua",
-      "bytes": 1127,
+      "bytes": 1092,
       "mode": 420,
-      "sha256": "a3d130b1ac67faa563ba162daef725172c9bbc08d6b17e68f376eaea8d57d22c"
+      "sha256": "1c9f24d9ef7a18450fb2a36b8805d793c88a36fe226bd33b0a20d72c9b212703"
     }
   ]
 }

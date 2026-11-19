@@ -14,9 +14,9 @@
     },
     {
       "path": "examples/platform/clearpath/migration/fsharp/xmake.lua",
-      "bytes": 621,
+      "bytes": 586,
       "mode": 420,
-      "sha256": "6a71f123dc821e535f343318a258b9818142a137c39b429fac389441f493fcc1"
+      "sha256": "9ffc91616d545afea70e25ed0783814b1b0ac233a7936a8f63bce93bde0d100e"
     }
   ]
 }

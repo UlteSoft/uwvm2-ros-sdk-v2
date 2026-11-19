@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/dobot/migration/c/xmake.lua",
-      "bytes": 1128,
+      "bytes": 1093,
       "mode": 420,
-      "sha256": "1dece5ee8afb0975ee64027d17dc45152403ba9a2d500950aa3c8170ebdcec53"
+      "sha256": "45d491b2668c53c220e32b49e7f997c88eb2f660d2ea86570b0e183cf50a0cce"
     }
   ]
 }

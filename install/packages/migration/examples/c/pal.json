@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/platform/pal/migration/c/xmake.lua",
-      "bytes": 1126,
+      "bytes": 1091,
       "mode": 420,
-      "sha256": "36bdca37c0ac6aeb4719c195a663db04a1e01386ba87c74fe71f7e6b9f8cbc25"
+      "sha256": "d23253bb64a620d819e53f9710b785612989b0222015d2b813b4b5bc31ea10be"
     }
   ]
 }
