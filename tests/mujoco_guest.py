@@ -167,7 +167,7 @@ def main():
             prelude = (f"const steps = {count}; const target_offset = {24+len(prefix)+8};\n"
                        f"const success = {str(mode=='success').lower()}; const crash = {str(mode=='crash').lower()};\n"
                        + "const template = [_]u8{" + ",".join(map(str, request)) + "};\n")
-            app.write_text(prelude + source.read_text())
+            app.write_text(source.read_text() + "\n" + prelude)
         if a.language == "nim":
             options = [] if site else ["-O3", "-g", "--producer", a.producer.resolve()]
             (directory / "simulation.nim").write_text(
