@@ -41,8 +41,10 @@ def qualify(args, platform, language, roots):
                         ["--component", "migration"], site_profile=args.c_site if language == "c" else None)
     sdk = Path(selection["directory"])
     selected = Path("examples/platform") / platform / "migration" / language
-    if [p.relative_to(sdk) for p in (sdk / "examples/platform").rglob("xmake.lua")] != [selected / "xmake.lua"]:
-        raise ValueError("installed another platform or language example")
+    inventory = {p.relative_to(sdk / "examples/platform") for p in (sdk / "examples/platform").rglob("xmake.lua")}
+    required = Path(platform, "migration", language, "xmake.lua")
+    if required not in inventory or any(len(p.parts) < 4 or p.parts[0] != platform or p.parts[2] != language for p in inventory):
+        raise ValueError("missing selected project or unexpected platform/language in the installation")
     project = case / "project"
     shutil.copytree(sdk / selected, project)
     env = dict(os.environ, UWVM_ROS_SDK_ROOT=str(sdk), WROS_VM=str(args.vm),
