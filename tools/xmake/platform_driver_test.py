@@ -12,7 +12,7 @@ import subprocess
 import time
 
 
-def run_case(argv, module, platform, *, parent_allowed, child_allowed):
+def run_case(argv, module, platform, *, parent_allowed, child_allowed, alias="arm"):
     """@brief Run one private test channel and return the VM exit and observed packet lengths.
 
     The peer never acknowledges the handshake. A permitted connect can exercise
@@ -43,14 +43,14 @@ def run_case(argv, module, platform, *, parent_allowed, child_allowed):
         identifiers = [os.urandom(16).hex() for _ in range(5)]
         contract = hashlib.sha256(b"SDK local driver permission example").hexdigest()
         deadline = time.monotonic_ns() + 660_000_000_000
-        flags.extend(["--ros-scene-grant", "robot", "arm", "driver", "joint", "registered-driver", actions,
+        flags.extend(["--ros-scene-grant", "robot", alias, "driver", "joint", "registered-driver", actions,
                       "--ros-scene-driver-budget", "robot", "1", "1048576",
-                      "--ros-scene-driver-channel", "robot", "arm", "main", str(client.fileno()),
+                      "--ros-scene-driver-channel", "robot", alias, "main", str(client.fileno()),
                       str(os.getpid()), str(os.getuid()), str(os.getgid()), *identifiers, contract,
                       "128", "128", "1000000000", str(deadline), str(key), str(clock),
-                      "--ros-scene-driver-schema", "robot", "arm", "device.submit", "64", "64", "8",
+                      "--ros-scene-driver-schema", "robot", alias, "device.submit", "64", "64", "8",
                       "--ros-scene", "robot", "platform_extension", child, "enable" if child_allowed else "disable",
-                      "--ros-scene", "robot", "platform_extension.bind", child, "arm"])
+                      "--ros-scene", "robot", "platform_extension.bind", child, alias])
         result = subprocess.run([*argv, *flags, "--run", str(module)], pass_fds=(client.fileno(), key, clock),
                                 timeout=600)
         if time.monotonic_ns() >= deadline:

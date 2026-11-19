@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/managed-platform-examples.md",
-      "bytes": 2012,
+      "bytes": 2153,
       "mode": 420,
-      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+      "sha256": "8bb0e3db285a96e9a6016823c5002c290bbf5c6043780bb8afa59dacdf14668f"
     },
     {
       "path": "document/zh/managed-platform-examples.md",
-      "bytes": 1796,
+      "bytes": 1933,
       "mode": 420,
-      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+      "sha256": "63f9c2d6880534374c9bbe995fe9b4ef68302f80e12f3eb9cf9696459dc6174a"
     },
     {
       "path": "examples/platform/nvidia-isaac-sim/extension/fsharp/Driver.fs",

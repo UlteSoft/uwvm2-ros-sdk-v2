@@ -62,15 +62,15 @@
     },
     {
       "path": "language/csharp/SceneEntry.cs",
-      "bytes": 4099,
+      "bytes": 4126,
       "mode": 420,
-      "sha256": "59c84e6ab1f3a07a62a9c7adbbb819c15b12331ac5c63cb728b457a871ea81cb"
+      "sha256": "0e7e2935d04cb6c08e936acf7f1315b7cd12e520ac90d0cc90d98170d49a0f9f"
     },
     {
       "path": "language/csharp/driver_binding.py",
-      "bytes": 4224,
+      "bytes": 4251,
       "mode": 420,
-      "sha256": "8cf95e39bd28456096d20120f39e2e31b8f68dc27b3de07b236d2a34080b2d52"
+      "sha256": "9068f84bab7e8a2661bfd79ae30be9e3bcafe97e2fd8a37d6529f8a92a27a9bb"
     },
     {
       "path": "language/csharp/host.py",

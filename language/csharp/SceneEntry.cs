@@ -44,7 +44,7 @@ static class SceneEntry
                     int token = BinaryPrimitives.ReadInt32LittleEndian(il.AsSpan(1, 4));
                     Require((token >> 24) == 0x70);
                     alias = data.GetUserString(MetadataTokens.UserStringHandle(token & 0x00ffffff));
-                    Require(System.Text.RegularExpressions.Regex.IsMatch(alias, @"\A[A-Za-z][A-Za-z0-9_-]{0,62}\z"));
+                    Require(alias != "." && alias != ".." && System.Text.RegularExpressions.Regex.IsMatch(alias, @"\A[A-Za-z0-9_.-]{1,255}\z"));
                 }
                 var call = Call(il, offset);
                 Require(call.Kind == HandleKind.MemberReference);

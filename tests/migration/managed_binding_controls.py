@@ -33,7 +33,9 @@ def main():
     wasm = args.output / "Driver.wasm"
     report = {"complete": False, "vm": sha(vm), "cgroup": route, "positive": {}, "rejected": {}}
     try:
-        source.write_text(original.replace("status = 13", "status = 11"))
+        # Exercise the full canonical scene identifier boundary in the real VM.
+        alias = "9._-" + "x" * 251
+        source.write_text(original.replace("status = 13", "status = 11").replace('"arm"', '"' + alias + '"'))
         subprocess.run([*options, source, "-o", wasm], check=True, timeout=120)
         expected = sha(wasm)
         for engine in ("int", "aot"):
@@ -42,13 +44,14 @@ def main():
                     "--debug-fault-action", "exit", "--runtime-memtag-mode", "sync"]
             if engine == "aot":
                 argv.extend(["--runtime-llvm-jit-full-policy", "legacy-light"])
-            status, lengths = run_case(argv, wasm, "unitree", parent_allowed=True, child_allowed=True)
+            status, lengths = run_case(argv, wasm, "unitree", parent_allowed=True, child_allowed=True, alias=alias)
             if status or not lengths:
                 raise ValueError(f"{engine}: missing authorized handshake, status {status}, packets {lengths}")
             report["positive"][engine] = lengths
         for case, expression in (("other_method", "Wros.Scene.Abi()"),
                                  ("invalid_alias", 'Wros.Scene.DriverConnectionStatus("../arm")'),
-                                 ("long_alias", 'Wros.Scene.DriverConnectionStatus("' + "a" * 64 + '")')):
+                                 ("reserved_alias", 'Wros.Scene.DriverConnectionStatus("..")'),
+                                 ("long_alias", 'Wros.Scene.DriverConnectionStatus("' + "a" * 256 + '")')):
             source.write_text(original.replace('Wros.Scene.DriverConnectionStatus("arm")', expression))
             result = subprocess.run([*options, source, "-o", wasm], capture_output=True, timeout=120)
             if not result.returncode or b"scene entry must return" not in result.stderr or sha(wasm) != expected:

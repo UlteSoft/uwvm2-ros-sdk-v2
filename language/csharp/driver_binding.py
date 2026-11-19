@@ -63,8 +63,8 @@ def entry_body(alias_size):
 
 def driver_program(scalar, alias):
     """@brief Add an exact local connection binding to a proved register-only managed policy."""
-    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,62}", alias):
-        raise ValueError("driver binding requires one literal ASCII alias of up to 63 bytes")
+    if alias in (".", "..") or not re.fullmatch(r"[A-Za-z0-9_.-]{1,255}", alias):
+        raise ValueError("driver binding requires one canonical scene alias of up to 255 ASCII bytes")
     encoded = alias.encode("ascii")
     i32, i64 = 0x7f, 0x7e
     types = [signature([i32, i64, i64, i64], [i32]), signature([i64, i32, *([i64] * 5)], [i32]),
