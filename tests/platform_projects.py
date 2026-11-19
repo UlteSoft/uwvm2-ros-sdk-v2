@@ -22,12 +22,13 @@ def digest(path):
         return hashlib.file_digest(data, "sha256").hexdigest()
 
 
-def passed_engines(log, modules):
-    """@brief Require an explicit final passing result for every built guest and engine.
+def engine_results(log, modules, outcome):
+    """@brief Require a final report with the requested outcome for every guest and engine.
+    @param outcome Expected Xmake test status for these guest assertions.
     @param log Output captured from the project's serial Xmake test invocation.
     @param modules Guest modules produced by the materialized project. Its binary
     target names are the Wasm filename stems.
-    @return Sorted target/engine names passing in the final Xmake report.
+    @return Sorted target/engine names with the expected status in the final report.
     """
     expected = {f"{module.stem}/{engine}" for module in modules for engine in ("int", "aot")}
     if len(expected) != 2 * len(modules):
@@ -39,10 +40,15 @@ def passed_engines(log, modules):
     rows = re.findall(r"^\s*\[ *[0-9]+%\]:\s+(\S+)\s+(\S+)", report, re.MULTILINE)
     if len(rows) != len(expected) or {name for name, _ in rows} != expected:
         raise ValueError("Xmake's final tests differ from the expected guest/engine pairs")
-    failed = [name for name, status in rows if status != "passed"]
-    if failed:
-        raise ValueError("Xmake did not pass " + ", ".join(failed))
+    mismatches = [name for name, status in rows if status != outcome]
+    if mismatches:
+        raise ValueError(f"Xmake expected {outcome} for " + ", ".join(mismatches))
     return sorted(expected)
+
+
+def passed_engines(log, modules):
+    """@brief Return the built guests whose tests passed in both engines."""
+    return engine_results(log, modules, "passed")
 
 
 def main():
@@ -124,8 +130,10 @@ def main():
                     raise RuntimeError("missing local negative-control fixture")
                 sensor.write_text(code.replace("!= 407","!= 408",1))
                 log = run(case+"-failed-assertion", [xmake,"test","-j1","sensor/*"], project, fail=True)
-                if "failed" not in log.lower() or "unreachable" not in log.lower():
-                    raise RuntimeError("expected a failing guest assertion")
+                if "unreachable" not in log.lower():
+                    raise RuntimeError("expected the deliberately failing guest assertion to trap")
+                state["cases"][-1]["failed_tests"] = engine_results(log, [Path("sensor.wasm")], "failed")
+                save()
     state["complete"] = True
     save()
 
