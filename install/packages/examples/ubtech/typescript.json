@@ -1,0 +1,76 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/ubtech/common/typescript/filter.ts",
+      "bytes": 321,
+      "mode": 420,
+      "sha256": "22f8489cb69c2da6774f79f920d397492c16f843e6da0b6c76b9dd6880cc0511"
+    },
+    {
+      "path": "examples/platform/ubtech/common/typescript/main.ts",
+      "bytes": 301,
+      "mode": 420,
+      "sha256": "4321e3ee53a907f7f9c71e0d1af9d34e6309a35fce3a87d73a725f4c5709642f"
+    },
+    {
+      "path": "examples/platform/ubtech/common/typescript/sensor.ts",
+      "bytes": 310,
+      "mode": 420,
+      "sha256": "6c580a1dd19fc57bd59da1334cbdc28389adf99b9eafb5dc403479445420da63"
+    },
+    {
+      "path": "examples/platform/ubtech/common/typescript/xmake.lua",
+      "bytes": 946,
+      "mode": 420,
+      "sha256": "4a138748c966a3484fce7a3a45a74a6f6cf4940a26a504bac367e5547ba50dc8"
+    },
+    {
+      "path": "examples/platform/ubtech/extension/typescript/driver.ts",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "9d79288417db95258133bc2a378eca01dd414c7d558e501fdc45929915f418fc"
+    },
+    {
+      "path": "examples/platform/ubtech/extension/typescript/xmake.lua",
+      "bytes": 661,
+      "mode": 420,
+      "sha256": "3e1e9040eae8f1adea180f0fd76a33e162a7f1d02651b96ee5d85e53f31e0537"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/typescript/grid.ts",
+      "bytes": 292,
+      "mode": 420,
+      "sha256": "5345b96e6244129e617178fdcbfe9797bd31b668dc1fc6671d57090d2e14cd68"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/typescript/xmake.lua",
+      "bytes": 527,
+      "mode": 420,
+      "sha256": "1cee7ad34851bc598508b0d7fb9f7b26f72428b3ce27cb70c19ac8566d55efa6"
+    }
+  ]
+}

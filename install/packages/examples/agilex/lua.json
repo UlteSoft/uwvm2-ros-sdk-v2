@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/agilex/common/lua/body.lua",
+      "bytes": 294,
+      "mode": 420,
+      "sha256": "a460bc692b5fe5bd549263f1b7d2df68f79e062886630c1612decfe705f9589e"
+    },
+    {
+      "path": "examples/platform/agilex/common/lua/xmake.lua",
+      "bytes": 528,
+      "mode": 420,
+      "sha256": "8d26297ca7d0e32a75ccd321f29f49cf381faa0f105556bd253126f999e729e0"
+    },
+    {
+      "path": "examples/platform/agilex/extension/lua/driver.lua",
+      "bytes": 259,
+      "mode": 420,
+      "sha256": "8ca9a5bf4af790b58bc8ccc92a28c8e31c0b02fefc10b1d220837c6f9d60d34f"
+    },
+    {
+      "path": "examples/platform/agilex/extension/lua/xmake.lua",
+      "bytes": 604,
+      "mode": 420,
+      "sha256": "e27e0f181b69d2842d63e2a2595b9f96a23778b5590c74c5dbaeeb4c6379a370"
+    },
+    {
+      "path": "examples/platform/agilex/migration/lua/grid.lua",
+      "bytes": 249,
+      "mode": 420,
+      "sha256": "1b0d188cfb0e476c8b6b1a83fad52e436f96b384ccc947847199f6783d4c0d39"
+    },
+    {
+      "path": "examples/platform/agilex/migration/lua/xmake.lua",
+      "bytes": 470,
+      "mode": 420,
+      "sha256": "582624b56afcc63b3582a6c4acd7b23d0af52aa402d2468a8fff3f9e20d6ba46"
+    }
+  ]
+}

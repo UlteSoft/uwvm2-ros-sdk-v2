@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/kuka/common/objectc/body.m",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "83ab37bdf56f51b248990953b00e887271dc30cb4f63d387d6259c494cc8399c"
+    },
+    {
+      "path": "examples/platform/kuka/common/objectc/xmake.lua",
+      "bytes": 499,
+      "mode": 420,
+      "sha256": "37d41cd254d0207471fabb035643a763fd0543cad1447f20669b8190b2f78522"
+    },
+    {
+      "path": "examples/platform/kuka/extension/objectc/driver.m",
+      "bytes": 725,
+      "mode": 420,
+      "sha256": "550095e9d690cee78a78830bb0fd67f864a9fb05943611bb070c11be246e5f27"
+    },
+    {
+      "path": "examples/platform/kuka/extension/objectc/xmake.lua",
+      "bytes": 525,
+      "mode": 420,
+      "sha256": "9bbbc17b5345c6b96cb521567da70e6477fd5f02c43e284dca53ba5da322a495"
+    },
+    {
+      "path": "examples/platform/kuka/migration/objectc/grid.m",
+      "bytes": 317,
+      "mode": 420,
+      "sha256": "32262250d957aaeb65af2c9b0d225ba46280ad3ec2cf6bb0675e6f00577cf1f7"
+    },
+    {
+      "path": "examples/platform/kuka/migration/objectc/xmake.lua",
+      "bytes": 472,
+      "mode": 420,
+      "sha256": "a5252316f04fdee7be6d451c1cc7abd649046414f14c38cce4c60cb770f38bff"
+    }
+  ]
+}

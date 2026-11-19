@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/franka/common/cpp/body.cpp",
+      "bytes": 183,
+      "mode": 420,
+      "sha256": "eb768f85d1f75fc0ffa1dc9c82cd9f6c9dc40f2ac380004036177c7737c78e60"
+    },
+    {
+      "path": "examples/platform/franka/common/cpp/xmake.lua",
+      "bytes": 497,
+      "mode": 420,
+      "sha256": "cff1dd155383fb2b4eddaefe871ac09216519acf5ab186a55a3cbc574f094cb7"
+    },
+    {
+      "path": "examples/platform/franka/extension/cpp/driver.cpp",
+      "bytes": 738,
+      "mode": 420,
+      "sha256": "14fa2a2ff2a3e4e9d9ce7fea02bc96ffd888e7c5aa3a0ea43dd1d3fadb2cb98b"
+    },
+    {
+      "path": "examples/platform/franka/extension/cpp/xmake.lua",
+      "bytes": 523,
+      "mode": 420,
+      "sha256": "8dbe32703901e2a3a0aa58d5f9fa71406ba0c26bc80bf7f8bf7fa1fc210f3d71"
+    },
+    {
+      "path": "examples/platform/franka/migration/cpp/grid.cpp",
+      "bytes": 328,
+      "mode": 420,
+      "sha256": "9a97ee6e79a06825e2cc9481de39ce6a4e81a49b035dd58147955505fed31a84"
+    },
+    {
+      "path": "examples/platform/franka/migration/cpp/xmake.lua",
+      "bytes": 470,
+      "mode": 420,
+      "sha256": "9d3de01749e2b523dd5f42d6d5ce813b7b5fff49deea79ae212a6461c88a8d52"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/kinova/common/d/body.d",
+      "bytes": 473,
+      "mode": 420,
+      "sha256": "434e34e759429b0c61af7f110e7136839e6755e193b2db297d35649081cf1755"
+    },
+    {
+      "path": "examples/platform/kinova/common/d/xmake.lua",
+      "bytes": 491,
+      "mode": 420,
+      "sha256": "25c6add4f826e4fc1bc8f381e6d3818a5b788c515066a082d43a773f5dd16522"
+    },
+    {
+      "path": "examples/platform/kinova/extension/d/driver.d",
+      "bytes": 641,
+      "mode": 420,
+      "sha256": "cdc84d8d4fda44c7b119852f013aa78195dd2f6df6e2a7482629a18ffc5c9f63"
+    },
+    {
+      "path": "examples/platform/kinova/extension/d/xmake.lua",
+      "bytes": 517,
+      "mode": 420,
+      "sha256": "7412d4414f5971a8b72b2e80ed712a1a0b30eca30fe1d1548b22b5163909e282"
+    },
+    {
+      "path": "examples/platform/kinova/migration/d/grid.d",
+      "bytes": 328,
+      "mode": 420,
+      "sha256": "5fa6f1f675458279b8be4b9d5bcfdc7744f839f30bd08f1b981202f805f18ea7"
+    },
+    {
+      "path": "examples/platform/kinova/migration/d/xmake.lua",
+      "bytes": 464,
+      "mode": 420,
+      "sha256": "d5d567304874b380e43ecfa0e9f296926f5d1967a0d647e6ade58e6995754b72"
+    }
+  ]
+}

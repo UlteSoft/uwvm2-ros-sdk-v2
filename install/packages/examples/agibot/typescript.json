@@ -1,0 +1,76 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/agibot/common/typescript/filter.ts",
+      "bytes": 321,
+      "mode": 420,
+      "sha256": "22f8489cb69c2da6774f79f920d397492c16f843e6da0b6c76b9dd6880cc0511"
+    },
+    {
+      "path": "examples/platform/agibot/common/typescript/main.ts",
+      "bytes": 301,
+      "mode": 420,
+      "sha256": "4321e3ee53a907f7f9c71e0d1af9d34e6309a35fce3a87d73a725f4c5709642f"
+    },
+    {
+      "path": "examples/platform/agibot/common/typescript/sensor.ts",
+      "bytes": 310,
+      "mode": 420,
+      "sha256": "6c580a1dd19fc57bd59da1334cbdc28389adf99b9eafb5dc403479445420da63"
+    },
+    {
+      "path": "examples/platform/agibot/common/typescript/xmake.lua",
+      "bytes": 946,
+      "mode": 420,
+      "sha256": "7a1b225b14bac8c002dfa45da6fce5cd0cdf3ffbe36073ab0275e39dcdb525f8"
+    },
+    {
+      "path": "examples/platform/agibot/extension/typescript/driver.ts",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "9d79288417db95258133bc2a378eca01dd414c7d558e501fdc45929915f418fc"
+    },
+    {
+      "path": "examples/platform/agibot/extension/typescript/xmake.lua",
+      "bytes": 661,
+      "mode": 420,
+      "sha256": "93c2eeecc3888c3491f826251019a3f5ea8310d00e5512a2e0c05e5400aad9b4"
+    },
+    {
+      "path": "examples/platform/agibot/migration/typescript/grid.ts",
+      "bytes": 292,
+      "mode": 420,
+      "sha256": "5345b96e6244129e617178fdcbfe9797bd31b668dc1fc6671d57090d2e14cd68"
+    },
+    {
+      "path": "examples/platform/agibot/migration/typescript/xmake.lua",
+      "bytes": 527,
+      "mode": 420,
+      "sha256": "22de8bfc5d8bca7f4201ae12d2f884b94fc8b69af72c9995aad72b49435e23cd"
+    }
+  ]
+}

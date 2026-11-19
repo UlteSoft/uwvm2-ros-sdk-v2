@@ -1,0 +1,15 @@
+-- @file xmake.lua
+-- @brief Build and test this platform's guest modules.
+set_project("flexiv-migration-cpp")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("migration")
+    set_kind("binary")
+    set_language("cpp")
+    set_ros_platform("flexiv")
+    set_wros_profile({core = "3.0", eh = true, mte = true})
+    set_optimize("fastest")
+    set_symbols("debug")
+    add_files("grid.cpp")
+    add_wros_tests("int", "aot")
+target_end()

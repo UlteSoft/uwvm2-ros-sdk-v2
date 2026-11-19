@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/abb/common/cpp/body.cpp",
+      "bytes": 183,
+      "mode": 420,
+      "sha256": "eb768f85d1f75fc0ffa1dc9c82cd9f6c9dc40f2ac380004036177c7737c78e60"
+    },
+    {
+      "path": "examples/platform/abb/common/cpp/xmake.lua",
+      "bytes": 491,
+      "mode": 420,
+      "sha256": "3e1478d070cf07bb22e390e1ea4c5212e8004861cd0fd2e1aed4f138a3b173a5"
+    },
+    {
+      "path": "examples/platform/abb/extension/cpp/driver.cpp",
+      "bytes": 738,
+      "mode": 420,
+      "sha256": "14fa2a2ff2a3e4e9d9ce7fea02bc96ffd888e7c5aa3a0ea43dd1d3fadb2cb98b"
+    },
+    {
+      "path": "examples/platform/abb/extension/cpp/xmake.lua",
+      "bytes": 517,
+      "mode": 420,
+      "sha256": "6e1171038a3512e35fb22b167343810b1ad9dde3df97b3b60408dfcc232b95dd"
+    },
+    {
+      "path": "examples/platform/abb/migration/cpp/grid.cpp",
+      "bytes": 328,
+      "mode": 420,
+      "sha256": "9a97ee6e79a06825e2cc9481de39ce6a4e81a49b035dd58147955505fed31a84"
+    },
+    {
+      "path": "examples/platform/abb/migration/cpp/xmake.lua",
+      "bytes": 464,
+      "mode": 420,
+      "sha256": "41b17540d31afc34bad2f757a9aec547ce209d4aa5fbe7974fb3abb8459715db"
+    }
+  ]
+}

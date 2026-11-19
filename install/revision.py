@@ -3,6 +3,7 @@ import argparse
 import json
 
 
+PROJECT_LANGUAGES = "c cpp csharp d fortran java js kotlin lua nim objectc rs tinygo typescript vbnet".split()
 BINDINGS = {"d": "d", "c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim"}
 DEVELOPMENT = ("c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim", "d", "typescript")
 
@@ -76,6 +77,8 @@ def main():
                 packages.append("compiler-source")
                 if args.language == "nim":
                     packages.append("nim-producer-source")
+    if args.language in PROJECT_LANGUAGES and args.component in ("development", "migration", "synchronous-aot", "numeric-aot"):
+        packages.append("examples/" + args.platform + "/" + args.language)
     print(json.dumps({"variant": args.component, "packages": packages}))
 
 

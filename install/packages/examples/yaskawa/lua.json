@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/yaskawa/common/lua/body.lua",
+      "bytes": 294,
+      "mode": 420,
+      "sha256": "a460bc692b5fe5bd549263f1b7d2df68f79e062886630c1612decfe705f9589e"
+    },
+    {
+      "path": "examples/platform/yaskawa/common/lua/xmake.lua",
+      "bytes": 530,
+      "mode": 420,
+      "sha256": "c2b4c5f66fbe009b61c3e0b00a0c8f5f700ce9f8f3104752519386f8ffb0f196"
+    },
+    {
+      "path": "examples/platform/yaskawa/extension/lua/driver.lua",
+      "bytes": 259,
+      "mode": 420,
+      "sha256": "8ca9a5bf4af790b58bc8ccc92a28c8e31c0b02fefc10b1d220837c6f9d60d34f"
+    },
+    {
+      "path": "examples/platform/yaskawa/extension/lua/xmake.lua",
+      "bytes": 606,
+      "mode": 420,
+      "sha256": "9b184737da85c93a5862afda4ec3db01cfbdfad4fbb3326912539d10132271a0"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/lua/grid.lua",
+      "bytes": 249,
+      "mode": 420,
+      "sha256": "1b0d188cfb0e476c8b6b1a83fad52e436f96b384ccc947847199f6783d4c0d39"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/lua/xmake.lua",
+      "bytes": 472,
+      "mode": 420,
+      "sha256": "40e2aa8b7abd97c6d7ce770e178a7435da1c7633c699a712c7aa8e8e1cba32f2"
+    }
+  ]
+}

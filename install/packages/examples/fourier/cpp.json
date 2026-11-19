@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/fourier/common/cpp/body.cpp",
+      "bytes": 183,
+      "mode": 420,
+      "sha256": "eb768f85d1f75fc0ffa1dc9c82cd9f6c9dc40f2ac380004036177c7737c78e60"
+    },
+    {
+      "path": "examples/platform/fourier/common/cpp/xmake.lua",
+      "bytes": 499,
+      "mode": 420,
+      "sha256": "fda73ce1f31cb3d14319fa02b94be7dfe90fd529abdf22767639849572b1ea23"
+    },
+    {
+      "path": "examples/platform/fourier/extension/cpp/driver.cpp",
+      "bytes": 738,
+      "mode": 420,
+      "sha256": "14fa2a2ff2a3e4e9d9ce7fea02bc96ffd888e7c5aa3a0ea43dd1d3fadb2cb98b"
+    },
+    {
+      "path": "examples/platform/fourier/extension/cpp/xmake.lua",
+      "bytes": 525,
+      "mode": 420,
+      "sha256": "0516c8400b876e17ce871db002cadfc5694c8e8008f924a895772f2fd967f0c7"
+    },
+    {
+      "path": "examples/platform/fourier/migration/cpp/grid.cpp",
+      "bytes": 328,
+      "mode": 420,
+      "sha256": "9a97ee6e79a06825e2cc9481de39ce6a4e81a49b035dd58147955505fed31a84"
+    },
+    {
+      "path": "examples/platform/fourier/migration/cpp/xmake.lua",
+      "bytes": 472,
+      "mode": 420,
+      "sha256": "59dbb0cdea9453f5e3f1de53a7359ee054c3c1dd2c220fc360909945476560c7"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/lua/body.lua",
+      "bytes": 294,
+      "mode": 420,
+      "sha256": "a460bc692b5fe5bd549263f1b7d2df68f79e062886630c1612decfe705f9589e"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/lua/xmake.lua",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "6e61fad211b017fc7a10c98aef86ae2725c5ef08b47061a720beb509d416091d"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/lua/driver.lua",
+      "bytes": 259,
+      "mode": 420,
+      "sha256": "8ca9a5bf4af790b58bc8ccc92a28c8e31c0b02fefc10b1d220837c6f9d60d34f"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/lua/xmake.lua",
+      "bytes": 622,
+      "mode": 420,
+      "sha256": "276c3ba9c4103ed3b4f0a0695694684998dcda34b9ca43fc490a60689b102be6"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/lua/grid.lua",
+      "bytes": 249,
+      "mode": 420,
+      "sha256": "1b0d188cfb0e476c8b6b1a83fad52e436f96b384ccc947847199f6783d4c0d39"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/lua/xmake.lua",
+      "bytes": 488,
+      "mode": 420,
+      "sha256": "6ee880f4c64959a2c1ebc3a1ee46b957d6fc7acc0691d8cc7dcca31b997c15fe"
+    }
+  ]
+}

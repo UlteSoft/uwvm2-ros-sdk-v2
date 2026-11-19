@@ -1,0 +1,2916 @@
+/** @file ros-abi.dox
+ * @brief Raw ROSv2 imports and guest memory contracts.
+ */
+
+/** @fn uint32_t wr_abi(void)
+ * @brief Returns major 2 only when explicitly exposed; errors encoded in same i32 result.
+ * @details Guest import <tt>uwvm_ros_v2.abi</tt>.
+ * Wire format: special_signature.
+ * Request fields: none.
+ * Result fields: major (u32).
+ * Host action: abi.
+ * @return The ROSv2 ABI major, or a host error.
+ */
+
+/** @fn uint32_t wr_capability_open(uint32_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3)
+ * @brief Exact existing alias; no grant creation or upgrade; undelivered handle rolled back.
+ * @details Guest import <tt>uwvm_ros_v2.capability.open</tt>.
+ * Wire format: special_signature.
+ * Request fields: alias (text).
+ * Result fields: capability (u64).
+ * Host action: capability.open.
+ * @param arg0 Index of the caller's linear memory.
+ * @param arg1 Address of the alias text.
+ * @param arg2 Length of the alias in bytes.
+ * @param arg3 Address of the resulting 64-bit capability handle.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_capability_close(uint64_t arg0)
+ * @brief Close capability handle without resetting budgets or resource lifetime.
+ * @details Guest import <tt>uwvm_ros_v2.capability.close</tt>.
+ * Wire format: special_signature.
+ * Request fields: capability (u64).
+ * Result fields: none.
+ * Host action: capability.close.
+ * @param arg0 Live capability handle owned by this caller.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_guard_create(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Create owned guard, rollback if handle delivery fails.
+ * @details Guest import <tt>uwvm_ros_v2.guard.create</tt>.
+ * Wire format: fixed_words.
+ * Request fields: none.
+ * Result fields: resource (u64).
+ * Host action: guard.create.
+ * Applicable resource purposes: guard.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_guard_trigger(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Increment guard generation under exact owner grant.
+ * @details Guest import <tt>uwvm_ros_v2.guard.trigger</tt>.
+ * Wire format: fixed_words.
+ * Request fields: guard (u64).
+ * Result fields: none.
+ * Host action: guard.trigger.
+ * Applicable resource purposes: guard.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_guard_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Consume pending count only after checked delivery.
+ * @details Guest import <tt>uwvm_ros_v2.guard.take</tt>.
+ * Wire format: fixed_words.
+ * Request fields: guard (u64).
+ * Result fields: count (u64).
+ * Host action: guard.take.
+ * Applicable resource purposes: guard.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_clock_create(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Kind must match exact clock purpose.
+ * @details Guest import <tt>uwvm_ros_v2.clock.create</tt>.
+ * Wire format: fixed_words.
+ * Request fields: kind (u64).
+ * Result fields: resource (u64).
+ * Host action: clock.create.
+ * Applicable resource purposes: clock.steady, clock.system, clock.ros.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_clock_read(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Sample owned clock; unstarted time remains flagged.
+ * @details Guest import <tt>uwvm_ros_v2.clock.read</tt>.
+ * Wire format: fixed_words.
+ * Request fields: clock (u64).
+ * Result fields: now (i64), epoch (u64), started (bool), kind (u64).
+ * Host action: clock.read.
+ * Applicable resource purposes: clock.steady, clock.system, clock.ros.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_clock_update(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief ROS clock source must independently permit clock.read with matching resource and binding.
+ * @details Guest import <tt>uwvm_ros_v2.clock.update</tt>.
+ * Wire format: fixed_words.
+ * Request fields: source_capability (u64), clock (u64), now (i64), started (bool).
+ * Result fields: none.
+ * Host action: clock.update.
+ * Applicable resource purposes: clock.ros.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_timer_create(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Clock dependency needs independent read grant.
+ * @details Guest import <tt>uwvm_ros_v2.timer.create</tt>.
+ * Wire format: fixed_words.
+ * Request fields: clock_capability (u64), clock (u64).
+ * Result fields: resource (u64).
+ * Host action: timer.create.
+ * Applicable resource purposes: timer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_timer_reset(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Overflow-checked schedule; zero period is one-shot.
+ * @details Guest import <tt>uwvm_ros_v2.timer.reset</tt>.
+ * Wire format: fixed_words.
+ * Request fields: timer (u64), due (i64), period (i64).
+ * Result fields: none.
+ * Host action: timer.reset.
+ * Applicable resource purposes: timer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_timer_cancel(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Disarm owned timer and notify waiters.
+ * @details Guest import <tt>uwvm_ros_v2.timer.cancel</tt>.
+ * Wire format: fixed_words.
+ * Request fields: timer (u64).
+ * Result fields: none.
+ * Host action: timer.cancel.
+ * Applicable resource purposes: timer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_timer_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Coalesced occurrence record consumed only after delivery.
+ * @details Guest import <tt>uwvm_ros_v2.timer.take</tt>.
+ * Wire format: fixed_words.
+ * Request fields: timer (u64).
+ * Result fields: expected (i64), actual (i64), occurrences (u64), clock_epoch (u64).
+ * Host action: timer.take.
+ * Applicable resource purposes: timer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_wait_create(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Create empty owned waitset.
+ * @details Guest import <tt>uwvm_ros_v2.wait.create</tt>.
+ * Wire format: fixed_words.
+ * Request fields: none.
+ * Result fields: resource (u64).
+ * Host action: wait.create.
+ * Applicable resource purposes: wait.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_wait_add(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Source requires independent resource.observe; bounded membership.
+ * @details Guest import <tt>uwvm_ros_v2.wait.add</tt>.
+ * Wire format: fixed_words.
+ * Request fields: waitset (u64), source_capability (u64), source (u64), interests (u64), token (u64).
+ * Result fields: none.
+ * Host action: wait.add.
+ * Applicable resource purposes: wait.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_wait_remove(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Detach exact source from owned waitset.
+ * @details Guest import <tt>uwvm_ros_v2.wait.remove</tt>.
+ * Wire format: fixed_words.
+ * Request fields: waitset (u64), source (u64).
+ * Result fields: none.
+ * Host action: wait.remove.
+ * Applicable resource purposes: wait.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_wait_acknowledge(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Acknowledge source sequence; readiness is not data consumption.
+ * @details Guest import <tt>uwvm_ros_v2.wait.acknowledge</tt>.
+ * Wire format: fixed_words.
+ * Request fields: waitset (u64), source (u64), sequence (u64).
+ * Result fields: none.
+ * Host action: wait.acknowledge.
+ * Applicable resource purposes: wait.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_wait_poll(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Nonconsuming bounded readiness; infinite wait explicit; authority revalidated after wake.
+ * @details Guest import <tt>uwvm_ros_v2.wait.poll</tt>.
+ * Wire format: fixed_words.
+ * Request fields: waitset (u64), duration_ns (u64).
+ * Result fields: records (array<ready_record>).
+ * Host action: wait.poll.
+ * Applicable resource purposes: wait.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_resource_close(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Close an owned local scheduling, lifecycle, sealed-buffer, model or transform resource according to its cleanup contract. Retained borrows or cleanup debt retain their capacity until actual retirement; closure does not grant another purpose. Sensor/proposal and recording/replay handles route to their owning dispatchers; retained borrows/pins still prevent premature retirement.
+ * @details Guest import <tt>uwvm_ros_v2.resource.close</tt>.
+ * Wire format: fixed_words.
+ * Request fields: resource (u64).
+ * Result fields: none.
+ * Host action: resource.close.
+ * Applicable resource purposes: guard, clock.steady, clock.system, clock.ros, timer, wait, lifecycle, buffer, model.language, model.vision, model.world, transform, sensor, proposal, recording, replay.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_context_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Create an independently owned context only after complete provider/security closure validation.
+ * @details Guest import <tt>uwvm_ros_v2.context.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile).
+ * Result fields: handle (u64).
+ * Host action: context.open.
+ * Applicable resource purposes: context.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_context_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Sanitized context identity, supported features and shutdown state. Provider feature reporting distinguishes configured, native-attested supported and currently available states; missing/failed native feature probes are not affirmative support.
+ * @details Guest import <tt>uwvm_ros_v2.context.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: context (u64).
+ * Result fields: profile (profile), state (text), generation (u64), features (array<provider_feature>).
+ * Host action: context.describe.
+ * Applicable resource purposes: context.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_context_shutdown(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Cancel owned work and wake waits; never process exit.
+ * @details Guest import <tt>uwvm_ros_v2.context.shutdown</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), context (u64).
+ * Result fields: receipt (receipt).
+ * Host action: context.shutdown.
+ * Applicable resource purposes: context.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_node_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Resolve immutable node/name/remapping/profile under exact parent context grant. Creation is asynchronous: explicit monotonically increasing key and finite absolute steady deadline; response is a request receipt, not an endpoint. communication.open.take retrieves a separately published typed handle.
+ * @details Guest import <tt>uwvm_ros_v2.node.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: context_capability (u64), context (u64), profile (profile), creation_key (u64), deadline (u64).
+ * Result fields: creation (communication_creation_receipt).
+ * Host action: node.open.
+ * Applicable resource purposes: node.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_node_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Only owned resolved identity and enabled features.
+ * @details Guest import <tt>uwvm_ros_v2.node.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: node (u64).
+ * Result fields: name (text), namespace (text), profile (profile), generation (u64).
+ * Host action: node.describe.
+ * Applicable resource purposes: node.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_type_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bounded immutable approved schema dependency closure; type names never load code.
+ * @details Guest import <tt>uwvm_ros_v2.type.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: identity (text), cursor (optional<u64>), limit (u64).
+ * Result fields: schema (message), page (page).
+ * Host action: type.describe.
+ * Applicable resource purposes: type.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_topic_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Create exactly one publisher or subscription role. Creation is asynchronous: explicit monotonically increasing key and finite absolute steady deadline; response is a request receipt, not an endpoint. communication.open.take retrieves a separately published typed handle.
+ * @details Guest import <tt>uwvm_ros_v2.topic.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (endpoint_request), creation_key (u64), deadline (u64).
+ * Result fields: creation (communication_creation_receipt).
+ * Host action: topic.open.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_topic_publish(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Reserve and validate complete message before acceptance; acceptance is not remote delivery.
+ * @details Guest import <tt>uwvm_ros_v2.topic.publish</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), endpoint (u64), body (message), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: topic.publish.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_topic_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Receive one source record without consuming on invalid/short output.
+ * @details Guest import <tt>uwvm_ros_v2.topic.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64).
+ * Result fields: record (delivery).
+ * Host action: topic.take.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_topic_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Owned node, resolved endpoint/type/direction and profile, with optional cached actual provider incarnation and native identity. Metadata is copied from the same retained endpoint; no middleware call or discovery occurs during description. Unknown provider generation and GID remain absent. This grants no publication or subscription authority.
+ * @details Guest import <tt>uwvm_ros_v2.topic.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64).
+ * Result fields: endpoint (endpoint_info).
+ * Host action: topic.describe.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_qos_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Requested/effective/supported settings; unavailable values remain absent.
+ * @details Guest import <tt>uwvm_ros_v2.qos.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64).
+ * Result fields: qos (qos_info).
+ * Host action: qos.describe.
+ * Applicable resource purposes: topic, service, action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_qos_liveliness_assert(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Only publisher role and qualified native manual-liveliness support.
+ * @details Guest import <tt>uwvm_ros_v2.qos.liveliness.assert</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), endpoint (u64).
+ * Result fields: receipt (receipt).
+ * Host action: qos.liveliness.assert.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_qos_acknowledgements_wait(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Wait for defined native acknowledgement horizon; unsupported is not success.
+ * @details Guest import <tt>uwvm_ros_v2.qos.acknowledgements.wait</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: qos.acknowledgements.wait.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Fix client/server role and finite request/response capacities. Creation is asynchronous: explicit monotonically increasing key and finite absolute steady deadline; response is a request receipt, not an endpoint. communication.open.take retrieves a separately published typed handle.
+ * @details Guest import <tt>uwvm_ros_v2.service.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (endpoint_request), creation_key (u64), deadline (u64).
+ * Result fields: creation (communication_creation_receipt).
+ * Host action: service.open.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Owned native-correlated request; remote outcome can remain unknown after timeout.
+ * @details Guest import <tt>uwvm_ros_v2.service.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), client (u64), body (message), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: service.submit.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Role-specific request/response atomically delivered with correlation.
+ * @details Guest import <tt>uwvm_ros_v2.service.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64).
+ * Result fields: record (delivery).
+ * Host action: service.take.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_respond(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Respond once to an exact live owned received request.
+ * @details Guest import <tt>uwvm_ros_v2.service.respond</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), server (u64), request (u64), body (message), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: service.respond.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_available(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Observe native readiness on the exact live client. Direct client grants supply source_capability zero. A service-observer grant requires its separately authorized registered source service.submit capability. Only the observer is charged. Either authorization may prevent result delivery.
+ * @details Guest import <tt>uwvm_ros_v2.service.available</tt>.
+ * Wire format: canonical_record.
+ * Request fields: client (u64), source_capability (u64).
+ * Result fields: available (bool), observed (stamp).
+ * Host action: service.available.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_abandon(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Retire local wait/response interest; never claim remote cancellation.
+ * @details Guest import <tt>uwvm_ros_v2.service.abandon</tt>.
+ * Wire format: canonical_record.
+ * Request fields: client (u64), request (u64).
+ * Result fields: receipt (receipt).
+ * Host action: service.abandon.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_action_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Fix action role, goal/feedback/result types and retention. Creation is asynchronous: explicit monotonically increasing key and finite absolute steady deadline; response is a request receipt, not an endpoint. communication.open.take retrieves a separately published typed handle.
+ * @details Guest import <tt>uwvm_ros_v2.action.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (endpoint_request), creation_key (u64), deadline (u64).
+ * Result fields: creation (communication_creation_receipt).
+ * Host action: action.open.
+ * Applicable resource purposes: action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_action_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Goal UUID is correlated with owned goal resource; not a transferable authority token.
+ * @details Guest import <tt>uwvm_ros_v2.action.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), client (u64), goal (goal), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: action.submit.
+ * Applicable resource purposes: action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_action_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Goal proposal/status/feedback/result/cancel request are distinct closed event kinds. uwvm/action/Event body follows action_event; outer correlation is request, body goal/UUID remain distinct.
+ * @details Guest import <tt>uwvm_ros_v2.action.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64).
+ * Result fields: record (delivery).
+ * Host action: action.take.
+ * Applicable resource purposes: action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_action_respond(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Legal transition and exact secondary action checked; accepted cancel is not terminal.
+ * @details Guest import <tt>uwvm_ros_v2.action.respond</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), endpoint (u64), response (action_response), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: action.respond.
+ * Applicable resource purposes: action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_action_cancel(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Cancellation proposal for owned goal; broader cancel set requires separate explicit scope.
+ * @details Guest import <tt>uwvm_ros_v2.action.cancel</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), client (u64), goal (u64), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: action.cancel.
+ * Applicable resource purposes: action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_action_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Sanitized endpoint/owned-goal state and retention; no unrelated UUID discovery. uwvm/action/State body follows action_endpoint_state.
+ * @details Guest import <tt>uwvm_ros_v2.action.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64), goal (optional<u64>).
+ * Result fields: state (message).
+ * Host action: action.describe.
+ * Applicable resource purposes: action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bind exact parameter keys, value algebra, descriptors and role.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: node_capability (u64), node (u64), profile (profile).
+ * Result fields: handle (u64).
+ * Host action: parameter.open.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_declare(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Declaration respects override/dynamic/read-only policy without ambient YAML access.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.declare</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), scope (u64), descriptor (parameter_descriptor), initial (parameter_value).
+ * Result fields: receipt (receipt).
+ * Host action: parameter.declare.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_undeclare(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit deletion distinct from not-set/uninitialized value.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.undeclare</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), scope (u64), name (text), expected_revision (optional<u64>).
+ * Result fields: receipt (receipt).
+ * Host action: parameter.undeclare.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_get(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bounded batch; missing/uninitialized/denied are not silently conflated.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.get</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64), names (array<text>).
+ * Result fields: values (array<parameter_item>), revision (optional<u64>).
+ * Host action: parameter.get.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Only granted descriptor metadata.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64), names (array<text>).
+ * Result fields: descriptors (array<parameter_descriptor>).
+ * Host action: parameter.describe.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_list(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bounded filtered key listing; counts and cursors obey same visibility. Name entries use fixed message type_identity ros.parameter.name and encoding canonical.text; each body is exactly one canonical wire text.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.list</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64), prefixes (array<text>), depth (u64), cursor (optional<u64>), limit (u64).
+ * Result fields: page (page).
+ * Host action: parameter.list.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_set(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Per-item writes; report every committed/rejected/unknown decision.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.set</tt>.
+ * Wire format: canonical_record.
+ * Request fields: transaction (parameter_transaction).
+ * Result fields: receipt (receipt), decisions (array<parameter_decision>).
+ * Host action: parameter.set.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_set_atomic(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief All or none only within qualified provider atomic domain; do not fake cross-node CAS. A ROS1 provider must separately declare atomic upsert of permitted undeclared keys and subtree replacement semantics; ROS2 declaration rules remain distinct. Native bridging cannot silently emulate atomic upsert with a racy get/declare/set sequence.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.set.atomic</tt>.
+ * Wire format: canonical_record.
+ * Request fields: transaction (parameter_transaction).
+ * Result fields: receipt (receipt), accepted (bool).
+ * Host action: parameter.set.atomic.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Deliver validation or committed event; no native callback into guest.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64).
+ * Result fields: event (parameter_event).
+ * Host action: parameter.take.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_respond(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Current validator generation/deadline; transformed keys and values revalidated; no recursive mutation.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.respond</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64), request (u64), accepted (bool), replacement (optional<array<parameter_item>>), reason (text).
+ * Result fields: receipt (receipt).
+ * Host action: parameter.respond.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_lifecycle_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Open one explicitly permitted client=1/server=2 role in a deployed local-lifecycle alias; no native node or actuator authority. Opening never resets state or history.
+ * @details Guest import <tt>uwvm_ros_v2.lifecycle.open</tt>.
+ * Wire format: local_lifecycle.
+ * Request fields: role (u64).
+ * Result fields: handle (u64).
+ * Host action: lifecycle.open.
+ * Applicable resource purposes: lifecycle.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_lifecycle_state(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Observe owned cached logical state and enforce an expired finite deadline on access; no physical or autonomous stop guarantee.
+ * @details Guest import <tt>uwvm_ros_v2.lifecycle.state</tt>.
+ * Wire format: local_lifecycle.
+ * Request fields: handle (u64).
+ * Result fields: state (u64), generation (u64), request (u64), transition (u64), deadline (u64), status (u64), delivered (u64).
+ * Host action: lifecycle.state.
+ * Applicable resource purposes: lifecycle.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_lifecycle_transitions(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return only currently legal and deployment-permitted transition bits; no transition authority is granted.
+ * @details Guest import <tt>uwvm_ros_v2.lifecycle.transitions</tt>.
+ * Wire format: local_lifecycle.
+ * Request fields: handle (u64).
+ * Result fields: allowed_mask (u64).
+ * Host action: lifecycle.transitions.
+ * Applicable resource purposes: lifecycle.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_lifecycle_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Exactly ordered successful-submission keys with original receipt replay, finite absolute steady deadline, expected generation and one pending callback. Rejected submissions do not consume key.
+ * @details Guest import <tt>uwvm_ros_v2.lifecycle.submit</tt>.
+ * Wire format: local_lifecycle.
+ * Request fields: handle (u64), key (u64), transition (u64), expected_generation (u64), deadline (u64).
+ * Result fields: key (u64), request (u64), generation (u64), state (u64), status (u64).
+ * Host action: lifecycle.submit.
+ * Applicable resource purposes: lifecycle.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_lifecycle_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Reserve one callback, release provider lock before checked delivery, then revalidate owner/request/generation/deadline before marking delivered. Failed delivery is not consumed.
+ * @details Guest import <tt>uwvm_ros_v2.lifecycle.take</tt>.
+ * Wire format: local_lifecycle.
+ * Request fields: handle (u64).
+ * Result fields: request (u64), transition (u64), generation (u64), phase (u64), deadline (u64).
+ * Host action: lifecycle.take.
+ * Applicable resource purposes: lifecycle.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_lifecycle_respond(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Resolve only an exactly delivered matching request/generation using ROS outcome97/98/99. Preserve last exact response receipt; error queues error-processing callback. No native callback execution.
+ * @details Guest import <tt>uwvm_ros_v2.lifecycle.respond</tt>.
+ * Wire format: local_lifecycle.
+ * Request fields: handle (u64), request (u64), expected_generation (u64), outcome (u64).
+ * Result fields: key (u64), request (u64), generation (u64), state (u64), status (u64).
+ * Host action: lifecycle.respond.
+ * Applicable resource purposes: lifecycle.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bound frame set/cache/source/clock-epoch policy.
+ * @details Guest import <tt>uwvm_ros_v2.transform.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile), clock_capability (u64), clock (u64).
+ * Result fields: handle (u64).
+ * Host action: transform.open.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_publish(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Authorize every parent/child and source; nonzero expected_generation fences the whole batch. Actual static replacement requires a matching nonzero generation and exact transform.static.replace action; zero permits only additions or unchanged static replay.
+ * @details Guest import <tt>uwvm_ros_v2.transform.publish</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), buffer (u64), expected_generation (u64), transforms (array<transform>).
+ * Result fields: receipt (receipt).
+ * Host action: transform.publish.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_lookup(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Enforce all query-path frames, epochs and cache bounds.
+ * @details Guest import <tt>uwvm_ros_v2.transform.lookup</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), query (transform_query).
+ * Result fields: transform (transform).
+ * Host action: transform.lookup.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_available(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Same visibility boundary as lookup; no hidden frame existence leak.
+ * @details Guest import <tt>uwvm_ros_v2.transform.available</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), query (transform_query).
+ * Result fields: available (bool), reason (text).
+ * Host action: transform.available.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_velocity(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Advanced time/reference-point operation with all frame/window checks.
+ * @details Guest import <tt>uwvm_ros_v2.transform.velocity</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), query (velocity_query).
+ * Result fields: velocity (velocity).
+ * Host action: transform.velocity.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Owned asynchronous wait binds exact clock epoch and query.
+ * @details Guest import <tt>uwvm_ros_v2.transform.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), buffer (u64), query (transform_query), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: transform.submit.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Nonconsuming failed copy of one owned query result.
+ * @details Guest import <tt>uwvm_ros_v2.transform.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), request (u64).
+ * Result fields: receipt (receipt), transform (optional<transform>).
+ * Host action: transform.take.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_cancel(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Cancel owned query and wake waiters.
+ * @details Guest import <tt>uwvm_ros_v2.transform.cancel</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), request (u64).
+ * Result fields: receipt (receipt).
+ * Host action: transform.cancel.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_transform_clear(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit history mutation and pending query invalidation; static policy separate.
+ * @details Guest import <tt>uwvm_ros_v2.transform.clear</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), buffer (u64), expected_generation (u64).
+ * Result fields: receipt (receipt).
+ * Host action: transform.clear.
+ * Applicable resource purposes: transform.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_graph_snapshot(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Exact filtered discovery through an explicitly owned observer node and context; observer node profile and actual parent context must match, with counted attachment capacity and complete origin authority.
+ * @details Guest import <tt>uwvm_ros_v2.graph.snapshot</tt>.
+ * Wire format: canonical_record.
+ * Request fields: context_capability (u64), context (u64), observer_node_capability (u64), observer_node (u64), profile (profile), cursor (optional<u64>), limit (u64).
+ * Result fields: page (page).
+ * Host action: graph.snapshot.
+ * Applicable resource purposes: discovery.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_graph_watch(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Exact filtered discovery through an explicitly owned observer node and context; observer node profile and actual parent context must match, with counted attachment capacity and complete origin authority.
+ * @details Guest import <tt>uwvm_ros_v2.graph.watch</tt>.
+ * Wire format: canonical_record.
+ * Request fields: context_capability (u64), context (u64), observer_node_capability (u64), observer_node (u64), profile (profile).
+ * Result fields: handle (u64).
+ * Host action: graph.watch.
+ * Applicable resource purposes: discovery.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_event_stream_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Authorize each observed source and field policy; source references use capability/resource pair.
+ * @details Guest import <tt>uwvm_ros_v2.event.stream.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: sources (array<source_ref>), profile (profile), capacity (capacity).
+ * Result fields: handle (u64).
+ * Host action: event.stream.open.
+ * Applicable resource purposes: event.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_event_stream_poll(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Copy complete records before consumption; explicit loss and generation; bounded steady deadline.
+ * @details Guest import <tt>uwvm_ros_v2.event.stream.poll</tt>.
+ * Wire format: canonical_record.
+ * Request fields: stream (u64), limit (u64), deadline (u64).
+ * Result fields: events (array<event_record>).
+ * Host action: event.stream.poll.
+ * Applicable resource purposes: event.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_event_stream_close(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Detach exact stream and wake waiters without closing sources.
+ * @details Guest import <tt>uwvm_ros_v2.event.stream.close</tt>.
+ * Wire format: canonical_record.
+ * Request fields: stream (u64).
+ * Result fields: closed (bool).
+ * Host action: event.stream.close.
+ * Applicable resource purposes: event.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_buffer_create(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Reserve bounded data/workspace before publication.
+ * @details Guest import <tt>uwvm_ros_v2.buffer.create</tt>.
+ * Wire format: canonical_record.
+ * Request fields: layout (buffer_layout).
+ * Result fields: handle (u64).
+ * Host action: buffer.create.
+ * Applicable resource purposes: buffer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_buffer_write(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Contiguous bounded write only before seal; no native pointer.
+ * @details Guest import <tt>uwvm_ros_v2.buffer.write</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), expected_offset (u64), data (bytes).
+ * Result fields: accepted_bytes (u64).
+ * Host action: buffer.write.
+ * Applicable resource purposes: buffer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_buffer_seal(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Immutable publication with digest and registered layout.
+ * @details Guest import <tt>uwvm_ros_v2.buffer.seal</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), digest (bytes).
+ * Result fields: reference (buffer_ref).
+ * Host action: buffer.seal.
+ * Applicable resource purposes: buffer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_buffer_read(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Exact bounded read; no host descriptor export.
+ * @details Guest import <tt>uwvm_ros_v2.buffer.read</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64), offset (u64), bytes (u64).
+ * Result fields: data (bytes).
+ * Host action: buffer.read.
+ * Applicable resource purposes: buffer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_buffer_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Untrusted origin cannot be relabelled as a trusted sensor.
+ * @details Guest import <tt>uwvm_ros_v2.buffer.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: buffer (u64).
+ * Result fields: layout (buffer_layout), sealed (bool), provenance (text).
+ * Host action: buffer.describe.
+ * Applicable resource purposes: buffer.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Exact positive deployment generation and 32 raw SHA256 bytes; sealed-input binding only. Roll back unpublished handles on failed delivery. No output-store read binding.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.open</tt>.
+ * Wire format: immutable_input.
+ * Request fields: generation (u64), sha256 (bytes).
+ * Result fields: handle (u64).
+ * Host action: artifact.open.
+ * Applicable resource purposes: package, configuration, calibration, map, model-weights.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_read(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bounded requested bytes from immutable handle and offset; raw output, EOF short read, no cursor. Exact read action; requested bytes cannot exceed configured transfer or output capacity. Published volatile cache objects are also readable under independent cache read authority; staging stays hidden.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.read</tt>.
+ * Wire format: immutable_input.
+ * Request fields: object (u64), offset (u64), bytes (u64).
+ * Result fields: data (bytes).
+ * Host action: artifact.read.
+ * Applicable resource purposes: package, configuration, calibration, map, model-weights, cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief 64-byte approved metadata: four LE words then raw32 SHA256. Purpose codes1 package,2 configuration,3 calibration,4 map,5 model-weights. No source path or FD.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.describe</tt>.
+ * Wire format: immutable_input.
+ * Request fields: object (u64).
+ * Result fields: generation (u64), size (u64), purpose_code (u64), maximum_transfer (u64), sha256 (bytes).
+ * Host action: artifact.describe.
+ * Applicable resource purposes: package, configuration, calibration, map, model-weights.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_begin(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit cache/volatile-output only. Per-alias next-key ACK and exact last-request replay; full begin allocation remains charged until abort/remove. Publication is immutable session data, never durable. Status and receipt queries do not acknowledge. No host path or descriptor.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.begin</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: key (u64), reservation (u64).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.begin.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_append(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit cache/volatile-output only. Per-alias next-key ACK and exact last-request replay; full begin allocation remains charged until abort/remove. Publication is immutable session data, never durable. Status and receipt queries do not acknowledge. No host path or descriptor.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.append</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: key (u64), object (u64), expected_offset (u64), data (bytes).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.append.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_commit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit cache/volatile-output only. Per-alias next-key ACK and exact last-request replay; full begin allocation remains charged until abort/remove. Publication is immutable session data, never durable. Status and receipt queries do not acknowledge. No host path or descriptor.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.commit</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: key (u64), object (u64), expected_size (u64).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.commit.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_abort(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit cache/volatile-output only. Per-alias next-key ACK and exact last-request replay; full begin allocation remains charged until abort/remove. Publication is immutable session data, never durable. Status and receipt queries do not acknowledge. No host path or descriptor.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.abort</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: key (u64), object (u64).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.abort.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_remove(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit cache/volatile-output only. Per-alias next-key ACK and exact last-request replay; full begin allocation remains charged until abort/remove. Publication is immutable session data, never durable. Status and receipt queries do not acknowledge. No host path or descriptor.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.remove</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: key (u64), object (u64).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.remove.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_sensor_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Ingress-only approved source/transport/schema/queue; no send/listen authority.
+ * @details Guest import <tt>uwvm_ros_v2.sensor.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile).
+ * Result fields: handle (u64).
+ * Host action: sensor.open.
+ * Applicable resource purposes: sensor.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_sensor_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Validated complete frame with timestamp origin and discontinuity. Capacity for the largest complete frame is checked before native read. The local capture ordinal and optional actual native sequence are distinct. Failed guest copy retains the frame for retry.
+ * @details Guest import <tt>uwvm_ros_v2.sensor.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: sensor (u64).
+ * Result fields: record (delivery), buffer (u64), schema (profile), buffer_profile (profile), frame (text), units (text), source (u64), native_sequence (optional<u64>).
+ * Host action: sensor.take.
+ * Applicable resource purposes: sensor.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_sensor_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bound source identity, loss and negotiated capabilities; no credentials.
+ * @details Guest import <tt>uwvm_ros_v2.sensor.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: sensor (u64).
+ * Result fields: profile (profile), state (message).
+ * Host action: sensor.describe.
+ * Applicable resource purposes: sensor.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_device_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Approved bus/protocol/command envelope, independent watchdog and finite capacity.
+ * @details Guest import <tt>uwvm_ros_v2.device.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile).
+ * Result fields: handle (u64).
+ * Host action: device.open.
+ * Applicable resource purposes: device.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_device_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Full command bounds/freshness/units/frame before hardware effect.
+ * @details Guest import <tt>uwvm_ros_v2.device.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: command (command).
+ * Result fields: receipt (receipt).
+ * Host action: device.submit.
+ * Applicable resource purposes: device.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_device_result(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Distinguish accepted, observed execution, partial and unknown effect.
+ * @details Guest import <tt>uwvm_ros_v2.device.result</tt>.
+ * Wire format: canonical_record.
+ * Request fields: device (u64), request (u64).
+ * Result fields: receipt (receipt), evidence (optional<execution_evidence>).
+ * Host action: device.result.
+ * Applicable resource purposes: device.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_device_stop(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Requires explicit stop authority; trusted watchdog independent.
+ * @details Guest import <tt>uwvm_ros_v2.device.stop</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), device (u64), profile (profile).
+ * Result fields: receipt (receipt).
+ * Host action: device.stop.
+ * Applicable resource purposes: device.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_device_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Actual provider/firmware support, state and watchdog contract.
+ * @details Guest import <tt>uwvm_ros_v2.device.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: device (u64).
+ * Result fields: description (device_description).
+ * Host action: device.describe.
+ * Applicable resource purposes: device.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_control_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Reserve complete continuous cycle and safe-state contract.
+ * @details Guest import <tt>uwvm_ros_v2.control.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile), device_capability (u64), device (u64), sources (array<control_source>).
+ * Result fields: opened (control_opening).
+ * Host action: control.open.
+ * Applicable resource purposes: control.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_control_sample(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief A bounded input/read phase tied to write deadline and sequence.
+ * @details Guest import <tt>uwvm_ros_v2.control.sample</tt>.
+ * Wire format: canonical_record.
+ * Request fields: cycle (u64).
+ * Result fields: sample (cycle_sample).
+ * Host action: control.sample.
+ * Applicable resource purposes: control.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_control_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Check same cycle/sequence/deadline; no attenuation skips an admitted phase.
+ * @details Guest import <tt>uwvm_ros_v2.control.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), cycle (u64), sequence (u64), controller_epoch (u64), schema (profile), command (message).
+ * Result fields: receipt (receipt).
+ * Host action: control.submit.
+ * Applicable resource purposes: control.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_control_result(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Report actual execution, missed phase and watchdog outcome.
+ * @details Guest import <tt>uwvm_ros_v2.control.result</tt>.
+ * Wire format: canonical_record.
+ * Request fields: cycle (u64), sequence (u64).
+ * Result fields: receipt (receipt).
+ * Host action: control.result.
+ * Applicable resource purposes: control.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_control_stop(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Drain or qualified safe stop; revoke never disables watchdog.
+ * @details Guest import <tt>uwvm_ros_v2.control.stop</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), cycle (u64), profile (profile).
+ * Result fields: receipt (receipt).
+ * Host action: control.stop.
+ * Applicable resource purposes: control.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_media_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Separate codec/ingress/egress/viewer and listener profile grants.
+ * @details Guest import <tt>uwvm_ros_v2.media.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile), source (resource_ref), output_capability (u64), egress (optional<resource_ref>).
+ * Result fields: handle (u64).
+ * Host action: media.open.
+ * Applicable resource purposes: media.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_media_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bound decoded expansion, encoded output and egress destination.
+ * @details Guest import <tt>uwvm_ros_v2.media.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), stream (u64), frame (buffer_ref), description (media_frame), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: media.submit.
+ * Applicable resource purposes: media.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_media_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Complete bounded encoded/decoded frame under profile.
+ * @details Guest import <tt>uwvm_ros_v2.media.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: stream (u64).
+ * Result fields: record (media_delivery).
+ * Host action: media.take.
+ * Applicable resource purposes: media.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_media_close(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Only owned stream/viewer; no unrelated listener shutdown.
+ * @details Guest import <tt>uwvm_ros_v2.media.close</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), stream (u64), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: media.close.
+ * Applicable resource purposes: media.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_recording_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Private finite volatile MCAP store with exact deployment channel/buffer profiles, caller incarnation ownership, atomic source read/export authority and retained pinned objects. Writer mutations use next-key exact recovery; resource.close releases writer or an unpinned checkpoint. Checkpoint is complete volatile acceptance, not durable storage.
+ * @details Guest import <tt>uwvm_ros_v2.recording.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile).
+ * Result fields: writer (u64).
+ * Host action: recording.open.
+ * Applicable resource purposes: recording.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_recording_append(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Private finite volatile MCAP store with exact deployment channel/buffer profiles, caller incarnation ownership, atomic source read/export authority and retained pinned objects. Writer mutations use next-key exact recovery; resource.close releases writer or an unpinned checkpoint. Checkpoint is complete volatile acceptance, not durable storage.
+ * @details Guest import <tt>uwvm_ros_v2.recording.append</tt>.
+ * Wire format: canonical_record.
+ * Request fields: writer (u64), key (u64), items (array<recording_buffer_item>).
+ * Result fields: receipt (recording_receipt).
+ * Host action: recording.append.
+ * Applicable resource purposes: recording.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_recording_checkpoint(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Private finite volatile MCAP store with exact deployment channel/buffer profiles, caller incarnation ownership, atomic source read/export authority and retained pinned objects. Writer mutations use next-key exact recovery; resource.close releases writer or an unpinned checkpoint. Checkpoint is complete volatile acceptance, not durable storage.
+ * @details Guest import <tt>uwvm_ros_v2.recording.checkpoint</tt>.
+ * Wire format: canonical_record.
+ * Request fields: writer (u64), key (u64).
+ * Result fields: receipt (recording_receipt).
+ * Host action: recording.checkpoint.
+ * Applicable resource purposes: recording.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_recording_stop(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Private finite volatile MCAP store with exact deployment channel/buffer profiles, caller incarnation ownership, atomic source read/export authority and retained pinned objects. Writer mutations use next-key exact recovery; resource.close releases writer or an unpinned checkpoint. Checkpoint is complete volatile acceptance, not durable storage.
+ * @details Guest import <tt>uwvm_ros_v2.recording.stop</tt>.
+ * Wire format: canonical_record.
+ * Request fields: writer (u64), key (u64), drain (bool).
+ * Result fields: receipt (recording_receipt).
+ * Host action: recording.stop.
+ * Applicable resource purposes: recording.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_replay_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Private finite volatile MCAP store with exact deployment channel/buffer profiles, caller incarnation ownership, atomic source read/export authority and retained pinned objects. Replay uses an explicitly granted fixed source and exact object digests; it returns bytes only and never publishes or changes clocks.
+ * @details Guest import <tt>uwvm_ros_v2.replay.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: source_capability (u64), profile (profile), objects (array<recording_object>).
+ * Result fields: replay (u64).
+ * Host action: replay.open.
+ * Applicable resource purposes: replay.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_replay_read(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Private finite volatile MCAP store with exact deployment channel/buffer profiles, caller incarnation ownership, atomic source read/export authority and retained pinned objects. Replay uses an explicitly granted fixed source and exact object digests; it returns bytes only and never publishes or changes clocks.
+ * @details Guest import <tt>uwvm_ros_v2.replay.read</tt>.
+ * Wire format: canonical_record.
+ * Request fields: replay (u64), limit (u64).
+ * Result fields: ordinal (u64), records (array<recording_message>).
+ * Host action: replay.read.
+ * Applicable resource purposes: replay.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_replay_seek(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Private finite volatile MCAP store with exact deployment channel/buffer profiles, caller incarnation ownership, atomic source read/export authority and retained pinned objects. Replay uses an explicitly granted fixed source and exact object digests; it returns bytes only and never publishes or changes clocks.
+ * @details Guest import <tt>uwvm_ros_v2.replay.seek</tt>.
+ * Wire format: canonical_record.
+ * Request fields: replay (u64), ordinal (u64).
+ * Result fields: ordinal (u64).
+ * Host action: replay.seek.
+ * Applicable resource purposes: replay.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_model_open(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Exact model/provider/task identities and reserved session capacity.
+ * @details Guest import <tt>uwvm_ros_v2.model.open</tt>.
+ * Wire format: canonical_record.
+ * Request fields: profile (profile).
+ * Result fields: handle (u64).
+ * Host action: model.open.
+ * Applicable resource purposes: model.language, model.vision, model.world.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_model_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Pin immutable inputs, data-egress grants and full task limits before work.
+ * @details Guest import <tt>uwvm_ros_v2.model.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: inference (inference).
+ * Result fields: receipt (receipt).
+ * Host action: model.submit.
+ * Applicable resource purposes: model.language, model.vision, model.world.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_model_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Streaming/terminal output explicitly distinguished; nonconsuming failed copy.
+ * @details Guest import <tt>uwvm_ros_v2.model.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: session (u64), request (u64).
+ * Result fields: receipt (receipt), output (optional<delivery>).
+ * Host action: model.take.
+ * Applicable resource purposes: model.language, model.vision, model.world.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_model_cancel(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Cancel request acknowledgement distinct from actual provider termination.
+ * @details Guest import <tt>uwvm_ros_v2.model.cancel</tt>.
+ * Wire format: canonical_record.
+ * Request fields: session (u64), request (u64).
+ * Result fields: receipt (receipt).
+ * Host action: model.cancel.
+ * Applicable resource purposes: model.language, model.vision, model.world.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_model_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Actual schema/placement support; no credentials/prompts/payload.
+ * @details Guest import <tt>uwvm_ros_v2.model.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: session (u64).
+ * Result fields: profile (profile), supported (array<text>).
+ * Host action: model.describe.
+ * Applicable resource purposes: model.language, model.vision, model.world.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_proposal_read(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Read inert validated model proposal and trusted provenance.
+ * @details Guest import <tt>uwvm_ros_v2.proposal.read</tt>.
+ * Wire format: canonical_record.
+ * Request fields: proposal (u64).
+ * Result fields: proposal (proposal).
+ * Host action: proposal.read.
+ * Applicable resource purposes: proposal.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_proposal_accept(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Independent arbiter and exact current target action/argument constraints; cannot broaden rights.
+ * @details Guest import <tt>uwvm_ros_v2.proposal.accept</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), proposal_capability (u64), proposal (u64), target_capability (u64), target (u64), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: proposal.accept.
+ * Applicable resource purposes: arbiter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_bridge_create(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Both endpoint directions/types/conversion/QoS preflight independently.
+ * @details Guest import <tt>uwvm_ros_v2.bridge.create</tt>.
+ * Wire format: canonical_record.
+ * Request fields: bridge (bridge_request).
+ * Result fields: handle (u64).
+ * Host action: bridge.create.
+ * Applicable resource purposes: bridge.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_bridge_start(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Revalidate both grants and generation; no unchecked forwarding thread.
+ * @details Guest import <tt>uwvm_ros_v2.bridge.start</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), bridge (u64), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: bridge.start.
+ * Applicable resource purposes: bridge.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_bridge_stop(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Stop admitted direction, drain/cancel declared in profile.
+ * @details Guest import <tt>uwvm_ros_v2.bridge.stop</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), bridge (u64), profile (profile), deadline (u64).
+ * Result fields: receipt (receipt).
+ * Host action: bridge.stop.
+ * Applicable resource purposes: bridge.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_bridge_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Conversion/loss/QoS degradation/loop/correlation state only within scope.
+ * @details Guest import <tt>uwvm_ros_v2.bridge.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: bridge (u64).
+ * Result fields: description (bridge_description).
+ * Host action: bridge.describe.
+ * Applicable resource purposes: bridge.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_log_emit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Independent log grant, bounded private content and declared attenuation; no format-string execution.
+ * @details Guest import <tt>uwvm_ros_v2.log.emit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: session (u64), sequence (u64), severity (text), logger (text), stamp (optional<log_stamp>), message (text), location (optional<log_location>).
+ * Result fields: receipt (log_receipt).
+ * Host action: log.emit.
+ * Applicable resource purposes: log.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_diagnostic_read(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Bounded metadata counters, denial/loss/timeout/provider states; content inspection separate.
+ * @details Guest import <tt>uwvm_ros_v2.diagnostic.read</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64), source_capability (u64), cursor (optional<u64>), limit (u64).
+ * Result fields: page (diagnostic_page).
+ * Host action: diagnostic.read.
+ * Applicable resource purposes: diagnostic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_request_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief No extra native effect; requires origin grant and request ownership.
+ * @details Guest import <tt>uwvm_ros_v2.request.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: request (u64).
+ * Result fields: receipt (receipt).
+ * Host action: request.describe.
+ * Applicable resource purposes: topic, service, action, parameter, lifecycle, transform, calibration, map, log, recording, cache, device, control, media, model.language, model.vision, model.world, arbiter, bridge, component, context, node.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_request_release(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Only terminal receipt retirement; unresolved effect/cleanup debt not forgiven.
+ * @details Guest import <tt>uwvm_ros_v2.request.release</tt>.
+ * Wire format: canonical_record.
+ * Request fields: request (u64).
+ * Result fields: released (bool).
+ * Host action: request.release.
+ * Applicable resource purposes: topic, service, action, parameter, lifecycle, transform, calibration, map, log, recording, cache, device, control, media, model.language, model.vision, model.world, arbiter, bridge, component, context, node.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_status(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit cache/volatile-output only. Per-alias next-key ACK and exact last-request replay; full begin allocation remains charged until abort/remove. Publication is immutable session data, never durable. Status and receipt queries do not acknowledge. No host path or descriptor.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.status</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: object (u64).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.status.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_receipt(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit cache/volatile-output only. Per-alias next-key ACK and exact last-request replay; full begin allocation remains charged until abort/remove. Publication is immutable session data, never durable. Status and receipt queries do not acknowledge. No host path or descriptor.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.receipt</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: key (u64).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.receipt.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_artifact_publish(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Publish one complete bounded volatile object using the existing exact replay stream; all publish/begin/append/commit rights and exposures required; scratch capacity reserved before carrier copying.
+ * @details Guest import <tt>uwvm_ros_v2.artifact.publish</tt>.
+ * Wire format: volatile_cache.
+ * Request fields: key (u64), size (u64), data (bytes).
+ * Result fields: key (u64), operation (u64), object (u64), effect_status (u64), accepted_bytes (u64), total_bytes (u64), retained_bytes (u64), state (u64), flags (u64).
+ * Host action: artifact.publish.
+ * Applicable resource purposes: cache.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_proposal_capture(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit finite capture of actual typed source observations and ordered sealed buffers; exact per-capability key replay. Closing capture releases only its own pins. No model execution or target effect.
+ * @details Guest import <tt>uwvm_ros_v2.proposal.capture</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), profile (profile), sources (array<proposal_capture_source>), expiry (u64).
+ * Result fields: capture (u64), inputs (array<proposal_captured_buffer>).
+ * Host action: proposal.capture.
+ * Applicable resource purposes: proposal.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_proposal_publish(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Authenticate complete successful terminal output from the actual model request against original captured input IDs, SHA and order. Independently authorize publication; model bytes cannot issue grants or execute tools.
+ * @details Guest import <tt>uwvm_ros_v2.proposal.publish</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), capture (u64), model_request (u64), envelope (bytes), expiry (u64).
+ * Result fields: proposal (u64).
+ * Host action: proposal.publish.
+ * Applicable resource purposes: proposal.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_communication_open_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Independent exact origin action and complete caller/incarnation checks. Take publishes a typed endpoint only after fresh origin admission; cancelled/unknown work retains native cleanup debt and never refunds creation work.
+ * @details Guest import <tt>uwvm_ros_v2.communication.open.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: request (u64).
+ * Result fields: creation (communication_creation_receipt), kind (u64), handle (u64).
+ * Host action: communication.open.take.
+ * Applicable resource purposes: node, topic, service, action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_communication_open_cancel(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Independent exact origin action and complete caller/incarnation checks. Take publishes a typed endpoint only after fresh origin admission; cancelled/unknown work retains native cleanup debt and never refunds creation work.
+ * @details Guest import <tt>uwvm_ros_v2.communication.open.cancel</tt>.
+ * Wire format: canonical_record.
+ * Request fields: request (u64).
+ * Result fields: creation (communication_creation_receipt).
+ * Host action: communication.open.cancel.
+ * Applicable resource purposes: node, topic, service, action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_capability_revoke(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Permanently revoke exactly the carrier capability grant. The target must equal the carrier capability, the exact grant must contain capability.revoke and the import must be exposed. One pre-reserved receipt per grant retains the nonzero retry key, exact caller incarnation and target. Atomically fence admissions before nonblocking provider retirement notifications. Retirement state 1 means fenced with notification pending; 2 means local notifications returned, never proof of native process exit, remote cancellation or physical stop. Exact retry can recover failed output after revocation without repeating notifications or allocating. Closing the handle or retiring the caller removes recovery access. No traffic quota may prevent this independently authorized authority reduction; short output and cancellation reject before fencing. Reopening cannot restore the grant; only trusted deployment creates new authority.
+ * @details Guest import <tt>uwvm_ros_v2.capability.revoke</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (u64), target_capability (u64).
+ * Result fields: key (u64), target_capability (u64), revocation_identity (u64), retirement_state (u64).
+ * Host action: capability.revoke.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_topic_reserve(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit two-phase receive: independently authorize the exact consumer endpoint, retain the original native record and deliver a bounded detached copy without acknowledgement. Same-consumer retry returns the retained record/nonce; concurrent consumers cannot steal it. Both node/context/schema origins and native metadata remain attached.
+ * @details Guest import <tt>uwvm_ros_v2.topic.reserve</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64), deadline (u64).
+ * Result fields: reservation (delivery_reservation).
+ * Host action: topic.reserve.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_topic_acknowledge(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Consume exactly the previously reserved record after guest processing. Exact replay is idempotent; stale generation, wrong consumer, altered nonce or expired reservation is refused. Lost native ACK is outcome_unknown and never triggers blind re-consumption. Bounded receipt survives failed guest delivery.
+ * @details Guest import <tt>uwvm_ros_v2.topic.acknowledge</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), reservation (reservation_ref).
+ * Result fields: receipt (receipt).
+ * Host action: topic.acknowledge.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_topic_release(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Cancel exactly the owned borrow while retaining the original record. This is not service-request cancellation or endpoint close. Cleanup uses pre-reserved capacity and is not throttled by creation/traffic quotas; uncertain native cancellation retains debt until trusted reconciliation.
+ * @details Guest import <tt>uwvm_ros_v2.topic.release</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), reservation (reservation_ref).
+ * Result fields: receipt (receipt).
+ * Host action: topic.release.
+ * Applicable resource purposes: topic.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_reserve(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Explicit two-phase receive: independently authorize the exact consumer endpoint, retain the original native record and deliver a bounded detached copy without acknowledgement. Same-consumer retry returns the retained record/nonce; concurrent consumers cannot steal it. Both node/context/schema origins and native metadata remain attached.
+ * @details Guest import <tt>uwvm_ros_v2.service.reserve</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64), deadline (u64).
+ * Result fields: reservation (delivery_reservation).
+ * Host action: service.reserve.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_acknowledge(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Consume exactly the previously reserved record after guest processing. Exact replay is idempotent; stale generation, wrong consumer, altered nonce or expired reservation is refused. Lost native ACK is outcome_unknown and never triggers blind re-consumption. Bounded receipt survives failed guest delivery.
+ * @details Guest import <tt>uwvm_ros_v2.service.acknowledge</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), reservation (reservation_ref).
+ * Result fields: receipt (receipt).
+ * Host action: service.acknowledge.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_release(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Cancel exactly the owned borrow while retaining the original record. This is not service-request cancellation or endpoint close. Cleanup uses pre-reserved capacity and is not throttled by creation/traffic quotas; uncertain native cancellation retains debt until trusted reconciliation.
+ * @details Guest import <tt>uwvm_ros_v2.service.release</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), reservation (reservation_ref).
+ * Result fields: receipt (receipt).
+ * Host action: service.release.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_exists(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Authorize the exact resolved key before existence lookup. Read-only existence authority reveals neither value nor descriptor and is independent of get/list. Missing, uninitialized and denied are distinct; denied never returns false as if absent.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.exists</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64), name (text).
+ * Result fields: exists (bool), initialized (bool), snapshot_revision (u64).
+ * Host action: parameter.exists.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_parameter_search(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief ROS1 ancestor search within a deployment-fixed canonical namespace root and finite candidate-count bound, including the starting namespace. Authorize each exact candidate key before existence lookup; return denied at the first unauthorized candidate. Exhaustion returns too_large; only reaching the root with no match returns not-found. One coherent local store snapshot supplies a revision even for negative results. No ambient namespace, filesystem path or unrestricted discovery. This local provider does not impersonate a native parameter server.
+ * @details Guest import <tt>uwvm_ros_v2.parameter.search</tt>.
+ * Wire format: canonical_record.
+ * Request fields: scope (u64), name (text), start_namespace (text).
+ * Result fields: resolved_name (optional<text>), snapshot_revision (u64).
+ * Host action: parameter.search.
+ * Applicable resource purposes: parameter.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_action_cancel_set(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Separately authorized finite explicit cancellation of owned goals. Whole-set identity validation precedes native effects, each candidate has independent authority admission and outcome evidence, and exact retry never reissues a candidate. Unknown stops further attempts; no implicit wildcard or foreign-principal authority.
+ * @details Guest import <tt>uwvm_ros_v2.action.cancel.set</tt>.
+ * Wire format: canonical_record.
+ * Request fields: key (request_key), client (u64), selection (action_cancel_selection), deadline (u64).
+ * Result fields: receipt (receipt), items (array<action_cancel_item>).
+ * Host action: action.cancel.set.
+ * Applicable resource purposes: action.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_service_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Inspect the exact retained native client/server endpoint and each request/response QoS leg. Support/absence is explicit; profile configuration never stands in for actual getter evidence. Observation grants no submission, response, borrow or discovery authority.
+ * @details Guest import <tt>uwvm_ros_v2.service.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: endpoint (u64).
+ * Result fields: endpoint (endpoint_info), channels (array<endpoint_qos_profile>).
+ * Host action: service.describe.
+ * Applicable resource purposes: service.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_permission_report(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Self observation defaults to allowed only after explicit ROSv2 binding. Family and exact function denials can only reduce observation; any exact denial refuses the full aggregate to prevent bypass. Explicit hidden removes the import. Returns own identity, exact import exposure, configured/live ROSv2 permissions and own group name without other members. WASI descriptor rows are initial approved rights; ROSv1 rows are configured policy, not a complete live handle snapshot. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.permission.report</tt>.
+ * Wire format: canonical_record.
+ * Request fields: family (text), function (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: permission.report.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return the exact registered target name and kind: main-wasm, preload-wasm or preload-dl. Default authority is zero: require explicit import exposure and exact module/metadata grant action. The trusted grant fixes the target; guests cannot supply arbitrary target names or wildcards. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.module.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: grant_alias (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: module.describe.
+ * Applicable resource purposes: module.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_imports(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return the exact Wasm import module/name pairs; native preloaddl platform imports are unsupported. Default authority is zero: require explicit import exposure and exact module/metadata grant action. The trusted grant fixes the target; guests cannot supply arbitrary target names or wildcards. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.module.imports</tt>.
+ * Wire format: canonical_record.
+ * Request fields: grant_alias (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: module.imports.
+ * Applicable resource purposes: module.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_exports(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return only export names already recorded in the module registry. Do not resolve or call a symbol. Default authority is zero: require explicit import exposure and exact module/metadata grant action. The trusted grant fixes the target; guests cannot supply arbitrary target names or wildcards. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.module.exports</tt>.
+ * Wire format: canonical_record.
+ * Request fields: grant_alias (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: module.exports.
+ * Applicable resource purposes: module.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_group(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return the target ROSv2 group name and its members only under this independent action. Default authority is zero: require explicit import exposure and exact module/metadata grant action. The trusted grant fixes the target; guests cannot supply arbitrary target names or wildcards. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.module.group</tt>.
+ * Wire format: canonical_record.
+ * Request fields: grant_alias (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: module.group.
+ * Applicable resource purposes: module.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_permission_report(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return permissions of the exact registered target for the requested family. The viewer observation policy also applies, including exact-function and aggregate denials. Default authority is zero: require explicit import exposure and exact module/metadata grant action. The trusted grant fixes the target; guests cannot supply arbitrary target names or wildcards. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.module.permission.report</tt>.
+ * Wire format: canonical_record.
+ * Request fields: grant_alias (text), family (text), function (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: module.permission.report.
+ * Applicable resource purposes: module.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_importers(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return direct registered Wasm importers of the exact target, as importer module/symbol rows. Require an independent module/metadata grant and exact exposure even when the target is the caller. Count all visited modules and imports, including nonmatches, against the finite scan budget. Reexports are not expanded and native dynamic-linker dependencies are not inspected. An explicit grant may also name a registered builtin module. No unrelated peers or their remaining imports are disclosed. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.module.importers</tt>.
+ * Wire format: canonical_record.
+ * Request fields: grant_alias (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: module.importers.
+ * Applicable resource purposes: module.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_vm_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Return only closed VM build-support flags, selected compiler, compile-thread ceiling and counts of registered declaration kinds. These are not live thread counts or per-module execution permissions. Require independent vm/runtime/metadata authority and exact exposure. Self permission.report and module grants cannot authorize VM observation. No module names, paths, process IDs, addresses, source bytes or credentials are returned. Carrier capability must be zero. Exact immediate caller identity comes from the runtime. Observation never freezes deployment, enrolls a caller, opens a capability, replenishes or consumes execution quotas, starts a provider, invokes an export, reads foreign memory, or changes another policy. A denial writes neither result nor length. Owned temporary buffers are securely overwritten. 
+ * @details Guest import <tt>uwvm_ros_v2.vm.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: grant_alias (text), first (u64).
+ * Result fields: page (permission_page).
+ * Host action: vm.describe.
+ * Applicable resource purposes: vm.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_call_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Require registered server incarnation, fixed caller role and token=0. Reserve a free slot, copy bounded request, return nonzero token. Failed delivery discards the unpublished request. Trusted startup route fixes exact endpoint names, semantic operation, opaque schema identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active threaded host calls and resumable/replay compilation profiles are refused. A live debugger value-observation profile is allowed; it does not grant recording, restoration or message authority. Detached scene queries never copy payloads; separately authorized debugger memory reads remain subject to debugger disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy defaults to true; false retains sender input bytes, including failure cleanup, without weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are outside this erasure contract.
+ * @details Guest import <tt>uwvm_ros_v2.module.call.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: token (u64), payload (bytes).
+ * Result fields: token (u64), payload (bytes).
+ * Host action: module.call.submit.
+ * Applicable resource purposes: module.call.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_call_take(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Require exact server role, token=0 and empty payload. First authorized take pins server incarnation even when returning again. Copy queued request once into a registered erasure region; preserve request on failed delivery. Trusted startup route fixes exact endpoint names, semantic operation, opaque schema identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active threaded host calls and resumable/replay compilation profiles are refused. A live debugger value-observation profile is allowed; it does not grant recording, restoration or message authority. Detached scene queries never copy payloads; separately authorized debugger memory reads remain subject to debugger disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy defaults to true; false retains sender input bytes, including failure cleanup, without weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are outside this erasure contract.
+ * @details Guest import <tt>uwvm_ros_v2.module.call.take</tt>.
+ * Wire format: canonical_record.
+ * Request fields: token (u64), payload (bytes).
+ * Result fields: token (u64), payload (bytes).
+ * Host action: module.call.take.
+ * Applicable resource purposes: module.call.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_call_respond(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Require received request token and exact server incarnation. Copy bounded response and overwrite server delivery region before committing responded state. Lost output does not resend or discard the committed response. Trusted startup route fixes exact endpoint names, semantic operation, opaque schema identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active threaded host calls and resumable/replay compilation profiles are refused. A live debugger value-observation profile is allowed; it does not grant recording, restoration or message authority. Detached scene queries never copy payloads; separately authorized debugger memory reads remain subject to debugger disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy defaults to true; false retains sender input bytes, including failure cleanup, without weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are outside this erasure contract.
+ * @details Guest import <tt>uwvm_ros_v2.module.call.respond</tt>.
+ * Wire format: canonical_record.
+ * Request fields: token (u64), payload (bytes).
+ * Result fields: token (u64), payload (bytes).
+ * Host action: module.call.respond.
+ * Applicable resource purposes: module.call.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_call_result(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Require exact original client token and empty payload. Copy committed response once and retain client erasure region until acknowledge. Pending returns again; duplicate consumption conflicts. Trusted startup route fixes exact endpoint names, semantic operation, opaque schema identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active threaded host calls and resumable/replay compilation profiles are refused. A live debugger value-observation profile is allowed; it does not grant recording, restoration or message authority. Detached scene queries never copy payloads; separately authorized debugger memory reads remain subject to debugger disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy defaults to true; false retains sender input bytes, including failure cleanup, without weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are outside this erasure contract.
+ * @details Guest import <tt>uwvm_ros_v2.module.call.result</tt>.
+ * Wire format: canonical_record.
+ * Request fields: token (u64), payload (bytes).
+ * Result fields: token (u64), payload (bytes).
+ * Host action: module.call.result.
+ * Applicable resource purposes: module.call.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_call_acknowledge(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Require delivered result and empty payload. Overwrite every retained region and host capacity before reusing slot. Exact retry with unchanged retained token carries no new data. Cleanup bypasses traffic quotas but requires authority. Trusted startup route fixes exact endpoint names, semantic operation, opaque schema identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active threaded host calls and resumable/replay compilation profiles are refused. A live debugger value-observation profile is allowed; it does not grant recording, restoration or message authority. Detached scene queries never copy payloads; separately authorized debugger memory reads remain subject to debugger disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy defaults to true; false retains sender input bytes, including failure cleanup, without weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are outside this erasure contract.
+ * @details Guest import <tt>uwvm_ros_v2.module.call.acknowledge</tt>.
+ * Wire format: canonical_record.
+ * Request fields: token (u64), payload (bytes).
+ * Result fields: none.
+ * Host action: module.call.acknowledge.
+ * Applicable resource purposes: module.call.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_module_call_cancel(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Either registered endpoint may cancel its exact token with empty payload. Overwrite both delivery regions and host capacity. No foreign policy mutation; cleanup bypasses traffic quotas but requires authority. Trusted startup route fixes exact endpoint names, semantic operation, opaque schema identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active threaded host calls and resumable/replay compilation profiles are refused. A live debugger value-observation profile is allowed; it does not grant recording, restoration or message authority. Detached scene queries never copy payloads; separately authorized debugger memory reads remain subject to debugger disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy defaults to true; false retains sender input bytes, including failure cleanup, without weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are outside this erasure contract.
+ * @details Guest import <tt>uwvm_ros_v2.module.call.cancel</tt>.
+ * Wire format: canonical_record.
+ * Request fields: token (u64), payload (bytes).
+ * Result fields: none.
+ * Host action: module.call.cancel.
+ * Applicable resource purposes: module.call.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_driver_connect(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Perform one nonblocking handshake on a registered inherited channel. Readiness grants no actuation authority; repeated handshake polling never launches code.
+ * @details Guest import <tt>uwvm_ros_v2.driver.connect</tt>.
+ * Wire format: canonical_record.
+ * Request fields: none.
+ * Result fields: connected (u64).
+ * Host action: driver.connect.
+ * Applicable resource purposes: driver.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_driver_submit(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Submit one bounded fixed-contract request. Exact in-flight retry returns its receipt without resending. Changed bytes or deadline conflict; submission is local transport acceptance, never physical completion.
+ * @details Guest import <tt>uwvm_ros_v2.driver.submit</tt>.
+ * Wire format: canonical_record.
+ * Request fields: sequence (u64), deadline (u64), payload (bytes).
+ * Result fields: sequence (u64).
+ * Host action: driver.submit.
+ * Applicable resource purposes: driver.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_driver_result(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Receive an exact sequence and incarnation-bound result. Failed guest delivery retains bytes. Timeout after send fences the session with effect_unknown; never retry a non-idempotent operation automatically.
+ * @details Guest import <tt>uwvm_ros_v2.driver.result</tt>.
+ * Wire format: canonical_record.
+ * Request fields: sequence (u64).
+ * Result fields: status (u64), payload (bytes).
+ * Host action: driver.result.
+ * Applicable resource purposes: driver.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_driver_describe(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Read detached session metadata only; never pump packets, infer physical safety, restart a driver or replenish authority.
+ * @details Guest import <tt>uwvm_ros_v2.driver.describe</tt>.
+ * Wire format: canonical_record.
+ * Request fields: none.
+ * Result fields: state (u64), sequence (u64), status (u64), effect_unknown (bool).
+ * Host action: driver.describe.
+ * Applicable resource purposes: driver.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
+
+/** @fn uint32_t wr_driver_disconnect(uint64_t arg0, uint32_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6)
+ * @brief Release this connection and erase retained buffers. Best-effort release and local descriptor closure never terminate a shared driver. Independent receiver expiry remains mandatory.
+ * @details Guest import <tt>uwvm_ros_v2.driver.disconnect</tt>.
+ * Wire format: canonical_record.
+ * Request fields: none.
+ * Result fields: released (u64).
+ * Host action: driver.disconnect.
+ * Applicable resource purposes: driver.
+ * @param arg0 Capability or object handle required by this operation.
+ * @param arg1 Index of the caller's linear memory.
+ * @param arg2 Address of the request bytes in that memory.
+ * @param arg3 Number of request bytes.
+ * @param arg4 Address of the caller's response buffer.
+ * @param arg5 Response buffer capacity in bytes.
+ * @param arg6 Address at which the host reports the response length, as a 64-bit word.
+ * @return The ROSv2 status code. Interpret response fields according to the operation contract.
+ */
