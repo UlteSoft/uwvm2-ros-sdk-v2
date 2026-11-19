@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/zig.md",
-      "bytes": 2919,
+      "bytes": 3085,
       "mode": 420,
-      "sha256": "d0e8785c178178ae96f6c2c2644bee25a957bdb57d236a80f28192f7e7f2c0ca"
+      "sha256": "b36c26e99c2d393159781fcd3d13fc455d0513723fa0f6ebce13e7bbc4566df6"
     },
     {
       "path": "document/zh/zig.md",
-      "bytes": 2520,
+      "bytes": 2683,
       "mode": 420,
-      "sha256": "4cecb433a0f9f597d66f805a8d343be214199ac89bf404c7e602109e49a21910"
+      "sha256": "751ec4588b3c8b68dbc031df1ac53f4f389db986b12d77f0ece10245e843a4d9"
     },
     {
       "path": "language/zig/check_site.py",
@@ -26,9 +26,9 @@
     },
     {
       "path": "language/zig/driver.py",
-      "bytes": 6968,
+      "bytes": 7056,
       "mode": 420,
-      "sha256": "0313f64180c3172979791246fafd12d5d4ca63c71d614b193171e9cf5e986fce"
+      "sha256": "40724a06428525de8ba5d24de12dd74d185df849346235120b94db81e9114ae0"
     },
     {
       "path": "language/zig/mark_mte.cpp",
@@ -47,6 +47,12 @@
       "bytes": 4328,
       "mode": 420,
       "sha256": "a10e995000e9c407140e0ac049b04047e4756c8ac5e1aab37c5b75e6d6acfdb8"
+    },
+    {
+      "path": "language/zig/scene.zig",
+      "bytes": 41825,
+      "mode": 420,
+      "sha256": "376eaa61db2e0629868c12e5956ac83d064741ac67e60b9f9a2e1a503a3454d8"
     },
     {
       "path": "language/zig/xmake/adapter.lua",

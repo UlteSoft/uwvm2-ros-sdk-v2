@@ -14,6 +14,11 @@ nim = ["## Fixed-width Wasm imports supplied by the ROSv2 VM.",
        "template wrAddress*(p: pointer): uint64 = uint64(cast[uint](p))", ""]
 d = ["/// Generated fixed-width D imports, linked through the SDK's Wasm C bindings.",
      "module wros_scene;", "extern(C) nothrow @nogc:", ""]
+zig = ["//! Generated ROSv2 raw bindings. Preserve pointer tag bits in every address argument.",
+       "//! Request and result layouts are defined in share/abi/ros.json.", ""]
+zig_leaf = {"abi": (), "capability.open": ("memory", "alias", "length", "result"),
+            "capability.close": ("capability",)}
+zig_wire = ("capability", "memory", "request", "length", "reply", "capacity", "written")
 d_shim = ["/* Generated D-to-Wasm ABI adapters. */", "#include <wros/scene.h>"]
 for op in abi["operations"]:
     name=op["name"]
@@ -32,9 +37,15 @@ for op in abi["operations"]:
     rs += [f'    #[link_name = "{name}"]', f"    pub fn {label}({rn}) -> u32;"]
     nn = ", ".join(f"a{i}: uint{t[1:]}" for i, t in enumerate(params))
     nim += [f"proc {label}*({nn}): uint32", f'  {{.importc: "{label}", header: "wros/scene.h".}}', ""]
+    labels = zig_leaf.get(name, zig_wire)
+    assert len(params) == len(labels)
+    zn = ", ".join(f"{arg}: u{t[1:]}" for arg, t in zip(labels, params))
+    zig += [f'extern "{module}" fn @"{name}"({zn}) u32;',
+            f"/// @brief Invoke the registered `{name}` operation.",
+            f'pub const {label} = @"{name}";', ""]
     ts += [f'@external("{module}", "{name}")',f"export declare function {label}({rn}): u32;"]
 for path, contents in [("include/wros/scene.h",c+["#ifdef __cplusplus","}","#endif"]),
-                       ("language/d/wros_scene.d",d), ("language/d/imports.c",d_shim),
+                       ("language/zig/scene.zig",zig[:-1]), ("language/d/wros_scene.d",d), ("language/d/imports.c",d_shim),
                        ("language/nim/wros_scene.nim",nim[:-1]), ("language/rust/scene.rs",rs+["}"]),("language/assemblyscript/scene.ts",ts)]:
     dest=root/path
     dest.parent.mkdir(parents=True,exist_ok=True)

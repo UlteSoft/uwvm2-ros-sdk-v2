@@ -1,6 +1,6 @@
 //! Query the installed ROS ABI before starting the controller.
-extern "uwvm_ros_v2" fn abi() u32;
+const scene = @import("wros_scene.zig");
 
 export fn _start() void {
-    if (abi() != 2) @trap();
+    if (scene.wr_abi() != 2) @trap();
 }

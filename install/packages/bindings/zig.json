@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "language/zig/scene.zig",
+      "bytes": 41825,
+      "mode": 420,
+      "sha256": "376eaa61db2e0629868c12e5956ac83d064741ac67e60b9f9a2e1a503a3454d8"
+    }
+  ]
+}

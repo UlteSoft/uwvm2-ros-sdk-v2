@@ -26,9 +26,9 @@
     },
     {
       "path": "examples/platform/boston_dynamics/common/zig/body.zig",
-      "bytes": 157,
+      "bytes": 172,
       "mode": 420,
-      "sha256": "8e4434f24fe3ac6fbf848e4995019c528e96b31e21baa65cb997b29a99463c9f"
+      "sha256": "6d0b3332ed71004950cbc1830b96f46979c0472c93a9a8199edfce7fedd647ab"
     },
     {
       "path": "examples/platform/boston_dynamics/common/zig/xmake.lua",
@@ -38,9 +38,9 @@
     },
     {
       "path": "examples/platform/boston_dynamics/extension/zig/body.zig",
-      "bytes": 797,
+      "bytes": 559,
       "mode": 420,
-      "sha256": "b971cd4711d0bdaf7fdacedd9b5826fb977521c24ce204f8b195960d5e9d4948"
+      "sha256": "7e6753ac60df0a698bd7da5d85f1bf7a3e5f9449ac80206e1abd3195ac4e1a2e"
     },
     {
       "path": "examples/platform/boston_dynamics/extension/zig/xmake.lua",

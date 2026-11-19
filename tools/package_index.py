@@ -115,7 +115,7 @@ def main():
                 managed_examples.extend(p.relative_to(ROOT).as_posix() for p in folder.iterdir() if p.is_file())
             package("examples/managed/" + platform + "/" + language, managed_examples)
     for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",
-                        "as": "language/assemblyscript/scene.ts"}.items():
+                        "as": "language/assemblyscript/scene.ts", "zig": "language/zig/scene.zig"}.items():
         package("bindings/" + key, [source])
     package("bindings/d", ["language/d/wros_scene.d", "language/d/imports.c", "include/wros/scene.h"])
     package("bindings/nim", ["language/nim/wros_scene.nim", "include/wros/scene.h"])
@@ -266,7 +266,7 @@ def main():
     ]
     language_files["zig"] = [
         "bin/wrzig", "document/en/zig.md", "document/zh/zig.md",
-        *["language/zig/" + name for name in ("release.py", "driver.py", "check_site.py", "prepare.py", "mark_mte.cpp")],
+        *["language/zig/" + name for name in ("release.py", "driver.py", "check_site.py", "prepare.py", "mark_mte.cpp", "scene.zig")],
     ]
     if set(language_files) != set(DEVELOPMENT):
         raise ValueError("developer payloads must match the revision hook")

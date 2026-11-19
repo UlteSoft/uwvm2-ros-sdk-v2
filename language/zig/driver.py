@@ -39,6 +39,7 @@ def build(source, output, toolchain, sysroots, profile, work, marker_digest=None
         raise ValueError("expected one regular Zig source file")
     app = work / "application.zig"
     app.write_bytes(read_bounded(source))
+    (work / "wros_scene.zig").write_bytes(read_bounded(SDK / "language/zig/scene.zig"))
     raw, marked, obj = (work / name for name in ("application.bc", "marked.bc", "application.o"))
     producer = zip_toolchain(toolchain, work)
     env = compiler_environment(toolchain)

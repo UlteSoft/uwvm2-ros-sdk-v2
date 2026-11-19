@@ -1,10 +1,5 @@
 //! Exercise the signed Zig controller and isolated driver through the typed ABI.
-extern "uwvm_ros_v2" fn @"capability.open"(memory: u32, address: u64, length: u64, result: u64) u32;
-extern "uwvm_ros_v2" fn @"driver.connect"(handle: u64, memory: u32, request: u64, size: u64, reply: u64, cap: u64, written: u64) u32;
-extern "uwvm_ros_v2" fn @"driver.submit"(handle: u64, memory: u32, request: u64, size: u64, reply: u64, cap: u64, written: u64) u32;
-extern "uwvm_ros_v2" fn @"driver.result"(handle: u64, memory: u32, request: u64, size: u64, reply: u64, cap: u64, written: u64) u32;
-extern "uwvm_ros_v2" fn @"driver.describe"(handle: u64, memory: u32, request: u64, size: u64, reply: u64, cap: u64, written: u64) u32;
-extern "uwvm_ros_v2" fn @"driver.disconnect"(handle: u64, memory: u32, request: u64, size: u64, reply: u64, cap: u64, written: u64) u32;
+const scene = @import("wros_scene.zig");
 
 const alias = "joint";
 var joint: u64 = 0;
@@ -32,8 +27,8 @@ fn put64(offset: usize, value: u64) void {
 }
 
 export fn _start() void {
-    if (@"capability.open"(0, @intFromPtr(alias.ptr), alias.len, @intFromPtr(&joint)) != 0) @trap();
-    if (poll(@"driver.connect", 0, 0) != 0) @trap();
+    if (scene.wr_capability_open(0, @intFromPtr(alias.ptr), alias.len, @intFromPtr(&joint)) != 0) @trap();
+    if (poll(scene.wr_driver_connect, 0, 0) != 0) @trap();
 
     sequence = 1;
     while (sequence <= steps) : (sequence += 1) {
@@ -42,16 +37,16 @@ export fn _start() void {
         if (success) {
             put64(target_offset, if (sequence % 2 != 0) 0x3fe0000000000000 else 0xbfe0000000000000);
         }
-        if (poll(@"driver.submit", @intFromPtr(&request), request.len) != 0) @trap();
-        const status = poll(@"driver.result", @intFromPtr(&sequence), @sizeOf(u64));
+        if (poll(scene.wr_driver_submit, @intFromPtr(&request), request.len) != 0) @trap();
+        const status = poll(scene.wr_driver_result, @intFromPtr(&sequence), @sizeOf(u64));
         if (crash) {
             if (status != 5 and status != 13) @trap();
-            if (invoke(@"driver.describe", 0, 0) != 0) @trap();
+            if (invoke(scene.wr_driver_describe, 0, 0) != 0) @trap();
             if (used < 32 or response[0] != 6 or response[3] != 1) @trap();
         } else {
             if (status != 0 or used < 24 or response[0] != @as(u64, if (success) 0 else 13)) @trap();
             if (response[2] != sequence) @trap();
         }
     }
-    if (invoke(@"driver.disconnect", 0, 0) != 0) @trap();
+    if (invoke(scene.wr_driver_disconnect, 0, 0) != 0) @trap();
 }
