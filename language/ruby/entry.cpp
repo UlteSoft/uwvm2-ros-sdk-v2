@@ -4,6 +4,7 @@
  */
 #include <mruby.h>
 #include <mruby/array.h>
+#include <mruby/class.h>
 #include <mruby/compile.h>
 #include <mruby/data.h>
 #include <mruby/error.h>
