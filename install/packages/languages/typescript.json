@@ -14,9 +14,9 @@
     },
     {
       "path": "bin/wrts",
-      "bytes": 8364,
+      "bytes": 8398,
       "mode": 493,
-      "sha256": "145cf1ff28f92279c096c485a77e6963a6f3cb4a77c6e36059a984a15695753b"
+      "sha256": "5cce2a7d5268b042e43cd33e85c086a502aac43e38fd53435f1b0dd54557130e"
     },
     {
       "path": "document/en/typescript.md",

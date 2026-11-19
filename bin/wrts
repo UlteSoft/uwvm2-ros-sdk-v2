@@ -129,7 +129,7 @@ def main():
         request.write_text(json.dumps(dict(sources=files, entry=files[0]["name"], declarations=declarations)))
         script, wasm = stage / "application.js", stage / "application.wasm"
         driver = ROOT / "language/typescript/compile.cjs"
-        subprocess.run([node, "--no-addons", "--max-old-space-size=256", driver, directory, request, script],
+        subprocess.run([node, "--jitless", "--single-threaded", "--no-addons", "--max-old-space-size=256", driver, directory, request, script],
                        cwd=stage, env={"LANG": "C", "TZ": "UTC"}, check=True, timeout=90)
         args_js = [sys.executable, ROOT / "bin/wrjs", script, "-o", wasm, "--target", args.target,
                    "--mte" if args.mte else "--no-mte", "--build-receipt"]

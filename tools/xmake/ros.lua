@@ -79,10 +79,13 @@ end
 -- Each case executes its own VM process and propagates the guest exit or trap.
 function add_wros_tests(...)
     local engines = {...}
-    assert(#engines > 0, "select at least one of int and aot")
+    if #engines == 0 then set_values("wros.unknown", "no VM test engine selected") end
     for _, engine in ipairs(engines) do
-        assert(engine == "int" or engine == "aot", "unsupported VM test engine")
-        add_tests(engine)
+        if engine == "int" or engine == "aot" then
+            add_tests(engine)
+        else
+            set_values("wros.unknown", "unsupported VM test engine")
+        end
     end
 end
 
