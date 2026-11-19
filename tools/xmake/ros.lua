@@ -10,6 +10,14 @@ toolchain("wros.guest")
     on_check(function () return true end)
 toolchain_end()
 
+--- @brief Pass the build profile to the test and run commands.
+local function guest_args(target, request)
+    return {path.join(request.root, "tools/xmake/run_guest.py"), path.absolute(target:targetfile()),
+            request.arch, request.core, request.threads and "threads" or "single",
+            "--exceptions", request.eh and "eh" or "noeh",
+            request.mte and "--check-tags" or "--disable-tags"}
+end
+
 rule("wros.source")
     set_extensions(".c", ".cc", ".cpp", ".cxx", ".C", ".lua", ".js", ".go", ".mod", ".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn",
                    ".rs", ".java", ".kt", ".cs", ".vb", ".fs", ".ts", ".py", ".nim", ".m", ".d", ".o", ".a")
@@ -28,10 +36,7 @@ rule("wros.application")
         assert(engine == "int" or engine == "aot", "use add_wros_tests for Wasm execution tests")
         local req = assert(target:data("wros.request"))
         assert(req.kind == "binary", "a VM test requires an executable Wasm target")
-        local args = {path.join(req.root, "tools/xmake/run_guest.py"), path.absolute(target:targetfile()),
-                      req.arch, req.core, req.threads and "threads" or "single", "--engine", engine,
-                      "--exceptions", req.eh and "eh" or "noeh"}
-        if req.mte then table.insert(args, "--check-tags") end
+        local args = table.join(guest_args(target, req), {"--engine", engine})
         local queries = table.wrap(target:values("wros.test_queries"))
         if #queries > 0 then table.join2(args, {"--queries", table.concat(queries, ",")}) end
         local policy = target:values("wros.test_policy")
@@ -47,8 +52,7 @@ rule("wros.application")
         assert(not option.get("arguments") and not target:get("runargs"), "Use the deployment VM for guest arguments")
         local request = assert(target:data("wros.request"))
         assert(request.kind == "binary", "Only a Wasm application can run")
-        os.execv("python3", {path.join(request.root, "tools/xmake/run_guest.py"),
-            path.absolute(target:targetfile()), request.arch, request.core, request.threads and "threads" or "single"})
+        os.execv("python3", guest_args(target, request))
     end)
 rule_end()
 
