@@ -14,15 +14,15 @@
     },
     {
       "path": "document/en/python.md",
-      "bytes": 6316,
+      "bytes": 6512,
       "mode": 420,
-      "sha256": "569e53b8cc8580fcfa0c0c55f1766d8ed0c21b62ec23f4ebe46c596ecf52b00c"
+      "sha256": "a2e41e4df21b3778cb65bc4f9661d3207e04e60a5bd2b31ea50e8f7d23cf8dab"
     },
     {
       "path": "document/zh/python.md",
-      "bytes": 5101,
+      "bytes": 5275,
       "mode": 420,
-      "sha256": "026e7e0fc5370ae8c64d99520c62d7ea25a6de6c240f4ab2a8490955d953302f"
+      "sha256": "82d91e47b4eb7ee5ebf42a9c9c7ca4d075e90ba2ad177cee5c2eb291a8290560"
     },
     {
       "path": "examples/py/body.py",

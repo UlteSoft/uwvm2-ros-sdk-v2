@@ -48,8 +48,10 @@ def main():
         parser.error("unknown language: " + args.language)
     if args.python_target and len(args.python_target) > 1:
         parser.error("select one --python-target per installation")
-    if args.python_target is not None and (args.language != "py" or args.component not in ("development", "compiler-source")):
-        parser.error("--python-target requires the Python development or compiler-source component")
+    if args.python_target is not None and (
+        args.language != "py" or args.component not in ("development", "compiler-source", "migration")
+    ):
+        parser.error("--python-target requires Python development, compiler-source or migration")
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")

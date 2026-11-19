@@ -15,6 +15,8 @@ export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/py/development"
 
 For a 64-bit project, select the signed wasm64 C site and append `-- --python-target wasm64` to the installer command. Its installer fetches one matching runtime archive. Use separate prefixes when both pointer widths are required at this revision. Configure an Xmake project with `xmake f -a wasm64` or pass `--target wasm64` to the compiler.
 
+The migration selection accepts the same target option. Pass `-- --component migration --python-target wasm64` to fetch the wasm64 runtime and the selected platform's editable migration project.
+
 The default linker uses the locally authenticated C toolchain. The distributed CPython target archive carries the compiler, libc closure, source release and build recipe hashes. An exact match permits a fast link using the verified archive. An unmatched runtime is built from the vendored Python.org source. A cold build currently requires a Linux development host with GNU Make, POSIX shell, system C compiler, binutils and writable executable temporary storage beside the output. It builds the matching host Python solely to freeze startup encodings. Cross-compilation uses the selected Wasm compiler and sysroot.
 
 | Option | Behavior |

@@ -25,8 +25,9 @@ def main():
     root, vm, xmake, output = [p.resolve() for p in (a.installed, a.vm, a.xmake, a.output)]
     platform = root.parents[1].name
     revision = root.parents[2].name
-    if root.parent.name != "py" or root.name != "development" or not re.fullmatch("[0-9a-f]{40}", revision):
-        raise ValueError("provide a commit-pinned Python development installation")
+    if (root.parent.name != "py" or root.name not in ("development", "migration")
+            or not re.fullmatch("[0-9a-f]{40}", revision)):
+        raise ValueError("provide a commit-pinned Python development or migration installation")
     output.mkdir()
     sys.path.insert(0, str(root / "install"))
     from imports import inspect
@@ -37,7 +38,8 @@ def main():
     def digest(path):
         with path.open("rb") as stream:
             return hashlib.file_digest(stream, "sha256").hexdigest()
-    results = dict(sdk_commit=revision, platform=platform, target=a.target, vm_sha256=digest(vm), steps=[], modules={})
+    results = dict(sdk_commit=revision, platform=platform, component=root.name, target=a.target,
+                   vm_sha256=digest(vm), cgroup=Path("/proc/self/cgroup").read_text().strip(), steps=[], modules={})
     def save():
         (output / "results.json").write_text(json.dumps(results, indent=2) + "\n")
     def run(name, argv, cwd):

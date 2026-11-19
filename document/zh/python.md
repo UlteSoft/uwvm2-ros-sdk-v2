@@ -15,6 +15,8 @@ export UWVM_ROS_SDK_ROOT="$PREFIX/$REV/unitree/py/development"
 
 要开发 64 位程序，指定已签名的 wasm64 C 站点，并在安装命令末尾加上 `-- --python-target wasm64`。安装器只拉取该宽度的运行库。两个宽度并存时使用不同的安装前缀。Xmake 可执行 `xmake f -a wasm64`，直接调用编译器可传入 `--target wasm64`。
 
+移植安装支持同一个目标选项。传入 `-- --component migration --python-target wasm64`，即可拉取 wasm64 运行库和所选平台的可编辑移植工程。
+
 安装程序按提交、语言和平台选择文件。SDK 核对目标解释器归档、构建配方、编译器和 libc 配置的摘要。完全匹配时，修改脚本只需重新链接。其他组合从仓内固定版本的 Python.org 源码构建。冷构建在 Linux 开发机上需要 GNU Make、shell、系统 C 编译器和 binutils，并在输出目录旁创建可执行临时目录。构建过程使用同版本主机工具生成启动编码，应用程序始终在 Wasm 内执行。
 
 | 参数 | 用途 |

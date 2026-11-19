@@ -124,6 +124,23 @@ class Installer(unittest.TestCase):
                 self.assertEqual([p for p in plan["packages"] if p.startswith("languages/")],
                                  ["languages/" + language])
                 self.assertTrue(all(p.startswith("install/") for p in source.requested))
+    def test_cpython_runtime_width_is_selective_for_development_and_migration(self):
+        """@brief Ensure each Python selection fetches only the requested guest runtime."""
+        for component in ("development", "migration"):
+            for width in ("wasm32", "wasm64"):
+                with self.subTest(component=component, width=width):
+                    prefix = self.prefix / width
+                    result = install(Source(self.commit, root), "abb", "py", prefix,
+                                     ["--component", component, "--python-target", width])
+                    names = [p for p in result["requested_paths"] if p.startswith("third-parties/cpython-runtime/")]
+                    stem = "third-parties/cpython-runtime/" + width + "-wasip1-core3.0-eh-mte"
+                    self.assertEqual(sorted(names), [stem + ".json", stem + ".tar.xz"])
+                    self.assertIn("examples/platform/abb/migration/py/xmake.lua", result["requested_paths"])
+                    # Development and migration can coexist. A single installation cannot change width.
+                    other = "wasm64" if width == "wasm32" else "wasm32"
+                    with self.assertRaisesRegex(ValueError, "existing selection differs"):
+                        install(Source(self.commit, root), "abb", "py", prefix,
+                                ["--component", component, "--python-target", other])
     def test_selective_and_retry(self):
         source=Source(self.commit,root)
         plan=install(source,"unitree","c",self.prefix,[],True)
