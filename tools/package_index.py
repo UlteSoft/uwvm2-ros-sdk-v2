@@ -78,6 +78,9 @@ def main():
     registry = json.loads((ROOT / "share/targets.json").read_text())
     render_inventory(registry)
     package("license", ["LICENSE"])
+    package("migration/tf2-buffer", ["tools/migration/tf2_buffer_port.py",
+                                     "tools/migration/tf2_single_executor_mutex.hpp",
+                                     "document/en/tf2-buffer-port.md", "document/zh/tf2-buffer-port.md"])
     package("migration/resources", [
         "tools/migration/package_manifest.py", "tools/migration/package_resources.py",
         "include/wros/package_resources.h", "document/en/migration.md", "document/zh/migration.md",

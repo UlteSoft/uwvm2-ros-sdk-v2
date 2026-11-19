@@ -3,6 +3,11 @@
 #include <chrono>
 #include <cmath>
 #include <string>
+#include <sstream>
+#if defined(WROS_TF2_THREADED)
+#include <atomic>
+#include <thread>
+#endif
 
 using namespace std::chrono_literals;
 
@@ -22,7 +27,62 @@ static tf2::TimePoint stamp(int second) { return tf2::TimePoint(std::chrono::sec
 
 static bool close(double a, double b) { return std::abs(a - b) < 1e-9; }
 
+static bool check_yaml() {
+    const std::u16string characters{0, u'A', u'"', u'\\', 0x80, 0x03a9, 0xd800, 0xdc00};
+    std::ostringstream out;
+    rosidl_generator_traits::value_to_yaml(characters, out);
+    // Jazzy emits raw ASCII, skips embedded NUL and escapes each non-ASCII code unit.
+    return out.str() == "\"A\"\\\\x80\\u03a9\\ud800\\udc00\"";
+}
+
+#if defined(WROS_TF2_SINGLE_EXECUTOR)
+static bool check_lock() {
+    wros_tf2::single_executor_mutex mutex;
+    try {
+        std::unique_lock outer(mutex);
+        try {
+            std::unique_lock nested(mutex);
+            return false;
+        } catch (const std::logic_error&) {}
+        throw 42;
+    } catch (int value) {
+        if (value != 42) return false;
+    }
+    std::unique_lock after_unwind(mutex);
+    return after_unwind.owns_lock();
+}
+#endif
+
+#if defined(WROS_TF2_THREADED)
+static bool check_parallel() {
+    tf2::BufferCore buffer(10s);
+    if (!insert(buffer, "map", "camera", 1, 2, 0, 1, true)) return false;
+    std::atomic<bool> ready{false}, valid{true};
+    auto reader = [&] {
+        while (!ready.load(std::memory_order_acquire)) std::this_thread::yield();
+        for (unsigned i = 0; i < 512; ++i) {
+            const auto pose = buffer.lookupTransform("map", "camera", stamp(1));
+            const auto x = pose.transform.translation.x;
+            if (x != 2 && x != 3) valid.store(false);
+        }
+    };
+    std::thread first(reader), second(reader);
+    ready.store(true, std::memory_order_release);
+    for (unsigned i = 0; i < 512; ++i)
+        if (!insert(buffer, "map", "camera", 1, 2 + (i & 1), 0, 1, true)) valid.store(false);
+    first.join();
+    second.join();
+    return valid.load();
+}
+#endif
+
 static int check_buffer() {
+    if (!check_yaml()) return 11;
+#if defined(WROS_TF2_SINGLE_EXECUTOR)
+    if (!check_lock()) return 12;
+#elif defined(WROS_TF2_THREADED)
+    if (!check_parallel()) return 13;
+#endif
     tf2::BufferCore buffer(10s);
     // Odom->base moves linearly by 2m and rotates by a half turn in 2s.
     // Base->camera is a fixed 1m offset on the robot's forward axis.

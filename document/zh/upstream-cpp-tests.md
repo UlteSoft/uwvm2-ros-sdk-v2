@@ -92,3 +92,7 @@ AOT。每次指定新目录。构建失败时保留编译器原文和 `complete=
 文件系统、套接字、环境或时钟的操作权限。WASI 构建在一个翻译单元中
 选择上游 `rcutils` 的 XSI `strerror_r` 分支。BufferCore 测试使用原版
 日志宏的 `NONE` 编译级别。DDS 接收、日志、线程配置及并发修改树仍需验证。
+
+C++ 迁移组件另提供了按摘要验证的 Jazzy BufferCore 适配。Wasm 坐标树测试可添加
+`--port single-executor` 测试单执行器，或添加 `--port threaded` 测试保留原版
+互斥锁的配置。原版结果使用默认的 `--port upstream`。见[安装及构建说明](tf2-buffer-port.md)。

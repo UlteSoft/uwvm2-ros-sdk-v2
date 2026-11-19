@@ -70,6 +70,8 @@ def main():
                 if args.language not in ("c", "cpp"):
                     parser.error("the migration resource component currently requires c or cpp")
                 packages.extend(("migration/resources", "migration/policy"))
+                if args.language == "cpp":
+                    packages.append("migration/tf2-buffer")
             if args.component == "compiler-source":
                 packages.append("compiler-source")
                 if args.language == "nim":

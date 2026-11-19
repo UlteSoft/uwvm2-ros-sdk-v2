@@ -39,14 +39,19 @@ def main():
         parser.add_argument("--" + name, required=True, type=lambda s: Path(s).resolve())
     parser.add_argument("--layer", required=True, choices=("buffer", "cache"))
     parser.add_argument("--target", required=True, choices=("native", "wasm"))
+    parser.add_argument("--port", choices=("upstream", "single-executor", "threaded"), default="upstream")
     a = parser.parse_args()
+    if a.port != "upstream" and a.layer != "buffer":
+        parser.error("the compatibility port is specific to BufferCore")
+    if a.port == "single-executor" and a.target != "wasm":
+        parser.error("the single-executor port is restricted to nonshared Wasm")
     group = cgroup_record()
     if ".tmp" not in a.output.parts:
         parser.error("use a fresh directory in a project .tmp")
     a.output.mkdir(mode=0o700, parents=True, exist_ok=False)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     env = dict(os.environ, TMPDIR=str(a.output), PATH="/usr/bin:/bin", PYTHONDONTWRITEBYTECODE="1")
-    report = dict(complete=False, layer=a.layer, target=a.target, cgroup=group, commands=[],
+    report = dict(complete=False, layer=a.layer, target=a.target, port=a.port, cgroup=group, commands=[],
                   runnerSha256=sha(Path(__file__)), vmSha256=sha(a.vm))
     result = a.output / "results.json"
 
@@ -94,8 +99,23 @@ def main():
                    for d in generated for p in sorted(d.rglob("*")) if p.is_file()}
         save(a.output / "header-inputs.json", mapping)
         report["installedJazzyHeadersSha256"] = sha(a.output / "header-inputs.json")
-    includes = [flag for p in [src / "include", rc / "include", *generated] for flag in ("-I", p)]
+    overlays = []
+    source_paths = {u:src / u for u in units}
+    if a.port != "upstream":
+        recipe = Path(__file__).resolve().parents[2] / "tools/migration/tf2_buffer_port.py"
+        port = a.output / "port"
+        check("prepare-port", [sys.executable, "-I", "-B", recipe, "--tf2-source", src, "--ros-prefix",
+                               a.ros_prefix, "--output", port, "--execution", a.port])
+        report["portManifest"] = json.loads((port / "port.json").read_bytes())
+        report["portRecipeSha256"] = sha(recipe)
+        source_paths["src/buffer_core.cpp"] = Path(report["portManifest"]["buffer_source"])
+        overlays.append(port / "include")
+    includes = [flag for p in [*overlays, src / "include", rc / "include", *generated] for flag in ("-I", p)]
     flags = ["-D", "RCUTILS_LOG_MIN_SEVERITY=RCUTILS_LOG_MIN_SEVERITY_NONE", *includes]
+    if a.port == "threaded":
+        flags += ["-pthread", "-D", "WROS_TF2_THREADED=1"]
+    elif a.port == "single-executor":
+        flags += ["-D", "WROS_TF2_SINGLE_EXECUTOR=1"]
     save(result, report)
     if a.target == "native":
         # Use the C frontend and XSI strerror_r for the original rcutils C units.
@@ -108,7 +128,7 @@ def main():
         for unit in units:
             obj = a.output / (Path(unit).stem + ".o")
             check("cpp-" + obj.stem, ["/usr/bin/g++", "-std=c++20", "-O3", "-g", *flags,
-                                      "-c", src / unit, "-o", obj])
+                                      "-c", source_paths[unit], "-o", obj])
             objects.append(obj)
         for negative in (0, 1):
             label = "changed-reference" if negative else "reference"
@@ -134,23 +154,54 @@ def main():
         check(label + "-build", [a.sdk / "bin/wrcc", "--std", "c++20", "-O3", "-g", "--target",
               "wasm32", "--reactor", "--export", "_start", "--build-receipt", *flags,
               "-I", rc / "src", "-D", f"WROS_CHANGED_REFERENCE={negative}", fixture,
-              *(src / u for u in units), rc / c_units[0], xsi, "-o", module])
+              *source_paths.values(), rc / c_units[0], xsi, "-o", module])
         receipt = Path(str(module) + ".wros-build.json")
-        if json.loads(receipt.read_bytes())["mode"] != "strict":
+        record = json.loads(receipt.read_bytes())
+        if record["profile"]["threads"] != (a.port == "threaded") or record["profile"]["exceptions"] != "eh":
+            raise ValueError("unexpected thread/exception profile")
+        if record["mode"] != "strict":
             raise ValueError("strict MTE build required")
         check(label + "-verify", [sys.executable, "-B", a.sdk / "install/qualification.py",
               "--vm", a.vm, "--artifact", module, "--receipt", receipt, "--approved-receipt-sha256", sha(receipt)])
-        imports = inspect(module.read_bytes())
+        from imports import Reader, require_core
+        binary = module.read_bytes()
+        imports = inspect(binary)
+        reader = Reader(binary)
+        require_core(reader)
+        memory_flags = []
+        while reader.position < len(reader.data):
+            kind = reader.byte()
+            section = Reader(reader.take(reader.uint()))
+            if kind == 5:
+                for _ in range(section.count()):
+                    limits = section.uint()
+                    if limits & ~3:
+                        raise ValueError("expected standard wasm32 memory limits")
+                    memory_flags.append(limits)
+                    section.uint()
+                    if limits & 1:
+                        section.uint()
+                section.end()
+        if len(memory_flags) != 1 or bool(memory_flags[0] & 2) != (a.port == "threaded"):
+            raise ValueError("expected one locally defined memory with matching sharedness")
         policy = ["--wasip1-single-create", "module.wasm", "--wasip1-single-enable", "module.wasm"]
         for imp in imports:
+            if a.port == "threaded" and imp == dict(module="wasi", name="thread-spawn", kind=0,
+                                                     params=["i32"], results=["i32"]):
+                policy += ["--wasithread-single-create", "module.wasm", "--wasithread-single-enable", "module.wasm",
+                           "--wasithread-single-interface", "module.wasm", "thread-spawn", "allow",
+                           "--wasithread-single-limit", "module.wasm", "max-extra-threads", "2",
+                           "--wasithread-single-limit", "module.wasm", "max-threads", "3",
+                           "--wasithread-single-limit", "module.wasm", "max-spawns", "2"]
+                continue
             if (imp["module"] != "wasi_snapshot_preview1" or imp["kind"] != 0 or
                     WASI.get(imp["name"]) != (imp.get("params"), imp.get("results"))):
                 raise ValueError("unexpected guest input " + repr(imp))
             policy += ["--wasip1-single-interface", "module.wasm", imp["name"], "deny"]
-        report["imports"][label] = dict(imports=imports, policy=policy, guestSha256=sha(module))
+        report["imports"][label] = dict(imports=imports, policy=policy, memoryFlags=memory_flags, guestSha256=sha(module))
         for engine in ("int","aot"):
             name = label + "-" + engine
-            cmd = [a.vm, *Profile().uwvm_feature_flags(), "--debug-fault-action", "exit", "--runtime-" + engine,
+            cmd = [a.vm, *Profile(threads=a.port == "threaded").uwvm_feature_flags(), "--debug-fault-action", "exit", "--runtime-" + engine,
                    "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable", *policy, "--run", module]
             if negative:
                 status = step(name, cmd)

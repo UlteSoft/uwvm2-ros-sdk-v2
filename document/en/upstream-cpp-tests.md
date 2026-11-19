@@ -113,3 +113,9 @@ access. The WASI build selects the original XSI `strerror_r` branch of
 macros at the upstream `NONE` level. These results cover in-memory behavior.
 DDS reception, logging, the threaded profile and concurrent tree mutation
 need separate validation.
+
+The C++ migration component also includes a digest-pinned Jazzy BufferCore
+port. Add `--port single-executor` to the Wasm buffer command for the
+registered adaptation or `--port threaded` for the genuine mutex profile.
+Original source results use the default `--port upstream`. See the
+[installation and build instructions](tf2-buffer-port.md).
