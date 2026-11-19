@@ -8,9 +8,9 @@
     },
     {
       "path": "bin/wrjs",
-      "bytes": 5959,
+      "bytes": 6771,
       "mode": 493,
-      "sha256": "82f835be6a556e31fad068ca73316807867bea7ca00764533f313a0d5637f4ef"
+      "sha256": "023d5f53eac5df79db738b091e141637fab8e71d38311f469c8ab21406f01991"
     },
     {
       "path": "document/en/js.md",
@@ -62,9 +62,9 @@
     },
     {
       "path": "third-parties/quickjs/README.md",
-      "bytes": 956,
+      "bytes": 1389,
       "mode": 420,
-      "sha256": "cf50592981b3eb7f8863acff42d823ac4257c97bd7e0a036772fbb2efb19cdb6"
+      "sha256": "3a3b8c4b82e2ce3d9aa8ac1348337aa7b0325f9afffb91ca577792e489a8d493"
     },
     {
       "path": "third-parties/quickjs/cutils.c",
@@ -133,6 +133,24 @@
       "sha256": "4ee9eda6f7eb739a1860fd7c3239943d808619b0464a42c8552d6c695afbbfe8"
     },
     {
+      "path": "third-parties/quickjs/official-source.json",
+      "bytes": 3916,
+      "mode": 420,
+      "sha256": "98a8ca8ccd0817b1528904f978c16f7b3698e9cdf03c6cc5b6e22727965dde76"
+    },
+    {
+      "path": "third-parties/quickjs/official-source.patch.xz",
+      "bytes": 446248,
+      "mode": 420,
+      "sha256": "a028d3a6c178d8fce6560152563e9b1fb48811cd05ef6bced44711f8f3d2595f"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs-2026-06-04.tar.xz",
+      "bytes": 621500,
+      "mode": 420,
+      "sha256": "b376e839b322978313d929fd20663b11ba58b75df5a46c126dd19ea2fa70ad2a"
+    },
+    {
       "path": "third-parties/quickjs/quickjs-atom.h",
       "bytes": 8544,
       "mode": 420,
@@ -161,6 +179,12 @@
       "bytes": 8029,
       "mode": 420,
       "sha256": "8c2916d8df39bc3066eb59ec21e345e7d5412df078641ae7abdab54bee627506"
+    },
+    {
+      "path": "third-parties/quickjs/verify_release.py",
+      "bytes": 3006,
+      "mode": 420,
+      "sha256": "141cf4973f1193a8dde6a02f158316736216267ded191b48ff01d5d69bcfa6c9"
     },
     {
       "path": "third-parties/quickjs/wasm-quickjs-call-storage.patch",

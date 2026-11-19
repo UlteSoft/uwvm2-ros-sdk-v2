@@ -72,9 +72,21 @@ def main():
     with tempfile.TemporaryDirectory(dir=args.output.parent) as scratch:
         stage = Path(scratch).resolve()
         inputs = {}
-        for path in [ROOT / "language/js/entry.c", *sorted(source.glob("*.h")), *[source / (n + ".c") for n in UNITS]]:
+        with (source / "official-source.json").open("rb") as stream:
+            release = stream.read(4097)
+        if sha(release) != "98a8ca8ccd0817b1528904f978c16f7b3698e9cdf03c6cc5b6e22727965dde76":
+            raise ValueError("unexpected QuickJS official release manifest")
+        manifest = json.loads(release)
+        engine_files = {name for name in manifest["files"] if name.endswith((".h", ".c"))}
+        paths = [*sorted(source.glob("*.h")), *[source / (n + ".c") for n in UNITS]]
+        if {path.name for path in paths} != engine_files:
+            raise ValueError("unexpected QuickJS release source inventory")
+        for path in [ROOT / "language/js/entry.c", *paths]:
             data = read_bounded(path)
-            inputs[path.relative_to(ROOT).as_posix()] = sha(data)
+            digest = sha(data)
+            if path.parent == source and digest != manifest["files"][path.name]["sdk_sha256"]:
+                raise ValueError("QuickJS source differs from the reviewed official release adaptation: " + path.name)
+            inputs[path.relative_to(ROOT).as_posix()] = digest
             (stage / path.name).write_bytes(data)
         literal = "\n".join('"' + "".join("\\%03o" % c for c in script[i:i+128]) + '"'
                             for i in range(0, len(script), 128)) or '""'
