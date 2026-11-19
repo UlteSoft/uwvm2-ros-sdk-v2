@@ -28,6 +28,7 @@ export WROS_TOOLCHAIN=/path/to/wasm-llvm
 | `--entry Module.Method` | 编译一个接收 `int` 并返回 `int` 的 F# 函数，以 `evaluate(i32) -> i32` 导出。 |
 | `--scene-entry Module.Method` | 编译一个 `unit -> int` 的入口，该入口将 `Wros.Scene.Abi()` 的返回值传给本模块的策略函数。 |
 | `--mte` | 默认启用 WasmMTE 代码生成，并证明最终整数函数不依赖线性内存、其他调用或宿主导入。经过检查的场景启动器添加一个类型固定的导入。 |
+| `--eh`、`--no-eh` | 选择是否启用标准 Wasm 异常代码生成特性。当前经过检查的函数不支持托管异常处理。 |
 | `--no-mte` | 关闭 WasmMTE 代码生成，最终产物仍需通过同一整数函数检查。 |
 | `--host-cxx PATH` | 指定编译方法提取器的宿主 C++ 编译器。 |
 | `--target wasm32`、`-o FILE.wasm` | 以 `-O3 -g` 生成单个 Core Wasm 模块。 |

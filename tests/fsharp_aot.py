@@ -66,7 +66,9 @@ def main():
     run("cli",[*cli,"--scene-entry","Robot.Start",sample,"-o",direct])
     plain = out/"plain.wasm"
     run("plain",[*cli,"--no-mte","--scene-entry","Robot.Start",sample,"-o",plain])
-    for name, module in (("xmake",installed),("cli",direct),("plain",plain)):
+    noeh = out/"no-eh.wasm"
+    run("no-eh",[*cli,"--no-eh","--scene-entry","Robot.Start",sample,"-o",noeh])
+    for name, module in (("xmake",installed),("cli",direct),("plain",plain),("no-eh",noeh)):
         data = module.read_bytes()
         if inspect(data) != [{"module":"uwvm_ros_v2","name":"abi","kind":0,"params":[],"results":["i32"]}]:
             raise ValueError("unexpected ROS or WASI import")
@@ -74,9 +76,13 @@ def main():
             raise ValueError("unexpected state in a register-only ROS application")
         if b"WasmROS F# + Mono LLVMOnly" not in data or b"Robot.fs" not in data:
             raise ValueError("missing F# source attribution in Wasm")
+        if name == "no-eh" and b"exception-handling" in data:
+            raise ValueError("disabled EH target still advertises exception handling")
         report["products"][name] = sha(module)
         for engine in ("int","aot"):
             base = [*vm(engine),"--wasm-set-main-module-name","main"]
+            if name == "no-eh":
+                base = ["--wasm-feature-disable-exceptions" if a=="--wasm-feature-enable-exceptions" else a for a in base]
             bind = ["--ros-scene-create","robot","--ros-scene-bind","robot","main","--ros-scene-interface","robot","abi"]
             run(name+"-"+engine+"-hidden",[*base,"--run",module],b"scene interface is hidden")
             run(name+"-"+engine+"-allowed",[*base,*bind,"allow","--run",module])
@@ -99,7 +105,7 @@ def main():
     destination = out/"existing.wasm"
     destination.write_bytes(b"known prior output")
     for name, body, error in (
-        ("state","let mutable state = 2\nlet Scale(n:int) = n + state","needs the CLR"),
+        ("state","let mutable state = 2\nlet Scale(n:int) = n + state","unsupported numeric IL operation: call"),
         ("heap","let Scale(n:int) = let items = Array.create n n in items.[0]","unsupported numeric IL operation"),
         ("script-reference",'#r "unapproved.dll"\nlet Scale(n:int) = n',"error FS"),
     ):

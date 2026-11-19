@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/fsharp.md",
-      "bytes": 3550,
+      "bytes": 3698,
       "mode": 420,
-      "sha256": "4db88542e65fadd4a29da73269a7d073e38da0da3f1981ce7e8cb39c54e0c66d"
+      "sha256": "e3c0d099b4ac25e3ea8e501729da044dcda34dab7239e8b1e42c124f56b185a4"
     },
     {
       "path": "document/zh/fsharp.md",
-      "bytes": 3336,
+      "bytes": 3476,
       "mode": 420,
-      "sha256": "de849398d65fd5309d080ce94b1ae71994b45c595ea1d7d3dad8ae1cd4cbd015"
+      "sha256": "132fbae2eaca586a56d662206540887c249f143aa4b53914b9bbd204477d01be"
     },
     {
       "path": "examples/fsharp/scene-abi/Robot.fs",
@@ -74,9 +74,9 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 10735,
+      "bytes": 11084,
       "mode": 420,
-      "sha256": "dd146b168bcc7e0a1b5e7ba3dbf9f20afa1fe0b21c82b0d319ac2fdc2e852248"
+      "sha256": "1c75df0c3b519d4ea6d9068e6204808bc75333642f6f8e456131d2379b22dde8"
     },
     {
       "path": "language/csharp/packages.json",
@@ -104,9 +104,9 @@
     },
     {
       "path": "language/fsharp/xmake/adapter.lua",
-      "bytes": 1559,
+      "bytes": 1580,
       "mode": 420,
-      "sha256": "5761a8db5dc560a61c85e3493aba7a3f8c31f7be696a5dde8b5337905e03d80c"
+      "sha256": "9582bffdf1add416aaccd240ad4954975dea52129b744103a94525312fd97bb3"
     }
   ]
 }

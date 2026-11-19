@@ -3,7 +3,7 @@ function describe()
 end
 
 function validate(target, request)
-    assert(request.kind == "binary" and request.arch == "wasm32" and request.core == "3.0" and request.eh and not request.threads,
+    assert(request.kind == "binary" and request.arch == "wasm32" and request.core == "3.0" and not request.threads,
            "F# AOT requires a final wasm32 Core 3.0 single-thread module")
     assert(request.mte_flag ~= "--legacy-mte", "Select the checked F# profile")
     assert(#request.operations == 0 or (#request.operations == 1 and request.operations[1] == "abi"),
@@ -18,7 +18,7 @@ function validate(target, request)
 end
 
 function build(target, request, sources)
-    local args = {"--target", request.arch, request.mte_flag, #request.operations == 1 and "--scene-entry" or "--entry",
+    local args = {"--target", request.arch, request.eh and "--eh" or "--no-eh", request.mte_flag, #request.operations == 1 and "--scene-entry" or "--entry",
                   request.exports[1], "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
                   "--dotnet", assert(os.getenv("WROS_DOTNET")), "--mono-compiler", assert(os.getenv("WROS_MONO")),
                   "-o", target:targetfile()}

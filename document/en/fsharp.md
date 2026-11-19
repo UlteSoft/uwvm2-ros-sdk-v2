@@ -28,6 +28,7 @@ Use a global F# module, one public integer policy and, for a scene application, 
 | `--entry Module.Method` | Compile an F# function taking one `int` and returning `int`. Export it as `evaluate(i32) -> i32`. |
 | `--scene-entry Module.Method` | Compile a `unit -> int` entry which passes the result of `Wros.Scene.Abi()` to a policy function in the same module. |
 | `--mte` | Default. Use the WasmMTE producer and prove the final integer kernel has no linear memory, calls or host imports. The checked scene wrapper adds one typed import. |
+| `--eh` or `--no-eh` | Enable or disable the standard Wasm EH code-generation feature. The checked kernel cannot use managed exception handling. |
 | `--no-mte` | Disable WasmMTE code generation. The same closed-function proof applies. |
 | `--host-cxx PATH` | Choose the host C++ compiler for the extractor. |
 | `--target wasm32`, `-o FILE.wasm` | Emit a single core Wasm file. Code generation uses `-O3 -g`. |

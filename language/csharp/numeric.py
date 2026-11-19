@@ -86,7 +86,7 @@ def compile_guest(args, work, language="csharp"):
     flags = shlex.split(run("LLVM development libraries", [tool / "llvm-config", "--cxxflags", "--ldflags", "--libs",
                             "transformutils", "irreader", "bitwriter", "core", "support", "--system-libs"]))
     run("LLVM method extractor", [args.host_cxx.resolve(strict=True), "-O3", "-g", HERE / "leaf.cpp", *flags, "-o", "extract"])
-    profile = Profile(mte=not args.no_mte)
+    profile = Profile(mte=not args.no_mte, exceptions="eh" if args.eh else "noeh")
     run("managed method", [work / "extract", "--mte" if profile.mte else "--no-mte", row, "kernel.bc", "leaf.bc", *debug_args])
     codegen = ["-O3", "-g", "-ffreestanding", "-c", "leaf.bc", "-o", "leaf.o"]
     closure = None
@@ -94,7 +94,7 @@ def compile_guest(args, work, language="csharp"):
         command, closure = make_command(args.toolchain, [args.sysroots], profile, "c", codegen, verify=True)
     else:
         command = [tool / "clang", "--no-default-config", "--target=" + profile.triple, *profile.llvm_feature_flags(),
-                   "-fwasm-exceptions", "-mllvm", "-wasm-use-legacy-eh=false",
+                   *(["-fwasm-exceptions", "-mllvm", "-wasm-use-legacy-eh=false"] if args.eh else ["-fno-exceptions"]),
                    *(["-fsanitize=memtag"] if profile.mte else []), *codegen]
     run("core wasm32", command)
     run("Wasm link", [tool / "wasm-ld", "--fatal-warnings", "--no-entry", "--export=evaluate",
@@ -136,6 +136,10 @@ def main(language="csharp"):
     entry.add_argument("--entry", help="global static class and public method, e.g. Filter.Scale")
     parser.add_argument("--host-cxx", type=Path, default=Path("/usr/bin/g++"))
     parser.add_argument("--target", choices=("wasm32",), default="wasm32")
+    parser.set_defaults(eh=True)
+    if language == "fsharp":
+        parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=True,
+                            help="toggle the standard Wasm exception target feature; managed handlers need the CLR")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--mte", action="store_true")
     mode.add_argument("--legacy-mte", action="store_true")

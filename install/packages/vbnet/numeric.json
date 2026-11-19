@@ -74,9 +74,9 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 10735,
+      "bytes": 11084,
       "mode": 420,
-      "sha256": "dd146b168bcc7e0a1b5e7ba3dbf9f20afa1fe0b21c82b0d319ac2fdc2e852248"
+      "sha256": "1c75df0c3b519d4ea6d9068e6204808bc75333642f6f8e456131d2379b22dde8"
     },
     {
       "path": "language/csharp/packages.json",
