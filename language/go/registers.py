@@ -6,6 +6,13 @@ from graphlib import TopologicalSorter
 I32, I64 = 0x7f, 0x7e
 TYPES = {"int32": I32, "uint32": I32, "int64": I64, "uint64": I64, "bool": I32}
 OPS = {}
+SHIFTS = {}
+CONVERSIONS = {
+    "Trunc64to32": (I64, I32, 0xa7),
+    "SignExt32to64": (I32, I64, 0xac),
+    "ZeroExt32to64": (I32, I64, 0xad),
+}
+ROTATIONS = {"RotateLeft32": (I32, 0x77), "RotateLeft64": (I64, 0x89)}
 BOOL_OPS = {"EqB": 0x46, "NeqB": 0x47, "AndB": 0x71, "OrB": 0x72}
 for bits, wasmtype, first in [(32, I32, 0x6a), (64, I64, 0x7c)]:
     for opname, offset in {"Add": 0, "Sub": 1, "Mul": 2, "And": 7, "Or": 8, "Xor": 9}.items():
@@ -14,6 +21,25 @@ for bits, wasmtype, first in [(32, I32, 0x6a), (64, I64, 0x7c)]:
     for opname, offset in {"Eq": 0, "Neq": 1, "Less": 2, "LessU": 3, "Leq": 6, "LeqU": 7}.items():
         spelling = opname.rstrip("U") + str(bits) + ("U" if opname.endswith("U") else "")
         OPS[spelling] = (equal + offset, wasmtype, True)
+    for count_bits, count_type in ((32, I32), (64, I64)):
+        for op, instruction, signed in (("Lsh", first + 10, False), ("Rsh", first + 11, True),
+                                        ("RshU", first + 12, False)):
+            name = op.rstrip("U") + str(bits) + ("U" if op.endswith("U") else "") + "x" + str(count_bits)
+            SHIFTS[name] = (wasmtype, count_type, bits, instruction, signed)
+
+
+def register_type(value):
+    """@brief Read the scalar width of an SSA value without widening the guest ABI."""
+    # The pinned Go Wasm frontend supplies untyped constant shift counts as
+    # word-sized uint values. Keep machine-word types out of public signatures.
+    if value["op"] == "Const64" and value["type"] == "uint":
+        return I64
+    return TYPES[value["type"]]
+
+
+def same_representation(left, right):
+    """@brief Allow integer signedness aliases while keeping bool distinct."""
+    return left == right or ("bool" not in (left, right) and TYPES[left] == TYPES[right])
 
 
 def uleb(n):
@@ -138,6 +164,35 @@ def lower(f, locations=None):
         local_ids[v["id"]] = len(params) + len(locals_)
         locals_.append(bytes([1, t]))
 
+    def emit_shift(v, t, args):
+        """@brief Lower shifts without dropping the unmasked Go count."""
+        operand, count, width, instruction, signed = SHIFTS[v["op"]]
+        base, amount = args
+        if (t != operand or ids[base]["type"] == "bool" or v["type"] == "bool"
+                or register_type(ids[base]) != operand or register_type(ids[amount]) != count
+                or ids[amount]["type"] not in ("uint32", "uint64", "uint")
+                or v.get("literal", 0) not in (0, 1)):
+            raise ValueError("incorrect Go SSA shift signature")
+        literal = ids[amount].get("literal", 0)
+        bounded = ids[amount]["op"] in ("Const32", "Const64") and 0 <= literal < width
+        get(base)
+        get(amount)
+        if count != operand:
+            code.append(0xa7 if operand == I32 else 0xad)  # wrap or zero extend
+        if bounded:
+            code.append(instruction)
+            return
+        if not signed:
+            code.append(instruction)
+        const(operand, width - 1 if signed else 0)
+        get(amount)
+        const(count, width)
+        # Wasm masks a shift count. Test the original unsigned count, including
+        # its upper bits, before selecting a zero value or a saturated count.
+        code.extend(bytes([0x49 if count == I32 else 0x54, 0x1b]))
+        if signed:
+            code.append(instruction)
+
     def emit_scalar(v, t):
         """@brief Lower one validated scalar value using Wasm locals and numeric ops."""
         op, args = v["op"], v.get("args", [])
@@ -163,10 +218,30 @@ def lower(f, locations=None):
         elif op in OPS and len(args) == 2:
             instruction, operand, comparison = OPS[op]
             if (t != (I32 if comparison else operand) or comparison != (v["type"] == "bool")
-                    or any(ids[a]["type"] == "bool" or TYPES[ids[a]["type"]] != operand for a in args)):
+                    or any(ids[a]["type"] == "bool" or register_type(ids[a]) != operand for a in args)):
                 raise ValueError("incorrect Go SSA operation signature")
             get(args[0])
             get(args[1])
+            code.append(instruction)
+        elif op in SHIFTS and len(args) == 2:
+            emit_shift(v, t, args)
+        elif op in ROTATIONS and len(args) == 2:
+            operand, instruction = ROTATIONS[op]
+            amount = register_type(ids[args[1]])
+            if (t != operand or register_type(ids[args[0]]) != operand or v["type"] == "bool"
+                    or any(ids[a]["type"] == "bool" for a in args) or v.get("literal", 0)):
+                raise ValueError("incorrect Go SSA rotation signature")
+            get(args[0])
+            get(args[1])
+            if amount != t:
+                code.append(0xa7 if t == I32 else 0xad)
+            code.append(instruction)
+        elif op in CONVERSIONS and len(args) == 1:
+            operand, result, instruction = CONVERSIONS[op]
+            if (t != result or register_type(ids[args[0]]) != operand or v["type"] == "bool"
+                    or ids[args[0]]["type"] == "bool" or v.get("literal", 0)):
+                raise ValueError("incorrect Go SSA integer conversion signature")
+            get(args[0])
             code.append(instruction)
         elif op in ("Neg32", "Neg64", "Com32", "Com64") and len(args) == 1:
             if (v["type"] == "bool" or ids[args[0]]["type"] == "bool"
@@ -231,7 +306,7 @@ def lower(f, locations=None):
                 continue
             if op == "MakeResult":
                 if (kind != "Ret" or value_id != terminator or len(args) != 2 or args[1] != memory[0]
-                        or args[0] not in live or ids[args[0]]["type"] != f["result"]
+                        or args[0] not in live or not same_representation(ids[args[0]]["type"], f["result"])
                         or v["type"] != f["result"] + ",mem"):
                     raise ValueError("Go return changes the memory token or uses an unavailable scalar")
                 ret = args[0]
@@ -239,7 +314,7 @@ def lower(f, locations=None):
             if any(a not in live for a in args):
                 raise ValueError("Go scalar operand does not dominate its use")
             begin = len(code)
-            emit_scalar(v, TYPES[v["type"]])
+            emit_scalar(v, register_type(v))
             if locations is not None and begin < len(code):
                 # An existing argument is an SSA alias with no emitted code.
                 points[begin] = v.get("source")

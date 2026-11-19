@@ -24,6 +24,13 @@ func Calibrated(x, bias int64, invert bool) int64 {
     return out+7
 }
 func Valid(armed, fresh, stopped bool) bool { return armed && fresh && !stopped }
+func Field(value uint32, shift uint64) uint32 { return value >> shift }
+func SignedField(value int64, shift uint32) int64 { return value >> shift }
+func Flag(value uint64, shift uint64) uint64 { return value << shift }
+func Rotate(value uint32) uint32 { return value << 27 | value >> 5 }
+func Narrow(value int64) int32 { return int32(value) }
+func Widen(value int32) uint64 { return uint64(value) }
+func UnsignedValue(value int32) uint32 { return uint32(value) }
 func Start() uint32 { return 0 }
 """
 CONSUMER = """(module
@@ -34,6 +41,13 @@ CONSUMER = """(module
  (import "algorithm" "Clamp" (func $clamp (param i32) (result i32)))
  (import "algorithm" "Calibrated" (func $calibrate (param i64 i64 i32) (result i64)))
  (import "algorithm" "Valid" (func $valid (param i32 i32 i32) (result i32)))
+ (import "algorithm" "Field" (func $field (param i32 i64) (result i32)))
+ (import "algorithm" "SignedField" (func $signed (param i64 i32) (result i64)))
+ (import "algorithm" "Flag" (func $flag (param i64 i64) (result i64)))
+ (import "algorithm" "Rotate" (func $rotate (param i32) (result i32)))
+ (import "algorithm" "Narrow" (func $narrow (param i64) (result i32)))
+ (import "algorithm" "Widen" (func $widen (param i32) (result i64)))
+ (import "algorithm" "UnsignedValue" (func $unsigned (param i32) (result i32)))
  (func (export "_start")
   (if (i32.ne (call $gain (i32.const 2147483647) (i32.const 2) (i32.const 3)) (i32.const 1)) (then unreachable))
   (if (i64.ne (call $sub (i64.const 4) (i64.const 6)) (i64.const -2)) (then unreachable))
@@ -49,7 +63,16 @@ CONSUMER = """(module
   (if (i32.ne (call $valid (i32.const 3) (i32.const 2) (i32.const 0)) (i32.const 1)) (then unreachable))
   (if (call $valid (i32.const 0) (i32.const 1) (i32.const 0)) (then unreachable))
   (if (call $valid (i32.const 1) (i32.const 0) (i32.const 0)) (then unreachable))
-  (if (call $valid (i32.const 1) (i32.const 1) (i32.const 9)) (then unreachable))))"""
+  (if (call $valid (i32.const 1) (i32.const 1) (i32.const 9)) (then unreachable))
+  (if (i32.ne (call $field (i32.const -1) (i64.const 31)) (i32.const 1)) (then unreachable))
+  (if (call $field (i32.const -1) (i64.const 4294967296)) (then unreachable))
+  (if (i64.ne (call $signed (i64.const -19) (i32.const -1)) (i64.const -1)) (then unreachable))
+  (if (i64.ne (call $signed (i64.const 19) (i32.const -1)) (i64.const 0)) (then unreachable))
+  (if (i64.ne (call $flag (i64.const 7) (i64.const 64)) (i64.const 0)) (then unreachable))
+  (if (i32.ne (call $rotate (i32.const 32)) (i32.const 1)) (then unreachable))
+  (if (i32.ne (call $narrow (i64.const 4294967297)) (i32.const 1)) (then unreachable))
+  (if (i64.ne (call $widen (i32.const -1)) (i64.const -1)) (then unreachable))
+  (if (i32.ne (call $unsigned (i32.const -1)) (i32.const -1)) (then unreachable))))"""
 NEGATIVE = {
     "pointer": "func Bad(p *int32) int32 { return *p }",
     "slice": "func Bad(p []int32) int32 { return p[0] }",
@@ -60,6 +83,7 @@ NEGATIVE = {
     "runtime-panic": "func Bad(x uint32) uint32 { if x > 0 { panic(\"sensor\") }; return x }",
     "directive": "//go:noinline\nfunc Bad() uint32 { return 1 }",
     "bad-type": "func Bad() uint32 { return false }",
+    "possibly-negative-shift": "func Bad(x uint32, count int32) uint32 { return x >> count }",
     "import": 'import "unsafe"',
 }
 
