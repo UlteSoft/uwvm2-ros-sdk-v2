@@ -23,3 +23,26 @@
 在相同 cgroup、CPU 和锁下执行 `tests/migration/upstream_cpp_report.py INPUT/results.json OUTPUT.json` 生成各包统计。报告按源码及头文件的唯一组合计数，分别列出未改动用例、经修订用例、重复归档、未选取文件、原生与 Wasm 产物摘要，以及实际运行结果。
 
 使用另一个已签署的编译器和 VM 时，可在相同 cgroup 和锁内运行 `tests/migration/upstream_cpp_replay.py`，传入 `--previous INPUT/results.json`、`--sdk`、`--installation-receipt`、`--toolchain`、`--sysroots`、`--vm` 和 `--output`。它先复核已完成的原生基线、源码和产物摘要、GoogleTest XML 及断言轨迹，再从相同源码重建所有 Wasm 程序，逐件核对产物、编译收据、VM 摘要及已签署的工具链资格，再在两个引擎执行。收据记录复用的原生结果摘要。
+
+## 深度图像 RVL
+
+`tests/migration/depth_rvl.py` 使用独立的格式参考编码器核对
+`compressed_depth_image_transport` 的 RVL 实现。在验收 cgroup 和共享 SDK
+验收锁下，从 SDK 仓库执行下列命令。参数依次指定 ROS 源码语料、已安装且
+具备严格 wasm32 MTE 配置的 C++ SDK、与配置匹配的 VM，以及 `.tmp` 下的新目录。
+
+```sh
+/usr/bin/python3 -B tests/migration/depth_rvl.py \
+  --corpus "$ROS_SOURCE_CORPUS" --sdk "$INSTALLED_CPP_SDK" \
+  --vm "$UWVM_ROS" --output "$PWD/.tmp/depth-rvl"
+```
+
+脚本检查各快照的归档摘要，按实现和头文件的实际内容归并。本轮 16 个快照有
+6 个包含 RVL，其中 Indigo 与 Noetic 共享一份实现，Jazzy、Kilted、Lyrical
+与 Rolling 共享另一份。两份实现分别处理空帧、全零、常值、正负极差、
+变长编码边界和合成扫描线。测试逐字比较压缩结果，逐像素检查解码结果。
+更改一个预期编码字后，原生程序必须返回错误，同一个无宿主导入的严格
+Wasm 模块必须在解释器和 AOT 中均触发陷阱。
+
+结论限于小端平台和本地生成的有效 RVL 帧。上游解码 API 接收像素数，
+没有压缩输入长度参数。接收外部帧、ROS 图像传输插件、PNG 及其他包内源码均需单独验证。

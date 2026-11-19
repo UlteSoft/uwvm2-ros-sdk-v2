@@ -25,3 +25,33 @@ For the per-package totals, run `tests/migration/upstream_cpp_report.py INPUT/re
 Strict runs verify each compiled artifact, build receipt and matching VM digest before executing the module. To record the exact SDK revision selected for compilation, pass the JSON output of the selective installation command using `--installation-receipt FILE`.
 
 For another signed compiler/VM combination, `tests/migration/upstream_cpp_replay.py` can reuse a completed native baseline. Supply `--previous INPUT/results.json`, `--sdk`, `--installation-receipt`, `--toolchain`, `--sysroots`, `--vm` and `--output` under the same cgroup and lock. It verifies the previous source and artifact hashes, GoogleTest XML and assertion traces. It then retains those native results and rebuilds, verifies and runs every guest on both engines. The output identifies the reused receipt by SHA-256.
+
+## Depth-image RVL
+
+`tests/migration/depth_rvl.py` checks the RVL codec in
+`compressed_depth_image_transport` against an independent encoder. From the
+SDK checkout, run the following command inside the qualification cgroup and
+under the shared SDK qualification lock. Supply the source corpus root, an
+installed C++ development SDK with an approved strict wasm32 MTE site profile,
+the corresponding VM, and a fresh output directory in `.tmp`.
+
+```sh
+/usr/bin/python3 -B tests/migration/depth_rvl.py \
+  --corpus "$ROS_SOURCE_CORPUS" --sdk "$INSTALLED_CPP_SDK" \
+  --vm "$UWVM_ROS" --output "$PWD/.tmp/depth-rvl"
+```
+
+The runner checks the recorded source archive for each package instance
+and groups identical implementation and header bytes. In the tested inventory,
+6 of 16 snapshots contain RVL. They yield two source variants, one shared by
+Indigo and Noetic and one by Jazzy, Kilted, Lyrical and Rolling. For each
+variant the original codec processes empty, zero, constant, alternating-delta,
+variable-length integer boundary and synthetic scan frames. Every encoded
+word must match the reference. Every decoded pixel must match the input.
+Changing an expected word must cause the native probe to fail and both VM
+engines to trap. Both engines run the same strict guest with zero imports.
+
+This result covers little-endian, valid, locally owned RVL frames. The original
+decompression API takes a pixel count and has no compressed byte length.
+External frame admission, ROS image-transport plugins, PNG and the remaining
+package sources require separate validation.
