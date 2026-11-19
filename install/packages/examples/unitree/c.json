@@ -53,6 +53,30 @@
       "bytes": 519,
       "mode": 420,
       "sha256": "6b29066e4b5d54c9cc0c99b411b226ec9ca33af5958a16703b58f7b2d8f0c378"
+    },
+    {
+      "path": "examples/platform/unitree/migration/c/README.md",
+      "bytes": 506,
+      "mode": 420,
+      "sha256": "132474abc535a218dbecf03ae729f0423d63da1c6f388c8b7061e480b2f6ab34"
+    },
+    {
+      "path": "examples/platform/unitree/migration/c/README.zh.md",
+      "bytes": 507,
+      "mode": 420,
+      "sha256": "c2b26858b8c3e57114ac17c1501c025f108d3b5181825bff0025a7d461ae2036"
+    },
+    {
+      "path": "examples/platform/unitree/migration/c/upstream.lock",
+      "bytes": 236,
+      "mode": 420,
+      "sha256": "e84a4df6eb83a6f81905c9211caefc0c5b6527f9b69ced2306a4cd342e1424eb"
+    },
+    {
+      "path": "examples/platform/unitree/migration/c/xmake.lua",
+      "bytes": 1095,
+      "mode": 420,
+      "sha256": "a136318809754bf581893804af7837b8858b93d89f4f6da44eff38cd042ca119"
     }
   ]
 }

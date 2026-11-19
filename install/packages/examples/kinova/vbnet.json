@@ -35,6 +35,30 @@
       "bytes": 508,
       "mode": 420,
       "sha256": "9faf68190a566cc223b5b6216c82f2ee6f77b46f19b61a845f59b675c97ed6d2"
+    },
+    {
+      "path": "examples/platform/kinova/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/kinova/extension/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "00d0d39b22ffbbe04af2aed82f5bb9567549bc3d4aca615c04abd43e3d61f03a"
+    },
+    {
+      "path": "examples/platform/kinova/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/kinova/migration/vbnet/xmake.lua",
+      "bytes": 566,
+      "mode": 420,
+      "sha256": "f01862dd1af494a2ab84a1755c326807c899d3e1a826fe61688fc66a4225f695"
     }
   ]
 }

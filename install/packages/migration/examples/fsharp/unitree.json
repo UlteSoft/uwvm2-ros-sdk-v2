@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/unitree/migration/fsharp/README.md",
+      "bytes": 247,
+      "mode": 420,
+      "sha256": "753c6d39aa1aa759600832b07e6bdeb247399a00cf97f8ee61480c27b2b19e3d"
+    },
+    {
+      "path": "examples/platform/unitree/migration/fsharp/README.zh.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "0b58b12ef55bc8c686740e755b21d5e8f0c53f29cb7ab429eb700fb39cf6de26"
+    },
+    {
+      "path": "examples/platform/unitree/migration/fsharp/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "542acdf30be672330a6876705b092e9055ec0bedfe8104dd8b90a7c4f23c46c8"
+    }
+  ]
+}

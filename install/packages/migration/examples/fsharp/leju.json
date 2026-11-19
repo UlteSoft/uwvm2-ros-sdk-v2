@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/leju/migration/fsharp/README.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "bf71ac94567d03c9436efe89759336d9c12e0666cf1386e0e997ee6c5d6d48e1"
+    },
+    {
+      "path": "examples/platform/leju/migration/fsharp/README.zh.md",
+      "bytes": 242,
+      "mode": 420,
+      "sha256": "b7d201abd9fd87d15716eb41d9d0bb30a5c4ca260bc41aa7554300336f1713c5"
+    },
+    {
+      "path": "examples/platform/leju/migration/fsharp/xmake.lua",
+      "bytes": 581,
+      "mode": 420,
+      "sha256": "a16864eb82ce75ebbfe40935cd8e820bc12acd55470ba18b23e86a0e8921efe9"
+    }
+  ]
+}

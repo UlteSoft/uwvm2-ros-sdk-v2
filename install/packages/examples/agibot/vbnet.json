@@ -35,6 +35,30 @@
       "bytes": 508,
       "mode": 420,
       "sha256": "832f4471dc9e989b066fc7b8865f802d87d864d2bc27bb01b659e68696d631bb"
+    },
+    {
+      "path": "examples/platform/agibot/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/agibot/extension/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "3fbf5ca527b85f2d2d30fb0f6b1835ec21680349709ca8c13af79d2b3f9d48f9"
+    },
+    {
+      "path": "examples/platform/agibot/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/agibot/migration/vbnet/xmake.lua",
+      "bytes": 566,
+      "mode": 420,
+      "sha256": "e6a22b800a1c0b9209c573dd4fce01545d319af540c0b44ddd0f932651b817bb"
     }
   ]
 }

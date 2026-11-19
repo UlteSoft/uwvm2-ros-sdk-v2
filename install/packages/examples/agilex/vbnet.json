@@ -35,6 +35,30 @@
       "bytes": 508,
       "mode": 420,
       "sha256": "a56e0125f67101bbee61885e2d4d17fd06d5d4832dda537b36955e1aacb8a761"
+    },
+    {
+      "path": "examples/platform/agilex/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/agilex/extension/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "613bf09d6183a700a9a390d21780ee13b8328ef38e68847d9aeb1fd4b1034f1c"
+    },
+    {
+      "path": "examples/platform/agilex/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/agilex/migration/vbnet/xmake.lua",
+      "bytes": 566,
+      "mode": 420,
+      "sha256": "3bf5c97ab9866d9ceac338524d8f84e85cf10aaea6e922ff139edd74a4076e34"
     }
   ]
 }

@@ -1,0 +1,58 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-migration-examples.md",
+      "bytes": 3090,
+      "mode": 420,
+      "sha256": "ac8e3a969d5e876c6cbcb8e73aa05c52888c1d073cae1e2101e3368cc1ed29c5"
+    },
+    {
+      "path": "document/zh/platform-migration-examples.md",
+      "bytes": 2811,
+      "mode": 420,
+      "sha256": "b0a0d73c53b12a5536d7f47fddd86b7c214de9c7e23b7c3a83fad99a416df1fe"
+    },
+    {
+      "path": "examples/shared/migration/c/imu.lock",
+      "bytes": 232,
+      "mode": 420,
+      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+    },
+    {
+      "path": "examples/shared/migration/c/prepare.py",
+      "bytes": 2664,
+      "mode": 420,
+      "sha256": "28db5c630984f4b9441d3282980afba2c9da8018cfeeeb1fbd1d1c660d7efa03"
+    },
+    {
+      "path": "examples/shared/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
+      "path": "third-parties/migration-examples/sensor_msgs/LICENSE",
+      "bytes": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "third-parties/migration-examples/sensor_msgs/README.md",
+      "bytes": 438,
+      "mode": 420,
+      "sha256": "8b15dc88135cb3fb561048e1fafeb0812a7869d33a34c03311123d98244cbbd2"
+    },
+    {
+      "path": "third-parties/migration-examples/sensor_msgs/msg/Imu.msg",
+      "bytes": 1211,
+      "mode": 420,
+      "sha256": "5800b7c2e6d3afed966ae229b1559f6e762c792ad34a88e55ad4288d8bbbd34b"
+    },
+    {
+      "path": "third-parties/migration-examples/sensor_msgs/package.xml",
+      "bytes": 1298,
+      "mode": 420,
+      "sha256": "00cc932b8a1d2a9064c621bfacab56428a5175afe37269da38ba09361e8a4a5a"
+    }
+  ]
+}

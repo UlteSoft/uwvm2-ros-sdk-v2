@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/kuka/migration/c/README.md",
+      "bytes": 495,
+      "mode": 420,
+      "sha256": "56584aafff9fa520f61f595f4c79e7f9e348be441a815ee0201e178490458ad0"
+    },
+    {
+      "path": "examples/platform/kuka/migration/c/README.zh.md",
+      "bytes": 496,
+      "mode": 420,
+      "sha256": "3f1beb29648329b401c1386ba3566b31123441484e4f66542e9addea9043f290"
+    },
+    {
+      "path": "examples/platform/kuka/migration/c/upstream.lock",
+      "bytes": 249,
+      "mode": 420,
+      "sha256": "0474f0abcecead427569461d67348922445ac68b4efcc9ec0ab60c43c133b368"
+    },
+    {
+      "path": "examples/platform/kuka/migration/c/xmake.lua",
+      "bytes": 1092,
+      "mode": 420,
+      "sha256": "6418e57484266a07c0d1102a9406cbd5328b88e01bceef86688b3f616f04897b"
+    }
+  ]
+}

@@ -35,6 +35,30 @@
       "bytes": 504,
       "mode": 420,
       "sha256": "873aca23a61d2935d583d1e996041a5020e56fef78be16c64b4bf0704fe642b4"
+    },
+    {
+      "path": "examples/platform/limx/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/limx/extension/vbnet/xmake.lua",
+      "bytes": 582,
+      "mode": 420,
+      "sha256": "cb1102f9cc658133b7cbff36d8a2a12c1ccf107349fd3095e1dc9ff202f643a5"
+    },
+    {
+      "path": "examples/platform/limx/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/limx/migration/vbnet/xmake.lua",
+      "bytes": 562,
+      "mode": 420,
+      "sha256": "821762d97eeb247eec5dbc77ef68be03af8e9336d04ff38fc1439e9969986b1b"
     }
   ]
 }

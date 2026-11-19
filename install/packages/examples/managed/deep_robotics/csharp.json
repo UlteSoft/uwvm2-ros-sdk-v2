@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/csharp/xmake.lua",
+      "bytes": 592,
+      "mode": 420,
+      "sha256": "d9e7abcede6e26564c2710c631a9760820c2741cc7d62f68c87729b2cb3963e1"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/csharp/xmake.lua",
+      "bytes": 572,
+      "mode": 420,
+      "sha256": "382e956d6c0fd50eb9d45fa9a897e230d22f525d3933b32935e45a9249030e32"
+    }
+  ]
+}

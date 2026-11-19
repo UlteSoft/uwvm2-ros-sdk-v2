@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/franka/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "097314e4a7e656d125fc2c8712a83da682ddf981450d397926dffb961663c019"
+    },
+    {
+      "path": "examples/platform/franka/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "c0e06006b16176db09b714e019d83430b47a974e35cef524a0a245a792bd386b"
+    },
+    {
+      "path": "examples/platform/franka/migration/fsharp/xmake.lua",
+      "bytes": 583,
+      "mode": 420,
+      "sha256": "e73d5cdb2e05b76f2e92f0d18801bc6d043e76afefb1358b5a3d8e7c676ff48b"
+    }
+  ]
+}

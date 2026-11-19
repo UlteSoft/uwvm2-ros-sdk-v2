@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://interbotix_xs_msgs/msg/ArmJoy.msg",
+    "sha256": "dc1c79a173d9802da2313e12152fea0457a1b2f81b3332131a46ad2fb3fb71c3",
+    "manifest_sha256": "de23848fc40b3a89b78e545a5c0b73a040be6845c85fe6b628d517133ecf7a83"
+  }
+]

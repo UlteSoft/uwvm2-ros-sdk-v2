@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/limx/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/limx/extension/csharp/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "3df3aa31aa0e2b05a72e91fb5b3bdaec7d41aa9c95c9a8c4ccd9e38a9cd2b4ad"
+    },
+    {
+      "path": "examples/platform/limx/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/limx/migration/csharp/xmake.lua",
+      "bytes": 554,
+      "mode": 420,
+      "sha256": "2b8787290497153ded3cd635a6dbf6640ddf1e40fafa158d3c49a41af8ce8e22"
+    }
+  ]
+}

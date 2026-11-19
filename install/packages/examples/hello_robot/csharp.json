@@ -35,6 +35,30 @@
       "bytes": 520,
       "mode": 420,
       "sha256": "e38b508edeadf1edb51ded6ad21a08937fb7253d9fdabc19d30f4a33fa89e209"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/csharp/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "c239ac29d257c061b30f3dd0124bcd4e2412da915ac1db4c346e05a30c2c2282"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/csharp/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "cb88adb15b33e788ae69a4a8fcfcd940c02ed35767d77bf6ed88088b1ab28b6b"
     }
   ]
 }

@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://stretch_calibration/config/head_calibration_options.yaml",
+    "sha256": "da41a2fd20c3f9dc0320188782f07d57806b2465c0eaad52cfbf48074f9bb901",
+    "manifest_sha256": "aef8df32a82384bbb6a89a6c240c5f3734e27e373d7d0068d5bf788d6f3d2aeb"
+  }
+]

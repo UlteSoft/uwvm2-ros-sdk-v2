@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/kinova/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "0799aa9fe15f576d6691f9fcde7e000f98db4ce865f01b0a3579563a9147bd40"
+    },
+    {
+      "path": "examples/platform/kinova/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "cee8af7b5032257f6b27870f927e262ac80de627dd6bd6edc4e53aa1bb852cd9"
+    },
+    {
+      "path": "examples/platform/kinova/migration/fsharp/xmake.lua",
+      "bytes": 583,
+      "mode": 420,
+      "sha256": "97d8f357f33014e8df4dd2c1d6078a8c90509a336e3389e16d835f7e0482cd39"
+    }
+  ]
+}

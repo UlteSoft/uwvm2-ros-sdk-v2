@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/dobot/migration/fsharp/README.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "cd90e74670ee10c0ac57f1543fafd98c1efd807f7f7ad221088a7d54905e13d1"
+    },
+    {
+      "path": "examples/platform/dobot/migration/fsharp/README.zh.md",
+      "bytes": 243,
+      "mode": 420,
+      "sha256": "56069543868dee72848a7848627e993b05d302b471c577371631e9439a7eac87"
+    },
+    {
+      "path": "examples/platform/dobot/migration/fsharp/xmake.lua",
+      "bytes": 582,
+      "mode": 420,
+      "sha256": "11dd6c10d7776ff22dc3d55461a4c67e615589b50dc8ead8d7cdab015f625664"
+    }
+  ]
+}

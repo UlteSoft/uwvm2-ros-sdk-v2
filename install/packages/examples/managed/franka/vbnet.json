@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/franka/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/franka/extension/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "44265ec0bcc2fdb013ddaae7dda1c25c050837431d777a359eb9a35eedfc36c1"
+    },
+    {
+      "path": "examples/platform/franka/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/franka/migration/vbnet/xmake.lua",
+      "bytes": 566,
+      "mode": 420,
+      "sha256": "7c6b09df15b97bdf9214b28a2691671dc353f69300843c4820cb705d631483fd"
+    }
+  ]
+}

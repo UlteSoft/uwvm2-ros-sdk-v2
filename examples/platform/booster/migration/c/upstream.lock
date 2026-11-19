@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://booster_interface/msg/ImuState.msg",
+    "sha256": "aab374da59a0ad77db57eb3d55bed5a5ba2080a100a592e88dcf2d9866dfa00a",
+    "manifest_sha256": "743701e24edcea074381b2aa123705d34b052da8d51568f17b0dd1f880d877a5"
+  }
+]

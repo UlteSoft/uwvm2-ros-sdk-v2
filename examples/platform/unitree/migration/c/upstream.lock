@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://unitree_go/msg/IMUState.msg",
+    "sha256": "95b5b2aa84fbbea748a560f18cc3950a6091c5822aa1dba326aa183327cb8198",
+    "manifest_sha256": "6a23b69425841653e4f4ed1231a1305c4c6f40c15d83225260ff82aba6df62f5"
+  }
+]

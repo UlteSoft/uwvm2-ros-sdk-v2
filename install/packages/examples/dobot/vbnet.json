@@ -35,6 +35,30 @@
       "bytes": 506,
       "mode": 420,
       "sha256": "f3c398992350c45a0338cbd48d2452407013a5bdfed54473b7d8c5893d0d256f"
+    },
+    {
+      "path": "examples/platform/dobot/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/dobot/extension/vbnet/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "51a884e751d0eb141bb4a62f2f97f83fc4c8eebe050f685bb442fac477ef49f4"
+    },
+    {
+      "path": "examples/platform/dobot/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/dobot/migration/vbnet/xmake.lua",
+      "bytes": 564,
+      "mode": 420,
+      "sha256": "69d5b9cfd0da820994b9406e6709ac0eb1fe398fe8644c42b9442c06f1cfde07"
     }
   ]
 }

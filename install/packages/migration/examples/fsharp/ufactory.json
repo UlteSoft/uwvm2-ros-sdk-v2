@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/ufactory/migration/fsharp/README.md",
+      "bytes": 248,
+      "mode": 420,
+      "sha256": "a9a4ac45eb3adb79690eb3ac9be9c1ccca3cde7dbd05583175a43f0c3b01b68b"
+    },
+    {
+      "path": "examples/platform/ufactory/migration/fsharp/README.zh.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "8200412129e3ece42c5111e4808ad3a329c8d871ea40981e76a54cdc1414e080"
+    },
+    {
+      "path": "examples/platform/ufactory/migration/fsharp/xmake.lua",
+      "bytes": 585,
+      "mode": 420,
+      "sha256": "7b20c30bc4b93f66cac2bad8219c46ea90e16ef2b1d5b39ade14373cb5704aff"
+    }
+  ]
+}

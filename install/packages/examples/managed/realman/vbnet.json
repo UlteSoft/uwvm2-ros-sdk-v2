@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/realman/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/realman/extension/vbnet/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "7a8f80d26b26c1dddfd694d583e0c3f7714d61bbf0d11b304007e289103350cd"
+    },
+    {
+      "path": "examples/platform/realman/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/realman/migration/vbnet/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "ef7d41fcbb13172bd21f8773b943761e3f7b63d197ff7ff6507d3186522e9e86"
+    }
+  ]
+}

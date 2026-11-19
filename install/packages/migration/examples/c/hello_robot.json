@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/hello_robot/migration/c/README.md",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "aa2ded48742a6d4aad17899b7082d668eecf19e4856ad2974a93e5d30f456ab3"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/c/README.zh.md",
+      "bytes": 519,
+      "mode": 420,
+      "sha256": "9100fca6f36c4dc0a8ec6d5e49b6ca56a8c1b5708d8f37298724fa090c89a703"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/c/upstream.lock",
+      "bytes": 265,
+      "mode": 420,
+      "sha256": "bdfaed2a830e5359d60eca4a22594f27b388f5b09f2890eb55ac38f6fee31490"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/c/xmake.lua",
+      "bytes": 1099,
+      "mode": 420,
+      "sha256": "a90d250c1d0bd0d8142e43b4b3a8801018fa9e1a07c434d30a0efab64f90ae1d"
+    }
+  ]
+}

@@ -35,6 +35,30 @@
       "bytes": 528,
       "mode": 420,
       "sha256": "c7daa836f42d6b0418685da0d47574139b3b428c85337debeecfbf188c58b0ef"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/extension/vbnet/xmake.lua",
+      "bytes": 606,
+      "mode": 420,
+      "sha256": "830cbb2e6b48aa81099783e4ad4780da2138b2882dbf084201b2f7949ed0c995"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "e4ff3b9e6582ed66b8708602cd928e7ac7326396af4f17e522275d81b449614c"
     }
   ]
 }

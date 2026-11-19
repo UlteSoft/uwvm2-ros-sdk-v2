@@ -35,6 +35,30 @@
       "bytes": 512,
       "mode": 420,
       "sha256": "48d1a8c4a28f24766f06d444451d2ce03a7f98937499464c1acaf9b72769aafe"
+    },
+    {
+      "path": "examples/platform/robotis/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/robotis/extension/csharp/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "6456e98c37ef2ca102f35be2669128f972633d4a1ec5b1e268b93100c8b07408"
+    },
+    {
+      "path": "examples/platform/robotis/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/robotis/migration/csharp/xmake.lua",
+      "bytes": 560,
+      "mode": 420,
+      "sha256": "5711c73937e6c0d9131ce9626c49056c8b6affffa9c8365896057d9c0fdf8a7c"
     }
   ]
 }

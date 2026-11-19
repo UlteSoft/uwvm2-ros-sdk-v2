@@ -35,6 +35,30 @@
       "bytes": 508,
       "mode": 420,
       "sha256": "a281af543f8af6f99c8911818ab5f965d3cc73c85430ef410d04294557a59f89"
+    },
+    {
+      "path": "examples/platform/dobot/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/dobot/extension/csharp/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "f1d91b1f6dd782fcbbdac8e41a9ac1965c8323e15ee8ebbe8c25a54ad8d02ff7"
+    },
+    {
+      "path": "examples/platform/dobot/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/dobot/migration/csharp/xmake.lua",
+      "bytes": 556,
+      "mode": 420,
+      "sha256": "98efb4298968454f8f3026cf5f50b59723ad75a9ddfdb5951cbaff5e465d32d5"
     }
   ]
 }

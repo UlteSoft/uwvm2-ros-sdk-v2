@@ -53,6 +53,30 @@
       "bytes": 535,
       "mode": 420,
       "sha256": "62a2e78af1bce785ad96a614d39174b69effeed822de53778bb743d7950827c4"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/c/README.md",
+      "bytes": 479,
+      "mode": 420,
+      "sha256": "8e7d96386c3a4485e829ea0b75f84a0bbe7184be848316a858ce354e90f5d5f1"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/c/README.zh.md",
+      "bytes": 480,
+      "mode": 420,
+      "sha256": "0fec516e3bb306132f3bedc0cd1b582c46e9b739eb0052663690e76d2fd24f6b"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/c/upstream.lock",
+      "bytes": 232,
+      "mode": 420,
+      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/c/xmake.lua",
+      "bytes": 1103,
+      "mode": 420,
+      "sha256": "d252459b6dff5a4237ad275b01179f2e6bdbf584505323d7abddc109d5aa82a6"
     }
   ]
 }

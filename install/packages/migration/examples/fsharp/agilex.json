@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/agilex/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "e4f4d9e18e02f555d0c89cb3119573287b89639730a0432d828dcc54ac49cd0e"
+    },
+    {
+      "path": "examples/platform/agilex/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "c8ea28e17e5f59a3b6143a4e92941d8ed716c9d02c45db6a22767952ba8a2ee0"
+    },
+    {
+      "path": "examples/platform/agilex/migration/fsharp/xmake.lua",
+      "bytes": 583,
+      "mode": 420,
+      "sha256": "db78507f8d5b6ad2c121ede387a5083b7c7e5820c886899a4926d07a84c9be0b"
+    }
+  ]
+}

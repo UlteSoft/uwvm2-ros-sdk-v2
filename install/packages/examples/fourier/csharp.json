@@ -35,6 +35,30 @@
       "bytes": 512,
       "mode": 420,
       "sha256": "15ee149996be1163fab7567d6805e567388163257d329ce36b5190988c3f63a8"
+    },
+    {
+      "path": "examples/platform/fourier/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/fourier/extension/csharp/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "f83a891b0e3893765518dc2ecb3cac00674448ae9c93218c20f7a3ad7c4211e0"
+    },
+    {
+      "path": "examples/platform/fourier/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/fourier/migration/csharp/xmake.lua",
+      "bytes": 560,
+      "mode": 420,
+      "sha256": "ff7ced2a722101fbaef89ddecd46990c415b0df7076d555eba3d7a8f2b069f86"
     }
   ]
 }

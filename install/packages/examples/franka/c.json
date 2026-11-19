@@ -53,6 +53,30 @@
       "bytes": 517,
       "mode": 420,
       "sha256": "b119b55eeec30d758d9362aa3761145a6a93a46b5d1a8b9fe63151422b7db543"
+    },
+    {
+      "path": "examples/platform/franka/migration/c/README.md",
+      "bytes": 476,
+      "mode": 420,
+      "sha256": "a209c1caa61dda17839cdae113f380b2f826af07890d59d7f93268827db803d0"
+    },
+    {
+      "path": "examples/platform/franka/migration/c/README.zh.md",
+      "bytes": 477,
+      "mode": 420,
+      "sha256": "e2827ebb0c4041c4c62b1c25be3ea8120df8fe291dbd24bf8c12db2deaa6e45f"
+    },
+    {
+      "path": "examples/platform/franka/migration/c/upstream.lock",
+      "bytes": 234,
+      "mode": 420,
+      "sha256": "33e244f333f563cc328fa4fbbcd91b627129ff5b24d9ee688efdb0c778514500"
+    },
+    {
+      "path": "examples/platform/franka/migration/c/xmake.lua",
+      "bytes": 1094,
+      "mode": 420,
+      "sha256": "d169a2e8455445511dab7b5bdb2147c8ece87afbdfa4419506e55d0a0662ab73"
     }
   ]
 }

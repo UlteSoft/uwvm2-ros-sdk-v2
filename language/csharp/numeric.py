@@ -20,6 +20,7 @@ from frontend import audit
 from guest_profile import Profile
 from imports import inspect
 from scalar import prove_scalar, scene_program
+from driver_binding import driver_program
 
 
 def compile_guest(args, work, language="csharp"):
@@ -47,14 +48,14 @@ def compile_guest(args, work, language="csharp"):
 
     dll = "WrosKernel.dll"
     references = [refs / name for name in ("mscorlib.dll", "System.Runtime.dll", "netstandard.dll")]
-    if args.scene_entry:
+    if args.scene_entry or args.driver_entry:
         csc("Wros.Scene.Bindings.dll", [HERE / "Scene.cs"], references, "library")
         references.append(work / "Wros.Scene.Bindings.dll")
     if language == "fsharp":
         fsharp = host / "sdk" / SDK_VERSION / "FSharp"
         # This directory contains only reviewed reference assemblies staged by host.stage.
         references = [*sorted(refs.glob("*.dll")), fsharp / "FSharp.Core.dll"]
-        if args.scene_entry:
+        if args.scene_entry or args.driver_entry:
             references.append(work / "Wros.Scene.Bindings.dll")
         run("F# " + dll, [host / "dotnet", fsharp / "fsc.dll", "--nologo", "--noframework", "--targetprofile:netcore",
             "--target:library", "--langversion:10.0", "--simpleresolution", "--deterministic+",
@@ -69,10 +70,11 @@ def compile_guest(args, work, language="csharp"):
     else:
         csc(dll, args.sources, references, "library")
     csc("Admit.dll", [HERE / "Admit.cs", HERE / "SceneEntry.cs"], sorted(host_refs.glob("*.dll")), "exe")
-    entry = args.scene_entry or args.entry
+    entry = args.scene_entry or args.driver_entry or args.entry
     record = run("managed metadata", [host / "dotnet", "exec", "--runtimeconfig", roslyn / "csc.runtimeconfig.json",
                                  "Admit.dll", dll, *entry.split("."), "WrosKernel.pdb",
-                                 *(["scene"] if args.scene_entry else []), *(["vbnet"] if language == "vbnet" else [])]).strip().split(" ")
+                                 *(["scene", "driver"] if args.driver_entry else ["scene"] if args.scene_entry else []), *(["vbnet"] if language == "vbnet" else [])]).strip().split(" ")
+    alias = record.pop() if args.driver_entry else None
     row, digest, line, points, name = record
     if not row.isascii() or not row.isdecimal() or len(row) > 7:
         raise ValueError("invalid Mono method row")
@@ -104,10 +106,10 @@ def compile_guest(args, work, language="csharp"):
     audit(guest, profile)
     if inspect(guest):
         raise ValueError("numeric component must have zero imports")
-    if language in ("vbnet", "fsharp") or args.scene_entry or (not args.legacy_mte and not args.no_mte):
+    if language in ("vbnet", "fsharp") or args.scene_entry or args.driver_entry or (not args.legacy_mte and not args.no_mte):
         guest = prove_scalar(guest)
-    if args.scene_entry:
-        guest = scene_program(guest)
+    if args.scene_entry or args.driver_entry:
+        guest = driver_program(guest, alias) if args.driver_entry else scene_program(guest)
         audit(guest, profile)
     if closure is not None:
         # The standalone link above has already checked that this exact leaf
@@ -133,6 +135,7 @@ def main(language="csharp"):
         parser.add_argument("--" + option, type=Path, required=True)
     entry = parser.add_mutually_exclusive_group(required=True)
     entry.add_argument("--scene-entry", help="public static int entry calling Policy(Wros.Scene.Abi())")
+    entry.add_argument("--driver-entry", help="public entry returning Policy(Wros.Scene.DriverConnectionStatus(literalAlias))")
     entry.add_argument("--entry", help="global static class and public method, e.g. Filter.Scale")
     parser.add_argument("--host-cxx", type=Path, default=Path("/usr/bin/g++"))
     parser.add_argument("--target", choices=("wasm32",), default="wasm32")
@@ -153,9 +156,9 @@ def main(language="csharp"):
         parser.error(title + " produces final modules with a statically checked register-only policy")
     if args.compile_only and not args.legacy_mte and not args.no_mte:
         parser.error("no signed strict C# release for relocatable objects; the scalar proof requires a final module")
-    if args.scene_entry and args.compile_only:
+    if (args.scene_entry or args.driver_entry) and args.compile_only:
         parser.error("--scene-entry produces a complete core module")
-    if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]{0,127}\.[A-Za-z_][A-Za-z_0-9]{0,127}", args.scene_entry or args.entry):
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]{0,127}\.[A-Za-z_][A-Za-z_0-9]{0,127}", args.scene_entry or args.driver_entry or args.entry):
         parser.error("expected a global Class.Method entry")
     if args.compile_only != (args.sysroots is not None):
         parser.error("use -c and --sysroots together for a relocatable SDK object")

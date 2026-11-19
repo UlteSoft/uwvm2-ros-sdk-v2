@@ -35,6 +35,30 @@
       "bytes": 512,
       "mode": 420,
       "sha256": "7d65b1d23ec1936be6f33c76cfd7bb11b9d12d9f38dcb4f207bb1516232f8e22"
+    },
+    {
+      "path": "examples/platform/ufactory/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/ufactory/extension/vbnet/xmake.lua",
+      "bytes": 590,
+      "mode": 420,
+      "sha256": "edabbaf887c44cf5c854cf975e93867a03215edf7c34ec67e63ca1256b19e24e"
+    },
+    {
+      "path": "examples/platform/ufactory/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/ufactory/migration/vbnet/xmake.lua",
+      "bytes": 570,
+      "mode": 420,
+      "sha256": "52727ebe92c839fc44c2405cd072358a63c607281a72c4c3af4825d13b492b0e"
     }
   ]
 }

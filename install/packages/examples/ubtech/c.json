@@ -53,6 +53,30 @@
       "bytes": 517,
       "mode": 420,
       "sha256": "c812632e4968892d41a809f57efafa8a61136714d6a2a386500cc87cf7b08752"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/c/README.md",
+      "bytes": 488,
+      "mode": 420,
+      "sha256": "1131b743c41040d87ee61760ded41e442ccce5da582a39ececae1852afa49ebe"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/c/README.zh.md",
+      "bytes": 489,
+      "mode": 420,
+      "sha256": "7ea7fe1c80200a4361d6b004456b78be73568b5e9e036d98b759cbc3d89339fb"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/c/upstream.lock",
+      "bytes": 241,
+      "mode": 420,
+      "sha256": "2b155d86161183917599d27dbd3abb6f0c8d1ae8939fcd8d0ed00f44b831fbe8"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/c/xmake.lua",
+      "bytes": 1094,
+      "mode": 420,
+      "sha256": "2e7b3763180e909dea17caaf0f49ef922b903f767886725bd6c182ea05c0b9d2"
     }
   ]
 }

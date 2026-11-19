@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://franka_description/robots/panda_arm.urdf",
+    "sha256": "e1fb335ca060722abc830206e23af0ae8d7b32d135e52ee914132d9b19b3e29c",
+    "manifest_sha256": "f1a4e3d2728abec627f28b6afaf66ab8cc9ad9e9e3b3a77b928f6d900af6a8fe"
+  }
+]

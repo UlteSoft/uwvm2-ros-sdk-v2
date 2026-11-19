@@ -35,6 +35,30 @@
       "bytes": 504,
       "mode": 420,
       "sha256": "0c516faebb67c7cceaaa08732f1e2db42553c548150c918ced2368fb2d20e50c"
+    },
+    {
+      "path": "examples/platform/kuka/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/kuka/extension/vbnet/xmake.lua",
+      "bytes": 582,
+      "mode": 420,
+      "sha256": "f71f9e6e4e0032d276b33b7edb450d4f3e51370a7d1b78fbe888b16bf5f4caf8"
+    },
+    {
+      "path": "examples/platform/kuka/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/kuka/migration/vbnet/xmake.lua",
+      "bytes": 562,
+      "mode": 420,
+      "sha256": "8de9b79db5d26c54a58290dc14920dbc092d4495cd3675fbdc527da8d8b9d440"
     }
   ]
 }

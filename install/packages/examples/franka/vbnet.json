@@ -35,6 +35,30 @@
       "bytes": 508,
       "mode": 420,
       "sha256": "6521b183d8724a544ebff5a35c32e8752745e05360254789016924a8ee3adc26"
+    },
+    {
+      "path": "examples/platform/franka/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/franka/extension/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "44265ec0bcc2fdb013ddaae7dda1c25c050837431d777a359eb9a35eedfc36c1"
+    },
+    {
+      "path": "examples/platform/franka/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/franka/migration/vbnet/xmake.lua",
+      "bytes": 566,
+      "mode": 420,
+      "sha256": "7c6b09df15b97bdf9214b28a2691671dc353f69300843c4820cb705d631483fd"
     }
   ]
 }

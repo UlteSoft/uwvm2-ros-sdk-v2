@@ -35,6 +35,30 @@
       "bytes": 504,
       "mode": 420,
       "sha256": "b3e4f938481f5cff7ea084638103d2b0585bc8962cd7880885d9e165df3f1dcd"
+    },
+    {
+      "path": "examples/platform/abb/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/abb/extension/csharp/xmake.lua",
+      "bytes": 572,
+      "mode": 420,
+      "sha256": "46449f3710e55bb0678303eff2691c30adb4fcf0632dec3d4b950f5fd5edfe2c"
+    },
+    {
+      "path": "examples/platform/abb/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/abb/migration/csharp/xmake.lua",
+      "bytes": 552,
+      "mode": 420,
+      "sha256": "32c0afef070494cadd902be3866af47d91403554cdc0a1d635136b6f9d69aa06"
     }
   ]
 }

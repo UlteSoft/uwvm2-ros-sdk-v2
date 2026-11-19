@@ -35,6 +35,30 @@
       "bytes": 504,
       "mode": 420,
       "sha256": "d63872ced3d7e8bef5a516d28ab09e0ec23f51e7a05fd948d813af3e74d6dfa3"
+    },
+    {
+      "path": "examples/platform/pal/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/pal/extension/csharp/xmake.lua",
+      "bytes": 572,
+      "mode": 420,
+      "sha256": "4a8ec22828903549dfd803fff74bba9da9bcb57b245a18f72eaa8870ed7da912"
+    },
+    {
+      "path": "examples/platform/pal/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/pal/migration/csharp/xmake.lua",
+      "bytes": 552,
+      "mode": 420,
+      "sha256": "d4105290ba788dca3322ef5c5fc949bec238645239c61c72929d72319b05234f"
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/fanuc/migration/fsharp/README.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "64b88f6f782d96ef6f38ef13c34f583af5b5a32702577ce17b100b27d18b40fd"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/fsharp/README.zh.md",
+      "bytes": 243,
+      "mode": 420,
+      "sha256": "8e4688d343916be6d71031a03cfa9ba25d142fc3a73002498d36abfd531a9d8d"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/fsharp/xmake.lua",
+      "bytes": 582,
+      "mode": 420,
+      "sha256": "b28de8cbc9e165217f2616e969db3f176cbbfc283119c8a968b412139b2facbc"
+    }
+  ]
+}

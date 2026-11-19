@@ -35,6 +35,30 @@
       "bytes": 522,
       "mode": 420,
       "sha256": "55adbbba327a4c31ff11bfb7c0c35140c9e91936c26399953e29eeff9d5611a5"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/csharp/xmake.lua",
+      "bytes": 590,
+      "mode": 420,
+      "sha256": "451e49253b4ce85dffa26f7b2cb3a18b71492140ea20176c8458d573f7a7195b"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/csharp/xmake.lua",
+      "bytes": 570,
+      "mode": 420,
+      "sha256": "0b061b47a77a866bc11e030b55bf6a347fb5107213c9871a23e658dce395820d"
     }
   ]
 }

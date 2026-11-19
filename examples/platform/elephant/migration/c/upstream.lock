@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://myarm_communication/msg/MyArmPumpStatus.msg",
+    "sha256": "4126837fed94e7f5ef94f448706c02b225128a006b0780f748065fa9ed4f92bc",
+    "manifest_sha256": "507b0f2cacb49e1b2689add70cd2acdf532ec64cdd2f8c021fdbe2237c5d331c"
+  }
+]

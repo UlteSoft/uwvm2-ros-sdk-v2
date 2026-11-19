@@ -35,6 +35,30 @@
       "bytes": 526,
       "mode": 420,
       "sha256": "f05b37c33e9ce57641dd6fe77ae03958da934f5545de601d8f73c9c6960d7905"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/vbnet/xmake.lua",
+      "bytes": 604,
+      "mode": 420,
+      "sha256": "4fc102308982b46941754f97a462814e2b625e8862eb41036ec596ee37479360"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/vbnet/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "81b4de4ccac3d7996ffd3d99a658dca0a91e60b2605534d09cfee12bb6390056"
     }
   ]
 }

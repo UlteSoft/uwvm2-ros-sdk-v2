@@ -35,6 +35,30 @@
       "bytes": 518,
       "mode": 420,
       "sha256": "ef50face25f9ffc9c7646c05ae0c5ec780158bba98cc66e45ebe8edf0e268c9a"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/vbnet/xmake.lua",
+      "bytes": 596,
+      "mode": 420,
+      "sha256": "dbfc9236259fe1cd40a0a81ac8a0cedf499c148cc053bbfe47d6667f72bd1001"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/vbnet/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "5d13e19efb568e4ce8d8f28a0c924e8c3cb8bc1dbb7e2c3c6f21e2897664c6cd"
     }
   ]
 }

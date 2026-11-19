@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/trossen/migration/fsharp/README.md",
+      "bytes": 247,
+      "mode": 420,
+      "sha256": "27c5f225760ce73ee012e883e5c7ce7401f9ca36c74c37fc4618e448301633c8"
+    },
+    {
+      "path": "examples/platform/trossen/migration/fsharp/README.zh.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "c997bb92ce128b94af0e6c9fff8d8b043abfc093b2c3b8b96af68451831c819c"
+    },
+    {
+      "path": "examples/platform/trossen/migration/fsharp/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "db2312b943fe765ead12966dc57a889f9079d5fc9ff52e7205ad58b5da965ae6"
+    }
+  ]
+}

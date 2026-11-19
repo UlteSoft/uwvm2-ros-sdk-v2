@@ -35,6 +35,30 @@
       "bytes": 508,
       "mode": 420,
       "sha256": "cc5a2c4d8b34bdac26f6622e5bcb657ec51b0c0857ec4be1fe4f0f62fc82fef2"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "9e77816272b53b75480c79c624dee45bce95b65e7fb402417306463d122a3d40"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/vbnet/xmake.lua",
+      "bytes": 566,
+      "mode": 420,
+      "sha256": "07070199a2eb88790f9e95adb0cfa7c3a97b6d17c0fa5802d2471f4c4dce6212"
     }
   ]
 }

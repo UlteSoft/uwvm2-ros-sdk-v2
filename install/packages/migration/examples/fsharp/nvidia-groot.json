@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/nvidia-groot/migration/fsharp/README.md",
+      "bytes": 252,
+      "mode": 420,
+      "sha256": "ba84cb82ea67cc22c46ca959367d04130e3fe7e15d860b686f6f261c3581cfc4"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/fsharp/README.zh.md",
+      "bytes": 250,
+      "mode": 420,
+      "sha256": "0f9e5dcf01e57a80c026f711474fef8b90aef866b31c31d4891d66daa605515e"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/fsharp/xmake.lua",
+      "bytes": 589,
+      "mode": 420,
+      "sha256": "61098c1339e0eac22da919e5589e2604133602ff7a01b931956aa6004514ad92"
+    }
+  ]
+}

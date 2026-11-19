@@ -35,6 +35,30 @@
       "bytes": 510,
       "mode": 420,
       "sha256": "d5b062092055479000784b1550c3abd56b8917a80c8e986233e7f4d0e491511c"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/nvidia/extension/csharp/xmake.lua",
+      "bytes": 578,
+      "mode": 420,
+      "sha256": "b2bdcf47c9b9c2038e6f0a324a633ac6bfe7d31c125a687eb858b2d02f0baf55"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/csharp/xmake.lua",
+      "bytes": 558,
+      "mode": 420,
+      "sha256": "6a6c9d020b3d4cad54424450ca6e6272afc81d1672683c1ecb63d0dafe4e8f20"
     }
   ]
 }

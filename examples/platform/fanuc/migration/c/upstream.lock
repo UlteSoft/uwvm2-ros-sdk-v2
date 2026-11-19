@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://fanuc_msgs/msg/RMIStatus.msg",
+    "sha256": "cab50a0cc4381d48930a6e99eb8227ee0dd3776f12a0f9f83347aa3bd172f921",
+    "manifest_sha256": "bbb22cc4cc9570bb26c7cddd0c4747b2d06807ba52604f01cfc0747aa4250347"
+  }
+]

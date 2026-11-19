@@ -53,6 +53,30 @@
       "bytes": 519,
       "mode": 420,
       "sha256": "e8c143d62e69ee1e7dc1881c5474b04c144a39129957aad895536fc7d2d76c98"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/README.md",
+      "bytes": 471,
+      "mode": 420,
+      "sha256": "0aebdf3a4522739e8731fa43dabde5dd456c5761a411dad4c291e218499640c3"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/README.zh.md",
+      "bytes": 472,
+      "mode": 420,
+      "sha256": "fba53e03034ae68e477e98baa16eceaf8a57686a9618a11876f48969a0fcb204"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/upstream.lock",
+      "bytes": 232,
+      "mode": 420,
+      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/xmake.lua",
+      "bytes": 1095,
+      "mode": 420,
+      "sha256": "028d5e10bc8b6af778e90fa51f7501af055c9b1d1fca7fd5f0f124dfe15c4851"
     }
   ]
 }

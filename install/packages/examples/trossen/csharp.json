@@ -35,6 +35,30 @@
       "bytes": 512,
       "mode": 420,
       "sha256": "230153fb8cc3bcfd5ac9fd025c802ea0533ce0d73dab2ac4771c435588adc204"
+    },
+    {
+      "path": "examples/platform/trossen/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/trossen/extension/csharp/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "9a3b37fc2b2220613256d60060e2ec709da28a00fb49160fec3dfe281262c6aa"
+    },
+    {
+      "path": "examples/platform/trossen/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/trossen/migration/csharp/xmake.lua",
+      "bytes": 560,
+      "mode": 420,
+      "sha256": "9f8fade244cf369ebec2110fa371614cf925d2165f5421678801f34b4bc52335"
     }
   ]
 }

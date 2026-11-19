@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/agibot/migration/c/README.md",
+      "bytes": 541,
+      "mode": 420,
+      "sha256": "70a7e202e21ac1fa3c0c7d033079b6c8ac63f562a289b301ca66c5fa81e29fc9"
+    },
+    {
+      "path": "examples/platform/agibot/migration/c/README.zh.md",
+      "bytes": 542,
+      "mode": 420,
+      "sha256": "8fcb75e34680dd7e5e485c52a40a8acf2cd2a44277442645421fdd76eec5f1fd"
+    },
+    {
+      "path": "examples/platform/agibot/migration/c/upstream.lock",
+      "bytes": 238,
+      "mode": 420,
+      "sha256": "b4db423e562498d33e37e1e3cf4d3c9c8d055fcd1931b9037b82d7373513bba1"
+    },
+    {
+      "path": "examples/platform/agibot/migration/c/xmake.lua",
+      "bytes": 1094,
+      "mode": 420,
+      "sha256": "e638df85d6a1fd951434a7aec6f830766db383211b487e5a18845e43e2523280"
+    }
+  ]
+}

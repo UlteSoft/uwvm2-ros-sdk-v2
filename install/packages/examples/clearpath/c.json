@@ -53,6 +53,30 @@
       "bytes": 523,
       "mode": 420,
       "sha256": "96fb4a139a500345469e3065c1c6cf6cabb138f02db05257c120cd76951fc429"
+    },
+    {
+      "path": "examples/platform/clearpath/migration/c/README.md",
+      "bytes": 550,
+      "mode": 420,
+      "sha256": "2f75035ced88bb2455a2ce5737e956728b2aebcba2d26080b640124161c0dd4a"
+    },
+    {
+      "path": "examples/platform/clearpath/migration/c/README.zh.md",
+      "bytes": 551,
+      "mode": 420,
+      "sha256": "7fbeccceae5fd2a4a35ec4c5afd5c44bb54bd5e1ca7858cbc78411f5db46aad6"
+    },
+    {
+      "path": "examples/platform/clearpath/migration/c/upstream.lock",
+      "bytes": 263,
+      "mode": 420,
+      "sha256": "ece0e15fa83f7485a9892cd264211f07418e5b8230d6e6f59124c39e98dcf708"
+    },
+    {
+      "path": "examples/platform/clearpath/migration/c/xmake.lua",
+      "bytes": 1097,
+      "mode": 420,
+      "sha256": "9688c02450a71033042e8bec0465a71a986e0f88ff41dac33b2e5e8bdc03a7b0"
     }
   ]
 }

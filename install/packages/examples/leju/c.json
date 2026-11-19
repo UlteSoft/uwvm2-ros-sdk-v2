@@ -53,6 +53,30 @@
       "bytes": 513,
       "mode": 420,
       "sha256": "24bcf7943cd75c5dc6a65030e7417bd8c4553802b667615748f829e5c13a030c"
+    },
+    {
+      "path": "examples/platform/leju/migration/c/README.md",
+      "bytes": 507,
+      "mode": 420,
+      "sha256": "ba4bf0a0d83235e038a0fed2ecc83884ec839ee782c79c5f7c10b367b5bfc1b8"
+    },
+    {
+      "path": "examples/platform/leju/migration/c/README.zh.md",
+      "bytes": 508,
+      "mode": 420,
+      "sha256": "1738341dee97fae64faa0810948c36b461bd20ce03feeee39fd350f73a1ee5b3"
+    },
+    {
+      "path": "examples/platform/leju/migration/c/upstream.lock",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "399e29b01b96c2e47d70038419cff6c5f29ac377a3ecfa011627102dbc1f1fa2"
+    },
+    {
+      "path": "examples/platform/leju/migration/c/xmake.lua",
+      "bytes": 1092,
+      "mode": 420,
+      "sha256": "0637464fb72d8446219412afc6957db06af22c78d2268f7dccc2302b8f6da032"
     }
   ]
 }

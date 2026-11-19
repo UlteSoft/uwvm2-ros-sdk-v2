@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "document/en/managed-platform-examples.md",
+      "bytes": 2012,
+      "mode": 420,
+      "sha256": "23e9af993bea8b371ed24206c6caf291d06a92ab1bbe43e41cc538d952d09f45"
+    },
+    {
+      "path": "document/zh/managed-platform-examples.md",
+      "bytes": 1796,
+      "mode": 420,
+      "sha256": "62eb9fc15f0789308dea6fe59c1873f90cc4f70e8ac2101abfa68649c4ca2e7e"
+    },
+    {
+      "path": "examples/platform/trossen/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/trossen/extension/vbnet/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "4be0fdc94715b8ec7a2d31287a7995bfb7620f0d5b06ef0e449c89f323aba328"
+    },
+    {
+      "path": "examples/platform/trossen/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/trossen/migration/vbnet/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "e1cd9caa796ab43c99911a655b5afcb26e888656ead17484fbb45124d2118b1e"
+    }
+  ]
+}

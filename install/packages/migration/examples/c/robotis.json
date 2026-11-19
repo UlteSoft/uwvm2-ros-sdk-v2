@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/robotis/migration/c/README.md",
+      "bytes": 478,
+      "mode": 420,
+      "sha256": "6005f5cbc85ffefb340683a413e6751b5a9256583d1e07e816c1302a811ef848"
+    },
+    {
+      "path": "examples/platform/robotis/migration/c/README.zh.md",
+      "bytes": 479,
+      "mode": 420,
+      "sha256": "53013ef08ddfbca4e6d3649980ed7644e71fa059b64d5f9a1e6d037106df6034"
+    },
+    {
+      "path": "examples/platform/robotis/migration/c/upstream.lock",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "1ffe03adf90d0c7e2b78c6d312aa7079ac5f68ed6a9d76933e70fde16128fa15"
+    },
+    {
+      "path": "examples/platform/robotis/migration/c/xmake.lua",
+      "bytes": 1095,
+      "mode": 420,
+      "sha256": "2afe1d0c80e704ada95a230fedbd66e6b4188d8087ab3c8a79cd951b9641a204"
+    }
+  ]
+}

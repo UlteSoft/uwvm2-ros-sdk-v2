@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/yaskawa/migration/fsharp/README.md",
+      "bytes": 247,
+      "mode": 420,
+      "sha256": "f3eebc8ca4c25a37d4fca7e80757846c23ca000c9bbbdcc1ef2f982314a984b1"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/fsharp/README.zh.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "5a656a658ff177a55fa078a88c40700ba6689c1aed9ae46acb8f914353640b86"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/fsharp/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "8c101279fc2e0d25e5ef97168bd0a7cd8ec541b9eac4ac63f0423cf53844100a"
+    }
+  ]
+}

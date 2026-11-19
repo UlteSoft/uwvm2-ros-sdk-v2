@@ -47,6 +47,10 @@ def main():
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")
+    elif args.component == "migration" and args.language in ("csharp", "vbnet", "fsharp"):
+        packages.extend(("protocol", "frontend", args.language + "/numeric", "xmake/common", "xmake/platforms/" + args.platform))
+        if args.language == "fsharp":
+            packages.extend(("migration/examples/fsharp/common", "migration/examples/fsharp/" + args.platform))
     elif args.component == "numeric-aot" or (args.component == "development" and args.language in ("csharp", "vbnet", "fsharp")):
         if args.language not in ("csharp", "vbnet", "fsharp"):
             parser.error("the numeric-aot component requires csharp, fsharp or vbnet")
@@ -71,6 +75,8 @@ def main():
                 if args.language not in ("c", "cpp"):
                     parser.error("the migration resource component currently requires c or cpp")
                 packages.extend(("migration/resources", "migration/policy"))
+                if args.language == "c":
+                    packages.extend(("migration/examples/c/common", "migration/examples/c/" + args.platform))
                 if args.language == "cpp":
                     packages.append("migration/tf2-buffer")
             if args.component == "compiler-source":
@@ -79,6 +85,8 @@ def main():
                     packages.append("nim-producer-source")
     if args.language in PROJECT_LANGUAGES and args.component in ("development", "migration", "synchronous-aot", "numeric-aot"):
         packages.append("examples/" + args.platform + "/" + args.language)
+    if args.language in ("csharp", "fsharp", "vbnet") and args.component in ("development", "numeric-aot", "migration"):
+        packages.append("examples/managed/" + args.platform + "/" + args.language)
     print(json.dumps({"variant": args.component, "packages": packages}))
 
 

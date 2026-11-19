@@ -35,6 +35,30 @@
       "bytes": 506,
       "mode": 420,
       "sha256": "2c7c069c8d6a92ba3698bab9de65681fd37fc8c010362cda0267333c0c8a57e6"
+    },
+    {
+      "path": "examples/platform/leju/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/leju/extension/csharp/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "8a51c112709f476e67f1f404818c8ef4c155828a62c3d3318f1a244143a03ff2"
+    },
+    {
+      "path": "examples/platform/leju/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/leju/migration/csharp/xmake.lua",
+      "bytes": 554,
+      "mode": 420,
+      "sha256": "07504dcdafca4638c92257462ec0d1975b822730da4981ca193ace3b4906c8d0"
     }
   ]
 }

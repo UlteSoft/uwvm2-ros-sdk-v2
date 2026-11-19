@@ -35,6 +35,30 @@
       "bytes": 502,
       "mode": 420,
       "sha256": "d0e0e0280d3da9f88ea06ae9335fb6adfa6b23e24249503eb642caec7e66abe4"
+    },
+    {
+      "path": "examples/platform/pal/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/pal/extension/vbnet/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "06d1b6a2707babf3bcebccebdc7bea63ab79ea28271f90b247427425ea91d2f3"
+    },
+    {
+      "path": "examples/platform/pal/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/pal/migration/vbnet/xmake.lua",
+      "bytes": 560,
+      "mode": 420,
+      "sha256": "762cd4e84b2e7dc970ba98f2cf647e9ec1e069763b78b3d2db796d5489b35664"
     }
   ]
 }

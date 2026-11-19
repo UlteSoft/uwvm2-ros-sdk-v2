@@ -35,6 +35,30 @@
       "bytes": 510,
       "mode": 420,
       "sha256": "8482227dcbe3103855856ba841d59dd2c9b87ec7613603c50e95ade523719f03"
+    },
+    {
+      "path": "examples/platform/trossen/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/trossen/extension/vbnet/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "4be0fdc94715b8ec7a2d31287a7995bfb7620f0d5b06ef0e449c89f323aba328"
+    },
+    {
+      "path": "examples/platform/trossen/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/trossen/migration/vbnet/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "e1cd9caa796ab43c99911a655b5afcb26e888656ead17484fbb45124d2118b1e"
     }
   ]
 }

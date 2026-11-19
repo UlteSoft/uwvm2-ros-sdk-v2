@@ -35,6 +35,30 @@
       "bytes": 504,
       "mode": 420,
       "sha256": "ab08342a163e3153075ae42816f50c01311df7eb143b424dd72e1a7a4361c4bf"
+    },
+    {
+      "path": "examples/platform/leju/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/leju/extension/vbnet/xmake.lua",
+      "bytes": 582,
+      "mode": 420,
+      "sha256": "ddab9ed098929a1d54707951cdc1043a50cae11c5bd879c12b0bcff4362bb9b2"
+    },
+    {
+      "path": "examples/platform/leju/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/leju/migration/vbnet/xmake.lua",
+      "bytes": 562,
+      "mode": 420,
+      "sha256": "0a81ff79b319ad4f0b5a9e2f5037bb7d8f63081e01a1db2efd42df675bbf2826"
     }
   ]
 }

@@ -53,6 +53,30 @@
       "bytes": 517,
       "mode": 420,
       "sha256": "ce4de262ecee2a18d6660319a9be3e4293e0014e5226ead34265007b235c91fe"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/c/README.md",
+      "bytes": 526,
+      "mode": 420,
+      "sha256": "de16b489d807e1bc8f1c90fa54dd49fef92432ec86550cc654edb262a7ca5b40"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/c/README.zh.md",
+      "bytes": 527,
+      "mode": 420,
+      "sha256": "32415579857706237253c77a0917ac2d096895d3c1c78859440613607c199c57"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/c/upstream.lock",
+      "bytes": 256,
+      "mode": 420,
+      "sha256": "8d1d2de559a742b3c3e391d63166ed25443a3fa5e4b7d95dd01c7249a8e1b2ac"
+    },
+    {
+      "path": "examples/platform/nvidia/migration/c/xmake.lua",
+      "bytes": 1094,
+      "mode": 420,
+      "sha256": "57c88a13bfa6aa8c6f43b1c4761abedf7f3230d77a13c1b3625470d457e7474e"
     }
   ]
 }

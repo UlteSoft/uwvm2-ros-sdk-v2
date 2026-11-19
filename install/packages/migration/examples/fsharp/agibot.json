@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/agibot/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "bedfe18061b4f2440395f703aa6dce04d2ccc717ffa29e5383db91ffe9c554f4"
+    },
+    {
+      "path": "examples/platform/agibot/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "6f3b6f1eefbc65ab393b4c5fd0fff7be0cb25aeca5d2d1b772201c6033d1059d"
+    },
+    {
+      "path": "examples/platform/agibot/migration/fsharp/xmake.lua",
+      "bytes": 583,
+      "mode": 420,
+      "sha256": "f33eab4db05d8ed41f01299899664453c5a6765ef646f7ebb910def385035116"
+    }
+  ]
+}

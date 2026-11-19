@@ -35,6 +35,30 @@
       "bytes": 512,
       "mode": 420,
       "sha256": "450b23463b63ce2b33fdd693edee85b6ad66b0c829671f83092bf175131d94fd"
+    },
+    {
+      "path": "examples/platform/unitree/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/unitree/extension/csharp/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "3177074381bc38eff8157feaa59d9ff10a0d3b7b29087c35e1dbb47ef54c773d"
+    },
+    {
+      "path": "examples/platform/unitree/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/unitree/migration/csharp/xmake.lua",
+      "bytes": 560,
+      "mode": 420,
+      "sha256": "a32c48e21c1bfb7dc85063f601b872d073e105b8a1c88c0f65f0babeae424730"
     }
   ]
 }

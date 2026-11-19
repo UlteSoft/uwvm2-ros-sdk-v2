@@ -35,6 +35,30 @@
       "bytes": 528,
       "mode": 420,
       "sha256": "c52b317cc3fc7b7818208b690e17af9c9d5ddb5bbe8642296b4bedf772cd4d62"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/extension/vbnet/xmake.lua",
+      "bytes": 606,
+      "mode": 420,
+      "sha256": "47d201b21a6eeb3ce23b410fff184176b8e2ee357fb11030f21e7168857782fa"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/vbnet/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "194b6668a3074565e471281f41ed15a98086e96f2b97af22edd28d7aa1cc3acd"
     }
   ]
 }

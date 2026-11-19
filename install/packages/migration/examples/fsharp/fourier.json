@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/fourier/migration/fsharp/README.md",
+      "bytes": 247,
+      "mode": 420,
+      "sha256": "320e6ae4cbe70eb455b4d97e023d6dc2964603da9078eb0535c422dbfde05f7f"
+    },
+    {
+      "path": "examples/platform/fourier/migration/fsharp/README.zh.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "26da67541a661b5107d01917298dbca0084acb5bf6023201826669335aed7675"
+    },
+    {
+      "path": "examples/platform/fourier/migration/fsharp/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "20fa866f01825854c8b3d9d461992271f53c511f5872e7743ea14deb4c20f511"
+    }
+  ]
+}

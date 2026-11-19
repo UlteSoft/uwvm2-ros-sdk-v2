@@ -53,6 +53,30 @@
       "bytes": 515,
       "mode": 420,
       "sha256": "6da350acc352f5d30d0f780688aa74218a51d305416aa649c591b6ec76a3f750"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/c/README.md",
+      "bytes": 481,
+      "mode": 420,
+      "sha256": "3a168dd74aadb370e5ab2fe09cdc6b89a75dbfce299ed50c13e5922019cf97fd"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/c/README.zh.md",
+      "bytes": 482,
+      "mode": 420,
+      "sha256": "b8a765ed43f7503f6788aab184abbf0796e17d624436191beec03d9260c15361"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/c/upstream.lock",
+      "bytes": 237,
+      "mode": 420,
+      "sha256": "c0fe35d17bdb5cd160978450098f792404a0f1fb453903466c10e217ee291e4e"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/c/xmake.lua",
+      "bytes": 1093,
+      "mode": 420,
+      "sha256": "32112bf4cadad06f7d292554eab35ef70e62ebdc71e84c42c6e49875b2dc8954"
     }
   ]
 }

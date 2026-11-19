@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://franka_msgs/msg/Elbow.msg",
+    "sha256": "3bdb18227176ab8f368f00b47ee06aa843bd2df4cd60e40034bf6b69d42f496e",
+    "manifest_sha256": "0be0328a737b3b711c72d1b954d8883aae4f19f93a1ff9eed1a7296e81e1bd56"
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://drdds/msg/ImuData.msg",
+    "sha256": "1ca03691b4331216ae78f7914b879663c1fb79701611d4f4e8bb43284febf5d8",
+    "manifest_sha256": "15a823ad0d303830118b79076c6b61b36b0b4d424f5730dbfc147168b87f4170"
+  }
+]

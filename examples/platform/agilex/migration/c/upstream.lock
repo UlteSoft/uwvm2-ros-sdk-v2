@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://scout_msgs/msg/ScoutStatus.msg",
+    "sha256": "4ba5eb2011000fd7b6c59338880c9ee9464d98d547dbb55e96b52beb4ea0d201",
+    "manifest_sha256": "41c4b542551be79e63bafd2f8feaaec1350faff93915175aaff636fd76a25665"
+  }
+]

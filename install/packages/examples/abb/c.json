@@ -53,6 +53,30 @@
       "bytes": 511,
       "mode": 420,
       "sha256": "ec99ce705d2103455d5cca375015fca41ce191ce21fa3c5095c7e10c0b354328"
+    },
+    {
+      "path": "examples/platform/abb/migration/c/README.md",
+      "bytes": 493,
+      "mode": 420,
+      "sha256": "7e2a0fc3f1ddcea26cde93f75c595cb1028c6bfc4ce4e6fcda3af267f2373315"
+    },
+    {
+      "path": "examples/platform/abb/migration/c/README.zh.md",
+      "bytes": 494,
+      "mode": 420,
+      "sha256": "c52b18ee454e5fd6ba7055c15d4fd5c861bcde09964dac260c6a360ee2c07b78"
+    },
+    {
+      "path": "examples/platform/abb/migration/c/upstream.lock",
+      "bytes": 235,
+      "mode": 420,
+      "sha256": "b113090035e0e4ea1c75e6d8f024cfba8298d3e0d514de4b0a882824b905fcdf"
+    },
+    {
+      "path": "examples/platform/abb/migration/c/xmake.lua",
+      "bytes": 1091,
+      "mode": 420,
+      "sha256": "9fba989e05db7a170345bc78f780ddafd32ca6166f8f973ba853339e7d8869ae"
     }
   ]
 }

@@ -53,6 +53,30 @@
       "bytes": 515,
       "mode": 420,
       "sha256": "11e8ae6bf02ba333e345ec5049e885dd18fd9988ee23a456a9ab2d52235b3573"
+    },
+    {
+      "path": "examples/platform/dobot/migration/c/README.md",
+      "bytes": 488,
+      "mode": 420,
+      "sha256": "de190ed8f2634d9871a36f9e8add3e57b7a242219c9f7bd1c242223807f145c5"
+    },
+    {
+      "path": "examples/platform/dobot/migration/c/README.zh.md",
+      "bytes": 489,
+      "mode": 420,
+      "sha256": "7b4d85f5877c698084d01024257069b2007ac9a66916c32ab357eb7021601274"
+    },
+    {
+      "path": "examples/platform/dobot/migration/c/upstream.lock",
+      "bytes": 242,
+      "mode": 420,
+      "sha256": "9485078c7f96cd238fb45857893767fdae709ed2f4656f85a25cbeff5ecb7bb6"
+    },
+    {
+      "path": "examples/platform/dobot/migration/c/xmake.lua",
+      "bytes": 1093,
+      "mode": 420,
+      "sha256": "45d491b2668c53c220e32b49e7f997c88eb2f660d2ea86570b0e183cf50a0cce"
     }
   ]
 }

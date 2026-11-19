@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/nvidia-groot/migration/c/README.md",
+      "bytes": 476,
+      "mode": 420,
+      "sha256": "a680c40d1d8adc95f0a774459fe92d808795da6f7ea093c8711f74808399b915"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/c/README.zh.md",
+      "bytes": 477,
+      "mode": 420,
+      "sha256": "99ff3ab4c7ca856fa20a710018dad03c724dfde5e711bbbcfd54e030f2f65287"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/c/upstream.lock",
+      "bytes": 232,
+      "mode": 420,
+      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/c/xmake.lua",
+      "bytes": 1100,
+      "mode": 420,
+      "sha256": "ecc45a24dcb86c91695fed1faeba2ddc6baff8e3c6c45b6685131d5c06ebc4ba"
+    }
+  ]
+}

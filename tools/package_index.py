@@ -88,6 +88,27 @@ def main():
     ])
     package("migration/policy", ["tools/migration/legacy_permissions.py", "document/en/legacy-permissions.md",
                                  "document/zh/legacy-permissions.md"])
+    migration_guides = ["document/en/platform-migration-examples.md", "document/zh/platform-migration-examples.md"]
+    fixture = "third-parties/migration-examples/sensor_msgs/"
+    package("migration/examples/c/common", [*migration_guides, "examples/shared/migration/c/prepare.py",
+            "examples/shared/migration/c/resource.c", "examples/shared/migration/c/imu.lock",
+            *(fixture + name for name in ("LICENSE", "README.md", "package.xml", "msg/Imu.msg"))])
+    package("migration/examples/fsharp/common", [*migration_guides, "examples/shared/migration/fsharp/GoalStatus.fs"])
+    for platform in registry["platforms"]:
+        for language in ("c", "fsharp"):
+            directory = f"examples/platform/{platform}/migration/{language}/"
+            names = ["README.md", "README.zh.md", "xmake.lua"]
+            if language == "c":
+                names.append("upstream.lock")
+            package(f"migration/examples/{language}/{platform}", [directory + name for name in names])
+    for platform in registry["platforms"]:
+        for language in ("csharp", "vbnet", "fsharp"):
+            managed_examples = ["document/en/managed-platform-examples.md", "document/zh/managed-platform-examples.md"]
+            areas = ("extension",) if language == "fsharp" else ("extension", "migration")
+            for area in areas:
+                folder = ROOT / "examples/platform" / platform / area / language
+                managed_examples.extend(p.relative_to(ROOT).as_posix() for p in folder.iterdir() if p.is_file())
+            package("examples/managed/" + platform + "/" + language, managed_examples)
     for key, source in {"c": "include/wros/scene.h", "rs": "language/rust/scene.rs",
                         "as": "language/assemblyscript/scene.ts"}.items():
         package("bindings/" + key, [source])
@@ -121,12 +142,12 @@ def main():
                             optional_components=["synchronous-aot"])
         if language in ("csharp", "vbnet", "fsharp"):
             metadata.update(development_package=True, development_scope="freestanding-i32-method",
-                            optional_components=["numeric-aot"])
+                            optional_components=["numeric-aot", "migration"])
         write_json(path, metadata)
         package("metadata/" + language, [path])
 
     mono_aot = ["language/csharp/prepare_host.py", "language/csharp/packages.json", "install/private_exports.py", "language/csharp/numeric.py", "language/csharp/host.py",
-                "language/csharp/Scene.cs", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py",
+                "language/csharp/Scene.cs", "language/csharp/driver_binding.py", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py",
                 "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256"]
     for language, example in (("csharp", "Robot.cs"), ("vbnet", "Robot.vb"), ("fsharp", "Robot.fs")):
         paths = [*mono_aot, "bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",

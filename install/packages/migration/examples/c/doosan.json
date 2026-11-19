@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/doosan/migration/c/README.md",
+      "bytes": 487,
+      "mode": 420,
+      "sha256": "7d1586735477e353bff42e6aeb398e7329de900e90843fe14a1c25a8990bd380"
+    },
+    {
+      "path": "examples/platform/doosan/migration/c/README.zh.md",
+      "bytes": 488,
+      "mode": 420,
+      "sha256": "8ee1456c21a7bb21c7f881fbd6bb9d16f0df3dc4e0e39f8c6cfcc6e8b76becfc"
+    },
+    {
+      "path": "examples/platform/doosan/migration/c/upstream.lock",
+      "bytes": 234,
+      "mode": 420,
+      "sha256": "1ef94ded19f1fa4e531c536e13a26da73a7efbb174775fcf02281c6f87c73f5a"
+    },
+    {
+      "path": "examples/platform/doosan/migration/c/xmake.lua",
+      "bytes": 1094,
+      "mode": 420,
+      "sha256": "de0f4e24dcc132e2535d135596cbc9d77c08790c1a2295bf6a877576f3177d7e"
+    }
+  ]
+}

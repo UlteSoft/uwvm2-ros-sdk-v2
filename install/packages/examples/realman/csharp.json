@@ -35,6 +35,30 @@
       "bytes": 512,
       "mode": 420,
       "sha256": "341edb86a0cdcc646db80bcb68d036a48357ed0bf430fbd75185fbfe050dee06"
+    },
+    {
+      "path": "examples/platform/realman/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/realman/extension/csharp/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "dca5b938a3ada0385d1029095c5fdf4fde0e96f98f5adf92b6d619a5f26e5554"
+    },
+    {
+      "path": "examples/platform/realman/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/realman/migration/csharp/xmake.lua",
+      "bytes": 560,
+      "mode": 420,
+      "sha256": "f97cad8a2cb489d2ead14fa32f01936af2f4bc8421743770745709e940cd60dc"
     }
   ]
 }

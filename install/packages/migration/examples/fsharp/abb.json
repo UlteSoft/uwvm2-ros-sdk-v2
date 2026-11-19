@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/abb/migration/fsharp/README.md",
+      "bytes": 243,
+      "mode": 420,
+      "sha256": "708f9ab2ab937e3e7d46531f39d707c12bdc162172f433e7af07f8b57f6a1906"
+    },
+    {
+      "path": "examples/platform/abb/migration/fsharp/README.zh.md",
+      "bytes": 241,
+      "mode": 420,
+      "sha256": "0fed8362e20d187a0cc3162e37356f12e603429adfb070cc94cf250104901254"
+    },
+    {
+      "path": "examples/platform/abb/migration/fsharp/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "73ee951d17aa4a528eca4a5cd296dd6009c793f0fbcc23abab7e8cc0504aff9f"
+    }
+  ]
+}

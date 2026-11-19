@@ -35,6 +35,30 @@
       "bytes": 512,
       "mode": 420,
       "sha256": "102a3b8be95d0ea2190eb4112d9eae1a88659665c872169ebf3aeec58a725ea4"
+    },
+    {
+      "path": "examples/platform/elephant/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/elephant/extension/vbnet/xmake.lua",
+      "bytes": 590,
+      "mode": 420,
+      "sha256": "3b75357a98494020fb149dae7cadf9f7d56d2e812e691df9d6f9a2abb1912fb2"
+    },
+    {
+      "path": "examples/platform/elephant/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/elephant/migration/vbnet/xmake.lua",
+      "bytes": 570,
+      "mode": 420,
+      "sha256": "ff0d2037e44069c641921b1fc2559f46ac0cc65b5ccd72e003cb34c34a4acf7c"
     }
   ]
 }

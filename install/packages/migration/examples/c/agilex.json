@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/agilex/migration/c/README.md",
+      "bytes": 478,
+      "mode": 420,
+      "sha256": "abafac9db224a6736bb110855351f85b11f8b6c41805efe3401dae9459650b51"
+    },
+    {
+      "path": "examples/platform/agilex/migration/c/README.zh.md",
+      "bytes": 479,
+      "mode": 420,
+      "sha256": "a6befa2d1703bc69d74dbb06373e4f3ff02d5a8148b8f5ce7202fc7794b274d9"
+    },
+    {
+      "path": "examples/platform/agilex/migration/c/upstream.lock",
+      "bytes": 239,
+      "mode": 420,
+      "sha256": "0410625d6f507bd2b02c2f440ccfe46f5167ec4ca1c33e9a7e119cb6aca38f9a"
+    },
+    {
+      "path": "examples/platform/agilex/migration/c/xmake.lua",
+      "bytes": 1094,
+      "mode": 420,
+      "sha256": "3221ccdd53d5eb5963804a1e36b9209cfcc01c5e69d3642cc786570665dfc511"
+    }
+  ]
+}

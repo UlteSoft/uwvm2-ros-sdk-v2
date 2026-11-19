@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://flexiv_msgs/msg/OperationalStatus.msg",
+    "sha256": "fc318a5a0683b2b6e78c5cf5f939a8f2430f3f790c5e9f89ede5cfbc6b818edc",
+    "manifest_sha256": "bd212f4046e8b9b77f741510aadbeecb10795532c41c1ef7e349bbc9b5bb5dbb"
+  }
+]

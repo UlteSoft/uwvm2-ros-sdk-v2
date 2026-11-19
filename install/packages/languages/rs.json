@@ -20,14 +20,14 @@
     },
     {
       "path": "examples/rs/body.rs",
-      "mode": 420,
       "bytes": 261,
+      "mode": 420,
       "sha256": "1b61495c0b7c41b810affefedbb3a86433ffd2c1682ba4b5c20af4febea06b11"
     },
     {
       "path": "examples/rs/xmake.lua",
-      "mode": 420,
       "bytes": 342,
+      "mode": 420,
       "sha256": "c79bc904bfcf31811b6d969d0b2dab3019382855f9d6ebbea77c13eb4d828afd"
     },
     {
@@ -38,8 +38,8 @@
     },
     {
       "path": "language/rust/check_site.py",
-      "mode": 420,
       "bytes": 1904,
+      "mode": 420,
       "sha256": "a926f396cc2506dc9009cde0fd5aa15676e6aa716590378441868227b6f39fef"
     },
     {

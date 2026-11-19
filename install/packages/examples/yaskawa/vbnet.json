@@ -35,6 +35,30 @@
       "bytes": 510,
       "mode": 420,
       "sha256": "1704bdfea7b60ea3d2cc4ab884f1e1e1e17e764100aa4eb94e383b4a31d95db6"
+    },
+    {
+      "path": "examples/platform/yaskawa/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/yaskawa/extension/vbnet/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "9ab292199f8b6de6ea53e11113ad42d3b2b7ec5a3f5e2677fb0e6b922fb029d9"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/vbnet/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "847517056c0314b2325859b611f01087a76eb406c0b222489c1bb401ebb7baef"
     }
   ]
 }

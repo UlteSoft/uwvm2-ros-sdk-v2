@@ -35,6 +35,30 @@
       "bytes": 510,
       "mode": 420,
       "sha256": "807223b1067dd1c3badf044052b6c6c282eb5a8fb9c9f7ada7a2c1c977fdf57b"
+    },
+    {
+      "path": "examples/platform/robotis/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/robotis/extension/vbnet/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "108958019b3f371a67505feca049a7f8dd61abfdf6667945c5d3f30c50ece12b"
+    },
+    {
+      "path": "examples/platform/robotis/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/robotis/migration/vbnet/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "6ad8c4d3549050aeda67d2ad6134ac6d302db5ddc6ba314cb355341837de5436"
     }
   ]
 }

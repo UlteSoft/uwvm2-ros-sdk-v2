@@ -35,6 +35,30 @@
       "bytes": 514,
       "mode": 420,
       "sha256": "ea3247519f87f999ac822f11b0cc724b68d05bad9d4842d774ce9fca8f9b38a9"
+    },
+    {
+      "path": "examples/platform/elephant/extension/csharp/Driver.cs",
+      "bytes": 449,
+      "mode": 420,
+      "sha256": "7e997d522c4f3d084e0bb5b84e76bddfb82730d6354bb7814b2f4e436b489874"
+    },
+    {
+      "path": "examples/platform/elephant/extension/csharp/xmake.lua",
+      "bytes": 582,
+      "mode": 420,
+      "sha256": "855a6db05a9944776c7d120f91506728544a5f7fec4794e3eec21fa14df58ad7"
+    },
+    {
+      "path": "examples/platform/elephant/migration/csharp/GoalStatus.cs",
+      "bytes": 778,
+      "mode": 420,
+      "sha256": "5ca863bdf4437515f82e7c6f55d7d3f7fe657e61f3e26554154bcf6ccc3ceb6a"
+    },
+    {
+      "path": "examples/platform/elephant/migration/csharp/xmake.lua",
+      "bytes": 562,
+      "mode": 420,
+      "sha256": "109cbf29e01060941dddb659330067dd2237f6c9f1dbbc36d53b4e675b35cb8f"
     }
   ]
 }

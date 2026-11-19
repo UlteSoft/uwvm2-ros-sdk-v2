@@ -50,21 +50,27 @@
     },
     {
       "path": "language/csharp/Admit.cs",
-      "bytes": 8244,
+      "bytes": 8367,
       "mode": 420,
-      "sha256": "1aa17f2b9883618ca5f8dd479c437cc85635b9aabc34e851ab2ee696365d27a8"
+      "sha256": "115cf4dc4865a6b6e4990bb63fd64a4556f6f99e5bfe980328ecf1e915ef17c6"
     },
     {
       "path": "language/csharp/Scene.cs",
-      "bytes": 370,
+      "bytes": 675,
       "mode": 420,
-      "sha256": "3789a61e509d757446a787da330513ce558b4079cdddefa31145ceaffc51b0c2"
+      "sha256": "8de39220bc9eec665ab9be786739a8f9ebaf5527822758c439fbaa9a52557e55"
     },
     {
       "path": "language/csharp/SceneEntry.cs",
-      "bytes": 3432,
+      "bytes": 4099,
       "mode": 420,
-      "sha256": "fc0cb72418436c8416ee512bd7e3bcba397b78fd07f082f35b26e503b3fabc6f"
+      "sha256": "59c84e6ab1f3a07a62a9c7adbbb819c15b12331ac5c63cb728b457a871ea81cb"
+    },
+    {
+      "path": "language/csharp/driver_binding.py",
+      "bytes": 4224,
+      "mode": 420,
+      "sha256": "8cf95e39bd28456096d20120f39e2e31b8f68dc27b3de07b236d2a34080b2d52"
     },
     {
       "path": "language/csharp/host.py",
@@ -86,9 +92,9 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 11084,
+      "bytes": 11560,
       "mode": 420,
-      "sha256": "1c75df0c3b519d4ea6d9068e6204808bc75333642f6f8e456131d2379b22dde8"
+      "sha256": "f6f9b1d6ee28dec6df6106c58e2cbf4086519d6747695f5053372f58f89fbb53"
     },
     {
       "path": "language/csharp/packages.json",
@@ -110,9 +116,9 @@
     },
     {
       "path": "language/csharp/xmake/adapter.lua",
-      "bytes": 2359,
+      "bytes": 2483,
       "mode": 420,
-      "sha256": "08b1e4b6fc0d8b202ee7ad70b817350f12c412f504fda6a29b3495162569cf04"
+      "sha256": "f81729ad50c8ef0fe5b619effdab635948f773d8c8b36c8440f631e53130d28d"
     },
     {
       "path": "tests/csharp/README.md",

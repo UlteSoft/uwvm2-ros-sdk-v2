@@ -4,6 +4,7 @@
   "command_name": "wrfs",
   "development_scope": "freestanding-i32-method",
   "optional_components": [
-    "numeric-aot"
+    "numeric-aot",
+    "migration"
   ]
 }

@@ -35,6 +35,30 @@
       "bytes": 510,
       "mode": 420,
       "sha256": "606eec0e5ad657339f565d243a84c8acad9de981a7b77b29144cbd9fd44aef2d"
+    },
+    {
+      "path": "examples/platform/unitree/extension/vbnet/Driver.vb",
+      "bytes": 546,
+      "mode": 420,
+      "sha256": "bea971cb5b8b1f08bcd13fad8877874f6a164d6c077501ef8af95e77c74bdc90"
+    },
+    {
+      "path": "examples/platform/unitree/extension/vbnet/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "cf5f715f632cda6fc0d14d8be2ece2b970397a7e3951310258c59cfda33d102f"
+    },
+    {
+      "path": "examples/platform/unitree/migration/vbnet/GoalStatus.vb",
+      "bytes": 942,
+      "mode": 420,
+      "sha256": "baa5f0c7fe3919a6ee480f73b99dbabcbfa5ff73c35d65c7394d3418a969c704"
+    },
+    {
+      "path": "examples/platform/unitree/migration/vbnet/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "3b6972319e54d3eff24082182fd8ccb8fb407619980aa859a0b31252a4c8e3aa"
     }
   ]
 }
