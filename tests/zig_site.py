@@ -18,8 +18,10 @@ from release import FORMAT, SETTINGS, local_release, measure, profile_for, quali
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    for key in ("toolchain", "sysroots", "no-mte-sysroots", "vm", "vm-source", "cosign", "output", "authority-work"):
+    for key in ("toolchain", "no-mte-toolchain", "vm", "vm-source", "cosign", "output", "authority-work"):
         p.add_argument("--" + key, type=lambda value: Path(value).resolve(), required=True)
+    for key in ("sysroots", "no-mte-sysroots"):
+        p.add_argument("--" + key, type=lambda value: Path(value).resolve(), action="append", required=True)
     p.add_argument("--commit", required=True)
     args = p.parse_args()
     group = cgroup_record()
@@ -53,7 +55,7 @@ def main():
         scratch = out / (label + "-work")
         scratch.mkdir()
         module = out / (label + ".wasm")
-        build(source, module, args.toolchain, [args.sysroots], profile, scratch)
+        build(source, module, args.toolchain, args.sysroots, profile, scratch)
         shutil.rmtree(scratch)
         return module
 
@@ -71,6 +73,7 @@ def main():
     def stamp(seconds):
         return (now + datetime.timedelta(seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+    no_mte_receipts = [item for path in args.no_mte_sysroots for item in ("--sysroots", path)]
     for bits in (32, 64):
         tag = "wasm" + str(bits)
         profile = profile_for(bits)
@@ -83,7 +86,7 @@ def main():
         run(tag + "-missing-site", [sys.executable, "-B", ROOT / "bin/wrzig", common, "-o", out / "refused.wasm"],
             b"needs a signed Zig site")
         run(tag + "-bad-import", [sys.executable, "-B", ROOT / "bin/wrzig", invalid, "-o", out / "refused.wasm",
-            "--target", tag, "--no-mte", "--toolchain", args.toolchain, "--sysroots", args.no_mte_sysroots],
+            "--target", tag, "--no-mte", "--toolchain", args.no_mte_toolchain, *no_mte_receipts],
             b"unauthorized import or signature")
         assert not (out / "refused.wasm").exists()
         groups = {
@@ -93,7 +96,7 @@ def main():
             "authority": [tag + "-int-hidden", tag + "-aot-hidden"],
             "admission": [tag + "-missing-site", tag + "-bad-import"],
         }
-        inputs = measure(args.toolchain, [args.sysroots], profile)
+        inputs = measure(args.toolchain, args.sysroots, profile)
         row = dict(format=FORMAT, language="zig", profile=profile.to_dict(), settings=SETTINGS,
                    inputs=inputs, vm_sha256=vm_sha256,
                    tests={name: qualification.canonical(dict(cases={c: cases[c] for c in group},
@@ -115,7 +118,7 @@ def main():
             run(tag + "-sign", [*prefix, "sign", unsigned, "--policy", rules, "--key", ca["key"],
                 "--certificate", ca["certificate"], "--crl", ca["crl"], "--module-id", module_id, "--module-version", "1",
                 "--algorithm", "Ed25519", "--not-before", stamp(-60), "--not-after", stamp(7200), "--output", signed])
-        site = dict(toolchain=str(args.toolchain), sysroots=[str(args.sysroots)], release_sha256=qualification.canonical(row),
+        site = dict(toolchain=str(args.toolchain), sysroots=list(map(str, args.sysroots)), release_sha256=qualification.canonical(row),
                     trust=dict(verifier=str(args.cosign), verifier_sha256=sha(args.cosign), statement=str(signed),
                                statement_sha256=sha(signed), policy=str(rules)))
         config = out / (tag + "-site.json")
@@ -139,8 +142,8 @@ def main():
         for engine in ("int", "aot"):
             run(tag + "-strict-" + engine, vm(profile, engine, module, *policy))
         plain = out / (tag + "-untagged.wasm")
-        run(tag + "-off", [*compiler, common, "--target", tag, "--no-mte", "--toolchain", args.toolchain,
-                            "--sysroots", args.no_mte_sysroots, "-o", plain, "--build-receipt"])
+        run(tag + "-off", [*compiler, common, "--target", tag, "--no-mte", "--toolchain", args.no_mte_toolchain,
+                            *no_mte_receipts, "-o", plain, "--build-receipt"])
         assert json.loads(Path(str(plain) + ".wros-build.json").read_bytes())["mode"] == "off"
         for engine in ("int", "aot"):
             run(tag + "-off-" + engine, vm(profile_for(bits, tagged=False), engine, plain, *policy))
