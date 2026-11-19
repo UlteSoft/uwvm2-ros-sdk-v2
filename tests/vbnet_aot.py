@@ -73,6 +73,11 @@ def main():
                    "        Return slot Xor value\n    End Function\nEnd Class\n")
     rejected = out / "rejected.wasm"
     run("refuse-storage", [*common, "--entry", "Storage.Read", bad, "-o", rejected], False)
+    inherited = project / "Inherited.vb"
+    inherited.write_text("Public Class Ancestor\nEnd Class\nPublic NotInheritable Class Child\n"
+                         "    Inherits Ancestor\n    Public Shared Function Pass(value As Integer) As Integer\n"
+                         "        Return value\n    End Function\nEnd Class\n")
+    run("refuse-managed-base", [*common, "--entry", "Child.Pass", inherited, "-o", rejected], False)
     if rejected.exists():
         raise ValueError("rejected source produced an artifact")
     report["complete"] = True

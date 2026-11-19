@@ -60,6 +60,18 @@ static class Admit
         }
     }
 
+    static bool IsSystemObject(MetadataReader data, EntityHandle handle)
+    {
+        if (handle.Kind != HandleKind.TypeReference) return false;
+        var parent = data.GetTypeReference((TypeReferenceHandle)handle);
+        if (parent.ResolutionScope.Kind != HandleKind.AssemblyReference ||
+            data.GetString(parent.Name) != "Object" || data.GetString(parent.Namespace) != "System")
+            return false;
+        var scope = data.GetAssemblyReference((AssemblyReferenceHandle)parent.ResolutionScope);
+        string name = data.GetString(scope.Name);
+        return name == "System.Runtime" || name == "mscorlib";
+    }
+
     static int Main(string[] args)
     {
         try {
@@ -83,7 +95,7 @@ static class Admit
                     // VB uses a sealed class with Shared methods. It has no static-class modifier.
                     var required = vb ? TypeAttributes.Sealed : TypeAttributes.Abstract | TypeAttributes.Sealed;
                     if ((type.Attributes & required) != required || type.GetGenericParameters().Count != 0 ||
-                        (vb && type.GetFields().Count != 0))
+                        (vb && (type.GetFields().Count != 0 || !IsSystemObject(data, type.BaseType))))
                         throw new Exception("expected a non-generic stateless method owner");
                     var signature = data.GetBlobReader(method.Signature);
                     // DEFAULT managed calling convention, one parameter, I4 result and I4 parameter.
