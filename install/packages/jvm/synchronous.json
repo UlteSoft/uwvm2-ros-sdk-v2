@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "document/en/jvm.md",
-      "bytes": 11584,
+      "bytes": 12759,
       "mode": 420,
-      "sha256": "fa44cd1af6e52e051b86901c4318cc3181be023b429efca07f698d70ab328c7e"
+      "sha256": "17a23106b2b317f6de09503d4da2abcbf8e72498c73326be7ab30b03da5f3787"
     },
     {
       "path": "document/zh/jvm.md",
-      "bytes": 9920,
+      "bytes": 10944,
       "mode": 420,
-      "sha256": "a37964b3d1f5f7a25cd7ce243972b284f6f7502fa2573e71ae8ebc503e774e0f"
+      "sha256": "2ed703c928562c28bf16cafb8e88029271ecd9865f589152b36430bd0fe732a7"
     },
     {
       "path": "include/wros/scene.h",
@@ -32,9 +32,9 @@
     },
     {
       "path": "language/jvm/Translate.java",
-      "bytes": 1654,
+      "bytes": 1796,
       "mode": 420,
-      "sha256": "9e72da876287a08998827ad1d511b2b84d77a5767bffffdf026c4378f1e2c450"
+      "sha256": "d7e3389a0a898b48a6323e9e61a7349503af89cf34ad72f76a689e9a5c3e9c2d"
     },
     {
       "path": "language/jvm/contracts.h",
