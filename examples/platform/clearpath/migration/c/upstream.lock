@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://clearpath_safety_msgs/msg/WatchdogConfigNodeStatus.msg",
+    "sha256": "3aac18ecb968818c625dabd10c4da507472aca7138174a2d70e734cb6d88dae8",
+    "manifest_sha256": "081e335d4d819912bc214cf1bcb4d55c4778329ee793dead5203f2432a9c80dc"
+  }
+]

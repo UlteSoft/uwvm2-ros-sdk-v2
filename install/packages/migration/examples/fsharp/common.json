@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-migration-examples.md",
+      "bytes": 3082,
+      "mode": 420,
+      "sha256": "f5a8277ebf4c56a95be1cf49f3caa2c76ae37c4ea715628bef9256b73f53e482"
+    },
+    {
+      "path": "document/zh/platform-migration-examples.md",
+      "bytes": 2803,
+      "mode": 420,
+      "sha256": "31d2729b4b985ef3fdd731aa9e5179d52473cf9838bbeaecc066dfc73184046c"
+    },
+    {
+      "path": "examples/shared/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    }
+  ]
+}

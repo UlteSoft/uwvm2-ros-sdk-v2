@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/pal/migration/c/README.md",
+      "bytes": 481,
+      "mode": 420,
+      "sha256": "be774af2fc64c7e7c8d0e5b6ccf8903316473d6eb921d878d2969272f9539547"
+    },
+    {
+      "path": "examples/platform/pal/migration/c/README.zh.md",
+      "bytes": 482,
+      "mode": 420,
+      "sha256": "e1310d0ffc03d69e8b3f52e44bf0f25fdb73c5913d0b87d20bb19869d1d2a409"
+    },
+    {
+      "path": "examples/platform/pal/migration/c/upstream.lock",
+      "bytes": 242,
+      "mode": 420,
+      "sha256": "d9e1ad7184e0897016696d9148d9da5c1a1db03d167acadf4b67786d46d2cca2"
+    },
+    {
+      "path": "examples/platform/pal/migration/c/xmake.lua",
+      "bytes": 1126,
+      "mode": 420,
+      "sha256": "36bdca37c0ac6aeb4719c195a663db04a1e01386ba87c74fe71f7e6b9f8cbc25"
+    }
+  ]
+}

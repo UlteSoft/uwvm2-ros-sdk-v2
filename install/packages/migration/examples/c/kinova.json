@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/kinova/migration/c/README.md",
+      "bytes": 470,
+      "mode": 420,
+      "sha256": "b697da21d1c9047a46245d80a4b429d65b2b9cc736a24dffcd2911532166783d"
+    },
+    {
+      "path": "examples/platform/kinova/migration/c/README.zh.md",
+      "bytes": 471,
+      "mode": 420,
+      "sha256": "9b85ef8c7143dff2ba64fbb3e339636645bf72610237efc560be13735ce8544b"
+    },
+    {
+      "path": "examples/platform/kinova/migration/c/upstream.lock",
+      "bytes": 232,
+      "mode": 420,
+      "sha256": "c409af58ed98d1638b6884fe714d6d142ce661e4d86e44e447640397e2c2b691"
+    },
+    {
+      "path": "examples/platform/kinova/migration/c/xmake.lua",
+      "bytes": 1129,
+      "mode": 420,
+      "sha256": "7181088510ca9bbb85706480572c985b6627c495fb97bf113af0f37a6aedbc8f"
+    }
+  ]
+}

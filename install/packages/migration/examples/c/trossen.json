@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/trossen/migration/c/README.md",
+      "bytes": 519,
+      "mode": 420,
+      "sha256": "3ff44800a5804969de8932e53bb9fe50eb054b41409989339c50cf15c29424b6"
+    },
+    {
+      "path": "examples/platform/trossen/migration/c/README.zh.md",
+      "bytes": 520,
+      "mode": 420,
+      "sha256": "8cb04bed802798e1fb9df6211a84bbb18d0cd0c47e22fd51656d8a3f10dcbf1f"
+    },
+    {
+      "path": "examples/platform/trossen/migration/c/upstream.lock",
+      "bytes": 242,
+      "mode": 420,
+      "sha256": "f54126268aef07f925998444e67db341cf2b3c7c6d98f9bf418a1491f4f7dc78"
+    },
+    {
+      "path": "examples/platform/trossen/migration/c/xmake.lua",
+      "bytes": 1130,
+      "mode": 420,
+      "sha256": "a770e4db3b149ec88edad173a5117704b7c23e1ad4ea0c33454297ef0a9d5a09"
+    }
+  ]
+}

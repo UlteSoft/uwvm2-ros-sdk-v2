@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/realman/migration/c/README.md",
+      "bytes": 500,
+      "mode": 420,
+      "sha256": "f93e02c6ad9865c5ff105c89a66c9cfbbd4fd49517d59e6c5a1deaac8b6f7311"
+    },
+    {
+      "path": "examples/platform/realman/migration/c/README.zh.md",
+      "bytes": 501,
+      "mode": 420,
+      "sha256": "bd9543d30589fede2dc14618981cd7fc260ed5993846ac92f41809add73c2b7a"
+    },
+    {
+      "path": "examples/platform/realman/migration/c/upstream.lock",
+      "bytes": 251,
+      "mode": 420,
+      "sha256": "3bafa5c0674f43968a53d5cda88957a3c344dab646264c4ebbd67ddbce2eed8f"
+    },
+    {
+      "path": "examples/platform/realman/migration/c/xmake.lua",
+      "bytes": 1130,
+      "mode": 420,
+      "sha256": "9ce55b2316bd894bcd3ddb0f41a5303e97f34413cb58415f6922f816ba8bf65c"
+    }
+  ]
+}

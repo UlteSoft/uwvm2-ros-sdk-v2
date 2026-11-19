@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/booster/migration/c/README.md",
+      "bytes": 513,
+      "mode": 420,
+      "sha256": "ac1470fa697373b75120e2fe73bdb4c63ca3cca8e42d47840fc6afe61a304d2e"
+    },
+    {
+      "path": "examples/platform/booster/migration/c/README.zh.md",
+      "bytes": 514,
+      "mode": 420,
+      "sha256": "4d5251b72719540901459693ef2adedbc9128027e838da3f58544f5818e0ace6"
+    },
+    {
+      "path": "examples/platform/booster/migration/c/upstream.lock",
+      "bytes": 243,
+      "mode": 420,
+      "sha256": "622c30873243fe314c734136c5bf3d59faa8e6df34e3b6e8dd2d9eeb3112c10d"
+    },
+    {
+      "path": "examples/platform/booster/migration/c/xmake.lua",
+      "bytes": 1130,
+      "mode": 420,
+      "sha256": "f4476af25dca746f84e475fbe74a733976652d385c17a6b6e7b4cc12e3f9ecd4"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://kuka_driver_interfaces/msg/KssStatus.msg",
+    "sha256": "6bb238b937abab031f855506796d1a4b6412d65a0d3d3ab24bd5d420714cc388",
+    "manifest_sha256": "4f3633e9ec696345dcf550974149f3cf07e88cb3a86cffc34fdd6d95be2e00dc"
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://sensor_msgs/msg/Imu.msg",
+    "sha256": "5800b7c2e6d3afed966ae229b1559f6e762c792ad34a88e55ad4288d8bbbd34b",
+    "manifest_sha256": "33bda9fa2bdc15be5f72c393c2a9f74bbb3bfcadf5a439693f2400b2838f2be8"
+  }
+]

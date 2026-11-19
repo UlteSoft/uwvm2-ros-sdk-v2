@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://rm_ros_interfaces/msg/Armcurrentstatus.msg",
+    "sha256": "db50495a50ecddfe90a5d94b5d305ba255fd93bc7cd9173f59930e898293d4d3",
+    "manifest_sha256": "611e5749038e99672fce6184e53e1f4d51b457d21a116ea14161f6db12a899d9"
+  }
+]

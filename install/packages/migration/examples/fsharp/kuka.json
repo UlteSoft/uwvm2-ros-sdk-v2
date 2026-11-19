@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/kuka/migration/fsharp/README.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "f1a1a7dd68b6287af4af8f25f389702f8c80a2b2fcdb924c61cb7b0f520ca7dd"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fsharp/README.zh.md",
+      "bytes": 242,
+      "mode": 420,
+      "sha256": "4bd26c373e9ca51610420231d990a7f848aa3baf81ce3374da0afcbdf94ffbcc"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fsharp/xmake.lua",
+      "bytes": 616,
+      "mode": 420,
+      "sha256": "71adb1d1aa3f8a6537a22c2d4c20c4525f35e188fd31d88ae1980b7f4ae25634"
+    }
+  ]
+}

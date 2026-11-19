@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://dobot_msgs_v4/msg/RobotStatus.msg",
+    "sha256": "1ec166dc668196f7f34f2cb41726c021019be19328d434c90a5ba85015998bba",
+    "manifest_sha256": "5d44aa0ceed1f6ff948090bdc971d56a3e7f1cc85d85ee275f636c712c28197c"
+  }
+]

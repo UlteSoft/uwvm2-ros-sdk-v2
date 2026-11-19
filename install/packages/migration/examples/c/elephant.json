@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/elephant/migration/c/README.md",
+      "bytes": 512,
+      "mode": 420,
+      "sha256": "44fd40987a14108c7d68bb01abc61d0d74b3fd1a3f38fff2f94433f12256f6d1"
+    },
+    {
+      "path": "examples/platform/elephant/migration/c/README.zh.md",
+      "bytes": 513,
+      "mode": 420,
+      "sha256": "820481fbf2ee2bd7ad90090b92b63581c66d5d534247ceb258ed40171eeece4d"
+    },
+    {
+      "path": "examples/platform/elephant/migration/c/upstream.lock",
+      "bytes": 252,
+      "mode": 420,
+      "sha256": "cdaabad4cd80e3cb76a48975c87df73fb113b7b96d3882f723f84d20f676791e"
+    },
+    {
+      "path": "examples/platform/elephant/migration/c/xmake.lua",
+      "bytes": 1131,
+      "mode": 420,
+      "sha256": "7835d01c484d64ed1611491d97a11dd3bd758dc338052542dc2a3220f3009213"
+    }
+  ]
+}

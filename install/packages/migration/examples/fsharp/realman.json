@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/realman/migration/fsharp/README.md",
+      "bytes": 247,
+      "mode": 420,
+      "sha256": "bbe6403809c76612a7135d933687d55334bf4f3e0a2c57c09af117ce0c51da92"
+    },
+    {
+      "path": "examples/platform/realman/migration/fsharp/README.zh.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "921d0bd7a6da06bed134df160ba2bf38d45a95162c40dec658525097f284de88"
+    },
+    {
+      "path": "examples/platform/realman/migration/fsharp/xmake.lua",
+      "bytes": 619,
+      "mode": 420,
+      "sha256": "fd417bada2e7398c66e5205b220d3c74d8994a75b5d4b190babeaa0d7e7830c1"
+    }
+  ]
+}

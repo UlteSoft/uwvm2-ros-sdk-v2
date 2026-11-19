@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/abb/migration/c/README.md",
+      "bytes": 493,
+      "mode": 420,
+      "sha256": "7e2a0fc3f1ddcea26cde93f75c595cb1028c6bfc4ce4e6fcda3af267f2373315"
+    },
+    {
+      "path": "examples/platform/abb/migration/c/README.zh.md",
+      "bytes": 494,
+      "mode": 420,
+      "sha256": "c52b18ee454e5fd6ba7055c15d4fd5c861bcde09964dac260c6a360ee2c07b78"
+    },
+    {
+      "path": "examples/platform/abb/migration/c/upstream.lock",
+      "bytes": 235,
+      "mode": 420,
+      "sha256": "b113090035e0e4ea1c75e6d8f024cfba8298d3e0d514de4b0a882824b905fcdf"
+    },
+    {
+      "path": "examples/platform/abb/migration/c/xmake.lua",
+      "bytes": 1126,
+      "mode": 420,
+      "sha256": "df3c81a028035378c8b6dc865cb026ada49ea25d04d081da469db4fa5220ba45"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/yaskawa/migration/c/README.md",
+      "bytes": 487,
+      "mode": 420,
+      "sha256": "584c5765632236b6dccd63bac7d01b104d98c03594390e62665c8e7ca44595a7"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/c/README.zh.md",
+      "bytes": 488,
+      "mode": 420,
+      "sha256": "9076db45f64a7dffa0810f026f0b5c50bd9099135cc2d1b1c438f7dedb184a29"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/c/upstream.lock",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "bd32b7ed72df24e88fba521ddfb31044bd5098767951800a43106cb0425e3de1"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/c/xmake.lua",
+      "bytes": 1130,
+      "mode": 420,
+      "sha256": "7b14eae8065568f8c93efd53ed859d274e75000465a9de610bb16c282919275b"
+    }
+  ]
+}

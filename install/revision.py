@@ -46,6 +46,9 @@ def main():
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")
+    elif args.component == "migration" and args.language == "fsharp":
+        packages.extend(("protocol", "frontend", "fsharp/numeric", "xmake/common", "xmake/platforms/" + args.platform,
+                         "migration/examples/fsharp/common", "migration/examples/fsharp/" + args.platform))
     elif args.component == "numeric-aot" or (args.component == "development" and args.language in ("csharp", "vbnet", "fsharp")):
         if args.language not in ("csharp", "vbnet", "fsharp"):
             parser.error("the numeric-aot component requires csharp, fsharp or vbnet")
@@ -70,6 +73,8 @@ def main():
                 if args.language not in ("c", "cpp"):
                     parser.error("the migration resource component currently requires c or cpp")
                 packages.extend(("migration/resources", "migration/policy"))
+                if args.language == "c":
+                    packages.extend(("migration/examples/c/common", "migration/examples/c/" + args.platform))
                 if args.language == "cpp":
                     packages.append("migration/tf2-buffer")
             if args.component == "compiler-source":

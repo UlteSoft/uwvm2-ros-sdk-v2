@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/franka/migration/c/README.md",
+      "bytes": 476,
+      "mode": 420,
+      "sha256": "a209c1caa61dda17839cdae113f380b2f826af07890d59d7f93268827db803d0"
+    },
+    {
+      "path": "examples/platform/franka/migration/c/README.zh.md",
+      "bytes": 477,
+      "mode": 420,
+      "sha256": "e2827ebb0c4041c4c62b1c25be3ea8120df8fe291dbd24bf8c12db2deaa6e45f"
+    },
+    {
+      "path": "examples/platform/franka/migration/c/upstream.lock",
+      "bytes": 234,
+      "mode": 420,
+      "sha256": "33e244f333f563cc328fa4fbbcd91b627129ff5b24d9ee688efdb0c778514500"
+    },
+    {
+      "path": "examples/platform/franka/migration/c/xmake.lua",
+      "bytes": 1129,
+      "mode": 420,
+      "sha256": "5a8a2aa252b3084f93d8a0a9e206017f249aa725ed25d7191617963dcd3d3f6a"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/limx/migration/c/README.md",
+      "bytes": 487,
+      "mode": 420,
+      "sha256": "fb1687e07f2936abf1061e055ce9bd0cdef1400544a98c5015bf00c71ead8738"
+    },
+    {
+      "path": "examples/platform/limx/migration/c/README.zh.md",
+      "bytes": 488,
+      "mode": 420,
+      "sha256": "3491c03cf5160a4e28f7d7d2e41f4a28662c0830cf68eb9d46abd1b6b15d2e38"
+    },
+    {
+      "path": "examples/platform/limx/migration/c/upstream.lock",
+      "bytes": 254,
+      "mode": 420,
+      "sha256": "29640b3ffeb4ad4f6b807833407c501a4413597baa476ea96e00fdde1ae0b7b6"
+    },
+    {
+      "path": "examples/platform/limx/migration/c/xmake.lua",
+      "bytes": 1127,
+      "mode": 420,
+      "sha256": "a3d130b1ac67faa563ba162daef725172c9bbc08d6b17e68f376eaea8d57d22c"
+    }
+  ]
+}

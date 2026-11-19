@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://aimdk_msgs/msg/JointState.msg",
+    "sha256": "bdc131e7aa452b5ccc22e5f22cd5d28dcee5929c7794ff2fed0625ae910c9e72",
+    "manifest_sha256": "47ab858b108fb5ee9e8889638ce98ec8e2d9af5757360f3c3712b534633a62a5"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/flexiv/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "9e1859311ded3a30214dbc1a063114649bf93d966aaf61307c2512c9fb1336ca"
+    },
+    {
+      "path": "examples/platform/flexiv/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "f30005fbba82e14ab9c353d4f519ddd39957e880ea7a91d17af3e2343b30c60c"
+    },
+    {
+      "path": "examples/platform/flexiv/migration/fsharp/xmake.lua",
+      "bytes": 618,
+      "mode": 420,
+      "sha256": "71434da0facf3e415b5074c60197284d451c248b391ab4cbaf74cda9d598680a"
+    }
+  ]
+}

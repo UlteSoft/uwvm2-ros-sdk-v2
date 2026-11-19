@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/deep_robotics/migration/c/README.md",
+      "bytes": 477,
+      "mode": 420,
+      "sha256": "183832b0debb3040c3371804b5844392c5e713b9e22ed0f4390905b5689c99f7"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/c/README.zh.md",
+      "bytes": 478,
+      "mode": 420,
+      "sha256": "97b018c9f0b7d8644d31db3f89e0c60864c70074224ff16b9d13e5b2f2beedad"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/c/upstream.lock",
+      "bytes": 230,
+      "mode": 420,
+      "sha256": "830c9df9bb7b5d8339f13620952d4b58a8906693edae3be8646c7144d83852a1"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/c/xmake.lua",
+      "bytes": 1136,
+      "mode": 420,
+      "sha256": "558bab0057df4f80d7dcfd5a8078f8e70ff7d12a3525b78566f0c2c5593f64ed"
+    }
+  ]
+}

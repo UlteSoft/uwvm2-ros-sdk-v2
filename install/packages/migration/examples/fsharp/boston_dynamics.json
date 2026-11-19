@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/boston_dynamics/migration/fsharp/README.md",
+      "bytes": 255,
+      "mode": 420,
+      "sha256": "7d7a240cff647bfbdbb3158fe24fceefae9e461503b555e32621943e6057cd8e"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/fsharp/README.zh.md",
+      "bytes": 253,
+      "mode": 420,
+      "sha256": "92f095c43b78b3d2911e6da49a199dcc24ea0f564fc516638f71bb5dd3581b41"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/fsharp/xmake.lua",
+      "bytes": 627,
+      "mode": 420,
+      "sha256": "f1aea5489f70e5234743255a494025b2b5b9a4a86d0206f0c0996330ba35b06c"
+    }
+  ]
+}

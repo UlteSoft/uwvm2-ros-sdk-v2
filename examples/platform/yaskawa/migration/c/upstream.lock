@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://motoros2_interfaces/msg/AlarmInfo.msg",
+    "sha256": "0e751eec501290d29fba03880493868be919da4939eb58a3bed5508e8a3d37b1",
+    "manifest_sha256": "f92bd870fc91362fdb61703a0760e6707bba6cf490d2f1480481c5fe1165af87"
+  }
+]

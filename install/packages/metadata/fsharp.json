@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/fsharp.json",
-      "bytes": 178,
+      "bytes": 195,
       "mode": 420,
-      "sha256": "f86497834f858ba53d83217591d2ec0be38e2d2c1b55406e051502fc3ee67dd8"
+      "sha256": "33d410526d1734d3713204db95241c488e688d827321443a460bc6d1f285915e"
     }
   ]
 }

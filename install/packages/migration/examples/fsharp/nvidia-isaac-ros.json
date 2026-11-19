@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/fsharp/README.md",
+      "bytes": 256,
+      "mode": 420,
+      "sha256": "15b1c89108a91f4f05ebee156d64d09ba3907996d70d79d105746f74966871af"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/fsharp/README.zh.md",
+      "bytes": 254,
+      "mode": 420,
+      "sha256": "c428225be1298571d238ea24c41d904a4b7d8658bdd2178a7c4914d8d44e557b"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/fsharp/xmake.lua",
+      "bytes": 628,
+      "mode": 420,
+      "sha256": "1cd12fd26a79b2f1adbabd453dea3826f9d98e6ef88cca96df00ca5059fcb04b"
+    }
+  ]
+}

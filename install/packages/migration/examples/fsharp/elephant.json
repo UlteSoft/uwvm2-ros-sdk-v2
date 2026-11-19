@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/elephant/migration/fsharp/README.md",
+      "bytes": 248,
+      "mode": 420,
+      "sha256": "7771c416c670780f177eddaa7f6e8e15fcf998c5c3bec3900c2fe26082363f14"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fsharp/README.zh.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "25c6d6ef1781f92c8838d8b31b758f3c39ecd8f4827a208ac4b378bbb62a9cf3"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fsharp/xmake.lua",
+      "bytes": 620,
+      "mode": 420,
+      "sha256": "d7bc5913214b2c21f4ba67d656320d461c16656d80a2fb6d5e72cbf47c8af311"
+    }
+  ]
+}

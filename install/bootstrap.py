@@ -126,7 +126,8 @@ def install(source,platform,language,prefix,options,plan=False,site_profile=None
     variant=name(selected["variant"])
     site_data = None
     if site_profile is not None:
-        if plan or variant != "development" or language not in ("java", "kotlin", "c", "cpp", "fortran", "js", "lua", "nim", "objectc", "d", "tinygo", "rs"):
+        development = variant == "development" or (variant == "migration" and language in ("c", "cpp"))
+        if plan or not development or language not in ("java", "kotlin", "c", "cpp", "fortran", "js", "lua", "nim", "objectc", "d", "tinygo", "rs"):
             raise ValueError("--site-profile requires a supported language development installation")
         if not site_profile.is_file():
             raise ValueError("site profile must be an explicit local file")

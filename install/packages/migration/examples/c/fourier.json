@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/fourier/migration/c/README.md",
+      "bytes": 471,
+      "mode": 420,
+      "sha256": "0aebdf3a4522739e8731fa43dabde5dd456c5761a411dad4c291e218499640c3"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/README.zh.md",
+      "bytes": 472,
+      "mode": 420,
+      "sha256": "fba53e03034ae68e477e98baa16eceaf8a57686a9618a11876f48969a0fcb204"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/upstream.lock",
+      "bytes": 232,
+      "mode": 420,
+      "sha256": "40f5b4acc1983bb69cd0c5a3375a3dc3f147cc6c3eb283ee507733fd0e248fbc"
+    },
+    {
+      "path": "examples/platform/fourier/migration/c/xmake.lua",
+      "bytes": 1130,
+      "mode": 420,
+      "sha256": "82d1a0274d475d3c90e83fc3225bf783e0cfe82c793314d182b5e84abd9c5cea"
+    }
+  ]
+}

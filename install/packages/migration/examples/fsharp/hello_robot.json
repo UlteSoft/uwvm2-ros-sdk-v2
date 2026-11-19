@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/hello_robot/migration/fsharp/README.md",
+      "bytes": 251,
+      "mode": 420,
+      "sha256": "41e4aff089c72a9454ad58f62e143c08a27fad79c80f0c90e2f5ac8677a5536e"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/fsharp/README.zh.md",
+      "bytes": 249,
+      "mode": 420,
+      "sha256": "46ef805bcd03a2ef7b57d9c9379de4c231d52b8820e7b8b70cfc10c623ce0d9f"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/fsharp/xmake.lua",
+      "bytes": 623,
+      "mode": 420,
+      "sha256": "1c10281840a1622d8bc5798680a2f27cef36ef7f7fbbbce4fa9f5c2d834be6c8"
+    }
+  ]
+}

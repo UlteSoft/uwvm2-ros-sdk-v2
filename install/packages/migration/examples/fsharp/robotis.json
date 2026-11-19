@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/robotis/migration/fsharp/README.md",
+      "bytes": 247,
+      "mode": 420,
+      "sha256": "b5b8e93623fa5bb39ee68defe881badcf9d0c14df724a71bbada515482bdef93"
+    },
+    {
+      "path": "examples/platform/robotis/migration/fsharp/README.zh.md",
+      "bytes": 245,
+      "mode": 420,
+      "sha256": "b565fe62efd52fb65ac2105bc8833b5638475eee16b93cb794fb43720404a677"
+    },
+    {
+      "path": "examples/platform/robotis/migration/fsharp/xmake.lua",
+      "bytes": 619,
+      "mode": 420,
+      "sha256": "a69b2043f25d5b82cd96d29d55bc009c26970dbf365915bd44b9961e6db8fe3b"
+    }
+  ]
+}

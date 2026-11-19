@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/deep_robotics/migration/fsharp/README.md",
+      "bytes": 253,
+      "mode": 420,
+      "sha256": "6b9c53a885fa971a14e9d91e659a12a4f7f7433a0aa5ec11223ca4b8655c61cd"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/fsharp/README.zh.md",
+      "bytes": 251,
+      "mode": 420,
+      "sha256": "797193edf042fe692331bdaafe819410b3ef83d71a6ac771f23b8adae04f897a"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/fsharp/xmake.lua",
+      "bytes": 625,
+      "mode": 420,
+      "sha256": "a8f64f5841f93a103e8dd477fd074286dfcb2f54a52808accbbe6c0376cd4016"
+    }
+  ]
+}

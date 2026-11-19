@@ -1,0 +1,7 @@
+[
+  {
+    "uri": "package://dsr_msgs/msg/LogAlarm.msg",
+    "sha256": "e9d3a01151050c3f917427398a025fc73b1f74b0363b2af6624a57c92093b11f",
+    "manifest_sha256": "b48a125f65569cc2c6916c26ef5163d1b7bf31241a6799ef00b24fbcbeea2e42"
+  }
+]

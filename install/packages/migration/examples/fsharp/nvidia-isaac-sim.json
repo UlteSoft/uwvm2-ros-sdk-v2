@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/README.md",
+      "bytes": 256,
+      "mode": 420,
+      "sha256": "05b950bd3f0381364ab95a2bc54503be87bb56f08c86931b8f55485d7646f9e6"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/README.zh.md",
+      "bytes": 254,
+      "mode": 420,
+      "sha256": "f92deb6122563baeb13e07c33a3ef8737b81dfde24c78afafa506fa0a0c316da"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/migration/fsharp/xmake.lua",
+      "bytes": 628,
+      "mode": 420,
+      "sha256": "99c4bd8f8dd8c11b4b897a9570c66cc307d70ee76cb3a7b192341afec199e66e"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "examples/platform/ubtech/migration/fsharp/README.md",
+      "bytes": 246,
+      "mode": 420,
+      "sha256": "f9116633d168b5f3bcf9a1f361c199c7e584e58bae8e9a2e9500a651d371fb2c"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/fsharp/README.zh.md",
+      "bytes": 244,
+      "mode": 420,
+      "sha256": "7a2378a112f0958b8852059527631eccd92f94c4f398e83a628eb63f7bf21f6c"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/fsharp/xmake.lua",
+      "bytes": 618,
+      "mode": 420,
+      "sha256": "dc561b57120459f433eebd9634939f7316d2ab3268b53695dec391cb3f2a58d8"
+    }
+  ]
+}
