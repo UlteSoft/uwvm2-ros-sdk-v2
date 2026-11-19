@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/trossen/common/py/body.py",
+      "bytes": 102,
+      "mode": 420,
+      "sha256": "cd856a9c6ff08e42793665fc8026619ceeb0c8d80e57617721fb65d02d60517d"
+    },
+    {
+      "path": "examples/platform/trossen/common/py/xmake.lua",
+      "bytes": 611,
+      "mode": 420,
+      "sha256": "0c9361e0d2c9c1f4b7477fb9b10e060c34a24c3677212f81bf383398ac46d0f2"
+    },
+    {
+      "path": "examples/platform/trossen/extension/py/body.py",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "0930affc0bf4cd64505596d0728580d8b570e55848b79faa21592d153ad8da9b"
+    },
+    {
+      "path": "examples/platform/trossen/extension/py/xmake.lua",
+      "bytes": 711,
+      "mode": 420,
+      "sha256": "c854c3f634b921f78524f7512afb7d3e90ba2710a84a325c3b2b5c02ce92a50d"
+    },
+    {
+      "path": "examples/platform/trossen/migration/py/body.py",
+      "bytes": 648,
+      "mode": 420,
+      "sha256": "667479b1c370fcb410e8604962f9c6a4381d66f3f39bd2edacd797810692d9c1"
+    },
+    {
+      "path": "examples/platform/trossen/migration/py/xmake.lua",
+      "bytes": 579,
+      "mode": 420,
+      "sha256": "66e0a69c233038835373ef95db5779333919efc6b98456dc1f7c6cbb534fa1ed"
+    }
+  ]
+}

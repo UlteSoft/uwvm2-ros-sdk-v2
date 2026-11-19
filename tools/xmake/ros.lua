@@ -12,7 +12,7 @@ toolchain_end()
 
 rule("wros.source")
     set_extensions(".c", ".cc", ".cpp", ".cxx", ".C", ".lua", ".js", ".go", ".mod", ".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn",
-                   ".rs", ".java", ".kt", ".cs", ".vb", ".fs", ".ts", ".nim", ".m", ".d", ".o", ".a")
+                   ".rs", ".java", ".kt", ".cs", ".vb", ".fs", ".ts", ".py", ".nim", ".m", ".d", ".o", ".a")
 rule_end()
 
 rule("wros.application")
@@ -112,6 +112,11 @@ end
 
 function add_wros_lua_operations(...)
     add_values("wros.lua_operations", ...)
+end
+
+--- @brief Embed named Python modules or packages, resolved relative to this target.
+function add_wros_python_modules(...)
+    add_values("wros.py_modules", ...)
 end
 
 function add_wros_operations(...)

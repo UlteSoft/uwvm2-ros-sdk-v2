@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/kinova/common/py/body.py",
+      "bytes": 102,
+      "mode": 420,
+      "sha256": "cd856a9c6ff08e42793665fc8026619ceeb0c8d80e57617721fb65d02d60517d"
+    },
+    {
+      "path": "examples/platform/kinova/common/py/xmake.lua",
+      "bytes": 609,
+      "mode": 420,
+      "sha256": "f2ccb31d2492e174f9b9ccdd32afb64caf439270c4fcce5edeb8ae2ff4ae3408"
+    },
+    {
+      "path": "examples/platform/kinova/extension/py/body.py",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "0930affc0bf4cd64505596d0728580d8b570e55848b79faa21592d153ad8da9b"
+    },
+    {
+      "path": "examples/platform/kinova/extension/py/xmake.lua",
+      "bytes": 709,
+      "mode": 420,
+      "sha256": "4cf9874b49461e4c53691bcc6ff487835bfd821ee4d7e0c2959befc0631b0d31"
+    },
+    {
+      "path": "examples/platform/kinova/migration/py/body.py",
+      "bytes": 648,
+      "mode": 420,
+      "sha256": "667479b1c370fcb410e8604962f9c6a4381d66f3f39bd2edacd797810692d9c1"
+    },
+    {
+      "path": "examples/platform/kinova/migration/py/xmake.lua",
+      "bytes": 577,
+      "mode": 420,
+      "sha256": "dc029ff3b6d2870f8ccf75095e4332091ef75228e3b7039ea3b8b6c5310c9ce2"
+    }
+  ]
+}
