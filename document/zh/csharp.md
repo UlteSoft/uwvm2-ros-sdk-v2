@@ -33,27 +33,27 @@ SDK 的测试将两个 C# 方法编译为 wasm32 核心模块，并在 uwvm2-ros
 
 ## 用 wrcs 编译 C# 数值方法
 
-安装时选择语言 `csharp`，在安装器的 `--` 后指定 `--component numeric-aot`。这个选项安装 `bin/wrcs`、IL 审核与 LLVM 源码、对应平台的 Xmake 适配和示例。在本机准备上文指定的 .NET SDK、面向 WASI 的 Mono 交叉编译器和 WasmROS LLVM 开发包，分别设置 `WROS_DOTNET`、`WROS_MONO`、`WROS_TOOLCHAIN`。GNU C++ 只编译宿主上读取 LLVM bitcode 的工具。开发者提交的 C# 代码编译为 core wasm32。
+安装时选择语言 `csharp` 即可获取独立整数计算开发配置。也可显式选择 `--component numeric-aot`。这个选项安装 `bin/wrcs`、IL 审核与 LLVM 源码、对应平台的 Xmake 适配和示例。在本机准备上文指定的 .NET SDK、面向 WASI 的 Mono 交叉编译器和 WasmROS LLVM 开发包，分别设置 `WROS_DOTNET`、`WROS_MONO`、`WROS_TOOLCHAIN`。GNU C++ 只编译宿主上读取 LLVM bitcode 的工具。开发者提交的 C# 代码编译为 core wasm32。
 
 用固定入口和完整 SDK 提交号选择安装，指定本地安装前缀。
 
 ```sh
 /usr/bin/python3 install/bootstrap.py install --commit "$SDK_COMMIT" --platform unitree \
-  --language csharp --prefix "$SDK_PREFIX" -- --component numeric-aot
-export UWVM_ROS_SDK_ROOT="$SDK_PREFIX/$SDK_COMMIT/unitree/csharp/numeric-aot"
+  --language csharp --prefix "$SDK_PREFIX"
+export UWVM_ROS_SDK_ROOT="$SDK_PREFIX/$SDK_COMMIT/unitree/csharp/development"
 ```
 
 宿主输入为 .NET SDK 9.0.100-preview.6.24328.19、版本为 9.0.0-preview.6.24327.7 的 Microsoft.NETCore.App.Ref 和 Mono WASI 包，以及根据 dotnet/runtime 提交 `573461dc897731c11d6166574b77a8c3aabba220` 构建的 LLVMOnly 交叉编译器。组件按 `language/csharp/inputs.sha256` 逐一校验后装载所需宿主文件。SDK1 提供对应版本的构建步骤。[Mono 交叉编译器构建说明](https://github.com/UlteSoft/uwvm2-ros-sdk/blob/466ec1647ae8577bc2c16bd4f8df8162636817f4/src/language/dotnet/mono-native-eh/README.md)
 
 ```sh
 "$UWVM_ROS_SDK_ROOT/bin/wrcs" --dotnet "$WROS_DOTNET" --mono-compiler "$WROS_MONO" \
-  --toolchain "$WROS_TOOLCHAIN" --entry Filter.Scale --legacy-mte \
+  --toolchain "$WROS_TOOLCHAIN" --entry Filter.Scale \
   "$UWVM_ROS_SDK_ROOT/examples/csharp/numeric-aot/Filter.cs" -o filter.wasm
 ```
 
-入口必须位于全局命名空间的非泛型静态类中，签名为 `public static int Scale(int input)`。通过 `类名.方法名` 选择入口。Wasm 导出 `evaluate(i32) -> i32`，内存固定为 64 KiB，宿主导入数量为零。支持整数常量、参数、局部变量、比较、位运算、unchecked 加减乘、分支和循环。工具读取真实 IL，按 MethodDef 行号选择 Mono 生成的方法，核对其隐藏上下文没有参与计算，再生成单参数 ABI。程序集中的类型或模块初始化器，以及入口使用托管数组、对象、其他函数调用、异常或 P/Invoke 时均会被拒绝。这些功能需要更完整的 CLR。其余方法不会成为 Wasm 入口。
+入口必须位于全局命名空间的非泛型静态类中，签名为 `public static int Scale(int input)`。通过 `类名.方法名` 选择入口。Wasm 导出 `evaluate(i32) -> i32`，宿主导入数量为零。支持整数常量、参数、局部变量、比较、位运算、unchecked 加减乘、分支和循环。工具读取真实 IL，按 MethodDef 行号选择 Mono 生成的方法，核对其隐藏上下文没有参与计算，再生成单参数 ABI。程序集中的类型或模块初始化器，以及入口使用托管数组、对象、其他函数调用、异常或 P/Invoke 时均会被拒绝。这些功能需要更完整的 CLR。其余方法不会成为 Wasm 入口。
 
-`--legacy-mte` 显式生成启用 MTE 的未签署制品，`--no-mte` 显式关闭 MTE。默认严格模式需要签署过的语言资格；当前 C# 尚无相应发布。Xmake 工程可复制 `examples/csharp/numeric-aot/xmake.lua`，设置 `set_language("csharp")` 和 `add_wros_exports("Filter.Scale")`，按 `-O3 -g` 构建。调用方提供整数参数调用 `evaluate`。选择平台不会授予驱动权限。
+默认和 `--mte` 都启用 WasmMTE 编译。发布独立内核前，`wrcs` 解码最终 Wasm，逐条验证唯一函数仅使用整数和寄存器，然后移除闲置的私有内存。最终模块没有线性内存、全局变量、宿主导入或其他执行入口。取局部变量地址的代码可能需要内存，此时证明失败。可重定位对象仍需最终链接，也无法使用这项逐制品证明。显式选用 `--legacy-mte` 会生成未签署的插装代码，`--no-mte` 关闭插装。这两个选项保留 64 KiB 私有内存。通用 CLR 堆还需单独验收。Xmake 工程可复制 `examples/csharp/numeric-aot/xmake.lua`，设置 `set_language("csharp")` 和 `add_wros_exports("Filter.Scale")`，按 `-O3 -g` 构建。调用方提供整数参数调用 `evaluate`。选择平台不会授予驱动权限。
 
 Roslyn 生成 Portable PDB，并以 SHA-256 标识源文件。AOT 前端将方法第一个可见序列点的文档摘要与本次输入匹配，把 C# 方法名、源文件名和该行写入 DWARF。只有恰好包含一个可见序列点的方法才把指令定位到该条源码语句。包含多个序列点的方法保留方法级定位；隐藏或无法匹配的源码不生成行定位。调试信息省略构建机源文件的绝对路径。
 

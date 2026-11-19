@@ -32,7 +32,7 @@
 | Kotlin | `kotlin` | `wrkt` |
 | C# | `csharp` | `wrcs` |
 
-Java 和 Kotlin 可通过 `synchronous-aot` 组件安装。C# 可通过 `numeric-aot` 组件编译独立整数方法。完整 CLR 开发包仍待验收。 [C# 编译指南](csharp.md)可用 `revision-help` 查询指定提交的命令名，再用 `plan` 核实该提交实际提供的组件。静态归档工具使用 `wrar`。已固定到旧提交的安装继续使用对应提交的命令。
+Java 和 Kotlin 可通过 `synchronous-aot` 组件安装。C# 的默认安装支持编译独立整数方法。完整 CLR 开发包仍待验收。 [C# 编译指南](csharp.md)可用 `revision-help` 查询指定提交的命令名，再用 `plan` 核实该提交实际提供的组件。静态归档工具使用 `wrar`。已固定到旧提交的安装继续使用对应提交的命令。
 
 ## 按 commit 安装
 

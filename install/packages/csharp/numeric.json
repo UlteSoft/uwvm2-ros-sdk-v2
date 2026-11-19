@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/csharp.md",
-      "bytes": 7540,
+      "bytes": 8033,
       "mode": 420,
-      "sha256": "ef42b5d021fce852612eac2c011c6dfa7389a17b2f601603a18bf50412056583"
+      "sha256": "6ff788c98c0dd5f78307869f8ace3e59b3ccf03c0c409b1c5d594f98a9fab46d"
     },
     {
       "path": "document/zh/csharp.md",
-      "bytes": 8212,
+      "bytes": 8596,
       "mode": 420,
-      "sha256": "28f7a34843c5c48c9612a3c0a76d92c8d9907770c2d15f6a84a8beebc361ba4b"
+      "sha256": "783ebb3732f6a76a6104a8d4dbec60d9762305cef303b23b8984f97563ce4b26"
     },
     {
       "path": "examples/csharp/numeric-aot/Filter.cs",
@@ -26,9 +26,9 @@
     },
     {
       "path": "examples/csharp/numeric-aot/xmake.lua",
-      "bytes": 402,
+      "bytes": 363,
       "mode": 420,
-      "sha256": "e18c15ac09a3e8fa7caafad6b9f6afa9148f3ef68a1967a9e0b00d2a24e3b5fe"
+      "sha256": "9e2039c6abda5c60668e7baf8b3697243d9092918bd20068aeab50819daa2dda"
     },
     {
       "path": "install/private_exports.py",
@@ -62,15 +62,21 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 7927,
+      "bytes": 8074,
       "mode": 420,
-      "sha256": "ba48597677fe87023a5d531911c77514f47b6ee71cc7fd0841c0c7c199471580"
+      "sha256": "1b00f5c04a290598b2f59dcede282eacf89347df2b8b99d70237846ae84c8145"
+    },
+    {
+      "path": "language/csharp/scalar.py",
+      "bytes": 2837,
+      "mode": 420,
+      "sha256": "f1fb6d958f5bf949ef8698b991db4cf7b7ccb9dbd6e1be1cbde7adcfab6b95ad"
     },
     {
       "path": "language/csharp/xmake/adapter.lua",
-      "bytes": 2091,
+      "bytes": 2120,
       "mode": 420,
-      "sha256": "fa3b3a3f375749215ad046b55032432b48e3bcda0e956caf738549611c294b8a"
+      "sha256": "0445bab6ca75311e0317eb5e12c19b7c8bcdbfc085589296727e44537777ed53"
     },
     {
       "path": "tests/csharp/README.md",

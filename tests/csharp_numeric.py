@@ -36,14 +36,13 @@ def main():
 
     save()
     source = Source(args.commit, args.repository.resolve())
-    for language, flags in (("csharp", []), ("c", ["--component", "numeric-aot"])):
-        try:
-            install(source, "unitree", language, out / "install", flags, plan=True)
-        except ValueError:
-            report["cases"].append({"name": "refuse-" + language, "result": "correct refusal"})
-        else:
-            raise ValueError("unexpected component admission")
-    result = install(source, "unitree", "csharp", out / "install", ["--component", "numeric-aot"])
+    try:
+        install(source, "unitree", "c", out / "install", ["--component", "numeric-aot"], plan=True)
+    except ValueError:
+        report["cases"].append({"name": "refuse-c", "result": "correct refusal"})
+    else:
+        raise ValueError("unexpected numeric AOT admission for C")
+    result = install(source, "unitree", "csharp", out / "install", [])
     sdk = Path(result["directory"])
     adapters = {p for p in source.requested if p.endswith("/adapter.lua") or p.endswith("/platform.lua")}
     expected_adapters = {"language/csharp/xmake/adapter.lua", "platform/unitree/xmake/platform.lua"}
@@ -75,7 +74,7 @@ def main():
 
     xmake = args.xmake.resolve()
     for language, variant, message in (("java", "numeric-aot", b"synchronous-aot component for java"),
-                                       ("csharp", "development", b"numeric-aot component for csharp")):
+                                       ("csharp", "protocol", b"numeric-aot component for csharp")):
         renamed = out / "renamed" / args.commit / "unitree" / language / variant
         shutil.copytree(sdk, renamed)
         env["UWVM_ROS_SDK_ROOT"] = str(renamed)
@@ -132,7 +131,6 @@ target_end()
             raise ValueError("refused build published an SDK object")
     cli_out = out / "project.wasm"
     for label, flags, refusal in (
-        ("default-strict", [], b"no signed strict"), ("strict", ["--mte"], b"no signed strict"),
         ("wasip2", ["--target", "wasm32-wasip2"], b"invalid choice"),
         ("wasip3", ["--target", "wasm32-wasip3"], b"invalid choice"),
         ("component", ["--component-model"], b"unrecognized arguments"),
@@ -140,6 +138,11 @@ target_end()
     ):
         run(label, [*cli, *flags, "--entry", "Filter.Scale", sample, "-o", cli_out], refusal)
 
+    run("strict-explicit", [*cli, "--mte", "--entry", "Filter.Scale", sample, "-o", cli_out])
+    for scalar in (example, cli_out):
+        data = scalar.read_bytes()
+        if [data[start] for start, _, _, _ in sections(data) if data[start]] != [1, 3, 7, 10]:
+            raise ValueError("strict C# kernel exposes guest resources or has additional sections")
     # A distinct user source exercises the compiler, not just the packaged example.
     body = project / "Track.cs"
     body.write_text("""public static class Track {
@@ -151,6 +154,10 @@ target_end()
     public static int Array(int n) { int[] a = new int[4]; a[0] = n; return a[0] + a.Length; }
     public static long Wide(int n) => n;
 }""")
+    cli_out.write_bytes(b"original")
+    run("strict-address-taken", [*cli, "--entry", "Track.Tags", body, "-o", cli_out], b"C# scalar proof rejects")
+    if cli_out.read_bytes() != b"original":
+        raise ValueError("failed scalar proof replaced an existing output")
     (out / "observe.c").write_text("""
 __attribute__((import_module("component"), import_name("evaluate"))) extern int evaluate(int);
 void _start(void) {
@@ -172,7 +179,7 @@ void _start(void) {
 """)
     modules = [example]
     for name, entry, mode in (("tags", "Track.Tags", "--legacy-mte"), ("plain", "Track.Tags", "--no-mte"),
-                              ("loop", "Track.Sum", "--legacy-mte")):
+                              ("loop", "Track.Sum", "--mte")):
         path = out / (name + ".wasm")
         run("compile-" + name, [*cli, mode, "--entry", entry, body, "-o", path])
         modules.append(path)

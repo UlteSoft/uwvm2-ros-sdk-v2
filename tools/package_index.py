@@ -103,13 +103,14 @@ def main():
         if language in ("java","kotlin"):
             metadata["optional_components"] = ["synchronous-aot"]
         if language == "csharp":
-            metadata["optional_components"] = ["numeric-aot"]
+            metadata.update(development_package=True, development_scope="freestanding-i32-method",
+                            optional_components=["numeric-aot"])
         write_json(path, metadata)
         package("metadata/" + language, [path])
 
     package("csharp/numeric", [
         "install/private_exports.py", "bin/" + COMPILER_COMMANDS["csharp"], "language/csharp/numeric.py", "language/csharp/host.py",
-        "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
+        "language/csharp/scalar.py", "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
         "language/csharp/xmake/adapter.lua", "examples/csharp/numeric-aot/Filter.cs",
         "examples/csharp/numeric-aot/xmake.lua", "document/en/csharp.md", "document/zh/csharp.md",
         "tests/csharp/README.md",

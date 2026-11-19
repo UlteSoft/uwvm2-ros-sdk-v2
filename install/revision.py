@@ -46,7 +46,7 @@ def main():
     packages = ["platforms/" + args.platform, "metadata/" + args.language]
     if args.component == "policy-review":
         packages.append("migration/policy")
-    elif args.component == "numeric-aot":
+    elif args.component == "numeric-aot" or (args.component == "development" and args.language == "csharp"):
         if args.language != "csharp":
             parser.error("the numeric-aot component requires csharp")
         packages.extend(("protocol", "frontend", "csharp/numeric", "xmake/common", "xmake/platforms/" + args.platform))

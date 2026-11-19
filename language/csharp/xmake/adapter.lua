@@ -5,8 +5,8 @@ end
 function validate(target, request)
     assert(request.arch == "wasm32" and request.core == "3.0" and request.eh and not request.threads,
            "C# numeric AOT requires wasm32 Core 3.0, single-thread with the standard EH target")
-    assert(request.mte_flag == "--legacy-mte" or request.mte_flag == "--no-mte",
-           "C# numeric AOT has no signed strict MTE release")
+    assert(request.kind ~= "static" or request.mte_flag ~= "--mte",
+           "C# scalar proof requires a final module; no signed strict release for relocatable objects")
     local exports = request.exports
     assert(#exports == 1 and exports[1]:match("^[%a_][%w_]*%.[%a_][%w_]*$"),
            "add_wros_exports must select exactly one C# Class.Method")

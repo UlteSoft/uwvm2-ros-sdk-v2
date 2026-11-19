@@ -1,7 +1,8 @@
 {
   "id": "csharp",
-  "development_package": false,
+  "development_package": true,
   "command_name": "wrcs",
+  "development_scope": "freestanding-i32-method",
   "optional_components": [
     "numeric-aot"
   ]

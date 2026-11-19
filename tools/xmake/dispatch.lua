@@ -17,7 +17,7 @@ local function selection(root)
     local components = {java = "synchronous-aot", kotlin = "synchronous-aot", csharp = "numeric-aot"}
     local expected = components[language]
     if expected then
-        assert(variant == expected, "Select the installed " .. expected .. " component for " .. language)
+        assert(variant == expected or (language == "csharp" and variant == "development"), "Select the installed " .. expected .. " component for " .. language)
     else
         local migration = variant == "migration" and (language == "c" or language == "cpp")
         assert(variant == "development" or variant == "compiler-source" or migration, "Select an installed Wasm development directory")

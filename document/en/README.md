@@ -33,7 +33,7 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | Kotlin | `kotlin` | `wrkt` |
 | C# | `csharp` | `wrcs` |
 
-Java and Kotlin are available with the `synchronous-aot` selection. C# offers the `numeric-aot` component for freestanding integer methods. The full CLR development package is pending. [C# compiler guide](csharp.md) Check `revision-help` at the selected commit for the command and use `plan` to check package availability. The archive utility is `wrar`. Previous installations retain the names from their pinned commit.
+Java and Kotlin are available with the `synchronous-aot` selection. The default C# installation compiles freestanding integer methods. The full CLR development package is pending. [C# compiler guide](csharp.md) Check `revision-help` at the selected commit for the command and use `plan` to check package availability. The archive utility is `wrar`. Previous installations retain the names from their pinned commit.
 
 ## Install a pinned selection
 

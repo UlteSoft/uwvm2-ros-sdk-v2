@@ -26,9 +26,9 @@
     },
     {
       "path": "tools/xmake/dispatch.lua",
-      "bytes": 11299,
+      "bytes": 11354,
       "mode": 420,
-      "sha256": "f57b4aa5c77e2788bb1c44bee666f5261c76020291e0a4ededf20fd1f7eabc3d"
+      "sha256": "f6fad355fc58028e040f903a8e767dcef3835996cb025560bfff0cd964372dc3"
     },
     {
       "path": "tools/xmake/ros.lua",

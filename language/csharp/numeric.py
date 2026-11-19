@@ -19,6 +19,7 @@ from private_exports import keep_private_memory
 from frontend import audit
 from guest_profile import Profile
 from imports import inspect
+from scalar import prove_scalar
 
 
 def compile_guest(args, work):
@@ -80,6 +81,8 @@ def compile_guest(args, work):
     audit(guest, profile)
     if inspect(guest):
         raise ValueError("numeric component must have zero imports")
+    if not args.legacy_mte and not args.no_mte:
+        guest = prove_scalar(guest)
     if closure is not None:
         # The standalone link above has already checked that this exact leaf
         # needs no host imports. The enclosing body must pass the final SDK audit.
@@ -111,8 +114,8 @@ def main():
     parser.add_argument("-o", "--output", type=Path, required=True)
     parser.add_argument("sources", nargs="+", type=Path)
     args = parser.parse_args()
-    if not args.legacy_mte and not args.no_mte:
-        parser.error("no signed strict C# release is available; select --legacy-mte or --no-mte explicitly")
+    if args.compile_only and not args.legacy_mte and not args.no_mte:
+        parser.error("no signed strict C# release for relocatable objects; the scalar proof requires a final module")
     if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]{0,127}\.[A-Za-z_][A-Za-z_0-9]{0,127}", args.entry):
         parser.error("expected a global Class.Method entry")
     if args.compile_only != (args.sysroots is not None):
