@@ -20,9 +20,9 @@
     },
     {
       "path": "examples/shared/migration/c/prepare.py",
-      "bytes": 2664,
+      "bytes": 2814,
       "mode": 420,
-      "sha256": "28db5c630984f4b9441d3282980afba2c9da8018cfeeeb1fbd1d1c660d7efa03"
+      "sha256": "5a75719f2d3d39aae9810307302589ee532faf41d3d0a047d0971653af8b4b17"
     },
     {
       "path": "examples/shared/migration/c/resource.c",

@@ -37,7 +37,11 @@ def main():
     if root is None:
         root = ROOT / "third-parties/migration-examples/sensor_msgs"
         lock = Path(__file__).with_name("imu.lock")
-    entries = json.loads(lock.read_bytes(), object_pairs_hook=unique_fields)
+    with lock.open("rb") as stream:
+        raw_lock = stream.read(4097)
+    if len(raw_lock) > 4096:
+        parser.error("resource lock exceeds 4096 bytes")
+    entries = json.loads(raw_lock, object_pairs_hook=unique_fields)
     if not isinstance(entries, list) or len(entries) != 1:
         parser.error("the example requires exactly one pinned resource")
     rows = collect([root], entries, verify=True)

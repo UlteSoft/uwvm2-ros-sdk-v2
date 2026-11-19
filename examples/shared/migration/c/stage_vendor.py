@@ -15,18 +15,29 @@ from package_resources import parts, read_file, unique_fields
 from package_manifest import describe
 
 
+def bounded(path):
+    """@brief Read a single small example descriptor before parsing its contents."""
+    with path.open("rb") as stream:
+        data = stream.read(4097)
+    if len(data) > 4096:
+        raise ValueError("example descriptor exceeds 4096 bytes")
+    return data
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", required=True, type=Path, help="selected C migration project")
     parser.add_argument("--source-root", required=True, type=Path, help="locally supplied original vendor repository root")
     parser.add_argument("--output", required=True, type=Path, help="new ROS package directory")
     args = parser.parse_args()
-    lock = json.loads((args.project / "upstream.lock").read_bytes(), object_pairs_hook=unique_fields)
-    if not isinstance(lock, list) or len(lock) != 1 or set(lock[0]) != {"uri", "sha256", "manifest_sha256"}:
+    lock = json.loads(bounded(args.project / "upstream.lock"), object_pairs_hook=unique_fields)
+    if not isinstance(lock, list) or len(lock) != 1 or not isinstance(lock[0], dict) or set(lock[0]) != {"uri", "sha256", "manifest_sha256"}:
         parser.error("expected one pinned package URI")
     entry = lock[0]
     package, path = parts(entry["uri"])
-    manifest = (args.project / "vendor-package.xml").read_bytes()
+    if path[0] in ("package.xml", "manifest.xml"):
+        parser.error("vendor resource collides with its package manifest")
+    manifest = bounded(args.project / "vendor-package.xml")
     if not package.startswith("wros_example_") or not manifest or len(manifest) > 4096:
         parser.error("expected an SDK example package manifest")
     parsed = describe(manifest, "package.xml", package)

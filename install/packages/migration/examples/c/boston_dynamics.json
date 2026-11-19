@@ -38,9 +38,9 @@
     },
     {
       "path": "examples/shared/migration/c/stage_vendor.py",
-      "bytes": 2387,
+      "bytes": 2816,
       "mode": 420,
-      "sha256": "67415c9b8c3c9afb32df5635b44c439bed8eb9f3126e00cf7a0f7aa952011a7c"
+      "sha256": "a7dea3b17fecd08b50d527091f886444c5a1b825a3950f9822339e0e289852dd"
     }
   ]
 }
