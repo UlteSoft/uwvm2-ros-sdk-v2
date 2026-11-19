@@ -36,8 +36,10 @@ def main():
                       args.thread_mode == "threads", exceptions=args.exceptions)
     argv = [str(vm), *profile.uwvm_feature_flags(), "--wasm-set-main-module-name", "main"]
     if args.engine:
-        argv += ["--runtime-" + args.engine, "--runtime-compile-threads", "0",
+        argv += ["--runtime-" + args.engine, "--runtime-compile-threads", "3" if args.engine == "aot" else "0",
                  "--runtime-llvm-jit-cache-path", "disable", "--debug-fault-action", "exit"]
+        if args.engine == "aot":
+            argv += ["--runtime-llvm-jit-full-policy", "legacy-light"]
     if args.check_tags:
         argv += ["--runtime-memtag-mode", "sync"]
     # Only an operator running a local test can opt into these specific queries.
