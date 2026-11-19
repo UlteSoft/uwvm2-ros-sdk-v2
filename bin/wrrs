@@ -18,9 +18,12 @@ from compiler import compiler_environment, digest, make_command
 from frontend import audit
 from guest_profile import Profile
 import qualification
+import local_release
 
 LANGUAGE = SDK / "language/rust"
 INSTRUMENTER = SDK / "tools/wasm/tag_ir.cpp"
+sys.path.insert(0, str(LANGUAGE))
+import check_site
 
 
 def rust_view(root, lock, work):
@@ -73,7 +76,8 @@ def compile_rust(options, source, output, work):
     # clang++ uses its invocation name to select the C++ link runtime.
     host_cxx = options.host_cxx.absolute()
     receipts = [receipt.resolve(strict=True) for receipt in options.sysroots]
-    admission = qualification.admit("rs", options, profile, {"host_cxx": host_cxx, "rustc": options.rustroot / "bin/rustc"})
+    admission = qualification.admit("rs", options, profile, {"host_cxx": host_cxx, "rustc": options.rustroot / "bin/rustc"},
+                                    selected_release=options.selected_release)
     _, closure = make_command(tool, receipts, profile, "c", ["-c"], verify=True)
     env = compiler_environment(tool)
     env.update(HOME=str(work), TMPDIR=str(work), LC_ALL="C")
@@ -141,23 +145,50 @@ def compile_rust(options, source, output, work):
     qualification.finish(admission, options, module, output, {name: row["suppressions"] for name, row in stages.items()})
 
 
+def configure(options):
+    options.selected_release = None
+    explicit = (options.toolchain, options.sysroots, options.rustroot)
+    if not any(explicit):
+        site = local_release.site_config(SDK)
+        if site is None or qualification.switch(options) != "--mte" or options.host_cxx is not None:
+            raise ValueError("provide explicit producer paths or install a signed strict Rust site profile")
+        row = check_site.select(site)
+        options.selected_release = qualification.canonical(row)
+        options.toolchain = Path(site["toolchain"])
+        options.sysroots = list(map(Path, site["sysroots"]))
+        extra = check_site.inputs(options.toolchain)
+        options.rustroot = extra["rustc"].parents[1]
+        options.host_cxx = extra["host_cxx"]
+        if options.O is None:
+            options.O = row["settings"]["optimization"]
+        if options.g is None:
+            options.g = row["settings"]["debug"]
+    elif not all(explicit):
+        raise ValueError("provide --rustroot, --toolchain and --sysroots together")
+    else:
+        options.O = options.O or "2"
+        options.g = bool(options.g)
+        options.host_cxx = options.host_cxx or Path("/usr/bin/c++")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("-o", "--output", type=Path, required=True)
-    parser.add_argument("--rustroot", type=Path, required=True)
-    parser.add_argument("--toolchain", type=Path, required=True)
-    parser.add_argument("--sysroots", action="append", type=Path, required=True)
-    parser.add_argument("--host-cxx", type=Path, default=Path("/usr/bin/c++"))
+    parser.add_argument("--rustroot", type=Path)
+    parser.add_argument("--toolchain", type=Path)
+    parser.add_argument("--sysroots", action="append", type=Path)
+    parser.add_argument("--host-cxx", type=Path)
     parser.add_argument("--target", choices=["wasm32"], default="wasm32")
     parser.add_argument("--core", choices=["3.0"], default="3.0")
     qualification.arguments(parser)
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=False)
-    parser.add_argument("-O", choices=list("0123"), default="2")
-    parser.add_argument("-g", action="store_true")
+    parser.add_argument("-O", choices=list("0123"))
+    parser.add_argument("-g", action="store_true", default=None)
     parser.add_argument("--print-identity", action="store_true")
     options = parser.parse_args()
     try:
+        configure(options)
         source = options.source.resolve(strict=True)
         output = options.output.absolute()
         if options.eh:

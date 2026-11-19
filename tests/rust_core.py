@@ -20,6 +20,7 @@ def main():
     for key in ("rustroot", "toolchain", "sysroots", "plain-sysroots", "runtime", "output"):
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--sdk", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--host-cxx", type=Path, default=Path("/usr/bin/c++"))
     candidate_arguments(parser)
     args = parser.parse_args()
     sdk, work, rust, tool, runtime = [p.resolve() for p in
@@ -30,7 +31,7 @@ def main():
     os.environ["TMPDIR"] = str(work)
     app = sdk / "bin/wrrs"
     inputs = [Path(__file__), source, source.with_name("tagged_access.rs"), app, runtime, args.sysroots, args.plain_sysroots,
-              rust / "bin/rustc", tool / "bin/clang", sdk / "language/rust/toolchain-inputs.json", sdk / "tools/wasm/tag_ir.cpp"]
+              rust / "bin/rustc", args.host_cxx, tool / "bin/clang", sdk / "language/rust/toolchain-inputs.json", sdk / "tools/wasm/tag_ir.cpp"]
     receipt["inputs"] = {str(p): sha(p) for p in inputs}
     report = work / "results.json"
 
@@ -49,7 +50,7 @@ def main():
         return result.stdout
 
     module = work / "body.wasm"
-    base = [app, "--rustroot", rust, "--toolchain", tool, "--target", "wasm32", "--no-eh",
+    base = [app, "--rustroot", rust, "--host-cxx", args.host_cxx.absolute(), "--toolchain", tool, "--target", "wasm32", "--no-eh",
             "-O3", "-g", "--print-identity", "-o", module]
     for mode, closure, switches in (("tagged", args.sysroots, []), ("plain", args.plain_sysroots, ["--no-mte"])):
         build = [*base, "--sysroots", closure.resolve(), *switches]

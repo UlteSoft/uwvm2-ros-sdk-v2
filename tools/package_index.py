@@ -185,8 +185,8 @@ def main():
             "runtime/runtime_tinygowasm.go", "runtime/runtime_wasip1.go", "runtime/wros_gc.go", "runtime/wros_gc.c")],
     ]
     language_files["rs"] = [
-        "bin/wrrs", "tools/wasm/tag_ir.cpp", "language/rust/scene.rs", "language/rust/toolchain-inputs.json",
-        "document/en/rust.md", "document/zh/rust.md",
+        "bin/wrrs", "tools/wasm/tag_ir.cpp", "language/rust/scene.rs", "language/rust/toolchain-inputs.json", "language/rust/check_site.py",
+        "document/en/rust.md", "document/zh/rust.md", "examples/rs/body.rs", "examples/rs/xmake.lua",
         *["third-parties/rust/" + name for name in ("rust-src-1.98.0.tar.xz", "COPYRIGHT", "LICENSE-APACHE", "LICENSE-MIT")],
     ]
     if set(language_files) != set(DEVELOPMENT):

@@ -23,7 +23,7 @@ def main():
     parser.add_argument("--repository", type=Path, default=ROOT)
     parser.add_argument("--sdk-commit", required=True)
     parser.add_argument("--address-bits", type=int, choices=(32, 64), default=32)
-    parser.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran"), default="c")
+    parser.add_argument("--language", choices=("c", "cpp", "lua", "nim", "objectc", "fortran", "rs"), default="c")
     parser.add_argument("--eh", action="store_true", help="use the default EH-enabled frontend configuration")
     parser.add_argument("--fortran-lapack", type=lambda path: Path(path).resolve(), nargs=2, metavar=("DLAPY3", "DLADIV"),
                         help="check the two original corpus subprograms using the signed Fortran installation")
@@ -40,7 +40,9 @@ def main():
         parser.error("this language release requires the EH sysroot")
     if a.language == "objectc" and (not a.objc_clang or not a.objc_runtime):
         parser.error("supply --objc-clang and --objc-runtime for Objective-C")
-    if a.xmake and a.language not in ("lua", "nim", "objectc", "fortran"):
+    if a.language == "rs" and (not a.xmake or a.address_bits != 32 or a.eh):
+        parser.error("supply --xmake and the wasm32 panic=abort Rust release")
+    if a.xmake and a.language not in ("lua", "nim", "objectc", "fortran", "rs"):
         parser.error("--xmake requires a published example project for this language")
     if not a.output.is_relative_to(ROOT / ".tmp"):
         parser.error("use a new SDK .tmp directory")
@@ -96,6 +98,35 @@ def main():
     run("sign", [a.cosign, "wasm", "secure", "sign", a.unsigned, "--policy", policy, "--key", ca["key"],
                  "--certificate", ca["certificate"], "--crl", ca["crl"], "--module-id", module_id, "--module-version", "1",
                  "--algorithm", "Ed25519", "--not-before", stamp(-60), "--not-after", stamp(3600), "--output", signed])
+    if a.language == "rs":
+        import qualification
+        row, = qualification.local_release.decode(signed.read_bytes())
+        trust = dict(verifier=str(a.cosign), verifier_sha256=sha(a.cosign), policy=str(policy),
+                     statement=str(signed), statement_sha256=sha(signed))
+        site = dict(toolchain=str(a.toolchain), sysroots=[str(a.sysroots)], trust=trust,
+                    release_sha256=qualification.canonical(row))
+        install = [sys.executable, "-I", "-B", ROOT / "install/bootstrap.py", "install", "--commit", a.sdk_commit,
+                   "--local-repository", a.repository.resolve(), "--platform", "unitree", "--language", "rs"]
+        config = a.output / "site-profile.json"
+        for name, overrides, diagnostic in (
+            ("wrong-row", {"release_sha256": "0"*64}, b"select one signed release"),
+            ("wrong-statement", {"trust": dict(trust, statement_sha256="0"*64)}, b"bundle differs"),
+        ):
+            config.write_text(json.dumps(dict(site, **overrides)))
+            run(name, [*install, "--site-profile", config, "--prefix", a.output/name], False)
+            if diagnostic not in (a.output/(name+".log")).read_bytes():
+                raise ValueError("unexpected install denial for " + name)
+        config.write_text(json.dumps(site))
+        run("install-site", [*install, "--site-profile", config, "--prefix", a.output / "signed-sdk"])
+        installed = json.loads((a.output / "install-site.log").read_bytes())
+        run("installed-builds", [sys.executable, "-B", ROOT / "tests/xmake_site.py", "--sdk",
+            installed["directory"], "--vm", a.runtime, "--xmake", a.xmake.absolute(),
+            "--output", a.output / "installed-builds"], timeout=600)
+        builds = a.output / "installed-builds/results.json"
+        report.update(complete=json.loads(builds.read_bytes())["complete"], builds_sha256=sha(builds),
+                      release_sha256=site["release_sha256"], statement_sha256=sha(signed))
+        save()
+        return
     wasm = a.output / "app.wasm"
     front = sdk / "bin" / {"c": "wrc", "cpp": "wrcc", "lua": "wrlua", "nim": "wrnim", "objectc": "wrobjc", "fortran": "wrf"}[a.language]
     suffix = {"objectc": "m", "fortran": "f90"}.get(a.language, a.language)
