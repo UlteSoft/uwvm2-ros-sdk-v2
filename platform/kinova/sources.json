@@ -2,6 +2,10 @@
   "platform": "kinova",
   "sources": [
     {
+      "repository": "https://github.com/Kinovarobotics/ros2_kortex",
+      "revision": "b2aa46b29ae8fadd5b293c57e3500925c61eb8e8"
+    },
+    {
       "repository": "https://github.com/ros-controls/control_msgs",
       "revision": "4418bbf3efda12828795e4bb011742133c67a6e2"
     },

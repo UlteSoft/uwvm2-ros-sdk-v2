@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/kinova/sources.json",
-      "bytes": 535,
+      "bytes": 678,
       "mode": 420,
-      "sha256": "5718ca296c29c8ef7be7cd2cd99b7514c7c1f076d3d6b76573c344702c199301"
+      "sha256": "6ce2f9c08a272dbdd1da0b41c71ded86493bdd59de2e23841858c5a3d7447692"
     }
   ]
 }
