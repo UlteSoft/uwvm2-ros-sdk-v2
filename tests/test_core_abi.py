@@ -128,6 +128,21 @@ class CoreAbi(unittest.TestCase):
                 self.assertEqual(result.returncode == 0, ok, result.stderr)
                 self.assertEqual(result.stdout, content if ok else b"")
 
+    def test_xmake_reports_vm_signal(self):
+        """@brief Preserve an abnormal VM exit in the test result and diagnostics."""
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            vm = base / "vm"
+            vm.write_text('#!/bin/sh\nkill -TERM "$$"\n')
+            vm.chmod(0o700)
+            guest = base / "guest.wasm"
+            guest.write_bytes(fn_export("_start"))
+            result = subprocess.run([sys.executable, ROOT / "tools/xmake/run_guest.py", guest,
+                                     "wasm32", "3.0", "single", "--engine", "aot"],
+                                    env={**os.environ, "WROS_VM": str(vm)}, capture_output=True)
+            self.assertEqual(result.returncode, 143, result.stderr)
+            self.assertIn(b"WROS aot test: VM signal 15", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

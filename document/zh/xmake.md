@@ -44,7 +44,7 @@ target_end()
 | `set_ros_platform(id)` | 为目标选择具体厂商或平台。每个登记平台都能使用已发布的通用 Wasm 语言开发包。设备访问需要部署者另外授权。 |
 | `set_wros_sdk(directory)` | 为单个目标指定另一次安装返回的 `development` 或 `compiler-source` 目录，提交必须与公共入口一致。一个项目可包含不同语言、不同平台的目标。 |
 | `set_wros_profile(table)` | 设置下面列出的一个或多个字段，作用域是当前目标。未知字段在配置阶段报错。 |
-| `add_wros_tests("int", "aot")` | xmake test 将目标交给独立的解释器和 AOT 进程执行。WROS_VM 指定 VM，WROS_RUN_QUERIES 逐项指定测试用的只读查询。客户程序陷阱或 VM 错误使测试失败。 |
+| `add_wros_tests("int", "aot")` | xmake test 将目标交给独立的解释器和 AOT 进程执行。WROS_VM 指定 VM，WROS_RUN_QUERIES 逐项指定测试用的只读查询。来宾陷阱、VM 错误或单次 VM 调用超过 600 秒都会使测试失败。 |
 | `set_wros_test_queries(...)` | 分别传入字符串 `abi`、`realtime-clock`、`monotonic-clock`、`realtime-resolution`、`monotonic-resolution` 中需要的项，声明该测试允许的只读查询。操作员可通过逗号分隔的 `WROS_RUN_QUERIES` 收紧已声明的权限，显式设为空值会拒绝所有查询。 |
 | `set_wros_test_policy("platform-driver-denial")` | 建立一个本地测试对端。对每个引擎分别只开启上级驱动权限或只开启平台扩展权限，验证两条拒绝路径。来宾陷阱或对端收到任何数据包都使测试失败。用 `set_ros_platform` 选择平台，再用 `add_wros_tests` 注册引擎。 |
 | `set_wros_typescript_entry(file)` | 从 add_files 声明的多个 .ts 文件中选择一个启动模块。 |

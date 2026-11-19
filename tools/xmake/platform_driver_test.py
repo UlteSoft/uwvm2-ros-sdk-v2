@@ -9,6 +9,7 @@ import hashlib
 import os
 import socket
 import subprocess
+import sys
 import time
 
 
@@ -75,9 +76,11 @@ def run_case(argv, module, platform, *, parent_allowed, child_allowed, alias="ar
 def check(argv, module, platform):
     """@brief Enforce both denial configurations and check that neither reached the external peer."""
     for parent_allowed in (True, False):
+        denied = "platform extension" if parent_allowed else "parent driver grant"
         status, packets = run_case(argv, module, platform, parent_allowed=parent_allowed, child_allowed=not parent_allowed)
         if status:
+            print(f"WROS driver test ({platform}, denied {denied}): VM exit {status}", file=sys.stderr)
             return status
         if packets:
-            raise RuntimeError("driver permission test unexpectedly produced a peer event")
+            raise RuntimeError(f"WROS driver test ({platform}, denied {denied}) produced an unexpected peer event")
     return 0

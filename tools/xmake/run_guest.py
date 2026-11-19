@@ -134,8 +134,16 @@ def main():
         snapshot.write_bytes(content)
         if args.driver_denial:
             from platform_driver_test import check
-            return check(argv, snapshot, args.driver_denial)
-        status = subprocess.run([*argv, "--run", str(snapshot)]).returncode
+        try:
+            if args.driver_denial:
+                return check(argv, snapshot, args.driver_denial)
+            status = subprocess.run([*argv, "--run", str(snapshot)], timeout=600 if args.engine else None).returncode
+        except subprocess.TimeoutExpired:
+            print(f"WROS {args.engine} test: VM timed out after 600 seconds", file=sys.stderr)
+            return 124
+        if args.engine and status:
+            outcome = f"exit {status}" if status > 0 else f"signal {-status}"
+            print(f"WROS {args.engine} test: VM {outcome}", file=sys.stderr)
     return status if status >= 0 else 128 - status
 
 
