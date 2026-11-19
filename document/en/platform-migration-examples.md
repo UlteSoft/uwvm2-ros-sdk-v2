@@ -15,7 +15,7 @@ cp -R "$UWVM_ROS_SDK_ROOT/examples/platform/$PLATFORM/migration/c" ./resource-ex
 cd resource-example
 xmake f -c -y -a wasm32
 xmake -j1
-xmake test
+xmake test -j1
 ```
 
 The build checks the original ROS 2 `sensor_msgs` manifest and `msg/Imu.msg`, then embeds the resource in the guest. To select the platform project's upstream resource instead, point `WROS_ROS_PACKAGE_ROOT` to the directory containing the exact package manifest specified by its README, then rebuild and rerun the tests. Resources in externally supplied vendor packages stay local. Both the resource bytes and manifest must match the SHA-256 digests in `upstream.lock`. The guest checks exact URI lookup, byte count, content checksum and a missing-resource result. It needs no filesystem or network grant.
@@ -32,7 +32,7 @@ cp -R "$UWVM_ROS_SDK_ROOT/examples/platform/$PLATFORM/migration/fsharp" ./goal-e
 cd goal-example
 xmake f -c -y -a wasm32
 xmake -j1
-xmake test
+xmake test -j1
 ```
 
 The F# guest checks all ten ROS 1 wire status values. It expects the terminal states PREEMPTED, SUCCEEDED, ABORTED, REJECTED, RECALLED and LOST. LOST is a client-side determination. The scene ABI query seeds the traversal and checks that the guest runs against ABI 2. The test grants only this query. These two projects verify resource migration and local status interpretation. Device control, DDS interoperability and robot dynamics require independent tests. [ROS 1 wire values](https://github.com/ros/common_msgs/blob/092bc230c8153dd4cfee0c84c9796cc7e6b09fdb/actionlib_msgs/msg/GoalStatus.msg) and [actionlib client semantics](https://github.com/ros/actionlib/blob/noetic-devel/actionlib/include/actionlib/client/simple_client_goal_state.h).

@@ -15,7 +15,7 @@ cp -R "$UWVM_ROS_SDK_ROOT/examples/platform/$PLATFORM/migration/c" ./resource-ex
 cd resource-example
 xmake f -c -y -a wasm32
 xmake -j1
-xmake test
+xmake test -j1
 ```
 
 默认使用随示例分发的 ROS 2 `sensor_msgs` 包清单与 `msg/Imu.msg`。要运行对应平台 README 指定的上游资源，将 `WROS_ROS_PACKAGE_ROOT` 指向该版本的包清单所在目录，然后重新构建并测试。外部提供的厂商包仅在本机读取。宿主核对 `upstream.lock` 中的资源和清单 SHA-256。Wasm 检查 URI 精确查找、字节数、完整内容校验和与缺失资源的返回值。该示例所需的文件系统和网络权限均为零。
@@ -32,7 +32,7 @@ cp -R "$UWVM_ROS_SDK_ROOT/examples/platform/$PLATFORM/migration/fsharp" ./goal-e
 cd goal-example
 xmake f -c -y -a wasm32
 xmake -j1
-xmake test
+xmake test -j1
 ```
 
 F# 客户端遍历 ROS 1 的十个线协议状态值，检查进入终态的六个值 PREEMPTED、SUCCEEDED、ABORTED、REJECTED、RECALLED 和 LOST。LOST 由客户端判定。遍历从实际读取的场景 ABI 开始，并检验主机 ABI 为 2。测试只授予 ABI 查询权限。设备控制、DDS 通信和机器人物理动力学需分别验收。[ROS 1 状态定义](https://github.com/ros/common_msgs/blob/092bc230c8153dd4cfee0c84c9796cc7e6b09fdb/actionlib_msgs/msg/GoalStatus.msg) 与 [actionlib 客户端终态语义](https://github.com/ros/actionlib/blob/noetic-devel/actionlib/include/actionlib/client/simple_client_goal_state.h)。

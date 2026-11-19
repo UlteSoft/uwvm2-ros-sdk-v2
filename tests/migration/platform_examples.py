@@ -55,7 +55,7 @@ def qualify(args, platform, language, roots):
             env["WROS_ROS_PACKAGE_ROOT"] = str(roots[platform])
     run(case / "configure.log", [args.xmake, "f", "-c", "-y", "-a", "wasm32"], project, env)
     run(case / "build.log", [args.xmake, "-j1"], project, env)
-    log = run(case / "run.log", [args.xmake, "test", "-v"], project, env)
+    log = run(case / "run.log", [args.xmake, "test", "-j1", "-v"], project, env)
     if not all("--engine " + engine in log for engine in ("int", "aot")):
         raise ValueError("Xmake did not dispatch both guest engine tests: " + log[-1500:])
     target, = (project / "build").rglob("*.wasm")
@@ -72,10 +72,15 @@ def qualify(args, platform, language, roots):
     else:
         # Repeat the real executable in the closed VM. No host query is available.
         closed = dict(env, WROS_RUN_QUERIES="")
-        log = run(case / "closed.log", [args.xmake, "test", "-v"], project, closed, False)
-        if "scene interface is hidden" not in log:
-            raise ValueError("unexpected closed VM diagnostic: " + log[-1200:])
-        record["denial"] = sha(case / "closed.log")
+        record["denials"] = {}
+        for engine in ("int", "aot"):
+            receipt = case / (engine + "-closed.log")
+            log = run(receipt, [sys.executable, sdk / "tools/xmake/run_guest.py", target,
+                      "wasm32", "3.0", "single", "--engine", engine, "--check-tags", "--exceptions", "eh"],
+                      project, closed, False)
+            if "scene interface is hidden" not in log:
+                raise ValueError("unexpected closed VM diagnostic: " + log[-1200:])
+            record["denials"][engine] = sha(receipt)
     return record
 
 
