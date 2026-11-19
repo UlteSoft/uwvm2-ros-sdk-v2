@@ -1,6 +1,8 @@
 # @file controller.rb
 # @brief Exercise the approved simulated joint over typed ROSv2 calls.
 
+DEADLINE_WINDOW_NS = 5_000_000_000
+
 # @brief Encode one nonnegative integer as a little-endian wire word.
 def wire_u64(value)
   bytes = "\x00" * 8
@@ -47,7 +49,7 @@ raise "driver connection refused" unless poll("driver.connect", joint, "")[0] ==
 (1..STEPS).each do |sequence|
   status, sample, length = WROS.call("clock.read", steady, clock, 32)
   raise "clock sample failed" unless status == 0 && length == 32
-  expiry = wire_u64(read_u64(sample, 0) + 5 * 1_000_000_000)
+  expiry = wire_u64(read_u64(sample, 0) + DEADLINE_WINDOW_NS)
   word = wire_u64(sequence)
   request = replace(replace(TEMPLATE, 0, word + expiry), 32, word)
   request = replace(request, request.bytesize - 8, expiry)
