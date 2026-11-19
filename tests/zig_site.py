@@ -61,6 +61,7 @@ def main():
 
     common = ROOT / "examples/shared/common/zig/body.zig"
     storage = ROOT / "tests/zig_storage.zig"
+    bad_tag = ROOT / "tests/zig_bad_tag.zig"
     policy = ["--wasm-set-main-module-name", "main", "--ros-scene-create", "robot",
               "--ros-scene-bind", "robot", "main", "--ros-scene-interface", "robot", "abi", "allow"]
     invalid = out / "invalid.zig"
@@ -79,10 +80,15 @@ def main():
         profile = profile_for(bits)
         app = candidate(profile, tag + "-common", common)
         layout = candidate(profile, tag + "-storage", storage)
+        rejected = candidate(profile, tag + "-bad-tag", bad_tag)
         for engine in ("int", "aot"):
             run(tag + "-" + engine + "-common", vm(profile, engine, app, *policy))
             run(tag + "-" + engine + "-hidden", vm(profile, engine, app), b"interface is hidden")
             run(tag + "-" + engine + "-storage", vm(profile, engine, layout))
+            case = tag + "-" + engine + "-bad-tag"
+            run(case, vm(profile, engine, rejected), b"memory tag mismatch")
+            if cases[case]["exit"] != 122:
+                raise RuntimeError(case + " did not return the stable MTE fault status")
         run(tag + "-missing-site", [sys.executable, "-B", ROOT / "bin/wrzig", common, "-o", out / "refused.wasm"],
             b"needs a signed Zig site")
         run(tag + "-bad-import", [sys.executable, "-B", ROOT / "bin/wrzig", invalid, "-o", out / "refused.wasm",
@@ -92,7 +98,7 @@ def main():
         groups = {
             "vm-int": [tag + "-int-common"],
             "vm-aot": [tag + "-aot-common"],
-            "storage": [tag + "-int-storage", tag + "-aot-storage"],
+            "storage": [tag + suffix for suffix in ("-int-storage", "-aot-storage", "-int-bad-tag", "-aot-bad-tag")],
             "authority": [tag + "-int-hidden", tag + "-aot-hidden"],
             "admission": [tag + "-missing-site", tag + "-bad-import"],
         }
@@ -100,7 +106,7 @@ def main():
         row = dict(format=FORMAT, language="zig", profile=profile.to_dict(), settings=SETTINGS,
                    inputs=inputs, vm_sha256=vm_sha256,
                    tests={name: qualification.canonical(dict(cases={c: cases[c] for c in group},
-                       source=sha(common), storage=sha(storage), vm=vm_sha256))
+                       source=sha(common), storage=sha(storage), bad_tag=sha(bad_tag), vm=vm_sha256))
                        for name, group in groups.items()})
         protected = args.authority_work / tag
         protected.mkdir()
