@@ -1,4 +1,8 @@
-"""Build the controller from SDK source and compare an external TLS MuJoCo receiver with native stepping."""
+"""@file mujoco_guest.py
+@brief Compare a Wasm controller using an isolated TLS MuJoCo receiver with native stepping.
+@details Signed development-site runs bind the VM and compiler release before building;
+each generated controller and its receipt are verified before the simulation starts.
+"""
 import argparse
 import hashlib
 import json
@@ -26,6 +30,7 @@ def fortran_settings(request, target_offset, count, mode):
 
 
 def main():
+    """@brief Compile and verify each requested guest configuration and run the receiver scenarios."""
     p = argparse.ArgumentParser(description=__doc__)
     for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output"):
         p.add_argument("--" + field, required=True, type=Path)
@@ -38,7 +43,7 @@ def main():
     p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
     p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "rs", "tinygo", "fortran", "csharp"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
-    p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D, Objective-C and TinyGo sites supply their own tools and sysroots")
+    p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D, Fortran, Nim, Objective-C, Rust and TinyGo sites supply their own tools and sysroots")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
     p.add_argument("--toolchain64", type=Path, help="base compiler prefix for a distinct wasm64 sysroot")
     p.add_argument("--objc-clang", type=Path)
@@ -64,13 +69,13 @@ def main():
         p.error("--dotnet and --mono-compiler are required together for C#")
     if a.flang and a.language != "fortran":
         p.error("--flang applies to Fortran")
-    if (a.rustroot is not None) != (a.language == "rs"):
-        p.error("--rustroot is required for Rust")
     widths = (32,) if a.language in ("rs", "tinygo", "csharp", "js", "d") else (32, 64)
     site = None
-    explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64, a.goroot, a.tinygoroot)
-    if a.language in ("d", "objectc", "tinygo") and a.installed_sdk and not any(explicit):
+    explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64, a.goroot, a.tinygoroot, a.producer, a.rustroot, a.flang)
+    if a.language in ("d", "objectc", "tinygo", "nim", "rs", "fortran") and a.installed_sdk and not any(explicit):
         site = local_release.site_config(compiler_root)
+    if not site and (a.rustroot is not None) != (a.language == "rs"):
+        p.error("provide --rustroot for an explicit Rust toolchain")
     if not site and any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
         p.error("provide explicit Go and TinyGo roots or use an installed signed TinyGo site")
     if a.language == "d" and (not site or not (compiler_root / "bin/wrd").is_file()):
@@ -93,6 +98,12 @@ def main():
         if a.language == "tinygo":
             a.goroot = a.toolchain / "libexec/wros/go"
             a.tinygoroot = a.toolchain / "libexec/wros/tinygo"
+        if a.language == "rs":
+            a.rustroot = a.toolchain / "libexec/wros/rust"
+        if a.language == "nim":
+            a.producer = a.toolchain / "bin/wrnim-lower"
+        if a.language == "fortran":
+            a.flang = a.toolchain / "bin/flang"
         if a.language == "objectc":
             a.objc_clang = a.toolchain / "bin/wros-objc-clang"
     if a.address_bits:
@@ -101,7 +112,7 @@ def main():
         widths = (a.address_bits,)
     sysroots = {width: getattr(a, "sysroots" + str(width)) for width in widths}
     if not a.toolchain or (not site and not all(sysroots.values())):
-        p.error("supply the toolchain and a sysroot for each selected width, or an installed Objective-C site")
+        p.error("supply the toolchain and a sysroot for each selected width, or an installed signed language site")
     objc_runtimes = ({profile.address_bits: a.toolchain / "share/wros/objectc" / profile.identity} if site and a.language == "objectc" else
                      {32: a.objc_runtime32, 64: a.objc_runtime64})
     objc_runtimes = {width: objc_runtimes[width] for width in widths}
@@ -138,7 +149,7 @@ def main():
                        f"__gshared ubyte[{len(request)}] request = [" + ",".join(map(str, request)) + "];\n")
             app.write_text(prelude + source.read_text())
         if a.language == "nim":
-            options = ["-O3", "-g", "--producer", a.producer.resolve()]
+            options = [] if site else ["-O3", "-g", "--producer", a.producer.resolve()]
             (directory / "simulation.nim").write_text(
                 f"const steps* = {count}\nconst targetOffset* = {24+len(prefix)+8}\n"
                 f"const success* = {str(mode=='success').lower()}\nconst crash* = {str(mode=='crash').lower()}\n"
@@ -161,9 +172,9 @@ def main():
                            f'local mode = "{mode}"\nlocal target_offset = {24+len(prefix)+8}\n' + source.read_text())
         if a.language == "fortran":
             app.write_text(fortran_settings(request, 24+len(prefix)+8, count, mode) + source.read_text())
-            options = ["--eh", "-O3", "-g", *(["--flang", a.flang.resolve()] if a.flang else [])]
+            options = [] if site else ["--eh", "-O3", "-g", *(["--flang", a.flang.resolve()] if a.flang else [])]
         if a.language == "rs":
-            options = ["--rustroot", a.rustroot.resolve(), "-O3", "-g"]
+            options = [] if site else ["--rustroot", a.rustroot.resolve(), "-O3", "-g"]
             (directory / "simulation.rs").write_text(
                 f"const STEPS:u64={count};\nconst TARGET:usize={24+len(prefix)+8};\n"
                 f"const SUCCESS:bool={str(mode=='success').lower()};\nconst CRASH:bool={str(mode=='crash').lower()};\n"
@@ -210,7 +221,8 @@ def main():
             run(wasm.stem + "-verify", [sys.executable, "-B", *verifier, "--artifact", wasm,
                                         "--receipt", receipt, "--vm", a.runtime.resolve(), "--approved-receipt-sha256",
                                         hashlib.sha256(receipt.read_bytes()).hexdigest()])
-        controls = Profile(width, exceptions="noeh" if a.language == "rs" else "eh").uwvm_feature_flags()
+        guest_profile = profile if site else Profile(width, exceptions="noeh" if a.language == "rs" else "eh")
+        controls = guest_profile.uwvm_feature_flags()
         if a.language in ("js", "objectc"):
             controls += ["--wasip1-single-create", "main", "--wasip1-single-enable", "main",
                          "--wasip1-single-interface", "main", "clock_time_get_wasm64" if width == 64 else "clock_time_get", "allow",
@@ -225,14 +237,15 @@ def main():
         args.extend(["--vendor-model",str(a.vendor_model.resolve()),"--vendor-assets",str(a.vendor_assets.resolve()),
                      "--platform-targets",str(ROOT/"share/targets.json"),"--audit-calls"])
     producers = [path for path in (a.flang, a.producer) if path]
+    if site:
+        producers.extend((compiler_root / "share/qualification/site-profile.json", Path(site["trust"]["statement"])))
     if a.language == "d":
-        producers.extend((compiler_root / "language/d/wros_scene.d", compiler_root / "language/d/imports.c",
-                          compiler_root / "share/qualification/site-profile.json", Path(site["trust"]["statement"])))
+        producers.extend((compiler_root / "language/d/wros_scene.d", compiler_root / "language/d/imports.c"))
     if a.language == "csharp":
         producers.extend((compiler_root / "bin/wrcs", ROOT / "tests/mujoco/controller.cs",
                           *(ROOT / "language/csharp" / file for file in ("inputs.sha256", "Admit.cs", "SceneEntry.cs", "Scene.cs", "leaf.cpp", "numeric.py", "host.py", "scalar.py"))))
     if a.language == "rs":
-        producers.extend((a.rustroot / "bin/rustc", ROOT / "language/rust/scene.rs", ROOT / "tools/wasm/tag_ir.cpp"))
+        producers.extend((a.rustroot / "bin/rustc", compiler_root / "language/rust/scene.rs", compiler_root / "tools/wasm/tag_ir.cpp"))
     if a.language == "tinygo":
         producers.extend((a.goroot / "bin/go", a.tinygoroot / "bin/tinygo", compiler_root / "language/tinygo/scene/scene_wros.go",
                           compiler_root / "tools/wasm/tag_ir.cpp"))
@@ -242,7 +255,8 @@ def main():
                compile_guest=compile_guest, guest_name=a.language, guest_widths=widths,
                guest_inputs=(source, Path(__file__), compiler, *producers, *manifests, *objc_inputs,
                              *([compiler_root / "language/lua/scene.hpp", compiler_root / "language/lua/entry.cpp", compiler_root / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),
-                             *[tc/"bin"/tool for tc in {toolchains[w] for w in widths} for tool in ("clang","wasm-ld")], compiler_root / "include/wros/scene.h"))
+                             *[tc/"bin"/tool for tc in {toolchains[w] for w in widths} for tool in ("clang","wasm-ld")],
+                             *([] if a.language == "rs" else [compiler_root / "include/wros/scene.h"])))
 
 
 if __name__ == "__main__":

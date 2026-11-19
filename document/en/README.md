@@ -236,7 +236,7 @@ python3 tests/mujoco_guest.py --language d --installed-sdk "$SDK" --address-bits
   --vendor-assets "$GO2_ASSETS" --output "$OUT"
 ```
 
-For a signed TinyGo site, use the Unitree TinyGo development directory as `SDK` and replace `--language d` with `--language tinygo`. The fixture builds the Go controller with the installed `wrtg` and verifies its build receipt against the VM before running each scenario.
+To run the same Go2 scenarios with Nim, Fortran, Rust or TinyGo, set `SDK` to the Unitree development installation for that language and pass `--language nim`, `fortran`, `rs` or `tinygo`. The installed profile selects the compiler, sysroot and address width. The harness verifies the signed language release and VM digest, then checks the receipt for each compiled controller before stepping the model. A rejected or expired site stops the run. The results apply to the recorded model, joint, simulated receiver and software versions. Physical stopping distance and independent emergency stop require separate hardware measurements.
 
 The Java and Kotlin synchronous AOT package uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
