@@ -76,3 +76,40 @@ expected coordinate must fail on each target. The absolute error bound is
 0.00003 m with float scalars and 0.00000000002 m with double scalars for these
 test poses. This run covers local transform arithmetic. Timed buffer lookup,
 frame-tree ownership and DDS delivery require their own integration tests.
+
+## Jazzy BufferCore and transform history
+
+`tests/migration/tf2_buffer_layers.py` builds the Jazzy `tf2` and `rcutils`
+sources from their digest-checked archives. The full BufferCore test also
+uses generated C++ message headers from a Jazzy installation. The native
+compiler builds the source translation units for the test. The Wasm compiler
+uses the selected strict MTE development SDK. Run each layer and target
+independently under the qualification cgroup and lock.
+
+```sh
+/usr/bin/python3 -B tests/migration/tf2_buffer_layers.py \
+  --layer buffer --target native --corpus "$ROS_SOURCE_CORPUS" \
+  --sdk "$INSTALLED_CPP_SDK" --vm "$UWVM_ROS" \
+  --ros-prefix "$JAZZY_PREFIX" --output "$PWD/.tmp/tf2-buffer-native"
+```
+
+Use `--layer cache` for the original `TimeCache`, and `--target wasm` for
+strict interpreter and AOT execution. Use a different output directory on
+each invocation. A failed build leaves the original diagnostic and a receipt
+with `complete=false`. The fixtures use deterministic timestamps.
+
+| Layer | Native | Strict wasm32, no threads |
+| --- | --- | --- |
+| BufferCore | Passed out-of-order insertion, interpolation across a dynamic and a static edge, latest time, disconnected trees, forward and backward extrapolation, and clearing the graph | Build blocked. The C++ sysroot lacks `std::mutex` required by BufferCore and `std::wstring_convert` used by Jazzy's generated ROS message headers |
+| TimeCache | Passed ordered lookup after out-of-order insertion, interpolation, latest time, extrapolation, eviction and clear | Passed interpreter and AOT with all imported WASI operations denied |
+
+The negative control offsets the expected interpolation by one metre. Native
+execution returns a mismatch and the Wasm cache probe traps in both engines.
+For the cache, the linked C++ library retains `environ_get`, `environ_sizes_get`,
+`clock_time_get` and `proc_exit`. Each is exposed with the per-module
+`deny` disposition. The test grants no filesystem, socket, environment or clock
+access. The WASI build selects the original XSI `strerror_r` branch of
+`rcutils` in one translation unit. The buffer builds compile ROS logging
+macros at the upstream `NONE` level. These results cover in-memory behavior.
+DDS reception, logging, the threaded profile and concurrent tree mutation
+need separate validation.

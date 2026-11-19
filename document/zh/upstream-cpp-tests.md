@@ -62,3 +62,33 @@ Wasm 模块必须在解释器和 AOT 中均触发陷阱。
 和 AOT 三个环境逐项比较结果。将一项预期坐标偏移一米，三个环境都必须
 检测出错误。本组姿态的绝对误差限分别为单精度 0.00003 米、双精度
 0.00000000002 米。时间缓冲查询、坐标树控制权限和 DDS 传输需要各自的联测。
+
+## Jazzy BufferCore 与变换历史
+
+`tests/migration/tf2_buffer_layers.py` 从校验了摘要的语料归档构建 Jazzy 原版
+`tf2` 和 `rcutils`。BufferCore 还使用 Jazzy 安装中的 C++ 消息头文件。
+原生测试编译上游源文件；Wasm 测试使用所选的严格 MTE SDK。在验收 cgroup
+和共享锁下分别执行各组合。
+
+```sh
+/usr/bin/python3 -B tests/migration/tf2_buffer_layers.py \
+  --layer buffer --target native --corpus "$ROS_SOURCE_CORPUS" \
+  --sdk "$INSTALLED_CPP_SDK" --vm "$UWVM_ROS" \
+  --ros-prefix "$JAZZY_PREFIX" --output "$PWD/.tmp/tf2-buffer-native"
+```
+
+`--layer cache` 选择原版 `TimeCache`；`--target wasm` 同时测试解释器和
+AOT。每次指定新目录。构建失败时保留编译器原文和 `complete=false` 的记录。
+测试使用确定性的时间戳。
+
+| 层 | 原生 | 严格 wasm32、无线程 |
+| --- | --- | --- |
+| BufferCore | 通过乱序插入、动静两段变换插值、最新时间、断开树、前后超界及清空查询 | 构建受阻。BufferCore 需要的 `std::mutex` 和 Jazzy 消息头使用的 `std::wstring_convert` 未在该 C++ sysroot 提供 |
+| TimeCache | 通过乱序插入后的按时间查询、插值、最新时间、外推拒绝、剪除过期记录及清空 | 解释器和 AOT 均通过，所有导入的 WASI 操作均设为拒绝 |
+
+故意把插值预期偏移一米时，原生程序返回错误，Wasm 时间缓存在两个引擎
+均触发陷阱。C++ 库保留了 `environ_get`、`environ_sizes_get`、
+`clock_time_get` 和 `proc_exit` 四个导入，均使用单模块 `deny`，未授予
+文件系统、套接字、环境或时钟的操作权限。WASI 构建在一个翻译单元中
+选择上游 `rcutils` 的 XSI `strerror_r` 分支。BufferCore 测试使用原版
+日志宏的 `NONE` 编译级别。DDS 接收、日志、线程配置及并发修改树仍需验证。
