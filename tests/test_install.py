@@ -89,8 +89,12 @@ class Installer(unittest.TestCase):
                 self.assertIn('program = "' + command + '"', adapter)
                 help_text = subprocess.check_output([directory / "bin" / command, "--help"], text=True)
                 self.assertIn("usage: " + command + " ", help_text)
-                self.assertLessEqual({p.name for p in (directory / "bin").iterdir()},
-                                     {command, "wrar", "wrc", "wrcc"})
+                allowed = {command, "wrar", "wrc", "wrcc"}
+                if language == "typescript":
+                    # wrts passes the generated JavaScript to the SDK's QuickJS driver.
+                    allowed.add("wrjs")
+                    self.assertTrue((directory / "bin/wrjs").is_file())
+                self.assertLessEqual({p.name for p in (directory / "bin").iterdir()}, allowed)
 
     def test_migration_selects_each_published_project(self):
         """@brief Verify that every editable migration resolves its guest compiler and package."""
