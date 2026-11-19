@@ -237,3 +237,5 @@ python3 tests/mujoco_guest.py --language d --installed-sdk "$SDK" --address-bits
 Java/Kotlin 可选同步 AOT 组件使用 `set_wros_jvm_main(class_name)` 指定入口。详见 [JVM 编译与 Xmake 参数](jvm.md)。
 
 [JavaScript 解释器与 ROS 接口](js.md)
+
+[将 TypeScript 应用编译为 Wasm](typescript.md)

@@ -1,0 +1,256 @@
+{
+  "files": [
+    {
+      "path": "bin/wrc",
+      "bytes": 183,
+      "mode": 493,
+      "sha256": "d41aa0805eae98acdedd17383aa47d18384cc891861af465c8067ff4c1842250"
+    },
+    {
+      "path": "bin/wrjs",
+      "bytes": 6771,
+      "mode": 493,
+      "sha256": "023d5f53eac5df79db738b091e141637fab8e71d38311f469c8ab21406f01991"
+    },
+    {
+      "path": "bin/wrts",
+      "bytes": 8398,
+      "mode": 493,
+      "sha256": "5cce2a7d5268b042e43cd33e85c086a502aac43e38fd53435f1b0dd54557130e"
+    },
+    {
+      "path": "document/en/typescript.md",
+      "bytes": 3232,
+      "mode": 420,
+      "sha256": "31c9f6c911eb585b13aeb42e311d00028aa624f7aa9e28a2014cd2179b7c2c2c"
+    },
+    {
+      "path": "document/zh/typescript.md",
+      "bytes": 2847,
+      "mode": 420,
+      "sha256": "22f988a8d77dd0a96025ef45ee85335a20fb79ba14da1ab7fee0e102132abd91"
+    },
+    {
+      "path": "examples/typescript/filter.ts",
+      "bytes": 321,
+      "mode": 420,
+      "sha256": "22f8489cb69c2da6774f79f920d397492c16f843e6da0b6c76b9dd6880cc0511"
+    },
+    {
+      "path": "examples/typescript/main.ts",
+      "bytes": 301,
+      "mode": 420,
+      "sha256": "4321e3ee53a907f7f9c71e0d1af9d34e6309a35fce3a87d73a725f4c5709642f"
+    },
+    {
+      "path": "examples/typescript/xmake.lua",
+      "bytes": 510,
+      "mode": 420,
+      "sha256": "9274da9d33e294bc2c4f92c26677911e752e5b6f95d7b5529a9b7b607a91ce21"
+    },
+    {
+      "path": "include/wros/scene.h",
+      "bytes": 34227,
+      "mode": 420,
+      "sha256": "1d61f11c8f8c0220f3f9190d85a4ac9a813dd957b12cc80b36b20281670929e9"
+    },
+    {
+      "path": "language/js/entry.c",
+      "bytes": 7338,
+      "mode": 420,
+      "sha256": "a293e9f663492cf32bcaec6eec6d61e113ba7e5c6b1ded97ccf8f81312775d21"
+    },
+    {
+      "path": "language/typescript/compile.cjs",
+      "bytes": 5260,
+      "mode": 420,
+      "sha256": "567428c3b539c79d9e69f626414a464089657cbe4056a992ede8e41e1822c817"
+    },
+    {
+      "path": "language/typescript/xmake/adapter.lua",
+      "bytes": 2181,
+      "mode": 420,
+      "sha256": "f4e958ca06bc566fce97c2e3c7ddded2ce7eac7b797ba7a1c788d9cd33c850ca"
+    },
+    {
+      "path": "third-parties/quickjs/LICENSE",
+      "bytes": 1130,
+      "mode": 420,
+      "sha256": "598fd7fc928e4350abce36e337ba5a1346923c5c692f5be92c3d8e29ddd7c18d"
+    },
+    {
+      "path": "third-parties/quickjs/README.md",
+      "bytes": 1389,
+      "mode": 420,
+      "sha256": "3a3b8c4b82e2ce3d9aa8ac1348337aa7b0325f9afffb91ca577792e489a8d493"
+    },
+    {
+      "path": "third-parties/quickjs/cutils.c",
+      "bytes": 18632,
+      "mode": 420,
+      "sha256": "b266be9ac0d1ce82c7fade36861ef9b59740f8fd2fa43d52b9efae78a4b9062f"
+    },
+    {
+      "path": "third-parties/quickjs/cutils.h",
+      "bytes": 11277,
+      "mode": 420,
+      "sha256": "ae45698aa4f479dad164a573cabd22de01aa42377440ee8e7e81ca6366a95f25"
+    },
+    {
+      "path": "third-parties/quickjs/dtoa.c",
+      "bytes": 46182,
+      "mode": 420,
+      "sha256": "9a920871bbcc0d17196e51b665475b0d44fa869cb61cc3871a6aa9d8720466ce"
+    },
+    {
+      "path": "third-parties/quickjs/dtoa.h",
+      "bytes": 3491,
+      "mode": 420,
+      "sha256": "344d75304dc6de080c2899caec86607f5879ee7d2d970df9adf8d3e72107e9ed"
+    },
+    {
+      "path": "third-parties/quickjs/libregexp-opcode.h",
+      "bytes": 3317,
+      "mode": 420,
+      "sha256": "0f634a4b026c030013cf3048f377c0a031a4ed039f771a15afc6eba4927af966"
+    },
+    {
+      "path": "third-parties/quickjs/libregexp.c",
+      "bytes": 123594,
+      "mode": 420,
+      "sha256": "dcc1a0d7919921a08b80f00e85a1901e111df8d9cd2544592db10f22340e9813"
+    },
+    {
+      "path": "third-parties/quickjs/libregexp.h",
+      "bytes": 2921,
+      "mode": 420,
+      "sha256": "2362311b8693975d869f5cf746340062b8d2346cb732607c328b3ccf2f6a1b18"
+    },
+    {
+      "path": "third-parties/quickjs/libunicode-table.h",
+      "bytes": 265653,
+      "mode": 420,
+      "sha256": "649b072c3fee26d5fa778cd140a23bfdd0ff34f532b4b21ce263b7a979cce5bc"
+    },
+    {
+      "path": "third-parties/quickjs/libunicode.c",
+      "bytes": 63822,
+      "mode": 420,
+      "sha256": "591413a857aa7cd17c6ae000d4d381d3978f67bd33a1279856933ebe82da2eda"
+    },
+    {
+      "path": "third-parties/quickjs/libunicode.h",
+      "bytes": 6066,
+      "mode": 420,
+      "sha256": "7aa9cf58be71e877162fbbf169680995c7a853f3d08760cf309f48ae456bff2a"
+    },
+    {
+      "path": "third-parties/quickjs/list.h",
+      "bytes": 3366,
+      "mode": 420,
+      "sha256": "4ee9eda6f7eb739a1860fd7c3239943d808619b0464a42c8552d6c695afbbfe8"
+    },
+    {
+      "path": "third-parties/quickjs/official-source.json",
+      "bytes": 3916,
+      "mode": 420,
+      "sha256": "98a8ca8ccd0817b1528904f978c16f7b3698e9cdf03c6cc5b6e22727965dde76"
+    },
+    {
+      "path": "third-parties/quickjs/official-source.patch.xz",
+      "bytes": 446248,
+      "mode": 420,
+      "sha256": "a028d3a6c178d8fce6560152563e9b1fb48811cd05ef6bced44711f8f3d2595f"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs-2026-06-04.tar.xz",
+      "bytes": 621500,
+      "mode": 420,
+      "sha256": "b376e839b322978313d929fd20663b11ba58b75df5a46c126dd19ea2fa70ad2a"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs-atom.h",
+      "bytes": 8544,
+      "mode": 420,
+      "sha256": "c40bd3c96ba87b09463189a96b80252cfe220641f9b796df4f4e1a080ef35d41"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs-opcode.h",
+      "bytes": 16650,
+      "mode": 420,
+      "sha256": "2e0a108da1769e4c10a5bd4aff2753d618929317ebce084b1b76f81ac83924ee"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs.c",
+      "bytes": 2026822,
+      "mode": 420,
+      "sha256": "13c18837b29fd7b63b3c4f99ef1c9bfae080625cd273a1bbca4fd2de4d41500c"
+    },
+    {
+      "path": "third-parties/quickjs/quickjs.h",
+      "bytes": 53142,
+      "mode": 420,
+      "sha256": "971c141dca08ae46cd29380db91902edab3ca08abebfbd73f82331ddfbcfd2d2"
+    },
+    {
+      "path": "third-parties/quickjs/unicode_gen_def.h",
+      "bytes": 8029,
+      "mode": 420,
+      "sha256": "8c2916d8df39bc3066eb59ec21e345e7d5412df078641ae7abdab54bee627506"
+    },
+    {
+      "path": "third-parties/quickjs/verify_release.py",
+      "bytes": 3240,
+      "mode": 420,
+      "sha256": "1762b26c6afe63d9fcfe6c9e8c5c9763a9ac149380b467e2337598e567f8f233"
+    },
+    {
+      "path": "third-parties/quickjs/wasm-quickjs-call-storage.patch",
+      "bytes": 9274,
+      "mode": 420,
+      "sha256": "36143996a79e3e0da294a34e0c64a10a22c18794a0c8a330d1c0ee478659309f"
+    },
+    {
+      "path": "third-parties/typescript/LICENSE-node",
+      "bytes": 145485,
+      "mode": 420,
+      "sha256": "c738ae413cf561f174e34f6961f8ca458aae2369a73640dda6234c629b98bcc4"
+    },
+    {
+      "path": "third-parties/typescript/LICENSE.txt",
+      "bytes": 9197,
+      "mode": 420,
+      "sha256": "a7d00bfd54525bc694b6e32f64c7ebcf5e6b7ae3657be5cc12767bce74654a47"
+    },
+    {
+      "path": "third-parties/typescript/ThirdPartyNoticeText.txt",
+      "bytes": 37824,
+      "mode": 420,
+      "sha256": "1af3c68039c57e539422da82a4faada506ce6d0ea6f90e0b699d02dbcdb7a90c"
+    },
+    {
+      "path": "third-parties/typescript/compiler.tar.gz",
+      "bytes": 1699004,
+      "mode": 420,
+      "sha256": "ba1d0d8e90c248541000f417067c99e9f71ff93053e8703ff00215360f681508"
+    },
+    {
+      "path": "third-parties/typescript/node-linux-x64.xz",
+      "bytes": 33109116,
+      "mode": 420,
+      "sha256": "7c3cd057e0411ee6c4508cb258efc01a2322f6f7d8261ead36b4558e242b3d8f"
+    },
+    {
+      "path": "third-parties/typescript/pack_release.py",
+      "bytes": 3519,
+      "mode": 420,
+      "sha256": "8b42734c2baee777598552dd06a4b4d28e11bb7895adaf68f431f2ba663120c2"
+    },
+    {
+      "path": "third-parties/typescript/release.json",
+      "bytes": 6386,
+      "mode": 420,
+      "sha256": "1581ad9a53c0c2e95847b9ab4d4b576dedc4d0d1db2c3ad5e5e8fe0f89e038bc"
+    }
+  ]
+}

@@ -44,6 +44,8 @@ target_end()
 | `set_ros_platform(id)` | Select the exact installed vendor or platform. Every published guest development package is available on each registered platform. Driver access requires a separate deployment grant. |
 | `set_wros_sdk(directory)` | Override the default SDK selection for one target. Supply an installed `development` or `compiler-source` directory from the same commit as the shared declarations. This supports multiple language and platform selections in one project. |
 | `set_wros_profile(table)` | Set one or more target-local fields from the table below. An unknown field fails configuration. |
+| `add_wros_tests("int", "aot")` | Run the built module in separate interpreter and AOT processes with xmake test. WROS_VM selects the VM. WROS_RUN_QUERIES enables named read-only test queries. Guest traps and VM errors fail the test. |
+| `set_wros_typescript_entry(file)` | Choose one startup module among the .ts inputs of a multi-file TypeScript target. |
 | `add_wros_lua_operations(name, ...)` | Import the named ROSv2 operations into a Lua guest. The compiler checks each name against the pinned VM catalog. Deployment must expose the imports and grant the requested resource actions. |
 | `add_wros_exports(name, ...)` | For a C or C++ binary, export additional named Wasm functions alongside `_start`. Each name must match the frontend's C identifier syntax. |
 
