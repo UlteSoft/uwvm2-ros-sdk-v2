@@ -1,5 +1,9 @@
 {
   "id": "go",
-  "development_package": false,
-  "command_name": "wrgo"
+  "development_package": true,
+  "command_name": "wrgo",
+  "development_scope": "register-only-wasm32",
+  "optional_components": [
+    "compiler-source"
+  ]
 }

@@ -1,0 +1,106 @@
+{
+  "files": [
+    {
+      "path": "bin/wrgo",
+      "bytes": 303,
+      "mode": 493,
+      "sha256": "69e3a277408a599fd6494a5c5e4a436bbd64d295b8553d6806df987e53d2ac5e"
+    },
+    {
+      "path": "document/en/go.md",
+      "bytes": 3007,
+      "mode": 420,
+      "sha256": "29ead75890db1aebecd54059e4d28fd862317210f67f17f106ae4e1e65ce0768"
+    },
+    {
+      "path": "document/zh/go.md",
+      "bytes": 2825,
+      "mode": 420,
+      "sha256": "9cfec3348a6ccc4d563ab3634dd0d80d84166fe763f9b52e5ad14f39dc6d61b8"
+    },
+    {
+      "path": "examples/go/controller.go",
+      "bytes": 598,
+      "mode": 420,
+      "sha256": "546a8f6f1b4526a8d2a5e1d0c8aa55dd8f431f402293861330fd367baff3ccf9"
+    },
+    {
+      "path": "examples/go/xmake.lua",
+      "bytes": 386,
+      "mode": 420,
+      "sha256": "41d7ceb47bbff9b72c35e5685766d48513e60bf55d82530970caafa26f864c58"
+    },
+    {
+      "path": "examples/shared/common/go/controller.go",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+    },
+    {
+      "path": "examples/shared/common/go/xmake.lua",
+      "bytes": 351,
+      "mode": 420,
+      "sha256": "a4a756be401b605b1859881c3480a9d0b6855814ef641b045453d7f3ea105cee"
+    },
+    {
+      "path": "examples/shared/extension/go/controller.go",
+      "bytes": 506,
+      "mode": 420,
+      "sha256": "9bdeaa607e860fda02ba8494e525551a62be3aa4edb7dc97df09888a51f79577"
+    },
+    {
+      "path": "examples/shared/extension/go/xmake.lua",
+      "bytes": 385,
+      "mode": 420,
+      "sha256": "9cd32b58040ee35c0e16644f9f63574e571fc05c3d401557a61550126c3210b7"
+    },
+    {
+      "path": "examples/shared/migration/go/controller.go",
+      "bytes": 642,
+      "mode": 420,
+      "sha256": "21d4f260ef5769166fe4f601ee7d33b562c0304ceb1f5e56f59d43331cb9dd80"
+    },
+    {
+      "path": "examples/shared/migration/go/xmake.lua",
+      "bytes": 354,
+      "mode": 420,
+      "sha256": "bbaada62d5e2966fb91329fc16eb04cb2e2c53b6e897b53efedb626c480c63af"
+    },
+    {
+      "path": "language/go/LICENSE",
+      "bytes": 1453,
+      "mode": 420,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "path": "language/go/driver.py",
+      "bytes": 4820,
+      "mode": 420,
+      "sha256": "96520f151227019121f1f78d00eed6a6c914447b10f8deaa8bb521c87117462d"
+    },
+    {
+      "path": "language/go/linux-amd64/producer.xz",
+      "bytes": 5169092,
+      "mode": 420,
+      "sha256": "cf5d5be550814e4b6b55be0b2b1f1899d66ed2a18d312b75b2f38f517029ca1f"
+    },
+    {
+      "path": "language/go/registers.py",
+      "bytes": 7488,
+      "mode": 420,
+      "sha256": "a9f758e56686908b866d4dd64356c72d3fa2f3add3cda03099defd6fc18a8703"
+    },
+    {
+      "path": "language/go/release.json",
+      "bytes": 923,
+      "mode": 420,
+      "sha256": "bc869aa98fba5e6985cbce78afc8c828616e9d71e941f46756f5def5ea7c0e95"
+    },
+    {
+      "path": "language/go/xmake/adapter.lua",
+      "bytes": 1508,
+      "mode": 420,
+      "sha256": "c5075113b0f7c65a29e961342c58977ddaba428958907bf49525f7238eaac429"
+    }
+  ]
+}

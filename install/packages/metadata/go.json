@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/go.json",
-      "bytes": 75,
+      "bytes": 175,
       "mode": 420,
-      "sha256": "bfa310db676c2f417009d58c18e5c4a0ed8fb1203ce05139374ab41fa4f994be"
+      "sha256": "c58ebb62e577d590ec3bcc2730cb1d44ff999d8b6209f9f30c105cb52c9d8997"
     }
   ]
 }
