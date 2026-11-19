@@ -1,6 +1,6 @@
 // The fixture only decodes frames made from bounded pixel arrays. The original
 // RVL interface takes a pixel count and has no compressed input length.
-#include "rvl_header"
+#include "adapter.h"
 #include "expected.h"
 #include <cstdint>
 

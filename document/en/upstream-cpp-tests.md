@@ -55,3 +55,24 @@ This result covers little-endian, valid, locally owned RVL frames. The original
 decompression API takes a pixel count and has no compressed byte length.
 External frame admission, ROS image-transport plugins, PNG and the remaining
 package sources require separate validation.
+
+## Rigid coordinate transforms
+
+Run `tests/migration/tf2_transforms.py` with the same `--corpus`, `--sdk`,
+`--vm`, qualification cgroup and lock as the RVL test. Give it a fresh
+`--output` directory. It selects the original tf2 LinearMath header from each
+archive, including the Groovy Bullet API. Older headers that include
+`ros/macros.h` use that file from the recorded ROS `cpp_common` snapshot. The run checked all 22 indexed tf2 snapshots and executed 13
+distinct header sets.
+
+Eight pose scenarios exercise parent/child transform composition, frame origin,
+inverse, inverse application, relative transforms and quaternion reconstruction.
+They include noncommuting rotations, an optical frame, near-zero and near-half-turn
+angles, and equivalent non-unit quaternion inputs. A separate Python reference
+computes positions from axis-angle rotations using Rodrigues' formula. The C++
+probe loads its inputs at runtime, checks the results against that reference,
+and compares native, interpreter and AOT behavior. A one-metre change in the
+expected coordinate must fail on each target. The absolute error bound is
+0.00003 m with float scalars and 0.00000000002 m with double scalars for these
+test poses. This run covers local transform arithmetic. Timed buffer lookup,
+frame-tree ownership and DDS delivery require their own integration tests.

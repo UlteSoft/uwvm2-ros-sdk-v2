@@ -88,7 +88,9 @@ class SourceArchive:
             if current in found:
                 continue
             found[current] = self.read(current)
-            for include in INCLUDE.findall(found[current].decode()):
+            # Older ROS headers use several encodings for comments. Preserve
+            # their original bytes and scan the ASCII include directives.
+            for include in INCLUDE.findall(found[current].decode(errors="surrogateescape")):
                 if include.startswith("/") or ".." in PurePosixPath(include).parts:
                     raise ValueError("external relative include " + include)
                 for candidate in (current.parent / include, PurePosixPath("include") / include):
