@@ -26,4 +26,6 @@ The compiler exports each named scalar function. Define `func Start() uint32` as
 
 MTE defaults on. Every emitted function must pass an instruction allowlist and preserve its initial SSA memory token. The encoder emits no memory, loads, stores or indirect calls. This proves that the published function needs no tags. The same constraint applies to explicit `--no-mte`. No WASI imports, native guest programs, components or host Go compiler fallbacks are exposed. The optional build receipt records the exact input, producer and guest digests, imports and MTE policy.
 
+Installations may additionally pass an operator-provided `--site-profile <file>`. It pins a specific WSEA-signed release for this scalar profile, the exact host compiler and encoder, both VM engine test receipts and an admission and Xmake receipt. Each build rechecks the signed statement. An ordinary commit-pinned installation needs no site statement.
+
 The shared migration example reproduces unsigned grid indexing and checks interior, row-boundary and wraparound cases. It ports one operation. [ROS Noetic Costmap2D::getIndex](https://github.com/ros-planning/navigation/blob/noetic-devel/costmap_2d/include/costmap_2d/costmap_2d.h#L171-L174)

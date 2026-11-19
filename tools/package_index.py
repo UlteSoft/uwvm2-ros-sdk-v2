@@ -187,7 +187,7 @@ def main():
         *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/fortran").rglob("*") if p.is_file()],
     ]
     language_files["go"] = [
-        "bin/wrgo", "language/go/driver.py", "language/go/registers.py", "language/go/release.json",
+        "bin/wrgo", "language/go/check_site.py", "language/go/driver.py", "language/go/registers.py", "language/go/release.json",
         "language/go/linux-amd64/producer.xz", "language/go/LICENSE", "examples/go/controller.go", "examples/go/xmake.lua",
         "document/en/go.md", "document/zh/go.md",
         *[f"examples/shared/{kind}/go/{name}" for kind in ("common", "extension", "migration")

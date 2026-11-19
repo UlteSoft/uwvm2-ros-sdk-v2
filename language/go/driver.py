@@ -10,6 +10,8 @@ import subprocess
 import sys
 import tempfile
 from registers import module
+from check_site import verify as verify_site
+import local_release
 
 ROOT = Path(__file__).resolve().parents[2]
 LANGUAGE = ROOT / "language/go"
@@ -37,6 +39,13 @@ def build(source, output, *, tagged=True, ros_abi=False, receipt=False):
         body = stream.read(LIMIT + 1)
     if not 1 <= len(body) <= LIMIT:
         raise ValueError("expected a Go source file of at most 1 MiB")
+    site_release = None
+    try:
+        site_data = local_release.read_file(ROOT / local_release.SITE, 32768)
+    except FileNotFoundError:
+        pass
+    else:
+        site_release = verify_site(site_data, ROOT)
     lock = json.loads((LANGUAGE / "release.json").read_bytes())
     item = LANGUAGE / "linux-amd64/producer.xz"
     if item.stat().st_size != lock["compressed_bytes"] or not 0 < lock["binary_bytes"] <= 32 << 20:
@@ -71,6 +80,8 @@ def build(source, output, *, tagged=True, ros_abi=False, receipt=False):
                       compiler_sha256=lock["binary_sha256"], wasm_sha256=sha(artifact),
                       wasm_imports=["uwvm_ros_v2.abi"] if ros_abi else [],
                       exports=sorted(f["name"] for f in graph) + ["_start"])
+        if site_release:
+            record["site_release_sha256"] = site_release
         if receipt:
             proof = stage / "build.json"
             proof.write_text(json.dumps(record, indent=2) + "\n")

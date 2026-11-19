@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/go.md",
-      "bytes": 3007,
+      "bytes": 3362,
       "mode": 420,
-      "sha256": "29ead75890db1aebecd54059e4d28fd862317210f67f17f106ae4e1e65ce0768"
+      "sha256": "badf9f7c290788ea0ad39d58f916404ae239717200818ca1389cba02363f3c93"
     },
     {
       "path": "document/zh/go.md",
-      "bytes": 2825,
+      "bytes": 3123,
       "mode": 420,
-      "sha256": "9cfec3348a6ccc4d563ab3634dd0d80d84166fe763f9b52e5ad14f39dc6d61b8"
+      "sha256": "21bb0aedd35e5a5a42fae59f2bc25b000fca2e0da2b23ca0ca36178501b2c921"
     },
     {
       "path": "examples/go/controller.go",
@@ -73,10 +73,16 @@
       "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
     },
     {
-      "path": "language/go/driver.py",
-      "bytes": 4820,
+      "path": "language/go/check_site.py",
+      "bytes": 2526,
       "mode": 420,
-      "sha256": "96520f151227019121f1f78d00eed6a6c914447b10f8deaa8bb521c87117462d"
+      "sha256": "50316248853390a552cf5df730508ea146ec2a36ff50ab79b6cd54086c451cf7"
+    },
+    {
+      "path": "language/go/driver.py",
+      "bytes": 5184,
+      "mode": 420,
+      "sha256": "df23ecd4a43c573a0a69090d133b9561643418d326d1403c877581fedf371cd5"
     },
     {
       "path": "language/go/linux-amd64/producer.xz",

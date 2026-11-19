@@ -26,4 +26,6 @@ WROS_VM=/absolute/path/to/uwvm2-ros xmake run
 
 MTE 默认开启。每个函数必须通过逐指令允许清单检查，并将原始 SSA 内存标识原样返回。生成器只发布无内存、无读写指令且无间接调用的模块，因此已发布函数能证明可以省略所有 tag。用户显式传 `--no-mte` 后仍执行同样的函数检查。生成物没有 WASI 导入、组件或原生执行入口，也不会回退至系统 Go 编译器。可选构建收据记录输入、编译器和产物摘要、导入与 MTE 设置。
 
+也可以用 `--site-profile <文件>` 传入操作员提供的配置。该配置绑定该标量配置下经过 WSEA 签名的发布声明、编译器、生成器、两个 VM 引擎测试、源码准入和 Xmake 收据。每次编译均重验签名；普通固定提交安装无需站点声明。
+
 迁移示例复现了 Noetic costmap_2d 的无符号网格索引运算，并校验内部单元格、行边界和溢出结果。其覆盖范围是该单项运算。[ROS Noetic Costmap2D::getIndex 源码](https://github.com/ros-planning/navigation/blob/noetic-devel/costmap_2d/include/costmap_2d/costmap_2d.h#L171-L174)
