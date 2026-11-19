@@ -41,7 +41,7 @@ def main():
                    help="exercise one address width from the selected language toolchain")
     p.add_argument("--vendor-model", type=Path, help="a pinned platform MJCF manifest from the VM fixtures")
     p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
-    p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "py", "ruby", "rs", "tinygo", "fortran", "csharp"), default="c")
+    p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "py", "ruby", "rs", "tinygo", "fortran", "csharp", "zig"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
     p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D, Fortran, Nim, Objective-C, Rust and TinyGo sites supply their own tools and sysroots")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
@@ -73,7 +73,7 @@ def main():
     widths = (32,) if a.language in ("rs", "tinygo", "csharp", "js", "d") else (32, 64)
     site = None
     explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64, a.goroot, a.tinygoroot, a.producer, a.rustroot, a.flang)
-    if (embedded or a.language in ("d", "objectc", "tinygo", "nim", "rs", "fortran")) and a.installed_sdk and not any(explicit):
+    if (embedded or a.language in ("d", "objectc", "tinygo", "nim", "rs", "fortran", "zig")) and a.installed_sdk and not any(explicit):
         site = local_release.site_config(compiler_root)
     if embedded and not site:
         p.error(a.language + " requires a signed installed C site for this simulation")
@@ -83,8 +83,14 @@ def main():
         p.error("provide explicit Go and TinyGo roots or use an installed signed TinyGo site")
     if a.language == "d" and (not site or not (compiler_root / "bin/wrd").is_file()):
         p.error("D BetterC requires --installed-sdk pointing to a signed D site without toolchain overrides")
+    if a.language == "zig" and not site:
+        p.error("Zig requires an installed signed site without toolchain overrides")
     if site:
-        if a.language == "d":
+        if a.language == "zig":
+            sys.path.insert(0, str(compiler_root / "language/zig"))
+            from release import authorized
+            row, _, _, _ = authorized(site)
+        elif a.language == "d":
             sys.path.insert(0, str(compiler_root / "language/d"))
             from release import authorized
             row = authorized(site)
@@ -130,7 +136,7 @@ def main():
     source = ROOT / "tests/mujoco" / ("controller." + extension.get(a.language, a.language))
     compiler = compiler_root / "bin" / {"d": "wrd", "c": "wrc", "csharp": "wrc", "cpp": "wrcc",
                                        "nim": "wrnim", "objectc": "wrobjc", "lua": "wrlua", "js": "wrjs",
-                                       "py": "wrpy", "ruby": "wrrb", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg"}[a.language]
+                                       "py": "wrpy", "ruby": "wrrb", "fortran": "wrf", "rs": "wrrs", "tinygo": "wrtg", "zig": "wrzig"}[a.language]
     manifests = list(map(Path, site["sysroots"])) if site else [path.resolve() for path in sysroots.values()]
     steady_deadlines = embedded or a.language == "js"
 
@@ -155,6 +161,12 @@ def main():
             prelude = (f"module application;\nenum steps = {count}; enum targetOffset = {24+len(prefix)+8};\n"
                        f"enum bool success = {str(mode=='success').lower()}; enum bool crash = {str(mode=='crash').lower()};\n"
                        f"__gshared ubyte[{len(request)}] request = [" + ",".join(map(str, request)) + "];\n")
+            app.write_text(prelude + source.read_text())
+        if a.language == "zig":
+            options = []
+            prelude = (f"const steps = {count}; const target_offset = {24+len(prefix)+8};\n"
+                       f"const success = {str(mode=='success').lower()}; const crash = {str(mode=='crash').lower()};\n"
+                       + "const template = [_]u8{" + ",".join(map(str, request)) + "};\n")
             app.write_text(prelude + source.read_text())
         if a.language == "nim":
             options = [] if site else ["-O3", "-g", "--producer", a.producer.resolve()]
@@ -223,17 +235,17 @@ def main():
         if site:
             receipt = Path(str(wasm) + ".wros-build.json")
             verifier = [compiler_root / "install/qualification.py"]
-            if a.language == "d":
+            if a.language in ("d", "zig"):
                 verifier = [compiler, "verify"]
                 record = json.loads(receipt.read_bytes())
                 if record.get("source_sha256") != hashlib.sha256(app.read_bytes()).hexdigest():
-                    raise ValueError("the BetterC receipt refers to a different controller source")
+                    raise ValueError("the signed receipt refers to a different controller source")
                 entries = inspect(wasm.read_bytes())
                 expected = {"capability.open", "driver.connect", "driver.submit", "driver.result", "driver.disconnect"}
                 if mode == "crash":
                     expected.add("driver.describe")
                 if sorted((i["module"], i["name"]) for i in entries) != sorted(("uwvm_ros_v2", name) for name in expected):
-                    raise ValueError("unexpected BetterC controller imports")
+                    raise ValueError("unexpected controller imports")
             run(wasm.stem + "-verify", [sys.executable, "-B", *verifier, "--artifact", wasm,
                                         "--receipt", receipt, "--vm", a.runtime.resolve(), "--approved-receipt-sha256",
                                         hashlib.sha256(receipt.read_bytes()).hexdigest()])
@@ -267,6 +279,9 @@ def main():
         producers.extend((compiler_root / "share/qualification/site-profile.json", Path(site["trust"]["statement"])))
     if a.language == "d":
         producers.extend((compiler_root / "language/d/wros_scene.d", compiler_root / "language/d/imports.c"))
+    if a.language == "zig":
+        producers.extend(sorted(path for path in (compiler_root / "language/zig").iterdir() if path.is_file()))
+        producers.extend((a.toolchain / "bin/wros-zig-mte", *sorted((a.toolchain / "share/wros/zig").glob("*.tar.xz"))))
     if a.language == "csharp":
         producers.extend((compiler_root / "bin/wrcs", ROOT / "tests/mujoco/controller.cs",
                           *(ROOT / "language/csharp" / file for file in ("inputs.sha256", "Admit.cs", "SceneEntry.cs", "Scene.cs", "leaf.cpp", "numeric.py", "host.py", "scalar.py"))))
@@ -289,7 +304,7 @@ def main():
                guest_inputs=(source, Path(__file__), compiler, *producers, *manifests, *objc_inputs,
                              *([compiler_root / "language/lua/scene.hpp", compiler_root / "language/lua/entry.cpp", compiler_root / "third-parties/lua/lua-5.4.9.tar.gz"] if a.language == "lua" else []),
                              *[tc/"bin"/tool for tc in {toolchains[w] for w in widths} for tool in ("clang","wasm-ld")],
-                             *([] if a.language == "rs" else [compiler_root / "include/wros/scene.h"])))
+                             *([] if a.language in ("rs", "zig") else [compiler_root / "include/wros/scene.h"])))
 
 
 if __name__ == "__main__":
