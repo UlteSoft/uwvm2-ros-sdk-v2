@@ -6,8 +6,6 @@ import json
 import os
 from pathlib import Path
 import shutil
-import subprocess
-import sys
 
 from platform_examples import ROOT, Source, install, inspect, run, sha
 
@@ -30,8 +28,9 @@ def main():
         for language in ("fsharp", "csharp", "vbnet"):
             result = install(Source(args.commit, ROOT), args.platform, language, out / "installs", ["--component", "migration"])
             sdk = Path(result["directory"])
-            if [p.name for p in (sdk / "examples/platform").iterdir()] != [args.platform]:
-                raise ValueError("installation included another platform")
+            inventory = [p.relative_to(sdk / "examples/platform") for p in (sdk / "examples/platform").rglob("xmake.lua")]
+            if any(len(p.parts) < 4 or p.parts[0] != args.platform or p.parts[2] != language for p in inventory):
+                raise ValueError("installation included another platform or language")
             for area in (("extension",) if language == "fsharp" else ("migration", "extension")):
                 case = out / (language + "-" + area)
                 case.mkdir()
