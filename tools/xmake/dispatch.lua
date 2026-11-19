@@ -57,6 +57,7 @@ function configure(target, entry)
     assert(os.isfile(program), "Missing installed compiler frontend: " .. program)
     assert(not target:values("wros.unknown"), "Unknown WROS profile field: " .. tostring(target:values("wros.unknown")))
     assert(not target:values("wros.jvm_main") or language == "java" or language == "kotlin", "set_wros_jvm_main requires a JVM language")
+    assert(not target:values("wros.py_modules") or language == "py", "add_wros_python_modules requires Python")
     local core = target:values("wros.core") or "3.0"
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
     local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs")
@@ -78,7 +79,7 @@ function configure(target, entry)
     assert(not build_receipt or kind == "binary", "Deployment build receipts require a linked Wasm binary")
     local exports = table.wrap(target:values("wros.exports"))
     local operations = table.wrap(target:values("wros.operations"))
-    assert(language == "lua" or language == "js" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or #operations == 0,
+    assert(language == "lua" or language == "js" or language == "py" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or #operations == 0,
            "add_wros_operations requires a target with selectable ROS imports")
     local lua_operations = table.wrap(target:values("wros.lua_operations"))
     assert(language == "lua" or #lua_operations == 0, "add_wros_lua_operations requires a Lua target")
@@ -147,7 +148,7 @@ function build(target)
     local sources = qualified_inputs(target, request)
     local output = target:targetfile()
     os.mkdir(path.directory(output))
-    if request.adapter.family == "c" or request.adapter.id == "fortran" or request.adapter.id == "lua" or request.adapter.id == "js" or request.adapter.id == "nim" then
+    if request.adapter.family == "c" or request.adapter.id == "fortran" or request.adapter.id == "lua" or request.adapter.id == "js" or request.adapter.id == "py" or request.adapter.id == "nim" then
         local toolchain = os.getenv("WROS_TOOLCHAIN")
         request.site = not toolchain and not request.sysroots and
                        os.isfile(path.join(request.root, "share/qualification/site-profile.json"))

@@ -1,0 +1,15 @@
+set_project("robot")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("robot")
+    set_kind("binary")
+    set_language("py")
+    set_ros_platform(os.getenv("WROS_PLATFORM") or "unitree")
+    set_wros_profile({core = "3.0", mte = true, eh = true, build_receipt = true})
+    set_optimize("fastest")
+    set_symbols("debug")
+
+    set_wros_test_queries("realtime-clock", "monotonic-clock", "realtime-resolution", "monotonic-resolution")
+    add_wros_tests("int", "aot")
+    add_files("body.py")
+target_end()

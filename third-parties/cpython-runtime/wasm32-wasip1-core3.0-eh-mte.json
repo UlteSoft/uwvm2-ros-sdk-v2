@@ -1,0 +1,28 @@
+{
+  "format": "wros-cpython-runtime",
+  "source_sha256": "c2215904f02b175596dc49351585104f4bc20341e1c47378b26a2c274360ce73",
+  "compiler_sha256": "bef951b144a88c57bf582d7be4a62e87bd1e5252c8e5d32688fd6b5df90de123",
+  "closure_sha256": "53bf612591e40bced67e01deb6af0e5edbf90edea5d9536452c51e8e790a9c88",
+  "profile": {
+    "address_bits": 32,
+    "wasm_version": "3.0",
+    "threads": false,
+    "mte": true,
+    "exceptions": "eh",
+    "triple": "wasm32-wasip1",
+    "abi": "wasi_snapshot_preview1",
+    "memtag_wire": "packed-v1",
+    "extensions": [
+      "wasmmte"
+    ]
+  },
+  "recipe": {
+    "build_interpreter.py": "c4a592a019bd10247c36be1152a94c14a2348b4dbe1a89e9f91105e7db812969",
+    "freeze_encodings.py": "291d090a6d1ef3d534063c770c5c1d9d94a5741e88c4af68b87ec943af4fee81",
+    "runtime_paths.mk": "3709ad9df68d5838b1bb10ab2a1a6dc0b6d0221fd261c258fb856243e598e79b",
+    "runtime_pack.py": "500471e4b0102c3af2787703383c94651d7e471e135b194a16318d7f0174e506"
+  },
+  "file": "wasm32-wasip1-core3.0-eh-mte.tar.xz",
+  "sha256": "17be07aea712a116897e4451beda250be762e32878def783f13f8d245616d07c",
+  "archive_sha256": "f2589d60858f24b7632c0806c6c4ed0863fdb13b297533e02b75207d882ec13b"
+}

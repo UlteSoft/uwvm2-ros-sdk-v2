@@ -98,7 +98,7 @@ def configure_site(directory, language, data):
     check = ("import sys; from pathlib import Path; root=Path(sys.argv[1]); "
              "sys.path.insert(0,str(root/'install')); from qualification import check_site; "
              "print(check_site(sys.stdin.buffer.read(),root,sys.argv[2]))")
-    command = (["-c", check, str(directory), "c" if language == "js" else language] if language not in ("nim", "objectc", "d", "tinygo", "rs")
+    command = (["-c", check, str(directory), "c" if language in ("js", "py") else language] if language not in ("nim", "objectc", "d", "tinygo", "rs")
                else [str(directory / "language" / ("rust" if language == "rs" else language) / "check_site.py")])
     if language in ("java", "kotlin"):
         command = [str(directory / "language/jvm/release.py"), language]
@@ -126,7 +126,7 @@ def install(source,platform,language,prefix,options,plan=False,site_profile=None
     variant=name(selected["variant"])
     site_data = None
     if site_profile is not None:
-        if plan or variant != "development" or language not in ("java", "kotlin", "c", "cpp", "fortran", "js", "lua", "nim", "objectc", "d", "tinygo", "rs"):
+        if plan or variant != "development" or language not in ("java", "kotlin", "c", "cpp", "fortran", "js", "lua", "nim", "objectc", "d", "tinygo", "rs", "py"):
             raise ValueError("--site-profile requires a supported language development installation")
         if not site_profile.is_file():
             raise ValueError("site profile must be an explicit local file")
