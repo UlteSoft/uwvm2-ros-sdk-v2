@@ -48,6 +48,10 @@ assert sys.maxsize == (1 << ({bits} - 1)) - 1
 assert time.clock_gettime_ns(time.CLOCK_MONOTONIC) > 0
 assert time.get_clock_info('monotonic').resolution > 0
 try:
+    time.clock_gettime_ns(1 << 120)
+except TypeError: pass
+else: raise AssertionError('oversized clock ID was accepted')
+try:
     import _socket
 except ImportError: pass
 else: raise AssertionError('unexpected socket module')
