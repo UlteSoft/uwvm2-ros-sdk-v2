@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/hello_robot/common/d/body.d",
+      "bytes": 473,
+      "mode": 420,
+      "sha256": "434e34e759429b0c61af7f110e7136839e6755e193b2db297d35649081cf1755"
+    },
+    {
+      "path": "examples/platform/hello_robot/common/d/xmake.lua",
+      "bytes": 501,
+      "mode": 420,
+      "sha256": "f5e53b28e1d5af8585be34ab0b05491ceca394de3b25d3b304aca1123794bb9c"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/d/driver.d",
+      "bytes": 641,
+      "mode": 420,
+      "sha256": "cdc84d8d4fda44c7b119852f013aa78195dd2f6df6e2a7482629a18ffc5c9f63"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/d/xmake.lua",
+      "bytes": 527,
+      "mode": 420,
+      "sha256": "2eee7e1270801b75bd400ff343819ee75afcd02da082d511ed9e64d14f4b3ad8"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/d/grid.d",
+      "bytes": 328,
+      "mode": 420,
+      "sha256": "5fa6f1f675458279b8be4b9d5bcfdc7744f839f30bd08f1b981202f805f18ea7"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/d/xmake.lua",
+      "bytes": 474,
+      "mode": 420,
+      "sha256": "c2a7953c5f9917546d05dc134eba2f788d6026f514cce8a1c0bf48fc120988e4"
+    }
+  ]
+}

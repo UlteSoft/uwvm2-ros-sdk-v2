@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/kuka/common/nim/body.nim",
+      "bytes": 260,
+      "mode": 420,
+      "sha256": "b91f678246c36cc46bc119239d037ab3f9da4a3d78a0468d6949de6ae07273e2"
+    },
+    {
+      "path": "examples/platform/kuka/common/nim/xmake.lua",
+      "bytes": 493,
+      "mode": 420,
+      "sha256": "db4551ff1fa078ead4f72927184f421cc697c4c113334b0beb5b5ac10cf89576"
+    },
+    {
+      "path": "examples/platform/kuka/extension/nim/driver.nim",
+      "bytes": 487,
+      "mode": 420,
+      "sha256": "6a42689a23052890167f1a0780135504141ece6e7a6b54674c7877493162b639"
+    },
+    {
+      "path": "examples/platform/kuka/extension/nim/xmake.lua",
+      "bytes": 519,
+      "mode": 420,
+      "sha256": "d1722ebe0391342b657c639888078149f2d6967a7052f30537cd7c22ecdef0bf"
+    },
+    {
+      "path": "examples/platform/kuka/migration/nim/grid.nim",
+      "bytes": 243,
+      "mode": 420,
+      "sha256": "0b8debe6608d0ed4f7d49938d2f97f64dcde47188531bebe22d9eb6fd281cb92"
+    },
+    {
+      "path": "examples/platform/kuka/migration/nim/xmake.lua",
+      "bytes": 466,
+      "mode": 420,
+      "sha256": "076423e954a690a913aa586becf709686ab9f4e6f77fc89a5df59add94e0c7e4"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/universal_robots/common/rs/body.rs",
+      "bytes": 331,
+      "mode": 420,
+      "sha256": "49b526f0e49a6fb4ce1b751790f9447bcf59471a09c946333718016901d69b9f"
+    },
+    {
+      "path": "examples/platform/universal_robots/common/rs/xmake.lua",
+      "bytes": 462,
+      "mode": 420,
+      "sha256": "76aa30f98b079bd7cc874efc0d9fde4cc3033b4bc42aa9e938009bf99a3294f3"
+    },
+    {
+      "path": "examples/platform/universal_robots/extension/rs/driver.rs",
+      "bytes": 844,
+      "mode": 420,
+      "sha256": "d45fd9769d15519943a66b69e2233c0ad1912d80b9d85ecc3d98310d95e739be"
+    },
+    {
+      "path": "examples/platform/universal_robots/extension/rs/xmake.lua",
+      "bytes": 488,
+      "mode": 420,
+      "sha256": "04f1c6075e0b785576fb281b0a68a892221783511c8048de2dc61cd837473267"
+    },
+    {
+      "path": "examples/platform/universal_robots/migration/rs/grid.rs",
+      "bytes": 456,
+      "mode": 420,
+      "sha256": "e82d158f62c49060c3794c61e4d50c27c09cda5977b1c51846de334e2488d910"
+    },
+    {
+      "path": "examples/platform/universal_robots/migration/rs/xmake.lua",
+      "bytes": 435,
+      "mode": 420,
+      "sha256": "5c41cca52be346845574d8fbe916c07c2a9dc1ad1ac2a0081e5311a28da0c40c"
+    }
+  ]
+}

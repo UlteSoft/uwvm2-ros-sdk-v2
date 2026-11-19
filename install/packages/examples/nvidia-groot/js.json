@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/js/body.js",
+      "bytes": 225,
+      "mode": 420,
+      "sha256": "b0824140d039fb13cfa38e59bbb0e23be4301573626c8a6ad404a2cfbcf08e09"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/js/sensor.js",
+      "bytes": 283,
+      "mode": 420,
+      "sha256": "5ff14c07cb2844cabf23b2a397e90e452d5f1a4e899e0eacc24f5a16766cdcc7"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/js/xmake.lua",
+      "bytes": 886,
+      "mode": 420,
+      "sha256": "21f7c295189ca071e02314726455475e66fbe02c087d5ad67a7545eea09344a5"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/js/driver.js",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "9d79288417db95258133bc2a378eca01dd414c7d558e501fdc45929915f418fc"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/js/xmake.lua",
+      "bytes": 657,
+      "mode": 420,
+      "sha256": "d00f7d17af3dc0405efa6891adc9fd313f6a138a8b63e9d80179b8d5c6003afa"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/js/grid.js",
+      "bytes": 268,
+      "mode": 420,
+      "sha256": "241e9de8795b3f4bf20485236ac28b98627ef88006b82a95c15900c09947d4c6"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/js/xmake.lua",
+      "bytes": 523,
+      "mode": 420,
+      "sha256": "d37bc7b69a6c041b395056ecd1ec067e5c353b4d5177f4ac125cfb0bf334c2a5"
+    }
+  ]
+}

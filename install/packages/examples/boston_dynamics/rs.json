@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/rs/body.rs",
+      "bytes": 331,
+      "mode": 420,
+      "sha256": "49b526f0e49a6fb4ce1b751790f9447bcf59471a09c946333718016901d69b9f"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/rs/xmake.lua",
+      "bytes": 460,
+      "mode": 420,
+      "sha256": "3c0e42bb2bd138c6e2e88e7dafeba27a26171f730587eb15c947bfc22d300e1a"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/rs/driver.rs",
+      "bytes": 844,
+      "mode": 420,
+      "sha256": "d45fd9769d15519943a66b69e2233c0ad1912d80b9d85ecc3d98310d95e739be"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/rs/xmake.lua",
+      "bytes": 486,
+      "mode": 420,
+      "sha256": "645cae48b5d48012b0e9bc525a0b54984d57d7251e78043c8ff2cdc56013a36f"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/rs/grid.rs",
+      "bytes": 456,
+      "mode": 420,
+      "sha256": "e82d158f62c49060c3794c61e4d50c27c09cda5977b1c51846de334e2488d910"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/rs/xmake.lua",
+      "bytes": 433,
+      "mode": 420,
+      "sha256": "02194567881426b5c882f9ccfe42e9c845517a1c21b7c092a967d63eec6c2e1e"
+    }
+  ]
+}

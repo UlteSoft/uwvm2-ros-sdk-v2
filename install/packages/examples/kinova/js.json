@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/kinova/common/js/body.js",
+      "bytes": 225,
+      "mode": 420,
+      "sha256": "b0824140d039fb13cfa38e59bbb0e23be4301573626c8a6ad404a2cfbcf08e09"
+    },
+    {
+      "path": "examples/platform/kinova/common/js/sensor.js",
+      "bytes": 283,
+      "mode": 420,
+      "sha256": "5ff14c07cb2844cabf23b2a397e90e452d5f1a4e899e0eacc24f5a16766cdcc7"
+    },
+    {
+      "path": "examples/platform/kinova/common/js/xmake.lua",
+      "bytes": 868,
+      "mode": 420,
+      "sha256": "22f30be2c758de49d66e65df002373c5a80e860e9636344576a4b26e8e1cd973"
+    },
+    {
+      "path": "examples/platform/kinova/extension/js/driver.js",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "9d79288417db95258133bc2a378eca01dd414c7d558e501fdc45929915f418fc"
+    },
+    {
+      "path": "examples/platform/kinova/extension/js/xmake.lua",
+      "bytes": 645,
+      "mode": 420,
+      "sha256": "f78b4c4ab89bef999ef623ae4b589fd73dd6f34d222a72c21f46c22bcc1750b8"
+    },
+    {
+      "path": "examples/platform/kinova/migration/js/grid.js",
+      "bytes": 268,
+      "mode": 420,
+      "sha256": "241e9de8795b3f4bf20485236ac28b98627ef88006b82a95c15900c09947d4c6"
+    },
+    {
+      "path": "examples/platform/kinova/migration/js/xmake.lua",
+      "bytes": 511,
+      "mode": 420,
+      "sha256": "1a34d63cd1626184f422d54ef266d20c7e5eb38ed4331d85e53ac42da68799b6"
+    }
+  ]
+}

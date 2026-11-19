@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/yaskawa/common/fortran/body.f90",
+      "bytes": 621,
+      "mode": 420,
+      "sha256": "cd9073d064bca48471cc43514b139d90d837b45567215676edf11323b21854ea"
+    },
+    {
+      "path": "examples/platform/yaskawa/common/fortran/xmake.lua",
+      "bytes": 507,
+      "mode": 420,
+      "sha256": "c2928c2bcd8af60906591213c15fab651d674dcb0ca93ff529c2f22496cf0073"
+    },
+    {
+      "path": "examples/platform/yaskawa/extension/fortran/driver.f90",
+      "bytes": 1154,
+      "mode": 420,
+      "sha256": "1b72100c9a3ee4f89c1b0e80b5306550a1dab9c5a813b477f50accad6eee7715"
+    },
+    {
+      "path": "examples/platform/yaskawa/extension/fortran/xmake.lua",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "45bfc5e8630e0ac52e8863214c2d7567dc9f39628fd05233805195c8d2a49357"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/fortran/grid.f90",
+      "bytes": 514,
+      "mode": 420,
+      "sha256": "66ce600e42ceff6354f29e276a8ddb61b234323ced1efc6e6fb7fc4043484190"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/fortran/xmake.lua",
+      "bytes": 480,
+      "mode": 420,
+      "sha256": "c1f4e3d8280dbbacdb0aab16240b2f385522eabe2fb914c2d7ee2f056a7860c6"
+    }
+  ]
+}

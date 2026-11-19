@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HOOK = ROOT / "install/revision.py"
 hook = runpy.run_path(str(HOOK))
 DEVELOPMENT = hook["DEVELOPMENT"]
+PROJECT_LANGUAGES = hook["PROJECT_LANGUAGES"]
 COMPILER_COMMANDS = hook["COMPILER_COMMANDS"]
 
 
@@ -96,6 +97,16 @@ def main():
     package("protocol", ["share/abi/ros.json", "LICENSE"])
     for name, languages in registry["platforms"].items():
         platform_adapter(name, languages)
+    for name in registry["platforms"]:
+        platform_examples = ROOT / "examples/platform" / name
+        for language in PROJECT_LANGUAGES:
+            inputs = [p.relative_to(ROOT).as_posix()
+                      for case in ("common", "extension", "migration")
+                      for p in sorted((platform_examples / case / language).glob("*")) if p.is_file()]
+            if not inputs:
+                raise ValueError(f"missing examples for {name}/{language}")
+            package(f"examples/{name}/{language}", [*inputs, "document/en/platform-examples.md",
+                    "document/zh/platform-examples.md", "document/source/ros-abi.dox", "document/source/Doxyfile"])
     for language in registry["languages"]:
         path = "share/language/" + language + ".json"
         metadata = {"id": language, "development_package": language in DEVELOPMENT}

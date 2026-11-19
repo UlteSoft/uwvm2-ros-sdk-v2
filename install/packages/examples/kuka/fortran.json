@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/kuka/common/fortran/body.f90",
+      "bytes": 621,
+      "mode": 420,
+      "sha256": "cd9073d064bca48471cc43514b139d90d837b45567215676edf11323b21854ea"
+    },
+    {
+      "path": "examples/platform/kuka/common/fortran/xmake.lua",
+      "bytes": 501,
+      "mode": 420,
+      "sha256": "999cba0b9140647cbbb92b031082c277025346cf8bc3f9962980f995a69533e2"
+    },
+    {
+      "path": "examples/platform/kuka/extension/fortran/driver.f90",
+      "bytes": 1154,
+      "mode": 420,
+      "sha256": "1b72100c9a3ee4f89c1b0e80b5306550a1dab9c5a813b477f50accad6eee7715"
+    },
+    {
+      "path": "examples/platform/kuka/extension/fortran/xmake.lua",
+      "bytes": 527,
+      "mode": 420,
+      "sha256": "c1040f82a80eb77495e7c0e568d519b9d5b39157eabd81085b4e8795966ec300"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fortran/grid.f90",
+      "bytes": 514,
+      "mode": 420,
+      "sha256": "66ce600e42ceff6354f29e276a8ddb61b234323ced1efc6e6fb7fc4043484190"
+    },
+    {
+      "path": "examples/platform/kuka/migration/fortran/xmake.lua",
+      "bytes": 474,
+      "mode": 420,
+      "sha256": "b66676185a80cce73951a5338427d5617d4c52d9cc0610c2154f40b4b5bb5a56"
+    }
+  ]
+}

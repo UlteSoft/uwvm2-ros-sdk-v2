@@ -1,0 +1,58 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/common/c/body.c",
+      "bytes": 161,
+      "mode": 420,
+      "sha256": "c9c5a26ecbd8055018aa1edddb228ab2a291e2f26a8c14be3333d8985e76ca90"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/common/c/sensor.c",
+      "bytes": 457,
+      "mode": 420,
+      "sha256": "97098d79e0d9885bcb3d7464752ca2ac4db75bb51ae7cca59f928bb9bb5d29ee"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/common/c/xmake.lua",
+      "bytes": 800,
+      "mode": 420,
+      "sha256": "a9ca240ea9be2f80cde48c321212b2eccc09668e03b4ec0aa56aeee022479753"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/extension/c/driver.c",
+      "bytes": 725,
+      "mode": 420,
+      "sha256": "c2650e4aa93380e365654bf613b42a30fdf57e0db3cbda7065782ef338ea5c90"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-sim/extension/c/xmake.lua",
+      "bytes": 537,
+      "mode": 420,
+      "sha256": "da5ac1c26ce14579bd0bbca46614ad26a858ad372bc2615297cd202170d5aacb"
+    }
+  ]
+}

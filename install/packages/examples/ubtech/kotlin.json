@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/ubtech/common/kotlin/Main.kt",
+      "bytes": 215,
+      "mode": 420,
+      "sha256": "034afb9bd9a018a3214f17a4d994b36ee41420b1d19f0b9371c6a30f4675a8f3"
+    },
+    {
+      "path": "examples/platform/ubtech/common/kotlin/xmake.lua",
+      "bytes": 571,
+      "mode": 420,
+      "sha256": "a205252dfdfbf5e886b25780428f2d100bb6166289f519b03f6d17058d20124a"
+    },
+    {
+      "path": "examples/platform/ubtech/extension/kotlin/Main.kt",
+      "bytes": 456,
+      "mode": 420,
+      "sha256": "3a866cf3597198e46123e91b5049c0774db6b021e009c280f5267b2f8daed41c"
+    },
+    {
+      "path": "examples/platform/ubtech/extension/kotlin/xmake.lua",
+      "bytes": 645,
+      "mode": 420,
+      "sha256": "dabb72c0313d1cb5285431633444864e45245b4865b10725b189f87c55498e74"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/kotlin/Main.kt",
+      "bytes": 301,
+      "mode": 420,
+      "sha256": "80d58583ee03e753c2c590d8fcf9398b8be5b8d3cb837f5ecb1a5a573a63ec6c"
+    },
+    {
+      "path": "examples/platform/ubtech/migration/kotlin/xmake.lua",
+      "bytes": 513,
+      "mode": 420,
+      "sha256": "601153c831ef7abab8a9285d0cc652463c2c7c60d7f94c350f880cd6a013172d"
+    }
+  ]
+}

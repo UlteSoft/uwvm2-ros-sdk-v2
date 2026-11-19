@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/hello_robot/common/objectc/body.m",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "83ab37bdf56f51b248990953b00e887271dc30cb4f63d387d6259c494cc8399c"
+    },
+    {
+      "path": "examples/platform/hello_robot/common/objectc/xmake.lua",
+      "bytes": 513,
+      "mode": 420,
+      "sha256": "80fe91f0c6a05c846e080b14584c906406f9f360713a78261bb0edd08214fa21"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/objectc/driver.m",
+      "bytes": 725,
+      "mode": 420,
+      "sha256": "550095e9d690cee78a78830bb0fd67f864a9fb05943611bb070c11be246e5f27"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/objectc/xmake.lua",
+      "bytes": 539,
+      "mode": 420,
+      "sha256": "c11da2b271c7b63098abaa2769402f7bf2e1b6c7673a448e5e1142de3442f500"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/objectc/grid.m",
+      "bytes": 317,
+      "mode": 420,
+      "sha256": "32262250d957aaeb65af2c9b0d225ba46280ad3ec2cf6bb0675e6f00577cf1f7"
+    },
+    {
+      "path": "examples/platform/hello_robot/migration/objectc/xmake.lua",
+      "bytes": 486,
+      "mode": 420,
+      "sha256": "ea22b688c5887fd186d328fa550ea22f437539412f7d7baea1cb84b14639caa2"
+    }
+  ]
+}

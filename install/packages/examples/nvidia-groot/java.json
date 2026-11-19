@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/java/Main.java",
+      "bytes": 272,
+      "mode": 420,
+      "sha256": "bc0c3ca0a759b702508612a0168e35039df615ee74d7cad08757e973fb7cf14e"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/java/xmake.lua",
+      "bytes": 581,
+      "mode": 420,
+      "sha256": "061829f00fb9d0a4ef7c6eded7bb6ef7fee214ff81582e5351bc9c839c67dcb4"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/java/Main.java",
+      "bytes": 538,
+      "mode": 420,
+      "sha256": "bf184502194a6219269844f1f47e75ddfb7e30580f30d434dc08b8f1f97d904a"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/java/xmake.lua",
+      "bytes": 655,
+      "mode": 420,
+      "sha256": "c7b7323b361b5811b81336c00b95202dfee98426f11ddd51f2ff9c3341d9f92f"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/java/Main.java",
+      "bytes": 367,
+      "mode": 420,
+      "sha256": "aeacdd5b5993de4871b26ab458b96e263a5550a063dcedc9b63f02cde7f66bcd"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/java/xmake.lua",
+      "bytes": 523,
+      "mode": 420,
+      "sha256": "a1c8154be8943f3b28a05691be5599cac4e58741ca5ce10cb808039b399452cb"
+    }
+  ]
+}

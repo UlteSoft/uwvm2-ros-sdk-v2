@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/common/kotlin/Main.kt",
+      "bytes": 215,
+      "mode": 420,
+      "sha256": "034afb9bd9a018a3214f17a4d994b36ee41420b1d19f0b9371c6a30f4675a8f3"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/common/kotlin/xmake.lua",
+      "bytes": 591,
+      "mode": 420,
+      "sha256": "3bdef8af99247f0e1c5df581a100fac853f1c80fd58307298b308c6b3c0f8413"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/extension/kotlin/Main.kt",
+      "bytes": 456,
+      "mode": 420,
+      "sha256": "3a866cf3597198e46123e91b5049c0774db6b021e009c280f5267b2f8daed41c"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/extension/kotlin/xmake.lua",
+      "bytes": 665,
+      "mode": 420,
+      "sha256": "5f5cfb8ba7d14ed81f0f158ce512a3277c95672d0aea514ac26dea2ecbca1a19"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/kotlin/Main.kt",
+      "bytes": 301,
+      "mode": 420,
+      "sha256": "80d58583ee03e753c2c590d8fcf9398b8be5b8d3cb837f5ecb1a5a573a63ec6c"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/kotlin/xmake.lua",
+      "bytes": 533,
+      "mode": 420,
+      "sha256": "a6c039322c7fa42d2329e3b01cf1037f4ec903a20a0d692b89af4a97dc894837"
+    }
+  ]
+}

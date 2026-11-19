@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/fourier/common/objectc/body.m",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "83ab37bdf56f51b248990953b00e887271dc30cb4f63d387d6259c494cc8399c"
+    },
+    {
+      "path": "examples/platform/fourier/common/objectc/xmake.lua",
+      "bytes": 505,
+      "mode": 420,
+      "sha256": "1feec1ef4d5fc8e4d71c051755be4e2521230c1156ff552b21b0f96fc38f2163"
+    },
+    {
+      "path": "examples/platform/fourier/extension/objectc/driver.m",
+      "bytes": 725,
+      "mode": 420,
+      "sha256": "550095e9d690cee78a78830bb0fd67f864a9fb05943611bb070c11be246e5f27"
+    },
+    {
+      "path": "examples/platform/fourier/extension/objectc/xmake.lua",
+      "bytes": 531,
+      "mode": 420,
+      "sha256": "62a53ec72754ca541ffa4ff6562d77325d1e28e3998a36f78109ac22169b36b3"
+    },
+    {
+      "path": "examples/platform/fourier/migration/objectc/grid.m",
+      "bytes": 317,
+      "mode": 420,
+      "sha256": "32262250d957aaeb65af2c9b0d225ba46280ad3ec2cf6bb0675e6f00577cf1f7"
+    },
+    {
+      "path": "examples/platform/fourier/migration/objectc/xmake.lua",
+      "bytes": 478,
+      "mode": 420,
+      "sha256": "5709744fe1569db7ad60ed41b6cf1168f27433fed3bba264b64419ec75c17d89"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/pal/common/java/Main.java",
+      "bytes": 272,
+      "mode": 420,
+      "sha256": "bc0c3ca0a759b702508612a0168e35039df615ee74d7cad08757e973fb7cf14e"
+    },
+    {
+      "path": "examples/platform/pal/common/java/xmake.lua",
+      "bytes": 563,
+      "mode": 420,
+      "sha256": "c950aad56bc6808ded6734f4f942600e15256b355b542fe17d401f76797b852f"
+    },
+    {
+      "path": "examples/platform/pal/extension/java/Main.java",
+      "bytes": 538,
+      "mode": 420,
+      "sha256": "bf184502194a6219269844f1f47e75ddfb7e30580f30d434dc08b8f1f97d904a"
+    },
+    {
+      "path": "examples/platform/pal/extension/java/xmake.lua",
+      "bytes": 637,
+      "mode": 420,
+      "sha256": "2b6da4dd3001c0c2c8954861b4dd7868b66e4115a7d37f3f073e6b71eb0d0d36"
+    },
+    {
+      "path": "examples/platform/pal/migration/java/Main.java",
+      "bytes": 367,
+      "mode": 420,
+      "sha256": "aeacdd5b5993de4871b26ab458b96e263a5550a063dcedc9b63f02cde7f66bcd"
+    },
+    {
+      "path": "examples/platform/pal/migration/java/xmake.lua",
+      "bytes": 505,
+      "mode": 420,
+      "sha256": "1e147ac2b3a7ad13c31bd1d2d2cd7ad4b19bc6fe5c4d5bd46fafad98d580d4bf"
+    }
+  ]
+}

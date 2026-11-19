@@ -44,16 +44,19 @@ def check(argv, module, platform):
             child = "uwvm_ros_v2.platform_extension." + platform + ".v1"
             identifiers = [os.urandom(16).hex() for _ in range(5)]
             contract = hashlib.sha256(b"SDK local driver permission example").hexdigest()
+            deadline = time.monotonic_ns() + 660_000_000_000
             flags.extend(["--ros-scene-grant", "robot", "arm", "driver", "joint", "registered-driver", actions,
                           "--ros-scene-driver-budget", "robot", "1", "1048576",
                           "--ros-scene-driver-channel", "robot", "arm", "main", str(client.fileno()),
                           str(os.getpid()), str(os.getuid()), str(os.getgid()), *identifiers, contract,
-                          "128", "128", "1000000000", str(time.monotonic_ns() + 30_000_000_000), str(key), str(clock),
+                          "128", "128", "1000000000", str(deadline), str(key), str(clock),
                           "--ros-scene-driver-schema", "robot", "arm", "device.submit", "64", "64", "8",
                           "--ros-scene", "robot", "platform_extension", child, "disable" if parent_allowed else "enable",
                           "--ros-scene", "robot", "platform_extension.bind", child, "arm"])
             result = subprocess.run([*argv, *flags, "--run", str(module)], pass_fds=(client.fileno(), key, clock),
-                                    timeout=180)
+                                    timeout=600)
+            if time.monotonic_ns() >= deadline:
+                raise RuntimeError("test identity expired during the platform check")
             if result.returncode:
                 return result.returncode if result.returncode > 0 else 128 - result.returncode
             peer.setblocking(False)

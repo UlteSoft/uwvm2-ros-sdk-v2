@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/unitree/common/lua/body.lua",
+      "bytes": 294,
+      "mode": 420,
+      "sha256": "a460bc692b5fe5bd549263f1b7d2df68f79e062886630c1612decfe705f9589e"
+    },
+    {
+      "path": "examples/platform/unitree/common/lua/xmake.lua",
+      "bytes": 530,
+      "mode": 420,
+      "sha256": "d5f4268f3af601e8b831199f4fa59843b36fbfe6753e816a06003349c7349b86"
+    },
+    {
+      "path": "examples/platform/unitree/extension/lua/driver.lua",
+      "bytes": 259,
+      "mode": 420,
+      "sha256": "8ca9a5bf4af790b58bc8ccc92a28c8e31c0b02fefc10b1d220837c6f9d60d34f"
+    },
+    {
+      "path": "examples/platform/unitree/extension/lua/xmake.lua",
+      "bytes": 606,
+      "mode": 420,
+      "sha256": "d76097f8a89ba9a0b23795697d82a346655635f0c0146f10598df5410980d142"
+    },
+    {
+      "path": "examples/platform/unitree/migration/lua/grid.lua",
+      "bytes": 249,
+      "mode": 420,
+      "sha256": "1b0d188cfb0e476c8b6b1a83fad52e436f96b384ccc947847199f6783d4c0d39"
+    },
+    {
+      "path": "examples/platform/unitree/migration/lua/xmake.lua",
+      "bytes": 472,
+      "mode": 420,
+      "sha256": "480e9596294e9abd8aff5ce9fd011561b8717d22180dbcd68258df48aebb7f7a"
+    }
+  ]
+}
