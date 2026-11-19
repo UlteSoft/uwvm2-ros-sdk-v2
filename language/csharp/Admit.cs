@@ -66,6 +66,9 @@ static class Admit
             using var file = File.OpenRead(args[0]);
             using var image = new PEReader(file);
             var data = image.GetMetadataReader();
+            bool scene = args.Length == 5 && args[4] == "scene";
+            var policy = scene ? SceneEntry.Policy(image, data, args[1], args[2]) : default;
+            string selectedName = "";
             int selected = -1;
             foreach (var th in data.TypeDefinitions) {
                 var type = data.GetTypeDefinition(th);
@@ -74,14 +77,14 @@ static class Admit
                     string name = data.GetString(method.Name);
                     // Extracting a single member bypasses managed initialization.
                     if (name == ".cctor") throw new Exception("static or module initializer needs the CLR");
-                    if (name != args[2] || data.GetString(type.Name) != args[1] || !type.Namespace.IsNil ||
+                    if ((scene ? mh != policy : name != args[2]) || data.GetString(type.Name) != args[1] || !type.Namespace.IsNil ||
                         !type.GetDeclaringType().IsNil) continue;
                     if ((type.Attributes & (TypeAttributes.Abstract | TypeAttributes.Sealed)) !=
                         (TypeAttributes.Abstract | TypeAttributes.Sealed) || type.GetGenericParameters().Count != 0)
                         throw new Exception("expected a non-generic static class");
                     var signature = data.GetBlobReader(method.Signature);
                     // DEFAULT managed calling convention, one parameter, I4 result and I4 parameter.
-                    if (selected >= 0 || (method.Attributes & (MethodAttributes.Static | MethodAttributes.MemberAccessMask)) !=
+                    if (selected >= 0 || method.GetGenericParameters().Count != 0 || (method.Attributes & (MethodAttributes.Static | MethodAttributes.MemberAccessMask)) !=
                         (MethodAttributes.Static | MethodAttributes.Public) || method.RelativeVirtualAddress == 0 ||
                         signature.Length != 4 || signature.ReadByte() != 0 || signature.ReadByte() != 1 ||
                         signature.ReadByte() != 8 || signature.ReadByte() != 8)
@@ -93,6 +96,7 @@ static class Admit
                     var body = image.GetMethodBody(method.RelativeVirtualAddress);
                     if (!body.ExceptionRegions.IsEmpty) throw new Exception("managed handlers need the CLR");
                     CheckCode(body.GetILBytes());
+                    selectedName = name;
                     selected = MetadataTokens.GetRowNumber(mh) - 1;
                 }
             }
@@ -112,7 +116,7 @@ static class Admit
                 digest = Convert.ToHexString(pdb.GetBlobBytes(document.Hash)).ToLowerInvariant();
                 firstLine = point.StartLine;
             }
-            Console.WriteLine($"{selected} {digest} {firstLine} {visible}");
+            Console.WriteLine($"{selected} {digest} {firstLine} {visible} {selectedName}");
             return 0;
         } catch (Exception error) {
             Console.Error.WriteLine(error.Message);

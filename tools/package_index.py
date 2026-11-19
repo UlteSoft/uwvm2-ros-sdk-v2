@@ -110,7 +110,8 @@ def main():
 
     package("csharp/numeric", [
         "install/private_exports.py", "bin/" + COMPILER_COMMANDS["csharp"], "language/csharp/numeric.py", "language/csharp/host.py",
-        "language/csharp/scalar.py", "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
+        "examples/csharp/scene-abi/Robot.cs", "examples/csharp/scene-abi/xmake.lua",
+        "language/csharp/Scene.cs", "language/csharp/SceneEntry.cs", "language/csharp/scalar.py", "language/csharp/Admit.cs", "language/csharp/leaf.cpp", "language/csharp/inputs.sha256",
         "language/csharp/xmake/adapter.lua", "examples/csharp/numeric-aot/Filter.cs",
         "examples/csharp/numeric-aot/xmake.lua", "document/en/csharp.md", "document/zh/csharp.md",
         "tests/csharp/README.md",

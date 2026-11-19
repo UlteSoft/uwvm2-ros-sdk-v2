@@ -230,7 +230,7 @@ def main():
                           compiler_root / "share/qualification/site-profile.json", Path(site["trust"]["statement"])))
     if a.language == "csharp":
         producers.extend((compiler_root / "bin/wrcs", ROOT / "tests/mujoco/controller.cs",
-                          *(ROOT / "language/csharp" / file for file in ("inputs.sha256", "Admit.cs", "leaf.cpp", "numeric.py", "host.py"))))
+                          *(ROOT / "language/csharp" / file for file in ("inputs.sha256", "Admit.cs", "SceneEntry.cs", "Scene.cs", "leaf.cpp", "numeric.py", "host.py", "scalar.py"))))
     if a.language == "rs":
         producers.extend((a.rustroot / "bin/rustc", ROOT / "language/rust/scene.rs", ROOT / "tools/wasm/tag_ir.cpp"))
     if a.language == "tinygo":

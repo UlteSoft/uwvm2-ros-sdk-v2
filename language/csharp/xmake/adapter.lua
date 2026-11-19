@@ -7,6 +7,8 @@ function validate(target, request)
            "C# numeric AOT requires wasm32 Core 3.0, single-thread with the standard EH target")
     assert(request.kind ~= "static" or request.mte_flag ~= "--mte",
            "C# scalar proof requires a final module; no signed strict release for relocatable objects")
+    assert(#request.operations == 0 or (request.kind == "binary" and #request.operations == 1 and request.operations[1] == "abi"),
+           "C# scene entry supports exactly the abi query")
     local exports = request.exports
     assert(#exports == 1 and exports[1]:match("^[%a_][%w_]*%.[%a_][%w_]*$"),
            "add_wros_exports must select exactly one C# Class.Method")
@@ -24,7 +26,7 @@ function build(target, request, sources)
         output = path.join(target:autogendir(), "wros", "evaluate.o")
         os.mkdir(path.directory(output))
     end
-    local args = {"--target", request.arch, request.mte_flag, "--entry", request.exports[1],
+    local args = {"--target", request.arch, request.mte_flag, #request.operations == 1 and "--scene-entry" or "--entry", request.exports[1],
                   "--toolchain", assert(os.getenv("WROS_TOOLCHAIN")),
                   "--dotnet", assert(os.getenv("WROS_DOTNET")),
                   "--mono-compiler", assert(os.getenv("WROS_MONO")), "-o", output}

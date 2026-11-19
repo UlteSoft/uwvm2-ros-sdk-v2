@@ -64,3 +64,9 @@ Roslyn 生成 Portable PDB，并以 SHA-256 标识源文件。AOT 前端将方�
 若控制器与计算内核属于同一信任域，可以在编译命令中加入 `-c --sysroots "$WROS_SYSROOTS"`，指定 `.o` 输出。产物是可重定位的 core Wasm 对象，C ABI 为 `int evaluate(int)`。编译器先验证该计算可独立链接且没有宿主导入，然后将对象绑定到匹配的编译器、sysroot 与目标配置。选择 legacy MTE 时生成未签署对象。严格构建要求经过审核的对象。最后由 SDK 的 C 或 C++ 前端审核整个主体的导入。静态链接的代码共享主体的内存和权限。
 
 Xmake 中将 C# 内核声明为 `set_kind("static")`，设置 `add_wros_exports("Filter.Scale")` 和匹配的 `WROS_SYSROOTS`。C 主体用 `set_wros_sdk` 选择同一提交下另行安装的 C 包，使用 `add_deps` 链接静态库。仓库的 `tests/csharp_numeric.py --sysroots` 会在两种 VM 引擎运行产物。`tests/mujoco_guest.py --language csharp` 以 C# 标量计算选择仿真目标值，由获准连接驱动的 C 主体提交。
+
+### 用 C# 程序查询 ROS 场景 ABI
+
+复制 `examples/csharp/scene-abi`，或使用与标量示例相同的宿主工具参数执行 `wrcs --scene-entry Robot.Start`。SDK 向 Roslyn 提供 `Wros.Scene.Abi()` 声明。无参数的公开静态入口将查询结果交给同一类的公开静态整数方法，再返回该方法的结果。编译器从 IL 核对这两个调用目标，以 Mono LLVMOnly 编译实际判断逻辑。返回零表示启动成功，其他值会使客体触发陷阱。Xmake 使用 `add_wros_exports("Robot.Start")` 和 `add_wros_operations("abi")`。
+
+最终模块仅导出 `_start`，没有线性内存，唯一导入是 `uwvm_ros_v2.abi() -> i32`。部署时 VM 必须给主模块绑定场景并暴露 ABI 查询。隐藏接口会阻止程序启动。额外的 CLR 调用或宿主操作在编译阶段被拒绝。

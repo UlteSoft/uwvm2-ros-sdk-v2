@@ -59,9 +59,9 @@ def main():
     cli = [sdk / "bin/wrcs", "--toolchain", tool, "--dotnet", args.dotnet.resolve(),
            "--mono-compiler", args.mono_compiler.resolve()]
 
-    def run(name, argv, refusal=None):
+    def run(name, argv, refusal=None, *, cwd=None):
         cmd = list(map(str, argv))
-        raw = subprocess.run(cmd, env=env, cwd=project, stdout=subprocess.PIPE,
+        raw = subprocess.run(cmd, env=env, cwd=cwd or project, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, timeout=180)
         (out / (name + ".log")).write_bytes(raw.stdout)
         report["cases"].append({"name": name, "exit": raw.returncode, "argv": cmd})
@@ -204,6 +204,56 @@ void _start(void) {
                 "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
                 "--runtime-memtag-mode", "sync", *(["--runtime-disable-memtag"] if mode == 2 else []),
                 "--wasm-preload-library", path, "component", "--run", observer])
+
+    # Exercise a C#-authored entry at the application boundary, with the real
+    # SDK-managed declaration and policy compiled from the installed example.
+    scene_project = out / "scene-project"
+    shutil.copytree(sdk / "examples/csharp/scene-abi", scene_project)
+    run("scene-xmake-config", [xmake, "f", "-c", "-y", "-a", "wasm32"], cwd=scene_project)
+    run("scene-xmake-build", [xmake, "-j1", "robot"], cwd=scene_project)
+    application, = (scene_project / "build").rglob("robot.wasm")
+    def scene_shape(path):
+        data = path.read_bytes()
+        standard = [data[start] for start, _, _, _ in sections(data) if data[start]]
+        expected = [{"module": "uwvm_ros_v2", "name": "abi", "kind": 0, "params": [], "results": ["i32"]}]
+        if standard != [1, 2, 3, 7, 10] or inspect(data) != expected:
+            raise ValueError("C# scene entry has an unexpected type or authority")
+        export, = (stream for start, _, _, stream in sections(data) if data[start] == 7)
+        if export.count() != 1 or (export.name(), export.byte(), export.uint()) != ("_start", 0, 2):
+            raise ValueError("C# scene program exports more than its startup function")
+        export.end()
+    scene_shape(application)
+    for engine in ("int", "aot"):
+        command = [args.vm.resolve(), *Profile().uwvm_feature_flags(), "--debug-fault-action", "exit",
+                   "--runtime-" + engine, "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
+                   "--wasm-set-main-module-name", "main"]
+        run("scene-hidden-" + engine, [*command, "--run", application], b"ROS scene interface is hidden")
+        binding = ["--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main",
+                   "--ros-scene-interface", "robot", "abi"]
+        run("scene-denied-" + engine, [*command, *binding, "deny", "--run", application], b"unreachable")
+        run("scene-abi-" + engine, [*command, *binding, "allow", "--run", application])
+    report["modules"]["robot.wasm"] = sha(application)
+    scene_source = (scene_project / "Robot.cs").read_text()
+    changed = out / "Changed.cs"
+    changed.write_text(scene_source.replace("major == 2", "major == 3"))
+    scene_cli = [*cli, "--scene-entry", "Robot.Start", changed, "-o", cli_out]
+    run("scene-compile-other-policy", scene_cli)
+    scene_shape(cli_out)
+    for engine in ("int", "aot"):
+        run("scene-reject-major-" + engine, [args.vm.resolve(), *Profile().uwvm_feature_flags(),
+            "--runtime-" + engine, "--runtime-compile-threads", "0", "--debug-fault-action", "exit",
+            "--wasm-set-main-module-name", "main", "--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main",
+            "--ros-scene-interface", "robot", "abi", "allow", "--run", cli_out], b"unreachable")
+    cli_out.write_bytes(b"original")
+    for label, code in (
+        ("no-query", scene_source.replace("Scene.Abi()", "2")),
+        ("extra-query", scene_source.replace("Scene.Abi()", "Scene.Abi() + Scene.Abi()")),
+        ("shadow-query", scene_source.replace("using Wros;", "public static class Scene { public static int Abi() => 2; }")),
+    ):
+        changed.write_text(code)
+        run("scene-refuse-" + label, scene_cli, b"scene entry must return")
+        if cli_out.read_bytes() != b"original":
+            raise ValueError("rejected scene entry replaced its output")
 
     cli_out.write_bytes(b"original")
     for name, entry, diagnostic in (("array", "Track.Array", b"unsupported numeric IL"),

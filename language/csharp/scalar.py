@@ -11,7 +11,8 @@ def checked_body(section):
     """
     if section.count() != 1:
         raise ValueError("expected one C# scalar body")
-    body = Reader(section.take(section.uint()))
+    raw = section.take(section.uint())
+    body = Reader(raw)
     section.end()
     for _ in range(body.count()):
         body.uint()
@@ -39,6 +40,7 @@ def checked_body(section):
         else:
             raise ValueError(f"C# scalar proof rejects opcode 0x{op:02x}")
     body.end()
+    return raw
 
 
 def prove_scalar(guest):
@@ -68,4 +70,45 @@ def prove_scalar(guest):
             out.append(guest[start:end])
     if seen != [1, 3, 5, 7, 10]:
         raise ValueError("C# scalar proof requires exactly one closed integer method")
+    return b"".join(out)
+
+
+def scene_program(scalar):
+    """Lower the validated Abi() and Policy(int) calls to a private Wasm entry.
+
+    In the resulting function index space, 0 is the ABI import, 1 is the
+    unmodified compiled policy and 2 is startup. The first code body's offset
+    in the code section stays stable for the policy's DWARF line information.
+    """
+    from artifacts import uleb
+
+    def field(data):
+        return uleb(len(data)) + data
+
+    def section(kind, data):
+        return bytes([kind]) + field(data)
+
+    module, operation = b"uwvm_ros_v2", b"abi"
+    entry = bytes.fromhex("00 10 00 10 01 04 40 00 0b 0b")  # if (Policy(Abi())) trap
+    function_types = bytes.fromhex("03 60 01 7f 01 7f 60 00 01 7f 60 00 00")
+    function_names = b"\x03" + b"".join(bytes([i]) + field(name) for i, name in
+                                         enumerate((module + b"." + operation, b"evaluate", b"_start")))
+    out = [scalar[:8]]
+    for start, end, name, body in sections(scalar):
+        kind = scalar[start]
+        if kind == 1:
+            out.append(section(1, function_types))
+            out.append(section(2, b"\x01" + field(module) + field(operation) + b"\x00\x01"))
+        elif kind == 3:
+            out.append(section(3, b"\x02\x00\x02"))
+        elif kind == 7:
+            out.append(section(7, b"\x01" + field(b"_start") + b"\x00\x02"))
+        elif kind == 10:
+            policy = checked_body(body)
+            out.append(section(10, b"\x02" + field(policy) + field(entry)))
+        elif not kind and name != "name":
+            out.append(scalar[start:end])
+        elif kind:
+            raise ValueError("unexpected state in C# scene policy")
+    out.append(section(0, field(b"name") + section(1, function_names)))
     return b"".join(out)

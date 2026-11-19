@@ -109,4 +109,4 @@ Rust targets use `set_language("rs")` and one crate root such as `add_files("src
 
 The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
-Lua and JVM targets can select ROS operation names with `add_wros_operations(...)`. See [JVM compiler options](jvm.md).
+Lua, JavaScript, JVM and C# targets select ROS imports through `add_wros_operations(...)`. C# scene programs accept `abi`. [C# scene entry](csharp.md) · [JVM compiler options](jvm.md).

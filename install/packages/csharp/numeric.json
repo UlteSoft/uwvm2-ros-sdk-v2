@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/csharp.md",
-      "bytes": 8033,
+      "bytes": 8996,
       "mode": 420,
-      "sha256": "6ff788c98c0dd5f78307869f8ace3e59b3ccf03c0c409b1c5d594f98a9fab46d"
+      "sha256": "00f9301be788653b4fc8a08bbc374e6aced865afa210bf78ffb60d69de1e594d"
     },
     {
       "path": "document/zh/csharp.md",
-      "bytes": 8596,
+      "bytes": 9442,
       "mode": 420,
-      "sha256": "783ebb3732f6a76a6104a8d4dbec60d9762305cef303b23b8984f97563ce4b26"
+      "sha256": "f20881b74728cc5f5445e559419ef1a42e17f82de08f985aad5154fb417fb230"
     },
     {
       "path": "examples/csharp/numeric-aot/Filter.cs",
@@ -31,6 +31,18 @@
       "sha256": "9e2039c6abda5c60668e7baf8b3697243d9092918bd20068aeab50819daa2dda"
     },
     {
+      "path": "examples/csharp/scene-abi/Robot.cs",
+      "bytes": 160,
+      "mode": 420,
+      "sha256": "b5acb78c3ed948ed4db1d1225238d3808927cb4e3d116e77572fc17c2a65186e"
+    },
+    {
+      "path": "examples/csharp/scene-abi/xmake.lua",
+      "bytes": 391,
+      "mode": 420,
+      "sha256": "5f6cf17c827c229b851ffafa93b707c20f87c295c2a35e77676755cd34c880b5"
+    },
+    {
       "path": "install/private_exports.py",
       "bytes": 2459,
       "mode": 420,
@@ -38,9 +50,21 @@
     },
     {
       "path": "language/csharp/Admit.cs",
-      "bytes": 7006,
+      "bytes": 7327,
       "mode": 420,
-      "sha256": "caeb4d127efb0e51a6ceb6a9cefa576b70f323b9949578d8538018951b57b79e"
+      "sha256": "9cbf0a9f9f27a43db931171033226dbd3d68dbb212e6168a406655bb3a6fee52"
+    },
+    {
+      "path": "language/csharp/Scene.cs",
+      "bytes": 370,
+      "mode": 420,
+      "sha256": "3789a61e509d757446a787da330513ce558b4079cdddefa31145ceaffc51b0c2"
+    },
+    {
+      "path": "language/csharp/SceneEntry.cs",
+      "bytes": 3432,
+      "mode": 420,
+      "sha256": "fc0cb72418436c8416ee512bd7e3bcba397b78fd07f082f35b26e503b3fabc6f"
     },
     {
       "path": "language/csharp/host.py",
@@ -62,21 +86,21 @@
     },
     {
       "path": "language/csharp/numeric.py",
-      "bytes": 8074,
+      "bytes": 8856,
       "mode": 420,
-      "sha256": "1b00f5c04a290598b2f59dcede282eacf89347df2b8b99d70237846ae84c8145"
+      "sha256": "a576eab3447288ab2b67e0dc74b45ac57718ac325e251618e931546b90948fe3"
     },
     {
       "path": "language/csharp/scalar.py",
-      "bytes": 2837,
+      "bytes": 4629,
       "mode": 420,
-      "sha256": "f1fb6d958f5bf949ef8698b991db4cf7b7ccb9dbd6e1be1cbde7adcfab6b95ad"
+      "sha256": "15e8025833faaef058d80c9a438cbd4f8aaae43f7d4fb7f66f4bb083f943d261"
     },
     {
       "path": "language/csharp/xmake/adapter.lua",
-      "bytes": 2120,
+      "bytes": 2359,
       "mode": 420,
-      "sha256": "0445bab6ca75311e0317eb5e12c19b7c8bcdbfc085589296727e44537777ed53"
+      "sha256": "08b1e4b6fc0d8b202ee7ad70b817350f12c412f504fda6a29b3495162569cf04"
     },
     {
       "path": "tests/csharp/README.md",
