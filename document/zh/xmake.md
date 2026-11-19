@@ -53,6 +53,7 @@ target_end()
 | `mte` | 布尔或字符串 `"legacy"`，默认 true | 默认要求通过相邻对象标签验收的发布组合。false 使用关闭插桩的 sysroot。`"legacy"` 允许使用未通过该验收的带标记工具链，并发出警告。C/C++ 源码属性仍可改变局部插桩。[发布和应用验收](memory-qualification.md) |
 | `build_receipt` | 布尔，默认 false | 对链接完成的 Wasm 目标，在二进制旁生成该产物的 `.wros-build.json` 收据。 |
 | `eh` | 布尔，Core 3.0 默认 true | 选择匹配的异常运行时。MVP 默认 false。 |
+| `herbceptions` | 布尔，C++ 默认 true | 控制 wrcc 的类型化错误返回，与 `eh` 独立。其他语言拒绝此字段。 |
 | `std` | 可选字符串 | C 支持 `c11`、`c17`、`c23`。C++ 支持 `c++17`、`c++20`、`c++23`。 |
 | `lua_abi` | 布尔，默认 false | 在 Lua 中提供 `wros.abi()`。部署或运行时仍须显式开放该查询。 |
 | `lua_seed` | 可选的 32 位无符号整数 | 使用 `--guest-seed` 编译 Lua，移除宿主时钟导入。 |

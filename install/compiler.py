@@ -106,7 +106,7 @@ def select_closure(receipts, profile, compiler_sha256):
     return found[0]
 
 
-def make_command(toolchain, receipts, profile, language, arguments, verify=False):
+def make_command(toolchain, receipts, profile, language, arguments, verify=False, *, herbceptions=None):
     if language not in ("c", "cpp"):
         raise ValueError("this driver handles c/cpp; other languages need their own complete MTE runtime closure")
     toolchain = toolchain.resolve()
@@ -119,6 +119,20 @@ def make_command(toolchain, receipts, profile, language, arguments, verify=False
         if item in ("-target", "--target", "--sysroot", "-isysroot", "-resource-dir", "-m32", "-m64", "-pthread", "-fwasm-exceptions", "-fexceptions", "-fno-exceptions") or item.startswith(("--target=", "-target=", "--sysroot=", "-isysroot", "-resource-dir=", "-fuse-ld=", "-fsanitize=", "-fno-sanitize=")):
             raise ValueError("use the SDK profile options instead of overriding " + item)
     filename, value, target, root, resource = select_closure(receipts, profile, digest(compiler))
+    if herbceptions is not None:
+        if language != "cpp" or type(herbceptions) is not bool:
+            raise ValueError("Herbceptions mode requires a C++ translation unit")
+        if value.get("producer") != "herbceptions":
+            raise ValueError("wrcc requires the Herbceptions Wasm producer and its matching C++ sysroot")
+    if herbceptions:
+        runtime = target.get("herbceptions")
+        archive_name = "lib/" + profile.triple + "/libherbceptions.a"
+        if not isinstance(runtime, dict) or runtime.get("archive") != archive_name:
+            raise ValueError("the selected C++ sysroot omits the Herbceptions runtime")
+        herb_archive = confined(root, archive_name)
+        recorded_hash = target["files"].get(str(herb_archive.relative_to(filename.parent)))
+        if not recorded_hash or runtime.get("archive_sha256") != recorded_hash:
+            raise ValueError("Herbceptions archive differs from the C++ sysroot manifest")
     if verify:
         builtin_dir = resource / "lib" / profile.triple.replace("-wasip1", "-unknown-wasip1")
         roots = (root, resource / "include", builtin_dir)
@@ -138,6 +152,8 @@ def make_command(toolchain, receipts, profile, language, arguments, verify=False
              "-resource-dir=" + str(resource), "-fuse-ld=" + str(linker),
              *profile.llvm_feature_flags()]
     flags += ["-fsanitize=memtag" if profile.mte else "-fno-sanitize=memtag"]
+    if herbceptions is not None:
+        flags.append("-fherbceptions" if herbceptions else "-fno-herbceptions")
     if profile.exceptions == "eh":
         flags += ["-fwasm-exceptions", "-mllvm", "-wasm-use-legacy-eh=false"]
     elif language == "cpp":
@@ -147,9 +163,12 @@ def make_command(toolchain, receipts, profile, language, arguments, verify=False
     if profile.exceptions == "eh" and not any(x in argv for x in ("-c", "-S", "-E", "-fsyntax-only")):
         command += ["-lunwind"]
     closure = hashlib.sha256(json.dumps(target, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-    return command, dict(closure_sha256=closure, profile=profile.to_dict(), receipt=str(filename),
-                         compiler_sha256=value["compiler_sha256"],
-                         qualified=bool(target.get("qualified", False)), authority_grants=[])
+    record = dict(closure_sha256=closure, profile=profile.to_dict(), receipt=str(filename),
+                  compiler_sha256=value["compiler_sha256"],
+                  qualified=bool(target.get("qualified", False)), authority_grants=[])
+    if herbceptions:
+        record["herbceptions_archive"] = str(herb_archive)
+    return command, record
 
 
 if __name__ == "__main__":

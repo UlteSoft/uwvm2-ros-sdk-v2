@@ -1,0 +1,3731 @@
+diff --git a/llvm/docs/LangRef.md b/llvm/docs/LangRef.md
+index 61d23eeee39cc49abd46bdacaed4cf8bc32bccf5..b3977f0fbc76d136f3b81787424ab01764650278 100644
+--- a/llvm/docs/LangRef.md
++++ b/llvm/docs/LangRef.md
+@@ -1474,6 +1474,21 @@ Currently, only the following parameter attributes are defined:
+     A function that accepts an `sret` argument must return `void`.
+     A return value may not be `sret`.
+ 
++`herbthrows_sret(<ty>)`
++:   This indicates that the pointer parameter specifies the address of the
++    in-memory payload that a herbception (`throws`) function returns. It is
++    the herbception counterpart of `sret`, but unlike `sret` it does not force
++    the function's return type to be `void`: the function still returns the
++    herbception discriminant, which tells the caller whether the pointee holds
++    a constructed payload.
++
++    Only the payload should be written through the pointer. A function with a
++    `herbthrows_sret` argument may have any return type.
++
++    The `herbthrows_sret` type argument specifies the in-memory payload type. Like
++    `sret` it must be on the first or second parameter, and only one such
++    parameter is permitted.
++
+ (attr_elementtype)=
+ 
+ `elementtype(<ty>)`
+diff --git a/llvm/include/llvm/Bitcode/LLVMBitCodes.h b/llvm/include/llvm/Bitcode/LLVMBitCodes.h
+index 358f9a65a80afdd9a1b2429bdc1525e6c8f326d9..858aa1e2b5a97712a419e8f945866746820730bb 100644
+--- a/llvm/include/llvm/Bitcode/LLVMBitCodes.h
++++ b/llvm/include/llvm/Bitcode/LLVMBitCodes.h
+@@ -826,6 +826,8 @@ enum AttributeKindCodes {
+   ATTR_KIND_NOOUTLINE = 107,
+   ATTR_KIND_FLATTEN = 108,
+   ATTR_KIND_NOIPA = 109,
++  ATTR_KIND_THROWS = 113,
++  ATTR_KIND_THROWS_SRET = 114,
+ };
+ 
+ enum ComdatSelectionKindCodes {
+diff --git a/llvm/include/llvm/CodeGen/FastISel.h b/llvm/include/llvm/CodeGen/FastISel.h
+index 02d2059d5478544d95b24c62034f43ac4b1fbe83..4a768196ef06dbe4d3473d1f57dbd7e14d0a0336 100644
+--- a/llvm/include/llvm/CodeGen/FastISel.h
++++ b/llvm/include/llvm/CodeGen/FastISel.h
+@@ -77,6 +77,9 @@ public:
+     bool DoesNotReturn : 1;
+     bool IsReturnValueUsed : 1;
+     bool IsPatchPoint : 1;
++    /// The called function (or call site) returns its value with the throws
++    /// (herbception) discriminant.
++    bool IsThrows : 1;
+ 
+     // IsTailCall Should be modified by implementations of FastLowerCall
+     // that perform tail call conversions.
+@@ -100,7 +103,8 @@ public:
+ 
+     CallLoweringInfo()
+         : RetSExt(false), RetZExt(false), IsVarArg(false), IsInReg(false),
+-          DoesNotReturn(false), IsReturnValueUsed(true), IsPatchPoint(false) {}
++          DoesNotReturn(false), IsReturnValueUsed(true), IsPatchPoint(false),
++          IsThrows(false) {}
+ 
+     CallLoweringInfo &setCallee(Type *ResultTy, FunctionType *FuncTy,
+                                 const Value *Target, ArgListTy &&ArgsList,
+@@ -118,6 +122,7 @@ public:
+       CallConv = Call.getCallingConv();
+       Args = std::move(ArgsList);
+       NumFixedArgs = FuncTy->getNumParams();
++      IsThrows = Call.hasFnAttr(Attribute::HerbThrows);
+ 
+       CB = &Call;
+ 
+@@ -138,6 +143,7 @@ public:
+       IsReturnValueUsed = !Call.use_empty();
+       RetSExt = Call.hasRetAttr(Attribute::SExt);
+       RetZExt = Call.hasRetAttr(Attribute::ZExt);
++      IsThrows = Call.hasFnAttr(Attribute::HerbThrows);
+ 
+       CallConv = Call.getCallingConv();
+       Args = std::move(ArgsList);
+diff --git a/llvm/include/llvm/CodeGen/Passes.h b/llvm/include/llvm/CodeGen/Passes.h
+index 86bf5aea7b23afdb426398fdbe9daecdb5a36b63..e4c6d62ea6f7d535f7d8d5a0363eddd3aa281c7b 100644
+--- a/llvm/include/llvm/CodeGen/Passes.h
++++ b/llvm/include/llvm/CodeGen/Passes.h
+@@ -428,6 +428,12 @@ LLVM_ABI extern char &PatchableFunctionID;
+ ///
+ LLVM_ABI FunctionPass *createStackProtectorPass();
+ 
++/// createHerbceptionsFlagReturnPass - This pass duplicates small return blocks
++/// of 'throws' functions so the trailing discriminant can be folded into the
++/// return sequence when the branch leading to the return implies it.
++///
++LLVM_ABI FunctionPass *createHerbceptionsFlagReturnPass();
++
+ /// createMachineVerifierPass - This pass verifies cenerated machine code
+ /// instructions for correctness.
+ ///
+diff --git a/llvm/include/llvm/CodeGen/TargetCallingConv.h b/llvm/include/llvm/CodeGen/TargetCallingConv.h
+index f197c7f1645ec0f275569b43a0102859588ffadf..383a2054590eb1f9b4134bf9afe5bc0e217d928a 100644
+--- a/llvm/include/llvm/CodeGen/TargetCallingConv.h
++++ b/llvm/include/llvm/CodeGen/TargetCallingConv.h
+@@ -56,6 +56,7 @@ namespace ISD {
+     unsigned IsPointer : 1;
+     /// Whether this is part of a variable argument list (non-fixed).
+     unsigned IsVarArg : 1;
++    unsigned IsThrows : 1;
+ 
+     unsigned ByValOrByRefSize = 0; ///< Byval or byref struct size
+ 
+@@ -69,7 +70,7 @@ namespace ISD {
+           IsSwiftError(0), IsCFGuardTarget(0), IsHva(0), IsHvaStart(0),
+           IsSecArgPass(0), MemAlign(0), OrigAlign(0),
+           IsInConsecutiveRegsLast(0), IsInConsecutiveRegs(0),
+-          IsCopyElisionCandidate(0), IsPointer(0), IsVarArg(0) {
++          IsCopyElisionCandidate(0), IsPointer(0), IsVarArg(0), IsThrows(0) {
+       static_assert(sizeof(*this) == 4 * sizeof(unsigned), "flags are too big");
+     }
+ 
+@@ -150,6 +151,9 @@ namespace ISD {
+     bool isVarArg() const { return IsVarArg; }
+     void setVarArg() { IsVarArg = 1; }
+ 
++    bool isThrows() const { return IsThrows; }
++    void setThrows() { IsThrows = 1; }
++
+     Align getNonZeroMemAlign() const {
+       return decodeMaybeAlign(MemAlign).valueOrOne();
+     }
+diff --git a/llvm/include/llvm/CodeGen/TargetLowering.h b/llvm/include/llvm/CodeGen/TargetLowering.h
+index 9a6dd7735421eee16c32a9c7221304c49d33227c..94079f00b7c47e1acf642f32be045dbe6f427ffb 100644
+--- a/llvm/include/llvm/CodeGen/TargetLowering.h
++++ b/llvm/include/llvm/CodeGen/TargetLowering.h
+@@ -4739,6 +4739,16 @@ public:
+     return false;
+   }
+ 
++  /// Return true if the target supports the throws (herbception) calling
++  /// convention, i.e. it can return a success/failure discriminant
++  /// alongside the return value using a target-specific mechanism (e.g. a
++  /// carry flag or an extra register) instead of a plain struct return.
++  /// When false, the middle-end falls back to returning the discriminant
++  /// as a regular struct member.
++  virtual bool supportThrowsCC() const {
++    return false;
++  }
++
+   /// Return true if the target supports that a subset of CSRs for the given
+   /// machine function is handled explicitly via copies.
+   virtual bool supportSplitCSR(MachineFunction *MF) const {
+@@ -4883,6 +4893,9 @@ public:
+     bool IsPatchPoint      : 1;
+     bool IsPreallocated : 1;
+     bool NoMerge           : 1;
++    /// The called function (or call site) returns its value with the throws
++    /// (herbception) discriminant.
++    bool IsThrows          : 1;
+ 
+     // IsTailCall should be modified by implementations of
+     // TargetLowering::LowerCall that perform tail call conversions.
+@@ -4912,6 +4925,7 @@ public:
+         : RetSExt(false), RetZExt(false), IsVarArg(false), IsInReg(false),
+           DoesNotReturn(false), IsReturnValueUsed(true), IsConvergent(false),
+           IsPatchPoint(false), IsPreallocated(false), NoMerge(false),
++          IsThrows(false),
+           DAG(DAG) {}
+ 
+     CallLoweringInfo &setDebugLoc(const SDLoc &dl) {
+@@ -4954,6 +4968,7 @@ public:
+       RetSExt = ResultAttrs.hasAttribute(Attribute::SExt);
+       RetZExt = ResultAttrs.hasAttribute(Attribute::ZExt);
+       NoMerge = ResultAttrs.hasAttribute(Attribute::NoMerge);
++      IsThrows = ResultAttrs.hasAttribute(Attribute::HerbThrows);
+ 
+       Callee = Target;
+       CallConv = CC;
+@@ -4976,6 +4991,7 @@ public:
+       RetSExt = Call.hasRetAttr(Attribute::SExt);
+       RetZExt = Call.hasRetAttr(Attribute::ZExt);
+       NoMerge = Call.hasFnAttr(Attribute::NoMerge);
++      IsThrows = Call.hasFnAttr(Attribute::HerbThrows);
+ 
+       Callee = Target;
+ 
+diff --git a/llvm/include/llvm/Demangle/ItaniumDemangle.h b/llvm/include/llvm/Demangle/ItaniumDemangle.h
+index 04338e1d7cb5166b7569416793c6ec05ec8daa0f..3bb142bfe99148fba1e706022d6092eb0c4a2c8f 100644
+--- a/llvm/include/llvm/Demangle/ItaniumDemangle.h
++++ b/llvm/include/llvm/Demangle/ItaniumDemangle.h
+@@ -923,6 +923,50 @@ public:
+   }
+ };
+ 
++// Herbception: `Dr` -- the `throws` specifier.
++class ThrowsSpec : public Node {
++public:
++  ThrowsSpec() : Node(KThrowsSpec) {}
++
++  template<typename Fn> void match(Fn F) const {}
++
++  void printLeft(OutputBuffer &OB) const override {
++    OB += "throws";
++  }
++};
++
++// Herbception: `DE <type> E` -- `return_failure{E}`.
++class FailureSpec : public Node {
++  const Node *E;
++public:
++  FailureSpec(const Node *E_) : Node(KFailureSpec), E(E_) {}
++
++  template<typename Fn> void match(Fn F) const { F(E); }
++
++  void printLeft(OutputBuffer &OB) const override {
++    OB += "return_failure{";
++    E->printAsOperand(OB);
++    OB += '}';
++  }
++};
++
++// Herbception: `Dg <expression> E` -- `throws(expr)` with a dependent
++// expression.
++class ThrowsExprSpec : public Node {
++  const Node *E;
++public:
++  ThrowsExprSpec(const Node *E_) : Node(KThrowsExprSpec), E(E_) {}
++
++  template<typename Fn> void match(Fn F) const { F(E); }
++
++  void printLeft(OutputBuffer &OB) const override {
++    OB += "throws";
++    OB.printOpen();
++    E->printAsOperand(OB);
++    OB.printClose();
++  }
++};
++
+ /// Represents the explicitly named object parameter.
+ /// E.g.,
+ /// \code{.cpp}
+@@ -955,21 +999,22 @@ class FunctionEncoding final : public Node {
+   NodeArray Params;
+   const Node *Attrs;
+   const Node *Requires;
++  const Node *Spec;
+   Qualifiers CVQuals;
+   FunctionRefQual RefQual;
+ 
+ public:
+   FunctionEncoding(const Node *Ret_, const Node *Name_, NodeArray Params_,
+-                   const Node *Attrs_, const Node *Requires_,
++                   const Node *Attrs_, const Node *Requires_, const Node *Spec_,
+                    Qualifiers CVQuals_, FunctionRefQual RefQual_)
+       : Node(KFunctionEncoding,
+              /*RHSComponentCache=*/Cache::Yes, /*ArrayCache=*/Cache::No,
+              /*FunctionCache=*/Cache::Yes),
+         Ret(Ret_), Name(Name_), Params(Params_), Attrs(Attrs_),
+-        Requires(Requires_), CVQuals(CVQuals_), RefQual(RefQual_) {}
++        Requires(Requires_), Spec(Spec_), CVQuals(CVQuals_), RefQual(RefQual_) {}
+ 
+   template<typename Fn> void match(Fn F) const {
+-    F(Ret, Name, Params, Attrs, Requires, CVQuals, RefQual);
++    F(Ret, Name, Params, Attrs, Requires, Spec, CVQuals, RefQual);
+   }
+ 
+   Qualifiers getCVQuals() const { return CVQuals; }
+@@ -978,6 +1023,7 @@ public:
+   const Node *getReturnType() const { return Ret; }
+   const Node *getAttrs() const { return Attrs; }
+   const Node *getRequires() const { return Requires; }
++  const Node *getSpec() const { return Spec; }
+ 
+   bool hasRHSComponentSlow(OutputBuffer &) const override { return true; }
+   bool hasFunctionSlow(OutputBuffer &) const override { return true; }
+@@ -1017,6 +1063,11 @@ public:
+     if (Attrs != nullptr)
+       Attrs->print(OB);
+ 
++    if (Spec != nullptr) {
++      OB += ' ';
++      Spec->print(OB);
++    }
++
+     if (Requires != nullptr) {
+       OB += " requires ";
+       Requires->print(OB);
+@@ -3958,6 +4009,9 @@ std::string_view AbstractManglingParser<Alloc, Derived>::parseBareSourceName() {
+ // <exception-spec> ::= Do                # non-throwing exception-specification (e.g., noexcept, throw())
+ //                  ::= DO <expression> E # computed (instantiation-dependent) noexcept
+ //                  ::= Dw <type>+ E      # dynamic exception specification with instantiation-dependent types
++//                  ::= Dr               # throws (herbception, std::error channel)
++//                  ::= DE <type> E      # return_failure{E} (herbception)
++//                  ::= Dg <expression> E # throws(expr) (herbception)
+ //
+ // <ref-qualifier> ::= R                   # & ref-qualifier
+ // <ref-qualifier> ::= O                   # && ref-qualifier
+@@ -3989,6 +4043,24 @@ Node *AbstractManglingParser<Derived, Alloc>::parseFunctionType() {
+       make<DynamicExceptionSpec>(popTrailingNodeArray(SpecsBegin));
+     if (!ExceptionSpec)
+       return nullptr;
++  } else if (consumeIf("Dr")) {
++    ExceptionSpec = make<ThrowsSpec>();
++    if (!ExceptionSpec)
++      return nullptr;
++  } else if (consumeIf("DE")) {
++    Node *E = getDerived().parseType();
++    if (E == nullptr || !consumeIf('E'))
++      return nullptr;
++    ExceptionSpec = make<FailureSpec>(E);
++    if (!ExceptionSpec)
++      return nullptr;
++  } else if (consumeIf("Dg")) {
++    Node *E = getDerived().parseExpr();
++    if (E == nullptr || !consumeIf('E'))
++      return nullptr;
++    ExceptionSpec = make<ThrowsExprSpec>(E);
++    if (!ExceptionSpec)
++      return nullptr;
+   }
+ 
+   consumeIf("Dx"); // transaction safe
+@@ -4237,7 +4309,9 @@ Node *AbstractManglingParser<Derived, Alloc>::parseType() {
+     if (look(AfterQuals) == 'F' ||
+         (look(AfterQuals) == 'D' &&
+          (look(AfterQuals + 1) == 'o' || look(AfterQuals + 1) == 'O' ||
+-          look(AfterQuals + 1) == 'w' || look(AfterQuals + 1) == 'x'))) {
++          look(AfterQuals + 1) == 'w' || look(AfterQuals + 1) == 'x' ||
++          look(AfterQuals + 1) == 'r' || look(AfterQuals + 1) == 'E' ||
++          look(AfterQuals + 1) == 'g'))) {
+       Result = getDerived().parseFunctionType();
+       break;
+     }
+@@ -4568,6 +4642,10 @@ Node *AbstractManglingParser<Derived, Alloc>::parseType() {
+     case 'o':
+     case 'O':
+     case 'w':
++    // Herbception exception specifiers on a function type.
++    case 'r':
++    case 'E':
++    case 'g':
+     // Transaction safe function type.
+     case 'x':
+       Result = getDerived().parseFunctionType();
+@@ -5742,6 +5820,31 @@ Node *AbstractManglingParser<Derived, Alloc>::parseEncoding(bool ParseParams) {
+       return nullptr;
+   }
+ 
++  // Herbception specifier on a function's own encoding. It sits between the
++  // name (and any enable_if attribute) and the bare function type; the
++  // position is unambiguous since no parameter or return type can begin
++  // with Dr/DE/Dg.
++  Node *Spec = nullptr;
++  if (consumeIf("Dr")) {
++    Spec = make<ThrowsSpec>();
++    if (!Spec)
++      return nullptr;
++  } else if (consumeIf("DE")) {
++    Node *E = getDerived().parseType();
++    if (E == nullptr || !consumeIf('E'))
++      return nullptr;
++    Spec = make<FailureSpec>(E);
++    if (!Spec)
++      return nullptr;
++  } else if (consumeIf("Dg")) {
++    Node *E = getDerived().parseExpr();
++    if (E == nullptr || !consumeIf('E'))
++      return nullptr;
++    Spec = make<ThrowsExprSpec>(E);
++    if (!Spec)
++      return nullptr;
++  }
++
+   Node *ReturnType = nullptr;
+   if (!NameInfo.CtorDtorConversion && NameInfo.EndsWithTemplateArgs) {
+     ReturnType = getDerived().parseType();
+@@ -5777,7 +5880,7 @@ Node *AbstractManglingParser<Derived, Alloc>::parseEncoding(bool ParseParams) {
+   }
+ 
+   return make<FunctionEncoding>(ReturnType, Name, Params, Attrs, Requires,
+-                                NameInfo.CVQualifiers,
++                                Spec, NameInfo.CVQualifiers,
+                                 NameInfo.ReferenceQualifier);
+ }
+ 
+diff --git a/llvm/include/llvm/Demangle/ItaniumNodes.def b/llvm/include/llvm/Demangle/ItaniumNodes.def
+index 3a28b1f175924722db293e94a3ddf8094056047c..fe1e76e4b8a018b12a7631c50d2f2866b4dfa93c 100644
+--- a/llvm/include/llvm/Demangle/ItaniumNodes.def
++++ b/llvm/include/llvm/Demangle/ItaniumNodes.def
+@@ -31,6 +31,9 @@ NODE(ArrayType)
+ NODE(FunctionType)
+ NODE(NoexceptSpec)
+ NODE(DynamicExceptionSpec)
++NODE(ThrowsSpec)
++NODE(FailureSpec)
++NODE(ThrowsExprSpec)
+ NODE(FunctionEncoding)
+ NODE(LiteralOperator)
+ NODE(SpecialName)
+diff --git a/llvm/include/llvm/Demangle/MicrosoftDemangle.h b/llvm/include/llvm/Demangle/MicrosoftDemangle.h
+index a2af87537aa5806d2bffc3c4e6e9147845d9ab28..bc08cb41e448e73bd98f51d35db3e67790a71b59 100644
+--- a/llvm/include/llvm/Demangle/MicrosoftDemangle.h
++++ b/llvm/include/llvm/Demangle/MicrosoftDemangle.h
+@@ -271,7 +271,8 @@ private:
+   FuncClass demangleFunctionClass(std::string_view &MangledName);
+   CallingConv demangleCallingConvention(std::string_view &MangledName);
+   StorageClass demangleVariableStorageClass(std::string_view &MangledName);
+-  bool demangleThrowSpecification(std::string_view &MangledName);
++  void demangleThrowSpecification(std::string_view &MangledName,
++                                  FunctionSignatureNode *FTy);
+   wchar_t demangleWcharLiteral(std::string_view &MangledName);
+   uint8_t demangleCharLiteral(std::string_view &MangledName);
+ 
+diff --git a/llvm/include/llvm/Demangle/MicrosoftDemangleNodes.h b/llvm/include/llvm/Demangle/MicrosoftDemangleNodes.h
+index 9a3ebf6a00e5960d5ae5dfbc82778fb299fbd63e..8a9f214cf500233e763538515a25101fb1977624 100644
+--- a/llvm/include/llvm/Demangle/MicrosoftDemangleNodes.h
++++ b/llvm/include/llvm/Demangle/MicrosoftDemangleNodes.h
+@@ -384,6 +384,12 @@ struct DEMANGLE_ABI FunctionSignatureNode : public TypeNode {
+ 
+   // True if the function type is noexcept.
+   bool IsNoexcept = false;
++
++  // Herbception: true if the function type is `throws`.
++  bool IsThrows = false;
++
++  // Herbception: the `return_failure{E}` error type, if any.
++  TypeNode *FailureType = nullptr;
+ };
+ 
+ struct IdentifierNode : public Node {
+diff --git a/llvm/include/llvm/IR/Argument.h b/llvm/include/llvm/IR/Argument.h
+index 05fd7ff4df326808157f6a1bf6d94758be17e3f5..388dfcfa261bee4e8948675d5ea92634591db855 100644
+--- a/llvm/include/llvm/IR/Argument.h
++++ b/llvm/include/llvm/IR/Argument.h
+@@ -119,6 +119,9 @@ public:
+   /// If this is an sret argument, return its type.
+   LLVM_ABI Type *getParamStructRetType() const;
+ 
++  /// If this is a throws_sret argument, return its type.
++  LLVM_ABI Type *getParamThrowsSretType() const;
++
+   /// If this is a byref argument, return its type.
+   LLVM_ABI Type *getParamByRefType() const;
+ 
+@@ -140,6 +143,9 @@ public:
+   /// Return true if this argument has the sret attribute.
+   LLVM_ABI bool hasStructRetAttr() const;
+ 
++  /// Return true if this argument has the throws_sret attribute.
++  LLVM_ABI bool hasThrowsSretAttr() const;
++
+   /// Return true if this argument has the inreg attribute.
+   LLVM_ABI bool hasInRegAttr() const;
+ 
+diff --git a/llvm/include/llvm/IR/Attributes.h b/llvm/include/llvm/IR/Attributes.h
+index 049f699b2980bfc672b31b7fdc0b67c73bc616f1..26ca4c8f80e30f68b641436617911a4abddab256 100644
+--- a/llvm/include/llvm/IR/Attributes.h
++++ b/llvm/include/llvm/IR/Attributes.h
+@@ -204,6 +204,8 @@ public:
+   LLVM_ABI static Attribute getWithByValType(LLVMContext &Context, Type *Ty);
+   LLVM_ABI static Attribute getWithStructRetType(LLVMContext &Context,
+                                                  Type *Ty);
++  LLVM_ABI static Attribute getWithThrowsSretType(LLVMContext &Context,
++                                                  Type *Ty);
+   LLVM_ABI static Attribute getWithByRefType(LLVMContext &Context, Type *Ty);
+   LLVM_ABI static Attribute getWithPreallocatedType(LLVMContext &Context,
+                                                     Type *Ty);
+@@ -496,6 +498,7 @@ public:
+   LLVM_ABI uint64_t getDereferenceableOrNullBytes() const;
+   LLVM_ABI Type *getByValType() const;
+   LLVM_ABI Type *getStructRetType() const;
++  LLVM_ABI Type *getThrowsSretType() const;
+   LLVM_ABI Type *getByRefType() const;
+   LLVM_ABI Type *getPreallocatedType() const;
+   LLVM_ABI Type *getInAllocaType() const;
+@@ -972,6 +975,9 @@ public:
+   /// Return the sret type for the specified function parameter.
+   LLVM_ABI Type *getParamStructRetType(unsigned ArgNo) const;
+ 
++  /// Return the throws_sret type for the specified function parameter.
++  LLVM_ABI Type *getParamThrowsSretType(unsigned ArgNo) const;
++
+   /// Return the byref type for the specified function parameter.
+   LLVM_ABI Type *getParamByRefType(unsigned ArgNo) const;
+ 
+@@ -1222,6 +1228,11 @@ public:
+   /// Retrieve the sret type.
+   Type *getStructRetType() const { return getTypeAttr(Attribute::StructRet); }
+ 
++  /// Retrieve the throws_sret type.
++  Type *getThrowsSretType() const {
++    return getTypeAttr(Attribute::HerbThrowsSret);
++  }
++
+   /// Retrieve the byref type.
+   Type *getByRefType() const { return getTypeAttr(Attribute::ByRef); }
+ 
+@@ -1295,6 +1306,9 @@ public:
+   /// This turns a sret type into the form used internally in Attribute.
+   LLVM_ABI AttrBuilder &addStructRetAttr(Type *Ty);
+ 
++  /// This turns a throws_sret type into the form used internally in Attribute.
++  LLVM_ABI AttrBuilder &addThrowsSretAttr(Type *Ty);
++
+   /// This turns a byref type into the form used internally in Attribute.
+   LLVM_ABI AttrBuilder &addByRefAttr(Type *Ty);
+ 
+diff --git a/llvm/include/llvm/IR/Attributes.td b/llvm/include/llvm/IR/Attributes.td
+index 4e45100b54d380c19699ebe01636936cada54ad6..e24bff997edd5da404f5d11d7b050fb928b69da8 100644
+--- a/llvm/include/llvm/IR/Attributes.td
++++ b/llvm/include/llvm/IR/Attributes.td
+@@ -328,6 +328,12 @@ def StrictFP : EnumAttr<"strictfp", IntersectPreserve, [FnAttr]>;
+ /// Hidden pointer to structure to return.
+ def StructRet : TypeAttr<"sret", IntersectPreserve, [ParamAttr]>;
+ 
++/// Hidden pointer through which a herbception (throws) function returns its
++/// payload. Unlike 'sret' this does not make the function's return type void:
++/// the function still returns the herbception discriminant, so the caller
++/// learns from that whether the pointee holds a constructed payload.
++def HerbThrowsSret : TypeAttr<"herbthrows_sret", IntersectPreserve, [ParamAttr]>;
++
+ /// AddressSanitizer is on.
+ def SanitizeAddress : EnumAttr<"sanitize_address", IntersectPreserve, [FnAttr]>;
+ 
+@@ -378,6 +384,12 @@ def SwiftSelf : EnumAttr<"swiftself", IntersectPreserve, [ParamAttr]>;
+ /// Argument is swift async context.
+ def SwiftAsync : EnumAttr<"swiftasync", IntersectPreserve, [ParamAttr]>;
+ 
++/// Function uses Herbceptions for error handling. When present, the backend
++/// may use a target-specific mechanism (e.g. a carry flag or an extra
++/// register) to carry the success/failure discriminant alongside the return
++/// value instead of a plain struct return.
++def HerbThrows : EnumAttr<"herbthrows", IntersectPreserve, [FnAttr]>;
++
+ /// Function must be in a unwind table.
+ def UWTable : IntAttr<"uwtable", IntersectPreserve, [FnAttr]>;
+ 
+diff --git a/llvm/include/llvm/IR/Function.h b/llvm/include/llvm/IR/Function.h
+index bd28f0d9902daac9539eb22894bc7b2575862151..4d32b97488ca703ecab0c2fff5c90477656b03b1 100644
+--- a/llvm/include/llvm/IR/Function.h
++++ b/llvm/include/llvm/IR/Function.h
+@@ -478,6 +478,11 @@ public:
+     return AttributeSets.getParamStructRetType(ArgNo);
+   }
+ 
++  /// Extract the throws_sret type for a parameter.
++  Type *getParamThrowsSretType(unsigned ArgNo) const {
++    return AttributeSets.getParamThrowsSretType(ArgNo);
++  }
++
+   /// Extract the inalloca type for a parameter.
+   Type *getParamInAllocaType(unsigned ArgNo) const {
+     return AttributeSets.getParamInAllocaType(ArgNo);
+@@ -671,6 +676,13 @@ public:
+            AttributeSets.hasParamAttr(1, Attribute::StructRet);
+   }
+ 
++  /// Determine if the function is marked as returning its payload through a
++  /// throws_sret pointer.
++  bool hasThrowsSretAttr() const {
++    return AttributeSets.hasParamAttr(0, Attribute::HerbThrowsSret) ||
++           AttributeSets.hasParamAttr(1, Attribute::HerbThrowsSret);
++  }
++
+   /// Determine if the parameter or return value is marked with NoAlias
+   /// attribute.
+   bool returnDoesNotAlias() const {
+diff --git a/llvm/include/llvm/IR/InstrTypes.h b/llvm/include/llvm/IR/InstrTypes.h
+index 5f7df6a4eb6f8c1864f95ba8d8fe5f87450aba8f..fdee435e12b71b7f2b6ab51d714aa0c6d9b36637 100644
+--- a/llvm/include/llvm/IR/InstrTypes.h
++++ b/llvm/include/llvm/IR/InstrTypes.h
+@@ -1897,6 +1897,15 @@ public:
+     return nullptr;
+   }
+ 
++  /// Extract the throws_sret type for a parameter.
++  Type *getParamThrowsSretType(unsigned ArgNo) const {
++    if (auto *Ty = Attrs.getParamThrowsSretType(ArgNo))
++      return Ty;
++    if (const Function *F = getCalledFunction())
++      return F->getAttributes().getParamThrowsSretType(ArgNo);
++    return nullptr;
++  }
++
+   /// Extract the elementtype type for a parameter.
+   /// Note that elementtype() can only be applied to call arguments, not
+   /// function declaration parameters.
+@@ -2047,6 +2056,15 @@ public:
+     return paramHasAttr(0, Attribute::StructRet);
+   }
+ 
++  /// Determine if the call has a throws_sret argument.
++  bool hasThrowsSretAttr() const {
++    if (arg_empty())
++      return false;
++
++    // Be friendly and also check the callee.
++    return paramHasAttr(0, Attribute::HerbThrowsSret);
++  }
++
+   /// Determine if any call argument is an aggregate passed by value.
+   bool hasByValArgument() const {
+     return Attrs.hasAttrSomewhere(Attribute::ByVal);
+diff --git a/llvm/include/llvm/InitializePasses.h b/llvm/include/llvm/InitializePasses.h
+index 4280d35e5340520c0d78c58a507f231627f67b2c..c3c3cc13f958531d929ad2e569fce58e99083ebc 100644
+--- a/llvm/include/llvm/InitializePasses.h
++++ b/llvm/include/llvm/InitializePasses.h
+@@ -132,6 +132,7 @@ LLVM_ABI void initializeGlobalMergeFuncPassWrapperPass(PassRegistry &);
+ LLVM_ABI void initializeGlobalMergePass(PassRegistry &);
+ LLVM_ABI void initializeGlobalsAAWrapperPassPass(PassRegistry &);
+ LLVM_ABI void initializeHardwareLoopsLegacyPass(PassRegistry &);
++LLVM_ABI void initializeHerbceptionsFlagReturnPass(PassRegistry &);
+ LLVM_ABI void initializeLibcallLoweringInfoWrapperPass(PassRegistry &);
+ LLVM_ABI void initializeMIRProfileLoaderPassPass(PassRegistry &);
+ LLVM_ABI void initializeIRSimilarityIdentifierWrapperPassPass(PassRegistry &);
+diff --git a/llvm/include/llvm/LTO/Config.h b/llvm/include/llvm/LTO/Config.h
+index f322f753813ff422698615c656d1b82fdaf4f242..b252ba7ff99c04b150bf0292b86091546174cfb8 100644
+--- a/llvm/include/llvm/LTO/Config.h
++++ b/llvm/include/llvm/LTO/Config.h
+@@ -15,6 +15,7 @@
+ #define LLVM_LTO_CONFIG_H
+ 
+ #include "llvm/ADT/DenseSet.h"
++#include "llvm/ADT/StringMap.h"
+ #include "llvm/Config/llvm-config.h"
+ #include "llvm/IR/DiagnosticInfo.h"
+ #include "llvm/IR/GlobalValue.h"
+@@ -26,7 +27,12 @@
+ #include "llvm/Target/TargetOptions.h"
+ 
+ #include <functional>
++#include <memory>
++#include <mutex>
+ #include <optional>
++#include <string>
++#include <utility>
++#include <vector>
+ 
+ namespace llvm {
+ 
+@@ -38,6 +44,44 @@ class PassPlugin;
+ 
+ namespace lto {
+ 
++/// One Definition Rule checker for herbception ("throws"/"fails{E}")
++/// functions, shared by all modules of an LTO link (including ThinLTO
++/// backend threads).
++///
++/// The herbception specifier is not part of the C++ mangled name, so two
++/// translation units can disagree about whether a symbol is a throws
++/// function -- and about its error payload type -- while producing the very
++/// same symbol name. The herbception error channel changes the returned-
++/// function ABI ({T, i1} return plus a target discriminant), and only the
++/// linker sees all of the definitions, so this is where the disagreement
++/// has to be diagnosed.
++class HerbceptionODRChecker {
++public:
++  /// The herbception-relevant part of a function's ABI: whether it carries
++  /// the 'throws' attribute, and the payload element of its {T, i1} return
++  /// type ("" when there is no herbception error channel at all).
++  struct Signature {
++    bool Throws = false;
++    std::string PayloadTy;
++
++    bool operator==(const Signature &Other) const {
++      return Throws == Other.Throws && PayloadTy == Other.PayloadTy;
++    }
++  };
++
++  /// Record \p Sig for symbol \p Name seen in module \p ModuleID. Conflicts
++  /// with previously recorded signatures are appended to the violation list.
++  void record(StringRef Name, const Signature &Sig, StringRef ModuleID);
++
++  /// Returns and clears the accumulated violation messages.
++  std::vector<std::string> takeViolations();
++
++private:
++  std::mutex Mutex;
++  StringMap<std::pair<Signature, std::string>> Definitions;
++  std::vector<std::string> Violations;
++};
++
+ /// LTO configuration. A linker can configure LTO by setting fields in this data
+ /// structure and passing it to the lto::LTO constructor.
+ struct Config {
+@@ -100,6 +144,20 @@ struct Config {
+   /// need to create copies, so it can set this field to false.
+   bool KeepSymbolNameCopies = true;
+ 
++  /// Check the herbception ("throws"/"fails{E}") signatures of all externally
++  /// visible functions across every LTO module (including ThinLTO backends)
++  /// and fail the link on One Definition Rule violations. On by default: the
++  /// herbception error channel changes the returned-function ABI but is not
++  /// part of the mangled name, so only the linker can catch translation units
++  /// that disagree about it.
++  bool CheckHerbceptionODR = true;
++
++  /// State shared by HerbceptionODRChecker scans of every input module. Kept
++  /// behind a shared_ptr so that copies of this Config (and ThinLTO backend
++  /// threads) all observe the same registry.
++  std::shared_ptr<HerbceptionODRChecker> HerbceptionODR =
++      std::make_shared<HerbceptionODRChecker>();
++
+   /// This flag is used as one of parameters to calculate cache entries and to
+   /// ensure that in-process cache and out-of-process (DTLTO) cache are
+   /// distinguished.
+diff --git a/llvm/include/llvm/Target/TargetCallingConv.td b/llvm/include/llvm/Target/TargetCallingConv.td
+index 75d8ae44935b107504eda045685439f71d2ef990..edef12d2a1b5b4d1040cda48d4a36864db2f224b 100644
+--- a/llvm/include/llvm/Target/TargetCallingConv.td
++++ b/llvm/include/llvm/Target/TargetCallingConv.td
+@@ -61,6 +61,11 @@ class CCIfSwiftAsync<CCAction A> : CCIf<"ArgFlags.isSwiftAsync()", A> {
+ class CCIfSwiftError<CCAction A> : CCIf<"ArgFlags.isSwiftError()", A> {
+ }
+ 
++/// CCIfThrows - If the current argument has the throws (herbception)
++/// discriminant attribute, apply Action A.
++class CCIfThrows<CCAction A> : CCIf<"ArgFlags.isThrows()", A> {
++}
++
+ /// CCIfCFGuardTarget - If the current argument has cfguardtarget parameter
+ /// attribute, apply Action A.
+ class CCIfCFGuardTarget<CCAction A> : CCIf<"ArgFlags.isCFGuardTarget()", A> {
+diff --git a/llvm/include/llvm/Transforms/Scalar/HerbceptionsLegacyEHFold.h b/llvm/include/llvm/Transforms/Scalar/HerbceptionsLegacyEHFold.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..2fb164d338f261b52a98e576a04b96c7287c1d53
+--- /dev/null
++++ b/llvm/include/llvm/Transforms/Scalar/HerbceptionsLegacyEHFold.h
+@@ -0,0 +1,33 @@
++//===- HerbceptionsLegacyEHFold.h - fold legacy throws into herbceptions ------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++//
++// When a legacy C++ throw (__cxa_throw / _CxxThrowException) provably unwinds
++// into the compiler-generated legacy->std::error conversion site and nowhere
++// else, the exception is only ever observed through the herbceptions error
++// channel. This pass folds such throws into a direct call to the
++// libherbceptions "direct" conversion entry points, eliminating the runtime
++// unwind entirely.
++//
++//===----------------------------------------------------------------------===//
++
++#ifndef LLVM_TRANSFORMS_SCALAR_HERBCEPTIONSLEGACYEHFOLD_H
++#define LLVM_TRANSFORMS_SCALAR_HERBCEPTIONSLEGACYEHFOLD_H
++
++#include "llvm/IR/PassManager.h"
++
++namespace llvm {
++
++class HerbceptionsLegacyEHFoldPass
++    : public OptionalPassInfoMixin<HerbceptionsLegacyEHFoldPass> {
++public:
++  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
++};
++
++} // end namespace llvm
++
++#endif // LLVM_TRANSFORMS_SCALAR_HERBCEPTIONSLEGACYEHFOLD_H
+diff --git a/llvm/lib/Bitcode/Reader/BitcodeReader.cpp b/llvm/lib/Bitcode/Reader/BitcodeReader.cpp
+index c57323ed415251e9c0df79b7bef9794254e265e6..19320bc1bc034bf8b4232caa201bfa7e4fb25b30 100644
+--- a/llvm/lib/Bitcode/Reader/BitcodeReader.cpp
++++ b/llvm/lib/Bitcode/Reader/BitcodeReader.cpp
+@@ -2256,6 +2256,8 @@ static Attribute::AttrKind getAttrFromCode(uint64_t Code) {
+     return Attribute::StrictFP;
+   case bitc::ATTR_KIND_STRUCT_RET:
+     return Attribute::StructRet;
++  case bitc::ATTR_KIND_THROWS_SRET:
++    return Attribute::HerbThrowsSret;
+   case bitc::ATTR_KIND_SANITIZE_ADDRESS:
+     return Attribute::SanitizeAddress;
+   case bitc::ATTR_KIND_SANITIZE_HWADDRESS:
+@@ -2334,6 +2336,8 @@ static Attribute::AttrKind getAttrFromCode(uint64_t Code) {
+     return Attribute::NoOutline;
+   case bitc::ATTR_KIND_NOIPA:
+     return Attribute::NoIPA;
++  case bitc::ATTR_KIND_THROWS:
++    return Attribute::HerbThrows;
+   }
+ }
+ 
+@@ -2446,6 +2450,8 @@ Error BitcodeReader::parseAttributeGroupBlock() {
+             B.addByValAttr(nullptr);
+           else if (Kind == Attribute::StructRet)
+             B.addStructRetAttr(nullptr);
++          else if (Kind == Attribute::HerbThrowsSret)
++            B.addThrowsSretAttr(nullptr);
+           else if (Kind == Attribute::InAlloca)
+             B.addInAllocaAttr(nullptr);
+           else if (Kind == Attribute::UWTable)
+@@ -4390,8 +4396,9 @@ Error BitcodeReader::parseFunctionRecord(ArrayRef<uint64_t> Record) {
+   // argument's pointee type. There should be no opaque pointers where the byval
+   // type is implicit.
+   for (unsigned i = 0; i != Func->arg_size(); ++i) {
+-    for (Attribute::AttrKind Kind : {Attribute::ByVal, Attribute::StructRet,
+-                                     Attribute::InAlloca}) {
++    for (Attribute::AttrKind Kind :
++         {Attribute::ByVal, Attribute::StructRet, Attribute::HerbThrowsSret,
++          Attribute::InAlloca}) {
+       if (!Func->hasParamAttribute(i, Kind))
+         continue;
+ 
+@@ -4413,6 +4420,9 @@ Error BitcodeReader::parseFunctionRecord(ArrayRef<uint64_t> Record) {
+       case Attribute::StructRet:
+         NewAttr = Attribute::getWithStructRetType(Context, PtrEltTy);
+         break;
++      case Attribute::HerbThrowsSret:
++        NewAttr = Attribute::getWithThrowsSretType(Context, PtrEltTy);
++        break;
+       case Attribute::InAlloca:
+         NewAttr = Attribute::getWithInAllocaType(Context, PtrEltTy);
+         break;
+@@ -4966,8 +4976,9 @@ Error BitcodeReader::propagateAttributeTypes(CallBase *CB,
+                                              ArrayRef<unsigned> ArgTyIDs) {
+   AttributeList Attrs = CB->getAttributes();
+   for (unsigned i = 0; i != CB->arg_size(); ++i) {
+-    for (Attribute::AttrKind Kind : {Attribute::ByVal, Attribute::StructRet,
+-                                     Attribute::InAlloca}) {
++    for (Attribute::AttrKind Kind :
++         {Attribute::ByVal, Attribute::StructRet, Attribute::HerbThrowsSret,
++          Attribute::InAlloca}) {
+       if (!Attrs.hasParamAttr(i, Kind) ||
+           Attrs.getParamAttr(i, Kind).getValueAsType())
+         continue;
+@@ -4984,6 +4995,9 @@ Error BitcodeReader::propagateAttributeTypes(CallBase *CB,
+       case Attribute::StructRet:
+         NewAttr = Attribute::getWithStructRetType(Context, PtrEltTy);
+         break;
++      case Attribute::HerbThrowsSret:
++        NewAttr = Attribute::getWithThrowsSretType(Context, PtrEltTy);
++        break;
+       case Attribute::InAlloca:
+         NewAttr = Attribute::getWithInAllocaType(Context, PtrEltTy);
+         break;
+diff --git a/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp b/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp
+index f4ce522c23b8ef2d722c6d554228130a2920b61d..a7ce14d0ad426e24fc85a48c7dfaa90b162bf591 100644
+--- a/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp
++++ b/llvm/lib/Bitcode/Writer/BitcodeWriter.cpp
+@@ -938,6 +938,8 @@ static uint64_t getAttrKindEncoding(Attribute::AttrKind Kind) {
+     return bitc::ATTR_KIND_STRICT_FP;
+   case Attribute::StructRet:
+     return bitc::ATTR_KIND_STRUCT_RET;
++  case Attribute::HerbThrowsSret:
++    return bitc::ATTR_KIND_THROWS_SRET;
+   case Attribute::SanitizeAddress:
+     return bitc::ATTR_KIND_SANITIZE_ADDRESS;
+   case Attribute::SanitizeAllocToken:
+@@ -1014,6 +1016,8 @@ static uint64_t getAttrKindEncoding(Attribute::AttrKind Kind) {
+     return bitc::ATTR_KIND_NOOUTLINE;
+   case Attribute::NoIPA:
+     return bitc::ATTR_KIND_NOIPA;
++  case Attribute::HerbThrows:
++    return bitc::ATTR_KIND_THROWS;
+   case Attribute::EndAttrKinds:
+     llvm_unreachable("Can not encode end-attribute kinds marker.");
+   case Attribute::None:
+diff --git a/llvm/lib/Bitcode/Writer/ValueEnumerator.cpp b/llvm/lib/Bitcode/Writer/ValueEnumerator.cpp
+index 2a1ad62c2804c6303ed543423e4a9f64aa02d9fd..95b0737342043ee345e05f0ddcb60bb5a337690b 100644
+--- a/llvm/lib/Bitcode/Writer/ValueEnumerator.cpp
++++ b/llvm/lib/Bitcode/Writer/ValueEnumerator.cpp
+@@ -1082,6 +1082,8 @@ void ValueEnumerator::incorporateFunction(const Function &F) {
+       EnumerateType(I.getParamByValType());
+     else if (I.hasAttribute(Attribute::StructRet))
+       EnumerateType(I.getParamStructRetType());
++    else if (I.hasAttribute(Attribute::HerbThrowsSret))
++      EnumerateType(I.getParamThrowsSretType());
+     else if (I.hasAttribute(Attribute::ByRef))
+       EnumerateType(I.getParamByRefType());
+   }
+diff --git a/llvm/lib/CodeGen/CMakeLists.txt b/llvm/lib/CodeGen/CMakeLists.txt
+index c572128b023c1e0d7389ac475ff4b8ce4190a7be..a6ac2e226a70ae986fe32555416282b90d010de3 100644
+--- a/llvm/lib/CodeGen/CMakeLists.txt
++++ b/llvm/lib/CodeGen/CMakeLists.txt
+@@ -72,6 +72,7 @@ add_llvm_component_library(LLVMCodeGen
+   GlobalMerge.cpp
+   GlobalMergeFunctions.cpp
+   HardwareLoops.cpp
++  HerbceptionsFlagReturn.cpp
+   IfConversion.cpp
+   ImplicitNullChecks.cpp
+   IndirectBrExpandPass.cpp
+diff --git a/llvm/lib/CodeGen/CodeGen.cpp b/llvm/lib/CodeGen/CodeGen.cpp
+index e0ed5731144b317bf7c96f15c2a1f7d4be49f62c..ce309d58bfc1d861a395b9eac9439bbb89046a7d 100644
+--- a/llvm/lib/CodeGen/CodeGen.cpp
++++ b/llvm/lib/CodeGen/CodeGen.cpp
+@@ -56,6 +56,7 @@ void llvm::initializeCodeGen(PassRegistry &Registry) {
+   initializeGlobalMergePass(Registry);
+   initializeGlobalMergeFuncPassWrapperPass(Registry);
+   initializeHardwareLoopsLegacyPass(Registry);
++  initializeHerbceptionsFlagReturnPass(Registry);
+   initializeIfConverterPass(Registry);
+   initializeImplicitNullChecksPass(Registry);
+   initializeIndirectBrExpandLegacyPassPass(Registry);
+diff --git a/llvm/lib/CodeGen/GlobalISel/CallLowering.cpp b/llvm/lib/CodeGen/GlobalISel/CallLowering.cpp
+index a580b784624532d1743f7e9df380d034c3ecc775..f7866a86a42227a25cbca3aa2d03525a85d048c9 100644
+--- a/llvm/lib/CodeGen/GlobalISel/CallLowering.cpp
++++ b/llvm/lib/CodeGen/GlobalISel/CallLowering.cpp
+@@ -111,6 +111,12 @@ bool CallLowering::lowerCall(MachineIRBuilder &MIRBuilder, const CallBase &CB,
+                              std::optional<PtrAuthInfo> PAI,
+                              Register ConvergenceCtrlToken,
+                              std::function<Register()> GetCalleeReg) const {
++  // The callee's return convention also applies to ordinary callers and
++  // indirect calls marked at the call site. Let SelectionDAG lower the whole
++  // function until GlobalISel implements both sides of that convention.
++  if (CB.hasFnAttr(Attribute::HerbThrows))
++    return false;
++
+   CallLoweringInfo Info;
+   const DataLayout &DL = MIRBuilder.getDataLayout();
+   MachineFunction &MF = MIRBuilder.getMF();
+diff --git a/llvm/lib/CodeGen/GlobalISel/IRTranslator.cpp b/llvm/lib/CodeGen/GlobalISel/IRTranslator.cpp
+index c66226258c87ef7a4303b75e17aa1819ce010c09..607daf29d08530c375934610b0cc7ca5428559bf 100644
+--- a/llvm/lib/CodeGen/GlobalISel/IRTranslator.cpp
++++ b/llvm/lib/CodeGen/GlobalISel/IRTranslator.cpp
+@@ -4230,7 +4230,8 @@ bool IRTranslator::runOnMachineFunction(MachineFunction &CurMF) {
+   ORE = std::make_unique<OptimizationRemarkEmitter>(&F);
+   CLI = MF->getSubtarget().getCallLowering();
+ 
+-  if (CLI->fallBackToDAGISel(*MF)) {
++  // SelectionDAG implements the Herbceptions return convention.
++  if (F.hasFnAttribute(Attribute::HerbThrows) || CLI->fallBackToDAGISel(*MF)) {
+     OptimizationRemarkMissed R("gisel-irtranslator", "GISelFailure",
+                                F.getSubprogram(), &F.getEntryBlock());
+     R << "unable to lower function: "
+diff --git a/llvm/lib/CodeGen/HerbceptionsFlagReturn.cpp b/llvm/lib/CodeGen/HerbceptionsFlagReturn.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..4531924ce5978c1e64b6a803e1c9b3fc069cfe13
+--- /dev/null
++++ b/llvm/lib/CodeGen/HerbceptionsFlagReturn.cpp
+@@ -0,0 +1,227 @@
++//===- HerbceptionsFlagReturn.cpp - Prepare return flags ------------------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++//
++// A 'throws' function returns {payload, i1}, where the trailing i1 is the
++// discriminant: it says whether the return registers hold a value or an
++// error. The backend lowers it to a condition-code flag where it can (CF on
++// x86, NZCV.C on AArch64, ...).
++//
++// SimplifyCFG merges all returns into one block, so the discriminant usually
++// reaches the return through a phi or is recomputed from a value that has to
++// stay live across a called 'throws' function. Instruction selection then
++// materializes it in a register only to turn it back into a flag at the
++// return, and may have to preserve the inputs of that computation.
++//
++// This pass duplicates a small return block into its predecessors and, where
++// the branch leading to the return already implies the discriminant, replaces
++// it with a constant there. The backend then sets the flag directly (stc/clc
++// on x86) or folds it into the return sequence (cmp on AArch64) instead of
++// materializing the value, and the computation that fed it is dead.
++//
++// The transform only rewrites how the return value is built: the signature,
++// the calling convention and the ABI do not change.
++//
++//===----------------------------------------------------------------------===//
++
++#include "llvm/ADT/SmallVector.h"
++#include "llvm/Analysis/ValueTracking.h"
++#include "llvm/CodeGen/Passes.h"
++#include "llvm/IR/Constants.h"
++#include "llvm/IR/Dominators.h"
++#include "llvm/IR/Function.h"
++#include "llvm/IR/Instructions.h"
++#include "llvm/IR/IntrinsicInst.h"
++#include "llvm/InitializePasses.h"
++#include "llvm/Pass.h"
++#include "llvm/Transforms/Utils/BasicBlockUtils.h"
++#include "llvm/Transforms/Utils/ValueMapper.h"
++
++using namespace llvm;
++
++#define DEBUG_TYPE "herbceptions-flag-return"
++
++namespace {
++
++class HerbceptionsFlagReturn : public FunctionPass {
++public:
++  static char ID;
++
++  HerbceptionsFlagReturn() : FunctionPass(ID) {}
++
++  bool runOnFunction(Function &F) override;
++
++  void getAnalysisUsage(AnalysisUsage &AU) const override {
++    AU.addRequired<DominatorTreeWrapperPass>();
++  }
++
++  StringRef getPassName() const override {
++    return "Herbceptions Return Flag Folding";
++  }
++};
++
++} // end anonymous namespace
++
++char HerbceptionsFlagReturn::ID = 0;
++
++INITIALIZE_PASS(HerbceptionsFlagReturn, DEBUG_TYPE,
++                "Fold herbceptions return flags to constants", false, false)
++
++FunctionPass *llvm::createHerbceptionsFlagReturnPass() {
++  return new HerbceptionsFlagReturn();
++}
++
++/// The use of the flag that \p RI returns, if it is set by an insertvalue.
++static Use *getFlagUse(ReturnInst *RI) {
++  auto *STy = dyn_cast_or_null<StructType>(
++      RI->getReturnValue() ? RI->getReturnValue()->getType() : nullptr);
++  if (!STy || STy->getNumElements() == 0 ||
++      !STy->getElementType(STy->getNumElements() - 1)->isIntegerTy(1))
++    return nullptr;
++  unsigned FlagIdx = STy->getNumElements() - 1;
++  Value *V = RI->getReturnValue();
++  while (auto *IV = dyn_cast<InsertValueInst>(V)) {
++    if (IV->getNumIndices() == 1 && IV->getIndices()[0] == FlagIdx)
++      return &IV->getOperandUse(
++          InsertValueInst::getInsertedValueOperandIndex());
++    V = IV->getAggregateOperand();
++  }
++  return nullptr;
++}
++
++/// Whether the return block \p BB is worth duplicating into its predecessors.
++static bool shouldDuplicate(BasicBlock *BB, ReturnInst *RI) {
++  if (pred_empty(BB) || BB->hasNPredecessorsOrMore(9) || BB->hasAddressTaken())
++    return false;
++  // The flag must be set in the block, possibly to a phi, or the value must
++  // be a phi. A flag that is already a constant needs no work.
++  Use *Flag = getFlagUse(RI);
++  auto *PN = dyn_cast_or_null<PHINode>(RI->getReturnValue());
++  if (Flag ? isa<Constant>(Flag->get()) : !(PN && PN->getParent() == BB))
++    return false;
++  // Only the construction of the return value, plus whatever computes the
++  // discriminant (late passes often recompute the branch condition here
++  // rather than keep it live across the edge). Duplicating is safe: each
++  // copy runs exactly on the edge that reached the block, so the same
++  // instructions execute on the same paths, just from more than one place.
++  unsigned NumInsts = 0;
++  for (Instruction &I : *BB) {
++    if (isa<PHINode>(I) || isa<DbgInfoIntrinsic>(I))
++      continue;
++    if (I.isTerminator()) {
++      if (!isa<ReturnInst>(I))
++        return false;
++      continue;
++    }
++    if (++NumInsts > 8)
++      return false;
++  }
++  for (BasicBlock *Pred : predecessors(BB))
++    if (!isa<UncondBrInst, CondBrInst>(Pred->getTerminator()))
++      return false;
++  return true;
++}
++
++/// The value of \p Cond at \p I if it is implied by a dominating branch.
++static std::optional<bool> getImpliedValue(Value *Cond, Instruction *I,
++                                           const DataLayout &DL) {
++  // CodeGenPrepare freezes the conditions of branches that it creates from
++  // selects.
++  BasicBlock *BB = I->getParent();
++  BasicBlock *Pred = BB->getSinglePredecessor();
++  auto *Br = Pred ? dyn_cast<CondBrInst>(Pred->getTerminator()) : nullptr;
++  if (Br && Br->getSuccessor(0) != Br->getSuccessor(1)) {
++    Value *BrCond = Br->getCondition();
++    if (auto *Fr = dyn_cast<FreezeInst>(BrCond))
++      BrCond = Fr->getOperand(0);
++    if (BrCond == Cond)
++      return Br->getSuccessor(0) == BB;
++  }
++  return isImpliedByDomCondition(Cond, I, DL);
++}
++
++/// Copy the return block \p BB into \p Pred, which ends in an unconditional
++/// branch to it. Returns the new return instruction.
++static ReturnInst *duplicateReturnInto(BasicBlock *BB, BasicBlock *Pred,
++                                       DominatorTree *DT) {
++  ValueToValueMapTy VMap;
++  for (PHINode &PN : BB->phis())
++    VMap[&PN] = PN.getIncomingValueForBlock(Pred);
++  Instruction *Br = Pred->getTerminator();
++  ReturnInst *NewRet = nullptr;
++  for (Instruction &I : *BB) {
++    if (isa<PHINode>(I))
++      continue;
++    Instruction *C = I.clone();
++    C->insertBefore(Br->getIterator());
++    RemapInstruction(C, VMap, RF_NoModuleLevelChanges | RF_IgnoreMissingLocals);
++    VMap[&I] = C;
++    if (auto *RI = dyn_cast<ReturnInst>(C))
++      NewRet = RI;
++  }
++  BB->removePredecessor(Pred);
++  Br->eraseFromParent();
++  DT->deleteEdge(Pred, BB);
++  return NewRet;
++}
++
++bool HerbceptionsFlagReturn::runOnFunction(Function &F) {
++  // Only 'throws' functions return a trailing discriminant. The transform
++  // grows the function by duplicating a small return block, so leave
++  // functions that are compiled for size alone.
++  if (skipFunction(F) || !F.hasFnAttribute(Attribute::HerbThrows) ||
++      F.hasMinSize())
++    return false;
++
++  const DataLayout &DL = F.getDataLayout();
++  DominatorTree *DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
++
++  SmallVector<BasicBlock *, 4> Returns;
++  for (BasicBlock &BB : F)
++    if (auto *RI = dyn_cast<ReturnInst>(BB.getTerminator()))
++      if (shouldDuplicate(&BB, RI))
++        Returns.push_back(&BB);
++
++  bool Changed = false;
++  for (BasicBlock *BB : Returns) {
++    SmallVector<BasicBlock *, 4> Preds(predecessors(BB));
++    SmallVector<ReturnInst *, 4> NewRets;
++    for (BasicBlock *Pred : Preds) {
++      // Give each edge a block of its own that ends in an unconditional
++      // branch to BB, into which the return is folded.
++      BasicBlock *From = Pred;
++      if (!isa<UncondBrInst>(Pred->getTerminator()))
++        From = SplitEdge(Pred, BB, DT);
++      NewRets.push_back(duplicateReturnInto(BB, From, DT));
++    }
++    // Where the flag is implied by the branch leading to the return, use the
++    // constant. The insertvalue that sets the flag may be shared with other
++    // paths, so set the constant in a new one right before the return.
++    for (ReturnInst *NewRI : NewRets) {
++      Use *Flag = getFlagUse(NewRI);
++      if (!Flag || isa<Constant>(Flag->get()))
++        continue;
++      if (std::optional<bool> Known = getImpliedValue(Flag->get(), NewRI, DL)) {
++        Value *RetVal = NewRI->getReturnValue();
++        unsigned FlagIdx =
++            cast<StructType>(RetVal->getType())->getNumElements() - 1;
++        NewRI->setOperand(
++            0, InsertValueInst::Create(
++                   RetVal, ConstantInt::getBool(F.getContext(), *Known),
++                   FlagIdx, "", NewRI->getIterator()));
++      }
++    }
++    if (pred_empty(BB)) {
++      // Deleting the last edge usually removed it from the tree already.
++      if (DT->getNode(BB))
++        DT->eraseNode(BB);
++      DeleteDeadBlock(BB);
++    }
++    Changed = true;
++  }
++  return Changed;
++}
+diff --git a/llvm/lib/CodeGen/SelectionDAG/FastISel.cpp b/llvm/lib/CodeGen/SelectionDAG/FastISel.cpp
+index 5550f4130141859b4b00346eaa5ce641895470b4..693b148d8d8813598b93c7ceaf91a173a3308377 100644
+--- a/llvm/lib/CodeGen/SelectionDAG/FastISel.cpp
++++ b/llvm/lib/CodeGen/SelectionDAG/FastISel.cpp
+@@ -996,6 +996,11 @@ bool FastISel::lowerCallTo(CallLoweringInfo &CLI) {
+ 
+   SmallVector<ISD::OutputArg, 4> Outs;
+   GetReturnInfo(CLI.CallConv, CLI.RetTy, getReturnAttrs(CLI), Outs, TLI, DL);
++  // Propagate the throws (herbception) discriminant flag to the last return
++  // value so that the caller-side return lowering can use a discriminant
++  // mechanism.
++  if (CLI.IsThrows && !Outs.empty())
++    Outs.back().Flags.setThrows();
+ 
+   bool CanLowerReturn = TLI.CanLowerReturn(
+       CLI.CallConv, *FuncInfo.MF, CLI.IsVarArg, Outs, CLI.RetTy->getContext(), CLI.RetTy);
+@@ -1004,7 +1009,8 @@ bool FastISel::lowerCallTo(CallLoweringInfo &CLI) {
+   if (!CanLowerReturn)
+     return false;
+ 
+-  for (EVT VT : RetTys) {
++  for (unsigned I = 0, E = RetTys.size(); I != E; ++I) {
++    EVT VT = RetTys[I];
+     MVT RegisterVT = TLI.getRegisterType(CLI.RetTy->getContext(), VT);
+     unsigned NumRegs = TLI.getNumRegisters(CLI.RetTy->getContext(), VT);
+     for (unsigned i = 0; i != NumRegs; ++i) {
+@@ -1015,6 +1021,10 @@ bool FastISel::lowerCallTo(CallLoweringInfo &CLI) {
+         Flags.setZExt();
+       if (CLI.IsInReg)
+         Flags.setInReg();
++      // Herbception (throws): the discriminant is the last part of the
++      // {T, i1} return value.
++      if (CLI.IsThrows && I == RetTys.size() - 1)
++        Flags.setThrows();
+       ISD::InputArg Ret(Flags, RegisterVT, VT, CLI.RetTy, CLI.IsReturnValueUsed,
+                         ISD::InputArg::NoArgIndex, 0);
+       CLI.Ins.push_back(Ret);
+@@ -1184,6 +1194,12 @@ bool FastISel::selectCall(const User *I) {
+   if (const auto *II = dyn_cast<IntrinsicInst>(Call))
+     return selectIntrinsicCall(II);
+ 
++  // Herbception (throws) calls return a {T, i1} value where the discriminant
++  // is carried in a target-specific mechanism (e.g. the carry flag on x86).
++  // FastISel does not implement this, so fall back to SelectionDAG ISel.
++  if (Call->hasFnAttr(Attribute::HerbThrows))
++    return false;
++
+   return lowerCall(Call);
+ }
+ 
+diff --git a/llvm/lib/CodeGen/SelectionDAG/SelectionDAGBuilder.cpp b/llvm/lib/CodeGen/SelectionDAG/SelectionDAGBuilder.cpp
+index 0f6bd53cafdd8ad853c57aedb86dfb49cf708661..744db54002b7d76e2cab72e75eabeedb7a7f7902 100644
+--- a/llvm/lib/CodeGen/SelectionDAG/SelectionDAGBuilder.cpp
++++ b/llvm/lib/CodeGen/SelectionDAG/SelectionDAGBuilder.cpp
+@@ -2314,6 +2314,12 @@ void SelectionDAGBuilder::visitRet(const ReturnInst &I) {
+         if (RetInReg)
+           Flags.setInReg();
+ 
++        // Herbception (throws) functions return with a discriminant. The
++        // discriminant is the last part of the {T, i1} return value.
++        if (F->getAttributes().hasFnAttr(Attribute::HerbThrows) &&
++            j == NumValues - 1)
++          Flags.setThrows();
++
+         if (I.getOperand(0)->getType()->isPointerTy()) {
+           Flags.setPointer();
+           Flags.setPointerAddrSpace(
+@@ -11482,6 +11488,11 @@ TargetLowering::LowerCallTo(TargetLowering::CallLoweringInfo &CLI) const {
+ 
+   SmallVector<ISD::OutputArg, 4> Outs;
+   GetReturnInfo(CLI.CallConv, CLI.RetTy, getReturnAttrs(CLI), Outs, *this, DL);
++  // Propagate the throws (herbception) discriminant flag to the last return
++  // value so that the caller-side return lowering can use a discriminant
++  // mechanism.
++  if (CLI.IsThrows && !Outs.empty())
++    Outs.back().Flags.setThrows();
+ 
+   bool CanLowerReturn =
+       this->CanLowerReturn(CLI.CallConv, CLI.DAG.getMachineFunction(),
+@@ -11540,6 +11551,10 @@ TargetLowering::LowerCallTo(TargetLowering::CallLoweringInfo &CLI) const {
+           Ret.Flags.setZExt();
+         if (CLI.IsInReg)
+           Ret.Flags.setInReg();
++        // Herbception (throws): the discriminant is the last part of the
++        // {T, i1} return value.
++        if (CLI.IsThrows && I == RetVTs.size() - 1)
++          Ret.Flags.setThrows();
+         CLI.Ins.push_back(Ret);
+       }
+     }
+diff --git a/llvm/lib/CodeGen/TargetLoweringBase.cpp b/llvm/lib/CodeGen/TargetLoweringBase.cpp
+index 44ce04e6c4dac9e000c46ee9d2c793654f6995e2..329ca446d02222482a4229075ff9d2d2fb3d9570 100644
+--- a/llvm/lib/CodeGen/TargetLoweringBase.cpp
++++ b/llvm/lib/CodeGen/TargetLoweringBase.cpp
+@@ -2116,8 +2116,15 @@ void llvm::GetReturnInfo(CallingConv::ID CC, Type *ReturnType,
+   unsigned NumValues = Types.size();
+   if (NumValues == 0) return;
+ 
+-  for (Type *Ty : Types) {
++  for (unsigned I = 0, E = NumValues; I != E; ++I) {
++    Type *Ty = Types[I];
+     EVT VT = TLI.getValueType(DL, Ty);
++
++    // Skip zero-sized types (empty structs) for throws functions.
++    // An empty struct should not consume a return register slot.
++    if (VT.isZeroSized() && attr.hasFnAttr(Attribute::HerbThrows))
++      continue;
++
+     ISD::NodeType ExtendKind = ISD::ANY_EXTEND;
+ 
+     if (attr.hasRetAttr(Attribute::SExt))
+@@ -2138,6 +2145,11 @@ void llvm::GetReturnInfo(CallingConv::ID CC, Type *ReturnType,
+     if (attr.hasRetAttr(Attribute::InReg))
+       Flags.setInReg();
+ 
++    // Propagate the throws (herbception) discriminant flag from the function.
++    // The discriminant is the last part of the {T, i1} return value.
++    if (attr.hasFnAttr(Attribute::HerbThrows) && I == E - 1)
++      Flags.setThrows();
++
+     // Propagate extension type if any
+     if (attr.hasRetAttr(Attribute::SExt))
+       Flags.setSExt();
+diff --git a/llvm/lib/CodeGen/TargetPassConfig.cpp b/llvm/lib/CodeGen/TargetPassConfig.cpp
+index 4996f5517fc0aa60e9b0b5775e94fc21e2fe0843..40f877dac7b442cdff205f3cfa08f112a7b71ce0 100644
+--- a/llvm/lib/CodeGen/TargetPassConfig.cpp
++++ b/llvm/lib/CodeGen/TargetPassConfig.cpp
+@@ -971,6 +971,11 @@ void TargetPassConfig::addCodeGenPrepare() {
+ void TargetPassConfig::addISelPrepare() {
+   addPreISel();
+ 
++  // Fold the trailing discriminant of 'throws' returns into the return
++  // sequence where the branch into the return block implies it.
++  if (getOptLevel() != CodeGenOptLevel::None)
++    addPass(createHerbceptionsFlagReturnPass());
++
+   // Force codegen to run according to the callgraph.
+   if (requiresCodeGenSCCOrder())
+     addPass(new DummyCGSCCPass);
+diff --git a/llvm/lib/Demangle/MicrosoftDemangle.cpp b/llvm/lib/Demangle/MicrosoftDemangle.cpp
+index 1049226704f7535db2ebf8ab49d22e72a183c61f..6932b83f1c949e4fe93aed4e9d52a19dfc7742c7 100644
+--- a/llvm/lib/Demangle/MicrosoftDemangle.cpp
++++ b/llvm/lib/Demangle/MicrosoftDemangle.cpp
+@@ -1902,14 +1902,28 @@ TypeNode *Demangler::demangleType(std::string_view &MangledName,
+   return Ty;
+ }
+ 
+-bool Demangler::demangleThrowSpecification(std::string_view &MangledName) {
+-  if (consumeFront(MangledName, "_E"))
+-    return true;
++void Demangler::demangleThrowSpecification(std::string_view &MangledName,
++                                           FunctionSignatureNode *FTy) {
++  // _E = noexcept, _H = throws, _F <type> = return_failure{E}
++  if (consumeFront(MangledName, "_E")) {
++    FTy->IsNoexcept = true;
++    return;
++  }
++  if (consumeFront(MangledName, "_H")) {
++    FTy->IsThrows = true;
++    return;
++  }
++  if (consumeFront(MangledName, "_F")) {
++    FTy->FailureType =
++        demangleType(MangledName, QualifierMangleMode::Drop);
++    if (!FTy->FailureType)
++      Error = true;
++    return;
++  }
+   if (consumeFront(MangledName, 'Z'))
+-    return false;
++    return;
+ 
+   Error = true;
+-  return false;
+ }
+ 
+ FunctionSignatureNode *
+@@ -1934,7 +1948,7 @@ Demangler::demangleFunctionType(std::string_view &MangledName,
+ 
+   FTy->Params = demangleFunctionParameterList(MangledName, FTy->IsVariadic);
+ 
+-  FTy->IsNoexcept = demangleThrowSpecification(MangledName);
++  demangleThrowSpecification(MangledName, FTy);
+ 
+   return FTy;
+ }
+diff --git a/llvm/lib/Demangle/MicrosoftDemangleNodes.cpp b/llvm/lib/Demangle/MicrosoftDemangleNodes.cpp
+index daca80b144de5f222cdab4085eae81003fca736d..7800396a2092a0cf9acdcc43d2ff3ad6be465352 100644
+--- a/llvm/lib/Demangle/MicrosoftDemangleNodes.cpp
++++ b/llvm/lib/Demangle/MicrosoftDemangleNodes.cpp
+@@ -444,6 +444,13 @@ void FunctionSignatureNode::outputPost(OutputBuffer &OB,
+ 
+   if (IsNoexcept)
+     OB << " noexcept";
++  if (IsThrows)
++    OB << " throws";
++  if (FailureType) {
++    OB << " return_failure{";
++    FailureType->output(OB, OF_Default);
++    OB << '}';
++  }
+ 
+   if (RefQualifier == FunctionRefQualifier::Reference)
+     OB << " &";
+diff --git a/llvm/lib/IR/Attributes.cpp b/llvm/lib/IR/Attributes.cpp
+index 4087b25951a1cc3e4ff6236f4cb768a399511bca..206265ff3f385b2297a4c83fbe330e64c3657fe3 100644
+--- a/llvm/lib/IR/Attributes.cpp
++++ b/llvm/lib/IR/Attributes.cpp
+@@ -261,6 +261,10 @@ Attribute Attribute::getWithStructRetType(LLVMContext &Context, Type *Ty) {
+   return get(Context, StructRet, Ty);
+ }
+ 
++Attribute Attribute::getWithThrowsSretType(LLVMContext &Context, Type *Ty) {
++  return get(Context, HerbThrowsSret, Ty);
++}
++
+ Attribute Attribute::getWithByRefType(LLVMContext &Context, Type *Ty) {
+   return get(Context, ByRef, Ty);
+ }
+@@ -1224,6 +1228,10 @@ Type *AttributeSet::getStructRetType() const {
+   return SetNode ? SetNode->getAttributeType(Attribute::StructRet) : nullptr;
+ }
+ 
++Type *AttributeSet::getThrowsSretType() const {
++  return SetNode ? SetNode->getAttributeType(Attribute::HerbThrowsSret) : nullptr;
++}
++
+ Type *AttributeSet::getPreallocatedType() const {
+   return SetNode ? SetNode->getAttributeType(Attribute::Preallocated) : nullptr;
+ }
+@@ -1999,6 +2007,10 @@ Type *AttributeList::getParamStructRetType(unsigned Index) const {
+   return getAttributes(Index + FirstArgIndex).getStructRetType();
+ }
+ 
++Type *AttributeList::getParamThrowsSretType(unsigned Index) const {
++  return getAttributes(Index + FirstArgIndex).getThrowsSretType();
++}
++
+ Type *AttributeList::getParamByRefType(unsigned Index) const {
+   return getAttributes(Index + FirstArgIndex).getByRefType();
+ }
+@@ -2347,6 +2359,10 @@ AttrBuilder &AttrBuilder::addStructRetAttr(Type *Ty) {
+   return addTypeAttr(Attribute::StructRet, Ty);
+ }
+ 
++AttrBuilder &AttrBuilder::addThrowsSretAttr(Type *Ty) {
++  return addTypeAttr(Attribute::HerbThrowsSret, Ty);
++}
++
+ AttrBuilder &AttrBuilder::addByRefAttr(Type *Ty) {
+   return addTypeAttr(Attribute::ByRef, Ty);
+ }
+@@ -2528,6 +2544,7 @@ AttributeMask AttributeFuncs::typeIncompatible(Type *Ty, AttributeSet AS,
+           .addAttribute(Attribute::InAlloca)
+           .addAttribute(Attribute::ByVal)
+           .addAttribute(Attribute::StructRet)
++          .addAttribute(Attribute::HerbThrowsSret)
+           .addAttribute(Attribute::ByRef)
+           .addAttribute(Attribute::ElementType)
+           .addAttribute(Attribute::AllocatedPointer);
+diff --git a/llvm/lib/IR/Function.cpp b/llvm/lib/IR/Function.cpp
+index 7c2a151dbefda12d51027e8eb83d8afc48d372a0..e815085984ce8e6c46aeae1ad70a49d9a75684ee 100644
+--- a/llvm/lib/IR/Function.cpp
++++ b/llvm/lib/IR/Function.cpp
+@@ -173,6 +173,7 @@ bool Argument::hasPointeeInMemoryValueAttr() const {
+   AttributeSet Attrs = getAttributes();
+   return Attrs.hasAttribute(Attribute::ByVal) ||
+          Attrs.hasAttribute(Attribute::StructRet) ||
++         Attrs.hasAttribute(Attribute::HerbThrowsSret) ||
+          Attrs.hasAttribute(Attribute::InAlloca) ||
+          Attrs.hasAttribute(Attribute::Preallocated) ||
+          Attrs.hasAttribute(Attribute::ByRef);
+@@ -193,6 +194,8 @@ static Type *getMemoryParamAllocType(AttributeSet ParamAttrs) {
+     return InAllocaTy;
+   if (Type *SRetTy = ParamAttrs.getStructRetType())
+     return SRetTy;
++  if (Type *ThrowsSretTy = ParamAttrs.getThrowsSretType())
++    return ThrowsSretTy;
+ 
+   return nullptr;
+ }
+@@ -226,6 +229,11 @@ Type *Argument::getParamStructRetType() const {
+   return getParent()->getParamStructRetType(getArgNo());
+ }
+ 
++Type *Argument::getParamThrowsSretType() const {
++  assert(getType()->isPointerTy() && "Only pointers have throws_sret types");
++  return getParent()->getParamThrowsSretType(getArgNo());
++}
++
+ Type *Argument::getParamByRefType() const {
+   assert(getType()->isPointerTy() && "Only pointers have byref types");
+   return getParent()->getParamByRefType(getArgNo());
+@@ -284,6 +292,11 @@ bool Argument::hasStructRetAttr() const {
+   return hasAttribute(Attribute::StructRet);
+ }
+ 
++bool Argument::hasThrowsSretAttr() const {
++  if (!getType()->isPointerTy()) return false;
++  return hasAttribute(Attribute::HerbThrowsSret);
++}
++
+ bool Argument::hasInRegAttr() const {
+   return hasAttribute(Attribute::InReg);
+ }
+diff --git a/llvm/lib/IR/Verifier.cpp b/llvm/lib/IR/Verifier.cpp
+index 9a455fbc9256a3f1f5caf51ac83220bb4c36e279..6ec107f355da0a664de687a58523a915e78a2cda 100644
+--- a/llvm/lib/IR/Verifier.cpp
++++ b/llvm/lib/IR/Verifier.cpp
+@@ -2084,18 +2084,21 @@ void Verifier::verifyParameterAttrs(AttributeSet Attrs, Type *Ty,
+   }
+ 
+   // Check for mutually incompatible attributes.  Only inreg is compatible with
+-  // sret.
++  // sret and throws_sret.
+   unsigned AttrCount = 0;
+   AttrCount += Attrs.hasAttribute(Attribute::ByVal);
+   AttrCount += Attrs.hasAttribute(Attribute::InAlloca);
+   AttrCount += Attrs.hasAttribute(Attribute::Preallocated);
+-  AttrCount += Attrs.hasAttribute(Attribute::StructRet) ||
+-               Attrs.hasAttribute(Attribute::InReg);
++  AttrCount += Attrs.hasAttribute(Attribute::StructRet);
++  AttrCount += Attrs.hasAttribute(Attribute::HerbThrowsSret);
++  AttrCount += Attrs.hasAttribute(Attribute::InReg) &&
++               !Attrs.hasAttribute(Attribute::StructRet) &&
++               !Attrs.hasAttribute(Attribute::HerbThrowsSret);
+   AttrCount += Attrs.hasAttribute(Attribute::Nest);
+   AttrCount += Attrs.hasAttribute(Attribute::ByRef);
+   Check(AttrCount <= 1,
+         "Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', "
+-        "'byref', and 'sret' are incompatible!",
++        "'byref', 'sret', and 'herbthrows_sret' are incompatible!",
+         V);
+ 
+   Check(!(Attrs.hasAttribute(Attribute::InAlloca) &&
+@@ -2110,6 +2113,12 @@ void Verifier::verifyParameterAttrs(AttributeSet Attrs, Type *Ty,
+         "'sret and returned' are incompatible!",
+         V);
+ 
++  Check(!(Attrs.hasAttribute(Attribute::HerbThrowsSret) &&
++          Attrs.hasAttribute(Attribute::Returned)),
++        "Attributes "
++        "'herbthrows_sret and returned' are incompatible!",
++        V);
++
+   Check(!(Attrs.hasAttribute(Attribute::ZExt) &&
+           Attrs.hasAttribute(Attribute::SExt)),
+         "Attributes "
+@@ -2260,6 +2269,7 @@ void Verifier::verifyFunctionAttrs(FunctionType *FT, AttributeList Attrs,
+   bool SawNest = false;
+   bool SawReturned = false;
+   bool SawSRet = false;
++  bool SawThrowsSRet = false;
+   bool SawSwiftSelf = false;
+   bool SawSwiftAsync = false;
+   bool SawSwiftError = false;
+@@ -2324,6 +2334,13 @@ void Verifier::verifyFunctionAttrs(FunctionType *FT, AttributeList Attrs,
+       SawSRet = true;
+     }
+ 
++    if (ArgAttrs.hasAttribute(Attribute::HerbThrowsSret)) {
++      Check(!SawThrowsSRet, "Cannot have multiple 'herbthrows_sret' parameters!", V);
++      Check(i == 0 || i == 1,
++            "Attribute 'herbthrows_sret' is not on first or second parameter!", V);
++      SawThrowsSRet = true;
++    }
++
+     if (ArgAttrs.hasAttribute(Attribute::SwiftSelf)) {
+       Check(!SawSwiftSelf, "Cannot have multiple 'swiftself' parameters!", V);
+       SawSwiftSelf = true;
+@@ -2892,6 +2909,9 @@ void Verifier::verifyStatepoint(const CallBase &Call) {
+       AttributeSet ArgAttrs = Attrs.getParamAttrs(5 + i);
+       Check(!ArgAttrs.hasAttribute(Attribute::StructRet),
+             "Attribute 'sret' cannot be used for vararg call arguments!", Call);
++      Check(!ArgAttrs.hasAttribute(Attribute::HerbThrowsSret),
++            "Attribute 'herbthrows_sret' cannot be used for vararg call arguments!",
++            Call);
+     }
+   }
+ 
+@@ -3095,6 +3115,8 @@ void Verifier::visitFunction(const Function &F) {
+   case CallingConv::AMDGPU_PS:
+   case CallingConv::AMDGPU_CS:
+     Check(!F.hasStructRetAttr(), "Calling convention does not allow sret", &F);
++    Check(!F.hasThrowsSretAttr(),
++          "Calling convention does not allow herbthrows_sret", &F);
+     if (F.getCallingConv() != CallingConv::SPIR_KERNEL) {
+       const unsigned StackAS = DL.getAllocaAddrSpace();
+       unsigned i = 0;
+@@ -3996,10 +4018,15 @@ void Verifier::visitCallBase(CallBase &Call) {
+ 
+       // Statepoint intrinsic is vararg but the wrapped function may be not.
+       // Allow sret here and check the wrapped function in verifyStatepoint.
+-      if (Call.getIntrinsicID() != Intrinsic::experimental_gc_statepoint)
++      if (Call.getIntrinsicID() != Intrinsic::experimental_gc_statepoint) {
+         Check(!ArgAttrs.hasAttribute(Attribute::StructRet),
+               "Attribute 'sret' cannot be used for vararg call arguments!",
+               Call);
++        Check(!ArgAttrs.hasAttribute(Attribute::HerbThrowsSret),
++              "Attribute 'herbthrows_sret' cannot be used for vararg call "
++              "arguments!",
++              Call);
++      }
+ 
+       if (ArgAttrs.hasAttribute(Attribute::InAlloca))
+         Check(Idx == Call.arg_size() - 1,
+@@ -4143,10 +4170,10 @@ void Verifier::verifyTailCCMustTailAttrs(const AttrBuilder &Attrs,
+ 
+ static AttrBuilder getParameterABIAttributes(LLVMContext& C, unsigned I, AttributeList Attrs) {
+   static const Attribute::AttrKind ABIAttrs[] = {
+-      Attribute::StructRet,  Attribute::ByVal,          Attribute::InAlloca,
+-      Attribute::InReg,      Attribute::StackAlignment, Attribute::SwiftSelf,
+-      Attribute::SwiftAsync, Attribute::SwiftError,     Attribute::Preallocated,
+-      Attribute::ByRef};
++      Attribute::StructRet,  Attribute::HerbThrowsSret,    Attribute::ByVal,
++      Attribute::InAlloca,   Attribute::InReg,         Attribute::StackAlignment,
++      Attribute::SwiftSelf,  Attribute::SwiftAsync,    Attribute::SwiftError,
++      Attribute::Preallocated, Attribute::ByRef};
+   AttrBuilder Copy(C);
+   for (auto AK : ABIAttrs) {
+     Attribute Attr = Attrs.getParamAttrs(I).getAttribute(AK);
+@@ -4177,6 +4204,18 @@ void Verifier::verifyMustTailCall(CallInst &CI) {
+   Check(F->getCallingConv() == CI.getCallingConv(),
+         "cannot guarantee tail call due to mismatched calling conv", &CI);
+ 
++  // - The caller and callee must agree on whether the herbception (throws)
++  //   convention is in use. It decides whether the return discriminant travels
++  //   in the carry flag or in an ordinary return register, so a 'throws' caller
++  //   that tail-called a plain function of the same signature would return a
++  //   discriminant its caller reads from a flag the callee never set. 'throws'
++  //   is a function attribute rather than a parameter one, so the ABI attribute
++  //   comparison below does not cover it.
++  Check(F->hasFnAttribute(Attribute::HerbThrows) ==
++            CI.hasFnAttr(Attribute::HerbThrows),
++        "cannot guarantee tail call due to mismatched 'herbthrows' attributes",
++        &CI);
++
+   // - The call must immediately precede a :ref:`ret <i_ret>` instruction.
+   // - The ret instruction must return the value produced by the call or void.
+   Instruction *Next = CI.getNextNode();
+diff --git a/llvm/lib/LTO/LTO.cpp b/llvm/lib/LTO/LTO.cpp
+index c8c5b0880819ad7185bf37768c5a54a73632e6e5..8b83a549b61348581a37cd225fa80d759da467e7 100644
+--- a/llvm/lib/LTO/LTO.cpp
++++ b/llvm/lib/LTO/LTO.cpp
+@@ -72,6 +72,94 @@ using namespace object;
+ 
+ #define DEBUG_TYPE "lto"
+ 
++//===----------------------------------------------------------------------===//
++// Herbception ODR checking
++//
++// The herbception ('throws'/'fails{E}') specifier changes the returned-
++// function ABI ({T, i1} return plus a target discriminant) but is not part
++// of the C++ mangled name. Translation units that disagree about it link
++// silently otherwise; see HerbceptionODRChecker in LTO/Config.h.
++//===----------------------------------------------------------------------===//
++
++void HerbceptionODRChecker::record(StringRef Name, const Signature &Sig,
++                                   StringRef ModuleID) {
++  std::lock_guard<std::mutex> Lock(Mutex);
++  auto [It, Inserted] = Definitions.try_emplace(Name, Sig, ModuleID.str());
++  if (Inserted || It->second.first == Sig)
++    return;
++
++  const Signature &Prev = It->second.first;
++  std::string Msg;
++  raw_string_ostream OS(Msg);
++  OS << "herbception ODR violation: symbol '" << Name
++     << "' has conflicting definitions: it is ";
++  if (Prev.Throws && Sig.Throws) {
++    OS << "defined with herbception error payload type '" << Prev.PayloadTy
++       << "' in '" << It->second.second << "', but with payload type '"
++       << Sig.PayloadTy << "' in '" << ModuleID << "'";
++  } else {
++    bool PrevThrows = Prev.Throws;
++    OS << "defined as a herbception ('throws') function with error payload "
++          "type '"
++       << (PrevThrows ? Prev.PayloadTy : Sig.PayloadTy) << "' in '"
++       << (PrevThrows ? StringRef(It->second.second) : ModuleID)
++       << "', but without the herbception error channel in '"
++       << (PrevThrows ? ModuleID : StringRef(It->second.second)) << "'";
++  }
++  Violations.push_back(std::move(Msg));
++}
++
++std::vector<std::string> HerbceptionODRChecker::takeViolations() {
++  std::lock_guard<std::mutex> Lock(Mutex);
++  return std::exchange(Violations, {});
++}
++
++/// Describe the herbception payload carried by \p F: the success/error
++/// payload element of its {T, i1} return struct (or the whole return type if
++/// it does not have the expected shape).
++static std::string getHerbceptionPayloadDesc(const Function &F) {
++  Type *RetTy = F.getReturnType();
++  if (auto *ST = dyn_cast<StructType>(RetTy))
++    if (ST->getNumElements() == 2 && ST->getElementType(1)->isIntegerTy(1))
++      RetTy = ST->getElementType(0);
++  std::string Desc;
++  raw_string_ostream OS(Desc);
++  RetTy->print(OS);
++  // Opaque pointers erase the construction slot's pointee type. Keep the
++  // hidden parameter's index, address space and payload in the link signature
++  // so independently compiled declarations cannot disagree on its layout.
++  for (const Argument &Arg : F.args()) {
++    if (!Arg.hasThrowsSretAttr())
++      continue;
++    OS << " herbthrows_sret[" << Arg.getArgNo() << ", "
++       << Arg.getType()->getPointerAddressSpace() << "](";
++    Arg.getParamThrowsSretType()->print(OS);
++    OS << ")";
++  }
++  return OS.str();
++}
++
++/// Record the herbception signature of every externally visible function in
++/// \p M and diagnose conflicts with any previously scanned module.
++///
++/// Note that only materialized bitcode modules can be inspected: modules that
++/// are never parsed in-process (e.g. --thinlto-index-only, ThinLTO cache
++/// hits, out-of-process DTLTO backends) are not scanned, and neither are
++/// definitions coming from native relocatable files.
++static void checkHerbceptionODRForModule(const Config &Conf, Module &M) {
++  if (!Conf.CheckHerbceptionODR || !Conf.HerbceptionODR)
++    return;
++  StringRef ModuleID = M.getModuleIdentifier();
++  HerbceptionODRChecker::Signature Sig;
++  for (Function &F : M.functions()) {
++    if (F.isIntrinsic() || F.hasLocalLinkage())
++      continue;
++    Sig.Throws = F.hasFnAttribute(llvm::Attribute::HerbThrows);
++    Sig.PayloadTy = Sig.Throws ? getHerbceptionPayloadDesc(F) : std::string();
++    Conf.HerbceptionODR->record(F.getName(), Sig, ModuleID);
++  }
++}
++
+ Error LTO::setupOptimizationRemarks() {
+   // Setup the remark streamer according to the provided configuration.
+   auto DiagFileOrErr = lto::setupLLVMOptimizationRemarks(
+@@ -978,6 +1066,8 @@ LTO::addRegularLTO(InputFile &Input, ArrayRef<SymbolResolution> InputRes,
+   if (Error Err = M.materializeMetadata())
+     return std::move(Err);
+ 
++  checkHerbceptionODRForModule(Conf, M);
++
+   if (LTOMode == LTOK_UnifiedRegular) {
+     // cfi.functions metadata is intended to be used with ThinLTO and may
+     // trigger invalid IR transformations if they are present when doing regular
+@@ -1378,6 +1468,18 @@ Error LTO::run(AddStreamFn AddStream, FileCache Cache) {
+     // reduce peak memory before importing.
+     Result = runThinLTO(AddStream, Cache, GUIDPreservedSymbols);
+ 
++  // Report herbception ODR violations collected while adding/scanning all
++  // input modules (regular LTO scans happen during add(), ThinLTO scans on
++  // the backend threads, which have been joined by now). Note that modules
++  // that are never materialized -- e.g. with --thinlto-index-only or served
++  // directly from the ThinLTO cache or an out-of-process DTLTO backend --
++  // are not scanned.
++  if (Conf.HerbceptionODR)
++    for (std::string &Violation : Conf.HerbceptionODR->takeViolations())
++      Result = joinErrors(std::move(Result),
++                          make_error<StringError>(std::move(Violation),
++                                                  inconvertibleErrorCode()));
++
+   if (StatsFile)
+     PrintStatisticsJSON(StatsFile->os());
+ 
+@@ -1653,6 +1755,8 @@ public:
+       if (!MOrErr)
+         return MOrErr.takeError();
+ 
++      checkHerbceptionODRForModule(Conf, **MOrErr);
++
+       return thinBackend(Conf, Task, AddStream, **MOrErr, CombinedIndex,
+                          ImportList, DefinedGlobals, &ModuleMap,
+                          Conf.CodeGenOnly, BitcodeLibFuncs);
+diff --git a/llvm/lib/Passes/PassBuilder.cpp b/llvm/lib/Passes/PassBuilder.cpp
+index 48a5108355c32071ce4940b920e9b46b5389f50c..f7826c539d9c7631c744cc2036a2824cd46f9a9d 100644
+--- a/llvm/lib/Passes/PassBuilder.cpp
++++ b/llvm/lib/Passes/PassBuilder.cpp
+@@ -300,6 +300,7 @@
+ #include "llvm/Transforms/Scalar/Float2Int.h"
+ #include "llvm/Transforms/Scalar/GVN.h"
+ #include "llvm/Transforms/Scalar/GuardWidening.h"
++#include "llvm/Transforms/Scalar/HerbceptionsLegacyEHFold.h"
+ #include "llvm/Transforms/Scalar/IVUsersPrinter.h"
+ #include "llvm/Transforms/Scalar/IndVarSimplify.h"
+ #include "llvm/Transforms/Scalar/InductiveRangeCheckElimination.h"
+diff --git a/llvm/lib/Passes/PassBuilderPipelines.cpp b/llvm/lib/Passes/PassBuilderPipelines.cpp
+index 5de45e5668fb92fa2df37ddfa1bc8ac851ef4dd5..050263159c6e6339aa885627145611a90cab561e 100644
+--- a/llvm/lib/Passes/PassBuilderPipelines.cpp
++++ b/llvm/lib/Passes/PassBuilderPipelines.cpp
+@@ -102,6 +102,7 @@
+ #include "llvm/Transforms/Scalar/ExpandMemCmp.h"
+ #include "llvm/Transforms/Scalar/Float2Int.h"
+ #include "llvm/Transforms/Scalar/GVN.h"
++#include "llvm/Transforms/Scalar/HerbceptionsLegacyEHFold.h"
+ #include "llvm/Transforms/Scalar/IndVarSimplify.h"
+ #include "llvm/Transforms/Scalar/InferAlignment.h"
+ #include "llvm/Transforms/Scalar/InstSimplifyPass.h"
+@@ -264,6 +265,10 @@ static cl::opt<bool>
+     EnableGVNSink("enable-gvn-sink",
+                   cl::desc("Enable the GVN sinking pass (default = off)"));
+ 
++static cl::opt<bool> EnableHerbceptionsLegacyEHFold(
++    "enable-herbceptions-legacy-eh-fold", cl::init(true), cl::Hidden,
++    cl::desc("Fold proven legacy throws into direct Herbceptions conversions"));
++
+ static cl::opt<bool> EnableJumpTableToSwitch(
+     "enable-jump-table-to-switch", cl::init(true),
+     cl::desc("Enable JumpTableToSwitch pass (default = true)"));
+@@ -1671,6 +1676,16 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
+   OptimizePM.addPass(
+       TailCallElimPass(/*UpdateFunctionEntryCount=*/isInstrumentedPGOUse()));
+ 
++  // Fold legacy throws that provably unwind into a compiler-generated
++  // legacy->std::error herbceptions conversion into direct conversion calls,
++  // eliminating the runtime unwind. Runs late, after inlining has exposed
++  // the throw-to-conversion shape, and right before the final SimplifyCFG
++  // so the bypassed EH dispatch is cleaned up. This also runs in the
++  // ThinLTO post-link pipeline, so -flto=thin builds fold throws whose
++  // conversion site only becomes visible at link time.
++  if (EnableHerbceptionsLegacyEHFold)
++    OptimizePM.addPass(HerbceptionsLegacyEHFoldPass());
++
+   // LoopSink (and other loop passes since the last simplifyCFG) might have
+   // resulted in single-entry-single-exit or empty blocks. Clean up the CFG.
+   OptimizePM.addPass(
+@@ -1933,6 +1948,15 @@ PassBuilder::buildThinLTOPreLinkDefaultPipeline(OptimizationLevel Level) {
+   invokeOptimizerLastEPCallbacks(MPM, Level,
+                                  /*Phase=*/ThinOrFullLTOPhase::ThinLTOPreLink);
+ 
++  // Fold legacy throws that provably unwind into a compiler-generated
++  // legacy->std::error herbceptions conversion. This must happen in
++  // pre-link, while the conversion helpers are still plain call sites:
++  // at post-link the helpers are imported and may be inlined, which
++  // dissolves the recognizable conversion chain.
++  if (EnableHerbceptionsLegacyEHFold)
++    MPM.addPass(createModuleToFunctionPassAdaptor(
++        HerbceptionsLegacyEHFoldPass()));
++
+   // Emit annotation remarks.
+   addAnnotationRemarksPass(MPM);
+ 
+diff --git a/llvm/lib/Passes/PassRegistry.def b/llvm/lib/Passes/PassRegistry.def
+index ec5657d3208e9bac5993d24e0ec31f3723b49774..35ae577a1564c8d3855d7c22c60924b4659b3573 100644
+--- a/llvm/lib/Passes/PassRegistry.def
++++ b/llvm/lib/Passes/PassRegistry.def
+@@ -461,6 +461,7 @@ FUNCTION_PASS("guard-widening", GuardWideningPass())
+ FUNCTION_PASS("gvn-hoist", GVNHoistPass())
+ FUNCTION_PASS("gvn-sink", GVNSinkPass())
+ FUNCTION_PASS("helloworld", HelloWorldPass())
++FUNCTION_PASS("herbceptions-legacy-eh-fold", HerbceptionsLegacyEHFoldPass())
+ FUNCTION_PASS("indirectbr-expand", IndirectBrExpandPass(*TM))
+ FUNCTION_PASS("infer-address-spaces", InferAddressSpacesPass())
+ FUNCTION_PASS("infer-alignment", InferAlignmentPass())
+diff --git a/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.cpp b/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.cpp
+index bd716a90dfbc9be23d145cb9e8691fc9c224fa73..2f5a8194ed12ba094abae6b82a2e9ea7995403b9 100644
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.cpp
+@@ -1583,8 +1583,11 @@ bool WebAssemblyTargetLowering::CanLowerReturn(
+     CallingConv::ID /*CallConv*/, MachineFunction & /*MF*/, bool /*IsVarArg*/,
+     const SmallVectorImpl<ISD::OutputArg> &Outs, LLVMContext & /*Context*/,
+     const Type *RetTy) const {
+-  // WebAssembly can only handle returning tuples with multivalue enabled
+-  return WebAssembly::canLowerReturn(Outs.size(), Subtarget);
++  // The Herbceptions convention can use two machine results even with the
++  // default single-result C ABI, provided the module supports multivalue.
++  return WebAssembly::canLowerReturn(Outs.size(), Subtarget) ||
++         (Subtarget->hasMultivalue() && Outs.size() == 2 &&
++          Outs.back().Flags.isThrows());
+ }
+ 
+ SDValue WebAssemblyTargetLowering::LowerReturn(
+@@ -1592,7 +1595,9 @@ SDValue WebAssemblyTargetLowering::LowerReturn(
+     const SmallVectorImpl<ISD::OutputArg> &Outs,
+     const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
+     SelectionDAG &DAG) const {
+-  assert(WebAssembly::canLowerReturn(Outs.size(), Subtarget) &&
++  assert((WebAssembly::canLowerReturn(Outs.size(), Subtarget) ||
++          (Subtarget->hasMultivalue() && Outs.size() == 2 &&
++           Outs.back().Flags.isThrows())) &&
+          "MVP WebAssembly can only return up to one value");
+   if (!callingConvSupported(CallConv))
+     fail(DL, DAG, "WebAssembly doesn't support non-C calling conventions");
+diff --git a/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.h b/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.h
+index 04e6d6f2d936724a40c4c5433467544a12fcabff..77649ee1cc74bcf4a391082d5d6f55bb275dd412 100644
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.h
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyISelLowering.h
+@@ -31,6 +31,10 @@ private:
+   /// right decision when generating code for different targets.
+   const WebAssemblySubtarget *Subtarget;
+ 
++  /// WebAssembly returns the throws (herbception) discriminant as an extra
++  /// multivalue return value.
++  bool supportThrowsCC() const override { return true; }
++
+   AtomicExpansionKind
+   shouldExpandAtomicRMWInIR(const AtomicRMWInst *) const override;
+   bool shouldScalarizeBinop(SDValue VecOp) const override;
+diff --git a/llvm/lib/Target/WebAssembly/WebAssemblyMachineFunctionInfo.cpp b/llvm/lib/Target/WebAssembly/WebAssemblyMachineFunctionInfo.cpp
+index 696a9529e432d054cacfe4df6bd8d120e75ff445..37df3c22f7f3dcd1508f17d36ebbb2c5c1caf845 100644
+--- a/llvm/lib/Target/WebAssembly/WebAssemblyMachineFunctionInfo.cpp
++++ b/llvm/lib/Target/WebAssembly/WebAssemblyMachineFunctionInfo.cpp
+@@ -67,9 +67,13 @@ void llvm::computeSignatureVTs(const FunctionType *Ty,
+   computeLegalValueVTs(ContextFunc, TM, Ty->getReturnType(), Results);
+ 
+   MVT PtrVT = MVT::getIntegerVT(TM.createDataLayout().getPointerSizeInBits());
+-  if (!WebAssembly::canLowerReturn(
+-          Results.size(),
+-          &TM.getSubtarget<WebAssemblySubtarget>(ContextFunc))) {
++  const auto &ST = TM.getSubtarget<WebAssemblySubtarget>(ContextFunc);
++  // A symbol uses its own calling convention, including when referenced from
++  // a caller with a different ABI. The two-result form requires multivalue.
++  bool IsThrowsReturn = ST.hasMultivalue() && Results.size() == 2 &&
++                        TargetFunc &&
++                        TargetFunc->hasFnAttribute(Attribute::HerbThrows);
++  if (!IsThrowsReturn && !WebAssembly::canLowerReturn(Results.size(), &ST)) {
+     // WebAssembly can't lower returns of multiple values without demoting to
+     // sret unless multivalue is enabled (see
+     // WebAssemblyTargetLowering::CanLowerReturn). So replace multiple return
+diff --git a/llvm/lib/Transforms/Coroutines/CoroSplit.cpp b/llvm/lib/Transforms/Coroutines/CoroSplit.cpp
+index c788c1623587a072cd981376fc07abdd2ab6c9f4..03a48910ce1b5dcbdb82f632ed048ce30afceec9 100644
+--- a/llvm/lib/Transforms/Coroutines/CoroSplit.cpp
++++ b/llvm/lib/Transforms/Coroutines/CoroSplit.cpp
+@@ -990,6 +990,12 @@ void coro::BaseCloner::create() {
+     // original function.  This should include optimization settings and so on.
+     NewAttrs = NewAttrs.addFnAttributes(
+         Context, AttrBuilder(Context, OrigAttrs.getFnAttrs()));
++    // The split functions use the coroutine resume-function ABI — plain
++    // void(frame*) — and are never 'throws' themselves: herbception
++    // errors leave the body through the promise, not the return
++    // discriminant.  Keeping 'throws' would also mismatch the musttail
++    // symmetric-transfer calls emitted into these functions.
++    NewAttrs = NewAttrs.removeFnAttribute(Context, Attribute::HerbThrows);
+ 
+     addFramePointerAttrs(NewAttrs, Context, 0, Shape.FrameSize,
+                          Shape.FrameAlign, /*NoAlias=*/false);
+@@ -1013,6 +1019,10 @@ void coro::BaseCloner::create() {
+     // Transfer the original function's attributes.
+     auto FnAttrs = OrigF.getAttributes().getFnAttrs();
+     NewAttrs = NewAttrs.addFnAttributes(Context, AttrBuilder(Context, FnAttrs));
++    // Same as for Switch: async continuation functions are plain
++    // resume functions and must not be 'throws' (their musttail calls
++    // carry no 'throws' call-site attribute).
++    NewAttrs = NewAttrs.removeFnAttribute(Context, Attribute::HerbThrows);
+     break;
+   }
+   case coro::ABI::Retcon:
+diff --git a/llvm/lib/Transforms/IPO/DeadArgumentElimination.cpp b/llvm/lib/Transforms/IPO/DeadArgumentElimination.cpp
+index d3b8fe496a5cf73ef57e07b35371a4aecacc2255..7b62abaa474e73ad3eac15267e6f7c70176f691b 100644
+--- a/llvm/lib/Transforms/IPO/DeadArgumentElimination.cpp
++++ b/llvm/lib/Transforms/IPO/DeadArgumentElimination.cpp
+@@ -573,6 +573,14 @@ void DeadArgumentEliminationPass::surveyFunction(const Function &F) {
+     }
+   }
+ 
++  // The last element of a `throws` (herbception) function's {T, i1} return
++  // is the failure discriminant delivered through the carry flag; it is part
++  // of the calling convention even when no caller inspects it. Stripping it
++  // would make the backend treat the real last payload element as the
++  // discriminant instead.
++  if (RetCount != 0 && F.hasFnAttribute(Attribute::HerbThrows))
++    RetValLiveness[RetCount - 1] = Live;
++
+   // Now we've inspected all callers, record the liveness of our return values.
+   for (unsigned Ri = 0; Ri != RetCount; ++Ri)
+     markValue(createRet(&F, Ri), RetValLiveness[Ri], MaybeLiveRetUses[Ri]);
+diff --git a/llvm/lib/Transforms/Scalar/CMakeLists.txt b/llvm/lib/Transforms/Scalar/CMakeLists.txt
+index 4f6b208c2e729aae4a155df41dabc3377f7076c4..614d41a41d54cf6b34a8b2f682a66526c117d0e0 100644
+--- a/llvm/lib/Transforms/Scalar/CMakeLists.txt
++++ b/llvm/lib/Transforms/Scalar/CMakeLists.txt
+@@ -20,6 +20,7 @@ add_llvm_component_library(LLVMScalarOpts
+   GVN.cpp
+   GVNHoist.cpp
+   GVNSink.cpp
++  HerbceptionsLegacyEHFold.cpp
+   IVUsersPrinter.cpp
+   InductiveRangeCheckElimination.cpp
+   IndVarSimplify.cpp
+diff --git a/llvm/lib/Transforms/Scalar/HerbceptionsLegacyEHFold.cpp b/llvm/lib/Transforms/Scalar/HerbceptionsLegacyEHFold.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..67df799ba795bcd7f3d57b03ef85f8f5734d3d16
+--- /dev/null
++++ b/llvm/lib/Transforms/Scalar/HerbceptionsLegacyEHFold.cpp
+@@ -0,0 +1,697 @@
++//===- HerbceptionsLegacyEHFold.cpp - fold legacy throws into herbceptions ----===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++//
++// Under -fherbceptions, a legacy C++ throw (__cxa_throw / _CxxThrowException)
++// whose unwind edge provably reaches only the compiler-generated
++// legacy-to-std::error conversion site can be folded into a direct conversion
++// call: the same libherbceptions __cxa_error_code_*_exception_ptr entry point
++// the site already calls, invoked with the "direct" flag so it mints the same
++// error code without ever raising the exception. This removes the unwind
++// edge, the EH dispatch (catchswitch/landingpad) hop, and the funclet
++// crossing.
++//
++// The fold is only legal when conversion is the *only* possible outcome of
++// the throw's unwind edge:
++//
++//  * The unwind destination must be a catchswitch whose sole handler is the
++//    catch-all conversion pad (MSVC/Wasm funclet model), or a landingpad with
++//    only `catch ptr null` clauses that flows to the conversion calls
++//    (Itanium model). Typed handlers sharing the dispatch could claim the
++//    exception first, so their presence disables the fold.
++//
++//  * No intervening cleanup may be skipped: the invoke must unwind directly
++//    to the conversion dispatch.
++//
++//  * Nothing may observe the in-flight exception. This holds because the
++//    conversion site is the only destination and it only inspects the
++//    exception through the conversion ABI calls. Real catches must not be
++//    folded: catch(T) clauses observe the exception object and
++//    std::current_exception(), which the folded path does not provide.
++//
++// The exception object's construction (which can itself throw, e.g. a
++// std::runtime_error string copy failing allocation) keeps its normal invoke;
++// only the final __cxa_throw/_CxxThrowException is folded.
++//
++//===----------------------------------------------------------------------===//
++
++#include "llvm/Transforms/Scalar/HerbceptionsLegacyEHFold.h"
++#include "llvm/ADT/DenseMap.h"
++#include "llvm/ADT/STLExtras.h"
++#include "llvm/ADT/SmallPtrSet.h"
++#include "llvm/ADT/SmallVector.h"
++#include "llvm/IR/CFG.h"
++#include "llvm/IR/Constants.h"
++#include "llvm/IR/Dominators.h"
++#include "llvm/IR/EHPersonalities.h"
++#include "llvm/IR/IRBuilder.h"
++#include "llvm/IR/InstrTypes.h"
++#include "llvm/IR/Instructions.h"
++#include "llvm/IR/IntrinsicInst.h"
++#include "llvm/IR/IntrinsicsWebAssembly.h"
++#include "llvm/IR/Module.h"
++#include "llvm/Transforms/Utils/BasicBlockUtils.h"
++#include "llvm/Transforms/Utils/Local.h"
++#include <algorithm>
++#include <utility>
++
++using namespace llvm;
++
++#define DEBUG_TYPE "herbceptions-legacy-eh-fold"
++
++namespace {
++
++constexpr StringLiteral MsvcDomainFnName =
++    "__cxa_error_domain_msvc_exception_ptr";
++constexpr StringLiteral MsvcCodeFnName =
++    "__cxa_error_code_msvc_exception_ptr";
++constexpr StringLiteral ItaniumDomainFnName =
++    "__cxa_error_domain_itanium_exception_ptr";
++constexpr StringLiteral ItaniumCodeFnName =
++    "__cxa_error_code_itanium_exception_ptr";
++
++/// First parameter of __cxa_error_code_*_exception_ptr: 1 selects the
++/// legacy in-flight conversion and 2 the direct mode emitted by this
++/// pass. The folded call reuses the ordinary conversion entry point, so
++/// the reference already exists wherever a conversion site exists.
++constexpr uint64_t InFlightFlag = 1;
++constexpr uint64_t DirectFlag = 2;
++
++enum class ThrowABI { Itanium, MSVC };
++
++/// A validated conversion dispatch reached by a foldable throw edge.
++struct ConvSite {
++  /// The conversion calls; their results are what downstream code consumes.
++  /// Funclet personalities emit them as calls or invokes depending on
++  /// whether the frontend marked the callee nounwind. DomainCall may be
++  /// null when the domain helper was inlined (under LTO it folds to a load
++  /// of the domain singleton, which folded edges then share through the
++  /// continuation block); the code call is required since it produces the
++  /// error code the folded edge must supply.
++  CallBase *DomainCall = nullptr;
++  CallBase *CodeCall = nullptr;
++  /// The block folded edges branch to. For the funclet model this is the
++  /// (possibly trampolined) catchret continuation. For the landingpad model
++  /// this is produced by splitting the conversion block after the calls.
++  BasicBlock *ContBB = nullptr;
++  /// Funclet model only: the conversion chain block whose edge enters
++  /// ContBB (the catchret block, or the last cleanup trampoline). Other
++  /// phis in ContBB reuse this edge's incoming value on the folded edge.
++  BasicBlock *ChainEndBB = nullptr;
++  /// Landingpad model only: the conversion block and the instruction to
++  /// split it before.
++  BasicBlock *ConvBB = nullptr;
++  Instruction *SplitBefore = nullptr;
++  /// Instructions making up the conversion dispatch (everything a folded
++  /// edge bypasses); only DomainCall and CodeCall may have uses outside.
++  SmallPtrSet<Instruction *, 8> ConvInsts;
++};
++
++static bool isNullConstant(Value *V) {
++  auto *C = dyn_cast<Constant>(V);
++  return C && C->isNullValue();
++}
++
++/// True if I is a call/invoke to the named function; records it in Out.
++static bool isNamedCall(Instruction &I, StringRef Name, CallBase *&Out) {
++  if (!isa<CallInst, InvokeInst>(I))
++    return false;
++  auto *CB = cast<CallBase>(&I);
++  Function *F = CB->getCalledFunction();
++  if (!F || F->getName() != Name)
++    return false;
++  Out = CB;
++  return true;
++}
++
++/// The conversion call carries the in-flight flag (1) in its first
++/// parameter; clone (0) and direct (2) calls are not the conversion.
++static bool isConversionCodeCall(Instruction &I, StringRef Name,
++                                 CallBase *&Out) {
++  if (!isNamedCall(I, Name, Out) || Out->arg_size() == 0)
++    return false;
++  auto *Flag = dyn_cast<ConstantInt>(Out->getArgOperand(0));
++  return Flag && Flag->getZExtValue() == InFlightFlag;
++}
++
++/// Instructions allowed on the conversion path: EH glue, the conversion
++/// calls, and pure plumbing feeding the code call. Anything else means the
++/// dispatch does real work the fold would skip.
++static bool isAllowedConvInst(Instruction &I, ThrowABI ABI,
++                              CallBase *&DomainCall, CallBase *&CodeCall,
++                              SmallPtrSetImpl<Instruction *> &ConvInsts) {
++  if (isa<CallInst, InvokeInst>(I)) {
++    StringRef DomName =
++        ABI == ThrowABI::MSVC ? MsvcDomainFnName : ItaniumDomainFnName;
++    StringRef CodeName =
++        ABI == ThrowABI::MSVC ? MsvcCodeFnName : ItaniumCodeFnName;
++    CallBase *Match = nullptr;
++    if (isNamedCall(I, DomName, Match)) {
++      if (DomainCall)
++        return false;
++      DomainCall = Match;
++      ConvInsts.insert(Match);
++      return true;
++    }
++    if (isConversionCodeCall(I, CodeName, Match)) {
++      if (CodeCall)
++        return false;
++      CodeCall = Match;
++      ConvInsts.insert(Match);
++      return true;
++    }
++    // Wasm catchpads extract the in-flight exception through intrinsics.
++    if (auto *II = dyn_cast<IntrinsicInst>(&I))
++      if (II->getIntrinsicID() == Intrinsic::wasm_get_exception ||
++          II->getIntrinsicID() == Intrinsic::wasm_get_ehselector) {
++        ConvInsts.insert(&I);
++        return true;
++      }
++    return false;
++  }
++  if (isa<CatchPadInst, CatchSwitchInst, LandingPadInst>(I) ||
++      isa<ExtractValueInst, PHINode, CatchReturnInst>(I) ||
++      isa<DbgInfoIntrinsic, PseudoProbeInst>(I) ||
++      I.isLifetimeStartOrEnd()) {
++    ConvInsts.insert(&I);
++    return true;
++  }
++  return false;
++}
++
++/// From the catchret's successor, follow any empty cleanup trampolines to
++/// the real continuation block. LastBB is set to the last trampoline seen
++/// (or left untouched when there are none), which is the block whose edge
++/// actually enters the continuation.
++static BasicBlock *
++followFuncletExit(BasicBlock *Cont, SmallPtrSetImpl<Instruction *> &ConvInsts,
++                  SmallPtrSetImpl<BasicBlock *> &Visited,
++                  BasicBlock *&LastBB) {
++  while (true) {
++    if (!Visited.insert(Cont).second)
++      return nullptr;
++    auto It = Cont->getFirstNonPHIIt();
++    if (It == Cont->end() || !isa<CleanupPadInst>(&*It))
++      return Cont;
++    // An intermediate cleanup funclet may only contain the funclet glue: it
++    // exists solely to exit the funclet, and the fold bypasses it.
++    auto *CLRI = dyn_cast<CleanupReturnInst>(Cont->getTerminator());
++    if (!CLRI || CLRI->unwindsToCaller())
++      return nullptr;
++    for (Instruction &I : *Cont)
++      if (!isa<CleanupPadInst, CleanupReturnInst>(I) &&
++          !isa<DbgInfoIntrinsic, PseudoProbeInst>(I))
++        return nullptr;
++    for (Instruction &I : *Cont)
++      ConvInsts.insert(&I);
++    LastBB = Cont;
++    Cont = CLRI->getUnwindDest();
++  }
++}
++
++/// The code call's exception operand must be computed inside the
++/// conversion dispatch (e.g. the landingpad/wasm.get.exception exn value);
++/// anything else means the value being converted is not the exception
++/// this edge delivers. The operand is the second parameter, after the
++/// flags word; the MSVC conversion passes null pointers instead (it reads
++/// the current exception itself).
++static bool codeCallArgIsConvLocal(const ConvSite &Site, ThrowABI ABI) {
++  if (ABI == ThrowABI::MSVC)
++    return Site.CodeCall->arg_size() == 3 &&
++           isNullConstant(Site.CodeCall->getArgOperand(1)) &&
++           isNullConstant(Site.CodeCall->getArgOperand(2));
++  if (Site.CodeCall->arg_size() != 4)
++    return false;
++  auto *I = dyn_cast<Instruction>(Site.CodeCall->getArgOperand(1));
++  return I && Site.ConvInsts.contains(I);
++}
++
++/// Funclet model (MSVC and wasm): the invoke unwinds to a catchswitch whose
++/// single handler is a catch-all pad. The conversion calls may be spread over
++/// a chain of blocks because the frontend emits them as invokes (each with
++/// its own unwind edge to the next enclosing funclet) whenever the callee is
++/// not marked nounwind.
++static bool matchFuncletConversion(InvokeInst &II, ThrowABI ABI,
++                                   ConvSite &Site) {
++  BasicBlock *UnwindDest = II.getUnwindDest();
++  auto *CSI =
++      dyn_cast_or_null<CatchSwitchInst>(&*UnwindDest->getFirstNonPHIIt());
++  if (!CSI || CSI->getNumHandlers() != 1)
++    return false;
++
++  BasicBlock *PadBB = *CSI->handler_begin();
++  auto *CPI = dyn_cast_or_null<CatchPadInst>(&*PadBB->getFirstNonPHIIt());
++  if (!CPI || CPI->getCatchSwitch() != CSI)
++    return false;
++  // Only a catch-all pad converts every exception; a typed pad would only
++  // run for matching types, and anything it failed to match would keep
++  // unwinding instead of converting.
++  for (Use &Arg : CPI->arg_operands())
++    if (!isNullConstant(Arg.get()))
++      return false;
++
++  StringRef DomName =
++      ABI == ThrowABI::MSVC ? MsvcDomainFnName : ItaniumDomainFnName;
++  StringRef CodeName =
++      ABI == ThrowABI::MSVC ? MsvcCodeFnName : ItaniumCodeFnName;
++
++  // Walk the conversion chain: glue instructions plus at most the domain and
++  // code calls per block, linked by invoke normal edges, unconditional
++  // branches, and finally a catchret to the continuation.
++  BasicBlock *BB = PadBB;
++  SmallPtrSet<BasicBlock *, 8> Visited{PadBB};
++  for (unsigned Depth = 0; Depth != 16; ++Depth) {
++    for (Instruction &I : *BB) {
++      if (I.isTerminator())
++        break;
++      if (!isAllowedConvInst(I, ABI, Site.DomainCall, Site.CodeCall,
++                             Site.ConvInsts))
++        return false;
++    }
++    Instruction *TI = BB->getTerminator();
++    if (auto *CRI = dyn_cast<CatchReturnInst>(TI)) {
++      Site.ConvInsts.insert(CRI);
++      Site.ContBB = CRI->getSuccessor();
++      Site.ChainEndBB = BB;
++      break;
++    }
++    if (auto *BI = dyn_cast<UncondBrInst>(TI)) {
++      BB = BI->getSuccessor(0);
++    } else if (auto *Inv = dyn_cast<InvokeInst>(TI)) {
++      CallBase *Match = nullptr;
++      if (isNamedCall(*Inv, DomName, Match)) {
++        if (Site.DomainCall)
++          return false;
++        Site.DomainCall = Match;
++      } else if (isConversionCodeCall(*Inv, CodeName, Match)) {
++        if (Site.CodeCall)
++          return false;
++        Site.CodeCall = Match;
++      } else {
++        return false;
++      }
++      Site.ConvInsts.insert(Inv);
++      BB = Inv->getNormalDest();
++    } else {
++      return false;
++    }
++    if (!Visited.insert(BB).second)
++      return false;
++  }
++  if (!Site.CodeCall || !Site.ContBB)
++    return false;
++
++  SmallPtrSet<BasicBlock *, 8> TrampolineVisited;
++  BasicBlock *LastTrampoline = Site.ChainEndBB;
++  Site.ContBB = followFuncletExit(Site.ContBB, Site.ConvInsts,
++                                  TrampolineVisited, LastTrampoline);
++  Site.ChainEndBB = LastTrampoline;
++  if (!Site.ContBB || Site.ContBB->isEHPad() || !codeCallArgIsConvLocal(Site, ABI))
++    return false;
++  return true;
++}
++
++/// Itanium model: the invoke unwinds to a catch-all-only landingpad that
++/// flows to a (possibly shared) block holding the conversion calls.
++static bool matchLandingpadConversion(InvokeInst &II, ConvSite &Site) {
++  BasicBlock *UnwindDest = II.getUnwindDest();
++  auto *LPI =
++      dyn_cast_or_null<LandingPadInst>(&*UnwindDest->getFirstNonPHIIt());
++  if (!LPI || LPI->getNumClauses() == 0)
++    return false;
++  for (unsigned I = 0, E = LPI->getNumClauses(); I != E; ++I)
++    if (!LPI->isCatch(I) || !isNullConstant(LPI->getClause(I)))
++      return false;
++
++  // Walk the single-successor chain to the conversion block. Intermediate
++  // blocks may only contain pure plumbing; a conditional edge means the
++  // exception can go somewhere other than conversion.
++  BasicBlock *BB = UnwindDest;
++  SmallPtrSet<BasicBlock *, 8> Visited;
++  for (unsigned Depth = 0; Depth != 16; ++Depth) {
++    if (!Visited.insert(BB).second)
++      return false;
++
++    // Does this block hold the conversion call pair?
++    CallBase *DomainCall = nullptr, *CodeCall = nullptr;
++    for (Instruction &I : *BB) {
++      CallBase *M = nullptr;
++      if (isNamedCall(I, ItaniumDomainFnName, M))
++        DomainCall = M;
++      else if (isConversionCodeCall(I, ItaniumCodeFnName, M))
++        CodeCall = M;
++    }
++
++    if (CodeCall) {
++      // Split point is just past the later call; everything before it is
++      // bypassed by folded edges and must be conversion plumbing. The
++      // calls themselves are skipped in the check (they seeded the match).
++      CallBase *LastCall =
++          DomainCall && !DomainCall->comesBefore(CodeCall) ? DomainCall
++                                                           : CodeCall;
++      Instruction *After = LastCall->getNextNode();
++      if (!After)
++        return false;
++      if (DomainCall)
++        Site.ConvInsts.insert(DomainCall);
++      Site.ConvInsts.insert(CodeCall);
++      CallBase *DupD = DomainCall, *DupC = CodeCall;
++      for (Instruction &I : *BB) {
++        if (&I == After)
++          break;
++        if (&I == DomainCall || &I == CodeCall)
++          continue;
++        if (!isAllowedConvInst(I, ThrowABI::Itanium, DupD, DupC,
++                               Site.ConvInsts))
++          return false;
++      }
++      Site.DomainCall = DomainCall;
++      Site.CodeCall = CodeCall;
++      Site.ConvBB = BB;
++      Site.SplitBefore = After;
++      if (!codeCallArgIsConvLocal(Site, ThrowABI::Itanium))
++        return false;
++      return true;
++    }
++
++    // Intermediate block: everything must be pure plumbing with a single
++    // unconditional exit.
++    CallBase *IgnoredD = nullptr, *IgnoredC = nullptr;
++    for (Instruction &I : *BB) {
++      if (isa<UncondBrInst>(I))
++        continue;
++      if (!isAllowedConvInst(I, ThrowABI::Itanium, IgnoredD, IgnoredC,
++                             Site.ConvInsts))
++        return false;
++    }
++    auto *BI = dyn_cast<UncondBrInst>(BB->getTerminator());
++    if (!BI)
++      return false;
++    BB = BI->getSuccessor(0);
++  }
++  return false;
++}
++
++/// Folded edges bypass everything in the conversion dispatch except the two
++/// call results, so nothing else defined there may be used downstream.
++static bool crossingValuesFoldable(const ConvSite &Site) {
++  for (Instruction *I : Site.ConvInsts) {
++    if (I == Site.DomainCall || I == Site.CodeCall)
++      continue;
++    for (User *U : I->users())
++      if (auto *UI = dyn_cast<Instruction>(U))
++        if (!Site.ConvInsts.contains(UI))
++          return false;
++  }
++  return true;
++}
++
++} // end anonymous namespace
++
++PreservedAnalyses
++HerbceptionsLegacyEHFoldPass::run(Function &F, FunctionAnalysisManager &FAM) {
++  if (F.isDeclaration() || !F.hasPersonalityFn())
++    return PreservedAnalyses::all();
++
++  SmallVector<InvokeInst *, 4> Throws;
++  for (BasicBlock &BB : F) {
++    auto *II = dyn_cast<InvokeInst>(BB.getTerminator());
++    if (!II)
++      continue;
++    Function *Callee = II->getCalledFunction();
++    if (!Callee)
++      continue;
++    if (Callee->getName() == "__cxa_throw" ||
++        Callee->getName() == "_CxxThrowException")
++      Throws.push_back(II);
++  }
++  if (Throws.empty())
++    return PreservedAnalyses::all();
++
++  EHPersonality Pers = classifyEHPersonality(F.getPersonalityFn());
++  // Scoped-EH personalities (MSVC funclets and wasm) both use the
++  // catchswitch/catchpad/catchret IR shape.
++  bool IsFunclet = isScopedEHPersonality(Pers);
++  DenseMap<BasicBlock *, ColorVector> Colors;
++  if (IsFunclet)
++    Colors = colorEHFunclets(F);
++
++  // Validate every site first; folding mutates the CFG.
++  struct FoldableSite {
++    InvokeInst *II;
++    ThrowABI ABI;
++    ConvSite Site;
++  };
++  SmallVector<FoldableSite, 4> Worklist;
++  for (InvokeInst *II : Throws) {
++    ThrowABI ABI = II->getCalledFunction()->getName() == "_CxxThrowException"
++                       ? ThrowABI::MSVC
++                       : ThrowABI::Itanium;
++    // A MSVC rethrow (_CxxThrowException(nullptr, nullptr)) is not a fresh
++    // throw and must not be folded.
++    if (ABI == ThrowABI::MSVC &&
++        (isNullConstant(II->getArgOperand(0)) ||
++         isNullConstant(II->getArgOperand(1))))
++      continue;
++    ConvSite Site;
++    bool Ok = IsFunclet ? matchFuncletConversion(*II, ABI, Site)
++                        : matchLandingpadConversion(*II, Site);
++    if (!Ok || !crossingValuesFoldable(Site))
++      continue;
++    // Moving the domain invoke installs a predecessor on its unwind pad.
++    // An existing PHI there may depend on a value defined inside the original
++    // funclet; retain the original conversion when that edge needs a value.
++    if (auto *DomInvoke = dyn_cast_or_null<InvokeInst>(Site.DomainCall)) {
++      BasicBlock *Dest = DomInvoke->getUnwindDest();
++      if (Dest != II->getUnwindDest() && !Dest->phis().empty())
++        continue;
++    }
++    Worklist.push_back({II, ABI, std::move(Site)});
++  }
++  if (Worklist.empty())
++    return PreservedAnalyses::all();
++
++  // Funclet legality: the branch from the site to the continuation must stay
++  // within the same funclet (or at function level).
++  for (auto It = Worklist.begin(); It != Worklist.end();) {
++    if (!IsFunclet) {
++      ++It;
++      continue;
++    }
++    const ColorVector &SiteColors = Colors.lookup(It->II->getParent());
++    const ColorVector &ContColors = Colors.lookup(It->Site.ContBB);
++    bool Same = SiteColors.size() == ContColors.size() &&
++                std::is_permutation(SiteColors.begin(), SiteColors.end(),
++                                    ContColors.begin());
++    // With a multi-color (shared) block the correct funclet token is
++    // ambiguous; only fold when both sides are function-level or inside one
++    // identical funclet and the invoke carries the token.
++    if (!Same || (SiteColors.size() > 1 &&
++                  !It->II->getOperandBundle(LLVMContext::OB_funclet)))
++      It = Worklist.erase(It);
++    else
++      ++It;
++  }
++  if (Worklist.empty())
++    return PreservedAnalyses::all();
++
++  // Every phi in the continuation gains an incoming on the folded edge.
++  // Conversion-call results are supplied by the replacement calls; any
++  // other value the phi takes on the conversion-chain edge must dominate
++  // the throw site so it can be reused there.
++  DominatorTree *DT = nullptr;
++  for (auto It = Worklist.begin(); It != Worklist.end();) {
++    ConvSite &Site = It->Site;
++    if (!Site.ChainEndBB) {
++      ++It;
++      continue;
++    }
++    bool Ok = true;
++    for (PHINode &PN : Site.ContBB->phis()) {
++      int Idx = PN.getBasicBlockIndex(Site.ChainEndBB);
++      if (Idx < 0) {
++        Ok = false;
++        break;
++      }
++      Value *V = PN.getIncomingValue(Idx);
++      if (V == Site.DomainCall || V == Site.CodeCall)
++        continue;
++      if (auto *I = dyn_cast<Instruction>(V)) {
++        if (!DT)
++          DT = &FAM.getResult<DominatorTreeAnalysis>(F);
++        if (!DT->dominates(I, It->II)) {
++          Ok = false;
++          break;
++        }
++      }
++    }
++    if (!Ok)
++      It = Worklist.erase(It);
++    else
++      ++It;
++  }
++  if (Worklist.empty())
++    return PreservedAnalyses::all();
++
++  // Landingpad model: split each conversion block after its calls once.
++  DenseMap<BasicBlock *, BasicBlock *> ConvBBToCont;
++  for (FoldableSite &WS : Worklist) {
++    if (IsFunclet)
++      continue;
++    ConvSite &Site = WS.Site;
++    BasicBlock *&ContBB = ConvBBToCont[Site.ConvBB];
++    if (!ContBB)
++      ContBB = SplitBlock(Site.ConvBB, Site.SplitBefore->getIterator());
++    ContBB->setName("herb.conv.cont");
++    Site.ContBB = ContBB;
++  }
++
++  // Set up merges before any site edge exists, so every existing
++  // predecessor of ContBB correctly contributes the conversion result.
++  // Downstream uses of the conversion results come in two shapes:
++  //   - phi incoming uses on edges *into* ContBB: the phi keeps the
++  //     original call result for the conversion edges and gains one
++  //     incoming per folded site.
++  //   - all other uses: replaced by a merge phi at the top of ContBB that
++  //     selects between the conversion result (old preds) and the direct
++  //     results (folded sites).
++  struct Merge {
++    PHINode *PN = nullptr;
++    SmallVector<PHINode *, 2> EdgePhis;
++  };
++  DenseMap<CallBase *, Merge> Merges;
++  for (FoldableSite &WS : Worklist) {
++    ConvSite &Site = WS.Site;
++    for (CallBase *OrigCall : {Site.DomainCall, Site.CodeCall}) {
++      if (!OrigCall)
++        continue;
++      auto [It, Inserted] = Merges.try_emplace(OrigCall);
++      if (!Inserted)
++        continue;
++      Merge &M = It->second;
++      bool NeedPN = false;
++      for (Use &U : OrigCall->uses()) {
++        auto *UI = dyn_cast<Instruction>(U.getUser());
++        if (!UI || Site.ConvInsts.contains(UI))
++          continue;
++        auto *UserPN = dyn_cast<PHINode>(UI);
++        if (UserPN && UserPN->getParent() == Site.ContBB) {
++          if (!is_contained(M.EdgePhis, UserPN))
++            M.EdgePhis.push_back(UserPN);
++          continue;
++        }
++        NeedPN = true;
++      }
++      if (!NeedPN)
++        continue;
++      M.PN = PHINode::Create(OrigCall->getType(), 0,
++                             OrigCall->getName() + ".fold",
++                             Site.ContBB->getFirstNonPHIIt());
++      for (BasicBlock *Pred : predecessors(Site.ContBB))
++        M.PN->addIncoming(OrigCall, Pred);
++      OrigCall->replaceUsesWithIf(M.PN, [&](Use &U) {
++        auto *UI = dyn_cast<Instruction>(U.getUser());
++        if (!UI || UI == M.PN || Site.ConvInsts.contains(UI))
++          return false;
++        if (auto *UserPN = dyn_cast<PHINode>(UI))
++          if (UserPN->getParent() == Site.ContBB)
++            return false;
++        return true;
++      });
++    }
++  }
++
++  for (FoldableSite &WS : Worklist) {
++    InvokeInst *II = WS.II;
++    ConvSite &Site = WS.Site;
++    BasicBlock *SiteBB = II->getParent();
++    BasicBlock *ContBB = Site.ContBB;
++
++    IRBuilder<> B(II);
++    B.SetCurrentDebugLocation(II->getDebugLoc());
++    SmallVector<OperandBundleDef, 1> Bundles;
++    II->getOperandBundlesAsDefs(Bundles);
++
++    // When the frontend emitted the domain conversion as an invoke, keep an
++    // unwind edge to the same destination so an unwinding callee still runs
++    // the same cleanups (the callee is noexcept in practice, making the edge
++    // dead). When the domain helper was inlined away there is nothing to
++    // emit: the domain value is produced in the continuation and shared by
++    // every incoming edge. The direct code call is always nounwind, so it
++    // is a plain call.
++    BasicBlock *TailBB = SiteBB;
++    Value *Dom = nullptr;
++    if (CallBase *DomainCall = Site.DomainCall) {
++      Function *DomFn = DomainCall->getCalledFunction();
++      if (auto *DomInvoke = dyn_cast<InvokeInst>(DomainCall)) {
++        BasicBlock *NextBB =
++            BasicBlock::Create(F.getContext(), SiteBB->getName() + ".herb.dom",
++                               &F);
++        Dom = B.CreateInvoke(FunctionCallee(DomFn->getFunctionType(), DomFn),
++                             NextBB, DomInvoke->getUnwindDest(), {}, Bundles,
++                             "herb.dom");
++        B.SetInsertPoint(NextBB);
++        TailBB = NextBB;
++      } else {
++        Dom = B.CreateCall(DomFn->getFunctionType(), DomFn, {}, Bundles,
++                           "herb.dom");
++      }
++    }
++
++    // The folded call reuses the ordinary conversion entry point with
++    // the direct flag: the flag word first, then the throw's own
++    // operands (obj, tinfo, dtor / obj, throwinfo).
++    FunctionType *CodeFTy = Site.CodeCall->getFunctionType();
++    SmallVector<Value *, 4> Args;
++    Args.push_back(ConstantInt::get(CodeFTy->getParamType(0), DirectFlag));
++    for (Use &U : II->args())
++      Args.push_back(U.get());
++    CallInst *Code = B.CreateCall(CodeFTy, Site.CodeCall->getCalledOperand(),
++                                  Args, Bundles, "herb.code");
++    Code->setCallingConv(Site.CodeCall->getCallingConv());
++    // The libherbceptions entry point is noexcept; marking the shared decl
++    // also lets later passes drop the conversion invoke's dead unwind edge.
++    if (Function *CodeFn =
++            dyn_cast<Function>(Site.CodeCall->getCalledOperand()))
++      CodeFn->setDoesNotThrow();
++
++    B.CreateBr(ContBB);
++    // Update PHIs while the original invoke still identifies its outgoing
++    // edges. Keep PHI nodes alive throughout the worklist, including merges
++    // whose last incoming will be installed below.
++    II->getNormalDest()->removePredecessor(SiteBB, /*KeepOneInputPHIs=*/true);
++    auto *DomInvoke = dyn_cast_or_null<InvokeInst>(Site.DomainCall);
++    if (!DomInvoke || DomInvoke->getUnwindDest() != II->getUnwindDest())
++      II->getUnwindDest()->removePredecessor(SiteBB, /*KeepOneInputPHIs=*/true);
++    II->eraseFromParent();
++
++    for (auto [OrigCall, NewVal] :
++         {std::pair<CallBase *, Value *>(Site.DomainCall, Dom),
++          std::pair<CallBase *, Value *>(Site.CodeCall, Code)}) {
++      if (!OrigCall)
++        continue;
++      Merge &M = Merges[OrigCall];
++      if (M.PN)
++        M.PN->addIncoming(NewVal, TailBB);
++      for (PHINode *EdgePhi : M.EdgePhis)
++        EdgePhi->addIncoming(NewVal, TailBB);
++    }
++
++    // Other phis in the continuation reuse the value the conversion-chain
++    // edge supplied (validated to dominate the throw site above).
++    if (Site.ChainEndBB)
++      for (PHINode &PN : ContBB->phis())
++        if (PN.getBasicBlockIndex(TailBB) < 0)
++          PN.addIncoming(PN.getIncomingValueForBlock(Site.ChainEndBB),
++                         TailBB);
++  }
++
++  // Folded edges may have left the dispatch and the invoke's normal
++  // destination unreachable.
++  removeUnreachableBlocks(F);
++  return PreservedAnalyses::none();
++}
+diff --git a/llvm/lib/Transforms/Utils/CodeExtractor.cpp b/llvm/lib/Transforms/Utils/CodeExtractor.cpp
+index 4c33848dacf512eed3525ba3045bb4246a22eddf..4afe24028718a23868d251dac4a89c83120a9f1d 100644
+--- a/llvm/lib/Transforms/Utils/CodeExtractor.cpp
++++ b/llvm/lib/Transforms/Utils/CodeExtractor.cpp
+@@ -965,6 +965,7 @@ Function *CodeExtractor::constructFunctionDeclaration(
+       case Attribute::CoroElideSafe:
+       case Attribute::NoDivergenceSource:
+       case Attribute::NoCreateUndefOrPoison:
++      case Attribute::HerbThrows:
+         continue;
+       // Those attributes should be safe to propagate to the extracted function.
+       case Attribute::AlwaysInline:
+@@ -1043,6 +1044,7 @@ Function *CodeExtractor::constructFunctionDeclaration(
+       case Attribute::SwiftError:
+       case Attribute::SwiftSelf:
+       case Attribute::SwiftAsync:
++      case Attribute::HerbThrowsSret:
+       case Attribute::ZExt:
+       case Attribute::ImmArg:
+       case Attribute::ByRef:
+diff --git a/llvm/test/Bitcode/throws-sret.ll b/llvm/test/Bitcode/throws-sret.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..184942b37ed5fbecce421c44844a88d507855136
+--- /dev/null
++++ b/llvm/test/Bitcode/throws-sret.ll
+@@ -0,0 +1,21 @@
++; RUN: llvm-as < %s | llvm-dis | FileCheck %s
++; RUN: verify-uselistorder < %s
++
++; herbthrows_sret must survive an assembly -> bitcode -> assembly round trip,
++; including its carried pointee type, on declarations, definitions and calls.
++
++; CHECK: define { ptr, i64 } @ret_payload(ptr herbthrows_sret({ i64, i64, i64, i64 }) %out, i32 %n)
++define { ptr, i64 } @ret_payload(ptr herbthrows_sret({ i64, i64, i64, i64 }) %out, i32 %n) {
++entry:
++  store i64 1, ptr %out, align 8
++  ret { ptr, i64 } zeroinitializer
++}
++
++; CHECK: declare { ptr, i64 } @decl(ptr herbthrows_sret({ i64, i64, i64, i64 }))
++declare { ptr, i64 } @decl(ptr herbthrows_sret({ i64, i64, i64, i64 }))
++
++; CHECK: call { ptr, i64 } @decl(ptr herbthrows_sret({ i64, i64, i64, i64 }) %
++define { ptr, i64 } @caller(ptr herbthrows_sret({ i64, i64, i64, i64 }) %out) {
++  %r = call { ptr, i64 } @decl(ptr herbthrows_sret({ i64, i64, i64, i64 }) %out)
++  ret { ptr, i64 } %r
++}
+diff --git a/llvm/test/CodeGen/WebAssembly/throws-attr.ll b/llvm/test/CodeGen/WebAssembly/throws-attr.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..192615698323a000de8926657a5fa3c310dd64c7
+--- /dev/null
++++ b/llvm/test/CodeGen/WebAssembly/throws-attr.ll
+@@ -0,0 +1,60 @@
++; RUN: llc -mtriple=wasm32-unknown-unknown -mattr=+multivalue < %s | FileCheck %s
++; RUN: llc -mtriple=wasm64-unknown-unknown -mattr=+multivalue < %s | FileCheck %s
++; RUN: llc -mtriple=wasm32-unknown-unknown -mattr=-multivalue < %s | FileCheck %s --check-prefix=MVP
++; RUN: llc -mtriple=wasm64-unknown-unknown -mattr=-multivalue < %s | FileCheck %s --check-prefix=NO-MULTI64
++; MVP: .functype ret_success (i32, i64) -> ()
++; MVP: .functype ret_error (i32, i64) -> ()
++; NO-MULTI64: .functype ret_success (i64, i64) -> ()
++; NO-MULTI64: .functype ret_error (i64, i64) -> ()
++
++; A function with the throws (herbception) attribute returns its value with a
++; discriminant. On WebAssembly the discriminant is returned as an extra
++; multivalue result.
++
++; Success: value in result 0, discriminant (0) in result 1.
++define { i64, i1 } @ret_success(i64 %x) #0 {
++; CHECK-LABEL: ret_success:
++; CHECK:         .functype ret_success (i64) -> (i64, i32)
++; CHECK:         local.get 0
++; CHECK-NEXT:    i32.const 0
++entry:
++  %r.i = insertvalue { i64, i1 } poison, i64 %x, 0
++  %r = insertvalue { i64, i1 } %r.i, i1 false, 1
++  ret { i64, i1 } %r
++}
++
++; Error: discriminant is true (1) in result 1.
++define { i64, i1 } @ret_error(i64 %x) #0 {
++; CHECK-LABEL: ret_error:
++; CHECK:         .functype ret_error (i64) -> (i64, i32)
++; CHECK:         local.get 0
++; CHECK-NEXT:    i32.const 1
++entry:
++  %r.i = insertvalue { i64, i1 } poison, i64 %x, 0
++  %r = insertvalue { i64, i1 } %r.i, i1 true, 1
++  ret { i64, i1 } %r
++}
++
++; The caller selects on the extra discriminant value.
++define i64 @call_and_select(i64 %x) #1 {
++; CHECK-LABEL: call_and_select:
++; CHECK:         .functype call_and_select (i64) -> (i64)
++; CHECK:         call ret_error
++; CHECK-NEXT:    local.set 1
++; CHECK-NEXT:    local.set 0
++; CHECK-NEXT:    i64.const 100
++; CHECK-NEXT:    local.get 0
++; CHECK-NEXT:    local.get 1
++; CHECK-NEXT:    i32.const 1
++; CHECK-NEXT:    i32.and
++; CHECK-NEXT:    i64.select
++entry:
++  %c = call { i64, i1 } @ret_error(i64 %x)
++  %val = extractvalue { i64, i1 } %c, 0
++  %disc = extractvalue { i64, i1 } %c, 1
++  %sel = select i1 %disc, i64 100, i64 %val
++  ret i64 %sel
++}
++
++attributes #0 = { herbthrows }
++attributes #1 = { nounwind }
+diff --git a/llvm/test/CodeGen/WebAssembly/throws-indirect.ll b/llvm/test/CodeGen/WebAssembly/throws-indirect.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..5f3812e86a75c57493d771ba9f4d2e2039bb3a19
+--- /dev/null
++++ b/llvm/test/CodeGen/WebAssembly/throws-indirect.ll
+@@ -0,0 +1,19 @@
++; RUN: llc -mtriple=wasm32 -mattr=+multivalue < %s | FileCheck %s
++; RUN: llc -mtriple=wasm32 -mattr=+multivalue -global-isel -global-isel-abort=0 < %s | FileCheck %s
++; RUN: llc -mtriple=wasm64 -mattr=+multivalue < %s | FileCheck %s
++
++; A plain caller and an indirect call use the callee's Herb ABI. The global
++; materializes an independently callable target with the same function type.
++@slot = global ptr @target
++declare { i64, i1 } @target(i64) herbthrows
++; CHECK: .functype target (i64) -> (i64, i32)
++define i64 @plain_caller(i64 %x) {
++; CHECK-LABEL: plain_caller:
++; CHECK: call_indirect
++  %callee = load volatile ptr, ptr @slot
++  %result = call { i64, i1 } %callee(i64 %x) herbthrows
++  %value = extractvalue { i64, i1 } %result, 0
++  %failed = extractvalue { i64, i1 } %result, 1
++  %ret = select i1 %failed, i64 -1, i64 %value
++  ret i64 %ret
++}
+diff --git a/llvm/test/Demangle/itanium-herbceptions.test b/llvm/test/Demangle/itanium-herbceptions.test
+new file mode 100644
+index 0000000000000000000000000000000000000000..00aaf7de300eb81101f60c2e0ac53bcff65d15a9
+--- /dev/null
++++ b/llvm/test/Demangle/itanium-herbceptions.test
+@@ -0,0 +1,26 @@
++RUN: llvm-cxxfilt -n < %s | FileCheck --match-full-lines %s
++
++_Z4takePDrFivE
++; CHECK: take(int (*)() throws)
++_Z4takePDoFivE
++; CHECK: take(int (*)() noexcept)
++_Z4takePFivE
++; CHECK: take(int (*)())
++_Z6take_rPDEiEFivE
++; CHECK: take_r(int (*)() return_failure{int})
++_Z6take_rPDElEFivE
++; CHECK: take_r(int (*)() return_failure{long})
++_ZN1SIPDrFivEE1mEv
++; CHECK: S<int (*)() throws>::m()
++_ZN1SIPDEiEFivEE1mEv
++; CHECK: S<int (*)() return_failure{int}>::m()
++_Z1fDrv
++; CHECK: f() throws
++_Z1gDEiEv
++; CHECK: g() return_failure{int}
++_Z1gDElEv
++; CHECK: g() return_failure{long}
++_ZN2ns3mthEDrPNS_5AllocE
++; CHECK: ns::mth(ns::Alloc*) throws
++_ZN1AC1EDri
++; CHECK: A::A(int) throws
+diff --git a/llvm/test/Demangle/ms-herbceptions.test b/llvm/test/Demangle/ms-herbceptions.test
+new file mode 100644
+index 0000000000000000000000000000000000000000..32f0cdb566e8c66817509a77d274e9d15aba1b55
+--- /dev/null
++++ b/llvm/test/Demangle/ms-herbceptions.test
+@@ -0,0 +1,20 @@
++; RUN: llvm-undname < %s | FileCheck %s
++
++?take@@YAXP6AHX_H@Z
++; CHECK: void __cdecl take(int (__cdecl *)(void) throws)
++?take@@YAXP6AHX_E@Z
++; CHECK: void __cdecl take(int (__cdecl *)(void) noexcept)
++?take@@YAXP6AHXZ@Z
++; CHECK: void __cdecl take(int (__cdecl *)(void))
++?take_r@@YAXP6AHX_FH@Z
++; CHECK: void __cdecl take_r(int (__cdecl *)(void) return_failure{int})
++?take_r@@YAXP6AHX_FJ@Z
++; CHECK: void __cdecl take_r(int (__cdecl *)(void) return_failure{long})
++?m@?$S@P6AHX_FH@@SAXXZ
++; CHECK: public: static void __cdecl S<int (__cdecl *)(void) return_failure{int}>::m(void)
++?f@@YAHX_H
++; CHECK: int __cdecl f(void) throws
++?g@@YAHX_FH
++; CHECK: int __cdecl g(void) return_failure{int}
++?nf@@YAHXZ
++; CHECK: int __cdecl nf(void)
+diff --git a/llvm/test/Feature/throws-attr.ll b/llvm/test/Feature/throws-attr.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..6a8f2d487f009d8b6e1ae845e887a30efcfe34a9
+--- /dev/null
++++ b/llvm/test/Feature/throws-attr.ll
+@@ -0,0 +1,32 @@
++; RUN: llvm-as < %s | llvm-dis > %t1.ll
++; RUN: llvm-as %t1.ll -o - | llvm-dis > %t2.ll
++; RUN: diff %t1.ll %t2.ll
++; RUN: llvm-as < %s | llvm-dis | FileCheck %s
++
++; The 'throws' attribute marks a function whose return value is accompanied by
++; a success/failure discriminant (herbception / deterministic exceptions).
++
++; CHECK: define { i64, i1 } @foo(i64 %x) #0
++; CHECK: attributes #0 = { herbthrows }
++
++define { i64, i1 } @foo(i64 %x) #0 {
++entry:
++  %r.i = insertvalue { i64, i1 } poison, i64 %x, 0
++  %r = insertvalue { i64, i1 } %r.i, i1 false, 1
++  ret { i64, i1 } %r
++}
++
++define void @bar() #0 {
++entry:
++  %c = call { i64, i1 } @foo(i64 42)
++  %ok = extractvalue { i64, i1 } %c, 1
++  br i1 %ok, label %err, label %done
++
++err:
++  ret void
++
++done:
++  ret void
++}
++
++attributes #0 = { herbthrows }
+diff --git a/llvm/test/LTO/WebAssembly/herb-hidden-payload.ll b/llvm/test/LTO/WebAssembly/herb-hidden-payload.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..5fcf90c73b8c0dc788f89b891cd05c65a201558d
+--- /dev/null
++++ b/llvm/test/LTO/WebAssembly/herb-hidden-payload.ll
+@@ -0,0 +1,25 @@
++; REQUIRES: webassembly-registered-target
++; RUN: split-file %s %t
++; RUN: llvm-as %t/def.ll -o %t/def.bc
++; RUN: llvm-as %t/use.ll -o %t/use.bc
++; RUN: not llvm-lto2 run %t/def.bc %t/use.bc -o %t/link -r=%t/def.bc,make,px -r=%t/use.bc,make, -r=%t/use.bc,start,px 2>&1 | FileCheck %s
++; CHECK: herbception ODR violation: symbol 'make'
++; CHECK-DAG: herbthrows_sret[0, 0](i64)
++; CHECK-DAG: herbthrows_sret[0, 0](i32)
++
++;--- def.ll
++target datalayout = "e-m:e-p:32:32-p10:8:8-p20:8:8-i64:64-i128:128-n32:64-S128-ni:1:10:20"
++target triple = "wasm32-unknown-unknown"
++define i1 @make(ptr herbthrows_sret(i64) %dst) herbthrows {
++  store i64 42, ptr %dst
++  ret i1 false
++}
++
++;--- use.ll
++target datalayout = "e-m:e-p:32:32-p10:8:8-p20:8:8-i64:64-i128:128-n32:64-S128-ni:1:10:20"
++target triple = "wasm32-unknown-unknown"
++declare i1 @make(ptr herbthrows_sret(i32)) herbthrows
++define i1 @start(ptr %dst) {
++  %failed = call i1 @make(ptr herbthrows_sret(i32) %dst)
++  ret i1 %failed
++}
+diff --git a/llvm/test/Other/new-pm-defaults.ll b/llvm/test/Other/new-pm-defaults.ll
+index c3a8ab3725ad631d330ad0c475bd97543bb0a9d0..6e4e028bd68e8d7f5448adec73f580c313aaea32 100644
+--- a/llvm/test/Other/new-pm-defaults.ll
++++ b/llvm/test/Other/new-pm-defaults.ll
+@@ -272,6 +272,7 @@
+ ; CHECK-O-NEXT: Running pass: MergeICmpsPass
+ ; CHECK-O-NEXT: Running pass: ExpandMemCmpPass
+ ; CHECK-O-NEXT: Running pass: TailCallElimPass
++; CHECK-O-NEXT: Running pass: HerbceptionsLegacyEHFoldPass
+ ; CHECK-O-NEXT: Running pass: SimplifyCFGPass
+ ; CHECK-DEFAULT-NEXT: Running pass: AllocToken
+ ; CHECK-EP-OPTIMIZER-LAST: Running pass: NoOpModulePass
+diff --git a/llvm/test/Other/new-pm-thinlto-postlink-defaults.ll b/llvm/test/Other/new-pm-thinlto-postlink-defaults.ll
+index df712ab7846f874191e0c3b890b3d088699e4a10..0aee250d7062a5a054474afcf6eae12472b6219b 100644
+--- a/llvm/test/Other/new-pm-thinlto-postlink-defaults.ll
++++ b/llvm/test/Other/new-pm-thinlto-postlink-defaults.ll
+@@ -198,6 +198,7 @@
+ ; CHECK-POSTLINK-O-NEXT: Running pass: MergeICmpsPass
+ ; CHECK-POSTLINK-O-NEXT: Running pass: ExpandMemCmpPass
+ ; CHECK-POSTLINK-O-NEXT: Running pass: TailCallElimPass
++; CHECK-POSTLINK-O-NEXT: Running pass: HerbceptionsLegacyEHFoldPass
+ ; CHECK-POSTLINK-O-NEXT: Running pass: SimplifyCFGPass
+ ; CHECK-POSTLINK-O-NEXT: Running pass: AllocTokenPass
+ ; CHECK-POST-EP-OPT-LAST-NEXT: Running pass: NoOpModulePass
+diff --git a/llvm/test/Other/new-pm-thinlto-postlink-pgo-defaults.ll b/llvm/test/Other/new-pm-thinlto-postlink-pgo-defaults.ll
+index f098951e1403d400b62a13041df56146c3a9165e..ba714b35e57d82dfa548a25f2f0b4c41e81da5dd 100644
+--- a/llvm/test/Other/new-pm-thinlto-postlink-pgo-defaults.ll
++++ b/llvm/test/Other/new-pm-thinlto-postlink-pgo-defaults.ll
+@@ -183,6 +183,7 @@
+ ; CHECK-O-NEXT: Running pass: MergeICmpsPass
+ ; CHECK-O-NEXT: Running pass: ExpandMemCmpPass
+ ; CHECK-O-NEXT: Running pass: TailCallElimPass
++; CHECK-O-NEXT: Running pass: HerbceptionsLegacyEHFoldPass
+ ; CHECK-O-NEXT: Running pass: SimplifyCFGPass
+ ; CHECK-O-NEXT: Running pass: AllocTokenPass
+ ; CHECK-O-NEXT: Running pass: GlobalDCEPass
+diff --git a/llvm/test/Other/new-pm-thinlto-postlink-samplepgo-defaults.ll b/llvm/test/Other/new-pm-thinlto-postlink-samplepgo-defaults.ll
+index 702920e5a6dbf900ddcd01e275ad37b3955861f0..7f6a06dcc0eba866a0fc44f2acc936149efc4f70 100644
+--- a/llvm/test/Other/new-pm-thinlto-postlink-samplepgo-defaults.ll
++++ b/llvm/test/Other/new-pm-thinlto-postlink-samplepgo-defaults.ll
+@@ -190,6 +190,7 @@
+ ; CHECK-O-NEXT: Running pass: MergeICmpsPass
+ ; CHECK-O-NEXT: Running pass: ExpandMemCmpPass
+ ; CHECK-O-NEXT: Running pass: TailCallElimPass
++; CHECK-O-NEXT: Running pass: HerbceptionsLegacyEHFoldPass
+ ; CHECK-O-NEXT: Running pass: SimplifyCFGPass
+ ; CHECK-O-NEXT: Running pass: AllocTokenPass
+ ; CHECK-O-NEXT: Running pass: GlobalDCEPass
+diff --git a/llvm/test/Other/new-pm-thinlto-prelink-defaults.ll b/llvm/test/Other/new-pm-thinlto-prelink-defaults.ll
+index 335d56b574227d25470788d20f0e0cf2c5823c1f..a3a05e63c6795ca96cabf310675b0b723c4db8c6 100644
+--- a/llvm/test/Other/new-pm-thinlto-prelink-defaults.ll
++++ b/llvm/test/Other/new-pm-thinlto-prelink-defaults.ll
+@@ -182,6 +182,7 @@
+ ; CHECK-EXT: Running pass: {{.*}}::Bye
+ ; CHECK-EP-OPT-EARLY-NEXT: Running pass: NoOpModulePass
+ ; CHECK-EP-OPT-LAST-NEXT: Running pass: NoOpModulePass
++; CHECK-O-NEXT: Running pass: HerbceptionsLegacyEHFoldPass on foo
+ ; CHECK-O-NEXT:          Running pass: AnnotationRemarksPass on foo
+ ; CHECK-O-NEXT: Running pass: LowerCommentStringPass
+ ; CHECK-O-NEXT: Running pass: CanonicalizeAliasesPass
+diff --git a/llvm/test/Other/new-pm-thinlto-prelink-pgo-defaults.ll b/llvm/test/Other/new-pm-thinlto-prelink-pgo-defaults.ll
+index 2c2046b0d09345587d79d9b3b2383213b9c65da4..06d0378fad5bcd30911e019a5311176dae5f1102 100644
+--- a/llvm/test/Other/new-pm-thinlto-prelink-pgo-defaults.ll
++++ b/llvm/test/Other/new-pm-thinlto-prelink-pgo-defaults.ll
+@@ -185,6 +185,7 @@
+ ; CHECK-O-NEXT: Running analysis: TargetLibraryAnalysis on bar
+ ; CHECK-O-NEXT: Running pass: GlobalDCEPass
+ ; CHECK-EXT: Running pass: {{.*}}::Bye
++; CHECK-O-NEXT: Running pass: HerbceptionsLegacyEHFoldPass on foo
+ ; CHECK-O-NEXT: Running pass: AnnotationRemarksPass on foo
+ ; CHECK-O-NEXT: Running pass: LowerCommentStringPass
+ ; CHECK-O-NEXT: Running pass: CanonicalizeAliasesPass
+diff --git a/llvm/test/Other/new-pm-thinlto-prelink-samplepgo-defaults.ll b/llvm/test/Other/new-pm-thinlto-prelink-samplepgo-defaults.ll
+index ef01b14df972afbcd400cba492d2aa099998dee0..62ecffc91358831eb6359ac50ccd3f0803ef61e0 100644
+--- a/llvm/test/Other/new-pm-thinlto-prelink-samplepgo-defaults.ll
++++ b/llvm/test/Other/new-pm-thinlto-prelink-samplepgo-defaults.ll
+@@ -148,6 +148,7 @@
+ ; CHECK-O-NEXT: Running pass: DeadArgumentEliminationPass
+ ; CHECK-O-NEXT: Running pass: GlobalOptPass
+ ; CHECK-O-NEXT: Running pass: GlobalDCEPass
++; CHECK-O-NEXT: Running pass: HerbceptionsLegacyEHFoldPass on foo
+ ; CHECK-O-NEXT: Running pass: AnnotationRemarksPass on foo
+ ; CHECK-O-NEXT: Running pass: LowerCommentStringPass
+ ; CHECK-O-NEXT: Running pass: CanonicalizeAliasesPass
+diff --git a/llvm/test/TableGen/callingconv-ifthrows.td b/llvm/test/TableGen/callingconv-ifthrows.td
+new file mode 100644
+index 0000000000000000000000000000000000000000..9734204320596983b86deef9fd574bdabe8c497b
+--- /dev/null
++++ b/llvm/test/TableGen/callingconv-ifthrows.td
+@@ -0,0 +1,14 @@
++// RUN: llvm-tblgen -gen-callingconv -I %p/../../include -I %p/Common %s | FileCheck %s
++
++// Check that the CCIfThrows predicate class emits an ArgFlags.isThrows()
++// guard, so that backends can implement a herbception-aware calling
++// convention (return value plus a success/failure discriminant).
++
++include "reg-with-subregs-common.td"
++
++def RetCC_Throws : CallingConv<[
++  CCIfThrows<CCCustom<"RetThrowsCC">>
++]>;
++
++// CHECK: if (ArgFlags.isThrows()) {
++// CHECK:   if (RetThrowsCC(ValNo, ValVT, LocVT, LocInfo, ArgFlags, State))
+diff --git a/llvm/test/Transforms/Coroutines/coro-split-musttail-throws.ll b/llvm/test/Transforms/Coroutines/coro-split-musttail-throws.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..682777603a21be4a45de9c14c45164a9978d8946
+--- /dev/null
++++ b/llvm/test/Transforms/Coroutines/coro-split-musttail-throws.ll
+@@ -0,0 +1,71 @@
++; A 'throws' (herbceptions) coroutine still gets musttail symmetric-transfer
++; calls in its split functions. The split functions use the plain
++; resume-function ABI (void(ptr)) and must not inherit 'throws': their
++; musttail calls carry no 'throws' call-site attribute, so a 'throws' caller
++; would trip the musttail verifier check.
++; RUN: opt < %s -passes='cgscc(coro-split),simplifycfg,early-cse,verify' -S | FileCheck %s
++
++define void @f() #0 {
++entry:
++  %id = call token @llvm.coro.id(i32 0, ptr null, ptr @f, ptr null)
++  %alloc = call ptr @malloc(i64 16)
++  %vFrame = call noalias nonnull ptr @llvm.coro.begin(token %id, ptr %alloc)
++
++  %save = call token @llvm.coro.save(ptr null)
++  %addr1 = call ptr @llvm.coro.subfn.addr(ptr null, i8 0)
++  call void %addr1(ptr null)
++
++  %suspend = call i8 @llvm.coro.suspend(token %save, i1 false)
++  switch i8 %suspend, label %exit [
++    i8 0, label %await.ready
++    i8 1, label %exit
++  ]
++await.ready:
++  %save2 = call token @llvm.coro.save(ptr null)
++  call void @llvm.coro.await.suspend.handle(ptr null, ptr null, ptr @await_suspend_function)
++
++  %suspend2 = call i8 @llvm.coro.suspend(token %save2, i1 false)
++  switch i8 %suspend2, label %exit [
++    i8 0, label %exit
++    i8 1, label %exit
++  ]
++exit:
++  call void @llvm.coro.end(ptr null, i1 false, token none)
++  ret void
++}
++
++; The ramp keeps 'throws'.
++; CHECK-LABEL: define void @f(
++; CHECK-SAME: #[[RAMPATTR:[0-9]+]]
++
++; The split functions are plain resume functions: no attribute group, and
++; their symmetric-transfer resume calls are musttail.
++; CHECK-LABEL: define internal void @f.resume(
++; CHECK-NOT: #
++; CHECK: musttail call void
++; CHECK-LABEL: define internal void @f.destroy(
++; CHECK-NOT: #
++; CHECK: musttail call void
++; CHECK-LABEL: define internal void @f.cleanup(
++; CHECK-NOT: #
++; CHECK: musttail call void
++
++; CHECK: attributes #[[RAMPATTR]] = { herbthrows }
++
++declare token @llvm.coro.id(i32, ptr readnone, ptr nocapture readonly, ptr) #1
++declare i1 @llvm.coro.alloc(token) #2
++declare i64 @llvm.coro.size.i64() #3
++declare ptr @llvm.coro.begin(token, ptr writeonly) #2
++declare token @llvm.coro.save(ptr) #2
++declare ptr @llvm.coro.frame() #3
++declare i8 @llvm.coro.suspend(token, i1) #2
++declare ptr @llvm.coro.free(token, ptr nocapture readonly) #1
++declare void @llvm.coro.end(ptr, i1, token) #2
++declare ptr @llvm.coro.subfn.addr(ptr nocapture readonly, i8) #1
++declare ptr @malloc(i64)
++declare ptr @await_suspend_function(ptr %awaiter, ptr %hdl)
++
++attributes #0 = { presplitcoroutine herbthrows }
++attributes #1 = { argmemonly nounwind readonly }
++attributes #2 = { nounwind }
++attributes #3 = { nounwind readnone }
+diff --git a/llvm/test/Transforms/DeadArgElim/throws-discriminant.ll b/llvm/test/Transforms/DeadArgElim/throws-discriminant.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..caa7e4af3548572e565225cc95569df9d5c849c4
+--- /dev/null
++++ b/llvm/test/Transforms/DeadArgElim/throws-discriminant.ll
+@@ -0,0 +1,26 @@
++; The trailing i1 of a `throws` (herbception) function's {T, i1} return is
++; the failure discriminant delivered through the carry flag. It is part of
++; the calling convention and must stay even when no caller inspects it;
++; otherwise the backend would treat the real last payload element as the
++; discriminant.
++;
++; RUN: opt -passes=deadargelim -S < %s | FileCheck %s
++
++; CHECK-LABEL: define internal { i32, i1 } @throws_fn()
++define internal { i32, i1 } @throws_fn() #0 {
++entry:
++  ret { i32, i1 } { i32 7, i1 true }
++}
++
++; The caller only reads element 0; the i1 discriminant is unused but must
++; not be stripped.
++; CHECK-LABEL: define i32 @caller()
++; CHECK: %call = call { i32, i1 } @throws_fn()
++define i32 @caller() {
++entry:
++  %call = call { i32, i1 } @throws_fn()
++  %v = extractvalue { i32, i1 } %call, 0
++  ret i32 %v
++}
++
++attributes #0 = { herbthrows }
+diff --git a/llvm/test/Transforms/HerbceptionsLegacyEHFold/itanium.ll b/llvm/test/Transforms/HerbceptionsLegacyEHFold/itanium.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..d3b33a4f07d89dbd8fd9d2649e6c68a21be37cc3
+--- /dev/null
++++ b/llvm/test/Transforms/HerbceptionsLegacyEHFold/itanium.ll
+@@ -0,0 +1,130 @@
++; RUN: opt -passes=herbceptions-legacy-eh-fold -S < %s | FileCheck %s
++;
++; Itanium model: a __cxa_throw whose unwind edge reaches only the
++; legacy->std::error conversion is folded into a direct conversion call.
++; The constructor-failure edge into the shared conversion block must be
++; preserved.
++
++target triple = "x86_64-unknown-linux-gnu"
++
++@.str = private unnamed_addr constant [3 x i8] c"eh\00", align 1
++@_ZTISt13runtime_error = external constant ptr
++@_ZTIi = external constant ptr
++
++; CHECK-LABEL: define {{.*}} @foo
++define dso_local { { ptr, i64 }, i1 } @foo() local_unnamed_addr personality ptr @__gxx_personality_v0 {
++entry:
++  %obj = tail call ptr @__cxa_allocate_exception(i64 16)
++  invoke void @_ZNSt13runtime_errorC1EPKc(ptr noundef nonnull align 8 dereferenceable(16) %obj, ptr noundef nonnull @.str)
++          to label %ctor.ok unwind label %ctor.fail
++
++ctor.ok:
++; The throw becomes a direct conversion (flags==2) and a plain branch;
++; no unwind.
++; CHECK-NOT: __cxa_throw
++; CHECK: %[[DOM:.*]] = call ptr @__cxa_error_domain_itanium_exception_ptr()
++; CHECK: %[[CODE:.*]] = call i64 @__cxa_error_code_itanium_exception_ptr(i64 2, ptr %obj, ptr @_ZTISt13runtime_error, ptr @_ZNSt13runtime_errorD1Ev)
++; CHECK: br label %[[CONT:.*]]
++  invoke void @__cxa_throw(ptr nonnull %obj, ptr nonnull @_ZTISt13runtime_error, ptr nonnull @_ZNSt13runtime_errorD1Ev)
++          to label %dead unwind label %throw.lpad
++
++dead:
++  unreachable
++
++; Ctor-failure path still converts the in-flight exception the slow way
++; (flags==1).
++; CHECK: landingpad
++; CHECK: call i64 @__cxa_error_code_itanium_exception_ptr(i64 1,
++; CHECK: [[CONT]]:
++; CHECK: phi ptr {{.*}}%[[DOM]]
++; CHECK: phi i64 {{.*}}%[[CODE]]
++ctor.fail:
++  %lp0 = landingpad { ptr, i32 }
++          catch ptr null
++  tail call void @__cxa_free_exception(ptr nonnull %obj)
++  br label %conv
++
++throw.lpad:
++  %lp1 = landingpad { ptr, i32 }
++          catch ptr null
++  br label %conv
++
++conv:
++  %exn.agg = phi { ptr, i32 } [ %lp1, %throw.lpad ], [ %lp0, %ctor.fail ]
++  %exn = extractvalue { ptr, i32 } %exn.agg, 0
++  %dom = tail call ptr @__cxa_error_domain_itanium_exception_ptr()
++  %code = tail call i64 @__cxa_error_code_itanium_exception_ptr(i64 1, ptr noundef %exn, ptr null, ptr null)
++  %e0 = insertvalue { ptr, i64 } poison, ptr %dom, 0
++  %e1 = insertvalue { ptr, i64 } %e0, i64 %code, 1
++  %r0 = insertvalue { { ptr, i64 }, i1 } poison, { ptr, i64 } %e1, 0
++  %r1 = insertvalue { { ptr, i64 }, i1 } %r0, i1 true, 1
++  ret { { ptr, i64 }, i1 } %r1
++}
++
++; A throw whose exception is observed by a real catch must not be folded.
++; CHECK-LABEL: define {{.*}} @real_catch
++; CHECK: invoke void @__cxa_throw
++; CHECK-NOT: exception_ptr(i64 2
++define i32 @real_catch() personality ptr @__gxx_personality_v0 {
++  %obj = tail call ptr @__cxa_allocate_exception(i64 4)
++  invoke void @__cxa_throw(ptr %obj, ptr @_ZTIi, ptr null)
++          to label %dead unwind label %lpad
++lpad:
++  %lp = landingpad { ptr, i32 }
++          catch ptr null
++  %exn = extractvalue { ptr, i32 } %lp, 0
++  %b = tail call ptr @__cxa_begin_catch(ptr %exn)
++  tail call void @__cxa_end_catch()
++  ret i32 7
++dead:
++  unreachable
++}
++
++; A throw unwinding to caller (cleanup + resume) must not be folded.
++; CHECK-LABEL: define {{.*}} @to_caller
++; CHECK: invoke void @__cxa_throw
++; CHECK-NOT: exception_ptr(i64 2
++define void @to_caller() personality ptr @__gxx_personality_v0 {
++  %obj = tail call ptr @__cxa_allocate_exception(i64 4)
++  invoke void @__cxa_throw(ptr %obj, ptr @_ZTIi, ptr null)
++          to label %dead unwind label %lpad
++lpad:
++  %lp = landingpad { ptr, i32 }
++          cleanup
++  resume { ptr, i32 } %lp
++dead:
++  unreachable
++}
++
++; A landingpad with a typed catch clause sharing the dispatch must not be
++; folded even if the catch-all conversion path also exists.
++; CHECK-LABEL: define {{.*}} @typed_sibling
++; CHECK: invoke void @__cxa_throw
++; CHECK-NOT: exception_ptr(i64 2
++; CHECK: ret i32
++define i32 @typed_sibling() personality ptr @__gxx_personality_v0 {
++  %obj = tail call ptr @__cxa_allocate_exception(i64 4)
++  invoke void @__cxa_throw(ptr %obj, ptr @_ZTIi, ptr null)
++          to label %dead unwind label %lpad
++lpad:
++  %lp = landingpad { ptr, i32 }
++          catch ptr @_ZTIi
++          catch ptr null
++  %exn = extractvalue { ptr, i32 } %lp, 0
++  %dom = tail call ptr @__cxa_error_domain_itanium_exception_ptr()
++  %code = tail call i64 @__cxa_error_code_itanium_exception_ptr(i64 1, ptr noundef %exn, ptr null, ptr null)
++  ret i32 0
++dead:
++  unreachable
++}
++
++declare ptr @__gxx_personality_v0(...)
++declare ptr @__cxa_allocate_exception(i64)
++declare void @__cxa_throw(ptr, ptr, ptr)
++declare void @__cxa_free_exception(ptr)
++declare ptr @__cxa_begin_catch(ptr)
++declare void @__cxa_end_catch()
++declare void @_ZNSt13runtime_errorC1EPKc(ptr, ptr)
++declare void @_ZNSt13runtime_errorD1Ev(ptr)
++declare ptr @__cxa_error_domain_itanium_exception_ptr()
++declare i64 @__cxa_error_code_itanium_exception_ptr(i64, ptr, ptr, ptr)
+diff --git a/llvm/test/Transforms/HerbceptionsLegacyEHFold/msvc.ll b/llvm/test/Transforms/HerbceptionsLegacyEHFold/msvc.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..358d28261cad12aed3fccccea658bb90f5e71013
+--- /dev/null
++++ b/llvm/test/Transforms/HerbceptionsLegacyEHFold/msvc.ll
+@@ -0,0 +1,158 @@
++; RUN: opt -passes=herbceptions-legacy-eh-fold -S < %s | FileCheck %s
++;
++; MSVC model: a _CxxThrowException whose unwind edge reaches only the
++; legacy->std::error conversion catchpad is folded into a direct
++; conversion call; the dead catchswitch is cleaned up.
++
++target triple = "x86_64-unknown-windows-msvc"
++
++@"_TI2?AVruntime_error@std@@" = external constant ptr
++
++; CHECK-LABEL: define {{.*}} @"?foo@@YAXXZ"
++define dso_local { { ptr, i64 }, i1 } @"?foo@@YAXXZ"() local_unnamed_addr personality ptr @__CxxFrameHandler3 {
++entry:
++  %obj = alloca i8, i32 24, align 8
++; The throw becomes a direct conversion and a plain branch; no unwind,
++; and the now-dead catchswitch dispatch is removed entirely.
++; CHECK-NOT: _CxxThrowException
++; CHECK-NOT: catchswitch
++; CHECK: %[[DOM:.*]] = call ptr @__cxa_error_domain_msvc_exception_ptr()
++; CHECK: %[[CODE:.*]] = call i64 @__cxa_error_code_msvc_exception_ptr(i64 2, ptr %obj, ptr @"_TI2?AVruntime_error@std@@")
++; CHECK: br label %[[CONT:.*]]
++; CHECK: [[CONT]]:
++; CHECK: ret
++  invoke void @_CxxThrowException(ptr %obj, ptr @"_TI2?AVruntime_error@std@@")
++          to label %dead unwind label %cs
++
++dead:
++  unreachable
++
++cs:
++  %cswtok = catchswitch within none [label %pad] unwind to caller
++
++pad:
++  %cp = catchpad within %cswtok [ptr null, i32 0, ptr null]
++  %dom = call ptr @__cxa_error_domain_msvc_exception_ptr() [ "funclet"(token %cp) ]
++  %code = call i64 @__cxa_error_code_msvc_exception_ptr(i64 1, ptr null, ptr null) [ "funclet"(token %cp) ]
++  catchret from %cp to label %cont
++
++cont:
++  %e0 = insertvalue { ptr, i64 } poison, ptr %dom, 0
++  %e1 = insertvalue { ptr, i64 } %e0, i64 %code, 1
++  %r0 = insertvalue { { ptr, i64 }, i1 } poison, { ptr, i64 } %e1, 0
++  %r1 = insertvalue { { ptr, i64 }, i1 } %r0, i1 true, 1
++  ret { { ptr, i64 }, i1 } %r1
++}
++
++; A catchswitch with a sibling handler must not be folded.
++; CHECK-LABEL: define {{.*}} @typed_sibling
++; CHECK: invoke void @_CxxThrowException
++; CHECK-NOT: exception_ptr(i64 2
++; CHECK: ret
++define i32 @typed_sibling() personality ptr @__CxxFrameHandler3 {
++entry:
++  %obj = alloca i8, i32 24, align 8
++  invoke void @_CxxThrowException(ptr %obj, ptr @"_TI2?AVruntime_error@std@@")
++          to label %dead unwind label %cs
++
++dead:
++  unreachable
++
++cs:
++  %cswtok = catchswitch within none [label %pad, label %other] unwind to caller
++
++pad:
++  %cp = catchpad within %cswtok [ptr null, i32 0, ptr null]
++  %dom = call ptr @__cxa_error_domain_msvc_exception_ptr() [ "funclet"(token %cp) ]
++  %code = call i64 @__cxa_error_code_msvc_exception_ptr(i64 1, ptr null, ptr null) [ "funclet"(token %cp) ]
++  catchret from %cp to label %cont
++
++other:
++  %op = catchpad within %cswtok [ptr null, i32 0, ptr null]
++  catchret from %op to label %cont
++
++cont:
++  ret i32 0
++}
++
++; A MSVC rethrow (_CxxThrowException(nullptr, nullptr)) is not a fresh
++; throw and must not be folded.
++; CHECK-LABEL: define {{.*}} @rethrow
++; CHECK: invoke void @_CxxThrowException
++; CHECK-NOT: exception_ptr(i64 2
++; CHECK: ret
++define i32 @rethrow() personality ptr @__CxxFrameHandler3 {
++entry:
++  invoke void @_CxxThrowException(ptr null, ptr null)
++          to label %dead unwind label %cs
++
++dead:
++  unreachable
++
++cs:
++  %cswtok = catchswitch within none [label %pad] unwind to caller
++
++pad:
++  %cp = catchpad within %cswtok [ptr null, i32 0, ptr null]
++  %dom = call ptr @__cxa_error_domain_msvc_exception_ptr() [ "funclet"(token %cp) ]
++  %code = call i64 @__cxa_error_code_msvc_exception_ptr(i64 1, ptr null, ptr null) [ "funclet"(token %cp) ]
++  catchret from %cp to label %cont
++
++cont:
++  ret i32 0
++}
++
++; The continuation may itself contain a phi taking the conversion results
++; (e.g. several conversion sites merging). That phi must keep the original
++; call result for the conversion edge and gain a new incoming value per
++; folded site. The rethrow invoke keeps the pad alive so the phi survives.
++; CHECK-LABEL: define {{.*}} @edge_phi
++; CHECK: %[[DOM:.*]] = call ptr @__cxa_error_domain_msvc_exception_ptr()
++; CHECK: %[[CODE:.*]] = call i64 @__cxa_error_code_msvc_exception_ptr(i64 2, ptr %obj, ptr @"_TI2?AVruntime_error@std@@")
++; CHECK: br label %[[CONT:.*]]
++; CHECK: invoke void @_CxxThrowException(ptr null, ptr null)
++; CHECK: [[CONT]]:
++; CHECK: phi ptr [ %dom, %pad ], [ %[[DOM]], %throw ]
++; CHECK: phi i64 [ %code, %pad ], [ %[[CODE]], %throw ]
++; CHECK: ret
++define i32 @edge_phi(i1 %c) personality ptr @__CxxFrameHandler3 {
++entry:
++  %obj = alloca i8, i32 24, align 8
++  br i1 %c, label %throw, label %rethrow
++
++throw:
++  invoke void @_CxxThrowException(ptr %obj, ptr @"_TI2?AVruntime_error@std@@")
++          to label %dead unwind label %cs
++
++rethrow:
++  invoke void @_CxxThrowException(ptr null, ptr null)
++          to label %dead unwind label %cs
++
++dead:
++  unreachable
++
++cs:
++  %cswtok = catchswitch within none [label %pad] unwind to caller
++
++pad:
++  %cp = catchpad within %cswtok [ptr null, i32 0, ptr null]
++  %dom = call ptr @__cxa_error_domain_msvc_exception_ptr() [ "funclet"(token %cp) ]
++  %code = call i64 @__cxa_error_code_msvc_exception_ptr(i64 1, ptr null, ptr null) [ "funclet"(token %cp) ]
++  catchret from %cp to label %cont
++
++cont:
++  %pd = phi ptr [ %dom, %pad ]
++  %pc = phi i64 [ %code, %pad ]
++  %e0 = insertvalue { ptr, i64 } poison, ptr %pd, 0
++  %e1 = insertvalue { ptr, i64 } %e0, i64 %pc, 1
++  %r0 = insertvalue { { ptr, i64 }, i1 } poison, { ptr, i64 } %e1, 0
++  %r1 = insertvalue { { ptr, i64 }, i1 } %r0, i1 true, 1
++  %p = extractvalue { { ptr, i64 }, i1 } %r1, 1
++  %z = zext i1 %p to i32
++  ret i32 %z
++}
++
++declare void @__CxxFrameHandler3(...)
++declare void @_CxxThrowException(ptr, ptr)
++declare ptr @__cxa_error_domain_msvc_exception_ptr()
++declare i64 @__cxa_error_code_msvc_exception_ptr(i64, ptr, ptr)
+diff --git a/llvm/test/Transforms/HerbceptionsLegacyEHFold/pipeline.ll b/llvm/test/Transforms/HerbceptionsLegacyEHFold/pipeline.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..83332441d80fe19abfc5ab0c8c22a4369aa546b1
+--- /dev/null
++++ b/llvm/test/Transforms/HerbceptionsLegacyEHFold/pipeline.ll
+@@ -0,0 +1,54 @@
++; The pass runs in the default optimization pipeline at every non-O0 level,
++; in the ThinLTO pre-link pipeline (so -flto=thin compiles fold throws while
++; the conversion helpers are still plain call sites and cannot be dissolved
++; by post-link importing/inlining), and in the ThinLTO post-link pipeline.
++; It can be disabled with -enable-herbceptions-legacy-eh-fold=false.
++;
++; RUN: opt -passes='default<O1>' -S < %s | FileCheck %s
++; RUN: opt -passes='default<O2>' -S < %s | FileCheck %s
++; RUN: opt -passes='default<O3>' -S < %s | FileCheck %s
++; RUN: opt -passes='thinlto-pre-link<O2>' -S < %s | FileCheck %s
++; RUN: opt -passes='thinlto<O2>' -S < %s | FileCheck %s
++; RUN: opt -enable-herbceptions-legacy-eh-fold=false -passes='thinlto-pre-link<O2>' -S < %s | FileCheck %s --check-prefix=DISABLED
++; RUN: opt -enable-herbceptions-legacy-eh-fold=false -passes='default<O3>' -S < %s | FileCheck %s --check-prefix=DISABLED
++
++target triple = "x86_64-unknown-linux-gnu"
++
++@_ZTIi = external constant ptr
++
++; CHECK-LABEL: define {{.*}} @foo
++; CHECK-NOT: __cxa_throw
++; CHECK: call i64 @__cxa_error_code_itanium_exception_ptr(i64 2,
++; CHECK: ret
++;
++; DISABLED-LABEL: define {{.*}} @foo
++; DISABLED: invoke void @__cxa_throw
++; DISABLED-NOT: exception_ptr(i64 2
++; DISABLED: ret
++define dso_local { { ptr, i64 }, i1 } @foo() personality ptr @__gxx_personality_v0 {
++entry:
++  %obj = tail call ptr @__cxa_allocate_exception(i64 4)
++  invoke void @__cxa_throw(ptr nonnull %obj, ptr nonnull @_ZTIi, ptr null)
++          to label %dead unwind label %throw.lpad
++
++dead:
++  unreachable
++
++throw.lpad:
++  %lp = landingpad { ptr, i32 }
++          catch ptr null
++  %exn = extractvalue { ptr, i32 } %lp, 0
++  %dom = tail call ptr @__cxa_error_domain_itanium_exception_ptr()
++  %code = tail call i64 @__cxa_error_code_itanium_exception_ptr(i64 1, ptr noundef %exn, ptr null, ptr null)
++  %e0 = insertvalue { ptr, i64 } poison, ptr %dom, 0
++  %e1 = insertvalue { ptr, i64 } %e0, i64 %code, 1
++  %r0 = insertvalue { { ptr, i64 }, i1 } poison, { ptr, i64 } %e1, 0
++  %r1 = insertvalue { { ptr, i64 }, i1 } %r0, i1 true, 1
++  ret { { ptr, i64 }, i1 } %r1
++}
++
++declare ptr @__gxx_personality_v0(...)
++declare ptr @__cxa_allocate_exception(i64)
++declare void @__cxa_throw(ptr, ptr, ptr)
++declare ptr @__cxa_error_domain_itanium_exception_ptr()
++declare i64 @__cxa_error_code_itanium_exception_ptr(i64, ptr, ptr, ptr)
+diff --git a/llvm/test/Transforms/HerbceptionsLegacyEHFold/wasm.ll b/llvm/test/Transforms/HerbceptionsLegacyEHFold/wasm.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..97a2080f4f919f9693bfb60539633355b7716e84
+--- /dev/null
++++ b/llvm/test/Transforms/HerbceptionsLegacyEHFold/wasm.ll
+@@ -0,0 +1,92 @@
++; RUN: opt -passes=herbceptions-legacy-eh-fold -S < %s | FileCheck %s
++;
++; Wasm EH model (catchswitch/catchpad/catchret like MSVC, but the
++; conversion uses the Itanium entry points on the wasm.get.exception
++; value). Real CodeGen emits the conversion calls as invokes carrying
++; "funclet" bundles and spreads them across several blocks; the chain
++; ends in catchret. The ctor-failure cleanup edge shares the
++; catchswitch and must be preserved.
++
++target triple = "wasm32-unknown-wasip1"
++
++@_ZTISt13runtime_error = external constant ptr
++
++; CHECK-LABEL: define {{.*}} @foo
++define hidden { { ptr, i32 }, i1 } @foo() local_unnamed_addr personality ptr @__gxx_wasm_personality_v0 {
++entry:
++  %obj = tail call ptr @__cxa_allocate_exception(i32 8)
++  invoke ptr @_ZNSt13runtime_errorC1EPKc(ptr noundef nonnull align 4 dereferenceable(8) %obj, ptr noundef nonnull null)
++          to label %ctor.ok unwind label %ctor.cleanup
++
++ctor.ok:
++; The folded path keeps the domain helper's unwind edge (the exception
++; could still escape if the domain call itself throws) but converts the
++; throw directly (flags==2) in a new block.
++; CHECK-NOT: __cxa_throw
++; CHECK: %[[DOM:.*]] = invoke ptr @__cxa_error_domain_itanium_exception_ptr()
++; CHECK-NEXT: to label %[[DOMOK:.*]] unwind label %[[UNW:.*]]
++  invoke void @__cxa_throw(ptr nonnull %obj, ptr nonnull @_ZTISt13runtime_error, ptr nonnull @_ZNSt13runtime_errorD1Ev)
++          to label %dead unwind label %cs
++
++dead:
++  unreachable
++
++; The catchswitch stays alive for the ctor-failure edge and keeps its
++; real catchpad conversion chain.
++; CHECK: catchswitch
++; CHECK: catchpad
++; CHECK: invoke ptr @__cxa_error_domain_itanium_exception_ptr() [ "funclet"
++; CHECK: call i32 @__cxa_error_code_itanium_exception_ptr(i32 1,
++; CHECK: catchret
++; CHECK: cont:
++; CHECK: phi ptr {{.*}}%[[DOM]]
++; CHECK: phi i32 {{.*}}%herb.code
++;
++; The new folded block is appended at the end of the function.
++; CHECK: [[DOMOK]]:
++; CHECK: %herb.code = call i32 @__cxa_error_code_itanium_exception_ptr(i32 2, ptr %obj, ptr @_ZTISt13runtime_error, ptr @_ZNSt13runtime_errorD1Ev)
++; CHECK: br label %cont
++cs:
++  %cswtok = catchswitch within none [label %pad] unwind label %unwind
++
++pad:
++  %cp = catchpad within %cswtok [ptr null]
++  %exn = call ptr @llvm.wasm.get.exception(token %cp)
++  %sel = call i32 @llvm.wasm.get.ehselector(token %cp)
++  %dom = invoke ptr @__cxa_error_domain_itanium_exception_ptr() [ "funclet"(token %cp) ]
++          to label %code.bb unwind label %unwind
++
++code.bb:
++  %code = invoke i32 @__cxa_error_code_itanium_exception_ptr(i32 1, ptr noundef %exn, ptr null, ptr null) [ "funclet"(token %cp) ]
++          to label %ret.bb unwind label %unwind
++
++ret.bb:
++  catchret from %cp to label %cont
++
++ctor.cleanup:
++  %clp = cleanuppad within none []
++  call void @__cxa_free_exception(ptr nonnull %obj) [ "funclet"(token %clp) ]
++  cleanupret from %clp unwind label %cs
++
++unwind:
++  %ulp = cleanuppad within none []
++  cleanupret from %ulp unwind to caller
++
++cont:
++  %e0 = insertvalue { ptr, i32 } poison, ptr %dom, 0
++  %e1 = insertvalue { ptr, i32 } %e0, i32 %code, 1
++  %r0 = insertvalue { { ptr, i32 }, i1 } poison, { ptr, i32 } %e1, 0
++  %r1 = insertvalue { { ptr, i32 }, i1 } %r0, i1 true, 1
++  ret { { ptr, i32 }, i1 } %r1
++}
++
++declare ptr @__gxx_wasm_personality_v0(...)
++declare ptr @__cxa_allocate_exception(i32)
++declare void @__cxa_throw(ptr, ptr, ptr)
++declare void @__cxa_free_exception(ptr)
++declare ptr @_ZNSt13runtime_errorC1EPKc(ptr, ptr)
++declare void @_ZNSt13runtime_errorD1Ev(ptr)
++declare ptr @llvm.wasm.get.exception(token)
++declare i32 @llvm.wasm.get.ehselector(token)
++declare ptr @__cxa_error_domain_itanium_exception_ptr()
++declare i32 @__cxa_error_code_itanium_exception_ptr(i32, ptr, ptr, ptr)
+diff --git a/llvm/test/Verifier/byref.ll b/llvm/test/Verifier/byref.ll
+index f7b0e84cd900813de21bdd9b6b7e4fec69fcb2cb..09473589a677e204664d05bdb934152891867864 100644
+--- a/llvm/test/Verifier/byref.ll
++++ b/llvm/test/Verifier/byref.ll
+@@ -8,37 +8,37 @@ define void @byref_unsized(ptr byref(%opaque.ty)) {
+   ret void
+ }
+ 
+-; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', and 'sret' are incompatible!
++; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', 'sret', and 'herbthrows_sret' are incompatible!
+ ; CHECK-NEXT: ptr @byref_byval
+ define void @byref_byval(ptr byref(i32) byval(i32)) {
+   ret void
+ }
+ 
+-; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', and 'sret' are incompatible!
++; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', 'sret', and 'herbthrows_sret' are incompatible!
+ ; CHECK-NEXT: ptr @byref_inalloca
+ define void @byref_inalloca(ptr byref(i32) inalloca(i32)) {
+   ret void
+ }
+ 
+-; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', and 'sret' are incompatible!
++; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', 'sret', and 'herbthrows_sret' are incompatible!
+ ; CHECK-NEXT: ptr @byref_preallocated
+ define void @byref_preallocated(ptr byref(i32) preallocated(i32)) {
+   ret void
+ }
+ 
+-; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', and 'sret' are incompatible!
++; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', 'sret', and 'herbthrows_sret' are incompatible!
+ ; CHECK-NEXT: ptr @byref_sret
+ define void @byref_sret(ptr byref(i32) sret(i32)) {
+   ret void
+ }
+ 
+-; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', and 'sret' are incompatible!
++; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', 'sret', and 'herbthrows_sret' are incompatible!
+ ; CHECK-NEXT: ptr @byref_inreg
+ define void @byref_inreg(ptr byref(i32) inreg) {
+   ret void
+ }
+ 
+-; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', and 'sret' are incompatible!
++; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', 'sret', and 'herbthrows_sret' are incompatible!
+ ; CHECK-NEXT: ptr @byref_nest
+ define void @byref_nest(ptr byref(i32) nest) {
+   ret void
+diff --git a/llvm/test/Verifier/throws-musttail.ll b/llvm/test/Verifier/throws-musttail.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..b0249af9528d9cd6b36c2bba92a6318004f860b5
+--- /dev/null
++++ b/llvm/test/Verifier/throws-musttail.ll
+@@ -0,0 +1,37 @@
++; RUN: not llvm-as %s -o /dev/null 2>&1 | FileCheck %s
++
++; A musttail call has to preserve the callee's return convention for the
++; caller's own caller. Whether a function uses the herbception (throws)
++; convention decides where the return discriminant lives -- in the carry flag,
++; or in an ordinary return register -- so the caller and callee must agree on
++; it. 'throws' is a function attribute, not a parameter attribute, so the
++; existing ABI-attribute comparison does not catch a mismatch: a 'throws'
++; function that tail-called a plain function of the same signature would return
++; a discriminant its caller reads from a flag the callee never set.
++
++declare { i64, i1 } @plain(i32)
++
++; CHECK: cannot guarantee tail call due to mismatched 'herbthrows' attributes
++define { i64, i1 } @throws_tails_non_throws(i32 %n) #0 {
++  %r = musttail call { i64, i1 } @plain(i32 %n)
++  ret { i64, i1 } %r
++}
++
++; Matching conventions are still allowed in either direction.
++define { i64, i1 } @throws_tails_throws(i32 %n) #0 {
++  %r = musttail call { i64, i1 } @throws_callee(i32 %n) #0
++  ret { i64, i1 } %r
++}
++
++define { i64, i1 } @throws_callee(i32 %n) #0 {
++  %r = insertvalue { i64, i1 } poison, i64 0, 0
++  %r2 = insertvalue { i64, i1 } %r, i1 false, 1
++  ret { i64, i1 } %r2
++}
++
++define { i64, i1 } @plain_tails_plain(i32 %n) {
++  %r = musttail call { i64, i1 } @plain(i32 %n)
++  ret { i64, i1 } %r
++}
++
++attributes #0 = { herbthrows }
+diff --git a/llvm/test/Verifier/throws-sret-inreg.ll b/llvm/test/Verifier/throws-sret-inreg.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..c4e8940c879bb796a175023696b03ff786797ff9
+--- /dev/null
++++ b/llvm/test/Verifier/throws-sret-inreg.ll
+@@ -0,0 +1,21 @@
++; RUN: llvm-as %s -o - | llvm-dis | FileCheck %s
++
++; The MSVC AArch64/arm64ec ABI classifier marks indirect non-trivial record
++; returns 'inreg' so the hidden return pointer uses the Windows alternate
++; placement (x0 for free functions, x1 for instance methods) instead of the
++; AAPCS x8 slot. The frontend propagates that onto the herbthrows_sret parameter,
++; so 'inreg herbthrows_sret' must be accepted like 'inreg sret' is — otherwise the
++; combination cannot survive bitcode round-tripping or ThinLTO import.
++
++%struct.NT = type { ptr, ptr, ptr }
++
++; CHECK: define {{.*}}@callee(ptr inreg noalias writable herbthrows_sret(%struct.NT)
++define { { ptr, i64 }, i1 } @callee(ptr inreg noalias writable herbthrows_sret(%struct.NT) %out, i32 %n) {
++  ret { { ptr, i64 }, i1 } zeroinitializer
++}
++
++; CHECK: call {{.*}}@callee(ptr inreg {{.*}}herbthrows_sret(%struct.NT)
++define { { ptr, i64 }, i1 } @caller(ptr %slot, i32 %n) {
++  %r = call { { ptr, i64 }, i1 } @callee(ptr inreg noalias writable herbthrows_sret(%struct.NT) %slot, i32 %n)
++  ret { { ptr, i64 }, i1 } %r
++}
+diff --git a/llvm/test/Verifier/throws-sret.ll b/llvm/test/Verifier/throws-sret.ll
+new file mode 100644
+index 0000000000000000000000000000000000000000..29a3da41803650a32c6df356b8c1c1410870a4ae
+--- /dev/null
++++ b/llvm/test/Verifier/throws-sret.ll
+@@ -0,0 +1,33 @@
++; RUN: not llvm-as %s -o /dev/null 2>&1 | FileCheck %s
++
++; herbthrows_sret is the herbception counterpart of sret: it names a hidden
++; pointer through which the payload is returned, but unlike sret it does not
++; force the function's return type to void.
++
++; Unlike 'sret', a non-void return is legal.
++define i64 @ok_non_void(ptr herbthrows_sret(i64) %out) {
++  ret i64 0
++}
++
++declare i64 @decl_non_void(ptr herbthrows_sret(i64))
++
++define i64 @call_non_void(ptr herbthrows_sret(i64) %out) {
++  %r = call i64 @decl_non_void(ptr herbthrows_sret(i64) %out)
++  ret i64 %r
++}
++
++; CHECK: Cannot have multiple 'herbthrows_sret' parameters!
++declare i64 @two(ptr herbthrows_sret(i64) %a, ptr herbthrows_sret(i64) %b)
++
++; CHECK: Attribute 'herbthrows_sret' is not on first or second parameter!
++declare i64 @late(ptr %a, ptr %b, ptr herbthrows_sret(i64) %c)
++
++; CHECK: Attributes 'byval', 'inalloca', 'preallocated', 'inreg', 'nest', 'byref', 'sret', and 'herbthrows_sret' are incompatible!
++declare i64 @byval(ptr herbthrows_sret(i64) byval(i64) %p)
++
++; CHECK: Attributes 'herbthrows_sret and returned' are incompatible!
++declare i64 @returned(ptr herbthrows_sret(i64) returned %p)
++
++; CHECK: herbthrows_sret(i64)' applied to incompatible type!
++; CHECK-NEXT: ptr @not_ptr
++declare i64 @not_ptr(i64 herbthrows_sret(i64) %x)

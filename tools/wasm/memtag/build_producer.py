@@ -13,10 +13,53 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tarfile
 
 SDK = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
+LLVM_RELEASE_TAG = "llvmorg-23.1.5"
+LLVM_RELEASE_COMMIT = "392dfff97d29b59d77e5cac6d4b6ef2585fe7117"
+HERB_FEATURE_COMMIT = "218014296779772a4edbe63eff3fe6fe0ba92390"
+
+
+def prepared_inventory_digest(contents):
+    encoded = json.dumps(contents, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def official_llvm_entry(lock):
+    stable = lock["sources"]["llvm-23.1.5"]
+    if (stable["repository"] != "https://github.com/llvm/llvm-project.git"
+            or stable["release_repository"] != stable["repository"]
+            or stable["release_prerelease"] is not False or stable["release_tag"] != LLVM_RELEASE_TAG
+            or stable["revision"] != LLVM_RELEASE_COMMIT or stable["release_revision"] != LLVM_RELEASE_COMMIT):
+        raise ValueError("a producer requires the pinned official LLVM release")
+    return stable
+
+
+def herbceptions_entry():
+    """Apply the reviewed language and ABI changes on top of the stable WasmMTE compiler."""
+    stable = official_llvm_entry(json.loads((HERE / "source-lock.json").read_bytes()))
+    series = json.loads((HERE / "patches/herbceptions/series.json").read_bytes())
+    if series["base_release"] != LLVM_RELEASE_TAG or series["feature_source_revision"] != HERB_FEATURE_COMMIT:
+        raise ValueError("Herbceptions backport provenance differs from this SDK")
+    patches = series["patches"]
+    expected = ["llvm-errors-abi.patch", "clang-syntax-abi.patch", "libherbceptions-target.patch",
+                "libcxxabi-herb-error-domain.patch"]
+    if [patch["path"] for patch in patches] != [
+            "tools/wasm/memtag/patches/herbceptions/" + name for name in expected]:
+        raise ValueError("incomplete or unordered stable Herbceptions backport")
+    for patch in patches:
+        path = (SDK / patch["path"]).resolve(strict=True)
+        if not path.is_relative_to(HERE / "patches/herbceptions") or digest(path) != patch["sha256"]:
+            raise ValueError("incorrect Herbceptions backport patch: " + str(path))
+    return {**stable, "feature_source_revision": HERB_FEATURE_COMMIT,
+            "patches": [*stable["patches"], *patches]}
+
+
+def prepare_herbceptions(work, archive_cache=None):
+    return prepare(herbceptions_entry(), work, archive_cache)
 
 
 def digest(path):
@@ -107,7 +150,8 @@ def build(args):
     from check_stack_tagging import check as check_stack_tagging
 
     lock = json.loads((HERE / "source-lock.json").read_text())
-    entry = lock["sources"]["llvm-23.1.5"]
+    herb = args.producer == "herbceptions"
+    entry = herbceptions_entry() if herb else official_llvm_entry(lock)
     work = args.work.resolve()
     if work == SDK or work in SDK.parents:
         raise ValueError("--work must be a dedicated build directory")
@@ -118,8 +162,17 @@ def build(args):
         if not (bootstrap / "bin" / executable).is_file():
             raise ValueError("missing explicit native bootstrap tool: " + executable)
     work.mkdir(parents=True, exist_ok=True)
-    source = prepare(entry, work, args.source_cache)
-    output = work / "build"
+    if args.llvm_source and not herb:
+        raise ValueError("--llvm-source requires the pinned Herbceptions producer")
+    prepared_source = prepare(entry, work, args.source_cache)
+    source = prepared_source
+    if herb:
+        reviewed_inventory = json.loads((source.parent / "source-inventory.json").read_bytes())
+        if args.llvm_source:
+            source = args.llvm_source.resolve(strict=True)
+            if inventory(source) != reviewed_inventory:
+                raise ValueError("local LLVM source differs from the reconstructed Herbceptions and WasmMTE tree")
+    output = (work / "build").resolve()
     output.mkdir(exist_ok=True)
     definitions = {
         "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": str(bootstrap / "bin/clang"),
@@ -137,11 +190,18 @@ def build(args):
     }
     programs = ["clang", "lld", "llc", "opt", "llvm-mc", "llvm-objdump", "llvm-readobj", "llvm-as",
                 "llvm-dis", "llvm-ar", "llvm-ranlib", "llvm-nm", "llvm-config", "FileCheck", "not", "count", "split-file"]
+    if herb:
+        definitions.update(CLANG_ENABLE_CIR="OFF", LLVM_PARALLEL_LINK_JOBS="1",
+                           CMAKE_C_FLAGS_RELEASE="-O3 -g -gsplit-dwarf -DNDEBUG",
+                           CMAKE_CXX_FLAGS_RELEASE="-O3 -g -gsplit-dwarf -DNDEBUG")
     commands = [[args.cmake, "-G", "Ninja", "-S", str(source / "llvm"), "-B", str(output),
                  *["-D" + key + "=" + value for key, value in definitions.items()]],
                 [args.cmake, "--build", str(output), "--parallel", str(args.jobs), "--target", *programs]]
-    record = dict(schema="uwvm-memtag-producer-build-v1", source=entry, commands=commands,
+    record = dict(schema="uwvm-memtag-producer-build-v1", producer=args.producer, source=entry, commands=commands,
                   bootstrap_sha256=digest(bootstrap / "bin/clang"), status="building", qualified=False)
+    if herb:
+        record.update(prepared_source=str(source),
+                      prepared_inventory_sha256=prepared_inventory_digest(reviewed_inventory))
     receipt = work / "producer-build.json"
     receipt.write_text(json.dumps(record, indent=2) + "\n")
     for index, command in enumerate(commands):
@@ -150,23 +210,28 @@ def build(args):
     version = subprocess.check_output([str(compiler), "--version"], text=True)
     targets = subprocess.check_output([str(compiler), "--print-targets"], text=True)
     registered = {line.split(" - ", 1)[0].strip() for line in targets.splitlines() if " - " in line}
-    if "clang version 23.1.5" not in version or registered != {"wasm32", "wasm64"}:
-        raise ValueError("producer version or registered targets differs from the stable Wasm-only contract")
+    import re
+    if not re.search(r"\bclang version 23\.1\.5(?:\s|$)", version) or registered != {"wasm32", "wasm64"}:
+        raise ValueError("producer version or registered targets differ from the selected Wasm-only contract")
     if subprocess.check_output([str(compiler), "-dumpmachine"], text=True).strip() != "wasm32-unknown-wasip1-threads":
         raise ValueError("compiler default target is not wasm32-wasip1-threads")
     record.update(status="built-awaiting-qualification", version=version, targets=targets,
-                  stack_tagging_checks=check_stack_tagging(output / "bin", source, work / "stack-tagging-checks"),
-                  binaries={name: digest(output / "bin" / name) for name in programs})
+                  stack_tagging_checks=check_stack_tagging(output / "bin", prepared_source, work / "stack-tagging-checks"),
+                  binaries={name: digest(output / "bin" / name) for name in
+                            (programs + (["clang++", "wasm-ld"] if herb else []))})
     receipt.write_text(json.dumps(record, indent=2) + "\n")
     print(receipt)
 
 
 def main():
-    import sys
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--producer", choices=("stable", "herbceptions"), default="stable",
+                        help="build herbceptions for wrcc or the stable producer for the other toolchains")
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--bootstrap", type=Path, required=True, help="existing native Clang/LLD prefix")
     parser.add_argument("--source-cache", type=Path)
+    parser.add_argument("--llvm-source", type=Path,
+                        help="reuse a local patched Herbceptions source after comparing it with the vendored tree")
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--cmake", default="cmake")
     parser.add_argument("--python", default=sys.executable)

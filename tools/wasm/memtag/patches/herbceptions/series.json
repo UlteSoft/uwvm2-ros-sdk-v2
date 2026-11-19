@@ -1,0 +1,24 @@
+{
+  "base_release": "llvmorg-23.1.5",
+  "feature_source_revision": "218014296779772a4edbe63eff3fe6fe0ba92390",
+  "feature_parent": "86644771e5b8973c7341e7c0d93ee4abc1acecb5",
+  "upstream_merge_base": "abcf345e259c938b89f05a670fabce26a6b06a76",
+  "patches": [
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/llvm-errors-abi.patch",
+      "sha256": "0031a3a33edb8d49f7ef3393be2304d3556c51dc45704a37db3693598b577b6e"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/clang-syntax-abi.patch",
+      "sha256": "43275649b3022cadb3a2571bfc3d5096debb88b1fdaa2fdf401ef749f3b4eab8"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/libherbceptions-target.patch",
+      "sha256": "cf24e79b98de5417bfb75d054f47a1478bda1585238cd12159a91d46fb1fbf5c"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/libcxxabi-herb-error-domain.patch",
+      "sha256": "0e9abc68f6b1c403c1439f14f4a6236eeab0cf98e5cc3bee67b5c612b8b27f77"
+    }
+  ]
+}

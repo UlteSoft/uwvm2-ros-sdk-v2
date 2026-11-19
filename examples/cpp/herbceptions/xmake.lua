@@ -1,0 +1,11 @@
+set_project("typed_channel")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("channel")
+    set_kind("binary")
+    set_language("cpp")
+    set_ros_platform(os.getenv("WROS_PLATFORM") or "unitree")
+    set_wros_profile({std = "c++20", herbceptions = true, eh = false})
+    add_files("channel.cpp")
+    add_wros_exports("offset")
+target_end()

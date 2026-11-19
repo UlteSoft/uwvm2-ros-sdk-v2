@@ -46,6 +46,9 @@ def main(language):
     parser.add_argument("--target", choices=("wasm32","wasm64"))
     parser.add_argument("--core", choices=("mvp","3.0"))
     parser.add_argument("--eh", action=argparse.BooleanOptionalAction, default=None)
+    if language == "cpp":
+        parser.add_argument("--herbceptions", action=argparse.BooleanOptionalAction, default=True,
+                            help="enable typed error returns (default), independently of traditional C++ EH")
     qualification.arguments(parser)
     parser.add_argument("-pthread","--threads", action="store_true", default=None)
     parser.add_argument("--reactor", action="store_true")
@@ -88,10 +91,13 @@ def main(language):
             # Resolve the compiler/sysroot first; require that exact profile for
             # every separately compiled input. Copy validated object bytes into
             # our private work directory so later path replacement cannot race.
-            command, record = make_command(a.toolchain,a.sysroots,profile,language,args,verify=True)
+            command, record = make_command(a.toolchain, a.sysroots, profile, language, args,
+                                           verify=True, herbceptions=getattr(a, "herbceptions", None))
             inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], a.toolchain, qualification.object_releases(admission))
             command += [*map(str, inputs), "-o",str(staged)]
             if not a.compile_only:
+                if "herbceptions_archive" in record:
+                    command.append(record["herbceptions_archive"])
                 # wasi-libc's compact formatter pulls stderr into even memory-only
                 # snprintf calls via its unsupported long-double diagnostic.
                 # The full formatter ships in the same verified guest sysroot.

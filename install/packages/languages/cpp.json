@@ -13,6 +13,30 @@
       "sha256": "0705fff5e24d24cd248ad8701df16ac7a5737c50c881f4770849480572c91c96"
     },
     {
+      "path": "document/en/cpp.md",
+      "bytes": 2739,
+      "mode": 420,
+      "sha256": "6f2b66f686bf29f564428cd70f7539c9d67a3ee09c37b579878c7bea6abb3d1a"
+    },
+    {
+      "path": "document/zh/cpp.md",
+      "bytes": 2496,
+      "mode": 420,
+      "sha256": "2993d4426748a1db4b3295514549563612117f9d4f41bc9983ddab304d5d312e"
+    },
+    {
+      "path": "examples/cpp/herbceptions/channel.cpp",
+      "bytes": 548,
+      "mode": 420,
+      "sha256": "568f6a6640210967ac334e255d0182a342b77af8aed2220cd1ecab0949b6d041"
+    },
+    {
+      "path": "examples/cpp/herbceptions/xmake.lua",
+      "bytes": 376,
+      "mode": 420,
+      "sha256": "ffe386e63740c02cda957d83f2acb0271de8b15f723e7440ec45aec57ee1f535"
+    },
+    {
       "path": "include/wros/scene.h",
       "bytes": 34227,
       "mode": 420,

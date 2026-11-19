@@ -8,9 +8,9 @@
     },
     {
       "path": "document/en/xmake.md",
-      "bytes": 10750,
+      "bytes": 10888,
       "mode": 420,
-      "sha256": "89d99f32e5ab36ba5693abcb635a6d7ab8dfc670e12c2ea6a5ddb3adbba9db4d"
+      "sha256": "9080421784d2017462bd6030c5a082a4d0ad2b447b0e32353b3d9a537443c5ee"
     },
     {
       "path": "document/zh/xmake-api-index.md",
@@ -20,21 +20,21 @@
     },
     {
       "path": "document/zh/xmake.md",
-      "bytes": 9956,
+      "bytes": 10092,
       "mode": 420,
-      "sha256": "47387caf30d5915675fe82a9c1169bfab726794f8c565764357a75ed7a77990c"
+      "sha256": "f747bf850d98d858a503d3f05f1fd766f00daf6785d68700872d07dd52f46405"
     },
     {
       "path": "tools/xmake/dispatch.lua",
-      "bytes": 11397,
+      "bytes": 11681,
       "mode": 420,
-      "sha256": "322bdcd541e0a37251d980a380413b0ca856098fb1d6d2054850f1b590bd8cc2"
+      "sha256": "1b3a15d68dfc7a4f0b5427ef73ca6f5edd4b3f0c02789a25ffd5aea4c2f8d063"
     },
     {
       "path": "tools/xmake/ros.lua",
-      "bytes": 2674,
+      "bytes": 2699,
       "mode": 420,
-      "sha256": "309bacd7f1aad4d56d383f7571d72c4e281048c7458c0a82332151c883d9aa49"
+      "sha256": "819ebb859318f39c077fc0601ba2877fcfbd42710a40d93f52a9c5561c9b62ea"
     },
     {
       "path": "tools/xmake/run_guest.py",

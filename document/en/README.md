@@ -1,5 +1,7 @@
 # WROS SDK developer guide
 
+[C++ typed error returns with wrcc](cpp.md)
+
 [Nim application development](nim.md)
 
 [Migrate ROS package resources](migration.md)

@@ -133,7 +133,13 @@ def main():
     if qualification.digest(a.sysroots) != a.approved_sysroots_sha256:
         p.error("sysroot manifest differs from the operator-approved source build")
     receipt = json.loads(a.sysroots.read_text())
-    if (receipt.get("sources") != sources["sources"] or
+    expected_sources = dict(sources["sources"])
+    if receipt.get("producer") == "herbceptions":
+        from build_producer import herbceptions_entry
+        expected_sources["llvm-23.1.5"] = herbceptions_entry()
+    elif a.language == "cpp":
+        p.error("a C++ release needs the Wasm Herbceptions compiler and runtime")
+    if (receipt.get("sources") != expected_sources or
             receipt.get("runtime_diagnostics") != sources["runtime_diagnostics"] or
             receipt.get("producer_allocation_policy") != sources["producer"]["allocation_policy"] or
             receipt.get("compiler_sha256") != binaries["clang"]):
@@ -161,6 +167,11 @@ def main():
         ("libc", "memtag_libc_scratch.py", [*base, *exception, "--address-bits", str(bits), "--sysroots", a.sysroots,
                                             "--output", a.output / "libc"]),
     ]
+    if a.language == "cpp":
+        tests.append(("herbceptions", "herbceptions/run.py", ["wrcc", "--wrcc", ROOT / "bin/wrcc",
+                      "--vm", a.runtime, "--toolchain", a.toolchain, "--sysroots", a.sysroots,
+                      "--profile", f"wasm{bits}-{profile.exceptions}", "--feature-flag", "default",
+                      "--candidate-mte", "--output", a.output / "herbceptions"]))
     if a.language == "tinygo":
         tests.append(("tinygo", "tinygo_mte.py", [*base, *go_flags, "--sysroots", a.sysroots, "--profile", profile.exceptions,
                                                  "--candidate-mte", "--output", a.output / "tinygo"]))
@@ -221,7 +232,7 @@ def main():
             raise ValueError("missing C++ allocation execution evidence")
     if a.language == "fortran":
         results["fortran"] = qualification.canonical({name: proof for name, proof in results.items() if name.startswith("fortran-")})
-    language_proof = {"c": "libc", "cpp": "heap", "lua": "lua", "nim": "nim", "objectc": "objectc", "fortran": "fortran", "tinygo": "tinygo"}[a.language]
+    language_proof = {"c": "libc", "cpp": "herbceptions", "lua": "lua", "nim": "nim", "objectc": "objectc", "fortran": "fortran", "tinygo": "tinygo"}[a.language]
     row = dict(language=a.language, profile=profile.to_dict(), settings={"optimization": a.O, "debug": a.g},
                inputs=measured, vm_sha256=vm_digest, sdk_commit=a.sdk_commit,
                source_lock_sha256=qualification.digest(lock), producer_programs_sha256=qualification.canonical(binaries),

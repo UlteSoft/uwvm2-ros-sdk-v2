@@ -143,17 +143,36 @@ def build(args):
     if work == SDK or work in SDK.parents:
         raise ValueError("--work must be a dedicated build directory")
     work.mkdir(parents=True, exist_ok=True)
+    herb = args.producer == "herbceptions"
+    with_domains = herb if args.herbceptions_runtime is None else args.herbceptions_runtime
+    if not herb and (with_domains or args.producer_receipt is not None):
+        raise ValueError("Herbceptions runtime and producer receipt require --producer herbceptions")
     previous = work / "sysroots.json"
-    if previous.is_file() and json.loads(previous.read_text()).get("mte") != args.mte:
-        raise ValueError("use a separate --work directory for each MTE mode to preserve sysroot receipts")
+    if previous.is_file():
+        prior = json.loads(previous.read_text())
+        if (prior.get("mte") != args.mte or prior.get("producer", "stable") != args.producer
+                or prior.get("herbceptions_runtime", False) != with_domains):
+            raise ValueError("use a separate work directory for different producers, runtime contents or MTE modes")
     toolchain = args.toolchain.resolve()
     environment = compiler_environment(toolchain)
     os.environ.clear()
     os.environ.update(environment)
     compiler = toolchain / "bin/clang"
+    herb_receipt = None
+    if herb:
+        from herbceptions_sysroot import verified_sources
+        llvm, herb_receipt = verified_sources(toolchain, args.producer_receipt, args.llvm_source, work)
+        if previous.is_file() and prior.get("producer_build_sha256") != herb_receipt:
+            raise ValueError("use a fresh work directory for a different Herbceptions producer")
     version = subprocess.check_output([str(compiler), "--version"], text=True)
-    if "clang version 23.1.5" not in version:
-        raise ValueError("the closure requires the stable LLVM 23.1.5 MTE producer")
+    release_name = "llvm-23.1.5"
+    if not re.search(r"\bclang version 23\.1\.5(?:\s|$)", version):
+        raise ValueError("the closure requires the selected MTE producer " + release_name)
+    if herb:
+        targets = subprocess.check_output([str(compiler), "--print-targets"], text=True)
+        registered = {line.split(" - ", 1)[0].strip() for line in targets.splitlines() if " - " in line}
+        if registered != {"wasm32", "wasm64"}:
+            raise ValueError("the Herbceptions producer must register only wasm32 and wasm64")
     for name in ("clang", "clang++", "llvm-ar", "llvm-ranlib", "llvm-nm", "llvm-config", "wasm-ld"):
         if not (toolchain / "bin" / name).is_file():
             raise ValueError("missing explicit compiler tool: " + name)
@@ -169,7 +188,12 @@ def build(args):
         assembly = subprocess.run(command, input=probe, capture_output=True, text=True, check=True).stdout
         require_allocation_policy(assembly, policy, bits)
         capability[str(bits)] = hashlib.sha256(assembly.encode()).hexdigest()
-    llvm = source_tree(lock["sources"]["llvm-23.1.5"], args.llvm_source, work, args.source_cache)
+    sources = dict(lock["sources"])
+    if herb:
+        from build_producer import herbceptions_entry
+        sources["llvm-23.1.5"] = herbceptions_entry()
+    else:
+        llvm = source_tree(sources["llvm-23.1.5"], args.llvm_source, work, args.source_cache)
     libc = source_tree(lock["sources"]["wasi-libc-sdk34"], args.libc_source, work, args.source_cache)
     runtimes = diagnostics_overlay(llvm, lock["runtime_diagnostics"]["llvm"], work)
     libc = diagnostics_overlay(libc, lock["runtime_diagnostics"]["libc"], work)
@@ -180,20 +204,25 @@ def build(args):
                    "PYTHONDONTWRITEBYTECODE": "1"}
     os.environ.update(environment)
     record = {"schema": "uwvm-memtag-sysroot-build-v1", "qualified": False, "status": "building",
-              "compiler_version": version, "compiler_sha256": digest(compiler), "sources": lock["sources"],
+              "compiler_version": version, "compiler_sha256": digest(compiler), "sources": sources,
               "mte": args.mte, "wasm_version": args.wasm_version, "producer_mte_codegen": capability,
               "runtime_diagnostics": lock["runtime_diagnostics"], "producer_allocation_policy": policy,
               "targets": [], "commands": []}
+    if herb:
+        record.update(producer=args.producer, producer_build_sha256=herb_receipt, herbceptions_runtime=with_domains)
     # Ninja does not treat the compiler executable as an object dependency.
     # Replacing clang at the same pathname must never reuse objects from the
     # previous producer. Namespace the component cache by its complete inputs.
     identity = {"recipe": "stable-sysroots-v3", "compiler": record["compiler_sha256"],
                 "recipe_sha256": digest(Path(__file__)),
                 "profile_recipe_sha256": digest(SDK / "install/guest_profile.py"),
-                "sources": lock["sources"], "runtime_diagnostics": lock["runtime_diagnostics"],
+                "sources": sources, "runtime_diagnostics": lock["runtime_diagnostics"],
                 "mte": args.mte, "wasm_version": args.wasm_version,
                 "archiver": digest(toolchain / "bin/llvm-ar"),
                 "ranlib": digest(toolchain / "bin/llvm-ranlib")}
+    if herb:
+        identity.update(producer_build_sha256=herb_receipt, herbceptions_runtime=with_domains,
+                        domain_recipe_sha256=digest(HERE / "herbceptions_sysroot.py"))
     build_identity = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     record["build_identity"] = build_identity
     receipt = work / "sysroots.json"
@@ -236,8 +265,8 @@ def build(args):
         shutil.copytree(original_resource / "include", resource / "include", dirs_exist_ok=True)
         feature_flags = profiles[target, args.profiles[0]].llvm_feature_flags()
         flags = "-g -ffile-prefix-map=" + str(work) + "=/usr/src/uwvm-sysroot"
-        flags += " -ffile-prefix-map=" + str(llvm) + "=/usr/src/llvm-23.1.5"
-        flags += " -ffile-prefix-map=" + str(runtimes) + "=/usr/src/llvm-23.1.5"
+        flags += " -ffile-prefix-map=" + str(llvm) + "=/usr/src/" + release_name
+        flags += " -ffile-prefix-map=" + str(runtimes) + "=/usr/src/" + release_name
         flags += " -ffile-prefix-map=" + str(target_libc) + "=/usr/src/wasi-libc-sdk34"
         flags += " " + " ".join(feature_flags)
         flags += " -D__WROS_NO_HOST_DIAGNOSTICS"
@@ -291,9 +320,11 @@ def build(args):
                        "LLVM_CONFIG_PATH": str(toolchain / "bin/llvm-config"), "UNIX": "ON",
                        "LIBCXX_HAS_MUSL_LIBC": "OFF", "LIBCXX_ENABLE_SHARED": "OFF", "LIBCXX_ENABLE_STATIC": "ON",
                        "LIBCXX_ENABLE_EXCEPTIONS": enabled, "LIBCXXABI_ENABLE_EXCEPTIONS": enabled,
+                       **({"LIBCXXABI_ENABLE_HERBCEPTIONS_ERROR_DOMAIN":
+                           "ON" if with_domains and profile == "eh" else "OFF"} if herb else {}),
                        "LIBCXX_ENABLE_THREADS": "ON" if threads else "OFF",
                        "LIBCXXABI_ENABLE_THREADS": "ON" if threads else "OFF",
-                       "LIBCXX_DEBUG_SOURCE_DIR": "/usr/src/llvm-23.1.5/libcxx",
+                       "LIBCXX_DEBUG_SOURCE_DIR": "/usr/src/" + release_name + "/libcxx",
                        "LIBCXX_ENABLE_FILESYSTEM": "ON", "LIBCXX_ENABLE_ABI_LINKER_SCRIPT": "OFF",
                        "LIBCXX_CXX_ABI": "libcxxabi", "LIBCXX_ABI_VERSION": "2",
                        "LIBCXXABI_ENABLE_SHARED": "OFF", "LIBCXXABI_ENABLE_STATIC": "ON",
@@ -311,6 +342,20 @@ def build(args):
                        "LIBCXX_INCLUDE_BENCHMARKS": "OFF", "LIBCXXABI_INCLUDE_TESTS": "OFF",
                        "LIBCXX_INSTALL_MODULES": "OFF", "LIBCXX_LIBDIR_SUFFIX": "/" + target,
                        "LIBCXXABI_LIBDIR_SUFFIX": "/" + target, "LIBUNWIND_LIBDIR_SUFFIX": "/" + target})
+            domain = {}
+            if with_domains:
+                from herbceptions_sysroot import definitions, install_domains
+                stage = work / "domains" / build_identity / profile / target
+                component("herbceptions-" + profile + "-" + target, llvm / "libherbceptions", stage,
+                          definitions(prefix, runtime_flags, common_target))
+                domain["herbceptions"] = install_domains(stage, prefix, target, toolchain)
+            elif herb and (prefix / "lib" / target / "libherbceptions.a").exists():
+                raise ValueError("unexpected Herbceptions archive in a no-runtime sysroot; use a fresh work directory")
+            if herb:
+                from herbceptions_sysroot import verify_exception_bridge
+                bridge = verify_exception_bridge(prefix, target, toolchain, with_domains and profile == "eh")
+                if with_domains:
+                    domain["herbceptions"]["legacy_exception_bridge"] = bridge
             # Resource headers and builtins are part of the compiler closure,
             # not optional host inputs. Include them in --verify coverage.
             files = {str(p.relative_to(work)): digest(p)
@@ -319,8 +364,12 @@ def build(args):
                                       "guest_profile": profiles[target, profile].to_dict(),
                                       "feature_flags": feature_flags,
                                       "sysroot": str(prefix.relative_to(work)), "resource": str(resource.relative_to(work)),
-                                      "builtins_sha256": digest(lookup), "files": files, "qualified": False})
+                                      "builtins_sha256": digest(lookup), "files": files, "qualified": False, **domain})
             receipt.write_text(json.dumps(record, indent=2) + "\n")
+    if herb:
+        _, end_receipt = verified_sources(toolchain, args.producer_receipt, llvm, work)
+        if end_receipt != herb_receipt:
+            raise ValueError("Herbceptions producer receipt changed during the sysroot build")
     record["status"] = "built-awaiting-qualification"
     receipt.write_text(json.dumps(record, indent=2) + "\n")
     print(receipt, flush=True)
@@ -330,6 +379,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--toolchain", type=Path, required=True)
+    parser.add_argument("--producer", choices=("stable", "herbceptions"), default="stable")
+    parser.add_argument("--producer-receipt", type=Path, help="exact producer-build.json for the stable LLVM Herbceptions backport")
+    parser.add_argument("--herbceptions-runtime", action=argparse.BooleanOptionalAction, default=None,
+                        help="install the target's static error domains; enabled by default for the Herbceptions producer")
     parser.add_argument("--llvm-source", type=Path)
     parser.add_argument("--libc-source", type=Path)
     parser.add_argument("--source-cache", type=Path)

@@ -153,7 +153,8 @@ def measure_inputs(language, options, profile, extra=None, sdk=ROOT, candidates=
         raise ValueError("expected a tagged development language profile")
     tc = options.toolchain.resolve(strict=True)
     receipts = options.sysroots if isinstance(options.sysroots, list) else [options.sysroots]
-    _, closure = make_command(tc, receipts, profile, "cpp" if language in ("cpp", "lua") else "c", ["-c"], verify=True)
+    _, closure = make_command(tc, receipts, profile, "cpp" if language in ("cpp", "lua") else "c",
+                              ["-c"], verify=True, herbceptions=True if language == "cpp" else None)
     inputs = {"compiler": closure["compiler_sha256"], "sysroot": closure["closure_sha256"],
               "linker": digest(tc / "bin/wasm-ld"), "archiver": digest(tc / "bin/llvm-ar")}
     extra = extra or {}

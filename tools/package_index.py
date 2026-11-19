@@ -138,7 +138,8 @@ def main():
                              "document/en/xmake-api-index.md", "document/zh/xmake-api-index.md"])
     language_files = {
         "c": ["bin/wrc", "include/wros/scene.h", "examples/c/body.c", "examples/c/xmake.lua"],
-        "cpp": ["bin/wrc", "bin/wrcc", "include/wros/scene.h"],
+        "cpp": ["bin/wrc", "bin/wrcc", "include/wros/scene.h", "document/en/cpp.md", "document/zh/cpp.md",
+                "examples/cpp/herbceptions/channel.cpp", "examples/cpp/herbceptions/xmake.lua"],
         "lua": ["bin/wrlua", "bin/wrcc", "include/wros/scene.h", "language/lua/entry.cpp", "language/lua/scene.hpp",
                 "third-parties/lua/lua-5.4.9.tar.gz", "third-parties/lua/LICENSE", "third-parties/lua/README.md",
                 "examples/lua/body.lua", "examples/lua/guard.lua", "document/en/lua.md", "document/zh/lua.md"],

@@ -120,7 +120,7 @@ class Installer(unittest.TestCase):
         self.assertFalse((self.prefix/self.commit/"unitree/c/development").exists())
     def test_incomplete_language_denied(self):
         with self.assertRaisesRegex(ValueError,"has not been published"):
-            install(Source(self.commit,root),"unitree","java",self.prefix,[])
+            install(Source(self.commit,root),"unitree","c_ffi_bridge",self.prefix,[])
     def test_no_mutable_refs(self):
         with self.assertRaises(ValueError):Source("main",root)
     def test_cpp_selection_builds_c_dependencies(self):

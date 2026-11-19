@@ -54,7 +54,7 @@ end
 
 function set_wros_profile(profile)
     for key, value in pairs(profile) do
-        if key == "core" or key == "eh" or key == "mte" or key == "std" or key == "lua_abi" or key == "lua_seed" or key == "build_receipt" then
+        if key == "core" or key == "eh" or key == "herbceptions" or key == "mte" or key == "std" or key == "lua_abi" or key == "lua_seed" or key == "build_receipt" then
             set_values("wros." .. key, tostring(value))
         else
             set_values("wros.unknown", tostring(key))

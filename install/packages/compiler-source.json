@@ -50,15 +50,15 @@
     },
     {
       "path": "tools/wasm/memtag/build_producer.py",
-      "bytes": 9180,
+      "bytes": 12982,
       "mode": 420,
-      "sha256": "a88ee6a96d7c15b90aed1fc620ed520ed5a9d053b73332dfde2c94240e5b8f24"
+      "sha256": "390640ae060424844b0a4d0402cb40ce8461bdb612ca0bf636a5391b420b9586"
     },
     {
       "path": "tools/wasm/memtag/build_sysroots.py",
-      "bytes": 21279,
+      "bytes": 24906,
       "mode": 420,
-      "sha256": "df580d3b78fb8bb5cc26a8a8d6155799ca5bfbc0f17984b637344290e3d32f8f"
+      "sha256": "66d60177df6cb7510cb90e0aeece2af2e6e8106e55fb96499741f35141a851ad"
     },
     {
       "path": "tools/wasm/memtag/bundle_local_releases.py",
@@ -77,6 +77,12 @@
       "bytes": 7241,
       "mode": 420,
       "sha256": "f9dcda6ecde72c265b14fddb15b0562ac9c1ea51d3bac9967808fcd728aedfc2"
+    },
+    {
+      "path": "tools/wasm/memtag/herbceptions_sysroot.py",
+      "bytes": 5461,
+      "mode": 420,
+      "sha256": "28ed7f7946b3cb9892f5b123c71e0665d28b325b36557aada0c2a627cb1892c4"
     },
     {
       "path": "tools/wasm/memtag/measure_release.py",
@@ -137,6 +143,36 @@
       "bytes": 154,
       "mode": 420,
       "sha256": "a8f88b159091b02de1d97d8466baf552c9d9c6925dcb11c0847974515b99fa64"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/clang-syntax-abi.patch",
+      "bytes": 820680,
+      "mode": 420,
+      "sha256": "43275649b3022cadb3a2571bfc3d5096debb88b1fdaa2fdf401ef749f3b4eab8"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/libcxxabi-herb-error-domain.patch",
+      "bytes": 51916,
+      "mode": 420,
+      "sha256": "0e9abc68f6b1c403c1439f14f4a6236eeab0cf98e5cc3bee67b5c612b8b27f77"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/libherbceptions-target.patch",
+      "bytes": 1262817,
+      "mode": 420,
+      "sha256": "cf24e79b98de5417bfb75d054f47a1478bda1585238cd12159a91d46fb1fbf5c"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/llvm-errors-abi.patch",
+      "bytes": 160648,
+      "mode": 420,
+      "sha256": "0031a3a33edb8d49f7ef3393be2304d3556c51dc45704a37db3693598b577b6e"
+    },
+    {
+      "path": "tools/wasm/memtag/patches/herbceptions/series.json",
+      "bytes": 980,
+      "mode": 420,
+      "sha256": "763167f97d9b246ac8d18a3b7ddcd820010de06d1cab328d31de8fbce6afe4e5"
     },
     {
       "path": "tools/wasm/memtag/patches/libc-wros-runtime-diagnostics.patch",
@@ -290,9 +326,9 @@
     },
     {
       "path": "tools/wasm/memtag/qualify_local_c.py",
-      "bytes": 16320,
+      "bytes": 17057,
       "mode": 420,
-      "sha256": "ce31dc97ac6295e28c7fe107ff254208bc5f140a235b7d79587e546da6c19449"
+      "sha256": "628669fe012695d8e96fb2cd013e5d404df0c260ac2573f13c75a8cf424c19db"
     },
     {
       "path": "tools/wasm/memtag/source-lock.json",

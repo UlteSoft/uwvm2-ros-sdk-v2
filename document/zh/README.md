@@ -1,5 +1,7 @@
 # WROS SDK 开发指南
 
+[使用 wrcc 编写类型化错误返回](cpp.md)
+
 [Nim 应用开发](nim.md)
 
 [移植 ROS 包内资源](migration.md)

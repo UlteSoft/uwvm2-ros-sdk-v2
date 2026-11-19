@@ -53,6 +53,7 @@ target_end()
 | `mte` | Boolean or `"legacy"`, default true | The default requires a reviewed neighbor-aware release. Use false for a matching uninstrumented sysroot or `"legacy"` to build with unqualified tagged inputs and a warning. C/C++ source attributes can change local instrumentation. [Release and application review](memory-qualification.md) |
 | `build_receipt` | Boolean, false | For linked Wasm targets, write the artifact-specific `.wros-build.json` sidecar next to the binary. |
 | `eh` | Boolean, true for Core 3.0 | Select the matching exception runtime. Default false on MVP. |
+| `herbceptions` | Boolean, true for C++ | Enable typed error returns in wrcc independently of `eh`. Other languages reject this field. |
 | `std` | Optional string | C accepts `c11`, `c17`, `c23`. C++ accepts `c++17`, `c++20`, `c++23`. |
 | `lua_abi` | Boolean, false | Include `wros.abi()` in a Lua application. Local VM execution also requires the operator to expose the ABI query. |
 | `lua_seed` | Optional unsigned 32-bit integer | Build Lua with `--guest-seed` and no host clock import. |

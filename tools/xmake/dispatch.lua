@@ -60,6 +60,8 @@ function configure(target, entry)
     local core = target:values("wros.core") or "3.0"
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
     local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs")
+    assert(target:values("wros.herbceptions") == nil or language == "cpp",
+           "herbceptions is a C++ profile option")
     local legacy_mte = target:values("wros.mte") == "legacy"
     local mte = legacy_mte or boolean(target, "mte", true)
     local mte_flag = legacy_mte and "--legacy-mte" or (mte and "--mte" or "--no-mte")
@@ -124,6 +126,9 @@ local function compiler_args(target, request)
     table.join2(args, {"--core", request.core, request.eh and "--eh" or "--no-eh", request.mte_flag})
     if request.threads then table.insert(args, "-pthread") end
     if request.std then table.join2(args, {"--std", request.std}) end
+    if request.adapter.id == "cpp" then
+        table.insert(args, boolean(target, "herbceptions", true) and "--herbceptions" or "--no-herbceptions")
+    end
     local levels = {none = "0", fast = "1", faster = "2", fastest = "3", smallest = "s"}
     if optimize or not request.site then
         table.insert(args, "-O" .. assert(levels[optimize or "faster"], "Unsupported guest optimization"))
