@@ -151,7 +151,7 @@ def main():
     language_files["d"] = [
         "bin/wrd", "include/wros/scene.h", "examples/d/body.d", "examples/d/xmake.lua",
         "document/en/d.md", "document/zh/d.md",
-        *["language/d/" + name for name in ("driver.py", "release.py", "check_site.py", "frontend.conf",
+        *["language/d/" + name for name in ("driver.py", "release.py", "release-inputs.json", "check_site.py", "frontend.conf",
                                              "entry.c", "imports.c", "wros_scene.d")],
     ]
     language_files["nim"] = [

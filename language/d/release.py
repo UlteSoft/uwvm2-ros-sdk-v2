@@ -54,6 +54,9 @@ def host_files(toolchain, expected=None):
     marker_receipt = marker.with_name(marker.name + ".json")
     host = {"ldc": digest(ldc), "loader": digest(LOADER), "marker": digest(marker),
             "marker_receipt": digest(marker_receipt)}
+    release = json.loads((SDK / "language/d/release-inputs.json").read_bytes())
+    if host["ldc"] != release["compiler_sha256"]:
+        raise ValueError("D frontend differs from the reviewed LDC release binary")
     if expected is not None and any(expected.get(k) != value for k, value in host.items()):
         raise ValueError("D frontend, ELF loader or LLVM marker differs from its signed identity")
     record = json.loads(local_release.read_file(marker_receipt, 2048))
@@ -67,7 +70,10 @@ def host_files(toolchain, expected=None):
     imports = (toolchain / "share/wros/betterc/imports").resolve(strict=True)
     if not (imports / "object.d").is_file():
         raise ValueError("the site needs the matching D compiler imports, including object.d")
-    host.update(libraries=libraries, marker_libraries=marker_libraries, imports=qualification.files(imports))
+    headers = qualification.files(imports)
+    if len(headers) != release["imports_count"] or canon(headers) != release["imports_sha256"]:
+        raise ValueError("D import tree differs from the reviewed LDC release headers")
+    host.update(libraries=libraries, marker_libraries=marker_libraries, imports=headers)
     return host
 
 

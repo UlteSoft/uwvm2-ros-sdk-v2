@@ -15,9 +15,9 @@ python3 tools/qualification/language_sources.py
 | JavaScript、Lua | QuickJS 原始分发版本为 2026-06-04。运行 `python3 third-parties/quickjs/verify_release.py` 可从该归档重放 SDK 的实际改动。Lua 5.4.9 源码归档与上游公布摘要一致。 |
 | Nim、Rust | Nim 2.2.4 源码与官方分发归档匹配。Rust 1.98.0 源码归档与稳定频道清单匹配。 |
 | TinyGo | 已核对的宿主清单对应 TinyGo 0.38.0 和 Go 1.24.2。独立的 Go 前端单列。 |
-| D | LDC 1.41.0 有正式版本。现场资格还需将实际可执行文件和 BetterC 导入文件关联至该版本。 |
+| D | 采用 Ubuntu 发布的 LDC 1.41.0。编译前按原始发行包核对实际编译器及 723 个 BetterC 导入文件。 |
 | Objective-C | GNUstep 正式发行的 libobjc2 2.3 对应 e877e782，SDK 旧基线 a21ae931 没有发行标签，两个提交已经分叉。检查器要求正式发行归档。 |
-| C#、Visual Basic | 两种语言共用的托管编译器宿主另行核查。 |
+| C#、Visual Basic | 两种语言使用微软 .NET SDK 10.0.404 和 10.0.15 的 WASI Mono AOT 与运行库包。按发行包摘要及解包后的文件清单核对宿主工具。 |
 
 缺少开发包的语言在报告中单列。升级工具链需更新上游来源证明并重新验收构建结果。
 此项核对只覆盖编译输入来源。执行配置、MTE、签名、仿真和平台能力各有独立验收。

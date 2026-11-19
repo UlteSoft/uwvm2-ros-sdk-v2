@@ -1,0 +1,14 @@
+{
+  "release": "v1.41.0",
+  "commit": "90e39b6a6e61d36ef5f5d0ab6ae0667130fd8549",
+  "package_version": "1:1.41.0-1ubuntu1",
+  "package_base": "https://archive.ubuntu.com/ubuntu/pool/universe/l/ldc/",
+  "packages": {
+    "ldc_1.41.0-1ubuntu1_amd64.deb": "b439ecda99ba867921087544a37fa241e95723220ae00cd262df9cc5351aef29",
+    "libphobos2-ldc-shared-dev_1.41.0-1ubuntu1_amd64.deb": "ecb5ae9749aabf17cea84d5c54c7be75a4f2722c7dad117e7329e4e1a3d8c7a7"
+  },
+  "source_descriptor_sha256": "c50e926c6b0ad61b8a29a0aa689b82eea4b8140626c364644f95557d710cff0d",
+  "compiler_sha256": "d058264cfff73033599701d2322ff86a153c9f4cb5d738f3cc2bdfcaa22ceb37",
+  "imports_count": 723,
+  "imports_sha256": "cda56f92a0fb361494b4e93270d85a598686e429a77150fc306db73dc6bf0b91"
+}

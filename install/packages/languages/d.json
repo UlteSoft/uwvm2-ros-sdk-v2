@@ -67,10 +67,16 @@
       "sha256": "4e4c253c7f809153c8d38fa563f80904d4448c5d0265301aa1ce2135320893f3"
     },
     {
-      "path": "language/d/release.py",
-      "bytes": 6218,
+      "path": "language/d/release-inputs.json",
+      "bytes": 752,
       "mode": 420,
-      "sha256": "17c01817544a565ef48cfb76dd8eb24c1f83e083c3d22daeb934dd31fa17ef96"
+      "sha256": "1cb996d66d88925c0a20f726744ef6f6efff3f8b1e60ce30d31849193072058d"
+    },
+    {
+      "path": "language/d/release.py",
+      "bytes": 6638,
+      "mode": 420,
+      "sha256": "50b8ad5240a58286dc25e99f4635e0a50d0a41c7ee8f755a848215d0a3c6b12f"
     },
     {
       "path": "language/d/wros_scene.d",
