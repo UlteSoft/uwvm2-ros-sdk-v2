@@ -13,6 +13,12 @@
       "sha256": "7ea7fe1c80200a4361d6b004456b78be73568b5e9e036d98b759cbc3d89339fb"
     },
     {
+      "path": "examples/platform/ubtech/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/ubtech/migration/c/upstream.lock",
       "bytes": 241,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/ubtech/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "2e7b3763180e909dea17caaf0f49ef922b903f767886725bd6c182ea05c0b9d2"
+      "sha256": "e6e3fa770d3e4ec552adddb6162d01b7f9d2e523b62328b0ec9f903563290f08"
     }
   ]
 }

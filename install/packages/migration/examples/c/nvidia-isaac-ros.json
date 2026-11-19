@@ -13,6 +13,12 @@
       "sha256": "1a80eeecdd0b6c16197b5cbbf5f216241db3ee168fe5ff79db690640227e5357"
     },
     {
+      "path": "examples/platform/nvidia-isaac-ros/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/upstream.lock",
       "bytes": 256,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/xmake.lua",
-      "bytes": 1104,
+      "bytes": 1085,
       "mode": 420,
-      "sha256": "cf1860bd32cd8202c645ecf0454d5a9b22b66de2f6722e023a09b3ad5b625277"
+      "sha256": "116e4b919c2004dc1f2550f56ff41937f0e5f49bd15718ff262f2ae93e07ccf7"
     }
   ]
 }

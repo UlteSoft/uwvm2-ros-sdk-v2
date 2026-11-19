@@ -99,7 +99,9 @@ def main():
             directory = f"examples/platform/{platform}/migration/{language}/"
             names = ["README.md", "README.zh.md", "xmake.lua"]
             if language == "c":
-                names.append("upstream.lock")
+                names.extend(("upstream.lock", "resource.c"))
+            else:
+                names.append("GoalStatus.fs")
             inputs = [directory + name for name in names]
             if language == "c" and (ROOT / directory / "vendor-package.xml").is_file():
                 inputs.extend([directory + "vendor-package.xml", "examples/shared/migration/c/stage_vendor.py"])

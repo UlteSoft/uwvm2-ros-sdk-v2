@@ -1,6 +1,12 @@
 {
   "files": [
     {
+      "path": "examples/platform/kuka/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
       "path": "examples/platform/kuka/migration/fsharp/README.md",
       "bytes": 244,
       "mode": 420,
@@ -14,9 +20,9 @@
     },
     {
       "path": "examples/platform/kuka/migration/fsharp/xmake.lua",
-      "bytes": 581,
+      "bytes": 532,
       "mode": 420,
-      "sha256": "ebe21c7be04dc82908e30ee9d550d40bb51381fbc398df2f804428705b8bf226"
+      "sha256": "0ff3cd0b30cb89d010866fa7de1487cbf250ca21e894ff9306bc86ed8c048a7a"
     }
   ]
 }

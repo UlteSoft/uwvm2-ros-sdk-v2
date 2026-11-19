@@ -13,6 +13,12 @@
       "sha256": "c52b18ee454e5fd6ba7055c15d4fd5c861bcde09964dac260c6a360ee2c07b78"
     },
     {
+      "path": "examples/platform/abb/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/abb/migration/c/upstream.lock",
       "bytes": 235,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/abb/migration/c/xmake.lua",
-      "bytes": 1091,
+      "bytes": 1072,
       "mode": 420,
-      "sha256": "9fba989e05db7a170345bc78f780ddafd32ca6166f8f973ba853339e7d8869ae"
+      "sha256": "45bf73c00a1c4b3804df8e64848fbd34a3e88c68019177caf3852a21e0631e7a"
     }
   ]
 }

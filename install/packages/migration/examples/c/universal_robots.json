@@ -13,6 +13,12 @@
       "sha256": "6ded601e5f32c334e663cde64bc518e8bc251b1f079e2de1bd7edf5b8ec90ac8"
     },
     {
+      "path": "examples/platform/universal_robots/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/universal_robots/migration/c/upstream.lock",
       "bytes": 247,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/universal_robots/migration/c/xmake.lua",
-      "bytes": 1104,
+      "bytes": 1085,
       "mode": 420,
-      "sha256": "4fb1458a2c3751b6afbeedbb54cfbfa0dda3d286a007b65c97e13e0fba00646d"
+      "sha256": "7e888756b2b1e3ef39f1eef444c1a90833afad86326ee7927d1e17e54e3b40c9"
     }
   ]
 }

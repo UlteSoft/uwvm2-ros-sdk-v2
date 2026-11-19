@@ -13,6 +13,12 @@
       "sha256": "3f1beb29648329b401c1386ba3566b31123441484e4f66542e9addea9043f290"
     },
     {
+      "path": "examples/platform/kuka/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/kuka/migration/c/upstream.lock",
       "bytes": 249,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/kuka/migration/c/xmake.lua",
-      "bytes": 1092,
+      "bytes": 1073,
       "mode": 420,
-      "sha256": "6418e57484266a07c0d1102a9406cbd5328b88e01bceef86688b3f616f04897b"
+      "sha256": "6af8df0887735815bcf4f729c1a769789eadca90143d8fdf6e6490c5638be76c"
     }
   ]
 }

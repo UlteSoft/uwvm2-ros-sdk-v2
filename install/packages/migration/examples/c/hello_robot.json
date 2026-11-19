@@ -13,6 +13,12 @@
       "sha256": "9100fca6f36c4dc0a8ec6d5e49b6ca56a8c1b5708d8f37298724fa090c89a703"
     },
     {
+      "path": "examples/platform/hello_robot/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/hello_robot/migration/c/upstream.lock",
       "bytes": 265,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/hello_robot/migration/c/xmake.lua",
-      "bytes": 1099,
+      "bytes": 1080,
       "mode": 420,
-      "sha256": "a90d250c1d0bd0d8142e43b4b3a8801018fa9e1a07c434d30a0efab64f90ae1d"
+      "sha256": "b0cd1c1199282db1950cc70992ad1ecf0f8aa73f55a71421225a251d94732b4a"
     }
   ]
 }

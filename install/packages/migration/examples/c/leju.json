@@ -13,6 +13,12 @@
       "sha256": "1738341dee97fae64faa0810948c36b461bd20ce03feeee39fd350f73a1ee5b3"
     },
     {
+      "path": "examples/platform/leju/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/leju/migration/c/upstream.lock",
       "bytes": 246,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/leju/migration/c/xmake.lua",
-      "bytes": 1092,
+      "bytes": 1073,
       "mode": 420,
-      "sha256": "0637464fb72d8446219412afc6957db06af22c78d2268f7dccc2302b8f6da032"
+      "sha256": "209b07d557342ee6bf4dd360e587469f7e47cb9cd1a851fc2e3d28f658ba6a73"
     }
   ]
 }

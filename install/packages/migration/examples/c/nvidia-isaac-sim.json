@@ -13,6 +13,12 @@
       "sha256": "d2ad206eaa1467dbe166951b2769452c994097cbb5e371a97aad49862180fc96"
     },
     {
+      "path": "examples/platform/nvidia-isaac-sim/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/nvidia-isaac-sim/migration/c/upstream.lock",
       "bytes": 249,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/nvidia-isaac-sim/migration/c/xmake.lua",
-      "bytes": 1104,
+      "bytes": 1085,
       "mode": 420,
-      "sha256": "18eb981af1bd190059fb73a9bc3c347b7e1a7652f1b0787f6b0227870dfe52a9"
+      "sha256": "9545c8547acca970adf4e874c1581426318b789039504d9a36bd78d7e7094fce"
     }
   ]
 }

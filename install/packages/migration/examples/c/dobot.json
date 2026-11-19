@@ -13,6 +13,12 @@
       "sha256": "7b4d85f5877c698084d01024257069b2007ac9a66916c32ab357eb7021601274"
     },
     {
+      "path": "examples/platform/dobot/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/dobot/migration/c/upstream.lock",
       "bytes": 242,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/dobot/migration/c/xmake.lua",
-      "bytes": 1093,
+      "bytes": 1074,
       "mode": 420,
-      "sha256": "45d491b2668c53c220e32b49e7f997c88eb2f660d2ea86570b0e183cf50a0cce"
+      "sha256": "dd0025e231ce1714d32aaa71a405f0610627beda3bb19148591ecefaadb9358d"
     }
   ]
 }

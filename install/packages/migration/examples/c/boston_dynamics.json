@@ -13,6 +13,12 @@
       "sha256": "a3b511ed288832225a297c64e2934f75872fc391a789dfa0dd552cc3614c24ac"
     },
     {
+      "path": "examples/platform/boston_dynamics/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/boston_dynamics/migration/c/upstream.lock",
       "bytes": 270,
       "mode": 420,
@@ -26,9 +32,9 @@
     },
     {
       "path": "examples/platform/boston_dynamics/migration/c/xmake.lua",
-      "bytes": 1103,
+      "bytes": 1084,
       "mode": 420,
-      "sha256": "d252459b6dff5a4237ad275b01179f2e6bdbf584505323d7abddc109d5aa82a6"
+      "sha256": "62849919615152a20a0d3430a6541028bd93c6540fd6debe28d32bfbe1ce04f3"
     },
     {
       "path": "examples/shared/migration/c/stage_vendor.py",

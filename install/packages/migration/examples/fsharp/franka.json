@@ -1,6 +1,12 @@
 {
   "files": [
     {
+      "path": "examples/platform/franka/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
       "path": "examples/platform/franka/migration/fsharp/README.md",
       "bytes": 246,
       "mode": 420,
@@ -14,9 +20,9 @@
     },
     {
       "path": "examples/platform/franka/migration/fsharp/xmake.lua",
-      "bytes": 583,
+      "bytes": 534,
       "mode": 420,
-      "sha256": "e73d5cdb2e05b76f2e92f0d18801bc6d043e76afefb1358b5a3d8e7c676ff48b"
+      "sha256": "891d1dfef9a7e9f1f97135610eeb54ef5e7dfa077267cb27f621287f808f408f"
     }
   ]
 }

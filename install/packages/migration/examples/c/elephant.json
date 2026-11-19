@@ -13,6 +13,12 @@
       "sha256": "820481fbf2ee2bd7ad90090b92b63581c66d5d534247ceb258ed40171eeece4d"
     },
     {
+      "path": "examples/platform/elephant/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/elephant/migration/c/upstream.lock",
       "bytes": 252,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/elephant/migration/c/xmake.lua",
-      "bytes": 1096,
+      "bytes": 1077,
       "mode": 420,
-      "sha256": "8e887d718c3ea3fb61445a6a33f95d3130a07a6c3df177cb735bcdde90d17311"
+      "sha256": "828fefafdd0eafb1710bb01638c367d950b04d4a2c8095c4ea651088bab25342"
     }
   ]
 }

@@ -13,6 +13,12 @@
       "sha256": "7fbeccceae5fd2a4a35ec4c5afd5c44bb54bd5e1ca7858cbc78411f5db46aad6"
     },
     {
+      "path": "examples/platform/clearpath/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/clearpath/migration/c/upstream.lock",
       "bytes": 263,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/clearpath/migration/c/xmake.lua",
-      "bytes": 1097,
+      "bytes": 1078,
       "mode": 420,
-      "sha256": "9688c02450a71033042e8bec0465a71a986e0f88ff41dac33b2e5e8bdc03a7b0"
+      "sha256": "a5f2bf73b8a5f2336f0eeaf573a286f5b807f6c47367db950eb478665d12933b"
     }
   ]
 }

@@ -13,6 +13,12 @@
       "sha256": "32415579857706237253c77a0917ac2d096895d3c1c78859440613607c199c57"
     },
     {
+      "path": "examples/platform/nvidia/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/nvidia/migration/c/upstream.lock",
       "bytes": 256,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/nvidia/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "57c88a13bfa6aa8c6f43b1c4761abedf7f3230d77a13c1b3625470d457e7474e"
+      "sha256": "544389f079d4f260317a9cb69ea77936781e9bdc4052fb38f1eb0bf788005cb8"
     }
   ]
 }

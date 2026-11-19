@@ -1,6 +1,12 @@
 {
   "files": [
     {
+      "path": "examples/platform/clearpath/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
       "path": "examples/platform/clearpath/migration/fsharp/README.md",
       "bytes": 249,
       "mode": 420,
@@ -14,9 +20,9 @@
     },
     {
       "path": "examples/platform/clearpath/migration/fsharp/xmake.lua",
-      "bytes": 586,
+      "bytes": 537,
       "mode": 420,
-      "sha256": "9ffc91616d545afea70e25ed0783814b1b0ac233a7936a8f63bce93bde0d100e"
+      "sha256": "e4dabfd8c10aeded6f3e53b481db779c419530a4b5872030a536b379aac2efd1"
     }
   ]
 }

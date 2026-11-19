@@ -15,7 +15,7 @@ target("resource")
     set_symbols("debug")
     set_wros_profile({std = "c23"})
     add_includedirs(generated)
-    add_files(path.join(source, "resource.c"))
+    add_files("resource.c")
     before_build(function ()
         local args = {"-I", "-B", path.join(source, "prepare.py"), "--platform-lock", lock, "--output", generated}
         local package = os.getenv("WROS_ROS_PACKAGE_ROOT")

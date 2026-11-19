@@ -13,6 +13,12 @@
       "sha256": "e1310d0ffc03d69e8b3f52e44bf0f25fdb73c5913d0b87d20bb19869d1d2a409"
     },
     {
+      "path": "examples/platform/pal/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/pal/migration/c/upstream.lock",
       "bytes": 242,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/pal/migration/c/xmake.lua",
-      "bytes": 1091,
+      "bytes": 1072,
       "mode": 420,
-      "sha256": "d23253bb64a620d819e53f9710b785612989b0222015d2b813b4b5bc31ea10be"
+      "sha256": "f3084e1abf3fdd51286a8b6dcbf03379d942d97dc61657052b8e6cd6bd07b002"
     }
   ]
 }

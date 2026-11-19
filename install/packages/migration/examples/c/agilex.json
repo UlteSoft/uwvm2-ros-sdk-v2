@@ -13,6 +13,12 @@
       "sha256": "a6befa2d1703bc69d74dbb06373e4f3ff02d5a8148b8f5ce7202fc7794b274d9"
     },
     {
+      "path": "examples/platform/agilex/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/agilex/migration/c/upstream.lock",
       "bytes": 239,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/agilex/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "3221ccdd53d5eb5963804a1e36b9209cfcc01c5e69d3642cc786570665dfc511"
+      "sha256": "6efcc2fddbd4c4eea37cfc20a8644b1f8a3c2fc29d33b7b9b5b37f004a3847b0"
     }
   ]
 }

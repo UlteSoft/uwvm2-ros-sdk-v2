@@ -13,6 +13,12 @@
       "sha256": "bd9543d30589fede2dc14618981cd7fc260ed5993846ac92f41809add73c2b7a"
     },
     {
+      "path": "examples/platform/realman/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/realman/migration/c/upstream.lock",
       "bytes": 251,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/realman/migration/c/xmake.lua",
-      "bytes": 1095,
+      "bytes": 1076,
       "mode": 420,
-      "sha256": "e7c5d99c3a1c6f1ce9ed04fb39222b7dde6c5b520604bb8019512db6c9412562"
+      "sha256": "57f954e7f2e4ff2c4c6aa0f8b8bf93de342397e3982ac5a740399e5d7259613e"
     }
   ]
 }

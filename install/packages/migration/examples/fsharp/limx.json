@@ -1,6 +1,12 @@
 {
   "files": [
     {
+      "path": "examples/platform/limx/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
       "path": "examples/platform/limx/migration/fsharp/README.md",
       "bytes": 244,
       "mode": 420,
@@ -14,9 +20,9 @@
     },
     {
       "path": "examples/platform/limx/migration/fsharp/xmake.lua",
-      "bytes": 581,
+      "bytes": 532,
       "mode": 420,
-      "sha256": "229e435013520faeaa935ee8102185a8668823bb2e0abeadd996d25459b5025b"
+      "sha256": "7ab097c55fd72556be0e0411e4c10039adcc72256e0f3f266925ffa59befdd66"
     }
   ]
 }

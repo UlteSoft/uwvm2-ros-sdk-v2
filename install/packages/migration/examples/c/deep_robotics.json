@@ -13,6 +13,12 @@
       "sha256": "97b018c9f0b7d8644d31db3f89e0c60864c70074224ff16b9d13e5b2f2beedad"
     },
     {
+      "path": "examples/platform/deep_robotics/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/deep_robotics/migration/c/upstream.lock",
       "bytes": 230,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/deep_robotics/migration/c/xmake.lua",
-      "bytes": 1101,
+      "bytes": 1082,
       "mode": 420,
-      "sha256": "ab10c8f61dac3f0aad0fdffd0bd2c2f13b434dddac676ad29ef8d113629da5fd"
+      "sha256": "7ae3cf340887423d781253d28b07150940f4d5087e23d924b2e3521bbec18e3c"
     }
   ]
 }

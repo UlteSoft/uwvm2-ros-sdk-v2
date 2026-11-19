@@ -13,6 +13,12 @@
       "sha256": "8ee1456c21a7bb21c7f881fbd6bb9d16f0df3dc4e0e39f8c6cfcc6e8b76becfc"
     },
     {
+      "path": "examples/platform/doosan/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/doosan/migration/c/upstream.lock",
       "bytes": 234,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/doosan/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "de0f4e24dcc132e2535d135596cbc9d77c08790c1a2295bf6a877576f3177d7e"
+      "sha256": "b3a76fdf8d59f54da9acbb29f310b36d33dd9e61f44ad73ff3941e34fc103724"
     }
   ]
 }

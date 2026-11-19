@@ -13,6 +13,12 @@
       "sha256": "8fcb75e34680dd7e5e485c52a40a8acf2cd2a44277442645421fdd76eec5f1fd"
     },
     {
+      "path": "examples/platform/agibot/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/agibot/migration/c/upstream.lock",
       "bytes": 238,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/agibot/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "e638df85d6a1fd951434a7aec6f830766db383211b487e5a18845e43e2523280"
+      "sha256": "9e63cb5aeab0f7d7f678b6ea89d9af96ce51ef5c3bb54cbc37d980888ab94a4e"
     }
   ]
 }

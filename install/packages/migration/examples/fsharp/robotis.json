@@ -1,6 +1,12 @@
 {
   "files": [
     {
+      "path": "examples/platform/robotis/migration/fsharp/GoalStatus.fs",
+      "bytes": 956,
+      "mode": 420,
+      "sha256": "19849cb4803139f6d46f80da5fc221d292f0e3e5adc414fc2b946a0c68e7d9c5"
+    },
+    {
       "path": "examples/platform/robotis/migration/fsharp/README.md",
       "bytes": 247,
       "mode": 420,
@@ -14,9 +20,9 @@
     },
     {
       "path": "examples/platform/robotis/migration/fsharp/xmake.lua",
-      "bytes": 584,
+      "bytes": 535,
       "mode": 420,
-      "sha256": "9431e6b1a95d4374317153a365e90f5e77e05cc515658668d40a20f25472a97c"
+      "sha256": "10bfd3c4061cc3a8ceddfe1dc1ca5a2e05666fb4703638012b648d703a335718"
     }
   ]
 }

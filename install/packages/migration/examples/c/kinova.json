@@ -13,6 +13,12 @@
       "sha256": "11985badb654fb4ac022f1379b5c59c958902e9d19846d219875e46d48f547d9"
     },
     {
+      "path": "examples/platform/kinova/migration/c/resource.c",
+      "bytes": 1081,
+      "mode": 420,
+      "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
       "path": "examples/platform/kinova/migration/c/upstream.lock",
       "bytes": 267,
       "mode": 420,
@@ -20,9 +26,9 @@
     },
     {
       "path": "examples/platform/kinova/migration/c/xmake.lua",
-      "bytes": 1094,
+      "bytes": 1075,
       "mode": 420,
-      "sha256": "996369776ed3457eeeab3ab44fa367b17b55db13696e4261fa64a653537be1d6"
+      "sha256": "6ad35e2d43ca31bc2061a5787534a1ee941c457dd98191a02247023e98d10689"
     }
   ]
 }
