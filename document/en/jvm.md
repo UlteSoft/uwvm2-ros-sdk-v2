@@ -32,6 +32,22 @@ The accepted application bytecode covers local classes, primitive arithmetic and
 
 The pinned build-host JVM runs interpreted with core dumps disabled. The guest always goes through the optimized Wasm AOT compiler.
 
+### Source debugging in UWVM
+
+Keep the build directory with `--work`. TeaVM writes the JVM bytecode line positions as C line directives, which Clang records in Wasm DWARF. Use the debugger's `sourceMap` to match the path in DWARF to the local source file. For a class in package `example`, a build made with `--work /build/java-log` can use the following DAP attach or launch setting.
+
+```json
+{
+  "sourceMap": {
+    "/build/java-log/example/Main.java": "/project/src/Main.java"
+  }
+}
+```
+
+Use `Main.kt` for Kotlin and the matching build directory. Inspect the actual paths with `llvm-dwarfdump --show-sources body.wasm`. With a verified breakpoint, the source view follows the Java or Kotlin line positions that survive optimization. Column numbers and the Variables view describe the generated C representation. Optimized ranges can skip source statements or leave values unavailable. JVM local names, object types and Kotlin inline scopes require further compiler metadata.
+
+The compiler source is part of the signed site measurement. Rebuild an application to obtain the line metadata and qualify the new SDK compiler before signing the corresponding release statement.
+
 ### Isolated driver sessions
 
 `wros.scene.Driver` attaches to a deployment-provisioned alias. `open(byte[] alias, int requestLimit, int responseLimit)` takes limits between zero and 65,536 bytes. Set the response limit at least as high as the deployment's registered maximum. Call `connect()`, then `submit(long sequence, long deadline, byte[] payload)` with the canonical payload for the registered schema and an absolute monotonic deadline. Modules receive each operation and the matching resource grant from the VM.

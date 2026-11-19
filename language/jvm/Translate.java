@@ -20,6 +20,8 @@ public final class Translate {
             compiler.setTargetDirectory(new File(args[1]));
             compiler.setTargetFileName("app");
             compiler.setOptimizationLevel(TeaVMOptimizationLevel.FULL);
+            // Preserve bytecode source positions through TeaVM's C line directives.
+            compiler.setDebugInformationGenerated(true);
             compiler.setStrict(true);
             compiler.setObfuscated(false);
             compiler.setMinHeapSize(2*1024*1024);

@@ -32,6 +32,22 @@ Java 使用 `wrjava`、`.java`；Kotlin 可用 `@file:JvmName("Main")` 指定 JV
 
 固定版本的宿主 JVM 使用解释执行并关闭 core dump。生成的客体始终经过带优化的 Wasm AOT 编译器。
 
+### 在 UWVM 中调试源码
+
+用 `--work` 保留构建目录。TeaVM 将 JVM 字节码行号写入 C 的行号指令，再由 Clang 记录到 Wasm DWARF。使用调试器的 `sourceMap` 将 DWARF 路径映射到实际源码。以下是包名为 `example`、构建选项为 `--work /build/java-log` 时的 DAP attach 或 launch 配置。
+
+```json
+{
+  "sourceMap": {
+    "/build/java-log/example/Main.java": "/project/src/Main.java"
+  }
+}
+```
+
+Kotlin 对应 `Main.kt` 和实际构建目录。可以用 `llvm-dwarfdump --show-sources body.wasm` 核对路径。断点绑定后，源码视图按优化后保留的 Java 或 Kotlin 行号显示位置。列号和变量视图来自生成的 C。优化可能跳过部分语句或使某些变量不可读取。JVM 局部变量原名、对象类型和 Kotlin 内联作用域需要进一步的编译器元数据。
+
+签名现场会校验编译器源码。应用需要重新编译才能获取行号元数据，新的 SDK 编译器需要重新验收，再签署对应的发布声明。
+
 ### 隔离驱动会话
 
 `wros.scene.Driver` 通过部署器预置的别名连接驱动。`open(byte[] alias, int requestLimit, int responseLimit)` 的两个长度上限均为 0 至 65,536 字节。响应上限应至少覆盖部署登记的响应容量。先执行 `connect()`，再调用 `submit(long sequence, long deadline, byte[] payload)` 提交该注册协议规定的载荷与单调时钟的绝对截止时间。部署须分别授权相应的接口和资源。
