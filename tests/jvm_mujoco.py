@@ -11,16 +11,40 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
 from guest_profile import Profile
 from imports import inspect
+import local_release
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output", "toolchain", "sysroots", "bundle"):
+    for field in ("vm-source", "runtime", "openssl-root", "mujoco", "output"):
         parser.add_argument("--" + field, required=True, type=Path)
+    for field in ("toolchain", "sysroots", "bundle"):
+        parser.add_argument("--" + field, type=Path, help="explicit tools for the candidate compiler")
+    parser.add_argument("--vendor-model", type=Path, help="pinned platform MJCF manifest")
+    parser.add_argument("--vendor-assets", type=Path, help="original assets from the platform model repository")
     parser.add_argument("--language", required=True, choices=("java", "kotlin"))
     parser.add_argument("--sdk",type=Path,default=ROOT,help="installed synchronous-aot source package for this language")
     args = parser.parse_args()
     sdk = args.sdk.resolve()
+    if bool(args.vendor_model) != bool(args.vendor_assets):
+        parser.error("provide both vendor model and vendor assets")
+    if args.vendor_model and json.loads(args.vendor_model.read_bytes())["platform"] != sdk.parents[1].name:
+        parser.error("vendor model must match the installed SDK platform")
+    site = local_release.site_config(sdk)
+    if site:
+        if any((args.toolchain, args.bundle, args.sysroots)):
+            parser.error("the installed site supplies the reviewed compiler and sysroot")
+        backend = Path(site["toolchain"]).resolve(strict=True)
+        sysroot, = map(Path, site["sysroots"])
+        tools = []
+        reviewed = (sdk / local_release.SITE, Path(site["trust"]["statement"]))
+    else:
+        if not all((args.toolchain, args.sysroots, args.bundle)):
+            parser.error("supply a signed installed SDK or all three explicit candidate tool paths")
+        backend = args.toolchain.resolve(strict=True)
+        sysroot = args.sysroots.resolve(strict=True)
+        tools = ["--toolchain", backend, "--sysroots", sysroot, "--bundle", args.bundle.resolve(strict=True), "--legacy-mte"]
+        reviewed = ()
     sys.path.insert(0, str(args.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
 
@@ -50,8 +74,7 @@ def main():
                         f"const val STEPS={count}\nconst val SUCCESS={success}\nconst val CRASH={crash}\n"
                         f"fun payload()=byteArrayOf({data})\n")
         settings.write_text(contents)
-        run(wasm.stem+"-compile", [sys.executable, compiler, "--toolchain", args.toolchain.resolve(), "--sysroots",
-                                   args.sysroots.resolve(), "--bundle", args.bundle.resolve(), "--legacy-mte",
+        run(wasm.stem+"-compile", [sys.executable, compiler, *tools,
                                    "--main-class", "simulation.Controller", controller, settings, "-o", wasm])
         imports = {(x["module"],x["name"]) for x in inspect(wasm.read_bytes())}
         allowed = {"capability.open","driver.connect","driver.submit","driver.result","driver.disconnect"}
@@ -63,12 +86,15 @@ def main():
     for key,value in (("source-root",args.vm_source),("runtime",args.runtime),("openssl-root",args.openssl_root),
                       ("mujoco",args.mujoco),("output",args.output)):
         argv.extend(["--"+key,str(value.resolve())])
+    if args.vendor_model:
+        argv.extend(["--vendor-model",str(args.vendor_model.resolve()),"--vendor-assets",str(args.vendor_assets.resolve()),
+                     "--platform-targets",str(ROOT / "share/targets.json"),"--audit-calls"])
     sources = sdk / "language/jvm"
     suite.main(argv, compile_guest=compile_guest,guest_name=args.language,guest_widths=(32,),
-               guest_inputs=(controller, Path(__file__), compiler, args.sysroots.resolve(), sources/"Admit.java",
+               guest_inputs=(controller, Path(__file__), compiler, sysroot, *reviewed, sources/"Admit.java",
                              sources/"jvm_frontend.py", sources/"contracts.h", sources/"java/wros/scene/Driver.java",
                              sdk/"language"/args.language/"host-inputs.json", sdk/"include/wros/scene.h",
-                             args.toolchain.resolve()/"bin/clang", args.toolchain.resolve()/"bin/wasm-ld"))
+                             backend/"bin/clang", backend/"bin/wasm-ld"))
 
     # A signal capability can be opened but cannot authorize a driver's typed operations.
     denied = controller.with_name("Denied." + ext)
@@ -81,8 +107,7 @@ def main():
         report["cases"].append({"name":label,"argv":list(map(str,argv)),"status":proc.returncode})
         (out/"driver-permissions.json").write_text(json.dumps(report,indent=2)+"\n")
         if proc.returncode: raise RuntimeError(label+": "+proc.stderr[-2000:].decode(errors="replace"))
-    check("compile",[sys.executable,compiler,"--toolchain",args.toolchain.resolve(),"--sysroots",args.sysroots.resolve(),
-                     "--bundle",args.bundle.resolve(),"--legacy-mte","--main-class","simulation.Denied",denied,"-o",guest])
+    check("compile",[sys.executable,compiler,*tools,"--main-class","simulation.Denied",denied,"-o",guest])
     assert {i["name"] for i in inspect(guest.read_bytes())} == {"capability.open","capability.close","driver.connect"}
     for engine in ("int","aot"):
         vm=[args.runtime.resolve(),*Profile().uwvm_feature_flags(),"--debug-fault-action","exit","--runtime-"+engine,
