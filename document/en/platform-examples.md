@@ -9,12 +9,11 @@ export UWVM_ROS_SDK_ROOT="$PWD/sdk/$SDK_COMMIT/unitree/c/development"
 export WROS_VM=/absolute/path/to/uwvm2-ros
 cp -r "$UWVM_ROS_SDK_ROOT/examples/platform/unitree/common/c" ./samples
 cd samples
-xmake f -p wasm-wasip1 -a wasm32 -y
 xmake build
 xmake test -j1
 ~~~
 
-Use the **directory** reported by the installer if your prefix differs. Select the language's approved site and profile as described in its guide. A selection downloads example sources for its own platform and language. Run xmake build from the project directory to build all its modules, or name one target. The Wasm binaries are under build. Run xmake test -j1 to run each guest assertion in a separate VM process. A host error, hidden import or guest trap fails the case. The tests in these examples use the read-only permissions declared in the xmake project. Deployment permissions are reviewed separately.
+Use the **directory** reported by the installer if your prefix differs. A selection downloads examples for its own platform and language. In a fresh project, `xmake build` selects single-threaded wasm32 and builds every target. To build for wasm64, install the matching toolchain profile and run `xmake f -a wasm64` first. Look for the Wasm binaries under `build`. Run `xmake test -j1` to execute each assertion in a separate VM process. A host error, hidden import or guest trap fails the case. Test permissions are declared in the project. Review production permissions at deployment.
 
 | Directory | What the project demonstrates |
 | --- | --- |

@@ -9,12 +9,11 @@ export UWVM_ROS_SDK_ROOT="$PWD/sdk/$SDK_COMMIT/unitree/c/development"
 export WROS_VM=/absolute/path/to/uwvm2-ros
 cp -r "$UWVM_ROS_SDK_ROOT/examples/platform/unitree/common/c" ./samples
 cd samples
-xmake f -p wasm-wasip1 -a wasm32 -y
 xmake build
 xmake test -j1
 ~~~
 
-安装位置以安装器输出的 directory 为准。各语言需要的工具链站点和编译配置见对应语言指南。按提交安装时只会下载所选平台和语言的示例。在工程目录中运行 xmake build 可生成该工程的所有 Wasm，也可指定单个目标。产物位于 build 目录。xmake test -j1 会启动独立 VM 执行每组断言；导入被隐藏、VM 报错或程序触发陷阱都会使测试失败。示例只声明本地测试需要的查询许可，现场部署另行审阅授权。
+安装位置以安装器输出的 directory 为准。按提交安装时只下载所选平台和语言的示例。在新工程中直接执行 `xmake build`，会以单线程 wasm32 构建所有目标。构建 wasm64 时先安装匹配的工具链配置，再执行 `xmake f -a wasm64`。Wasm 产物位于 `build` 目录。执行 `xmake test -j1` 后，每组断言在独立的 VM 进程中运行。导入被隐藏、VM 报错或程序触发陷阱均判为失败。测试权限由工程声明，生产权限在部署时审核。
 
 | 子目录 | 工程验证的内容 |
 | --- | --- |

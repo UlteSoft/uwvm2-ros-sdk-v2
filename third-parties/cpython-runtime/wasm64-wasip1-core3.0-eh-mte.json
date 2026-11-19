@@ -1,8 +1,8 @@
 {
   "format": "wros-cpython-runtime",
   "source_sha256": "c2215904f02b175596dc49351585104f4bc20341e1c47378b26a2c274360ce73",
-  "compiler_sha256": "bef951b144a88c57bf582d7be4a62e87bd1e5252c8e5d32688fd6b5df90de123",
-  "closure_sha256": "c2a8785e587df5ada8dec3eda88cf2139edfcd2b925ffa67f7d359ccd5006f9f",
+  "compiler_sha256": "4ed6cce04d570222f4bb574e2c965c721fdbef89fecc27de126045328ac727a1",
+  "closure_sha256": "ca75f0f16a1ce4b39dac30e48cdf60a540d274b0badce1a1bdb45721fab476ba",
   "profile": {
     "address_bits": 64,
     "wasm_version": "3.0",
@@ -23,6 +23,6 @@
     "runtime_pack.py": "500471e4b0102c3af2787703383c94651d7e471e135b194a16318d7f0174e506"
   },
   "file": "wasm64-wasip1-core3.0-eh-mte.tar.xz",
-  "sha256": "fa0747b54ef901038fc7adfea3d3f6010ec25a1d35c93ae9b27ce05b2228ca40",
-  "archive_sha256": "ff944fb839346e841b458de5ed5535b966c920397ed7a82908b5fb2cec6f2ced"
+  "sha256": "e516151dd0b2cc7f7aaa2aadd3bbc2b3e59b36920331ef1acc32cf82d2cc8e84",
+  "archive_sha256": "cd39374ae96d74f01552e6102fe9a1d68b01cea171a5e39ab55d6e7e6f87d51b"
 }

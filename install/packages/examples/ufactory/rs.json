@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "document/en/platform-examples.md",
-      "bytes": 4530,
+      "bytes": 4469,
       "mode": 420,
-      "sha256": "748872fe5bc30d7989f70491d01cb17317f6a731d2aa057f59a0186b9ddb62c9"
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
     },
     {
       "path": "document/source/Doxyfile",
@@ -20,9 +20,9 @@
     },
     {
       "path": "document/zh/platform-examples.md",
-      "bytes": 3913,
+      "bytes": 3877,
       "mode": 420,
-      "sha256": "fd3657a1a26a45ae5eb1a52ad74fda64cc8295edf42500ad321986a3d895c25f"
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
     },
     {
       "path": "examples/platform/ufactory/common/rs/body.rs",

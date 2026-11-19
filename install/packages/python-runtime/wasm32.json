@@ -4,13 +4,13 @@
       "path": "third-parties/cpython-runtime/wasm32-wasip1-core3.0-eh-mte.json",
       "bytes": 1188,
       "mode": 420,
-      "sha256": "5e6597fe8b6c8bdd9ee41726f66ae256c7e094c9941f242fc3cc206956f68ed0"
+      "sha256": "9c25e1b9ea8365f6943a5bd14adf3cef57123abfdfb316985d285c1f38847604"
     },
     {
       "path": "third-parties/cpython-runtime/wasm32-wasip1-core3.0-eh-mte.tar.xz",
-      "bytes": 8960976,
+      "bytes": 8958984,
       "mode": 420,
-      "sha256": "17be07aea712a116897e4451beda250be762e32878def783f13f8d245616d07c"
+      "sha256": "f15e42f5dc3ca0cb9df9cdd0e59c9b50d45ce25d739db9107560c40b339b0822"
     }
   ]
 }
