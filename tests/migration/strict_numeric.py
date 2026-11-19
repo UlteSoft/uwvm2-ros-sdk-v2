@@ -127,4 +127,3 @@ def qualify(package, scope, runner, entries, absent, vectors, adapter, dependenc
         raise ValueError("no implementation was tested for " + package)
     result["complete"] = True
     save(target, result)
-
