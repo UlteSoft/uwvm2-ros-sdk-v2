@@ -37,70 +37,10 @@
       "sha256": "21738fe16f546185db998d67964055381cdfcb6e51f5836c7bac8a93e80c25d6"
     },
     {
-      "path": "third-parties/sources/llvm-herbceptions-21801429/LICENSE.TXT",
-      "bytes": 15141,
-      "mode": 420,
-      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
-    },
-    {
-      "path": "third-parties/sources/llvm-herbceptions-21801429/part-000",
-      "bytes": 16777216,
-      "mode": 420,
-      "sha256": "1e253369aa706cd66cc2fc5abf2fb5c848c1caeb70f5dd67ca444e6b946c0481"
-    },
-    {
-      "path": "third-parties/sources/llvm-herbceptions-21801429/part-001",
-      "bytes": 16777216,
-      "mode": 420,
-      "sha256": "c36b75291d1c0f593a41183a95bd6c429d45f7dbaf569d9fffcfe3d662f00c61"
-    },
-    {
-      "path": "third-parties/sources/llvm-herbceptions-21801429/part-002",
-      "bytes": 16777216,
-      "mode": 420,
-      "sha256": "77953f1d6753003bef3a1d1275fb45ea5da23d1079229dc3bf5030daaf574bde"
-    },
-    {
-      "path": "third-parties/sources/llvm-herbceptions-21801429/part-003",
-      "bytes": 16777216,
-      "mode": 420,
-      "sha256": "5199c995ef294acc6f4ccc50ff552fd4066c8bef98b06b2b5cb3ad2036f6c5db"
-    },
-    {
-      "path": "third-parties/sources/llvm-herbceptions-21801429/part-004",
-      "bytes": 14011268,
-      "mode": 420,
-      "sha256": "dbeda9656038e0177c72bbab8ea1bff9c4097615d92cddc542541d97452ece1f"
-    },
-    {
-      "path": "third-parties/sources/llvm-herbceptions-21801429/source.json",
-      "bytes": 1738,
-      "mode": 420,
-      "sha256": "106362deb17ba87acbf95be422c0b0e2de11ebeb920ffa9a79f1d687224a7dbc"
-    },
-    {
       "path": "third-parties/sources/wasi-libc-sdk34.tar.xz/part-000",
       "bytes": 1529152,
       "mode": 420,
       "sha256": "73bce1b215282a82557421b80733d69b858a163a6334ecf42bab9664f2a508f8"
-    },
-    {
-      "path": "tools/wasm/herbceptions/README.md",
-      "bytes": 1341,
-      "mode": 420,
-      "sha256": "fe2b0838d48ac3b909bf2f09be6b2672a1d09263d598b5ba94bc86d035fc23ef"
-    },
-    {
-      "path": "tools/wasm/herbceptions/README.zh.md",
-      "bytes": 1249,
-      "mode": 420,
-      "sha256": "c3fd5e16486ba783ca314d46a63136ff0ac1c89a38f9b885f2217344449d1041"
-    },
-    {
-      "path": "tools/wasm/herbceptions/recover_source.py",
-      "bytes": 6553,
-      "mode": 420,
-      "sha256": "d0a9b06da6f4cf596c0206562d1217f083b4ec6db52441be884d34751587f97e"
     },
     {
       "path": "tools/wasm/memtag/README.md",

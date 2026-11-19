@@ -192,7 +192,7 @@ def main():
         raise ValueError("developer payloads must match the revision hook")
     for language, files in language_files.items():
         package("languages/" + language, [*files, f"language/{language}/xmake/adapter.lua"])
-    inputs = (file.relative_to(ROOT).as_posix() for directory in ("tools/wasm/memtag", "tools/wasm/herbceptions", "third-parties/sources")
+    inputs = (file.relative_to(ROOT).as_posix() for directory in ("tools/wasm/memtag", "third-parties/sources")
               for file in (ROOT / directory).rglob("*") if file.is_file() and "__pycache__" not in file.parts)
     package("compiler-source", inputs)
 
