@@ -96,3 +96,20 @@ AOT。每次指定新目录。构建失败时保留编译器原文和 `complete=
 C++ 迁移组件另提供了按摘要验证的 Jazzy BufferCore 适配。Wasm 坐标树测试可添加
 `--port single-executor` 测试单执行器，或添加 `--port threaded` 测试保留原版
 互斥锁的配置。原版结果使用默认的 `--port upstream`。见[安装及构建说明](tf2-buffer-port.md)。
+
+### 运行 Jazzy 上游测试套件
+
+在原生 `--layer buffer --target native` 测试中加入 `--upstream-tests`。
+脚本将从归档提取 Jazzy 的 `test/simple_tf2_core.cpp`，用 GoogleTest 运行
+原测试，并记录每个用例的断言数量与谓词执行轨迹。Wasm 复跑使用
+`--layer buffer --target wasm --port single-executor --upstream-tests`，同时传入
+`--native-oracle "$NATIVE_OUTPUT/results.json"`。脚本会比对两端的 tf2、rcutils、
+消息头、测试代码与断言适配器。套件有三个读取实时时钟的用例，因此本项测试
+对指定模块开放 `clock_time_get` 并授予 `realtime-clock`，检查返回日期有效。
+另一组运行仅开放接口、未授予资源，并校验宿主拒绝结果。整个套件无需文件
+系统或网络权限。另一个负控构建改变回调测试的期望断言数量，验证两端能检测差异。
+
+Jazzy tf2 0.36.23 的六组共 17 个原测试体，在原生 GoogleTest、Wasm 解释器和
+AOT 中均通过。原生轨迹共记录 78 次断言。时间显示用例执行了原格式化调用，
+上游没有为该用例设置断言。两个引擎均检测到故意改变的回调断言次数，也检测到
+撤销时钟资源授权后的拒绝。

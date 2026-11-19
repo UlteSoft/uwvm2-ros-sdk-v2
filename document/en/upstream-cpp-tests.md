@@ -119,3 +119,25 @@ port. Add `--port single-executor` to the Wasm buffer command for the
 registered adaptation or `--port threaded` for the genuine mutex profile.
 Original source results use the default `--port upstream`. See the
 [installation and build instructions](tf2-buffer-port.md).
+
+### Run the Jazzy upstream test suite
+
+Add `--upstream-tests` to a native `--layer buffer --target native` run.
+This extracts the matching Jazzy `test/simple_tf2_core.cpp` from the archive,
+runs its original tests with GoogleTest, and records each test's assertion
+count and predicate trace. To replay those bodies on Wasm, use
+`--layer buffer --target wasm --port single-executor --upstream-tests`
+and add `--native-oracle "$NATIVE_OUTPUT/results.json"`. The runner checks
+that the tf2 sources, rcutils sources, installed message headers, fixture
+and assertion adapter match the native receipt. The suite includes three
+wall-clock tests, so this invocation allows `clock_time_get` and grants
+`realtime-clock` to the named module. The guest verifies that it receives a
+valid date. A separate run omits the resource grant and checks the denial. Filesystem and
+network access are unnecessary. An additional build deliberately changes
+the expected callback assertion count to check that a mismatch is detected.
+
+Jazzy tf2 0.36.23 passed all 17 original test bodies in six suites on native
+GoogleTest and both Wasm engines. The native trace observed 78 assertions.
+The display-time test performed its original formatting call with zero
+assertions. Both engines rejected an intentionally changed callback assertion
+count and the clock check with its resource grant removed.

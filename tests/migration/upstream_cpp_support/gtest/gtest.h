@@ -44,3 +44,14 @@ int wros_run_all();
 #define EXPECT_NEAR(a,b,e) ::wros_test::check(std::fabs(double(a) - double(b)) <= double(e), ::wros_test::predicate("near:" #a "," #b "," #e))
 #define EXPECT_FLOAT_EQ(a,b) ::wros_test::check(::wros_test::equal_ulps<float, std::uint32_t>((a),(b)), ::wros_test::predicate("float:" #a "," #b))
 #define EXPECT_DOUBLE_EQ(a,b) ::wros_test::check(::wros_test::equal_ulps<double, std::uint64_t>((a),(b)), ::wros_test::predicate("double:" #a "," #b))
+#define ASSERT_EQ(a,b) EXPECT_EQ(a,b)
+#define ASSERT_NE(a,b) EXPECT_NE(a,b)
+#define EXPECT_THROW(statement, exception_type) do { \
+    bool caught_expected = false; \
+    try { statement; } catch (const exception_type&) { caught_expected = true; } \
+    ::wros_test::check(caught_expected, ::wros_test::predicate("throw:" #statement "," #exception_type)); \
+} while (false)
+#define EXPECT_NO_THROW(...) do { \
+    __VA_ARGS__; \
+    ::wros_test::check(true, ::wros_test::predicate("no-throw:" #__VA_ARGS__)); \
+} while (false)

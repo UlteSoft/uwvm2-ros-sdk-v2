@@ -40,7 +40,14 @@ def main():
     parser.add_argument("--layer", required=True, choices=("buffer", "cache"))
     parser.add_argument("--target", required=True, choices=("native", "wasm"))
     parser.add_argument("--port", choices=("upstream", "single-executor", "threaded"), default="upstream")
+    parser.add_argument("--upstream-tests", action="store_true", help="run the unmodified Jazzy simple_tf2_core.cpp suite")
+    parser.add_argument("--native-oracle", type=lambda path: Path(path).resolve())
     a = parser.parse_args()
+    if a.upstream_tests and (a.layer != "buffer" or
+       (a.target == "native" and a.port != "upstream") or (a.target == "wasm" and a.port != "single-executor")):
+        parser.error("upstream suite requires original native or single-executor Wasm BufferCore")
+    if bool(a.native_oracle) != (a.upstream_tests and a.target == "wasm"):
+        parser.error("pass the successful native upstream receipt for a Wasm upstream suite")
     if a.port != "upstream" and a.layer != "buffer":
         parser.error("the compatibility port is specific to BufferCore")
     if a.port == "single-executor" and a.target != "wasm":
@@ -81,9 +88,17 @@ def main():
     if a.layer == "buffer":
         units.extend(["src/static_cache.cpp", "src/buffer_core.cpp"])
     c_units = ["src/snprintf.c", "src/strerror.c"]
-    report["tf2"] = extract(a.corpus, index, "tf2", TF2, units, src)
+    archived = list(units)
+    if a.upstream_tests:
+        import tf2_upstream_suite as upstream
+        archived.append(upstream.UNIT)
+    report["tf2"] = extract(a.corpus, index, "tf2", TF2, archived, src)
     report["rcutils"] = extract(a.corpus, index, "rcutils", RCUTILS, c_units, rc)
     fixture = Path(__file__).with_name("tf2_buffer.cpp" if a.layer == "buffer" else "tf2_time_cache.cpp")
+    if a.upstream_tests:
+        fixture = src / upstream.UNIT
+        report["upstreamRunnerSha256"] = sha(Path(upstream.__file__))
+        report["assertionAdapterSha256"] = sha(upstream.SUPPORT / "gtest/gtest.h")
     report["fixtureSha256"] = sha(fixture)
     generated = []
     if a.layer == "buffer":
@@ -130,6 +145,12 @@ def main():
             check("cpp-" + obj.stem, ["/usr/bin/g++", "-std=c++20", "-O3", "-g", *flags,
                                       "-c", source_paths[unit], "-o", obj])
             objects.append(obj)
+        if a.upstream_tests:
+            report["upstreamTests"] = upstream.native(a, index, fixture, flags, objects, check)
+            report.update(complete=True, nativeCxxSha256=sha(Path("/usr/bin/g++")),
+                          nativeCSha256=sha(Path("/usr/bin/gcc")))
+            save(result, report)
+            return
         for negative in (0, 1):
             label = "changed-reference" if negative else "reference"
             binary = a.output / label
@@ -148,12 +169,23 @@ def main():
                    '#endif\n#include "strerror.c"\n')
     report["rcutilsXsiAdapterSha256"] = sha(xsi)
     report["imports"] = {}
+    if a.upstream_tests:
+        oracle = json.loads(a.native_oracle.read_bytes())
+        if (oracle.get("complete") is not True or oracle["target"] != "native" or oracle["port"] != "upstream"
+                or not oracle.get("upstreamTests") or any(report[k] != oracle[k] for k in
+                ("tf2", "rcutils", "fixtureSha256", "installedJazzyHeadersSha256", "assertionAdapterSha256",
+                 "upstreamRunnerSha256", "runnerSha256"))):
+            raise ValueError("incompatible native oracle")
+        report["nativeOracleSha256"] = sha(a.native_oracle)
+        report["upstreamTests"] = oracle["upstreamTests"]
+        flags += ["-I", upstream.SUPPORT]
     for negative in (0, 1):
         label = "changed-reference" if negative else "reference"
         module = a.output / (label + ".wasm")
+        test_entry = upstream.guest(a.output, fixture, oracle, negative) if a.upstream_tests else fixture
         check(label + "-build", [a.sdk / "bin/wrcc", "--std", "c++20", "-O3", "-g", "--target",
               "wasm32", "--reactor", "--export", "_start", "--build-receipt", *flags,
-              "-I", rc / "src", "-D", f"WROS_CHANGED_REFERENCE={negative}", fixture,
+              "-I", rc / "src", "-D", f"WROS_CHANGED_REFERENCE={negative}", test_entry,
               *source_paths.values(), rc / c_units[0], xsi, "-o", module])
         receipt = Path(str(module) + ".wros-build.json")
         record = json.loads(receipt.read_bytes())
@@ -198,7 +230,10 @@ def main():
             if (imp["module"] != "wasi_snapshot_preview1" or imp["kind"] != 0 or
                     WASI.get(imp["name"]) != (imp.get("params"), imp.get("results"))):
                 raise ValueError("unexpected guest input " + repr(imp))
-            policy += ["--wasip1-single-interface", "module.wasm", imp["name"], "deny"]
+            disposition = "allow" if a.upstream_tests and imp["name"] == "clock_time_get" else "deny"
+            policy += ["--wasip1-single-interface", "module.wasm", imp["name"], disposition]
+        if a.upstream_tests:
+            policy += ["--wasip1-single-grant", "module.wasm", "realtime-clock"]
         report["imports"][label] = dict(imports=imports, policy=policy, memoryFlags=memory_flags, guestSha256=sha(module))
         for engine in ("int","aot"):
             name = label + "-" + engine
@@ -210,6 +245,14 @@ def main():
                     raise ValueError("guest missed the changed reference or failed before the expected trap")
             else:
                 check(name, cmd)
+                if a.upstream_tests:
+                    # Accepting the interface alone must not expose a wall clock.
+                    clock_grant = cmd.index("--wasip1-single-grant")
+                    refused = name + "-no-clock-authority"
+                    code = step(refused, cmd[:clock_grant] + cmd[clock_grant + 3:])
+                    detail = (a.output / (refused + ".log")).read_text()
+                    if not code or "host_denied_wasip1.clock_time_get" not in detail or "unreachable" not in detail:
+                        raise ValueError("upstream wall-clock probe missed the denied resource")
     report["complete"] = True
     save(result, report)
 
