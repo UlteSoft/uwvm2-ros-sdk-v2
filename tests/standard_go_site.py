@@ -29,12 +29,14 @@ def canonical(value):
 def main():
     """@brief Check signed installation, guest execution and policy rejection on both engines."""
     parser = argparse.ArgumentParser(description=__doc__)
-    for key in ("vm", "vm-source", "cosign", "suite", "output"):
+    for key in ("vm", "vm-source", "cosign", "suite", "output", "authority-work"):
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--commit", required=True)
     args = parser.parse_args()
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
+    protected = args.authority_work.resolve()
+    protected.mkdir(mode=0o700, parents=True, exist_ok=False)
     cases = []
     suite = json.loads((args.suite / "results.json").read_bytes())
     if suite["vm_sha256"] != sha(args.vm) or suite["test_sha256"] != sha(SDK / "tests/standard_go.py"):
@@ -70,13 +72,13 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc)
     def stamp(seconds):
         return (now + datetime.timedelta(seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    with tempfile.TemporaryDirectory(dir=out) as temp:
+    with tempfile.TemporaryDirectory(dir=protected) as temp:
         ca = authority.Fixtures(Path(temp) / "authority").pki("test", family="ED25519")
         def sign(name, module_id, source):
-            policy = out / (name + ".policy")
+            policy = protected / (name + ".policy")
             result = out / (name + "-signed.wasm")
             prefix = [args.cosign, "wasm", "secure"]
-            run(name + "-policy", [*prefix, "policy-init", "--output", policy, "--state-dir", out / (name + "-state"),
+            run(name + "-policy", [*prefix, "policy-init", "--output", policy, "--state-dir", protected / (name + "-state"),
                                     "--trust-root", ca["root"], "--certificate", ca["certificate"],
                                     "--module-id", module_id, "--algorithms", "Ed25519"])
             run(name + "-sign", [*prefix, "sign", source, "--policy", policy, "--key", ca["key"],
