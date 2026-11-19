@@ -226,6 +226,8 @@ python3 tests/mujoco_guest.py --language d --installed-sdk "$SDK" --address-bits
   --vendor-assets "$GO2_ASSETS" --output "$OUT"
 ```
 
+使用签名的 TinyGo 站点时，将 `SDK` 设为已安装的 Unitree TinyGo 开发目录，并将 `--language d` 改为 `--language tinygo`。测试通过安装的 `wrtg` 编译 Go 控制器，在运行每个场景前验证构建收据与 VM 是否匹配。
+
 Java/Kotlin 可选同步 AOT 组件使用 `set_wros_jvm_main(class_name)` 指定入口。详见 [JVM 编译与 Xmake 参数](jvm.md)。
 
 [JavaScript 解释器与 ROS 接口](js.md)

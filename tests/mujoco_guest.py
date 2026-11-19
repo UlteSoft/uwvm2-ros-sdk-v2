@@ -38,7 +38,7 @@ def main():
     p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
     p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "rs", "tinygo", "fortran", "csharp"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
-    p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D and Objective-C sites supply their own tools and sysroots")
+    p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D, Objective-C and TinyGo sites supply their own tools and sysroots")
     p.add_argument("--producer", type=Path, help="Nim Wasm source producer")
     p.add_argument("--toolchain64", type=Path, help="base compiler prefix for a distinct wasm64 sysroot")
     p.add_argument("--objc-clang", type=Path)
@@ -66,13 +66,13 @@ def main():
         p.error("--flang applies to Fortran")
     if (a.rustroot is not None) != (a.language == "rs"):
         p.error("--rustroot is required for Rust")
-    if any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
-        p.error("--goroot and --tinygoroot are required for TinyGo")
     widths = (32,) if a.language in ("rs", "tinygo", "csharp", "js", "d") else (32, 64)
     site = None
-    explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64)
-    if a.language in ("d", "objectc") and a.installed_sdk and not any(explicit):
+    explicit = (a.toolchain, a.toolchain64, a.sysroots32, a.sysroots64, a.objc_clang, a.objc_runtime32, a.objc_runtime64, a.goroot, a.tinygoroot)
+    if a.language in ("d", "objectc", "tinygo") and a.installed_sdk and not any(explicit):
         site = local_release.site_config(compiler_root)
+    if not site and any((path is not None) != (a.language == "tinygo") for path in (a.goroot, a.tinygoroot)):
+        p.error("provide explicit Go and TinyGo roots or use an installed signed TinyGo site")
     if a.language == "d" and (not site or not (compiler_root / "bin/wrd").is_file()):
         p.error("D BetterC requires --installed-sdk pointing to a signed D site without toolchain overrides")
     if site:
@@ -82,7 +82,7 @@ def main():
             row = authorized(site)
         else:
             rows = local_release.verified_releases(site["trust"])
-            row = select_site_release(rows, "objectc", site.get("release_sha256"))
+            row = select_site_release(rows, a.language, site.get("release_sha256"))
         with a.runtime.open("rb") as stream:
             vm_digest = hashlib.file_digest(stream, "sha256").hexdigest()
         if row["vm_sha256"] != vm_digest:
@@ -90,6 +90,9 @@ def main():
         profile = Profile(**{name: row["profile"][name] for name in Profile.__dataclass_fields__})
         widths = (profile.address_bits,)
         a.toolchain = Path(site["toolchain"])
+        if a.language == "tinygo":
+            a.goroot = a.toolchain / "libexec/wros/go"
+            a.tinygoroot = a.toolchain / "libexec/wros/tinygo"
         if a.language == "objectc":
             a.objc_clang = a.toolchain / "bin/wros-objc-clang"
     if a.address_bits:
@@ -166,9 +169,9 @@ def main():
                 f"const SUCCESS:bool={str(mode=='success').lower()};\nconst CRASH:bool={str(mode=='crash').lower()};\n"
                 f"const TEMPLATE:[u8;{len(request)}]=[" + ",".join(map(str, request)) + "];\n")
         if a.language == "tinygo":
-            options = ["--goroot", a.goroot.resolve(), "--tinygoroot", a.tinygoroot.resolve()]
+            options = [] if site else ["--goroot", a.goroot.resolve(), "--tinygoroot", a.tinygoroot.resolve()]
             (directory / "go.mod").write_text("module example.local/mujoco\n\ngo 1.24\n\nrequire wros.local/scene v0.0.0\n"
-                + "replace wros.local/scene => " + json.dumps(str(ROOT / "language/tinygo/scene")) + "\n")
+                + "replace wros.local/scene => " + json.dumps(str(compiler_root / "language/tinygo/scene")) + "\n")
             (directory / "settings.go").write_text(f"package main\nconst steps={count}\nconst targetOffset={24+len(prefix)+8}\n"
                 f"const success={str(mode=='success').lower()}\nconst crash={str(mode=='crash').lower()}\n"
                 + "var template=[...]byte{" + ",".join(map(str, request)) + "}\n")
@@ -231,8 +234,8 @@ def main():
     if a.language == "rs":
         producers.extend((a.rustroot / "bin/rustc", ROOT / "language/rust/scene.rs", ROOT / "tools/wasm/tag_ir.cpp"))
     if a.language == "tinygo":
-        producers.extend((a.goroot / "bin/go", a.tinygoroot / "bin/tinygo", ROOT / "language/tinygo/scene/scene_wros.go",
-                          ROOT / "tools/wasm/tag_ir.cpp"))
+        producers.extend((a.goroot / "bin/go", a.tinygoroot / "bin/tinygo", compiler_root / "language/tinygo/scene/scene_wros.go",
+                          compiler_root / "tools/wasm/tag_ir.cpp"))
     if a.language == "js":
         producers.extend((compiler_root / "language/js/entry.c", compiler_root / "third-parties/quickjs/quickjs.c"))
     suite.main(args, **({"guest_steady_deadlines": True} if a.language == "js" else {}),

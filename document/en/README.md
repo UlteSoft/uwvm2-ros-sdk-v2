@@ -229,6 +229,8 @@ python3 tests/mujoco_guest.py --language d --installed-sdk "$SDK" --address-bits
   --vendor-assets "$GO2_ASSETS" --output "$OUT"
 ```
 
+For a signed TinyGo site, use the Unitree TinyGo development directory as `SDK` and replace `--language d` with `--language tinygo`. The fixture builds the Go controller with the installed `wrtg` and verifies its build receipt against the VM before running each scenario.
+
 The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
 [JavaScript interpreter and ROS operations](js.md)
