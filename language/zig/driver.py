@@ -62,7 +62,7 @@ def build(source, output, toolchain, sysroots, profile, work, marker_digest=None
     run([producer / "zig", "build-obj", app, "--zig-lib-dir", producer / "lib", "-target",
          f"wasm{bits}-freestanding", "-O", "Debug", "-fllvm", "-fno-emit-bin", "-femit-llvm-bc=" + str(raw),
          "-fno-compiler-rt", "-fno-stack-protector", "-fno-error-tracing"])
-    run([marker, str(bits), "on" if profile.mte else "off", raw, marked])
+    run([marker, str(bits), "on" if profile.mte else "off", raw, marked, source.resolve()])
     command, _ = make_command(toolchain, sysroots, profile, "c",
                               ["-O3", "-g", "-Wno-override-module", "-c", str(marked), "-o", str(obj)], verify=True)
     run(command)

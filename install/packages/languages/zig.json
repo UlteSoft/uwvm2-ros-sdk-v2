@@ -26,15 +26,15 @@
     },
     {
       "path": "language/zig/driver.py",
-      "bytes": 6950,
+      "bytes": 6968,
       "mode": 420,
-      "sha256": "f13fe66497c89ecf34f3490a23d9203a2dfcdad4756a46afd2c2dd29c63469b2"
+      "sha256": "0313f64180c3172979791246fafd12d5d4ca63c71d614b193171e9cf5e986fce"
     },
     {
       "path": "language/zig/mark_mte.cpp",
-      "bytes": 4268,
+      "bytes": 5401,
       "mode": 420,
-      "sha256": "79cc28268bb9c4db89de43f0eff1d3c9d6c8939a8a8aea9673c9dfc8828b9033"
+      "sha256": "cd0aa0673a1ee9ec0cb5b709aa96c1dcdbba54e5e41aed5b09cc8c483d75e687"
     },
     {
       "path": "language/zig/prepare.py",

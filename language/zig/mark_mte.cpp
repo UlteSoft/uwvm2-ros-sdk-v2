@@ -3,7 +3,10 @@
  * @details The driver supplies fresh IR from the pinned frontend. Reject
  * native code, optional target intrinsics and unchecked instrumentation controls.
  */
+#include <llvm/ADT/SmallPtrSet.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
+#include <llvm/IR/DebugInfo.h>
+#include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Attributes.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
@@ -13,8 +16,28 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 
+/// @brief Map the private source snapshot to its original location in DWARF.
+static void restoreDebugPath(llvm::Module &module, llvm::StringRef original) {
+    llvm::DebugInfoFinder info;
+    info.processModule(module);
+    llvm::SmallPtrSet<llvm::DIFile *, 8> files;
+    auto remember = [&](llvm::DIFile *file) {
+        if (file && (file->getFilename() == "application.zig" ||
+                     file->getFilename().ends_with("/application.zig")))
+            files.insert(file);
+    };
+    for (auto *unit : info.compile_units()) remember(unit->getFile());
+    for (auto *program : info.subprograms()) remember(program->getFile());
+    for (auto *scope : info.scopes()) remember(scope->getFile());
+    for (auto *type : info.types()) remember(type->getFile());
+    for (auto *global : info.global_variables()) remember(global->getVariable()->getFile());
+    for (auto *file : files) {
+        file->replaceOperandWith(0, llvm::MDString::get(module.getContext(), original));
+    }
+}
+
 int main(int argc, char **argv) {
-    if (argc != 5) return 2;
+    if (argc != 6) return 2;
     llvm::StringRef width(argv[1]);
     llvm::StringRef mode(argv[2]);
     if ((width != "32" && width != "64") || (mode != "on" && mode != "off")) return 2;
@@ -79,6 +102,7 @@ int main(int argc, char **argv) {
                 global.setMetadata("wasm.memtag.object", llvm::MDNode::get(context, {}));
         }
     }
+    restoreDebugPath(*module, argv[5]);
     if (llvm::verifyModule(*module, &llvm::errs())) return 1;
     std::error_code error;
     llvm::raw_fd_ostream output(argv[4], error);

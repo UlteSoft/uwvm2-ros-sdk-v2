@@ -1,7 +1,7 @@
 //! Check that independently addressable Zig storage receives distinct tags.
 var global_left: [48]u8 = @splat(19);
 var global_right: [48]u8 = @splat(23);
-const read_only = [48]u8{7} ** 48;
+const read_only: [48]u8 = @splat(7);
 const shift = if (@sizeOf(usize) == 4) 28 else 56;
 
 noinline fn distinct(left: *volatile u8, right: *volatile u8, expect_left: u8, expect_right: u8) void {
