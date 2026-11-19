@@ -31,9 +31,10 @@ def main():
     out = args.output
     out.mkdir(exist_ok=False, parents=True)
     env = dict(PATH=os.defpath, PYTHONDONTWRITEBYTECODE="1", TMPDIR=str(out))
-    report = dict(complete=False, scope="candidate, wasm32, synchronous single-thread Java and Kotlin GC",
+    report = dict(complete=False, failures={}, scope="candidate, wasm32, synchronous single-thread Java and Kotlin GC",
                   cgroup=cgroup_record(), steps=[], modules={}, inputs={})
     for path in (args.toolchain / "bin/clang", args.toolchain / "bin/wasm-ld", args.sysroots, args.runtime,
+                 SDK / "language/java/host-inputs.json", SDK / "language/kotlin/host-inputs.json",
                  *FIXTURES.iterdir(), Path(__file__), *sorted((SDK / "language/jvm").rglob("*")),
                  *sorted((SDK / "third-parties/jvm").rglob("*"))):
         if path.is_file() and "__pycache__" not in path.parts:
@@ -54,8 +55,7 @@ def main():
             raise RuntimeError(f"{label}: {log.decode(errors='replace')[-1800:]}")
 
     save()
-    for lang, compiler, ext, bundle in (("java", "wrjava", "java", args.java_bundle),
-                                       ("kotlin", "wrkt", "kt", args.kotlin_bundle)):
+    def measure(lang, compiler, ext, bundle):
         directory = out / lang
         directory.mkdir()
         work = directory / "work"
@@ -86,8 +86,17 @@ def main():
             for label, flags, module in (("source", [], guest), ("owners", [], checked),
                                         ("owners-disabled", ["--runtime-disable-memtag"], checked)):
                 run(lang + "-" + engine + "-" + label, [*common, *allowed, *flags, "--run", module])
-    report["complete"] = True
+    for lang, compiler, ext, bundle in (("java", "wrjava", "java", args.java_bundle),
+                                       ("kotlin", "wrkt", "kt", args.kotlin_bundle)):
+        try:
+            measure(lang, compiler, ext, bundle)
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+            report["failures"][lang] = str(error)
+            save()
+    report["complete"] = not report["failures"]
     save()
+    if report["failures"]:
+        raise SystemExit("managed ownership qualification failed for " + ", ".join(report["failures"]))
 
 
 if __name__ == "__main__":
