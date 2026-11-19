@@ -95,7 +95,12 @@
           "path": "language/tinygo/toolchain-inputs.json",
           "sha256": "7ae0ef20477328ec3b44d32a7e39a37665a0f21429c1b34ee78e70cefaede002"
         }
-      ]
+      ],
+      "linux_amd64": {
+        "url": "https://github.com/tinygo-org/tinygo/releases/download/v0.38.0/tinygo0.38.0.linux-amd64.tar.gz",
+        "archive_sha256": "edc3476ec69e309f0fd4afc1ec79c34e00a14bc3848a7133ac53f814e72faebd",
+        "binary_sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
+      }
     },
     "ldc": {
       "release_url": "https://github.com/ldc-developers/ldc/releases/tag/v1.41.0",
@@ -128,7 +133,12 @@
           "path": "language/tinygo/toolchain-inputs.json",
           "sha256": "7ae0ef20477328ec3b44d32a7e39a37665a0f21429c1b34ee78e70cefaede002"
         }
-      ]
+      ],
+      "linux_amd64": {
+        "url": "https://go.dev/dl/go1.24.2.linux-amd64.tar.gz",
+        "archive_sha256": "68097bd680839cbc9d464a0edce4f7c333975e27a90246890e9f1078c7e702ad",
+        "binary_sha256": "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
+      }
     },
     "quickjs": {
       "version": "2026-06-04",
@@ -315,7 +325,7 @@
         "libobjc2",
         "robin-map"
       ],
-      "note": "The GNUstep runtime must be ported and requalified from the official release before selecting it."
+      "note": "The SDK ports the official GNUstep libobjc2 v2.3 source to a single-threaded guest static archive. A signed site must qualify the resulting producer and runtime."
     },
     "csharp": {
       "components": [

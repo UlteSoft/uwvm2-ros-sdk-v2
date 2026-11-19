@@ -8,7 +8,7 @@ from compiler import digest
 
 ROOT = Path(__file__).resolve().parents[2]
 VENDOR = ROOT / "third-parties/objectc"
-ARCHIVES = {"libobjc2-a21ae931.tar.gz": "b5e34d8c8066765be58dbc95b4328b363a6bb5146ae860a96ed9f022826198c7",
+ARCHIVES = {"libobjc2-2.3.tar.gz": "5ead2276b42a534ac40437ce53b2231320b985539dc325453d93874be8d92869",
             "robin-map-1.4.0.tar.gz": "7930dbf9634acfc02686d87f615c0f4f33135948130b8922331c16d90a03250c"}
 PATCHES = ("objc-CGObjCGNU.cpp.patch", "objc-Clang.cpp.patch")
 FRONTEND_REVISION = "392dfff97d29b59d77e5cac6d4b6ef2585fe7117"

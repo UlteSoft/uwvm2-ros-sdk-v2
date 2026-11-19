@@ -43,7 +43,7 @@ def main():
             runtime.vendor_inputs()
             source = stage / "libobjc2"
             robin = stage / "robin-map"
-            runtime.extract("libobjc2-a21ae931.tar.gz", source)
+            runtime.extract("libobjc2-2.3.tar.gz", source)
             runtime.extract("robin-map-1.4.0.tar.gz", robin)
             run(["patch", "-F", "0", "--batch", "-p1", "-i", runtime.VENDOR / "libobjc2-wasm.patch"], source)
             build = stage / "build"

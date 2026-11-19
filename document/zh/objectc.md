@@ -4,6 +4,8 @@
 
 ## 准备编译器和语言运行库
 
+宿主构建器从 GNUstep 正式发布的 libobjc2 2.3 和 robin-map 1.4.0 构建来宾静态运行库。Wasm 移植排除了汇编分派和可执行跳板，并检查对象分配大小及分配失败。基于旧运行库的收据需要重新验收。[GNUstep 正式版本](https://github.com/gnustep/libobjc2/releases/tag/v2.3)
+
 安装目标平台的 `objectc` 开发包及配套编译器源码包。将 `SDK` 指向 SDK 根目录，其余路径应是本地可信工具及所需 sysroot 收据的绝对路径。准备过程使用 Python、CMake、Ninja 和 patch。主机工具用于构建编译器，编译器仅包含 WebAssembly 后端。
 
 ```sh

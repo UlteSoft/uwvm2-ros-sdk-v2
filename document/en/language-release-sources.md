@@ -15,9 +15,9 @@ python3 tools/qualification/language_sources.py
 | Java, Kotlin | TeaVM 0.13.1 matches the upstream release commit. Kotlin uses the official 2.1.20 compiler. Both host inventories bind the Ubuntu OpenJDK 21.0.10+7 package. The review compared the SHA-256 of 36 distinct Maven artifacts with Maven Central. |
 | JavaScript, Lua | JavaScript uses the official QuickJS 2026-06-04 distribution. Replay its complete source adaptation with `python3 third-parties/quickjs/verify_release.py`. The Lua 5.4.9 archive matches Lua's published digest. |
 | Nim, Rust | The retained Nim 2.2.4 source matches the official source distribution. The Rust 1.98.0 source archive matches the upstream stable channel manifest. |
-| TinyGo | The reviewed host inventory refers to TinyGo 0.38.0 and Go 1.24.2. The independent Go frontend has its own registry entry. |
+| TinyGo | The Linux amd64 compiler executables match the published TinyGo 0.38.0 and Go 1.24.2 archive payloads. The independent Go frontend has its own registry entry. |
 | D | The Ubuntu build of LDC 1.41.0 supplies the pinned compiler and 723 BetterC import files. The signed site checks both before compilation. |
-| Objective-C | GNUstep published libobjc2 2.3 at e877e782. The earlier SDK port used an untagged runtime, a21ae931. Those histories diverged. The checker expects the official source archive. |
+| Objective-C | GNUstep published libobjc2 2.3 at e877e782. The SDK builds a guest static library from the official release archive and robin-map 1.4.0. |
 | C#, Visual Basic | Both use the Microsoft .NET 10.0.404 SDK and 10.0.15 WASI Mono AOT and runtime packs. The package digests and extracted host-file inventory bind the installed tools to those releases. |
 
 A registry entry without a developer package is reported as such. New compiler or interpreter

@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/objectc.md",
-      "bytes": 6755,
+      "bytes": 7148,
       "mode": 420,
-      "sha256": "7d188b1ec0d03be0af83c5ce7445fcc5ad8aea17b0466305a266dbdf835d0d97"
+      "sha256": "ee85becb0bfed984c3b2368faaf31b6fcb50c66b4e2127e4e8b8d5605f3261b1"
     },
     {
       "path": "document/zh/objectc.md",
-      "bytes": 5756,
+      "bytes": 6087,
       "mode": 420,
-      "sha256": "cf56193073dc2871947adb8e02f933102dcf42a9a0343745b5330362971fcef0"
+      "sha256": "912ccb8a6c28ca1707adf6f6cd3ba68b492f5fb939001cbc40fc8b916a68279b"
     },
     {
       "path": "examples/objectc/body.m",
@@ -50,9 +50,9 @@
     },
     {
       "path": "language/objectc/build_runtime.py",
-      "bytes": 4757,
+      "bytes": 4752,
       "mode": 420,
-      "sha256": "cbc6960a5b796588283d250f2c1bea3f3a04b00e6c69bb511a77fd3c12bbf797"
+      "sha256": "c37d246d6284b18566f0f036f703014ff6a0b7a2dcadb7035fef7220bbc6fd9b"
     },
     {
       "path": "language/objectc/check_site.py",
@@ -68,9 +68,9 @@
     },
     {
       "path": "language/objectc/runtime.py",
-      "bytes": 4546,
+      "bytes": 4541,
       "mode": 420,
-      "sha256": "1449ffa22901a4cb24d70a1c0ab80017051041ba13c69382901ec16a6cd2c080"
+      "sha256": "b9fef86778485be0bb3fd6efa6eca3b24ff39977f0797f526a7f1decd88d5eaa"
     },
     {
       "path": "language/objectc/xmake/adapter.lua",
@@ -92,21 +92,21 @@
     },
     {
       "path": "third-parties/objectc/README.md",
-      "bytes": 1075,
+      "bytes": 1068,
       "mode": 420,
-      "sha256": "47122f2362dc2ce8a8f904e668dbd08f40c9a2b0a4a2e0df4e53bd1796a304a7"
+      "sha256": "544b764549001a9b5c8c96411da869345537c3ef0057910cfff14c02cf062893"
     },
     {
-      "path": "third-parties/objectc/libobjc2-a21ae931.tar.gz",
-      "bytes": 222707,
+      "path": "third-parties/objectc/libobjc2-2.3.tar.gz",
+      "bytes": 213139,
       "mode": 420,
-      "sha256": "b5e34d8c8066765be58dbc95b4328b363a6bb5146ae860a96ed9f022826198c7"
+      "sha256": "5ead2276b42a534ac40437ce53b2231320b985539dc325453d93874be8d92869"
     },
     {
       "path": "third-parties/objectc/libobjc2-wasm.patch",
-      "bytes": 19071,
+      "bytes": 21275,
       "mode": 420,
-      "sha256": "fd83707326d0f95cf99bcc51127de8199bed8534e93689f5b94667efc0548f1e"
+      "sha256": "d97110fa7302d6839bf22dd6b2478dba9c27c0c74c3b27f55e87ec0bfaa33e98"
     },
     {
       "path": "third-parties/objectc/objc-CGObjCGNU.cpp.patch",

@@ -4,6 +4,8 @@ The installation language ID is `objectc`. The compiler command is `wrobjc`. It 
 
 ## Prepare the host compiler and guest runtime
 
+The runtime comes from the official GNUstep libobjc2 2.3 release and the pinned robin-map 1.4.0 release. The Wasm port builds a guest-only static archive, omits assembly dispatch and executable trampolines, and uses checked object allocation. Runtime receipts built with the earlier source require fresh qualification. [GNUstep release](https://github.com/gnustep/libobjc2/releases/tag/v2.3)
+
 Select an installed `objectc` development package and its matching compiler-source package. Set `SDK` to its root. The base Wasm toolchain, sysroot receipt and host bootstrap must be provided explicitly. Use absolute paths. Preparation uses Python, CMake, Ninja and patch. The source build targets only WebAssembly. The local host compiler is used to compile the development tools.
 
 ```sh

@@ -14,9 +14,9 @@ python3 tools/qualification/language_sources.py
 | Java、Kotlin | TeaVM 0.13.1 与正式发行提交一致。Kotlin 编译器为 2.1.20，宿主清单绑定 Ubuntu OpenJDK 21.0.10+7。两份语言清单共有 36 个不同 Maven 构件，已逐项与 Maven Central 核对 SHA-256。 |
 | JavaScript、Lua | QuickJS 原始分发版本为 2026-06-04。运行 `python3 third-parties/quickjs/verify_release.py` 可从该归档重放 SDK 的实际改动。Lua 5.4.9 源码归档与上游公布摘要一致。 |
 | Nim、Rust | Nim 2.2.4 源码与官方分发归档匹配。Rust 1.98.0 源码归档与稳定频道清单匹配。 |
-| TinyGo | 已核对的宿主清单对应 TinyGo 0.38.0 和 Go 1.24.2。独立的 Go 前端单列。 |
+| TinyGo | Linux amd64 宿主编译器与 TinyGo 0.38.0 和 Go 1.24.2 官方归档内的二进制逐字节匹配。独立的 Go 前端单列。 |
 | D | 采用 Ubuntu 发布的 LDC 1.41.0。编译前按原始发行包核对实际编译器及 723 个 BetterC 导入文件。 |
-| Objective-C | GNUstep 正式发行的 libobjc2 2.3 对应 e877e782，SDK 旧基线 a21ae931 没有发行标签，两个提交已经分叉。检查器要求正式发行归档。 |
+| Objective-C | GNUstep 正式发行的 libobjc2 2.3 对应 e877e782，SDK 用该正式发行归档和 robin-map 1.4.0 构建客体静态库。 |
 | C#、Visual Basic | 两种语言使用微软 .NET SDK 10.0.404 和 10.0.15 的 WASI Mono AOT 与运行库包。按发行包摘要及解包后的文件清单核对宿主工具。 |
 
 缺少开发包的语言在报告中单列。升级工具链需更新上游来源证明并重新验收构建结果。

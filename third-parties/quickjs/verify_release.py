@@ -18,7 +18,11 @@ def sha(data):
 
 
 def read_manifest(directory):
-    return json.loads((directory / "official-source.json").read_bytes())
+    with (directory / "official-source.json").open("rb") as stream:
+        data = stream.read(4097)
+    if sha(data) != "98a8ca8ccd0817b1528904f978c16f7b3698e9cdf03c6cc5b6e22727965dde76":
+        raise ValueError("QuickJS source manifest differs from the reviewed SDK release")
+    return json.loads(data)
 
 
 def verify(directory, manifest):

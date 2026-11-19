@@ -182,9 +182,9 @@
     },
     {
       "path": "third-parties/quickjs/verify_release.py",
-      "bytes": 3006,
+      "bytes": 3240,
       "mode": 420,
-      "sha256": "141cf4973f1193a8dde6a02f158316736216267ded191b48ff01d5d69bcfa6c9"
+      "sha256": "1762b26c6afe63d9fcfe6c9e8c5c9763a9ac149380b467e2337598e567f8f233"
     },
     {
       "path": "third-parties/quickjs/wasm-quickjs-call-storage.patch",
