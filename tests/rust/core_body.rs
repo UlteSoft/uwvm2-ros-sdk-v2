@@ -40,9 +40,15 @@ pub extern "C" fn safe_wrapper(value: u32) -> u32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn proven_scalar() -> u32 { 17 }
 
+#[inline(never)]
+#[unsafe(link_section = ".wros.no_memtag")]
+#[unsafe(no_mangle)]
+pub fn wide_word(value: u128) -> u128 { value }
+
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() {
-    assert_eq!(core::hint::black_box(proven_scalar()), 17);
+    assert_eq!(core::hint::black_box(proven_scalar as extern "C" fn() -> u32)(), 17);
+    assert_eq!(core::hint::black_box(wide_word as fn(u128) -> u128)(1 << 88), 1 << 88);
     assert_eq!(read_static(core::hint::black_box(3)), 31);
     // Exercise the separately built ROS binding, including the VM grant.
     let version = unsafe { wros_scene::wr_abi() };

@@ -22,21 +22,29 @@ static bool suppressMemtag(llvm::GlobalObject& object) {
     return true;
 }
 
-// Rust source annotations request review. Only straight-line integer SSA can
-// lose its function attribute here. No pointer, call, stack slot or linear
-// memory operation can enter this proof, even if an earlier pass marked the
-// function readnone. Every other definition keeps normal target instrumentation.
+// These integer widths lower to native WebAssembly scalar registers. Wider
+// values can introduce a helper call or an indirect result during legalization.
+static bool isWasmRegisterInteger(llvm::Type* type) {
+    const auto* integer = llvm::dyn_cast<llvm::IntegerType>(type);
+    if (!integer) return false;
+    const unsigned bits = integer->getBitWidth();
+    return bits == 1 || bits == 8 || bits == 16 || bits == 32 || bits == 64;
+}
+
+// Rust annotations request a proof about this definition. Preserve the target
+// sanitizer attribute even after proving this IR contains no linear memory:
+// a later transform must still instrument any stack storage it introduces.
 static bool isRegisterOnlyRustBody(const llvm::Function& function) {
     if (function.size() != 1 || function.isVarArg() ||
-        !function.getReturnType()->isIntegerTy()) return false;
+        !isWasmRegisterInteger(function.getReturnType())) return false;
     for (const auto& argument : function.args())
-        if (!argument.getType()->isIntegerTy()) return false;
+        if (!isWasmRegisterInteger(argument.getType())) return false;
     for (const auto& instruction : function.getEntryBlock()) {
         if (!llvm::isa<llvm::ReturnInst, llvm::BinaryOperator, llvm::ICmpInst,
                        llvm::SelectInst, llvm::TruncInst, llvm::ZExtInst,
                        llvm::SExtInst, llvm::FreezeInst>(instruction)) return false;
         for (const auto& operand : instruction.operands()) {
-            if (!operand->getType()->isIntegerTy()) return false;
+            if (!isWasmRegisterInteger(operand->getType())) return false;
             if (!llvm::isa<llvm::Argument, llvm::Instruction, llvm::ConstantInt>(operand.get()))
                 return false;
         }
@@ -110,13 +118,15 @@ int main(int argc, char** argv) {
             function.hasFnAttribute(llvm::Attribute::DisableSanitizerInstrumentation);
         if (rust && instrument)
             function.removeFnAttr(llvm::Attribute::DisableSanitizerInstrumentation);
-        if (requested && (!rust || (instrument && isRegisterOnlyRustBody(function)))) {
+        if (requested && !rust) {
             suppressedFunctions.push_back(function.getName().str());
             function.removeFnAttr(llvm::Attribute::SanitizeMemTag);
             continue;
         }
-        if (rust && instrument && requested)
-            retainedFunctions.push_back(function.getName().str());
+        if (rust && instrument && requested) {
+            auto& report = isRegisterOnlyRustBody(function) ? suppressedFunctions : retainedFunctions;
+            report.push_back(function.getName().str());
+        }
         if (instrument) function.addFnAttr(llvm::Attribute::SanitizeMemTag);
         else if (function.hasFnAttribute(llvm::Attribute::SanitizeMemTag)) return 1;
     }
