@@ -129,7 +129,7 @@ class Installer(unittest.TestCase):
         for component in ("development", "migration"):
             for width in ("wasm32", "wasm64"):
                 with self.subTest(component=component, width=width):
-                    prefix = self.prefix / width
+                    prefix = self.prefix / component / width
                     source = Source(self.commit, root)
                     install(source, "abb", "py", prefix, ["--component", component, "--python-target", width])
                     names = [p for p in source.requested if p.startswith("third-parties/cpython-runtime/")]
