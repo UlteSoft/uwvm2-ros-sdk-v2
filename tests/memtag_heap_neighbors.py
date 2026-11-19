@@ -1,4 +1,4 @@
-"""Check registered heap colors across live allocations, resizing, retirement and GC."""
+"""@brief Check registered heap colors across live allocations, resizing, retirement and GC."""
 import argparse
 import json
 import os
@@ -8,6 +8,7 @@ import re
 import subprocess
 
 from separate_compilation import Profile, ROOT, cgroup_record, inspect, sha, candidate_arguments, candidate_command
+from compiler import compiler_environment, make_command
 
 
 def main():
@@ -23,6 +24,7 @@ def main():
     parser.add_argument("--host-cxx", type=Path)
     candidate_arguments(parser)
     args = parser.parse_args()
+    standard_candidate = args.candidate_mte and json.loads(args.sysroots.read_bytes()).get("producer") != "herbceptions"
     if bool(args.goroot) != bool(args.tinygoroot):
         parser.error("TinyGo requires both --goroot and --tinygoroot")
     work = args.output
@@ -45,9 +47,9 @@ def main():
     def save():
         (work / "results.json").write_text(json.dumps(receipt, indent=2) + "\n")
 
-    def run(name, cmd):
+    def run(name, cmd, env=None):
         command = candidate_command(cmd, args.candidate_mte)
-        result = subprocess.run(command, cwd=work, capture_output=True, timeout=240)
+        result = subprocess.run(command, cwd=work, env=env, capture_output=True, timeout=240)
         (work / (name + ".stderr")).write_bytes(result.stderr)
         receipt["cases"].append({"name": name, "exit": result.returncode, "argv": command})
         save()
@@ -94,6 +96,22 @@ def main():
     flags = ["--eh" if args.eh else "--no-eh", "--sysroots", args.sysroots, "--toolchain", args.toolchain, "-O" + args.O]
     if args.debug:
         flags.append("-g")
+
+    def compile_cpp(name, bits, module, sources):
+        """@brief Run the same C++ proof on a candidate's own libc++ and exception runtime."""
+        if standard_candidate:
+            # The stable C producer also builds libc++. Only the public wrcc
+            # frontend requires the separate Herbceptions source patch set.
+            profile = Profile(bits, exceptions="eh" if args.eh else "noeh")
+            options = ["-O" + args.O, *(["-g"] if args.debug else []),
+                       "-nostartfiles", "-Wl,--no-entry", "-Wl,--export=_start",
+                       *map(str, sources), "-o", str(module)]
+            command, _ = make_command(args.toolchain, [args.sysroots], profile, "cpp", options, verify=True)
+            run(name + "-compile", command, compiler_environment(args.toolchain))
+        else:
+            run(name + "-compile", [ROOT / "bin/wrcc", "--target", "wasm" + str(bits), *flags,
+                                    "--reactor", "--export", "_start", *sources, "-o", module])
+
     for bits in dict.fromkeys(args.address_bits):
         name = "libc-" + str(bits)
         module = work / (name + ".wasm")
@@ -102,14 +120,12 @@ def main():
         execute(name, bits, module)
         name = "libcxx-" + str(bits)
         module = work / (name + ".wasm")
-        run(name + "-compile", [ROOT / "bin/wrcc", "--target", "wasm" + str(bits), *flags,
-                                "--reactor", "--export", "_start", cpp_source, "-o", module])
+        compile_cpp(name, bits, module, [cpp_source])
         execute(name, bits, module)
         if args.eh:
             name = "unwind-" + str(bits)
             module = work / (name + ".wasm")
-            run(name + "-compile", [ROOT / "bin/wrcc", "--target", "wasm" + str(bits), *flags,
-                                    "--reactor", "--export", "_start", *unwind_sources, "-o", module])
+            compile_cpp(name, bits, module, unwind_sources)
             if inspect(module.read_bytes()):
                 raise RuntimeError("freestanding exception fixture unexpectedly imports host operations")
             for engine in ("int", "aot"):
