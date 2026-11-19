@@ -98,9 +98,9 @@
     },
     {
       "path": "tools/wasm/tag_ir.cpp",
-      "bytes": 5348,
+      "bytes": 8082,
       "mode": 420,
-      "sha256": "6d90a61a93ad7dc7966fca955dc2cd3fcc460170bdc92b49253f4f4a2bdccd5c"
+      "sha256": "ee65b1d8859405733a2c2eb0980b2204acf3427d5e6ce0a35cc5fdfde8c7f78e"
     }
   ]
 }

@@ -2,21 +2,21 @@
   "files": [
     {
       "path": "bin/wrrs",
-      "bytes": 8819,
+      "bytes": 9086,
       "mode": 493,
-      "sha256": "0f6be80de276ae8d7253489bf75cc5eb159ff45df6e247236d833bbeb28fdaee"
+      "sha256": "ba10b33907149e9fdf91069530ba21d244155438f3122c9479f97cbfa493c12a"
     },
     {
       "path": "document/en/rust.md",
-      "bytes": 3941,
+      "bytes": 4162,
       "mode": 420,
-      "sha256": "7f1153e1dbd67f4714e7dd17b90fbc018ee4d764497c83b20859deb8d5c10caf"
+      "sha256": "9f5255c316005f48ed6cce4aa30b334578a169cae4faf06e3d116b3720d25061"
     },
     {
       "path": "document/zh/rust.md",
-      "bytes": 3673,
+      "bytes": 3855,
       "mode": 420,
-      "sha256": "969f0ec296e7b5fa7e183be0dfaff996319ed664139112da9079bedeec3afa5c"
+      "sha256": "ba5b5dd0c0d907d5d938187f916c2995255f72d81ec57a077550264237146508"
     },
     {
       "path": "language/rs/xmake/adapter.lua",
@@ -62,9 +62,9 @@
     },
     {
       "path": "tools/wasm/tag_ir.cpp",
-      "bytes": 5348,
+      "bytes": 8082,
       "mode": 420,
-      "sha256": "6d90a61a93ad7dc7966fca955dc2cd3fcc460170bdc92b49253f4f4a2bdccd5c"
+      "sha256": "ee65b1d8859405733a2c2eb0980b2204acf3427d5e6ce0a35cc5fdfde8c7f78e"
     }
   ]
 }

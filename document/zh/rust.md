@@ -47,6 +47,6 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 
 前端每次从仓内固定版本的上游 `rust-src` 重建 `core` 和 `compiler_builtins`，在独立的临时 sysroot 中保存 Rust 元数据。先关闭 MIR 优化，在应用源码的插桩选择后再启用 LLVM 优化。运行库构建所需的内部选项由前端固定。用户 crate 使用稳定 Rust 语法。最终模块会检查每项导入的模块名、函数名和签名。
 
-按函数关闭插桩可同时使用 `#[unsafe(link_section = ".wros.no_memtag")]` 和 `#[inline(never)]`。可变静态变量使用显式符号名，例如 `#[unsafe(export_name = "__wros_no_memtag_state")]`。在 Wasm 目标上，Rust 将静态变量的 `link_section` 编译为自定义节内的数据，无法用它标识需要处理的全局变量。标记函数在后续优化中保留调用边界，同时要求 `#[inline(always)]` 会产生错误。有界访问还可以由编译器的静态证明单独省略标签。运行环境中的 VM 检查策略由部署者配置。
+启用 MTE 时，`#[unsafe(link_section = ".wros.no_memtag")]` 向编译器申请证明。当前可证明的范围为单个基本块内的整数运算、比较、选择、整数转换和标量返回。出现指针参数、栈对象、内存读写或调用时保留插装。可变静态对象即使使用 `__wros_no_memtag_` 前缀也保留标签。构建记录分别列出获准省略和保留插装的申请。应用、ROS 绑定和运行库在 LLVM 优化前执行同一规则。安全函数可以包含 `unsafe` 块，也可以调用封装裸指针的安全接口，函数签名和 Rust 引用类型都不足以证明访问安全。完全位于寄存器的值没有需要打标签的线性内存。需要关闭整个应用的插装时显式传入 `--no-mte`。
 
 使用 xmake 开发时设置 `set_language("rs")`，在 `add_files` 中指定 crate 根文件，并设置 `WROS_RUSTROOT`。本地 Rust 模块从该根文件声明。详见 [xmake 参考](xmake.md)。

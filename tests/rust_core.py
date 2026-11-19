@@ -1,4 +1,4 @@
-"""Compile real Rust no_std source and exercise WasmMTE, source opt-outs and VM grants."""
+"""Compile real Rust no_std source and exercise WasmMTE, proof-gated source attributes and VM grants."""
 import argparse
 import json
 from pathlib import Path
@@ -23,7 +23,7 @@ def main():
     work.mkdir(parents=True, exist_ok=False)
     os.environ["TMPDIR"] = str(work)
     app = sdk / "bin/wrrs"
-    inputs = [Path(__file__), source, app, runtime, args.sysroots, args.plain_sysroots,
+    inputs = [Path(__file__), source, source.with_name("tagged_access.rs"), app, runtime, args.sysroots, args.plain_sysroots,
               rust / "bin/rustc", tool / "bin/clang", sdk / "language/rust/toolchain-inputs.json", sdk / "tools/wasm/tag_ir.cpp"]
     receipt["inputs"] = {str(p): sha(p) for p in inputs}
     report = work / "results.json"
@@ -52,16 +52,25 @@ def main():
         if identity["profile"] != profile.to_dict() or sha(module) != identity["module_sha256"]:
             raise RuntimeError("incorrect compilation identity")
         suppressions = identity["stages"]["wros_application"]["suppressions"]
-        if "suppressed" not in suppressions["functions"] or "__wros_no_memtag_state" not in suppressions["globals"]:
-            raise RuntimeError("source marked function did not reach the LLVM marker")
+        if suppressions["proof"] != "register-only-integer-ssa" or suppressions["globals"]:
+            raise RuntimeError("unexpected Rust source proof")
+        expected_elisions = {"proven_scalar"} if profile.mte else set()
+        if set(suppressions["functions"]) != expected_elisions:
+            raise RuntimeError("incorrect source-level elision inventory: " + str(suppressions))
+        if profile.mte and ("safe_wrapper" not in suppressions["retained_functions"] or
+                            "__wros_no_memtag_state" not in suppressions["retained_globals"]):
+            raise RuntimeError("a source annotation suppressed an unproven access")
         imports = inspect(module.read_bytes())
         if [(r["module"], r["name"]) for r in imports] != [("uwvm_ros_v2", "abi")]:
             raise RuntimeError("unexpected linked imports")
         listing = run("disassemble-" + mode, [tool / "bin/llvm-objdump", "-d", module]).decode()
-        for function in ("tagged", "suppressed"):
+        for function in ("tagged", "safe_wrapper"):
             body = listing.split(f"<{function}>:", 1)[1].split("\n\n", 1)[0]
-            if ("memtag." in body) != (function == "tagged" and mode == "tagged"):
+            if ("memtag." in body) != (mode == "tagged"):
                 raise RuntimeError(f"{mode}: incorrect tag operations in {function}")
+        read_static = listing.split("<read_static>:", 1)[1].split("\n\n", 1)[0]
+        if ("memtag.load" in read_static) != profile.mte:
+            raise RuntimeError(f"{mode}: unexpected source-static address lowering")
         receipt["modules"][mode] = identity
         for engine in ("int", "aot"):
             vm = [runtime, *profile.uwvm_feature_flags(), "--runtime-" + engine, "--runtime-compile-threads", "0",
@@ -74,6 +83,28 @@ def main():
             if mode == "tagged":
                 run(f"{mode}-{engine}-runtime-off", [*vm, "--runtime-disable-memtag", "--ros-scene-interface",
                                                      "robot", "abi", "allow", "--run", module])
+    fault_fixture = source.with_name("tagged_access.rs").read_text()
+    for delta in (0, 1):
+        probe = work / ("probe" + str(delta) + ".rs")
+        probe.write_text(fault_fixture.replace("const TAG_DELTA: usize = 1;",
+                                              f"const TAG_DELTA: usize = {delta};"))
+        binary = work / (probe.stem + ".wasm")
+        run("compile-" + probe.stem, [*base[:-2], "-o", binary, "--sysroots", args.sysroots.resolve(), probe])
+        for engine in ("int", "aot"):
+            vm = [runtime, *Profile(32, exceptions="noeh").uwvm_feature_flags(), "--runtime-" + engine,
+                  "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
+                  "--debug-fault-action", "exit", "--runtime-memtag-backend", "software",
+                  "--runtime-memtag-mode", "sync", "--run", binary]
+            run(probe.stem + "-" + engine, vm, delta == 0, b"memory tag mismatch" if delta else None)
+    stripped = work / "without-debug.wasm"
+    without_debug = [arg for arg in base[:-2] if arg != "-g"]
+    run("compile-without-debug", [*without_debug, "-o", stripped, "--sysroots", args.sysroots.resolve(), source])
+    listing = run("disassemble-without-debug", [tool / "bin/llvm-objdump", "-d", stripped]).decode()
+    if "memtag.load" not in listing.split("<read_static>:", 1)[1].split("\n\n", 1)[0]:
+        raise RuntimeError("debug option changed source-static tagging")
+    sections = run("sections-without-debug", [tool / "bin/llvm-objdump", "-h", stripped]).decode()
+    if ".debug_info" in sections:
+        raise RuntimeError("release guest retained debug information")
     prior = sha(module)
     for name, flags, error in (("wasm64", ["--target", "wasm64"], b"invalid choice"),
                                ("threads", ["-pthread"], b"unrecognized arguments"),
@@ -85,7 +116,7 @@ def main():
     run("reject-import", [*build, bad], False, b"unauthorized import or signature")
     bad.write_text(source.read_text().replace('#[unsafe(export_name = "__wros_no_memtag_state")]',
                                               '#[unsafe(link_section = ".wros.no_memtag")]'))
-    run("reject-static-section", [*build, bad], False, b"for a Rust static use an export_name")
+    run("reject-static-section", [*build, bad], False, b"a Rust static cannot request tag elision")
     bad.write_text("#![feature(core_intrinsics)]\n" + source.read_text())
     run("reject-unstable-feature", [*build, bad], False, b"allow-features")
     if sha(module) != prior:

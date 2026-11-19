@@ -94,7 +94,7 @@ def compile_rust(options, source, output, work):
     # The backend applies the selected instrumentation policy before LLVM -O.
     common = [rustc, "--target", "wasm32-wasip1", "--edition=2024", "--crate-type=rlib", "--sysroot",
               sysroot, "-C", "opt-level=3", "-C", "no-prepopulate-passes", "-Z", "mir-opt-level=0",
-              "-C", "panic=abort", "-C", "codegen-units=1", "-C", "debuginfo=2" if options.g else "debuginfo=0"]
+              "-C", "panic=abort", "-C", "codegen-units=1", "-C", "debuginfo=2" if options.g or profile.mte else "debuginfo=0"]
     rust_env = dict(env, RUSTC_BOOTSTRAP="1")
     bindings = work / "wros_scene.rs"
     bindings.write_text("#![no_std]\n" + (LANGUAGE / "scene.rs").read_text())
@@ -113,6 +113,9 @@ def compile_rust(options, source, output, work):
         emit = f"--emit=metadata={metadata / ('lib' + name + '.rmeta')},llvm-bc={bc}"
         subprocess.run([*common, "--crate-name", name, *flags, emit, unit], cwd=work, env=rust_env, check=True)
         selection = "--rust-mte" if profile.mte else "--rust-no-mte"
+        if profile.mte and not options.g:
+            # Identify source statics in all builds, then drop debug information before lowering.
+            selection = "--rust-mte-strip-debug"
         suppressed = json.loads(subprocess.check_output([marker, selection, bc, tagged], cwd=work, env=env))
         args = ["-O" + options.O, *(["-g"] if options.g else []), "-c", str(tagged), "-o", str(obj)]
         command, _ = make_command(tool, receipts, profile, "c", args)
@@ -123,6 +126,8 @@ def compile_rust(options, source, output, work):
                                 suppressions=suppressed)
     module = work / "application.wasm"
     args = ["-nostartfiles", "-Wl,--no-entry", "-Wl,--export=_start", *objects, "-o", str(module)]
+    if not options.g:
+        args.append("-Wl,--strip-debug")
     command, _ = make_command(tool, receipts, profile, "c", args)
     subprocess.run(command, env=env, cwd=work, check=True)
     audit(read_bounded(module), profile)

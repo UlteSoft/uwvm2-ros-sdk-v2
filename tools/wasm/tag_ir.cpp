@@ -1,6 +1,9 @@
 // Apply the same function and global attributes used by Clang's WasmMTE
 // frontend to supported language IR before target lowering.
 #include "llvm/Bitcode/BitcodeWriter.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DebugInfo.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/InlineAsm.h"
@@ -19,12 +22,45 @@ static bool suppressMemtag(llvm::GlobalObject& object) {
     return true;
 }
 
+// Rust source annotations request review. Only straight-line integer SSA can
+// lose its function attribute here. No pointer, call, stack slot or linear
+// memory operation can enter this proof, even if an earlier pass marked the
+// function readnone. Every other definition keeps normal target instrumentation.
+static bool isRegisterOnlyRustBody(const llvm::Function& function) {
+    if (function.size() != 1 || function.isVarArg() ||
+        !function.getReturnType()->isIntegerTy()) return false;
+    for (const auto& argument : function.args())
+        if (!argument.getType()->isIntegerTy()) return false;
+    for (const auto& instruction : function.getEntryBlock()) {
+        if (!llvm::isa<llvm::ReturnInst, llvm::BinaryOperator, llvm::ICmpInst,
+                       llvm::SelectInst, llvm::TruncInst, llvm::ZExtInst,
+                       llvm::SExtInst, llvm::FreezeInst>(instruction)) return false;
+        for (const auto& operand : instruction.operands()) {
+            if (!operand->getType()->isIntegerTy()) return false;
+            if (!llvm::isa<llvm::Argument, llvm::Instruction, llvm::ConstantInt>(operand.get()))
+                return false;
+        }
+    }
+    return true;
+}
+
+// rustc attaches a definition to an addressable source static. Do not
+// re-layout anonymous constant pools, vtables or compiler-generated sections.
+static bool isRustSourceConstant(const llvm::GlobalVariable& global) {
+    if (global.hasSection() || global.isThreadLocal()) return false;
+    llvm::SmallVector<llvm::DIGlobalVariableExpression*, 1> definitions;
+    global.getDebugInfo(definitions);
+    return definitions.size() == 1 && definitions.front()->getVariable()->isDefinition() &&
+        definitions.front()->getExpression()->getNumElements() == 0;
+}
+
 int main(int argc, char** argv) {
     if (argc != 4) return 2;
     llvm::StringRef mode{argv[1]};
-    bool rust = mode == "--rust-mte" || mode == "--rust-no-mte";
+    bool stripRustDebug = mode == "--rust-mte-strip-debug";
+    bool rust = stripRustDebug || mode == "--rust-mte" || mode == "--rust-no-mte";
     if (!rust && mode != "--mte" && mode != "--no-mte") return 2;
-    bool instrument = mode == "--mte" || mode == "--rust-mte";
+    bool instrument = mode == "--mte" || mode == "--rust-mte" || stripRustDebug;
     llvm::LLVMContext context;
     llvm::SMDiagnostic diagnostic;
     auto module = llvm::parseIRFile(argv[2], diagnostic, context);
@@ -45,7 +81,7 @@ int main(int argc, char** argv) {
                 if (entry->getNumOperands() == 0) continue;
                 auto* name = llvm::dyn_cast_or_null<llvm::MDString>(entry->getOperand(0));
                 if (name && name->getString() == ".wros.no_memtag") {
-                    llvm::errs() << "for a Rust static use an export_name beginning __wros_no_memtag_\n";
+                    llvm::errs() << "a Rust static cannot request tag elision through a Wasm custom section\n";
                     return 1;
                 }
             }
@@ -53,6 +89,8 @@ int main(int argc, char** argv) {
     }
     llvm::json::Array suppressedFunctions;
     llvm::json::Array suppressedGlobals;
+    llvm::json::Array retainedFunctions;
+    llvm::json::Array retainedGlobals;
     for (auto& function : *module) {
         if (function.isIntrinsic()) continue;
         function.removeFnAttr("target-cpu");
@@ -68,28 +106,35 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        if (suppressMemtag(function) || function.hasFnAttribute(llvm::Attribute::DisableSanitizerInstrumentation)) {
-            if (rust) {
-                if (function.hasFnAttribute(llvm::Attribute::AlwaysInline)) {
-                    llvm::errs() << "an explicitly uninstrumented Rust function cannot be always_inline\n";
-                    return 1;
-                }
-                function.addFnAttr(llvm::Attribute::NoInline);
-            }
+        const bool requested = suppressMemtag(function) ||
+            function.hasFnAttribute(llvm::Attribute::DisableSanitizerInstrumentation);
+        if (rust && instrument)
+            function.removeFnAttr(llvm::Attribute::DisableSanitizerInstrumentation);
+        if (requested && (!rust || (instrument && isRegisterOnlyRustBody(function)))) {
             suppressedFunctions.push_back(function.getName().str());
             function.removeFnAttr(llvm::Attribute::SanitizeMemTag);
             continue;
         }
+        if (rust && instrument && requested)
+            retainedFunctions.push_back(function.getName().str());
         if (instrument) function.addFnAttr(llvm::Attribute::SanitizeMemTag);
         else if (function.hasFnAttribute(llvm::Attribute::SanitizeMemTag)) return 1;
     }
     for (auto& global : module->globals()) {
-        if (global.isDeclaration() || global.isConstant() || global.getName().starts_with("llvm.")) continue;
+        if (global.isDeclaration() || global.getName().starts_with("llvm.")) continue;
+        if (global.isConstant()) {
+            if (!rust || !instrument || !isRustSourceConstant(global)) continue;
+            global.setMetadata("wasm.memtag.object", llvm::MDNode::get(context, {}));
+        }
         auto metadata = global.hasSanitizerMetadata() ? global.getSanitizerMetadata()
                                                      : llvm::GlobalValue::SanitizerMetadata{};
         // setNoSanitizeMetadata records both address instrumentation exclusions.
-        if (suppressMemtag(global) || (rust && global.getName().starts_with("__wros_no_memtag_")) ||
-            (!metadata.Memtag && metadata.NoAddress && metadata.NoHWAddress)) {
+        const bool requested = suppressMemtag(global) ||
+            (rust && global.getName().starts_with("__wros_no_memtag_")) ||
+            (!metadata.Memtag && metadata.NoAddress && metadata.NoHWAddress);
+        if (rust && instrument && requested)
+            retainedGlobals.push_back(global.getName().str());
+        if (requested && !rust) {
             suppressedGlobals.push_back(global.getName().str());
             metadata.Memtag = false;
             global.setSanitizerMetadata(metadata);
@@ -102,6 +147,7 @@ int main(int argc, char** argv) {
             return 1;
         }
     }
+    if (stripRustDebug) llvm::StripDebugInfo(*module);
     if (llvm::verifyModule(*module, &llvm::errs())) return 1;
     std::error_code error;
     llvm::raw_fd_ostream out(argv[3], error);
@@ -116,7 +162,12 @@ int main(int argc, char** argv) {
         out.clear_error();
         return 1;
     }
-    llvm::outs() << llvm::json::Value(llvm::json::Object{
-        {"functions", std::move(suppressedFunctions)}, {"globals", std::move(suppressedGlobals)}
-    }) << '\n';
+    llvm::json::Object result{{"functions", std::move(suppressedFunctions)},
+                              {"globals", std::move(suppressedGlobals)}};
+    if (rust) {
+        result["proof"] = "register-only-integer-ssa";
+        result["retained_functions"] = std::move(retainedFunctions);
+        result["retained_globals"] = std::move(retainedGlobals);
+    }
+    llvm::outs() << llvm::json::Value(std::move(result)) << '\n';
 }
