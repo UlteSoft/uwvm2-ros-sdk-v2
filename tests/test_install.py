@@ -126,7 +126,10 @@ class Installer(unittest.TestCase):
         self.assertTrue(all(p.startswith("install/") for p in source.requested))
         source.requested.clear();res=install(source,"unitree","c",self.prefix,[])
         self.assertEqual(res["files"],plan["files"]);self.assertTrue((Path(res["directory"])/"bin/wrc").is_file())
-        self.assertFalse(any("franka" in p or "bin/wrcc" in p or "third-parties" in p for p in source.requested))
+        self.assertFalse(any("franka" in p or "bin/wrcc" in p for p in source.requested))
+        vendored = {p for p in source.requested if p.startswith("third-parties/")}
+        self.assertEqual(vendored, {"third-parties/migration-examples/sensor_msgs/" + n
+                                  for n in ("LICENSE", "README.md", "msg/Imu.msg", "package.xml")})
         source.requested.clear();self.assertTrue(install(source,"unitree","c",self.prefix,[])["reused"])
         self.assertTrue(all(p.startswith("install/") for p in source.requested))
     def test_digest_failure_no_partial_install(self):

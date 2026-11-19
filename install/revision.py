@@ -79,6 +79,9 @@ def main():
                 packages.append("go-producer-source" if args.language == "go" else "compiler-source")
                 if args.language == "nim":
                     packages.append("nim-producer-source")
+    if args.component == "development" and args.language == "c":
+        # The editable migration project prepares its immutable ROS message on the build host.
+        packages.extend(("migration/resources", "migration/examples/c/common", "migration/examples/c/" + args.platform))
     if args.language in PROJECT_LANGUAGES and args.component in ("development", "migration", "synchronous-aot", "numeric-aot"):
         packages.append("examples/" + args.platform + "/" + args.language)
     if args.language in ("csharp", "fsharp", "vbnet") and args.component in ("development", "numeric-aot", "migration"):
