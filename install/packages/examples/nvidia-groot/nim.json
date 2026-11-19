@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/nim/body.nim",
+      "bytes": 260,
+      "mode": 420,
+      "sha256": "b91f678246c36cc46bc119239d037ab3f9da4a3d78a0468d6949de6ae07273e2"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/common/nim/xmake.lua",
+      "bytes": 509,
+      "mode": 420,
+      "sha256": "5d955a0edb0b40a700ea03ec5835edaccfecd821c94a98452f35ead4e5623c2e"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/nim/driver.nim",
+      "bytes": 487,
+      "mode": 420,
+      "sha256": "6a42689a23052890167f1a0780135504141ece6e7a6b54674c7877493162b639"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/nim/xmake.lua",
+      "bytes": 535,
+      "mode": 420,
+      "sha256": "9fed44c89e07943681223b3e78b14e0a9cc752417963d7d77204acbd877c27a7"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/nim/grid.nim",
+      "bytes": 243,
+      "mode": 420,
+      "sha256": "0b8debe6608d0ed4f7d49938d2f97f64dcde47188531bebe22d9eb6fd281cb92"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/migration/nim/xmake.lua",
+      "bytes": 482,
+      "mode": 420,
+      "sha256": "7e582a66f3c43fdfb8896685f43d06de958f71c3946777b1903a0657fc9df17b"
+    }
+  ]
+}

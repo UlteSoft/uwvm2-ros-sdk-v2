@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/common/java/Main.java",
+      "bytes": 272,
+      "mode": 420,
+      "sha256": "bc0c3ca0a759b702508612a0168e35039df615ee74d7cad08757e973fb7cf14e"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/common/java/xmake.lua",
+      "bytes": 589,
+      "mode": 420,
+      "sha256": "febac17f60773d11c4236b58288f87f59b7cde7c27a2cf49a2dfde3cf987d198"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/extension/java/Main.java",
+      "bytes": 538,
+      "mode": 420,
+      "sha256": "bf184502194a6219269844f1f47e75ddfb7e30580f30d434dc08b8f1f97d904a"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/extension/java/xmake.lua",
+      "bytes": 663,
+      "mode": 420,
+      "sha256": "7b01b109ae8d4e82a82eb119b6aa6ba32d0d22878f9c861bba6560e47544dda4"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/java/Main.java",
+      "bytes": 367,
+      "mode": 420,
+      "sha256": "aeacdd5b5993de4871b26ab458b96e263a5550a063dcedc9b63f02cde7f66bcd"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/java/xmake.lua",
+      "bytes": 531,
+      "mode": 420,
+      "sha256": "ddb9ddfccfdc7a28067dbcb90d14e57fbaf551ab3c786f282b444dd550a6ba3b"
+    }
+  ]
+}

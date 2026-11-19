@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/flexiv/common/objectc/body.m",
+      "bytes": 373,
+      "mode": 420,
+      "sha256": "83ab37bdf56f51b248990953b00e887271dc30cb4f63d387d6259c494cc8399c"
+    },
+    {
+      "path": "examples/platform/flexiv/common/objectc/xmake.lua",
+      "bytes": 503,
+      "mode": 420,
+      "sha256": "2668b7463e23989e2cad15252d0f88a2c07588e2235cf39c345dbcf358c2d71b"
+    },
+    {
+      "path": "examples/platform/flexiv/extension/objectc/driver.m",
+      "bytes": 725,
+      "mode": 420,
+      "sha256": "550095e9d690cee78a78830bb0fd67f864a9fb05943611bb070c11be246e5f27"
+    },
+    {
+      "path": "examples/platform/flexiv/extension/objectc/xmake.lua",
+      "bytes": 529,
+      "mode": 420,
+      "sha256": "c8ca34b0d0d0821af782a2b41852eb9c1c2d4d681a5b1350111bfd8c5fd06e5e"
+    },
+    {
+      "path": "examples/platform/flexiv/migration/objectc/grid.m",
+      "bytes": 317,
+      "mode": 420,
+      "sha256": "32262250d957aaeb65af2c9b0d225ba46280ad3ec2cf6bb0675e6f00577cf1f7"
+    },
+    {
+      "path": "examples/platform/flexiv/migration/objectc/xmake.lua",
+      "bytes": 476,
+      "mode": 420,
+      "sha256": "2e00bd71e2ff10f6aca87fdcee61b0e102ec570dc4a3d334bdcaf4979135cf74"
+    }
+  ]
+}

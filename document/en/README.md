@@ -242,3 +242,5 @@ The Java and Kotlin synchronous AOT package uses `set_wros_jvm_main(class_name)`
 [JavaScript interpreter and ROS operations](js.md)
 
 [Compile a TypeScript application](typescript.md)
+
+[Platform examples and VM tests](platform-examples.md)

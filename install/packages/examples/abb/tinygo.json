@@ -1,0 +1,82 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/abb/common/tinygo/go.mod",
+      "bytes": 36,
+      "mode": 420,
+      "sha256": "d4c2f0f6a97a9c3c1895e2f2b6eb502f9063fe8a26934f37b3b9c37fef314f86"
+    },
+    {
+      "path": "examples/platform/abb/common/tinygo/main.go",
+      "bytes": 187,
+      "mode": 420,
+      "sha256": "b5e43f3d205d87efaecf14e8e86a67e16a1c3d653d425828fcdf2d99a5183ae0"
+    },
+    {
+      "path": "examples/platform/abb/common/tinygo/xmake.lua",
+      "bytes": 495,
+      "mode": 420,
+      "sha256": "7038e8f70e339b0841ecbbc9bad496991e80b4cfd90afb91030b1e02a228e5b3"
+    },
+    {
+      "path": "examples/platform/abb/extension/tinygo/go.mod",
+      "bytes": 37,
+      "mode": 420,
+      "sha256": "a37bc8cb26f36d5524011bfe6c4d35ff7dc796b15e0a9357f5ab0e557c4e2e21"
+    },
+    {
+      "path": "examples/platform/abb/extension/tinygo/main.go",
+      "bytes": 926,
+      "mode": 420,
+      "sha256": "7e33424bc8c99091b2b48299cd80322e378e41b7e6de46fad75399b5dd31a11e"
+    },
+    {
+      "path": "examples/platform/abb/extension/tinygo/xmake.lua",
+      "bytes": 519,
+      "mode": 420,
+      "sha256": "ae386b48772d819701857cb0206a34cd8d55a687910a145c8621846c354a5a76"
+    },
+    {
+      "path": "examples/platform/abb/migration/tinygo/go.mod",
+      "bytes": 35,
+      "mode": 420,
+      "sha256": "8148d19070bde7768c445e4eb3e1ab9d30dff8b1767d60057f9a743ac15c4075"
+    },
+    {
+      "path": "examples/platform/abb/migration/tinygo/main.go",
+      "bytes": 277,
+      "mode": 420,
+      "sha256": "7d01cf150212352ad6b372af332a14bfede26885941c3fab42ded908a86915fb"
+    },
+    {
+      "path": "examples/platform/abb/migration/tinygo/xmake.lua",
+      "bytes": 468,
+      "mode": 420,
+      "sha256": "fabc62ae92d0c026e74589af6c78b12aae8ddb98493ff72b3ecfc255d530740b"
+    }
+  ]
+}

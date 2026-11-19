@@ -239,3 +239,5 @@ Java/Kotlin 可选同步 AOT 组件使用 `set_wros_jvm_main(class_name)` 指定
 [JavaScript 解释器与 ROS 接口](js.md)
 
 [将 TypeScript 应用编译为 Wasm](typescript.md)
+
+[分平台示例与 VM 测试](platform-examples.md)

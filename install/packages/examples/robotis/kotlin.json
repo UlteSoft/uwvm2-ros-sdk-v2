@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/robotis/common/kotlin/Main.kt",
+      "bytes": 215,
+      "mode": 420,
+      "sha256": "034afb9bd9a018a3214f17a4d994b36ee41420b1d19f0b9371c6a30f4675a8f3"
+    },
+    {
+      "path": "examples/platform/robotis/common/kotlin/xmake.lua",
+      "bytes": 573,
+      "mode": 420,
+      "sha256": "4e24c12624c1f0a70ee7bae65718f6bae135447455e073f3e61158b8166d34a2"
+    },
+    {
+      "path": "examples/platform/robotis/extension/kotlin/Main.kt",
+      "bytes": 456,
+      "mode": 420,
+      "sha256": "3a866cf3597198e46123e91b5049c0774db6b021e009c280f5267b2f8daed41c"
+    },
+    {
+      "path": "examples/platform/robotis/extension/kotlin/xmake.lua",
+      "bytes": 647,
+      "mode": 420,
+      "sha256": "79a1b97f8eabb20c6f73e617fd083e92e457d1b16c596797343d1265d76d7247"
+    },
+    {
+      "path": "examples/platform/robotis/migration/kotlin/Main.kt",
+      "bytes": 301,
+      "mode": 420,
+      "sha256": "80d58583ee03e753c2c590d8fcf9398b8be5b8d3cb837f5ecb1a5a573a63ec6c"
+    },
+    {
+      "path": "examples/platform/robotis/migration/kotlin/xmake.lua",
+      "bytes": 515,
+      "mode": 420,
+      "sha256": "51a23e7442877c57c37863b335154e85dec48fe9337d859085bbd2b9b7ae30c6"
+    }
+  ]
+}

@@ -23,7 +23,11 @@ def main():
     parser.add_argument("--engine", choices=("int", "aot"))
     parser.add_argument("--exceptions", choices=("eh", "noeh"), default="noeh")
     parser.add_argument("--check-tags", action="store_true")
+    parser.add_argument("--queries", help="exact read-only query list for this local test")
+    parser.add_argument("--driver-denial", metavar="PLATFORM", help="verify both denied driver routes with a private test peer")
     args = parser.parse_args()
+    if args.driver_denial and (not args.engine or args.driver_denial != Path(__file__).resolve().parents[4].name):
+        parser.error("the test platform must match the installed SDK selection")
     vm = Path(os.environ.get("WROS_VM", ""))
     if not vm.is_absolute() or not vm.is_file() or not os.access(vm, os.X_OK):
         parser.error("set WROS_VM to the absolute path of the trusted uwvm2-ros executable")
@@ -32,12 +36,16 @@ def main():
                       args.thread_mode == "threads", exceptions=args.exceptions)
     argv = [str(vm), *profile.uwvm_feature_flags(), "--wasm-set-main-module-name", "main"]
     if args.engine:
-        argv += ["--runtime-" + args.engine, "--runtime-compile-threads", "0",
+        argv += ["--runtime-" + args.engine, "--runtime-compile-threads", "3" if args.engine == "aot" else "0",
                  "--runtime-llvm-jit-cache-path", "disable", "--debug-fault-action", "exit"]
+        if args.engine == "aot":
+            argv += ["--runtime-llvm-jit-full-policy", "legacy-light"]
     if args.check_tags:
         argv += ["--runtime-memtag-mode", "sync"]
     # Only an operator running a local test can opt into these specific queries.
-    queries = os.getenv("WROS_RUN_QUERIES", "").split(",")
+    queries = (args.queries if args.queries is not None else os.getenv("WROS_RUN_QUERIES", "")).split(",")
+    if args.driver_denial and "abi" in queries:
+        parser.error("the driver fixture owns its ROS environment")
     if queries != [""]:
         valid = {"abi", "realtime-clock", "monotonic-clock", "realtime-resolution", "monotonic-resolution"}
         if any(q not in valid for q in queries):
@@ -63,6 +71,9 @@ def main():
     with tempfile.TemporaryDirectory(prefix="wros-core-") as directory:
         snapshot = Path(directory) / "guest.wasm"
         snapshot.write_bytes(content)
+        if args.driver_denial:
+            from platform_driver_test import check
+            return check(argv, snapshot, args.driver_denial)
         status = subprocess.run([*argv, "--run", str(snapshot)]).returncode
     return status if status >= 0 else 128 - status
 

@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/elephant/common/fortran/body.f90",
+      "bytes": 621,
+      "mode": 420,
+      "sha256": "cd9073d064bca48471cc43514b139d90d837b45567215676edf11323b21854ea"
+    },
+    {
+      "path": "examples/platform/elephant/common/fortran/xmake.lua",
+      "bytes": 509,
+      "mode": 420,
+      "sha256": "ca16b4ec8c7c3733cce9e881287f41a416d9644ac02e09aa14f38ac586e5d44d"
+    },
+    {
+      "path": "examples/platform/elephant/extension/fortran/driver.f90",
+      "bytes": 1154,
+      "mode": 420,
+      "sha256": "1b72100c9a3ee4f89c1b0e80b5306550a1dab9c5a813b477f50accad6eee7715"
+    },
+    {
+      "path": "examples/platform/elephant/extension/fortran/xmake.lua",
+      "bytes": 535,
+      "mode": 420,
+      "sha256": "cc4df9e23f9f1337780f6c852e94f41777242fe50351287f245dd8d6953b5e89"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fortran/grid.f90",
+      "bytes": 514,
+      "mode": 420,
+      "sha256": "66ce600e42ceff6354f29e276a8ddb61b234323ced1efc6e6fb7fc4043484190"
+    },
+    {
+      "path": "examples/platform/elephant/migration/fortran/xmake.lua",
+      "bytes": 482,
+      "mode": 420,
+      "sha256": "e5d87bb817595df3de8f6830f65ec4f8202823f4dca79a2ec52442fdaa9670a5"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/deep_robotics/common/typescript/filter.ts",
+      "bytes": 321,
+      "mode": 420,
+      "sha256": "22f8489cb69c2da6774f79f920d397492c16f843e6da0b6c76b9dd6880cc0511"
+    },
+    {
+      "path": "examples/platform/deep_robotics/common/typescript/main.ts",
+      "bytes": 301,
+      "mode": 420,
+      "sha256": "4321e3ee53a907f7f9c71e0d1af9d34e6309a35fce3a87d73a725f4c5709642f"
+    },
+    {
+      "path": "examples/platform/deep_robotics/common/typescript/sensor.ts",
+      "bytes": 310,
+      "mode": 420,
+      "sha256": "6c580a1dd19fc57bd59da1334cbdc28389adf99b9eafb5dc403479445420da63"
+    },
+    {
+      "path": "examples/platform/deep_robotics/common/typescript/xmake.lua",
+      "bytes": 967,
+      "mode": 420,
+      "sha256": "401757d42ce87424f661ea698bdc5a3aad112f5512cdd82be681dc275e99f6a6"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/typescript/driver.ts",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "9d79288417db95258133bc2a378eca01dd414c7d558e501fdc45929915f418fc"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/typescript/xmake.lua",
+      "bytes": 675,
+      "mode": 420,
+      "sha256": "242cda315e293bc0ef7bb57fe4c8621588e737a1a19bec7db14c527fa5a3da23"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/typescript/grid.ts",
+      "bytes": 292,
+      "mode": 420,
+      "sha256": "5345b96e6244129e617178fdcbfe9797bd31b668dc1fc6671d57090d2e14cd68"
+    },
+    {
+      "path": "examples/platform/deep_robotics/migration/typescript/xmake.lua",
+      "bytes": 541,
+      "mode": 420,
+      "sha256": "c1947483bd15a325027afbb4ebfde38ceba9cc3373f61656b50bec0533359a4a"
+    }
+  ]
+}

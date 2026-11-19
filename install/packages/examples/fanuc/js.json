@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/fanuc/common/js/body.js",
+      "bytes": 225,
+      "mode": 420,
+      "sha256": "b0824140d039fb13cfa38e59bbb0e23be4301573626c8a6ad404a2cfbcf08e09"
+    },
+    {
+      "path": "examples/platform/fanuc/common/js/sensor.js",
+      "bytes": 283,
+      "mode": 420,
+      "sha256": "5ff14c07cb2844cabf23b2a397e90e452d5f1a4e899e0eacc24f5a16766cdcc7"
+    },
+    {
+      "path": "examples/platform/fanuc/common/js/xmake.lua",
+      "bytes": 865,
+      "mode": 420,
+      "sha256": "b5121eb6802be9950fb1cf5d3edb11c442bcddb44bd5531f09bafe5de8c8f5d0"
+    },
+    {
+      "path": "examples/platform/fanuc/extension/js/driver.js",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "9d79288417db95258133bc2a378eca01dd414c7d558e501fdc45929915f418fc"
+    },
+    {
+      "path": "examples/platform/fanuc/extension/js/xmake.lua",
+      "bytes": 643,
+      "mode": 420,
+      "sha256": "f4e069e53f24eb87a9d24767f9402f3ced983fdecb086941cd478219455d6b12"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/js/grid.js",
+      "bytes": 268,
+      "mode": 420,
+      "sha256": "241e9de8795b3f4bf20485236ac28b98627ef88006b82a95c15900c09947d4c6"
+    },
+    {
+      "path": "examples/platform/fanuc/migration/js/xmake.lua",
+      "bytes": 509,
+      "mode": 420,
+      "sha256": "152d469da446c827e3707b768568ee84032336ea1e565c37956c4a2cde91496e"
+    }
+  ]
+}

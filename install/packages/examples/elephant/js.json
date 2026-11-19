@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 3482,
+      "mode": 420,
+      "sha256": "77844005b3872dc7cc6e252fe24bb3140f37ed68c7e31f4a0b55bf931816c471"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3011,
+      "mode": 420,
+      "sha256": "0337691d5ec6bcf650391c42b0401ca74cf488ccb72703ef5bd3ca5b1b01b003"
+    },
+    {
+      "path": "examples/platform/elephant/common/js/body.js",
+      "bytes": 225,
+      "mode": 420,
+      "sha256": "b0824140d039fb13cfa38e59bbb0e23be4301573626c8a6ad404a2cfbcf08e09"
+    },
+    {
+      "path": "examples/platform/elephant/common/js/sensor.js",
+      "bytes": 283,
+      "mode": 420,
+      "sha256": "5ff14c07cb2844cabf23b2a397e90e452d5f1a4e899e0eacc24f5a16766cdcc7"
+    },
+    {
+      "path": "examples/platform/elephant/common/js/xmake.lua",
+      "bytes": 874,
+      "mode": 420,
+      "sha256": "cac5b8d8530094e76a264b35c84d091b60f658b45777e77ed7276c9dd94ed380"
+    },
+    {
+      "path": "examples/platform/elephant/extension/js/driver.js",
+      "bytes": 414,
+      "mode": 420,
+      "sha256": "9d79288417db95258133bc2a378eca01dd414c7d558e501fdc45929915f418fc"
+    },
+    {
+      "path": "examples/platform/elephant/extension/js/xmake.lua",
+      "bytes": 649,
+      "mode": 420,
+      "sha256": "6d1ca05d4d9f1186a60b67e9f64f4adc94b06149b068bb4de76421fd05bb683d"
+    },
+    {
+      "path": "examples/platform/elephant/migration/js/grid.js",
+      "bytes": 268,
+      "mode": 420,
+      "sha256": "241e9de8795b3f4bf20485236ac28b98627ef88006b82a95c15900c09947d4c6"
+    },
+    {
+      "path": "examples/platform/elephant/migration/js/xmake.lua",
+      "bytes": 515,
+      "mode": 420,
+      "sha256": "80b48d7ad46b1e667791ff1b70d8d499a59a8e0f8b7142d2cd00bac168e88a40"
+    }
+  ]
+}
