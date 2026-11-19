@@ -64,7 +64,8 @@ raise "unexpected ROS ABI" unless WROS.abi == 2
         (out / "results.json").write_text(json.dumps(result, indent=2) + "\n")
         if (error is None and process.returncode != 0
                 or error is not None and (process.returncode == 0 or error not in process.stderr)):
-            raise RuntimeError(label + ": " + process.stderr[-1600:].decode(errors="replace"))
+            raise RuntimeError(f"{label} exited with {process.returncode}. See {log}.\n"
+                               + process.stderr[:1600].decode(errors="replace"))
 
     app = out / "application.wasm"
     fail = out / "exception.wasm"
@@ -85,8 +86,8 @@ raise "unexpected ROS ABI" unless WROS.abi == 2
            "--ros-scene-interface", "robot", "abi", "allow"]
     for engine in ("int", "aot"):
         vm = [a.vm.resolve(), *Profile(a.bits).uwvm_feature_flags(), "--wasm-set-main-module-name", "main",
-              "--runtime-" + engine, "--runtime-compile-threads", "3", "--runtime-llvm-jit-full-policy",
-              "legacy-light", "--runtime-llvm-jit-cache-path", "disable", "--runtime-memtag-mode", "sync",
+              "--runtime-" + engine, "--runtime-compile-threads", "0", "--runtime-llvm-jit-policy",
+              "fast-compile", "--runtime-llvm-jit-cache-path", "disable", "--runtime-memtag-mode", "sync",
               "--debug-fault-action", "exit"]
         run(engine + "-checked-allocations", [*vm, *abi, "--run", app])
         run(engine + "-hidden-import", [*vm, "--run", app], b"ROS scene interface is hidden")
