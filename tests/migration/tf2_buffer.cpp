@@ -58,16 +58,24 @@ static bool check_parallel() {
     tf2::BufferCore buffer(10s);
     if (!insert(buffer, "map", "camera", 1, 2, 0, 1, true)) return false;
     std::atomic<bool> ready{false}, valid{true};
+    std::atomic<unsigned> readers_entered{0}, readers_saw_update{0};
+    auto position = [&] { return buffer.lookupTransform("map", "camera", stamp(1)).transform.translation.x; };
     auto reader = [&] {
+        if (position() != 2) valid.store(false);
+        readers_entered.fetch_add(1);
         while (!ready.load(std::memory_order_acquire)) std::this_thread::yield();
+        if (position() != 3) valid.store(false);
+        readers_saw_update.fetch_add(1);
         for (unsigned i = 0; i < 512; ++i) {
-            const auto pose = buffer.lookupTransform("map", "camera", stamp(1));
-            const auto x = pose.transform.translation.x;
+            const auto x = position();
             if (x != 2 && x != 3) valid.store(false);
         }
     };
     std::thread first(reader), second(reader);
+    while (readers_entered.load() != 2) std::this_thread::yield();
+    if (!insert(buffer, "map", "camera", 1, 3, 0, 1, true)) valid.store(false);
     ready.store(true, std::memory_order_release);
+    while (readers_saw_update.load() != 2) std::this_thread::yield();
     for (unsigned i = 0; i < 512; ++i)
         if (!insert(buffer, "map", "camera", 1, 2 + (i & 1), 0, 1, true)) valid.store(false);
     first.join();
