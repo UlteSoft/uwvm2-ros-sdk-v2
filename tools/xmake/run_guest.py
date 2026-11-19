@@ -1,4 +1,5 @@
-"""Execute a built guest in a user-selected u2ros VM under a local test policy."""
+"""@file run_guest.py
+@brief Execute a built guest in a user-selected u2ros VM under a local test policy."""
 import argparse
 import os
 from pathlib import Path
@@ -13,19 +14,28 @@ import tempfile
 
 
 def main():
+    """@brief Execute the audited artifact in the requested VM with scoped test permissions."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("module", type=Path)
     parser.add_argument("arch", choices=("wasm32", "wasm64"))
     parser.add_argument("core", choices=("mvp", "3.0"))
     parser.add_argument("thread_mode", choices=("threads", "single"))
+    parser.add_argument("--engine", choices=("int", "aot"))
+    parser.add_argument("--exceptions", choices=("eh", "noeh"), default="noeh")
+    parser.add_argument("--check-tags", action="store_true")
     args = parser.parse_args()
     vm = Path(os.environ.get("WROS_VM", ""))
     if not vm.is_absolute() or not vm.is_file() or not os.access(vm, os.X_OK):
         parser.error("set WROS_VM to the absolute path of the trusted uwvm2-ros executable")
     bits = int(args.arch[4:])
     profile = Profile(bits, "1.0" if args.core == "mvp" else "3.0",
-                      args.thread_mode == "threads", exceptions="noeh")
+                      args.thread_mode == "threads", exceptions=args.exceptions)
     argv = [str(vm), *profile.uwvm_feature_flags(), "--wasm-set-main-module-name", "main"]
+    if args.engine:
+        argv += ["--runtime-" + args.engine, "--runtime-compile-threads", "0",
+                 "--runtime-llvm-jit-cache-path", "disable", "--debug-fault-action", "exit"]
+    if args.check_tags:
+        argv += ["--runtime-memtag-mode", "sync"]
     # Only an operator running a local test can opt into these specific queries.
     queries = os.getenv("WROS_RUN_QUERIES", "").split(",")
     if queries != [""]:
