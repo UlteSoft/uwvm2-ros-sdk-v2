@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -76,12 +77,17 @@ def main():
         return (now + datetime.timedelta(seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%SZ")
     with tempfile.TemporaryDirectory(dir=protected) as temp:
         ca = authority.Fixtures(Path(temp) / "authority").pki("test", family="ED25519")
+        # Policy files retain these public certificate paths after the test key is erased.
+        public = {}
+        for name in ("root", "certificate"):
+            public[name] = protected / (name + ".pem")
+            shutil.copyfile(ca[name], public[name])
         def sign(name, module_id, source):
             policy = protected / (name + ".policy")
             result = out / (name + "-signed.wasm")
             prefix = [args.cosign, "wasm", "secure"]
             run(name + "-policy", [*prefix, "policy-init", "--output", policy, "--state-dir", protected / (name + "-state"),
-                                    "--trust-root", ca["root"], "--certificate", ca["certificate"],
+                                    "--trust-root", public["root"], "--certificate", public["certificate"],
                                     "--module-id", module_id, "--algorithms", "Ed25519"])
             run(name + "-sign", [*prefix, "sign", source, "--policy", policy, "--key", ca["key"],
                                  "--certificate", ca["certificate"], "--crl", ca["crl"], "--module-id", module_id,
