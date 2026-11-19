@@ -27,9 +27,11 @@ end
 
 # @brief Wait within the fixture budget for one driver operation.
 def poll(operation, joint, request)
-  100_000.times do
+  remaining = 100_000
+  while remaining > 0
     status, reply, length = WROS.call(operation, joint, request, 512)
     return [status, reply, length] if status != 11
+    remaining -= 1
   end
   raise "driver response exceeded the polling budget"
 end
@@ -45,7 +47,7 @@ raise "driver connection refused" unless poll("driver.connect", joint, "")[0] ==
 (1..STEPS).each do |sequence|
   status, sample, length = WROS.call("clock.read", steady, clock, 32)
   raise "clock sample failed" unless status == 0 && length == 32
-  expiry = wire_u64(read_u64(sample, 0) + 5_000_000_000)
+  expiry = wire_u64(read_u64(sample, 0) + 5 * 1_000_000_000)
   word = wire_u64(sequence)
   request = replace(replace(TEMPLATE, 0, word + expiry), 32, word)
   request = replace(request, request.bytesize - 8, expiry)
