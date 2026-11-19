@@ -1,12 +1,18 @@
 """Compile real Rust no_std source and exercise WasmMTE, proof-gated source attributes and VM grants."""
 import argparse
 import json
+import re
 from pathlib import Path
 import os
 import subprocess
 
 from separate_compilation import Profile, cgroup_record, sha, candidate_arguments, candidate_command
 from imports import inspect
+
+
+def wasm_functions(listing):
+    parts = re.split(r"(?m)^[0-9a-f]+ <([^>]+)>:\s*$", listing)
+    return dict(zip(parts[1::2], parts[2::2]))
 
 
 def main():
@@ -57,18 +63,24 @@ def main():
         expected_elisions = {"proven_scalar"} if profile.mte else set()
         if set(suppressions["functions"]) != expected_elisions:
             raise RuntimeError("incorrect source-level elision inventory: " + str(suppressions))
-        if profile.mte and ("safe_wrapper" not in suppressions["retained_functions"] or
+        if profile.mte and (not {"safe_wrapper", "wide_word"}.issubset(suppressions["retained_functions"]) or
                             "__wros_no_memtag_state" not in suppressions["retained_globals"]):
             raise RuntimeError("a source annotation suppressed an unproven access")
         imports = inspect(module.read_bytes())
         if [(r["module"], r["name"]) for r in imports] != [("uwvm_ros_v2", "abi")]:
             raise RuntimeError("unexpected linked imports")
         listing = run("disassemble-" + mode, [tool / "bin/llvm-objdump", "-d", module]).decode()
+        bodies = wasm_functions(listing)
         for function in ("tagged", "safe_wrapper"):
-            body = listing.split(f"<{function}>:", 1)[1].split("\n\n", 1)[0]
+            body = bodies[function]
             if ("memtag." in body) != (mode == "tagged"):
                 raise RuntimeError(f"{mode}: incorrect tag operations in {function}")
-        read_static = listing.split("<read_static>:", 1)[1].split("\n\n", 1)[0]
+        scalar = bodies["proven_scalar"]
+        if "i32.const" not in scalar or any(op in scalar for op in ("memtag.", ".load", ".store", "call")):
+            raise RuntimeError("proven scalar was not lowered to register-only Wasm")
+        if "i64.store" not in bodies["wide_word"]:
+            raise RuntimeError("wide return fixture did not exercise indirect storage")
+        read_static = bodies["read_static"]
         if ("memtag.load" in read_static) != profile.mte:
             raise RuntimeError(f"{mode}: unexpected source-static address lowering")
         receipt["modules"][mode] = identity
@@ -100,7 +112,7 @@ def main():
     without_debug = [arg for arg in base[:-2] if arg != "-g"]
     run("compile-without-debug", [*without_debug, "-o", stripped, "--sysroots", args.sysroots.resolve(), source])
     listing = run("disassemble-without-debug", [tool / "bin/llvm-objdump", "-d", stripped]).decode()
-    if "memtag.load" not in listing.split("<read_static>:", 1)[1].split("\n\n", 1)[0]:
+    if "memtag.load" not in wasm_functions(listing)["read_static"]:
         raise RuntimeError("debug option changed source-static tagging")
     sections = run("sections-without-debug", [tool / "bin/llvm-objdump", "-h", stripped]).decode()
     if ".debug_info" in sections:
