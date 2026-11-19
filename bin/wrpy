@@ -137,7 +137,7 @@ def main():
     cc, build_info = make_command(args.toolchain, args.sysroots, profile, "c", [], verify=True)
     if "-lunwind" in cc:
         cc.remove("-lunwind")
-    _, _, _, sysroot, _ = select_closure(args.sysroots, profile, build_info["compiler_sha256"])
+    _, _, _, sysroot, resource = select_closure(args.sysroots, profile, build_info["compiler_sha256"])
     env = compiler_environment(args.toolchain)
     operations = set(args.ros_operation) | ({"abi"} if args.ros_abi else set())
     declarations_text = selection(operations)
@@ -159,6 +159,10 @@ def main():
         (target / "permissions.c").write_text(denials)
         artifact = work / "body.wasm"
         args_link = [*cc, "-O3", "-g", "-ffile-prefix-map=" + str(work) + "=/wros/build",
+                     "-ffile-prefix-map=" + str(ROOT) + "=/wros/sdk",
+                     "-ffile-prefix-map=" + str(sysroot) + "=/wros/sysroot",
+                     "-ffile-prefix-map=" + str(resource) + "=/wros/resource",
+                     "-fdebug-compilation-dir=/wros/build",
                      "-I" + str(include), "-I" + str(generated), "-I" + str(target), "-I" + str(ROOT / "include"),
                      "-nostartfiles", "-Wl,--no-entry", "-Wl,-z,stack-size=8388608", "-Wl,--max-memory=268435456",
                      LANG / "entry.c", target / "permissions.c", library, *wrappers,

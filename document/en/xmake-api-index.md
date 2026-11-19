@@ -449,3 +449,7 @@ Index source [xmake-docs @ 3a0a0c2fbf78](https://github.com/xmake-io/xmake-docs/
 The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
 Lua, JavaScript, JVM and C# targets select ROS imports through `add_wros_operations(...)`. C# scene programs accept `abi`. [C# scene entry](csharp.md) · [JVM compiler options](jvm.md).
+
+### `add_wros_python_modules(...)`
+
+For a `py` target, embed additional modules with `add_wros_python_modules("robot=robot/__init__.py", "robot.units=robot/units.py")`. Relative paths start in the target script directory. A package requires its own `__init__.py`. Use `add_files` for the entry script and `add_wros_operations` to select the exact ROSv2 imports. [Python application guide](python.md)

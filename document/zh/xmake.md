@@ -113,3 +113,7 @@ Rust 目标使用 `set_language("rs")`，并通过 `add_files("src/lib.rs")` 指
 Java/Kotlin 可选同步 AOT 组件使用 `set_wros_jvm_main(class_name)` 指定入口。详见 [JVM 编译与 Xmake 参数](jvm.md)。
 
 Lua、JavaScript、JVM 与 C# 工程可用 `add_wros_operations(...)` 选择 ROS 导入。C# 场景入口接受 `abi`。[C# 场景入口](csharp.md) · [JVM 编译选项](jvm.md)。
+
+### `add_wros_python_modules(...)`
+
+在 `py` 目标中，使用 `add_wros_python_modules("robot=robot/__init__.py", "robot.units=robot/units.py")` 内嵌模块。路径相对于目标脚本所在目录，包须显式列出自己的 `__init__.py`。用 `add_files` 指定入口脚本，用 `add_wros_operations` 选择 ROSv2 导入。[Python 开发指南](python.md)
