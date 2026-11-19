@@ -184,7 +184,8 @@ def main():
                 section.end()
         if len(memory_flags) != 1 or bool(memory_flags[0] & 2) != (a.port == "threaded"):
             raise ValueError("expected one locally defined memory with matching sharedness")
-        policy = ["--wasip1-single-create", "module.wasm", "--wasip1-single-enable", "module.wasm"]
+        policy = ["--wasm-set-main-module-name", "module.wasm", "--wasip1-single-create", "module.wasm",
+                  "--wasip1-single-enable", "module.wasm"]
         for imp in imports:
             if a.port == "threaded" and imp == dict(module="wasi", name="thread-spawn", kind=0,
                                                      params=["i32"], results=["i32"]):
