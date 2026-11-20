@@ -41,6 +41,23 @@ $GATE python3 -B tests/sdk_acceptance.py \
 
 普通运行只在所选行均为 executable 时返回零。输出目录保留测试日志与子验收记录，每个用例结束后会清理临时安装文件和构建中间产物。扩展测试验证 SDK 的本机认证权限边界，官方仿真和实体厂商驱动由单独的测试覆盖。
 
+## 平台物理仿真
+
+`tests/mujoco_matrix.py` 按平台安装指定语言的签名 SDK，并校验模型清单摘要。
+每行用 MuJoCo 原生运行结果比对来宾驱动的 128 步轨迹，还在解释器和 AOT 中
+检查超范围命令是否推进零步，以及驱动崩溃时来宾是否能识别状态。
+
+矩阵每行指定 `platform`、`language`、`address_bits`、`model`、
+`model_sha256`、`assets` 和 `site`。路径相对于矩阵文件。
+可选的 `compiled_model_mib` 默认 64 MiB，最大 512 MiB。
+输出保留编译模型摘要、场景日志和每行回执。GPU 专用运行时与实体设备联锁需单独验收。
+
+```sh
+"$GATE" /usr/bin/python3 -B tests/mujoco_matrix.py --commit "$SDK_COMMIT" \
+  --plan "$PLAN" --runtime "$WROS_VM" --vm-source "$VM_SOURCE" \
+  --mujoco "$MUJOCO" --openssl-root "$OPENSSL_ROOT" --output "$OUTPUT"
+```
+
 ## 上游 C 库测试
 
 上游复验使用 GitHub 固定提交的库源码和原测试实现。结果记录原生对照、

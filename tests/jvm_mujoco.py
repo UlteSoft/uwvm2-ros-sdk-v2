@@ -22,20 +22,28 @@ def main():
         parser.add_argument("--" + field, type=Path, help="explicit tools for the candidate compiler")
     parser.add_argument("--vendor-model", type=Path, help="pinned platform MJCF manifest")
     parser.add_argument("--vendor-assets", type=Path, help="original assets from the platform model repository")
+    parser.add_argument("--vendor-model-max-mib", type=int, default=64,
+                        help="compiled model size limit for the selected vendor fixture")
     parser.add_argument("--language", required=True, choices=("java", "kotlin"))
     parser.add_argument("--sdk",type=Path,default=ROOT,help="installed synchronous-aot source package for this language")
     args = parser.parse_args()
     sdk = args.sdk.resolve()
     if bool(args.vendor_model) != bool(args.vendor_assets):
         parser.error("provide both vendor model and vendor assets")
+    if not args.vendor_model and args.vendor_model_max_mib != 64:
+        parser.error("--vendor-model-max-mib requires a vendor model")
     if args.vendor_model and json.loads(args.vendor_model.read_bytes())["platform"] != sdk.parents[1].name:
         parser.error("vendor model must match the installed SDK platform")
     site = local_release.site_config(sdk)
     if site:
         if any((args.toolchain, args.bundle, args.sysroots)):
             parser.error("the installed site supplies the reviewed compiler and sysroot")
-        backend = Path(site["toolchain"]).resolve(strict=True)
-        sysroot, = map(Path, site["sysroots"])
+        sys.path.insert(0, str(sdk / "language/jvm"))
+        from release import authorize
+        row, backend, sysroot, _ = authorize(site, args.language)
+        with args.runtime.open("rb") as runtime:
+            if hashlib.file_digest(runtime, "sha256").hexdigest() != row["vm_sha256"]:
+                parser.error("runtime differs from the signed JVM release")
         tools = []
         reviewed = (sdk / local_release.SITE, Path(site["trust"]["statement"]))
     else:
@@ -88,6 +96,7 @@ def main():
         argv.extend(["--"+key,str(value.resolve())])
     if args.vendor_model:
         argv.extend(["--vendor-model",str(args.vendor_model.resolve()),"--vendor-assets",str(args.vendor_assets.resolve()),
+                     "--vendor-model-max-mib", str(args.vendor_model_max_mib),
                      "--platform-targets",str(ROOT / "share/targets.json"),"--audit-calls"])
     sources = sdk / "language/jvm"
     suite.main(argv, compile_guest=compile_guest,guest_name=args.language,guest_widths=(32,),

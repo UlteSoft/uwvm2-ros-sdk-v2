@@ -41,6 +41,8 @@ def main():
                    help="exercise one address width from the selected language toolchain")
     p.add_argument("--vendor-model", type=Path, help="a pinned platform MJCF manifest from the VM fixtures")
     p.add_argument("--vendor-assets", type=Path, help="the original model files listed in the manifest")
+    p.add_argument("--vendor-model-max-mib", type=int, default=64,
+                   help="compiled model size limit for the selected vendor fixture")
     p.add_argument("--language", choices=("c", "cpp", "d", "nim", "objectc", "lua", "js", "py", "ruby", "rs", "tinygo", "fortran", "csharp", "zig"), default="c")
     p.add_argument("--candidate-mte", action="store_true", help="exercise an unqualified tagged compiler explicitly")
     p.add_argument("--installed-sdk", type=Path, help="compile with an installed SDK; signed D, Fortran, Nim, Objective-C, Rust and TinyGo sites supply their own tools and sysroots")
@@ -272,8 +274,11 @@ def main():
     if a.language == "py":
         args += ["--guest-startup-seconds", "360"]
     if a.vendor_model:
-        args.extend(["--vendor-model",str(a.vendor_model.resolve()),"--vendor-assets",str(a.vendor_assets.resolve()),
-                     "--platform-targets",str(ROOT/"share/targets.json"),"--audit-calls"])
+        args.extend(["--vendor-model", str(a.vendor_model.resolve()), "--vendor-assets", str(a.vendor_assets.resolve()),
+                     "--vendor-model-max-mib", str(a.vendor_model_max_mib),
+                     "--platform-targets", str(ROOT/"share/targets.json"), "--audit-calls"])
+    elif a.vendor_model_max_mib != 64:
+        p.error("--vendor-model-max-mib requires a vendor model")
     producers = [path for path in (a.flang, a.producer) if path]
     if site:
         producers.extend((compiler_root / "share/qualification/site-profile.json", Path(site["trust"]["statement"])))

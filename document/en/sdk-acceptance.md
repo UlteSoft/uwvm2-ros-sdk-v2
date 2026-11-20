@@ -41,6 +41,40 @@ The versioned results.json distinguishes three outcomes.
 
 A normal run returns zero only when every requested row is executable. Logs and child fixture receipts remain in the output directory. Temporary installations and objects are removed after each case. The platform extension fixture covers the SDK's authenticated local permission boundary. Official simulation and physical vendor drivers use dedicated acceptance fixtures.
 
+## Platform physics simulation
+
+Run `tests/mujoco_matrix.py` with a signed SDK site for each selected
+language and address width. Each row uses that platform's installed SDK,
+the exact model manifest and its local assets. The runner compares
+128 driven steps against native MuJoCo. It also checks a zero-step
+range refusal and a receiver crash under each VM engine.
+
+```json
+[
+  {
+    "platform": "unitree",
+    "language": "rs",
+    "address_bits": 32,
+    "model": "unitree-go2.json",
+    "model_sha256": "<sha256 of the reviewed manifest>",
+    "assets": "unitree-go2-assets",
+    "site": "rust-wasm32-site.json",
+    "compiled_model_mib": 64
+  }
+]
+```
+
+```sh
+"$GATE" /usr/bin/python3 -B tests/mujoco_matrix.py --commit "$SDK_COMMIT" \
+  --plan "$PLAN" --runtime "$WROS_VM" --vm-source "$VM_SOURCE" \
+  --mujoco "$MUJOCO" --openssl-root "$OPENSSL_ROOT" --output "$OUTPUT"
+```
+
+Relative paths resolve next to the plan. The optional compiled model
+limit is 64 MiB by default and accepts up to 512 MiB. The runner keeps
+the generated model digest, scenario logs and per-row receipts. Vendor
+GPU runtimes and physical safety interlocks require separate tests.
+
 ## Upstream C library tests
 
 The upstream replay builds library sources from pinned GitHub commits and uses
