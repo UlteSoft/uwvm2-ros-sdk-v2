@@ -10,6 +10,14 @@ export declare function writeByte(offset: u32, value: u32): void;
 @external("wros_as_driver", "writeWord")
 export declare function writeWord(offset: u32, value: u64): void;
 
+/** @brief Control automatic erasure of this guest's consumed request bytes. Defaults to true. */
+@external("wros_as_driver", "setRequestWipe")
+export declare function setRequestWipe(enabled: bool): void;
+
+/** @brief Zero the full private request. */
+@external("wros_as_driver", "clearRequest")
+export declare function clearRequest(): void;
+
 /** @brief Open the alias bytes staged at the start of the request. */
 @external("wros_as_driver", "open")
 export declare function open(aliasSize: u32): u32;
@@ -30,9 +38,9 @@ export declare function connect(capability: u64): u32;
 @external("wros_as_driver", "submit")
 export declare function submit(capability: u64, requestSize: u32): u32;
 
-/** @brief Poll the result using the first eight request bytes as a sequence key. */
+/** @brief Poll the result for a sequence, using a separate private key. */
 @external("wros_as_driver", "result")
-export declare function result(capability: u64): u32;
+export declare function result(capability: u64, sequence: u64): u32;
 
 /** @brief Read the driver's observed state without granting control authority. */
 @external("wros_as_driver", "describe")
@@ -46,6 +54,14 @@ export declare function disconnect(capability: u64): u32;
 @external("wros_as_driver", "replySize")
 export declare function replySize(): u32;
 
+/** @brief Return the last required length reported by a driver size error, or zero. */
+@external("wros_as_driver", "replyRequired")
+export declare function replyRequired(): u64;
+
 /** @brief Load one little-endian word within the last successful reply. */
 @external("wros_as_driver", "readWord")
 export declare function readWord(offset: u32): u64;
+
+/** @brief Zero the previous reply bytes, and reset length and required-size metadata. */
+@external("wros_as_driver", "clearReply")
+export declare function clearReply(): void;

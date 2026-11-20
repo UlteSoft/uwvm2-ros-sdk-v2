@@ -36,7 +36,7 @@ Managed objects, a general AssemblyScript runtime, wasm64, threads, exception ha
 
 Import the bindings from `./wros` in the application source. `wras --ros-driver`
 supplies this module from the selected SDK. The compiler generates one private,
-fixed wasm32 page with separate request, reply, length and handle extents.
+fixed wasm32 page with separate request, reply, length, handle, and sequence extents.
 Default MTE allocates each extent using the VM's managed `memtag.claimz`
 instruction. Tags are assigned by the VM's neighbor exclusion policy.
 `--no-mte` emits standard Wasm with the same explicit bounds. The generated
@@ -63,9 +63,15 @@ set to match exactly. Xmake uses `add_wros_operations` to enforce the same
 check. The reserved memory and the generated staging functions stay internal.
 `writeByte` and `writeWord` stage little-endian request bytes, and
 `submit(capability, size)` submits the specified prefix of the 512-byte
-request. `result(capability)` reads its sequence key from the first eight
-request bytes. `replySize` and `readWord` see only the last successful driver
-reply. Reads beyond that reply and writes outside the request trap.
+request. `result(capability, sequence)` uses a private sequence slot. The guest
+overwrites the consumed bytes after every open and submit, including retries.
+Stage the bytes again to retry, or explicitly select
+`setRequestWipe(false)` to retain this guest's staging bytes until
+`clearRequest()`. The opt-out changes only this module's own staging copy.
+`replySize` and `readWord` see only the last successful driver reply. The
+next driver call, capability open or close, or an explicit `clearReply()`
+overwrites it. `replyRequired` returns a separate required length after
+status 90. Reads beyond a successful reply and writes outside the request trap.
 
 ## MuJoCo simulation
 

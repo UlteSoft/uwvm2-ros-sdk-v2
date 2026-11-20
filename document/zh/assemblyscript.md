@@ -35,7 +35,7 @@ xmake test -j1
 ## 定长 ROSv2 驱动调用
 
 应用从 `./wros` 导入绑定，`wras --ros-driver` 从已选的 SDK 提供该模块。
-编译器为请求、响应、长度和句柄分配一页固定大小的私有 wasm32 内存，
+编译器为请求、响应、长度、句柄和序列号分配一页固定大小的私有 wasm32 内存，
 各区域独立。默认 MTE 用 VM 的受管 `memtag.claimz` 指令登记这些区域，
 由 VM 按邻近分配排斥规则分配标签。`--no-mte` 则生成带同样显式边界检查
 的标准 Wasm。生成的模块没有 WASIp1 导入。
@@ -59,8 +59,13 @@ wras controller.ts --ros-driver --ros-operation capability.open \
 选项逐项一致，Xmake 的 `add_wros_operations` 使用相同的机制。模块的
 私有内存和生成的编组函数保留在模块内部。`writeByte`、`writeWord` 用
 小端格式暂存请求，`submit(capability, size)` 提交 512 字节缓冲区的指定
-前缀。`result(capability)` 使用请求前八字节中的序列号。`replySize` 和
-`readWord` 只访问最近一次成功调用的响应。越界读写触发 trap。
+前缀。`result(capability, sequence)` 使用独立的序列号槽。模块在每次
+打开权限或提交请求后覆盖已经使用的请求字节，包括重试。重试前应重新
+写入请求，也可显式使用 `setRequestWipe(false)` 保留自己的暂存副本，
+并通过 `clearRequest()` 擦除。关闭擦除只影响当前模块自己的副本。
+`replySize` 和 `readWord` 只访问最近一次成功调用的响应。下一次驱动
+调用、打开或关闭权限、或显式调用 `clearReply()` 都会覆盖上一次响应。
+状态码 90 的所需空间由 `replyRequired` 单独报告。越界读写触发 trap。
 
 ## MuJoCo 仿真
 

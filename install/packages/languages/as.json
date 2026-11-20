@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/assemblyscript.md",
-      "bytes": 5796,
+      "bytes": 6240,
       "mode": 420,
-      "sha256": "7dfdf915caf7b0c36ebe56cf9eafafeb98abe67334c749e99f0df9b32ef0cee4"
+      "sha256": "ffa70f70243c77653110eb602b7e2ee49e39918faf4ef87f790324db88d6a5d5"
     },
     {
       "path": "document/zh/assemblyscript.md",
-      "bytes": 5105,
+      "bytes": 5582,
       "mode": 420,
-      "sha256": "fd8128d9f126a0c3451d18496a065e3827dd4f5136622909b4a1dcadbbc059db"
+      "sha256": "2dee514a0f119d711e291372c168e90ae595d86cb048e9ad09782f27a7e170c7"
     },
     {
       "path": "language/as/compile.mjs",
@@ -32,15 +32,15 @@
     },
     {
       "path": "language/as/driver_lowering.mjs",
-      "bytes": 6217,
+      "bytes": 7898,
       "mode": 420,
-      "sha256": "060c632e686ac84df34d3bdc28f56ae46b3ba18e64a573265489b2fb8067d85f"
+      "sha256": "131f7301248a360d11e9f2019402bf765c49b9a0d73a1fd228173b233b8bf129"
     },
     {
       "path": "language/as/wros.ts",
-      "bytes": 2088,
+      "bytes": 2793,
       "mode": 420,
-      "sha256": "0acedecdbd1b25f7e49dfb35434b11350bee149093a3f8a866a4fd1d8ca06188"
+      "sha256": "1e55ba2d9c9073bc87faa16737ea5a4f96a8ae32f513b9a986a95b8abb0950e7"
     },
     {
       "path": "language/as/xmake/adapter.lua",
