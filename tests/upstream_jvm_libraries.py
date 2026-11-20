@@ -38,10 +38,11 @@ BYTE_LIMIT = 256 * 1024
 ABI = [{"module": "uwvm_ros_v2", "name": "abi", "kind": 0, "params": [], "results": ["i32"]}]
 
 
-def pinned_sources(cache, out):
-    """Stage four exact files. A caller-supplied cache undergoes the same digest verification."""
+def pinned_sources(cache, out, names=SOURCES):
+    """Stage exact files. A caller-supplied cache undergoes the same digest verification."""
     sources = {}
-    for name, (location, digest) in SOURCES.items():
+    for name in names:
+        location, digest = SOURCES[name]
         url = "https://raw.githubusercontent.com/" + location
         if cache:
             with (cache / name).open("rb") as file:

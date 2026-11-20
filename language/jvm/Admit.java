@@ -14,6 +14,9 @@ public final class Admit {
         "java/lang/Object.<init>()V", "java/lang/Object.getClass()Ljava/lang/Class;",
         "java/lang/AssertionError.<init>()V", "java/lang/IllegalStateException.<init>(Ljava/lang/String;)V",
         "java/lang/System.gc()V", "java/lang/System.nanoTime()J", "java/lang/System.currentTimeMillis()J",
+        // TeaVM lowers these exact signatures to the bundled C bit reinterpretations.
+        "java/lang/Float.floatToRawIntBits(F)I", "java/lang/Float.intBitsToFloat(I)F",
+        "java/lang/Double.doubleToRawLongBits(D)J", "java/lang/Double.longBitsToDouble(J)D",
         "kotlin/jvm/internal/Intrinsics.checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V",
         "wros/scene/Driver.<init>()V", "wros/scene/Driver.open([BII)I", "wros/scene/Driver.connect()I",
         "wros/scene/Driver.submit(JJ[B)I", "wros/scene/Driver.result(J[B[J)I",
