@@ -11,6 +11,8 @@
   --fetch --output "$PWD/.tmp/stdlib-trapz-native"
 ```
 
-追加 `--site-profile "$SITE" --vm "$VM"` 可测试正式签名 `wrf` 路径。站点需要提供适配 wasm32 调试构建与该 VM 的 Fortran、C 和 C++ 资格记录。追加 `--plain --toolchain "$TOOLCHAIN" --sysroots "$PLAIN_SYSROOTS" --vm "$VM"` 可测试显式关闭 MTE 和 EH 的对照路径。两条路线均以 `-O3 -g` 构建，准入和链接通过后运行 INT 与 AOT。每次回放使用独立输出目录。
+追加 `--plain --guest-assertion-traps --toolchain "$TOOLCHAIN" --sysroots "$PLAIN_SYSROOTS" --vm "$VM"` 可回放显式关闭 MTE 和 EH 的构建。需要带 libc++ 的匹配 sysroot、固定版本的 Flang 和 Wasm IR 助手。固定的 Fortran 运行库使用该 sysroot 对应的 C++ 编译器和库。发布 Wasm 前，已安装的 `wrf` 会校验 sysroot、检查各对象的构建配置并审计最终导入。
 
-请求的路线失败时，脚本返回非零状态。`results.json` 记录各路线到达的阶段，同目录日志保留编译器或准入工具的实际诊断。SDK `63b57f8` 上的原始断言已通过原生 GFortran 15.2.0 验证。仅含 C 资格的签名站点在安装阶段拒绝了 Fortran。关闭 MTE 的对照构建到达 Flang C++ 运行库，但缺少 Herbceptions 生成工具与匹配 C++ sysroot。单独的静态库试验已生成封装归档，链接阶段仍需要固定版本 Flang 描述符运行库提供 `_FortranAAssign` 和 `_FortranAAssignTemporary`。该库配置的 Wasm 执行尚未验证。 [Flang 数组赋值实现](https://github.com/llvm/llvm-project/blob/392dfff97d29b59d77e5cac6d4b6ef2585fe7117/flang-rt/lib/runtime/assign.cpp)
+来宾测试用 trap 报告失败，保留 20 条数值断言和参数长度检查。回放要求 Wasm 零导入，并验证故意改错的断言在两个引擎中都触发 trap。Fortran 计算运行库尚未实现带外部 I/O 与进程退出语义的通用 `ERROR STOP`。
+
+追加 `--site-profile "$SITE" --vm "$VM"` 可验收签名发布的准入和编译。站点必须提供与 wasm32 调试构建和 VM 匹配的 Fortran、C 和 C++ 资格记录。两种模式都使用 `-O3 -g`。无 MTE 回放已通过原生、解释器和 AOT。仅含 C 凭据的站点会在准入阶段被拒绝，本用例仍需匹配的签名站点复验。每次回放使用新输出目录，路线失败时返回非零状态。回执和同目录日志记录实际构建输入、退出码和诊断。
