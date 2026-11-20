@@ -8,33 +8,45 @@
     },
     {
       "path": "document/en/assemblyscript.md",
-      "bytes": 4199,
+      "bytes": 5796,
       "mode": 420,
-      "sha256": "d66ee7f142ec1211967e87e360ff290211a2057a2e3dd75f39bb694ba2b06e42"
+      "sha256": "7dfdf915caf7b0c36ebe56cf9eafafeb98abe67334c749e99f0df9b32ef0cee4"
     },
     {
       "path": "document/zh/assemblyscript.md",
-      "bytes": 3675,
+      "bytes": 5105,
       "mode": 420,
-      "sha256": "c9730196b9972ce17d07bef7562aac378d9e21bc93636bf8dbd2e286c66bf343"
+      "sha256": "fd8128d9f126a0c3451d18496a065e3827dd4f5136622909b4a1dcadbbc059db"
     },
     {
       "path": "language/as/compile.mjs",
-      "bytes": 1781,
+      "bytes": 2234,
       "mode": 420,
-      "sha256": "99119626ea9164d7b2660ea7cd8a4e22e0753b2eb8ee836e158b5651fcc41745"
+      "sha256": "036ccf33c5def75d815502deb7c8d6310b457ea711296c3fe8862b57834f4649"
     },
     {
       "path": "language/as/driver.py",
-      "bytes": 7176,
+      "bytes": 11905,
       "mode": 420,
-      "sha256": "54533fb47c8f62bee5bf1ad082e03e1c36fc280f87b2defebdcc0fbb8c499f47"
+      "sha256": "01c91bf2a83503e8941322608d2cc40b2f7deb127bd505c78fb6fd4f1cd743bf"
+    },
+    {
+      "path": "language/as/driver_lowering.mjs",
+      "bytes": 6217,
+      "mode": 420,
+      "sha256": "060c632e686ac84df34d3bdc28f56ae46b3ba18e64a573265489b2fb8067d85f"
+    },
+    {
+      "path": "language/as/wros.ts",
+      "bytes": 2088,
+      "mode": 420,
+      "sha256": "0acedecdbd1b25f7e49dfb35434b11350bee149093a3f8a866a4fd1d8ca06188"
     },
     {
       "path": "language/as/xmake/adapter.lua",
-      "bytes": 1726,
+      "bytes": 2256,
       "mode": 420,
-      "sha256": "263788816206e913b05db1c79f0ef99f2ee7942ab0f7185443f41d7e31a74785"
+      "sha256": "bc36558d4a018d19247194eb6235ac14f138721ca1e357937034d1e9b4d4e639"
     },
     {
       "path": "third-parties/assemblyscript/assemblyscript.LICENSE",

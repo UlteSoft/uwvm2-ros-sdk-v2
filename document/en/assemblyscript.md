@@ -26,11 +26,46 @@ To build directly from a single `.ts` file, export `_start(): void` and run the 
 
 ## Supported source profile
 
-The development package supports scalar functions and control flow in a single wasm32 core application. For the default MTE setting it validates the final binary and verifies that it has zero linear memories, memory imports and data segments. `--no-mte` explicitly changes the requested setting within the same source profile. An application may import the exact `uwvm_ros_v2.abi` function through `--ros-abi`. An application built without that option must have no imports.
+The default scalar profile supports functions and control flow in a single wasm32 core application. It verifies that the module has zero linear memories, memory imports and data segments. An application may import the exact `uwvm_ros_v2.abi` function through `--ros-abi`. The separate bounded driver profile admits the driver APIs described below.
 
 Each platform selection also installs a migration example at `examples/platform/<platform>/migration/as`. It ports the unsigned grid index used by ROS Noetic Costmap2D. Run `xmake build` and `xmake test -j1` in that directory to check row boundaries, wrapping arithmetic and seeded inputs in both VM engines. The resulting Wasm has no imports. The caller supplies valid coordinates when using the result to access a grid. [ROS Noetic Costmap2D source](https://github.com/ros-planning/navigation/blob/f44bb1fc2810399165115cc98b530fe4b9397c18/costmap_2d/include/costmap_2d/costmap_2d.h)
 
-Managed objects, a general AssemblyScript runtime, wasm64, threads, exception handling and vendor-specific operations remain outside this profile.
+Managed objects, a general AssemblyScript runtime, wasm64, threads, exception handling and vendor-specific operations remain outside these profiles.
+
+## Bounded ROSv2 driver calls
+
+Import the bindings from `./wros` in the application source. `wras --ros-driver`
+supplies this module from the selected SDK. The compiler generates one private,
+fixed wasm32 page with separate request, reply, length and handle extents.
+Default MTE allocates each extent using the VM's managed `memtag.claimz`
+instruction. Tags are assigned by the VM's neighbor exclusion policy.
+`--no-mte` emits standard Wasm with the same explicit bounds. The generated
+module imports no WASIp1 functions.
+
+```ts
+import { writeWord, open, opened, close } from "./wros";
+
+export function _start(): void {
+    writeWord(0, 0x746e696f6a); // "joint"
+    if (open(5) != 0) unreachable();
+    if (close(opened()) != 0) unreachable();
+}
+```
+
+```sh
+wras controller.ts --ros-driver --ros-operation capability.open \
+    --ros-operation capability.close --build-receipt -g -o controller.wasm
+```
+
+At deployment the VM still controls which operation and alias the module can
+use. When supplied, repeated `--ros-operation` flags require the final import
+set to match exactly. Xmake uses `add_wros_operations` to enforce the same
+check. The reserved memory and the generated staging functions stay internal.
+`writeByte` and `writeWord` stage little-endian request bytes, and
+`submit(capability, size)` submits the specified prefix of the 512-byte
+request. `result(capability)` reads its sequence key from the first eight
+request bytes. `replySize` and `readWord` see only the last successful driver
+reply. Reads beyond that reply and writes outside the request trap.
 
 ## MuJoCo simulation
 
@@ -59,3 +94,5 @@ It also checks that an out-of-range command applies zero steps and that an
 external receiver crash after one step leaves the VM able to inspect the
 failed channel and disconnect. The receipt records all three cases in both
 INT and AOT, the exact assets, build hashes, and the driver-call audit.
+Pass `--direct-driver` to build a single AssemblyScript Wasm module that calls
+the ROSv2 driver itself. The test enables synchronous WasmMTE checks.

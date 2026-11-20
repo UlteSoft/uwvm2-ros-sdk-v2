@@ -6,7 +6,10 @@ import asc from "assemblyscript/asc";
 import binaryen from "binaryen";
 
 const source = await readFile("input.ts", "utf8");
-const compile = await asc.compileString({"input.ts": source}, {
+const sources = {"input.ts": source};
+const driver = process.argv.includes("--driver");
+if (driver) sources["wros.ts"] = await readFile("wros.ts", "utf8");
+const compile = await asc.compileString(sources, {
   runtime: "stub",
   noExportMemory: true,
   optimizeLevel: 3,
@@ -24,6 +27,8 @@ const module = binaryen.readBinary(compile.binary);
 try {
   // Preserve saturating scalar float-to-int conversions when validating Core Wasm.
   module.setFeatures(module.getFeatures() | binaryen.Features.NontrappingFPToInt);
+  const lowering = driver ? await import("./driver_lowering.mjs") : null;
+  if (lowering) lowering.hideDriverDeclarations(module);
   module.runPasses(["remove-unused-module-elements"]);
   if (module.hasMemory() || !module.validate()) {
     throw new Error("The scalar AssemblyScript profile requires validated Wasm without linear memory");
@@ -35,6 +40,10 @@ try {
   const fn = binaryen.getFunctionInfo(module.getFunction(exported.value));
   if (fn.params !== binaryen.none || fn.results !== binaryen.none) {
     throw new Error("_start must have signature () -> ()");
+  }
+  if (lowering) {
+    lowering.lowerDriver(module, !process.argv.includes("--plain"));
+    if (!module.validate()) throw new Error("Invalid generated driver staging module");
   }
   await writeFile("result.wasm", module.emitBinary(), {flag: "wx"});
 } finally {

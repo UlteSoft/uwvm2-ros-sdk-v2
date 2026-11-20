@@ -26,11 +26,41 @@ xmake test -j1
 
 ## 支持范围
 
-开发包支持单文件 wasm32 应用中的标量函数和控制流。默认 MTE 配置要求检查最终二进制，证明它没有线性内存、内存导入或数据段。可以用 `--no-mte` 显式修改 MTE 请求值，源码支持范围相同。`--ros-abi` 只允许签名精确匹配的 `uwvm_ros_v2.abi`，省略该参数时模块必须没有导入。
+默认标量配置支持单文件 wasm32 应用中的函数和控制流。它会检查最终二进制没有线性内存、内存导入或数据段。`--ros-abi` 只允许签名精确匹配的 `uwvm_ros_v2.abi`。下面的定长驱动配置提供独立的 ROSv2 驱动接口。
 
 每个平台的安装包也提供 `examples/platform/<platform>/migration/as`，演示如何移植 ROS Noetic Costmap2D 的无符号栅格索引。在目录内运行 `xmake build` 和 `xmake test -j1`，两个 VM 引擎都会测试行边界、回绕和固定种子的输入。生成的 Wasm 无导入。调用者用该索引访问栅格时，须确保坐标有效。[ROS Noetic Costmap2D 源码](https://github.com/ros-planning/navigation/blob/f44bb1fc2810399165115cc98b530fe4b9397c18/costmap_2d/include/costmap_2d/costmap_2d.h)
 
 托管对象、完整 AssemblyScript 运行时、wasm64、线程、异常处理和厂商专属操作仍待支持。
+
+## 定长 ROSv2 驱动调用
+
+应用从 `./wros` 导入绑定，`wras --ros-driver` 从已选的 SDK 提供该模块。
+编译器为请求、响应、长度和句柄分配一页固定大小的私有 wasm32 内存，
+各区域独立。默认 MTE 用 VM 的受管 `memtag.claimz` 指令登记这些区域，
+由 VM 按邻近分配排斥规则分配标签。`--no-mte` 则生成带同样显式边界检查
+的标准 Wasm。生成的模块没有 WASIp1 导入。
+
+```ts
+import { writeWord, open, opened, close } from "./wros";
+
+export function _start(): void {
+    writeWord(0, 0x746e696f6a); // "joint"
+    if (open(5) != 0) unreachable();
+    if (close(opened()) != 0) unreachable();
+}
+```
+
+```sh
+wras controller.ts --ros-driver --ros-operation capability.open \
+    --ros-operation capability.close --build-receipt -g -o controller.wasm
+```
+
+部署时由 VM 授权操作和别名。指定 `--ros-operation` 时，最终导入必须与
+选项逐项一致，Xmake 的 `add_wros_operations` 使用相同的机制。模块的
+私有内存和生成的编组函数保留在模块内部。`writeByte`、`writeWord` 用
+小端格式暂存请求，`submit(capability, size)` 提交 512 字节缓冲区的指定
+前缀。`result(capability)` 使用请求前八字节中的序列号。`replySize` 和
+`readWord` 只访问最近一次成功调用的响应。越界读写触发 trap。
 
 ## MuJoCo 仿真
 
@@ -53,3 +83,5 @@ PATH_TO_GATE python3 -B tests/assemblyscript_mujoco.py \
 脚本将 128 个仿真步与直接调用原生 MuJoCo 的结果比对，也检查越界命令
 不推进仿真，以及外部接收器在执行一步后崩溃时 VM 仍能查询故障状态并断连。
 收据记录 INT 和 AOT 各自的三项用例、模型资产、构建摘要和驱动调用审计。
+添加 `--direct-driver` 可测试由单个 AssemblyScript Wasm 发出的直接
+ROSv2 驱动调用，测试会开启同步 WasmMTE 检查。
