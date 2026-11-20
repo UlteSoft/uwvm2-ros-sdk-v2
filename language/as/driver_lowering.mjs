@@ -7,13 +7,7 @@ export const claimExport = "__wros_as_claimz";
 const intrinsicModule = "wros_as_driver";
 const host = "uwvm_ros_v2";
 const capacity = 512;
-const objects = [
-  ["request", 16, capacity],
-  ["reply", 16 + capacity, capacity],
-  ["length", 16 + 2 * capacity, 16],
-  ["handle", 32 + 2 * capacity, 16],
-  ["key", 48 + 2 * capacity, 16],
-];
+const extendedReplyCapacity = 4096;
 const i32 = binaryen.i32;
 const i64 = binaryen.i64;
 const none = binaryen.none;
@@ -46,6 +40,15 @@ export function lowerDriver(module, tagged) {
   }
   if (!imports.size) throw new Error("Import the driver bindings from ./wros");
   if (module.getExport(claimExport)) throw new Error("Reserved driver export name");
+  const replyCapacity = imports.has("resultWithCapacity") ? extendedReplyCapacity : capacity;
+  const tail = 16 + capacity + replyCapacity;
+  const objects = [
+    ["request", 16, capacity],
+    ["reply", 16 + capacity, replyCapacity],
+    ["length", tail, 16],
+    ["handle", tail + 16, 16],
+    ["key", tail + 32, 16],
+  ];
 
   const c = n => module.i32.const(n);
   const word = n => module.i64.const(BigInt(n));
@@ -61,7 +64,7 @@ export function lowerDriver(module, tagged) {
   const store = (name, value) => module.i64.store(0, 8, at(name), value);
   const load = name => module.i64.load(0, 8, at(name));
   const fill = (name, bytes) => module.memory.fill(at(name), c(0), bytes);
-  const validateLength = () => assert(module.i64.gt_u(load("length"), word(capacity)));
+  const validateLength = () => assert(module.i64.gt_u(load("length"), word(replyCapacity)));
   const clear = () => module.call(prefix + "clear_reply", [], none);
   const wipe = bytes => module.if(at("wipe"), fill("request", bytes));
 
@@ -135,25 +138,28 @@ export function lowerDriver(module, tagged) {
       store("handle", z())),
     slot(1),
   ], [i32]);
-  for (const name of ["connect", "submit", "result", "describe", "disconnect"]) {
+  for (const name of ["connect", "submit", "result", "resultWithCapacity", "describe", "disconnect"]) {
     const submit = name === "submit";
-    const result = name === "result";
-    const params = submit ? [i64, i32] : result ? [i64, i64] : [i64];
+    const extended = name === "resultWithCapacity";
+    const result = name === "result" || extended;
+    const params = extended ? [i64, i64, i32] : submit ? [i64, i32] : result ? [i64, i64] : [i64];
     const status = params.length;
+    const limit = () => extended ? slot(2) : c(capacity);
     bind(name, params, i32, () => [
       ...(submit ? [assert(module.i32.gt_u(slot(1), c(capacity)))] : []),
+      ...(extended ? [assert(module.i32.gt_u(slot(2), c(replyCapacity)))] : []),
       clear(),
       ...(result ? [store("key", slot(1, i64))] : []),
-      module.local.set(status, call("driver." + name, abi, [
+      module.local.set(status, call("driver." + (result ? "result" : name), abi, [
         slot(0, i64), c(0), pointer(result ? "key" : "request"),
         submit ? module.i64.extend_u(slot(1)) : word(result ? 8 : 0),
-        pointer("reply"), word(capacity), pointer("length"),
+        pointer("reply"), module.i64.extend_u(limit()), pointer("length"),
       ])),
       ...(submit ? [wipe(slot(1))] : []),
       ...(result ? [store("key", z())] : []),
       module.if(slot(status), block([
         module.if(module.i32.eq(slot(status), c(90)), assign("required", load("length"))),
-        module.if(module.i64.ne(load("length"), z()), fill("reply", c(capacity))),
+        module.if(module.i64.ne(load("length"), z()), fill("reply", limit())),
         store("length", z()),
       ])),
       slot(status),

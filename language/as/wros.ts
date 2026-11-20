@@ -38,9 +38,13 @@ export declare function connect(capability: u64): u32;
 @external("wros_as_driver", "submit")
 export declare function submit(capability: u64, requestSize: u32): u32;
 
-/** @brief Poll the result for a sequence, using a separate private key. */
+/** @brief Poll the result for a sequence using the default 512-byte reply capacity. */
 @external("wros_as_driver", "result")
 export declare function result(capability: u64, sequence: u64): u32;
+
+/** @brief Poll the same sequence with an explicit reply capacity up to 4096 bytes. */
+@external("wros_as_driver", "resultWithCapacity")
+export declare function resultWithCapacity(capability: u64, sequence: u64, capacity: u32): u32;
 
 /** @brief Read the driver's observed state without granting control authority. */
 @external("wros_as_driver", "describe")

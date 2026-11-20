@@ -32,15 +32,15 @@
     },
     {
       "path": "language/as/driver_lowering.mjs",
-      "bytes": 7932,
+      "bytes": 8389,
       "mode": 420,
-      "sha256": "0abdbf0fcd39f99c4083d29fbe618e0a8f6d1834c7c920a2c212f4e28818d233"
+      "sha256": "aef0963c0dd590e996bec15df27c1060b6812ee30291dd3bc4fd805b9d56e9d7"
     },
     {
       "path": "language/as/wros.ts",
-      "bytes": 2793,
+      "bytes": 3039,
       "mode": 420,
-      "sha256": "1e55ba2d9c9073bc87faa16737ea5a4f96a8ae32f513b9a986a95b8abb0950e7"
+      "sha256": "dc006cae44a8cd0690be9f27eaad9ca9f2d3bf93be495a9b6d1428012317f93b"
     },
     {
       "path": "language/as/xmake/adapter.lua",
