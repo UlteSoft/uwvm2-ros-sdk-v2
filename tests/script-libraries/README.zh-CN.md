@@ -31,4 +31,16 @@ TypeScript 5.9.3 执行严格类型检查。独立 Node.js 对照所用的 JavaS
 摘要必须与 `wrts` 打包进 QuickJS 的 JavaScript 一致。两个 Wasm 引擎均
 启用同步 MTE，模块只导入一个只读时钟。
 
+## AssemblyScript
+
+标量数学库测试复用 AssemblyScript 0.28.20 的 `imul` 和 `clz32` 共 28
+条原始断言。测试核对编译器携带的 `math.ts` 与上游文件一致，并以三级优化和
+调试名称构建。编译器选用上游完整的浮点转整数路径。两个 VM 引擎运行无导入、
+无线性内存的 wasm32 产物。Node.js 再用 ECMAScript Math 比对 4,100 个固定和
+随机生成的标量结果。
+[上游断言](https://github.com/AssemblyScript/assemblyscript/blob/b6bda05c29c9eb7d07d7f6cb2703508483b30493/tests/compiler/std/math.ts)
+
+按英文版命令获取归档和选择性安装 SDK。将完整提交 ID 传给 `--commit`，并在
+同一 64 GiB 门控内运行。
+
 [English](README.md)

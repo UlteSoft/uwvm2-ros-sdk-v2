@@ -75,4 +75,27 @@ JavaScript digest must match the JavaScript that `wrts` packages in QuickJS.
 Both Wasm engines evaluate the same module with synchronous MTE. The module
 imports one read-only clock.
 
+## AssemblyScript
+
+The scalar NativeMath replay takes the 28 original `imul` and `clz32`
+assertions from AssemblyScript 0.28.20. It checks that the installed
+compiler uses the original upstream `math.ts` and builds with its
+full float-to-integer conversion path at optimization level 3 with
+debug names. The generated wasm32 module has no imports or linear
+memory. The tests run on both VM engines and Node.js also compares
+4,100 generated and fixed scalar results against ECMAScript Math.
+[Upstream assertions](https://github.com/AssemblyScript/assemblyscript/blob/b6bda05c29c9eb7d07d7f6cb2703508483b30493/tests/compiler/std/math.ts)
+
+```sh
+curl --fail --location \
+    https://codeload.github.com/AssemblyScript/assemblyscript/tar.gz/b6bda05c29c9eb7d07d7f6cb2703508483b30493 \
+    --output .tmp/assemblyscript-0.28.20.tar.gz
+
+PATH_TO_GATE /usr/bin/python3 -B tests/script-libraries/assemblyscript_upstream.py \
+    --commit FULL_SDK_COMMIT \
+    --upstream .tmp/assemblyscript-0.28.20.tar.gz \
+    --vm PATH_TO_MATCHING_VM \
+    --output .tmp/assemblyscript-library-test
+```
+
 [简体中文](README.zh-CN.md)
