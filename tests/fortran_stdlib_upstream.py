@@ -118,7 +118,7 @@ def main():
     parser.add_argument("--native-arg", action="append", default=[], help="explicit native compiler option")
     parser.add_argument("--plain", action="store_true", help="also exercise explicit --no-mte and --no-eh")
     parser.add_argument("--guest-assertion-traps", action="store_true",
-                        help="replace fixture-only ERROR STOP reporting with a guest-local trap for --plain")
+                        help="replace fixture-only ERROR STOP reporting with a guest-local trap")
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
         parser.error("supply the exact SDK commit")
@@ -128,8 +128,8 @@ def main():
         parser.error("guest execution needs an explicit --vm")
     if args.plain and (args.toolchain is None or args.sysroots is None):
         parser.error("--plain needs an explicit toolchain and a matching untagged sysroot")
-    if args.guest_assertion_traps and not args.plain:
-        parser.error("--guest-assertion-traps requires --plain")
+    if args.guest_assertion_traps and not (args.plain or args.site_profile):
+        parser.error("--guest-assertion-traps requires a guest execution route")
     out = args.output.resolve()
     if ".tmp" not in out.parts:
         parser.error("choose a fresh output within .tmp")
@@ -204,6 +204,11 @@ def main():
     report["inputs"][str(native_guest)] = sha(native_guest)
     save()
 
+    guest_sources, failure, negative = build, None, None
+    if args.guest_assertion_traps:
+        guest_sources, failure, negative = guest_assertions(build, out)
+        report["inputs"].update({str(p): sha(p) for p in (*guest_sources, failure, negative)})
+
     for route in ("strict", "plain"):
         selected = args.site_profile is not None if route == "strict" else args.plain
         status = {"status": "unrequested"}
@@ -222,17 +227,18 @@ def main():
         vm = args.vm.resolve()
         image = out / (route + ".wasm")
         flags = ["--target", "wasm32", "-O3", "-g", "--build-receipt"]
+        runtime_flags = ["--wasm-feature-wasm3"]
         if route == "plain":
             flags += ["--toolchain", args.toolchain.resolve(), "--sysroots", args.sysroots.resolve(),
                       "--no-mte", "--no-eh"]
-        guest_sources, link, negative = build, [], None
-        if route == "plain" and args.guest_assertion_traps:
-            guest_sources, failure, negative = guest_assertions(build, out)
-            report["inputs"].update({str(p): sha(p) for p in (*guest_sources, failure, negative)})
-            obj = out / "guest-failure.o"
+        else:
+            runtime_flags += ["--runtime-memtag-mode", "sync"]
+        link = []
+        if failure:
+            obj = out / (route + "-guest-failure.o")
             status.update(phase="fixture-compile")
             cc_flags = [flag for flag in flags if flag != "--build-receipt"]
-            if run("plain-fixture-compile", [sdk / "bin/wrc", *cc_flags, "-c", failure, "-o", obj]) != 0:
+            if run(route + "-fixture-compile", [sdk / "bin/wrc", *cc_flags, "-c", failure, "-o", obj]) != 0:
                 continue
             link = ["--link-object", obj]
         status.update(phase="compile")
@@ -251,7 +257,7 @@ def main():
                 continue
         for engine in ("int", "aot"):
             status.update(phase=engine)
-            if run(route + "-" + engine, [vm, "--wasm-feature-wasm3", "--runtime-" + engine,
+            if run(route + "-" + engine, [vm, *runtime_flags, "--runtime-" + engine,
                    "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
                    "--run", image]) != 0:
                 break
@@ -267,17 +273,23 @@ def main():
             if imports.inspect(image.read_bytes()):
                 raise ValueError("expected an import-free numerical guest")
             status["guest_imports"] = []
-            neg_image = out / "plain-negative.wasm"
+            neg_image = out / (route + "-negative.wasm")
             status.update(status="blocked", phase="negative-compile")
-            if run("plain-negative-compile", [sdk / "bin/wrf", *flags, *link,
+            if run(route + "-negative-compile", [sdk / "bin/wrf", *flags, *link,
                                               *guest_sources[:-1], negative, "-o", neg_image]) != 0:
                 continue
             neg_receipt = Path(str(neg_image) + ".wros-build.json")
             report["inputs"].update({str(p): sha(p) for p in (neg_image, neg_receipt)})
+            if mode["mode"] == "strict":
+                status.update(phase="negative-artifact-admission")
+                if run("strict-negative-artifact-admission",
+                       [sys.executable, sdk / "install/qualification.py", "--artifact", neg_image,
+                        "--receipt", neg_receipt, "--vm", vm, "--approved-receipt-sha256", sha(neg_receipt)]) != 0:
+                    continue
             for engine in ("int", "aot"):
-                label = "plain-negative-" + engine
+                label = route + "-negative-" + engine
                 status.update(phase=label)
-                code = run(label, [vm, "--wasm-feature-wasm3", "--runtime-" + engine,
+                code = run(label, [vm, *runtime_flags, "--runtime-" + engine,
                                    "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path",
                                    "disable", "--run", neg_image])
                 if not code or b"unreachable" not in (out / (label + ".stderr")).read_bytes():
