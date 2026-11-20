@@ -144,6 +144,8 @@ def main():
             metadata.update(development_scope="register-only-wasm32", optional_components=["compiler-source"])
         if language == "as":
             metadata.update(development_scope="scalar-wasm32")
+        if language == "odin":
+            metadata.update(development_scope="freestanding-odin-wasm32", optional_components=["compiler-source", "migration"])
         if language == "wat":
             metadata.update(development_scope="core-wasm-assembler")
         if language == "zig":
@@ -179,6 +181,7 @@ def main():
         examples = sorted((ROOT / "examples" / language / "synchronous-aot").iterdir())
         package("jvm/" + language, ["bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",
                                    f"language/{language}/host-inputs.json", *(p.relative_to(ROOT).as_posix() for p in examples)])
+    package("odin/compiler-source", ["third-parties/odin/source.tar.xz"])
     policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py", "qualification.py", "local_release.py")]
     package("frontend", [*policy, "share/qualification/memory-neighbors.json", "bin/wrar", "install/archiver.py", "document/en/memtag.md", "document/zh/memtag.md",
                          "document/en/memory-qualification.md", "document/zh/memory-qualification.md"])
@@ -190,6 +193,10 @@ def main():
                "document/en/assemblyscript.md", "document/zh/assemblyscript.md",
                "third-parties/typescript/node-linux-x64.xz", "third-parties/typescript/LICENSE-node",
                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/assemblyscript").iterdir() if p.is_file()]],
+        "odin": ["bin/wrodin", "language/odin/driver.py", "language/odin/mark_mte.cpp",
+                 "document/en/odin.md", "document/zh/odin.md", "third-parties/odin/LICENSE",
+                 "third-parties/odin/LICENSE-LLVM", "third-parties/odin/release.json",
+                 "third-parties/odin/producer.tar.xz"],
         "wat": ["bin/wrwat", "language/wat/driver.py", "document/en/wat.md", "document/zh/wat.md",
                 *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/wat-mte").iterdir()
                   if p.is_file() and p.name != "sources.tar.xz"],

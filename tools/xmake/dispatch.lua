@@ -60,7 +60,7 @@ function configure(target, entry)
     assert(not target:values("wros.py_modules") or language == "py", "add_wros_python_modules requires Python")
     local core = target:values("wros.core") or "3.0"
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
-    local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs" and language ~= "as")
+    local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs" and language ~= "as" and language ~= "odin")
     assert(target:values("wros.herbceptions") == nil or language == "cpp",
            "herbceptions is a C++ profile option")
     local legacy_mte = target:values("wros.mte") == "legacy"
@@ -82,7 +82,7 @@ function configure(target, entry)
     assert(#wat_shared_memory == 0 or (language == "wat" and threads and #wat_shared_memory == 2),
            "set_wros_wat_shared_memory requires a threaded WAT target and an exact module and field")
     local operations = table.wrap(target:values("wros.operations"))
-    assert(language == "as" or language == "wat" or language == "go" or language == "lua" or language == "js" or language == "typescript" or language == "py" or language == "ruby" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or language == "fsharp" or #operations == 0,
+    assert(language == "as" or language == "odin" or language == "wat" or language == "go" or language == "lua" or language == "js" or language == "typescript" or language == "py" or language == "ruby" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or language == "fsharp" or #operations == 0,
            "add_wros_operations requires a target with selectable ROS imports")
     local lua_operations = table.wrap(target:values("wros.lua_operations"))
     assert(language == "lua" or #lua_operations == 0, "add_wros_lua_operations requires a Lua target")

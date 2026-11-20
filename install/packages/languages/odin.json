@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "bin/wrodin",
+      "bytes": 239,
+      "mode": 493,
+      "sha256": "a280a5684ec06999c5c16dcd4c8350a6bfcdfdc863ff21114eda641836342544"
+    },
+    {
+      "path": "document/en/odin.md",
+      "bytes": 3087,
+      "mode": 420,
+      "sha256": "4d8a6ab03ee40afb7062f597ed3c823274f61db1cb8091b1b2bc884dbb6e9058"
+    },
+    {
+      "path": "document/zh/odin.md",
+      "bytes": 2810,
+      "mode": 420,
+      "sha256": "94f1775116ca70ce12aa5c2cb439cb260ae3e991bddc6e2949a3042e0bfdc123"
+    },
+    {
+      "path": "language/odin/driver.py",
+      "bytes": 6722,
+      "mode": 420,
+      "sha256": "96c01ec0af92bed071074be5840352321f6252d60d45105239f980f21f99da68"
+    },
+    {
+      "path": "language/odin/mark_mte.cpp",
+      "bytes": 8139,
+      "mode": 420,
+      "sha256": "c72951aa81be61c86a2c4e50a197dc99f932bd224e260960fa540d7ce107edec"
+    },
+    {
+      "path": "language/odin/xmake/adapter.lua",
+      "bytes": 1857,
+      "mode": 420,
+      "sha256": "c1cda1f23edf92e43c56f3fd6f4d00a06f3b371fe0fa87c0f0c6d3318c2aedba"
+    },
+    {
+      "path": "third-parties/odin/LICENSE",
+      "bytes": 876,
+      "mode": 420,
+      "sha256": "c28b9a4f5a6eb24038aa67c946804883713078ffc25b2c0829f29c03569f4bfa"
+    },
+    {
+      "path": "third-parties/odin/LICENSE-LLVM",
+      "bytes": 15140,
+      "mode": 420,
+      "sha256": "3340babe8ac7bc6ae294d93aa01c310a250d43d5b760e5c12954882d4e5c83c7"
+    },
+    {
+      "path": "third-parties/odin/producer.tar.xz",
+      "bytes": 9394200,
+      "mode": 420,
+      "sha256": "94d976938395490a7764c1265fe217f9673fdd2e3c5356b6a9ddbc8287da386c"
+    },
+    {
+      "path": "third-parties/odin/release.json",
+      "bytes": 1080,
+      "mode": 420,
+      "sha256": "d73aaa13d945203a7d269c0c7a3bf1f723efa6ef6ca2b810f73d66232ffa94ce"
+    }
+  ]
+}

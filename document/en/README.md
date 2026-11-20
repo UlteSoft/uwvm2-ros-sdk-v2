@@ -32,6 +32,7 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | [Python / CPython](python.md) | `py` | `wrpy` |
 | [Ruby / mruby](ruby.md) | `ruby` | `wrrb` |
 | [Standalone Zig](zig.md) | `zig` | `wrzig` |
+| [Freestanding Odin](odin.md) | `odin` | `wrodin` |
 | Lua | `lua` | `wrlua` |
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [TypeScript](typescript.md) | `typescript` | `wrts` |

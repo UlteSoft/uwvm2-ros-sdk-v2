@@ -27,7 +27,7 @@
 | moonbit | — | — | — |
 | nim | [common/nim](common/nim/) | [extension/nim](extension/nim/) | [migration/nim](migration/nim/) |
 | objectc | [common/objectc](common/objectc/) | [extension/objectc](extension/objectc/) | [migration/objectc](migration/objectc/) |
-| odin | — | — | — |
+| odin | [common/odin](common/odin/) | — | [migration/odin](migration/odin/) |
 | php | — | — | — |
 | py | [common/py](common/py/) | [extension/py](extension/py/) | [migration/py](migration/py/) |
 | r | — | — | — |

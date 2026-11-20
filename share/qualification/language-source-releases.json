@@ -309,6 +309,28 @@
           "sha256": "7085c7c4a82668f52f680818e1150ddb6856b869d3812a2010e2753268639d0e"
         }
       ]
+    },
+    "odin-monthly": {
+      "version": "dev-2026-11a",
+      "release_url": "https://github.com/odin-lang/Odin/releases/tag/dev-2026-11a",
+      "commit": "9a6991685ddf663956d9836602eb421e141fc443",
+      "draft": false,
+      "prerelease": false,
+      "note": "Official upstream monthly source tag. make release avoids the nightly build define.",
+      "checks": [
+        {
+          "path": "third-parties/odin/release.json",
+          "sha256": "d73aaa13d945203a7d269c0c7a3bf1f723efa6ef6ca2b810f73d66232ffa94ce"
+        },
+        {
+          "path": "third-parties/odin/producer.tar.xz",
+          "sha256": "94d976938395490a7764c1265fe217f9673fdd2e3c5356b6a9ddbc8287da386c"
+        },
+        {
+          "path": "third-parties/odin/source.tar.xz",
+          "sha256": "a68abc609e1766bf650e878d2463f4c0f44381f1536fd4a9fa2266e9fdc7f0ce"
+        }
+      ]
     }
   },
   "languages": {
@@ -443,6 +465,11 @@
         "go-register-producer"
       ],
       "note": "Standard Go 1.24.2 optimized SSA for a fixed-width register-only guest. The developer selection includes a Wasm-only host compiler."
+    },
+    "odin": {
+      "components": [
+        "odin-monthly"
+      ]
     }
   },
   "separate_review": [],

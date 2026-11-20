@@ -3,9 +3,9 @@ import argparse
 import json
 
 
-PROJECT_LANGUAGES = "as c cpp csharp d fortran fsharp go java js kotlin lua nim objectc py rs ruby tinygo typescript vbnet wat zig".split()
+PROJECT_LANGUAGES = "as c cpp csharp d fortran fsharp go java js kotlin lua nim objectc odin py rs ruby tinygo typescript vbnet wat zig".split()
 BINDINGS = {"d": "d", "c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim", "zig": "zig"}
-DEVELOPMENT = ("as", "go", "c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim", "d", "typescript", "py", "ruby", "wat", "zig")
+DEVELOPMENT = ("as", "go", "c", "cpp", "fortran", "js", "lua", "objectc", "odin", "rs", "tinygo", "nim", "d", "typescript", "py", "ruby", "wat", "zig")
 
 # Command spellings are part of the per-commit SDK contract. A command name
 # can be reserved before its language has an installable compiler package.
@@ -86,8 +86,9 @@ def main():
                 if args.language == "cpp":
                     packages.append("migration/tf2-buffer")
             if args.component == "compiler-source":
-                packages.append({"go": "go-producer-source", "wat": "wat-producer-source"}
-                                .get(args.language, "compiler-source"))
+                source_packages = {"go": "go-producer-source", "odin": "odin/compiler-source",
+                                   "wat": "wat-producer-source"}
+                packages.append(source_packages.get(args.language, "compiler-source"))
                 if args.language == "nim":
                     packages.append("nim-producer-source")
     if args.component == "development" and args.language == "c":

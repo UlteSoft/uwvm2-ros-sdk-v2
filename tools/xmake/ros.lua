@@ -20,7 +20,7 @@ end
 
 rule("wros.source")
     set_extensions(".c", ".cc", ".cpp", ".cxx", ".C", ".lua", ".js", ".go", ".mod", ".f", ".F", ".f90", ".F90", ".f95", ".f03", ".f08", ".f18", ".for", ".ftn",
-                   ".rs", ".java", ".kt", ".cs", ".vb", ".fs", ".ts", ".py", ".rb", ".nim", ".m", ".d", ".wat", ".o", ".a")
+                   ".rs", ".java", ".kt", ".cs", ".vb", ".fs", ".ts", ".py", ".rb", ".nim", ".m", ".d", ".odin", ".wat", ".o", ".a")
 rule_end()
 
 rule("wros.application")

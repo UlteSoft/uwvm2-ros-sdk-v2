@@ -31,6 +31,7 @@
 | [Python / CPython](python.md) | `py` | `wrpy` |
 | [Ruby / mruby](ruby.md) | `ruby` | `wrrb` |
 | [独立 Zig](zig.md) | `zig` | `wrzig` |
+| [独立 Odin](odin.md) | `odin` | `wrodin` |
 | Lua | `lua` | `wrlua` |
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [TypeScript](typescript.md) | `typescript` | `wrts` |

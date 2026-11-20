@@ -1,0 +1,52 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/yaskawa/common/odin/controller.odin",
+      "bytes": 623,
+      "mode": 420,
+      "sha256": "c95c60c2d6839ae5c435d8420f3c41859b0de7518fba0f157bf9330214ab1d7d"
+    },
+    {
+      "path": "examples/platform/yaskawa/common/odin/xmake.lua",
+      "bytes": 512,
+      "mode": 420,
+      "sha256": "0a2caaa85c438a224ce08d0b0315821a7fb0a96c3d566f10cab5b40328c1769e"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/odin/grid.odin",
+      "bytes": 428,
+      "mode": 420,
+      "sha256": "fe907a053e2b016a54b56f7aaeb4707a2d03dc6ca569f51aaead0ee8519c10c9"
+    },
+    {
+      "path": "examples/platform/yaskawa/migration/odin/xmake.lua",
+      "bytes": 448,
+      "mode": 420,
+      "sha256": "7fd611735196f1d9fbe05605bc5ec816c0f80ddb39fbb11167f6c34cd79b98af"
+    }
+  ]
+}
