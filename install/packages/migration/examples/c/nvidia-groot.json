@@ -2,15 +2,15 @@
   "files": [
     {
       "path": "examples/platform/nvidia-groot/migration/c/README.md",
-      "bytes": 854,
+      "bytes": 1238,
       "mode": 420,
-      "sha256": "258b7de8a72cca68748cd85379c65c2f3b8bfbab47599d7a3a5b6f5ffab1ea8a"
+      "sha256": "69915e43f0fd04361ad28c544e8c99141a433634696f7e4f51d7c4738bcc77a4"
     },
     {
       "path": "examples/platform/nvidia-groot/migration/c/README.zh.md",
-      "bytes": 759,
+      "bytes": 1156,
       "mode": 420,
-      "sha256": "4cbc120dc986a4cf0e9ac9f104d5b0b735903ee90c3c060b82a396927b69cfa0"
+      "sha256": "ab25f8917e640a14c55ae7ab5a745f13d1dab5b5ec96dd32d80e65e8d12f3d63"
     },
     {
       "path": "examples/platform/nvidia-groot/migration/c/resource.c",

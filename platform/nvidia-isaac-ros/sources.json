@@ -4,6 +4,10 @@
     {
       "repository": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common",
       "revision": "7bec6ae5dbb2faa11617f40226e8932a4a94e6e4"
+    },
+    {
+      "repository": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common",
+      "revision": "57a6485a1322e38791b1cb21c20a9e897fbc50a5"
     }
   ],
   "admission": "generic-driver",

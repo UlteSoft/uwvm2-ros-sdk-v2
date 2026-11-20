@@ -100,6 +100,7 @@ def main():
             names = ["README.md", "README.zh.md", "xmake.lua"]
             if language == "c":
                 names.extend(("upstream.lock", "resource.c"))
+                names.extend(path.name for path in (ROOT / directory).glob("upstream-*.lock"))
             else:
                 names.append("GoalStatus.fs")
             inputs = [directory + name for name in names]
@@ -190,6 +191,7 @@ def main():
                              "document/en/xmake-api-index.md", "document/zh/xmake-api-index.md"])
     language_files = {
         "as": ["bin/wras", "language/as/driver.py", "language/as/compile.mjs",
+               "language/as/driver_lowering.mjs", "language/as/wros.ts",
                "document/en/assemblyscript.md", "document/zh/assemblyscript.md",
                "third-parties/typescript/node-linux-x64.xz", "third-parties/typescript/LICENSE-node",
                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/assemblyscript").iterdir() if p.is_file()]],

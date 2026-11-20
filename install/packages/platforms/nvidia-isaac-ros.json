@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "platform/nvidia-isaac-ros/sources.json",
-      "bytes": 278,
+      "bytes": 428,
       "mode": 420,
-      "sha256": "b616e7f859811240e44bc26b59684916216b5c2630821c855a6d0d593ee5a029"
+      "sha256": "618d809ae119e64aa3a815a17d371429c65a89af1bf819f867fb9bd0f02d3999"
     }
   ]
 }

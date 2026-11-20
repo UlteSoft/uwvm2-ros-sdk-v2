@@ -56,21 +56,27 @@
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/README.md",
-      "bytes": 536,
+      "bytes": 1113,
       "mode": 420,
-      "sha256": "a00819131eb308512b7068e0ca9bce044a2e51e3b3829a405f118146ae950dff"
+      "sha256": "c02605896e84a7775bc720bb595230ce3d0058cb5d6f2d4003b5098eacd73871"
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/README.zh.md",
-      "bytes": 537,
+      "bytes": 1086,
       "mode": 420,
-      "sha256": "1a80eeecdd0b6c16197b5cbbf5f216241db3ee168fe5ff79db690640227e5357"
+      "sha256": "d6d9a9e15a23ddf443f14c987476163033a4253b5e72500c2bf4b60b0529c08f"
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/resource.c",
       "bytes": 1081,
       "mode": 420,
       "sha256": "b14d3e7c6ee6e2bb172b946e9a652e8b6c31226896ff6e5b6eb64a01469821ad"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/migration/c/upstream-5.1.lock",
+      "bytes": 256,
+      "mode": 420,
+      "sha256": "797c4e2d7bcfb51c8834bf8580d33e883f71db2f1de397f8339d255bb6d7ccbf"
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/upstream.lock",
@@ -80,9 +86,9 @@
     },
     {
       "path": "examples/platform/nvidia-isaac-ros/migration/c/xmake.lua",
-      "bytes": 1085,
+      "bytes": 1512,
       "mode": 420,
-      "sha256": "116e4b919c2004dc1f2550f56ff41937f0e5f49bd15718ff262f2ae93e07ccf7"
+      "sha256": "38f2dd682f276d34a279b2a37e6bc4a333627d9b245e3c15917992edb72363e9"
     }
   ]
 }
