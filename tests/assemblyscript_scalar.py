@@ -16,10 +16,28 @@ from platform_projects import passed_engines
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
+from artifacts import sections
 from bootstrap import MAX_METADATA, Source, install
-from imports import inspect
+from imports import Reader, inspect
 
 ABI = {"module": "uwvm_ros_v2", "name": "abi", "kind": 0, "params": [], "results": ["i32"]}
+
+
+def function_names(data):
+    """@brief Read function names from the standard Wasm name custom section."""
+    names = set()
+    for _, _, section_name, body in sections(data):
+        if section_name != "name":
+            continue
+        while body.position < len(body.data):
+            kind = body.byte()
+            subsection = Reader(body.take(body.uint()))
+            if kind == 1:
+                for _ in range(subsection.count()):
+                    subsection.uint()
+                    names.add(subsection.name())
+                subsection.end()
+    return names
 
 
 def main():
@@ -89,8 +107,8 @@ def main():
             if index == 0:
                 wras = sdk / "bin/wras"
                 plain = scratch / "plain.ts"
-                plain.write_text("export function f(x:i32):i32{return x+1;}\n"
-                                 "export function _start():void{if(f(41)!=42)unreachable();}\n")
+                plain.write_text("export function gainSample(x:i32):i32{return x+1;}\n"
+                                 "export function _start():void{if(gainSample(41)!=42)unreachable();}\n")
                 module = plain.with_suffix(".wasm")
                 checks["no_mte"] = run("explicit-no-mte", [wras, plain, "--no-mte", "--build-receipt", "-o", module],
                                        scratch, env)
@@ -100,6 +118,20 @@ def main():
                     "explicit-no-mte-int",
                     [args.vm, "-WF3", "-Rint", "--wasm-feature-disable-memtag-extension", "--run", module],
                     scratch, env,
+                )
+                debug = scratch / "debug.wasm"
+                checks["debug_names"] = run(
+                    "debug-names", [wras, plain, "--no-mte", "--build-receipt", "-g", "-o", debug],
+                    scratch, env,
+                )
+                assert all(name != "name" for _, _, name, _ in sections(module.read_bytes()))
+                names = function_names(debug.read_bytes())
+                assert {"input/gainSample", "input/_start"} <= names, names
+                checks["debug_names"].update(
+                    function_names=sorted(names), debug_wasm_sha256=sha(debug), plain_wasm_sha256=sha(module),
+                )
+                checks["debug_validate"] = run(
+                    "debug-validate", [args.wasm_tools, "validate", debug], scratch, env,
                 )
                 bad = scratch / "managed.ts"
                 bad.write_text("export function f(n:i32):i32 {let a=new Array<i32>(n);a[0]=n;return a[0];}\n"
