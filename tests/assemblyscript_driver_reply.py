@@ -185,7 +185,7 @@ def main():
         wasm = args.output / "controller.wasm"
         build = [sdk / "bin/wras", app, "--ros-driver", "--build-receipt", "-g",
                  *sum((["--ros-operation", name] for name in (
-                     "capability.open", "capability.close", "driver.connect", "driver.submit",
+                     "capability.open", "driver.connect", "driver.submit",
                      "driver.result", "driver.disconnect")), []), "-o", wasm]
         built = subprocess.run(list(map(str, build)), cwd=ROOT, env=env,
                                capture_output=True, timeout=120)
