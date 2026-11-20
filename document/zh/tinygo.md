@@ -81,3 +81,30 @@ VM 和 sysroot 做验收。用 `--approved-tinygo-inputs-sha256` 指定包含 `g
 执行 `wrtg PROJECT -o controller.wasm --build-receipt` 即可构建。
 Xmake 可以直接使用该安装提供的工具路径。编译器在构建前校验工具链各组件。
 签名声明或经过度量的编译器输入发生变化后，需要重新审核。
+
+## 复跑上游数值库测试
+
+[Gonum 复跑脚本](../../tests/tinygo_gonum_upstream.py) 执行
+[Gonum v0.17.0](https://github.com/gonum/gonum/releases/tag/v0.17.0)
+的全部 7 项 `floats/scalar` 测试。将原始 `floats/scalar/scalar.go`、
+`floats/scalar/scalar_test.go` 和 `LICENSE` 按文件名放进同一输入目录。
+脚本校验这三个文件的摘要，先用原生 Go 执行测试，再用按需安装的签名 SDK 中的
+`wrtg` 编译同一组断言。Wasm 用例以客户模块内的断言替换 Go 测试运行器。
+
+在 64 GiB 测试 cgroup 内，从 SDK 源码目录运行下列命令。输出目录必须尚未创建。
+SDK 提交号和 VM 须匹配为 wasm32 Core 3.0、EH 和 MTE 验收的签名站点配置。
+
+```sh
+python3 tests/tinygo_gonum_upstream.py --input "$GONUM_SCALAR_INPUTS" \
+  --site "$SITE" --vm "$UWVM" --commit "$REV" --platform unitree \
+  --output .tmp/tinygo-gonum
+```
+
+产物仅导入 `uwvm_ros_v2.abi`。解释器和 LLVM AOT 引擎都必须在该接口开放时
+通过测试，并在接口隐藏时拒绝加载同一个模块。脚本在 `results.json` 中记录源码、
+构建和执行证据。
+
+要验证签名 TinyGo SDK 与独立仿真驱动的交互，在
+[MuJoCo 测试矩阵](../../tests/mujoco_matrix.py) 中选择 `language` 为 `tinygo`、
+`address_bits` 为 `32`，并提供与所选平台对应的固定版本模型。Doosan M0609
+复跑通过 TLS 和两种 VM 引擎分别检查正常运动、越界拒绝及接收端故障。

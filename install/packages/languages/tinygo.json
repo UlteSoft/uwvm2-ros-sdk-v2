@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/tinygo.md",
-      "bytes": 7199,
+      "bytes": 8793,
       "mode": 420,
-      "sha256": "8475c22fbf2764442d5ad0821a8dc0714ca24fcc3205af1a89d6bf89d18e1f54"
+      "sha256": "9d5916e33bde25b67b77c011ff5857494f2aff2be2be9db7baa95c87554b0a28"
     },
     {
       "path": "document/zh/tinygo.md",
-      "bytes": 6637,
+      "bytes": 8131,
       "mode": 420,
-      "sha256": "df0b15a00875e4a3e810dcc9cbb89dbc391cea54f413bbd12a851f04712749b4"
+      "sha256": "9d65445391a670a7c748666d450875e934f94ebfc9964d52dd2e069872bbe521"
     },
     {
       "path": "include/wros/scene.h",

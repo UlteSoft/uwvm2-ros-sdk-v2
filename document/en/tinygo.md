@@ -128,3 +128,34 @@ the selected producer. Xmake accepts the same site installation without
 producer environment variables. The compiler verifies the producer components
 before compiling. Changing the signed release or a measured compiler input
 requires a new review.
+
+## Replay an upstream numerical library
+
+The [Gonum replay](../../tests/tinygo_gonum_upstream.py) checks all seven
+upstream `floats/scalar` test functions from [Gonum v0.17.0](https://github.com/gonum/gonum/releases/tag/v0.17.0).
+Pass an input directory containing the original `floats/scalar/scalar.go`,
+`floats/scalar/scalar_test.go` and `LICENSE` under their base names. The
+runner checks all three hashes, runs the tests with native Go, and compiles
+the same assertions with `wrtg` from a selective signed SDK installation.
+The Wasm harness replaces Go's test runner with guest-local assertions.
+
+Run this command from the SDK source checkout in the 64 GiB test cgroup.
+Use a fresh output directory and the SDK revision and VM from the signed
+wasm32 Core 3.0, EH and MTE site profile.
+
+```sh
+python3 tests/tinygo_gonum_upstream.py --input "$GONUM_SCALAR_INPUTS" \
+  --site "$SITE" --vm "$UWVM" --commit "$REV" --platform unitree \
+  --output .tmp/tinygo-gonum
+```
+
+The resulting module imports only `uwvm_ros_v2.abi`. The interpreter and
+LLVM AOT engine must both execute the tests with that interface exposed and
+reject the same module when the interface is hidden. The runner records
+source, build and execution evidence in `results.json`.
+
+To test the signed TinyGo SDK against an isolated simulated driver, use the
+[MuJoCo matrix](../../tests/mujoco_matrix.py) with `language` set to `tinygo`,
+`address_bits` set to `32` and a pinned model from the selected platform.
+The Doosan M0609 replay exercises normal motion, range rejection and
+receiver failure using TLS and both VM engines.
