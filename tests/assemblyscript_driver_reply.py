@@ -244,10 +244,6 @@ def main():
                     CONTRACT.hex(), "4096", "768", "30000000000", str(deadline + 1_000_000_000),
                     str(vm_key), str(clock),
                     "--ros-scene-driver-schema", "robot", ALIAS, "parameter.get", "32", "1024", "8",
-                    "--ros-scene", "robot", "platform_extension",
-                    "uwvm_ros_v2.platform_extension.unitree.v1", "enable",
-                    "--ros-scene", "robot", "platform_extension.bind",
-                    "uwvm_ros_v2.platform_extension.unitree.v1", ALIAS,
                     "--run", wasm,
                 ])
                 process = subprocess.Popen(args_vm, pass_fds=(left.fileno(), vm_key, clock),
