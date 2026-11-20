@@ -1,5 +1,6 @@
 {
   "id": "wat",
-  "development_package": false,
-  "command_name": "wrwat"
+  "development_package": true,
+  "command_name": "wrwat",
+  "development_scope": "core-wasm-assembler"
 }

@@ -233,6 +233,19 @@
         }
       ]
     },
+    "wasm-tools": {
+      "version": "1.263.0",
+      "release_url": "https://github.com/bytecodealliance/wasm-tools/releases/tag/v1.263.0",
+      "commit": "7a2fa422cdf9aeeaf488a2acac8bc94a078bfa32",
+      "draft": false,
+      "prerelease": false,
+      "checks": [
+        {
+          "path": "third-parties/wasm-tools/wasm-tools-1.263.0-x86_64-linux.tar.gz",
+          "sha256": "21c036c1740a0552124c79c6e2170cb61c5b016005671a6d5bc06cf642165431"
+        }
+      ]
+    },
     "assemblyscript": {
       "version": "0.28.20",
       "release_url": "https://github.com/AssemblyScript/assemblyscript/releases/tag/v0.28.20",
@@ -291,6 +304,11 @@
     }
   },
   "languages": {
+    "wat": {
+      "components": [
+        "wasm-tools"
+      ]
+    },
     "as": {
       "components": [
         "assemblyscript",

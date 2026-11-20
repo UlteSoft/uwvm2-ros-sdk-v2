@@ -36,6 +36,7 @@ The public compiler name uses `wr` followed by the language abbreviation. Use th
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [TypeScript](typescript.md) | `typescript` | `wrts` |
 | [AssemblyScript](assemblyscript.md) | `as` | `wras` |
+| [WebAssembly text](wat.md) | `wat` | `wrwat` |
 | [D BetterC](d.md) | `d` | `wrd` |
 | Java | `java` | `wrjava` |
 | Kotlin | `kotlin` | `wrkt` |

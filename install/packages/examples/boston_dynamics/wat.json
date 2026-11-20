@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/wat/controller.wat",
+      "bytes": 528,
+      "mode": 420,
+      "sha256": "bcd495077ea50b5b7b6879cb1b660e1e43e96b55b0ea7324f7b19f64663a5f65"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/common/wat/xmake.lua",
+      "bytes": 524,
+      "mode": 420,
+      "sha256": "5c9dd0354688bbe18bf31aeaedfcdb629a3fa1b83f9ede83d44d905566b79325"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/wat/driver.wat",
+      "bytes": 1255,
+      "mode": 420,
+      "sha256": "a080c2ead2272f1018bff321c26a76d362be4d5368d80922b615dd69788a6098"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/extension/wat/xmake.lua",
+      "bytes": 595,
+      "mode": 420,
+      "sha256": "cecf04a809a55601928ef6a003146985368a0607b058e0058d5ffb829499a236"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/wat/grid.wat",
+      "bytes": 833,
+      "mode": 420,
+      "sha256": "a25ba56ec15047aa11d55835a21335b824d1ce5af7f6b6c75006f636139d420e"
+    },
+    {
+      "path": "examples/platform/boston_dynamics/migration/wat/xmake.lua",
+      "bytes": 460,
+      "mode": 420,
+      "sha256": "27b0ce7a786add2138839ebd51e1070354d96c4a5ce2750201a54177d014eae4"
+    }
+  ]
+}

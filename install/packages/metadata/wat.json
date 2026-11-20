@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/wat.json",
-      "bytes": 77,
+      "bytes": 122,
       "mode": 420,
-      "sha256": "e4d53c36e5e62e28f80b1f60cdb50b284dc75a91f68448ebe93d9f8b82ddc9da"
+      "sha256": "6fb94f2cbd0d67251f555dbce8b9314a78ac8bce13727d7580080d4796e9e2ff"
     }
   ]
 }

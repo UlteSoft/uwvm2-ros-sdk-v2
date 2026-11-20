@@ -37,5 +37,5 @@
 | tinygo | [common/tinygo](common/tinygo/) | [extension/tinygo](extension/tinygo/) | [migration/tinygo](migration/tinygo/) |
 | typescript | [common/typescript](common/typescript/) | [extension/typescript](extension/typescript/) | [migration/typescript](migration/typescript/) |
 | vbnet | [common/vbnet](common/vbnet/) | [extension/vbnet](extension/vbnet/) | [migration/vbnet](migration/vbnet/) |
-| wat | — | — | — |
+| wat | [common/wat](common/wat/) | [extension/wat](extension/wat/) | [migration/wat](migration/wat/) |
 | zig | [common/zig](common/zig/) | [extension/zig](extension/zig/) | [migration/zig](migration/zig/) |

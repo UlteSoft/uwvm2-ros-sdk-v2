@@ -3,9 +3,9 @@ import argparse
 import json
 
 
-PROJECT_LANGUAGES = "as c cpp csharp d fortran fsharp go java js kotlin lua nim objectc py rs ruby tinygo typescript vbnet zig".split()
+PROJECT_LANGUAGES = "as c cpp csharp d fortran fsharp go java js kotlin lua nim objectc py rs ruby tinygo typescript vbnet wat zig".split()
 BINDINGS = {"d": "d", "c": "c", "cpp": "c", "objectc": "c", "rs": "rs", "as": "as", "nim": "nim", "zig": "zig"}
-DEVELOPMENT = ("as", "go", "c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim", "d", "typescript", "py", "ruby", "zig")
+DEVELOPMENT = ("as", "go", "c", "cpp", "fortran", "js", "lua", "objectc", "rs", "tinygo", "nim", "d", "typescript", "py", "ruby", "wat", "zig")
 
 # Command spellings are part of the per-commit SDK contract. A command name
 # can be reserved before its language has an installable compiler package.
@@ -76,6 +76,8 @@ def main():
         if args.component in ("development", "compiler-source", "migration"):
             if args.language not in DEVELOPMENT:
                 parser.error("a development package has not been published for this language")
+            if args.language == "wat" and args.component == "compiler-source":
+                parser.error("use the WAT development component for the pinned upstream assembler")
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
             if args.language == "py":
                 packages.append("python-runtime/" + (args.python_target or ["wasm32"])[0])

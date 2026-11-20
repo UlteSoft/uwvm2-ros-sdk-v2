@@ -144,6 +144,8 @@ def main():
             metadata.update(development_scope="register-only-wasm32", optional_components=["compiler-source"])
         if language == "as":
             metadata.update(development_scope="scalar-wasm32")
+        if language == "wat":
+            metadata.update(development_scope="core-wasm-assembler")
         if language == "zig":
             metadata.update(development_scope="freestanding-zig-core3")
         if language == "ruby":
@@ -188,6 +190,8 @@ def main():
                "document/en/assemblyscript.md", "document/zh/assemblyscript.md",
                "third-parties/typescript/node-linux-x64.xz", "third-parties/typescript/LICENSE-node",
                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/assemblyscript").iterdir() if p.is_file()]],
+        "wat": ["bin/wrwat", "language/wat/driver.py", "document/en/wat.md", "document/zh/wat.md",
+                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/wasm-tools").iterdir() if p.is_file()]],
         "c": ["bin/wrc", "include/wros/scene.h", "examples/c/body.c", "examples/c/xmake.lua"],
         "cpp": ["bin/wrc", "bin/wrcc", "include/wros/scene.h", "document/en/cpp.md", "document/zh/cpp.md",
                 "examples/cpp/herbceptions/channel.cpp", "examples/cpp/herbceptions/xmake.lua"],

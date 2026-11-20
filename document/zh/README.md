@@ -35,6 +35,7 @@
 | [JavaScript](js.md) | `js` | `wrjs` |
 | [TypeScript](typescript.md) | `typescript` | `wrts` |
 | [AssemblyScript](assemblyscript.md) | `as` | `wras` |
+| [WebAssembly 文本](wat.md) | `wat` | `wrwat` |
 | [D BetterC](d.md) | `d` | `wrd` |
 | Java | `java` | `wrjava` |
 | Kotlin | `kotlin` | `wrkt` |
