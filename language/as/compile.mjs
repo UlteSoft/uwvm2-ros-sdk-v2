@@ -10,7 +10,8 @@ const compile = await asc.compileString({"input.ts": source}, {
   runtime: "stub",
   noExportMemory: true,
   optimizeLevel: 3,
-  shrinkLevel: 1,
+  // Select the upstream full dtoi32 algorithm for NativeMath integer conversion.
+  shrinkLevel: 0,
   debug: process.argv.includes("--debug"),
 });
 const diagnostics = compile.stderr.toString();
@@ -21,6 +22,8 @@ if (compile.error || !compile.binary) {
 
 const module = binaryen.readBinary(compile.binary);
 try {
+  // Preserve saturating scalar float-to-int conversions when validating Core Wasm.
+  module.setFeatures(module.getFeatures() | binaryen.Features.NontrappingFPToInt);
   module.runPasses(["remove-unused-module-elements"]);
   if (module.hasMemory() || !module.validate()) {
     throw new Error("The scalar AssemblyScript profile requires validated Wasm without linear memory");

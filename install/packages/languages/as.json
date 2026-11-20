@@ -20,9 +20,9 @@
     },
     {
       "path": "language/as/compile.mjs",
-      "bytes": 1532,
+      "bytes": 1781,
       "mode": 420,
-      "sha256": "63bb769c7116127966b2bd9d91d3d378e7e9d883ff148250156225a9f34795b4"
+      "sha256": "99119626ea9164d7b2660ea7cd8a4e22e0753b2eb8ee836e158b5651fcc41745"
     },
     {
       "path": "language/as/driver.py",
