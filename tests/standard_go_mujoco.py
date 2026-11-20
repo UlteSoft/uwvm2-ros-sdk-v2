@@ -9,14 +9,15 @@ import tempfile
 
 DRIVE = """package robot
 
-// @brief Select the signed test setpoint from the current simulation step.
+// @brief Select the signed test setpoint using a guarded scalar division.
 // @param step Simulation step counter.
 // @return Negative one for even steps and positive one for odd steps.
 func Drive(step uint32) int32 {
-    if step & 1 == 0 {
+    if step == 0 {
         return -1
     }
-    return 1
+    oddSteps := step * (step & 1)
+    return int32(oddSteps / step)*2 - 1
 }
 
 // @brief Report successful startup.
@@ -80,7 +81,7 @@ def main():
                  "--openssl-root", args.openssl_root, "--vendor-model", args.vendor_model,
                  "--vendor-assets", args.vendor_assets, "--output", output, "--platform-targets", targets]
         status = simulation.main(list(map(str, flags)), compile_guest=compile_adapter, guest_widths=(32,),
-                                 guest_name="standard-Go conditional scalar law, Wasm driver test adapter",
+                                 guest_name="standard-Go guarded scalar division, Wasm driver test adapter",
                                  guest_inputs=(compiler, source, algorithm, Path(__file__)))
         if status:
             return status
