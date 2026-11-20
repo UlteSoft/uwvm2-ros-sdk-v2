@@ -1,11 +1,12 @@
 """@file jvm_raw_bits.py
-@brief Check the signed JVM raw float/double admission and exact runtime bits.
+@brief Check the signed JVM primitive bit operations and their admission boundaries.
 """
 import argparse
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -29,8 +30,8 @@ def main():
     out.mkdir(mode=0o700)
     env = {key: value for key, value in os.environ.items() if not key.startswith(("WROS_", "UWVM_", "XMAKE_"))}
     env.update(PATH="/usr/bin:/bin", WROS_VM=str(args.vm), TMPDIR=str(out), PYTHONDONTWRITEBYTECODE="1")
-    report = dict(complete=False, commit=args.commit, steps={}, cgroup=cgroup,
-                  raw_cases=dict(float=11, double=11),
+    report = dict(complete=False, commit=args.commit, steps={}, products={}, cgroup=cgroup,
+                  raw_cases=dict(float=11, double=11), leading_zero_cases=dict(int=8230, long=8262),
                   vm_sha256=hashlib.sha256(args.vm.read_bytes()).hexdigest())
 
     def save():
@@ -61,31 +62,47 @@ def main():
     bundle = (toolchain / "libexec/wros/jvm/java").resolve(strict=True)
     native_env = env | {"LD_LIBRARY_PATH": os.pathsep.join(str(bundle / name) for name in
         ("lib/host-runtime", "jdk21/lib/server", "jdk21/lib"))}
-    native = out / "native"
-    native.mkdir()
-    fixture = ROOT / "tests/jvm_raw_bits/RawBits.java"
-    report["fixture_sha256"] = hashlib.sha256(fixture.read_bytes()).hexdigest()
+    fixtures = ROOT / "tests/jvm_raw_bits"
     java = [bundle / "jdk21/bin/java", "-Xint", "-XX:-CreateCoredumpOnCrash"]
-    run("native-javac", [*java, "-m", "jdk.compiler/com.sun.tools.javac.Main", "-proc:none", "-g",
-                        "-d", native, fixture], environment=native_env)
-    run("native-run", [*java, "-cp", native, "example.RawBits"], environment=native_env)
-
-    guest = out / "raw.wasm"
+    javac = [*java, "-m", "jdk.compiler/com.sun.tools.javac.Main", "-proc:none", "-g"]
     wrjava = sdk / "bin/wrjava"
-    run("wasm-build", [wrjava, "--main-class", "example.RawBits", fixture,
-                      "--work", out / "compiler", "-o", guest])
-    product = guest.read_bytes()
-    if inspect(product):
-        raise ValueError("the raw-bit guest requires no host imports")
-    report["guest_sha256"] = hashlib.sha256(product).hexdigest()
-    run("wasm-disassembly", [toolchain / "bin/llvm-objdump", "-d", guest])
-    runner = [sys.executable, "-B", sdk / "tools/xmake/run_guest.py", guest, "wasm32", "3.0", "single",
-              "--exceptions", "eh", "--check-tags"]
-    for engine in ("int", "aot"):
-        run("wasm-" + engine, [*runner, "--engine", engine])
+
+    def native_check(name, entry, files):
+        native = out / (name + "-native")
+        native.mkdir()
+        run(name + "-native-javac", [*javac, "-d", native, *files], environment=native_env)
+        run(name + "-native-run", [*java, "-cp", native, entry], environment=native_env)
+
+    def check_fixture(name, entry, files):
+        native_check(name, entry, files)
+        guest = out / (name + ".wasm")
+        run(name + "-wasm-build", [wrjava, "--main-class", entry, *files,
+                                  "--work", out / (name + "-compiler"), "-o", guest])
+        product = guest.read_bytes()
+        if inspect(product):
+            raise ValueError("the primitive bit guest requires no host imports")
+        report["products"][name] = dict(guest_sha256=hashlib.sha256(product).hexdigest(),
+            source_sha256={path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in files})
+        run(name + "-wasm-disassembly", [toolchain / "bin/llvm-objdump", "-d", guest])
+        runner = [sys.executable, "-B", sdk / "tools/xmake/run_guest.py", guest, "wasm32", "3.0", "single",
+                  "--exceptions", "eh", "--check-tags"]
+        for engine in ("int", "aot"):
+            run(name + "-wasm-" + engine, [*runner, "--engine", engine])
+
+    original = out / "sources/fastutil/HashCommon.java"
+    body = original.read_text()
+    prefix = body[:body.index("/** Common code for all hash-based classes. */")]
+    powers = re.findall(r"\tpublic static (?:int|long) nextPowerOfTwo\([^\n]+\{\n[\s\S]+?^\t\}", body, re.MULTILINE)
+    if len(powers) != 2:
+        raise ValueError("missing pinned nextPowerOfTwo definitions")
+    selected = out / "HashCommon.java"
+    selected.write_text(prefix + "public class HashCommon {\n" + "\n".join(powers) + "\n}\n")
+    check_fixture("raw", "example.RawBits", (fixtures / "RawBits.java",))
+    check_fixture("leading", "example.LeadingZeros", (fixtures / "LeadingZeros.java", selected))
 
     for owner, method, signature, value in (
-        ("Float", "floatToIntBits", "(F)I", "0.0f"), ("Double", "doubleToLongBits", "(D)J", "0.0")
+        ("Float", "floatToIntBits", "(F)I", "0.0f"), ("Double", "doubleToLongBits", "(D)J", "0.0"),
+        ("Integer", "numberOfTrailingZeros", "(I)I", "0"), ("Long", "numberOfTrailingZeros", "(J)I", "0L"),
     ):
         source = out / "Reject.java"
         source.write_text("public class Reject { public static void main(String[] args) { "
@@ -95,20 +112,21 @@ def main():
         if (out / "rejected.wasm").exists():
             raise ValueError("denied code produced a Wasm file")
 
-    original = out / "sources/fastutil/HashCommon.java"
     probe = out / "Probe.java"
     probe.write_text("""import it.unimi.dsi.fastutil.HashCommon;
 public class Probe {
     public static void main(String[] args) {
-        if (HashCommon.float2int(-0.0f) != 0x80000000 || HashCommon.double2int(-0.0) != 0x80000000)
+        if (HashCommon.float2int(-0.0f) != 0x80000000 || HashCommon.double2int(-0.0) != 0x80000000
+                || HashCommon.nextPowerOfTwo(0) != 1 || HashCommon.nextPowerOfTwo(0L) != 1L)
             throw new AssertionError();
     }
 }
 """)
     # The release checks every method of the unmodified class. Its other
     # JDK dependencies remain outside the synchronous producer contract.
+    native_check("full-fastutil", "Probe", (original, probe))
     run("deny-full-fastutil", [wrjava, "--main-class", "Probe", original, probe, "-o", out / "full.wasm"],
-        denial=b"unsupported synchronous JVM feature: java/lang/Integer.numberOfLeadingZeros(I)I")
+        denial=b"unsupported synchronous JVM feature: java/lang/Math.ceil(D)D")
     report["complete"] = True
     save()
 
