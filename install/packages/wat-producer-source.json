@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "language/wat/mte-tool/Cargo.lock",
+      "bytes": 3112,
+      "mode": 420,
+      "sha256": "26f2548ccdb64ff05101d36361d31cce36aaf4dd866befa1a428c2f0aefa3bfc"
+    },
+    {
+      "path": "language/wat/mte-tool/Cargo.toml",
+      "bytes": 465,
+      "mode": 420,
+      "sha256": "8e2343fbb7ad641848b4152d87288ec814c7c186e9d97591a36de43dda4bf09f"
+    },
+    {
+      "path": "language/wat/mte-tool/extend.py",
+      "bytes": 3214,
+      "mode": 420,
+      "sha256": "e9296a53c955f0ec2d1dcdbfde3af2d96421501a6c56d6fe0b809ae21dc908f2"
+    },
+    {
+      "path": "language/wat/mte-tool/rebuild.py",
+      "bytes": 2513,
+      "mode": 420,
+      "sha256": "b644d6a464b9ce73ca66f44b64222a81a4b4b9720c915b9132a641b32d50132a"
+    },
+    {
+      "path": "language/wat/mte-tool/src/main.rs",
+      "bytes": 6985,
+      "mode": 420,
+      "sha256": "5ff8df02c5f8d2e16e9061958fb479c112fb6a3a3b5b82f0a0c54e953bb95f5a"
+    },
+    {
+      "path": "third-parties/wat-mte/sources.tar.xz",
+      "bytes": 1276612,
+      "mode": 420,
+      "sha256": "69186506bff2aba704acb7f9bdcd4cfaa91fa447fe8455d8fc927eda073b4c79"
+    }
+  ]
+}

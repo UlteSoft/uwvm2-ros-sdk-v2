@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
 from artifacts import sections
 from bootstrap import Source, install
+from guest_profile import Profile
+from imports import inspect
 
 
 def main():
@@ -72,6 +74,26 @@ def main():
           (func (export "_start")
             (i32.atomic.store (i32.const 0) (i32.const 81))
             (if (i32.ne (i32.atomic.load (i32.const 0)) (i32.const 81)) (then unreachable))))'''
+        tagged64 = '''(module
+          (memory 1 1)
+          (memory $wide i64 1 1 shared)
+          (func (export "_start")
+            (local $address i64)
+            (local.set $address (memtag.claim $wide (i64.const 128) (i64.const 16)))
+            (i64.atomic.store $wide (local.get $address) (i64.const 123))
+            (if (i64.ne (i64.atomic.load $wide (local.get $address)) (i64.const 123))
+                (then unreachable))
+            local.get $address
+            i64.const 16
+            memtag.release $wide
+            drop))'''
+        tagged_global = r'''(module
+          (memory $heap 1 1)
+          (data (i32.const 128) "\54")
+          (@custom "uwvm.memtag.linear.globals" "\02\01\00\80\01\10")
+          (func (export "_start")
+            (if (i32.ne (i32.load8_u (memtag.load $heap (i32.const 128))) (i32.const 84))
+              (then unreachable))))'''
 
         def build(label, wat, *flags, denial=None):
             text.write_bytes(wat if isinstance(wat, bytes) else wat.encode())
@@ -84,9 +106,18 @@ def main():
 
         def execute(label, arch="wasm32", core="3.0", eh_mode="eh", thread_mode="single", mte=True):
             for engine in ("int", "aot"):
-                run(label + "-" + engine, [sys.executable, runner, module, arch, core, thread_mode,
-                                          "--engine", engine, "--exceptions", eh_mode,
-                                          "--check-tags" if mte else "--disable-tags"])
+                if arch == "wasm64" and thread_mode == "threads":
+                    # Qualify Core atomics with a defined memory and no host startup ABI.
+                    assert mte and core == "3.0" and not inspect(module.read_bytes())
+                    profile = Profile(64, "3.0", True, mte=True, exceptions=eh_mode)
+                    vm = Path(env["WROS_VM"])
+                    command = [vm, *profile.uwvm_feature_flags(), "--runtime-" + engine,
+                               "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path", "disable",
+                               "--runtime-memtag-mode", "sync", "--debug-fault-action", "exit", "--run", module]
+                else:
+                    command = [sys.executable, runner, module, arch, core, thread_mode, "--engine", engine,
+                               "--exceptions", eh_mode, "--check-tags" if mte else "--disable-tags"]
+                run(label + "-" + engine, command)
 
         debug = build("mvp", empty, "--core", "mvp", "-g", "--build-receipt")
         assert ".debug_line" in {name for _, _, name, _ in sections(debug)}
@@ -102,17 +133,29 @@ def main():
         execute("memory64", "wasm64", mte=False)
         build("threads", atomics, "--threads", "--no-mte")
         execute("threads", thread_mode="threads", mte=False)
+        build("threads-mte-feature", atomics, "--threads")
+        execute("threads-mte-feature", thread_mode="threads")
+        build("memory64-threads-mte", tagged64, "--target", "wasm64", "--threads")
+        execute("memory64-threads-mte", "wasm64", thread_mode="threads")
+        build("tagged-global", tagged_global)
+        execute("tagged-global")
 
-        build("reject-memory", mem64, "--target", "wasm64", denial=b"default MTE requires no linear memory")
         build("reject-memory64", mem64, "--no-mte", denial=b"memory64")
         build("reject-threads", atomics, "--no-mte", denial=b"threads")
+        build("reject-mte-off", tagged64, "--target", "wasm64", "--threads", "--no-mte", denial=b"WasmMTE")
+        build("reject-tagged-address-width", tagged64.replace("(i64.const 128)", "(i32.const 128)"),
+              "--target", "wasm64", "--threads", denial=b"type mismatch")
+        build("reject-reserved-mte", tagged64.replace("memtag.claim", "memtag.add"),
+              "--target", "wasm64", "--threads", denial=b"unknown operator")
+        build("reject-metadata-version", tagged_global.replace(r"\02\01", r"\01\01"),
+              denial=b"globals version 2")
         build("reject-eh", eh, "--no-eh", denial=b"exceptions")
         build("reject-mvp-eh", empty, "--core", "mvp", "--eh", denial=b"MVP requires")
         build("reject-unselected", abi, denial=b"unauthorized import or signature")
         build("reject-signature", wrong_abi, "--ros-operation", "abi", denial=b"unauthorized import or signature")
         build("reject-missing", empty, "--ros-operation", "abi", denial=b"must import each selected")
         build("reject-unknown", empty, "--ros-operation", "absent", denial=b"select distinct operations")
-        build("reject-component", "(component)", denial=b"Component Model binaries")
+        build("reject-component", "(component)", denial=b"component")
         build("reject-wasip1", '(module (import "wasi_snapshot_preview1" "clock_time_get" (func)))',
               denial=b"unauthorized import or signature")
         build("reject-wasip2", '(module (import "wasi:io/poll@0.2.0" "poll" (func)))',
@@ -124,7 +167,7 @@ def main():
         build("preserve-artifact", empty)
         previous = module.read_bytes()
         text.write_text("(invalid)")
-        run("reject-preserve", [assembler, text, "-o", module], denial=b"error")
+        run("reject-preserve", [assembler, text, "-o", module], denial=b"expected valid module field")
         assert module.read_bytes() == previous
     report = {"complete": True, "commit": args.commit, "cgroup": group, "checks": results}
     (args.output / "results.json").write_text(json.dumps(report, indent=2) + "\n")

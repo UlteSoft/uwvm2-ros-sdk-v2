@@ -8,51 +8,75 @@
     },
     {
       "path": "document/en/wat.md",
-      "bytes": 3148,
+      "bytes": 4414,
       "mode": 420,
-      "sha256": "503752801e64db8dc90e074d9c4492833d02b677a058a857e6d7b88fdf3680d0"
+      "sha256": "b672e8c76ce60b56f70e7e6038666b016d4c9d7371f55507d98fb0c4585bb826"
     },
     {
       "path": "document/zh/wat.md",
-      "bytes": 2691,
+      "bytes": 3948,
       "mode": 420,
-      "sha256": "766dbd9c83083ccac656c9a6bbf74c973057edda8890d73801b8d31edad13514"
+      "sha256": "4ca389842fb2669d7bb657a4b4caec77142d1dc9275eff4082e762f30da105e8"
+    },
+    {
+      "path": "examples/wat/thread-mte/main.wat",
+      "bytes": 1968,
+      "mode": 420,
+      "sha256": "035d2e7fdc8212bac22b4a30ff12bb01554c79f6b8f53e5e055bb0ce85fbb60d"
+    },
+    {
+      "path": "examples/wat/thread-mte/owner.wat",
+      "bytes": 125,
+      "mode": 420,
+      "sha256": "be1f0b4ac0451cfd9f80288b08765ba8c78faf772aced62a942f60862b445054"
+    },
+    {
+      "path": "examples/wat/thread-mte/xmake.lua",
+      "bytes": 708,
+      "mode": 420,
+      "sha256": "26538ff26ecce4c014b68c3151b9462ab0b696e9ebdea5e15545454f0db51cbb"
     },
     {
       "path": "language/wat/driver.py",
-      "bytes": 6923,
+      "bytes": 8935,
       "mode": 420,
-      "sha256": "938f21b5c210e674917dd87ffb33b5271e9705c9868a0c9ad57f1bd1dd03a50c"
+      "sha256": "bee4e98b83419010e8ec464724fb4be8247587e8706fa1b29962cc071d054f71"
     },
     {
       "path": "language/wat/xmake/adapter.lua",
-      "bytes": 1484,
+      "bytes": 1630,
       "mode": 420,
-      "sha256": "b1088569a8467d939db868c293824710d48ff6859657cfa85e51e0df5b0223f6"
+      "sha256": "07cc0a1b6a4123ba0d64b7e6329801e89caaf7ccd38df4cf279ea2697385e4ff"
     },
     {
-      "path": "third-parties/wasm-tools/LICENSE-APACHE",
+      "path": "third-parties/wat-mte/LICENSE-APACHE",
       "bytes": 10847,
       "mode": 420,
       "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
     },
     {
-      "path": "third-parties/wasm-tools/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "path": "third-parties/wat-mte/LICENSE-Apache-2.0_WITH_LLVM-exception",
       "bytes": 12242,
       "mode": 420,
       "sha256": "a6c48161a09acc75a0e25503bab66a731eb5fba5392ed4bb4743e4ba5085327a"
     },
     {
-      "path": "third-parties/wasm-tools/LICENSE-MIT",
+      "path": "third-parties/wat-mte/LICENSE-MIT",
       "bytes": 1023,
       "mode": 420,
       "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
     },
     {
-      "path": "third-parties/wasm-tools/wasm-tools-1.263.0-x86_64-linux.tar.gz",
-      "bytes": 5976062,
+      "path": "third-parties/wat-mte/release.json",
+      "bytes": 524,
       "mode": 420,
-      "sha256": "21c036c1740a0552124c79c6e2170cb61c5b016005671a6d5bc06cf642165431"
+      "sha256": "018df76cc1b71afe81055d064d197e58858247c61d3fcf5cfd24004aee73272f"
+    },
+    {
+      "path": "third-parties/wat-mte/wros-wat-core-linux-x86_64.xz",
+      "bytes": 645592,
+      "mode": 420,
+      "sha256": "ee6fab75800b3e45454f4a9973fa609a78c6e5abd5c367f30463523193aa3b11"
     }
   ]
 }

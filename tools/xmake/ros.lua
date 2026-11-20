@@ -119,6 +119,11 @@ function add_wros_exports(...)
     add_values("wros.exports", ...)
 end
 
+--- @brief Select the exact external memory export imported by a WAT target.
+function set_wros_wat_shared_memory(module, field)
+    set_values("wros.wat_shared_memory", module, field)
+end
+
 --- @brief Select the ROS operations compiled into the embedded Lua runtime.
 function add_wros_lua_operations(...)
     add_values("wros.lua_operations", ...)

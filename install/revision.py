@@ -76,8 +76,6 @@ def main():
         if args.component in ("development", "compiler-source", "migration"):
             if args.language not in DEVELOPMENT:
                 parser.error("a development package has not been published for this language")
-            if args.language == "wat" and args.component == "compiler-source":
-                parser.error("use the WAT development component for the pinned upstream assembler")
             packages.extend(("frontend", "xmake/common", "xmake/platforms/" + args.platform, "languages/" + args.language))
             if args.language == "py":
                 packages.append("python-runtime/" + (args.python_target or ["wasm32"])[0])
@@ -88,7 +86,8 @@ def main():
                 if args.language == "cpp":
                     packages.append("migration/tf2-buffer")
             if args.component == "compiler-source":
-                packages.append("go-producer-source" if args.language == "go" else "compiler-source")
+                packages.append({"go": "go-producer-source", "wat": "wat-producer-source"}
+                                .get(args.language, "compiler-source"))
                 if args.language == "nim":
                     packages.append("nim-producer-source")
     if args.component == "development" and args.language == "c":

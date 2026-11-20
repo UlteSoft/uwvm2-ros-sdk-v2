@@ -1,0 +1,17 @@
+[package]
+name = "wros-wat-core"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+wast = { path = "vendor/wast-263.0.0", default-features = false, features = ["wasm-module", "dwarf"] }
+wasmparser = { path = "vendor/wasmparser-memtag", default-features = false, features = ["std", "validate", "features", "simd"] }
+
+[patch.crates-io]
+wasm-encoder = { path = "vendor/wasm-encoder-0.263.0" }
+
+[profile.release]
+debug = 1
+lto = "thin"
+panic = "abort"

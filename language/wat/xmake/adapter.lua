@@ -19,6 +19,9 @@ function build(target, req, sources)
     local argv = {path.absolute(sources[1]), "--core", req.core, "--target", req.arch,
                   req.mte_flag, req.eh and "--eh" or "--no-eh", "-o", path.absolute(target:targetfile())}
     if req.threads then table.insert(argv, "--threads") end
+    if #req.wat_shared_memory > 0 then
+        table.join2(argv, {"--shared-memory", req.wat_shared_memory[1], req.wat_shared_memory[2]})
+    end
     if req.build_receipt then table.insert(argv, "--build-receipt") end
     if target:get("symbols") then table.insert(argv, "-g") end
     for _, operation in ipairs(req.operations) do table.join2(argv, {"--ros-operation", operation}) end

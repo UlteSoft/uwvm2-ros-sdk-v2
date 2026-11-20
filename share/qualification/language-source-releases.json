@@ -241,8 +241,16 @@
       "prerelease": false,
       "checks": [
         {
-          "path": "third-parties/wasm-tools/wasm-tools-1.263.0-x86_64-linux.tar.gz",
-          "sha256": "21c036c1740a0552124c79c6e2170cb61c5b016005671a6d5bc06cf642165431"
+          "path": "third-parties/wat-mte/release.json",
+          "sha256": "018df76cc1b71afe81055d064d197e58858247c61d3fcf5cfd24004aee73272f"
+        },
+        {
+          "path": "third-parties/wat-mte/sources.tar.xz",
+          "sha256": "69186506bff2aba704acb7f9bdcd4cfaa91fa447fe8455d8fc927eda073b4c79"
+        },
+        {
+          "path": "third-parties/wat-mte/wros-wat-core-linux-x86_64.xz",
+          "sha256": "ee6fab75800b3e45454f4a9973fa609a78c6e5abd5c367f30463523193aa3b11"
         }
       ]
     },

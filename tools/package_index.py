@@ -191,7 +191,9 @@ def main():
                "third-parties/typescript/node-linux-x64.xz", "third-parties/typescript/LICENSE-node",
                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/assemblyscript").iterdir() if p.is_file()]],
         "wat": ["bin/wrwat", "language/wat/driver.py", "document/en/wat.md", "document/zh/wat.md",
-                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/wasm-tools").iterdir() if p.is_file()]],
+                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/wat-mte").iterdir()
+                  if p.is_file() and p.name != "sources.tar.xz"],
+                *[p.relative_to(ROOT).as_posix() for p in (ROOT / "examples/wat/thread-mte").iterdir() if p.is_file()]],
         "c": ["bin/wrc", "include/wros/scene.h", "examples/c/body.c", "examples/c/xmake.lua"],
         "cpp": ["bin/wrc", "bin/wrcc", "include/wros/scene.h", "document/en/cpp.md", "document/zh/cpp.md",
                 "examples/cpp/herbceptions/channel.cpp", "examples/cpp/herbceptions/xmake.lua"],
@@ -263,6 +265,9 @@ def main():
     ]
     package("go-producer-source", ["third-parties/go/go1.24.2.src.tar.gz", "language/go/LICENSE",
             *["language/go/producer/" + path for path in ("build.py", "main.go", "proof.go")]])
+    package("wat-producer-source", ["third-parties/wat-mte/sources.tar.xz",
+                                    *["language/wat/mte-tool/" + path for path in
+                                      ("Cargo.toml", "Cargo.lock", "extend.py", "rebuild.py", "src/main.rs")]])
     language_files["tinygo"] = [
         "bin/wrtg", "tools/wasm/tag_ir.cpp", "include/wros/scene.h", "document/en/tinygo.md", "document/zh/tinygo.md",
         *["language/tinygo/" + name for name in ("LICENSE-TinyGo", "toolchain-inputs.json", "check_site.py",
