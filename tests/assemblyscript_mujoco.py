@@ -21,6 +21,7 @@ from imports import inspect
 
 CONTROLLER = "assemblyscript-controller"
 SCENARIOS = {"success": 0, "range": 1, "crash": 2}
+CARRIER_PARAMS = ["i64", "i32", "i64", "i64", "i64", "i64", "i64"]
 
 
 def render_guest(suite, deadline, mode, count):
@@ -82,9 +83,12 @@ def main():
     parser.add_argument("--commit", required=True)
     for name in ("vm-source", "runtime", "mujoco", "openssl-root", "vendor-model", "vendor-assets", "output"):
         parser.add_argument("--" + name, required=True, type=lambda value: Path(value).resolve())
+    parser.add_argument("--vendor-model-max-mib", type=int, default=64)
     args = parser.parse_args()
     if not __debug__:
         parser.error("simulation qualification requires Python assertions")
+    if not 1 <= args.vendor_model_max_mib <= 512:
+        parser.error("the compiled model limit must be between 1 and 512 MiB")
     cgroup_record()
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     platform = json.loads(args.vendor_model.read_bytes())["platform"]
@@ -123,9 +127,13 @@ def main():
             run(wasm.stem + "-assemble", ["wat2wasm", "--enable-multi-memory", "--debug-names", wat, "-o", wasm],
                 env=env)
             imports = inspect(wasm.read_bytes())
-            expected = {"module": CONTROLLER, "name": "jointTarget", "kind": 0,
-                        "params": ["i64", "i32"], "results": ["f64"]}
-            assert [entry for entry in imports if entry["module"] != "uwvm_ros_v2"] == [expected]
+            expected = [{"module": CONTROLLER, "name": "jointTarget", "kind": 0,
+                         "params": ["i64", "i32"], "results": ["f64"]}]
+            for name, params in [(name, CARRIER_PARAMS) for name in suite.NAMES] + [
+                    ("capability.open", ["i32", "i64", "i64", "i64"])]:
+                expected.append({"module": "uwvm_ros_v2", "name": name, "kind": 0,
+                                 "params": params, "results": ["i32"]})
+            assert imports == expected
             return ["--wasip1-single-create", "main", "--wasip1-single-disable", "main",
                     "--wasip1-single-create", CONTROLLER, "--wasip1-single-disable", CONTROLLER,
                     "--wasm-preload-library", str(artifact), CONTROLLER]
@@ -135,6 +143,7 @@ def main():
             suite.main(["--source-root", str(args.vm_source), "--runtime", str(args.runtime),
                         "--mujoco", str(args.mujoco), "--openssl-root", str(args.openssl_root),
                         "--vendor-model", str(args.vendor_model), "--vendor-assets", str(args.vendor_assets),
+                        "--vendor-model-max-mib", str(args.vendor_model_max_mib),
                         "--platform-targets", str(registry), "--audit-calls", "--output", str(out)],
                        compile_guest=compile_guest, guest_name="AssemblyScript+WAT", guest_widths=(32,),
                        guest_inputs=(Path(__file__), source, artifact, sidecar, sdk / "bin/wras",
