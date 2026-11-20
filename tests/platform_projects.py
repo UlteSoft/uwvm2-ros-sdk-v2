@@ -68,6 +68,8 @@ def main():
     p.add_argument("--sysroots", type=Path, help="matching local sysroot manifest")
     p.add_argument("--managed-host", type=Path, help="prefix created by prepare_host.py for the selected .NET language")
     p.add_argument("--managed-toolchain", type=Path, help="qualified Wasm LLVM installation for .NET AOT")
+    p.add_argument("--build-via-test", action="store_true",
+                   help="build fresh example targets through xmake test")
     p.add_argument("--check-failure", action="store_true", help="also execute a deliberately failing local C assertion")
     a = p.parse_args()
     out = a.output.resolve()
@@ -143,11 +145,12 @@ def main():
             project = out/case
             shutil.copytree(sample, project)
             run(case+"-configure", [xmake,"f","-p","wasm-wasip1","-a",a.target,"-y"], project)
-            run(case+"-build", [xmake,"build","-j1"], project)
+            if not a.build_via_test:
+                run(case+"-build", [xmake,"build","-j1"], project)
+            log = run(case+"-test", [xmake,"test","-j1"], project)
             modules = sorted((project/"build").rglob("*.wasm"))
             if not modules:
                 raise RuntimeError(case+" produced no Wasm")
-            log = run(case+"-test", [xmake,"test","-j1"], project)
             state["cases"][-1]["passed_tests"] = passed_engines(log, modules)
             state["cases"][-1]["modules"] = {m.name:digest(m) for m in modules}
             save()

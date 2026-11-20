@@ -135,6 +135,9 @@ def execute_fixture(row, entry, args, evidence, work):
     command = [sys.executable, "-B", FIXTURE, "--commit", args.commit, "--language", row["language"],
                "--platform", row["platform"], "--case", row["case"], "--target", entry.get("target", "wasm32"),
                "--vm", args.vm, "--xmake", args.xmake, "--output", destination]
+    if row["tier"] == "platform":
+        # Xmake builds these fresh targets before running their guest tests.
+        command.append("--build-via-test")
     if "site" in entry:
         site = work / "site.json"
         site.write_bytes(read_bytes(entry["site"], 32768))
