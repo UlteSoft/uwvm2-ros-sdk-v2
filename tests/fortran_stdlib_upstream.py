@@ -78,6 +78,34 @@ def adapt_tests(source, output):
     return checks
 
 
+def guest_assertions(build, out):
+    """@brief Give the numerical fixture a guest-local failure path."""
+    interface = """implicit none
+interface
+  subroutine wros_test_failed(code) bind(c)
+    use iso_c_binding, only: c_int
+    integer(c_int), value :: code
+  end subroutine
+end interface
+"""
+    staged = build.copy()
+    for index, count in ((1, 1), (len(build) - 1, 20)):
+        source = build[index]
+        text, replaced = re.subn(r"error stop (\d+)", r"call wros_test_failed(\1)", source.read_text())
+        if replaced != count or text.count("implicit none\n") != 1:
+            raise ValueError("unexpected assertion report structure")
+        staged[index] = out / ("guest-" + source.name)
+        staged[index].write_text(text.replace("implicit none\n", interface, 1))
+    failure = out / "guest-failure.c"
+    failure.write_text("void wros_test_failed(int code) { (void)code; __builtin_trap(); }\n")
+    negative = out / "guest-checks-negative.f90"
+    checks = staged[-1].read_text()
+    if checks.count("ans = 128.0_sp") != 1:
+        raise ValueError("expected one false-assertion control")
+    negative.write_text(checks.replace("ans = 128.0_sp", "ans = 129.0_sp", 1))
+    return staged, failure, negative
+
+
 def main():
     """@brief Replay native, strict site, and explicit untagged paths under the test gate."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -89,6 +117,8 @@ def main():
     parser.add_argument("--fetch", action="store_true", help="fetch only the six reviewed upstream files")
     parser.add_argument("--native-arg", action="append", default=[], help="explicit native compiler option")
     parser.add_argument("--plain", action="store_true", help="also exercise explicit --no-mte and --no-eh")
+    parser.add_argument("--guest-assertion-traps", action="store_true",
+                        help="replace fixture-only ERROR STOP reporting with a guest-local trap for --plain")
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
         parser.error("supply the exact SDK commit")
@@ -98,6 +128,8 @@ def main():
         parser.error("guest execution needs an explicit --vm")
     if args.plain and (args.toolchain is None or args.sysroots is None):
         parser.error("--plain needs an explicit toolchain and a matching untagged sysroot")
+    if args.guest_assertion_traps and not args.plain:
+        parser.error("--guest-assertion-traps requires --plain")
     out = args.output.resolve()
     if ".tmp" not in out.parts:
         parser.error("choose a fresh output within .tmp")
@@ -193,8 +225,18 @@ def main():
         if route == "plain":
             flags += ["--toolchain", args.toolchain.resolve(), "--sysroots", args.sysroots.resolve(),
                       "--no-mte", "--no-eh"]
+        guest_sources, link, negative = build, [], None
+        if route == "plain" and args.guest_assertion_traps:
+            guest_sources, failure, negative = guest_assertions(build, out)
+            report["inputs"].update({str(p): sha(p) for p in (*guest_sources, failure, negative)})
+            obj = out / "guest-failure.o"
+            status.update(phase="fixture-compile")
+            cc_flags = [flag for flag in flags if flag != "--build-receipt"]
+            if run("plain-fixture-compile", [sdk / "bin/wrc", *cc_flags, "-c", failure, "-o", obj]) != 0:
+                continue
+            link = ["--link-object", obj]
         status.update(phase="compile")
-        if run(route + "-compile", [sdk / "bin/wrf", *flags, *build, "-o", image]) != 0:
+        if run(route + "-compile", [sdk / "bin/wrf", *flags, *link, *guest_sources, "-o", image]) != 0:
             continue
         receipt = Path(str(image) + ".wros-build.json")
         report["inputs"].update({str(p): sha(p) for p in (image, receipt, vm)})
@@ -216,6 +258,33 @@ def main():
         else:
             status.update(status="passed", assertions=len(report["assertions"]))
             del status["phase"]
+        if negative and status["status"] == "passed":
+            from importlib.util import module_from_spec, spec_from_file_location
+
+            spec = spec_from_file_location("wros_imports", sdk / "install/imports.py")
+            imports = module_from_spec(spec)
+            spec.loader.exec_module(imports)
+            if imports.inspect(image.read_bytes()):
+                raise ValueError("expected an import-free numerical guest")
+            status["guest_imports"] = []
+            neg_image = out / "plain-negative.wasm"
+            status.update(status="blocked", phase="negative-compile")
+            if run("plain-negative-compile", [sdk / "bin/wrf", *flags, *link,
+                                              *guest_sources[:-1], negative, "-o", neg_image]) != 0:
+                continue
+            neg_receipt = Path(str(neg_image) + ".wros-build.json")
+            report["inputs"].update({str(p): sha(p) for p in (neg_image, neg_receipt)})
+            for engine in ("int", "aot"):
+                label = "plain-negative-" + engine
+                status.update(phase=label)
+                code = run(label, [vm, "--wasm-feature-wasm3", "--runtime-" + engine,
+                                   "--runtime-compile-threads", "0", "--runtime-llvm-jit-cache-path",
+                                   "disable", "--run", neg_image])
+                if not code or b"unreachable" not in (out / (label + ".stderr")).read_bytes():
+                    break
+            else:
+                status.update(status="passed", false_assertion_traps=2)
+                del status["phase"]
         save()
     report["memory_events_after"] = (cgroup / "memory.events").read_text()
     report["complete"] = all(row["status"] != "blocked" for row in report["routes"].values())

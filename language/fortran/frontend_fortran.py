@@ -10,7 +10,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 VENDOR = ROOT / "third-parties/fortran"
 sys.path.insert(0, str(ROOT / "install"))
-from artifacts import archive_members, read_bounded, seal_object
+from artifacts import archive_members, read_bounded, seal_object, stage_inputs, strip_notes
+from frontend import audit
 from imports import inspect
 from compiler import compiler_environment, make_command
 from prepare import require_marker
@@ -144,7 +145,7 @@ def runtime_requirements(inputs):
     return descriptors or bool(intrinsics), sorted(intrinsics), clocks
 
 
-def guest_runtime(command, env, work, toolchain, descriptors, intrinsics):
+def guest_runtime(compile_unit, env, work, toolchain, descriptors, intrinsics):
     """Compile the target's numerical and selected descriptor/array runtime procedures."""
     includes = [VENDOR / "flang/include", VENDOR / "flang-rt/include"]
     runtime = VENDOR / "flang-rt/lib/runtime"
@@ -159,17 +160,34 @@ def guest_runtime(command, env, work, toolchain, descriptors, intrinsics):
                  "type-code", "type-info", "work-queue")
         sources.extend(runtime / (unit + ".cpp") for unit in (*units, *intrinsics))
         sources.append(ROOT / "language/fortran/compute_platform.cpp")
-    flags = ["--std", "c++17", *options, *(arg for p in includes for arg in ("-I", p))]
     objects = []
     for source in sources:
         obj = work / (source.stem + ".o")
-        subprocess.run([*command, *flags, "-c", source, "-o", obj],
-                       check=True, env=env, cwd=work)
+        compile_unit(source, obj, options, includes)
         objects.append(obj)
     archive = work / "libflang-compute.a"
     subprocess.run([sys.executable, "-B", ROOT / "bin/wrar", "--toolchain", toolchain, *objects, "-o", archive],
                    check=True, env=env, cwd=work)
     return archive
+
+
+def link_plain_runtime(sources, output, work, env, toolchain, receipts, profile, settings):
+    """Link explicitly uninstrumented Fortran descriptor programs against the verified C++ sysroot."""
+    command, closure = make_command(toolchain, receipts, profile, "cpp", [
+        *settings, "-nostartfiles", "-Wl,--no-entry", "-Wl,--export=_start",
+        "-o", str(output),
+    ], verify=True)
+    inputs = stage_inputs(sources, work, profile.to_dict(), closure["compiler_sha256"],
+                          closure["closure_sha256"], toolchain)
+    command.extend(map(str, inputs))
+    command.append("-lc-printscan-long-double")
+    if "-lunwind" in command:
+        command.remove("-lunwind")
+        command.append("-lunwind")
+    link_program(command, work, env)
+    data = strip_notes(read_bounded(output))
+    audit(data, profile)
+    output.write_bytes(data)
 
 
 def main():
@@ -245,7 +263,23 @@ def main():
             descriptors, intrinsics, clocks = runtime_requirements([*units, *objects])
             cc = [sys.executable, "-B", ROOT / "bin/wrc", *flags]
             cxx = [sys.executable, "-B", ROOT / "bin/wrcc", *flags]
-            runtime = guest_runtime(cxx, env, work, toolchain, descriptors, intrinsics)
+            settings = ["-O" + opts.O, *(["-g"] if opts.g else [])]
+            if profile.mte:
+                def compile_runtime(source, obj, defines, includes):
+                    subprocess.run([*cxx, "--std", "c++17", *defines,
+                                    *(arg for path in includes for arg in ("-I", path)),
+                                    "-c", source, "-o", obj], check=True, env=env, cwd=work)
+            else:
+                # The fixed upstream runtime C++ uses conventional semantics.
+                plain_cpp, closure = make_command(toolchain, receipts, profile, "cpp",
+                                                  [*settings, "-std=c++17", "-c"], verify=True)
+
+                def compile_runtime(source, obj, defines, includes):
+                    subprocess.run([*plain_cpp, *defines, *("-I" + str(path) for path in includes),
+                                    source, "-o", obj], check=True, env=env, cwd=work)
+                    obj.write_bytes(seal_object(read_bounded(obj), profile.to_dict(),
+                                                closure["compiler_sha256"], closure["closure_sha256"]))
+            runtime = guest_runtime(compile_runtime, env, work, toolchain, descriptors, intrinsics)
             stubs = []
             bridge_sources = [work / "wros_imports.c", ROOT / "language/fortran/entry.c"]
             if clocks:
@@ -257,8 +291,12 @@ def main():
             # The upstream descriptor work queue uses libc++'s std::variant.
             linker = cxx if descriptors else cc
             staged = work / "guest.wasm"
-            link_program([*linker, "--reactor", "--export", "_start", *units, *stubs,
-                          *objects, runtime, "-o", staged], work, env)
+            if descriptors and not profile.mte:
+                link_plain_runtime([*units, *stubs, *objects, runtime], staged, work, env,
+                                   toolchain, receipts, profile, settings)
+            else:
+                link_program([*linker, "--reactor", "--export", "_start", *units, *stubs,
+                              *objects, runtime, "-o", staged], work, env)
             qualification.finish(admission, opts, staged, output)
         return 0
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as exc:
