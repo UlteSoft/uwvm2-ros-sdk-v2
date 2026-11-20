@@ -1,4 +1,4 @@
-# base-x 与 abbrev 上游库测试
+# base-x、abbrev 与 mitt 上游库测试
 
 测试用固定 SDK 提交 `63b57f8b3debfe14cabd5af05de2ffbee22a0314` 安装
 QuickJS 和 mruby 路径。需要匹配 VM 的签名 C 站点，配置为 wasm32
@@ -18,5 +18,17 @@ Core 3.0、EH、单线程、严格 MTE 和 `-O3 -g`。编译及解释器记录�
 `.tmp` 输出目录。QuickJS 只导入一个只读时钟，mruby 导入表为空。
 两个产物分别在解释器和 AOT 中启用同步 MTE。结果记录输入源码、编译器、
 VM、Wasm 和每个执行阶段的状态。
+
+## TypeScript
+
+`mitt` 3.0.1 测试保留原始实现、全部 19 个运行时测试体和包含 10 条
+`@ts-expect-error` 的类型测试。适配只把测试导入映射到本地模块，并实现
+测试使用的断言和调用记录方法。运行时必须完成 43 条断言。
+[上游源码](https://github.com/developit/mitt/tree/b240473b5707857ba2c6a8e6d707c28d1e39da49)
+
+按英文版命令下载固定归档，通过签名 C 站点安装同一 SDK。使用 SDK 中的
+TypeScript 5.9.3 执行严格类型检查。独立 Node.js 对照所用的 JavaScript
+摘要必须与 `wrts` 打包进 QuickJS 的 JavaScript 一致。两个 Wasm 引擎均
+启用同步 MTE，模块只导入一个只读时钟。
 
 [English](README.md)

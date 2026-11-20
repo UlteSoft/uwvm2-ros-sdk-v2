@@ -1,4 +1,4 @@
-# Upstream base-x and abbrev tests
+# Upstream base-x, abbrev and mitt tests
 
 This replay installs the exact SDK revision
 `63b57f8b3debfe14cabd5af05de2ffbee22a0314` for QuickJS and mruby. It uses an
@@ -46,5 +46,33 @@ import. The mruby guest has an empty import table. Each module runs under
 the interpreter and AOT with synchronous tag checks. Receipts identify
 the archive, source, compiler, VM and Wasm digests and record failures at
 the stage that reported them.
+
+## TypeScript
+
+The `mitt` 3.0.1 replay retains the original library implementation, all
+19 runtime test bodies, and the compile-time fixture with 10
+`@ts-expect-error` checks. The adapter binds test imports to local modules
+and implements only the assertion and spy operations used by the original
+tests. It requires all 43 runtime assertions to execute.
+[Upstream source](https://github.com/developit/mitt/tree/b240473b5707857ba2c6a8e6d707c28d1e39da49)
+
+```sh
+curl --fail --location \
+    https://codeload.github.com/developit/mitt/tar.gz/b240473b5707857ba2c6a8e6d707c28d1e39da49 \
+    --output .tmp/mitt-3.0.1.tar.gz
+
+PATH_TO_GATE /usr/bin/python3 -B tests/script-libraries/mitt_upstream.py \
+    --sdk PATH_TO_SDK_REPOSITORY \
+    --site PATH_TO_SIGNED_C_SITE \
+    --vm PATH_TO_MATCHING_VM \
+    --mitt .tmp/mitt-3.0.1.tar.gz \
+    --output .tmp/mitt-library-test
+```
+
+The test type-checks the closed module set with the installed TypeScript
+5.9.3 compiler before running a separate native Node.js control. Its emitted
+JavaScript digest must match the JavaScript that `wrts` packages in QuickJS.
+Both Wasm engines evaluate the same module with synchronous MTE. The module
+imports one read-only clock.
 
 [简体中文](README.zh-CN.md)
