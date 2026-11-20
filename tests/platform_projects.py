@@ -64,6 +64,8 @@ def main():
     for name in ("vm", "xmake", "output"):
         p.add_argument("--" + name, type=Path, required=True)
     p.add_argument("--site", type=Path)
+    p.add_argument("--toolchain", type=Path, help="explicit Wasm LLVM prefix for a matching producer")
+    p.add_argument("--sysroots", type=Path, help="matching local sysroot manifest")
     p.add_argument("--managed-host", type=Path, help="prefix created by prepare_host.py for the selected .NET language")
     p.add_argument("--managed-toolchain", type=Path, help="qualified Wasm LLVM installation for .NET AOT")
     p.add_argument("--check-failure", action="store_true", help="also execute a deliberately failing local C assertion")
@@ -72,7 +74,9 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     vm = a.vm.resolve(strict=True)
     xmake = a.xmake.resolve(strict=True)
-    registry = json.loads((ROOT / "share/targets.json").read_bytes())
+    sys.path.insert(0, str(ROOT / "install"))
+    from bootstrap import MAX_METADATA, Source
+    registry = json.loads(Source(a.commit, ROOT).read("share/targets.json", MAX_METADATA))
     platforms = a.platform or sorted(registry["platforms"])
     if not set(platforms) <= set(registry["platforms"]) or a.language not in registry["languages"]:
         p.error("unknown platform or language")
@@ -92,6 +96,12 @@ def main():
             env[key] = str(directory.resolve())
     elif a.managed_host is not None or a.managed_toolchain is not None:
         p.error("managed host parameters apply only to .NET languages")
+    if a.toolchain is not None or a.sysroots is not None:
+        if a.site is not None or a.language in ("csharp", "fsharp", "vbnet"):
+            p.error("explicit tools cannot replace the selected signed site or managed profile")
+        if a.toolchain is None or not a.toolchain.is_dir() or a.sysroots is None or not a.sysroots.is_file():
+            p.error("provide an existing toolchain directory and its sysroot manifest together")
+        env.update(WROS_TOOLCHAIN=str(a.toolchain.resolve()), WROS_SYSROOTS=str(a.sysroots.resolve()))
     state = {"complete": False, "sdk_commit": a.commit, "vm_sha256": digest(vm), "cgroup": cgroup,
              "language": a.language, "target": a.target, "site_sha256": digest(a.site) if a.site else None, "cases": []}
 
@@ -116,6 +126,8 @@ def main():
         if a.site:
             args.extend(["--site-profile", a.site.resolve(strict=True)])
         args.extend(["--", "--component", a.component])
+        if a.language == "py" and a.target == "wasm64":
+            args.extend(["--python-target", "wasm64"])
         result = json.loads(run(platform+"-install", args, out))
         if result["commit"] != a.commit:
             raise RuntimeError("unexpected installed revision")
