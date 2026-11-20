@@ -47,6 +47,11 @@ def patterns():
                 for name, operator in (("Quotient", "/"), ("Remainder", "%")):
                     function = f"{name}{prefix.title()}{width}By{ordinal}"
                     yield function, operand, None, operand, f"x {operator} ({value})"
+            for name, operator in (("Quotient", "/"), ("Remainder", "%")):
+                function = f"Guarded{name}{prefix.title()}{width}"
+                yield function, operand, operand, operand, f"x {operator} n"
+                function = f"Odd{name}{prefix.title()}{width}"
+                yield function, operand, operand, operand, f"x {operator} (n | 1)"
 
 
 def main():
@@ -102,7 +107,8 @@ def main():
     cases = list(patterns())
     for i, (name, operand, count, returns, expression) in enumerate(cases):
         parameters = f"x {operand}" + (f", n {count}" if count else "")
-        definitions.append(f"func {name}({parameters}) {returns} {{ return {expression} }}")
+        guard = "if n == 0 { return x }; " if name.startswith("Guarded") else ""
+        definitions.append(f"func {name}({parameters}) {returns} {{ {guard}return {expression} }}")
         bits = width(operand)
         top, middle = (1 << bits) - 1, 1 << (bits - 1)
         values = (0, 1, 3, middle - 1, middle, middle + 1, top - 1, top)

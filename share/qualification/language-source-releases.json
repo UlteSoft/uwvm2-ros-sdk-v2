@@ -298,7 +298,7 @@
         },
         {
           "path": "language/go/release.json",
-          "sha256": "bc869aa98fba5e6985cbce78afc8c828616e9d71e941f46756f5def5ea7c0e95"
+          "sha256": "7085c7c4a82668f52f680818e1150ddb6856b869d3812a2010e2753268639d0e"
         }
       ]
     }

@@ -7,7 +7,7 @@ I32, I64 = 0x7f, 0x7e
 TYPES = {"int32": I32, "uint32": I32, "int64": I64, "uint64": I64, "bool": I32}
 OPS = {}
 SHIFTS = {}
-CONSTANT_DIVISIONS = {}
+DIVISIONS = {}
 CONVERSIONS = {
     "Trunc64to32": (I64, I32, 0xa7),
     "SignExt32to64": (I32, I64, 0xac),
@@ -24,7 +24,7 @@ for bits, wasmtype, first in [(32, I32, 0x6a), (64, I64, 0x7c)]:
         OPS[spelling] = (equal + offset, wasmtype, True)
     for op, suffix, offset in (("Div", "", 3), ("Div", "u", 4),
                                ("Mod", "", 5), ("Mod", "u", 6)):
-        CONSTANT_DIVISIONS[f"{op}{bits}{suffix}"] = (bits, wasmtype, first + offset, offset == 3)
+        DIVISIONS[f"{op}{bits}{suffix}"] = (bits, wasmtype, first + offset, offset == 3)
     for count_bits, count_type in ((32, I32), (64, I64)):
         for op, instruction, signed in (("Lsh", first + 10, False), ("Rsh", first + 11, True),
                                         ("RshU", first + 12, False)):
@@ -44,6 +44,27 @@ def register_type(value):
 def same_representation(left, right):
     """@brief Allow integer signedness aliases while keeping bool distinct."""
     return left == right or ("bool" not in (left, right) and TYPES[left] == TYPES[right])
+
+
+def constant_word(value):
+    """@brief Read an integer constant modulo its Wasm operand width."""
+    if value["op"] in ("Const32", "Const64"):
+        bits = int(value["op"][-2:])
+        return value.get("literal", 0) & ((1 << bits) - 1)
+    return None
+
+
+def branch_nonzero(control, values):
+    """@brief Identify the operand and branch index established by equality with zero."""
+    op = control["op"]
+    if op not in ("Eq32", "Eq64", "Neq32", "Neq64"):
+        return None
+    left, right = control["args"]
+    if constant_word(values[right]) == 0:
+        return left, int(op.startswith("Eq"))
+    if constant_word(values[left]) == 0:
+        return right, int(op.startswith("Eq"))
+    return None
 
 
 def uleb(n):
@@ -149,6 +170,7 @@ def lower(f, locations=None):
     code = bytearray()
     points = {}
     live_out = {}
+    edge_nonzero = {}
     positions = {ident: index for index, ident in enumerate(order)}
     phis = {ident: [v for v in block["values"] if v["op"] == "Phi"]
             for ident, block in blocks.items()}
@@ -204,26 +226,36 @@ def lower(f, locations=None):
         if narrow:
             code.append(0xa7)  # i32.wrap_i64
 
-    def emit_constant_division(v, t, args):
-        """@brief Prove the divisor is a nonzero literal and lower one integer operation."""
-        bits, operand, instruction, signed_quotient = CONSTANT_DIVISIONS[v["op"]]
-        divisor = ids[args[1]]
+    def emit_division(v, t, args):
+        """@brief Require a nonzero divisor and preserve Go signed quotient semantics."""
+        bits, operand, instruction, signed_quotient = DIVISIONS[v["op"]]
+        numerator, divisor = args
         if (t != operand or v["type"] == "bool" or
                 any(ids[a]["type"] == "bool" or register_type(ids[a]) != operand for a in args)
                 or v.get("literal", 0) not in (0, 1)):
             raise ValueError("incorrect Go SSA division signature")
-        mask = (1 << bits) - 1
-        literal = divisor.get("literal", 0) & mask
-        if divisor["op"] != f"Const{bits}" or literal == 0:
-            raise ValueError("Go division requires a nonzero constant divisor")
-        if signed_quotient and literal == mask:
-            # Go wraps MIN / -1 to MIN, while the Wasm signed quotient traps.
+        literal = constant_word(ids[divisor])
+        if literal == 0 or (literal is None and divisor not in nonzero):
+            raise ValueError("Go division requires a divisor proven nonzero on this path")
+        negate = 0x6b if operand == I32 else 0x7d
+        if signed_quotient and literal is None:
+            # Go wraps MIN / -1 to MIN. Avoid entering the partial Wasm div_s.
+            get(divisor)
+            const(operand, -1)
+            code.extend(bytes([0x46 if operand == I32 else 0x51, 0x04, operand]))
             const(operand, 0)
-            get(args[0])
-            code.append(0x6b if operand == I32 else 0x7d)
+            get(numerator)
+            code.extend(bytes([negate, 0x05]))
+            get(numerator)
+            get(divisor)
+            code.extend(bytes([instruction, 0x0b]))
+        elif signed_quotient and literal == (1 << bits) - 1:
+            const(operand, 0)
+            get(numerator)
+            code.append(negate)
         else:
-            get(args[0])
-            get(args[1])
+            get(numerator)
+            get(divisor)
             code.append(instruction)
 
     def emit_scalar(v, t):
@@ -258,8 +290,8 @@ def lower(f, locations=None):
             code.append(instruction)
         elif op in SHIFTS and len(args) == 2:
             emit_shift(v, t, args)
-        elif op in CONSTANT_DIVISIONS and len(args) == 2:
-            emit_constant_division(v, t, args)
+        elif op in DIVISIONS and len(args) == 2:
+            emit_division(v, t, args)
         elif op in ROTATIONS and len(args) == 2:
             operand, instruction = ROTATIONS[op]
             amount = register_type(ids[args[1]])
@@ -328,6 +360,11 @@ def lower(f, locations=None):
         kind = block["kind"]
         pred = predecessors[ident]
         live = set.intersection(*(live_out[p] for p in pred)) if pred else set()
+        incoming = [edge_nonzero[ident, index] for index in range(len(pred))]
+        nonzero = set.intersection(*incoming) if incoming else set()
+        for phi in phis[ident]:
+            if all(operand in facts for operand, facts in zip(phi["args"], incoming)):
+                nonzero.add(phi["id"])
         live.update(phi["id"] for phi in phis[ident])
         rows = {v["id"]: v for v in block["values"] if v["op"] != "Phi"}
         local_order = TopologicalSorter({i: [a for a in v.get("args", []) if a in rows]
@@ -354,6 +391,10 @@ def lower(f, locations=None):
                 # An existing argument is an SSA alias with no emitted code.
                 points[begin] = v.get("source")
             live.add(value_id)
+            literal = constant_word(v)
+            if ((literal is not None and literal != 0)
+                    or (op in ("Copy", "Or32", "Or64") and any(a in nonzero for a in args))):
+                nonzero.add(value_id)
         live_out[ident] = live
         if kind == "Ret":
             if ret is None:
@@ -364,10 +405,16 @@ def lower(f, locations=None):
                 code.append(0x0f)  # return
         elif kind == "Plain":
             mark()
-            jump(block["succs"][0], here, False)
+            edge = block["succs"][0]
+            edge_nonzero[edge["block"], edge["index"]] = nonzero
+            jump(edge, here, False)
         else:
             if terminator not in live or ids[terminator]["type"] != "bool":
                 raise ValueError("Go branch requires an available boolean")
+            proof = branch_nonzero(ids[terminator], ids)
+            for index, edge in enumerate(block["succs"]):
+                facts = nonzero | {proof[0]} if proof is not None and proof[1] == index else nonzero
+                edge_nonzero[edge["block"], edge["index"]] = facts
             mark(block.get("source"))
             get(terminator)
             code.extend(b"\x04\x40")

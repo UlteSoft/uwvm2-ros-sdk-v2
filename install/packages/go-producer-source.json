@@ -8,9 +8,9 @@
     },
     {
       "path": "language/go/producer/build.py",
-      "bytes": 4392,
+      "bytes": 4881,
       "mode": 420,
-      "sha256": "9ed91e714d43a6e3c4e4a8c1f266a7e4008ddb5b21b849d9135cbe2677436b21"
+      "sha256": "7954a6762bfffd46273edff7e820f7a7600dc31fe6e3bfeb747b95a2f373b729"
     },
     {
       "path": "language/go/producer/main.go",

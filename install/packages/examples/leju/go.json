@@ -26,9 +26,9 @@
     },
     {
       "path": "examples/platform/leju/common/go/controller.go",
-      "bytes": 533,
+      "bytes": 751,
       "mode": 420,
-      "sha256": "28c09240a51d4ab4d3139b1c3b1fac4cdfa96e63693a9e4130acccd28a3287ac"
+      "sha256": "96dea1a56d5b211fd8a33f2ccd556d6e64ac54555827cd39e2df4f4c3c246cc9"
     },
     {
       "path": "examples/platform/leju/common/go/xmake.lua",

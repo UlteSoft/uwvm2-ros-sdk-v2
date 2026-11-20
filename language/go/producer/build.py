@@ -57,9 +57,28 @@ def build(source, bootstrap, output):
         phases = ssa / "compile.go"
         text = phases.read_text()
         dispatch = "\t\tp.fn(f)\n"
-        if text.count(dispatch) != 1:
+        declaration = "\tconst logMemStats = false\n"
+        if text.count(dispatch) != 1 or text.count(declaration) != 1:
             raise ValueError("unexpected Go compiler phase dispatch")
-        phases.write_text(text.replace(dispatch, dispatch + '\t\tif p.name == "opt" { wrosWriteRegisters(f) }\n'))
+        hook = """		if p.name == "opt" {
+			for _, b := range f.Blocks {
+				if b.Kind == BlockExit {
+					wrosDeferred = true
+					break
+				}
+			}
+			if !wrosDeferred {
+				wrosWriteRegisters(f)
+			}
+		}
+		if p.name == "early fuse" && wrosDeferred {
+			// Remove blocks that the upstream prove pass made unreachable.
+			deadcode(f)
+			wrosWriteRegisters(f)
+		}
+"""
+        text = text.replace(declaration, declaration + "\tvar wrosDeferred bool\n")
+        phases.write_text(text.replace(dispatch, dispatch + hook))
         config = ssa / "config.go"
         text = config.read_text()
         first = text.index('\tcase "amd64":', text.index("func NewConfig("))
