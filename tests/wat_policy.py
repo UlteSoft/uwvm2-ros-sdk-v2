@@ -15,7 +15,7 @@ from separate_compilation import cgroup_record
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
-from artifacts import sections
+from artifacts import sections, uleb
 from bootstrap import Source, install
 from guest_profile import Profile
 from imports import inspect
@@ -102,6 +102,44 @@ def main():
             run(label, [assembler, text, "-o", module, *flags], denial=denial)
             assert module.exists() == (denial is None), label
             return module.read_bytes() if denial is None else None
+
+        # Pin the VM wire table independently of the assembler source. Keep
+        # the reserved 0x33 slot out of this set and test its rejection below.
+        operations = (
+            ("status", 0x20, 0, True), ("extract", 0x21, 1, True), ("insert", 0x22, 2, True),
+            ("tagbits", 0x23, 0, True), ("startbit", 0x24, 0, True), ("copy", 0x25, 2, True),
+            ("sub", 0x26, 2, True), ("load", 0x27, 1, True), ("untag", 0x28, 1, True),
+            ("untagstore", 0x29, 2, True), ("untagstorez", 0x2a, 2, True), ("store", 0x2b, 2, False),
+            ("storez", 0x2c, 2, False), ("random", 0x2d, 1, True), ("randomstore", 0x2e, 2, True),
+            ("randomstorez", 0x2f, 2, True), ("hint", 0x36, 3, True), ("hintstore", 0x37, 4, True),
+            ("hintstorez", 0x38, 4, True), ("claim", 0x40, 2, True), ("claimz", 0x41, 2, True),
+            ("reserve", 0x42, 2, True), ("activate", 0x43, 2, True), ("release", 0x44, 2, True),
+        )
+        fields = ["(memory 1 1)", "(memory $wide i64 1 1 shared)"]
+        expected = []
+        for index, value_type in ((0, "i32"), (1, "i64")):
+            for name, opcode, arity, result in operations:
+                params = f" (param {' '.join([value_type] * arity)})" if arity else ""
+                returns = f" (result {value_type})" if result else ""
+                if index == 0:
+                    # Default memory and flat WAT.
+                    accesses = "".join(f" local.get {i}" for i in range(arity))
+                    expression = f"{accesses} memtag.{name}"
+                else:
+                    # Folded WAT with both symbolic and numeric memory indices.
+                    memory = "$wide" if opcode % 2 == 0 else "1"
+                    accesses = "".join(f" (local.get {i})" for i in range(arity))
+                    expression = f" (memtag.{name} {memory}{accesses})"
+                fields.append(f"(func{params}{returns}{expression})")
+                accesses = b"".join(b"\x20" + uleb(i) for i in range(arity))
+                expected.append(b"\x00" + accesses + b"\xff" +
+                                uleb(0x01010000 | opcode) + uleb(index) + b"\x0b")
+        binary = build("packed-wire-all", "(module " + " ".join(fields) + ")", "--target", "wasm64", "--threads")
+        code, = (body for offset, _, _, body in sections(binary) if binary[offset] == 10)
+        assert code.uint() == len(expected)
+        for instructions in expected:
+            assert code.take(code.uint()) == instructions
+        code.end()
 
         runner = sdk / "tools/xmake/run_guest.py"
 
