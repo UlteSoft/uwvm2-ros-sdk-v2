@@ -32,9 +32,9 @@
     },
     {
       "path": "language/as/driver_lowering.mjs",
-      "bytes": 7898,
+      "bytes": 7932,
       "mode": 420,
-      "sha256": "131f7301248a360d11e9f2019402bf765c49b9a0d73a1fd228173b233b8bf129"
+      "sha256": "0abdbf0fcd39f99c4083d29fbe618e0a8f6d1834c7c920a2c212f4e28818d233"
     },
     {
       "path": "language/as/wros.ts",

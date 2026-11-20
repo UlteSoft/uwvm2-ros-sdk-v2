@@ -65,7 +65,7 @@ export function lowerDriver(module, tagged) {
   const clear = () => module.call(prefix + "clear_reply", [], none);
   const wipe = bytes => module.if(at("wipe"), fill("request", bytes));
 
-  module.setFeatures(module.getFeatures() | binaryen.Features.BulkMemory);
+  module.setFeatures(module.getFeatures() | binaryen.Features.BulkMemory | binaryen.Features.BulkMemoryOpt);
   module.setMemory(1, 1, null, [], false, false);
   for (const [name, base] of objects) module.addGlobal(prefix + name, i32, true, c(base));
   module.addGlobal(prefix + "ready", i32, true, c(0));
