@@ -77,7 +77,24 @@ def main():
         denial=b"WasmMTE")
     run("reject-undeclared-owner", [sdk / "bin/wrwat", "--threads", stale, "-o", out / "refused.wasm"],
         denial=b"unauthorized import or signature env.memory")
+    run("reject-eh-in-noeh-profile",
+        [*assemble, "--no-eh", project / "main.wat", "-o", out / "refused.wasm"], denial=b"exceptions")
     assert not (out / "refused.wasm").exists()
+
+    # Derive the no-EH guest from the same worker and allocation code so the
+    # two profiles differ only in the exception declaration and exercise.
+    declaration = "  (tag $signal (param i32))\n"
+    begin = "    (if (i32.ne\n"
+    end = "    (local.set $address (memtag.claim"
+    assert text.count(declaration) == text.count(begin) == text.count(end) == 1
+    start = text.index(begin)
+    stop = text.index(end, start)
+    assert "(try_table (catch $signal" in text[start:stop]
+    noeh = out / "no-eh.wat"
+    noeh.write_text((text[:start] + text[stop:]).replace(declaration, ""))
+    noeh_wasm = out / "no-eh.wasm"
+    run("assemble-noeh", [*assemble, "--no-eh", noeh, "-o", noeh_wasm])
+    report["noeh_guest_sha256"] = digest(noeh_wasm)
 
     base = [vm, "-WF3", "-WFE-threads", "--wasi-threads", "3", "3", "1048576", "16777216",
             "2097152", "131072", "--wasm-set-main-module-name", "main", "--runtime-compile-threads", "0",
@@ -90,6 +107,8 @@ def main():
     for engine in ("int", "aot"):
         command = [*base, "--runtime-" + engine, "--runtime-memtag-mode", "sync"]
         run(engine + "-shared-tagged", [*command, *permission, "--run", guest])
+        run(engine + "-shared-tagged-noeh", [*command, "--wasm-feature-disable-exceptions",
+                                             *permission, "--run", noeh_wasm])
         run(engine + "-stale-tag-lifetime", [*command, *permission, "--run", stale_wasm],
             denial=b"memory tag mismatch")
         run(engine + "-runtime-opt-out", [*command, *permission, "--runtime-disable-memtag", "--run", stale_wasm])
