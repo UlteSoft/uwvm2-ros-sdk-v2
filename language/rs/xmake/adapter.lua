@@ -12,6 +12,11 @@ end
 function build(target, req, sources)
     assert(#sources == 1 and #target:orderdeps() == 0, "Rust expects a single crate root with its Rust modules")
     local args = {path.absolute(sources[1]), "--target", req.arch, "--core", req.core, "--no-eh", req.mte_flag}
+    for _, library in ipairs(req.rust_libraries) do
+        local name, entry = library:match("^([^=]+)=(.+)$")
+        assert(name, "add_wros_rust_library expects a crate name and source entry")
+        table.join2(args, {"--library", name, path.absolute(entry, target:scriptdir())})
+    end
     local rust = os.getenv("WROS_RUSTROOT")
     local tool = os.getenv("WROS_TOOLCHAIN")
     local cxx = os.getenv("WROS_HOST_CXX")

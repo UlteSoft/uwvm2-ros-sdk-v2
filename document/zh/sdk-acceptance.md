@@ -88,3 +88,25 @@ git clone --depth 1 --branch v2.3.0 https://github.com/cespare/xxhash.git "$SOUR
 
 CPython 复验采用 ROS `angles` 的原始 unittest 方法和 PyPA `packaging`
 的版本用例。 [Python 复验说明](../../tests/cpython/upstream-libraries.zh-CN.md)。
+
+## 上游 Rust 与解释器库
+
+ArrayVec 0.7.7 复验需要已签名的 Rust wasm32 Core 3.0 配置，采用单线程、
+无 EH 和 `-O3 -g`。原生对照关闭库的默认特性，运行上游集成测试。访客
+运行 26 个原测试，覆盖内联向量、UTF-8 字符串、容量检查、迭代、区间移除
+和析构。测试入口使用 `core`，断言失败触发 Wasm trap。依赖宿主服务、
+标准库堆对象和异常展开的用例只在原生对照中运行。
+
+```sh
+git clone --depth 1 --branch 0.7.7 https://github.com/bluss/arrayvec.git "$SOURCES/arrayvec"
+"$GATE" /usr/bin/python3 -B tests/upstream_rust_libraries.py --sdk "$PWD" \
+  --source "$SOURCES/arrayvec" --commit "$SDK_COMMIT" --site "$SIGNED_RUST_SITE" \
+  --rustroot "$RUST_ROOT" --vm "$WROS_VM" --output "$RUST_OUTPUT"
+```
+
+如果要对照显式关闭 MTE 的配置，把 `--site` 换成
+`--toolchain "$WROS_LLVM" --plain-sysroots "$PLAIN_NOEH_SYSROOT"`，并选择新的
+输出目录。严格配置会记录反汇编确认的托管栈操作、签名绑定的 VM 和两个引擎的结果。
+
+QuickJS 和 mruby 复验独立记录源码提交及适配范围。
+[解释器库复验说明](../../tests/script-libraries/README.zh-CN.md)。

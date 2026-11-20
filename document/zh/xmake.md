@@ -113,6 +113,10 @@ TinyGo 主模块使用 `set_language("tinygo")` 和 `add_files("go.mod")`。通�
 
 Rust 目标使用 `set_language("rs")`，并通过 `add_files("src/lib.rs")` 指定一个 crate 根文件。配置签名开发站点后，默认从签名记录读取编译器及编译参数。显式选择时须同时指定 `WROS_RUSTROOT`、`WROS_TOOLCHAIN` 和 `WROS_SYSROOTS`。默认使用 wasm32 Core 3.0、panic=abort、单线程和 MTE。关闭插桩时设置 `set_wros_profile({mte=false})`，并通过 `WROS_SYSROOTS_NO_MTE` 指定匹配的收据。支持从 none 到 fastest 的优化级别和调试符号。参见 [Rust 开发指南](rust.md)。
 
+用 `add_wros_rust_library("arrayvec", "vendor/arrayvec/src/lib.rs")` 声明本地
+`no_std` 库。相对路径按目标的 xmake 脚本目录解析，先声明被依赖的库。各库
+采用应用的目标和 MTE 配置。
+
 Java/Kotlin 可选同步 AOT 组件使用 `set_wros_jvm_main(class_name)` 指定入口。详见 [JVM 编译与 Xmake 参数](jvm.md)。
 
 Lua、JavaScript、TypeScript、Python、Ruby、JVM 和 .NET 工程可用 `add_wros_operations(...)` 选择 ROS 导入。C# 场景入口接受 `abi`。[C# 场景入口](csharp.md) · [JVM 编译选项](jvm.md)。

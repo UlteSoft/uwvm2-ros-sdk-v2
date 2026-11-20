@@ -81,6 +81,8 @@ function configure(target, entry)
     local wat_shared_memory = table.wrap(target:values("wros.wat_shared_memory"))
     assert(#wat_shared_memory == 0 or (language == "wat" and threads and #wat_shared_memory == 2),
            "set_wros_wat_shared_memory requires a threaded WAT target and an exact module and field")
+    local rust_libraries = table.wrap(target:values("wros.rust_libraries"))
+    assert(language == "rs" or #rust_libraries == 0, "add_wros_rust_library requires a Rust target")
     local operations = table.wrap(target:values("wros.operations"))
     assert(language == "as" or language == "odin" or language == "wat" or language == "go" or language == "lua" or language == "js" or language == "typescript" or language == "py" or language == "ruby" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or language == "fsharp" or #operations == 0,
            "add_wros_operations requires a target with selectable ROS imports")
@@ -108,7 +110,7 @@ function configure(target, entry)
     assert(path.extension(name) == extension, "Target filename must end in " .. extension)
     target:set("filename", name)
     local request = {root = root, adapter = adapter, program = program, kind = kind, arch = arch, build_receipt = build_receipt,
-        core = core, eh = eh, mte = mte, mte_flag = mte_flag, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, lua_seed = lua_seed, lua_operations = lua_operations, operations = operations, std = std, implementation = implementation, wat_shared_memory = wat_shared_memory}
+        core = core, eh = eh, mte = mte, mte_flag = mte_flag, sysroots = sysroots, threads = threads, exports = exports, lua_abi = lua_abi, lua_seed = lua_seed, lua_operations = lua_operations, operations = operations, std = std, implementation = implementation, wat_shared_memory = wat_shared_memory, rust_libraries = rust_libraries}
     if implementation.validate then implementation.validate(target, request) end
     target:data_set("wros.request", request)
 end

@@ -124,6 +124,11 @@ function set_wros_wat_shared_memory(module, field)
     set_values("wros.wat_shared_memory", module, field)
 end
 
+--- @brief Add one local Rust library root. Declare dependencies before their consumers.
+function add_wros_rust_library(name, entry)
+    add_values("wros.rust_libraries", name .. "=" .. entry)
+end
+
 --- @brief Select the ROS operations compiled into the embedded Lua runtime.
 function add_wros_lua_operations(...)
     add_values("wros.lua_operations", ...)

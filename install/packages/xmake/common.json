@@ -8,9 +8,9 @@
     },
     {
       "path": "document/en/xmake.md",
-      "bytes": 12814,
+      "bytes": 13077,
       "mode": 420,
-      "sha256": "b7ad8091a69d3698d01cc0db12d4774b9db5eade01215c6b0dfd49059808341b"
+      "sha256": "66a032aab927165370bbd186fd31de82a84ad692024b44161a87e091c4ef4218"
     },
     {
       "path": "document/zh/xmake-api-index.md",
@@ -20,15 +20,15 @@
     },
     {
       "path": "document/zh/xmake.md",
-      "bytes": 11854,
+      "bytes": 12078,
       "mode": 420,
-      "sha256": "6269d01b897d4e121fa3f2b6626c91d41d767bbee7dd25d88a9e7869e1fd162b"
+      "sha256": "932b8fe85bfa51abbb554fbc3cea05043546e2cfe72d4edbfa2b35d3d7bd9133"
     },
     {
       "path": "tools/xmake/dispatch.lua",
-      "bytes": 12425,
+      "bytes": 12635,
       "mode": 420,
-      "sha256": "af357fecd81a9414529d18a1e699ab7c336dc9b8b136add6b31eab2996ff20c1"
+      "sha256": "a4964b1e4412976815550c84ea73dfc29b198b7840dad4a4c58d6f6157794235"
     },
     {
       "path": "tools/xmake/platform_driver_test.py",
@@ -38,9 +38,9 @@
     },
     {
       "path": "tools/xmake/ros.lua",
-      "bytes": 6127,
+      "bytes": 6325,
       "mode": 420,
-      "sha256": "71e08db24fa00f0c92587fd4d3c096e21bcf710008483ef730a5f81a2641143a"
+      "sha256": "3c736f2f7f0f21408f3cf09ed9160aac9ad2f72c05f763a41d8e360776dc60f0"
     },
     {
       "path": "tools/xmake/run_guest.py",

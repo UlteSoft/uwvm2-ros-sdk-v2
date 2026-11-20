@@ -1,6 +1,6 @@
 # Rust core applications
 
-`wrrs` builds one Rust 2024 crate root and its Rust modules into a wasm32 reactor. This profile uses Core 3.0, one thread and `panic=abort`. It supports `core`, compiler builtins and the SDK's raw ROS imports. Programs requiring Cargo dependency resolution, procedural macros, `alloc`, `std`, unwinding or memory64 need a different runtime closure. No such closure is installed by this selection.
+`wrrs` builds a Rust 2024 application root, its Rust modules and explicitly selected local libraries into a wasm32 reactor. This profile uses Core 3.0, one thread and `panic=abort`. It supports `core`, compiler builtins and the SDK's raw ROS imports. Programs requiring Cargo dependency resolution, procedural macros, `alloc`, `std`, unwinding or memory64 need a different runtime closure.
 
 ## Install and compile
 
@@ -36,9 +36,16 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 
 ## Compiler controls
 
+Use `--library arrayvec /path/to/arrayvec/src/lib.rs` to compile a local
+`no_std` library with the same compiler settings and MTE policy as the
+application. Repeat the option in dependency order. For example, a second
+library can use `arrayvec` if it appears after that declaration. The
+application refers to the libraries by their declared crate names.
+
 | Option | Meaning |
 | --- | --- |
 | `--rustroot PATH` | Linux x86-64 Rust 1.98.0 installation matching `language/rust/toolchain-inputs.json`. |
+| `--library NAME CRATE_ROOT` | Build a declared Rust 2024 source crate. Repeat in dependency order. |
 | `--toolchain PATH` | WasmMTE Clang, linker and corresponding LLVM development files. |
 | `--sysroots FILE` | Matching sysroot build receipt. Repeat to supply different profiles. |
 | `--target wasm32 --core 3.0 --no-eh` | Current supported target. These values are the Rust defaults. |

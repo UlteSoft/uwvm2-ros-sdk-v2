@@ -1,6 +1,6 @@
 # Rust core 应用开发
 
-`wrrs` 将一个 Rust 2024 crate 根文件及其模块编译为 wasm32 reactor。当前配置使用 Wasm Core 3.0、单线程和 `panic=abort`，提供 `core`、编译器内建库和 SDK 的 ROS 原始导入。依赖 Cargo 包解析、过程宏、`alloc`、`std`、异常展开或 wasm64 的程序需要另外的运行库配置，当前安装包尚未提供。
+`wrrs` 将 Rust 2024 应用根文件、模块和明确声明的本地库编译为 wasm32 reactor。当前配置使用 Wasm Core 3.0、单线程和 `panic=abort`，提供 `core`、编译器内建库和 SDK 的 ROS 原始导入。依赖 Cargo 包解析、过程宏、`alloc`、`std`、异常展开或 wasm64 的程序需要另外的运行库配置。
 
 ## 安装与编译
 
@@ -39,6 +39,7 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 | 选项 | 用途 |
 | --- | --- |
 | `--rustroot PATH` | 指定与 `language/rust/toolchain-inputs.json` 对应的 Linux x86-64 Rust 1.98.0。 |
+| `--library NAME CRATE_ROOT` | 用与应用相同的编译和 MTE 配置构建本地 Rust 2024 源码 crate。可按依赖顺序重复声明。 |
 | `--toolchain PATH` | 指定 WasmMTE Clang、链接器和相应 LLVM 开发文件。 |
 | `--sysroots FILE` | 选择匹配的 sysroot 收据，可重复传入不同配置。 |
 | `--target wasm32 --core 3.0 --no-eh` | 当前支持的目标，也是此 Rust 前端的默认配置。 |

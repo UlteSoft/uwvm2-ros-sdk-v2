@@ -113,6 +113,10 @@ Use `set_language("fortran")` and add the Fortran sources for a numerical progra
 
 Rust targets use `set_language("rs")` and one crate root such as `add_files("src/lib.rs")`. A signed development site supplies the reviewed Rust toolchain and its settings. For explicit selection, set `WROS_RUSTROOT`, `WROS_TOOLCHAIN`, and `WROS_SYSROOTS` together. The adapter defaults to Wasm32 Core 3.0, panic=abort, a single thread and MTE. Use `WROS_SYSROOTS_NO_MTE` with `set_wros_profile({mte=false})` for the matching untagged profile. Optimization levels through `fastest` and debug symbols map to the Rust driver. See the [Rust guide](rust.md).
 
+Declare local `no_std` libraries with `add_wros_rust_library("arrayvec", "vendor/arrayvec/src/lib.rs")`.
+Paths are relative to the target's script. Declare each library before the
+ones that use it. Each is compiled with the application's target and MTE profile.
+
 The optional Java and Kotlin synchronous AOT component uses `set_wros_jvm_main(class_name)`. See [JVM compiler and Xmake options](jvm.md).
 
 Lua, JavaScript, TypeScript, Python, Ruby, JVM and managed .NET targets select ROS imports through `add_wros_operations(...)`. C# scene programs accept `abi`. [C# scene entry](csharp.md) · [JVM compiler options](jvm.md).

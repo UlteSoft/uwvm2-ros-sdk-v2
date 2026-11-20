@@ -94,3 +94,28 @@ git clone --depth 1 --branch v2.3.0 https://github.com/cespare/xxhash.git "$SOUR
 
 The CPython replay uses the original ROS `angles` unittest methods and PyPA
 `packaging` version cases. [Python replay instructions](../../tests/cpython/upstream-libraries.md).
+
+## Upstream Rust and interpreter libraries
+
+Use a signed wasm32 Rust site with the Core 3.0, no-EH, single-thread profile
+at `-O3 -g` to replay ArrayVec 0.7.7. The native control runs the upstream
+integration suite with default crate features disabled. The guest runs 26
+original test bodies for inline vectors, UTF-8 strings, capacity handling,
+iteration, draining and value drops. Its test entry uses `core` and redirects
+test panics to a Wasm trap. Tests that require host services, heap-backed
+standard-library objects or unwinding run only in the native control.
+
+```sh
+git clone --depth 1 --branch 0.7.7 https://github.com/bluss/arrayvec.git "$SOURCES/arrayvec"
+"$GATE" /usr/bin/python3 -B tests/upstream_rust_libraries.py --sdk "$PWD" \
+  --source "$SOURCES/arrayvec" --commit "$SDK_COMMIT" --site "$SIGNED_RUST_SITE" \
+  --rustroot "$RUST_ROOT" --vm "$WROS_VM" --output "$RUST_OUTPUT"
+```
+
+To compare an explicit MTE opt-out, replace `--site` with
+`--toolchain "$WROS_LLVM" --plain-sysroots "$PLAIN_NOEH_SYSROOT"` and choose a
+fresh output directory. The strict path records the decoded managed stack
+instructions, the signed VM identity and the results from both engines.
+
+The QuickJS and mruby replays have their own input pins and adaptation
+boundaries. [Interpreter library replay instructions](../../tests/script-libraries/README.md).
