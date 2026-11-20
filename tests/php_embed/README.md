@@ -28,9 +28,10 @@ disabled. The explicit `--no-mte` build selects an uninstrumented compiler
 profile and still runs both engines. Each result records the actual compiler
 closure, VM and Wasm digests.
 
-The probe verifies the upstream release archives before extraction. The SDK's
-EH sysroot currently requires the upstream wasi-libc SJLJ helper to be compiled
-in the same profile for Zend's C bailout paths. The linker closes file,
+The probe verifies bounded copies of both release archives and extracts those
+same bytes. The SDK builds wasi-libc with `SETJMP=OFF`. The probe compiles
+the pinned wasi-libc SJLJ helper in the selected EH profile for Zend's C
+bailout paths and records its source digest. The linker closes file,
 descriptor and poll operations, and guest stubs refuse native POSIX operations.
 The final import audit accepts only Preview 1 environment, clock and process
 exit declarations. VM policy supplies an empty environment and two clocks, and
@@ -39,12 +40,15 @@ outside this probe.
 
 The initial strict MTE build identified compiler gaps for Zend's nonlocal
 bailout edges and dynamic stack allocations. The MTE configuration uses Zend's
-existing heap branch for variable-sized scratch allocations, so those
-allocations use the selected SDK allocator. The compiler still controls whether
-the surviving stack lifetimes can receive exact ownership. The result stays
-incomplete if the compiler refuses any translation unit. Threading, memory64,
-native fiber switching, PHP PHPT suites, ROS bindings and device deployment
-require their own qualification.
+existing heap branch for variable-sized scratch allocations. Native Wasm SJLJ
+lowering happens after the current stack-tagging pass. It adds resume edges
+within the live frame and can redirect cleanup edges to those continuations.
+An owner-aware lowering must distinguish a live continuation from a frame
+exit, release the exact tokens when crossing frames, and preserve the ownership
+state of objects live at a valid continuation. The result stays incomplete if
+the compiler refuses any translation unit. Threading, memory64, native fiber
+switching, PHP PHPT suites, ROS bindings and device deployment require their
+own qualification.
 
 - [PHP release downloads](https://www.php.net/downloads.php)
 - [WASI SDK 34 release](https://github.com/WebAssembly/wasi-sdk/releases/tag/wasi-sdk-34)

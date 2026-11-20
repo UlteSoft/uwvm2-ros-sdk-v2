@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+from contextlib import suppress
+import hashlib
+import io
 import json
 import os
 import re
@@ -30,6 +33,7 @@ from separate_compilation import cgroup_record
 
 
 PHP_RELEASE = "8.6.0"
+PHP_SOURCE_BYTES = 15148068
 PHP_SOURCE_SHA256 = "5f84beaa3d763aee1e4feed99bf54ec692c383b322e25626807b589238c3a087"
 EMULATION = ["signal", "process-clocks", "getpid", "mman"]
 CLOCK_ENV_IMPORTS = {"environ_get", "environ_sizes_get", "clock_time_get", "proc_exit"}
@@ -49,14 +53,27 @@ def replace_once(file: Path, anchor: str, replacement: str) -> None:
     file.write_text(text.replace(anchor, replacement, 1))
 
 
+def source_snapshot(path: Path, name: str, extent: int, sha256: str) -> io.BytesIO:
+    """Read exactly the pinned archive and extract from the bytes that passed verification."""
+    if not path.is_file():
+        raise ValueError(f"{name} source must be a regular archive file: {path}")
+    with path.open("rb") as source:
+        data = source.read(extent + 1)
+    if len(data) != extent or hashlib.sha256(data).hexdigest() != sha256:
+        raise ValueError(f"{name} source archive differs from the pinned release: {path}")
+    return io.BytesIO(data)
+
+
 def prepare_sources(work: Path, php_archive: Path, wasi_archive: Path,
-                    mte: bool) -> tuple[Path, Path, Path]:
+                    mte: bool, report: dict) -> tuple[Path, Path, Path]:
     """Extract verified upstream inputs and apply the guest-only SAPI restrictions."""
     lock = json.loads((SDK / "tools/wasm/memtag/source-lock.json").read_bytes())
     wasi = lock["sources"]["wasi-libc-sdk34"]
-    if digest(php_archive) != PHP_SOURCE_SHA256 or digest(wasi_archive) != wasi["archive_sha256"]:
-        raise ValueError("upstream source digest differs")
-    with tarfile.open(php_archive, "r:xz") as stream:
+    php_input = source_snapshot(php_archive, f"PHP {PHP_RELEASE}", PHP_SOURCE_BYTES, PHP_SOURCE_SHA256)
+    wasi_input = source_snapshot(wasi_archive, "wasi-libc SDK 34",
+                                 wasi["archive_bytes"], wasi["archive_sha256"])
+    report.update(php_archive_sha256=PHP_SOURCE_SHA256, wasi_libc_archive_sha256=wasi["archive_sha256"])
+    with php_input, tarfile.open(fileobj=php_input, mode="r:xz") as stream:
         stream.extractall(work, members=(member for member in stream if not member.name.endswith(".phpt")),
                           filter="data")
 
@@ -92,13 +109,14 @@ def prepare_sources(work: Path, php_archive: Path, wasi_archive: Path,
     prefix = wasi["root"] + "/libc-top-half/musl/"
     inputs = {"src/setjmp/wasm32/rt.c": runtime,
               **{f"include/{name}": overlay / name for name in ("netdb.h", "pwd.h", "grp.h", "syslog.h")}}
-    with tarfile.open(wasi_archive, "r:xz") as stream:
+    with wasi_input, tarfile.open(fileobj=wasi_input, mode="r:xz") as stream:
         for relative, destination in inputs.items():
             member = stream.getmember(prefix + relative)
             if not member.isfile():
                 raise ValueError(f"unexpected wasi-libc source member {relative}")
             with stream.extractfile(member) as source_file, destination.open("xb") as target:
                 shutil.copyfileobj(source_file, target)
+    report["sjlj_source_sha256"] = digest(runtime)
     return source, overlay, runtime
 
 
@@ -108,6 +126,9 @@ def write_denials(header: Path, output: Path) -> list[str]:
     signatures = dict(re.findall(
         r"\b__wasi_errno_t\s+(__wasi_\w+)\s*(\([^()]*\))\s*__attribute__", source
     ))
+    missing = sorted(name for name in DENIED_WASI if "__wasi_" + name not in signatures)
+    if missing:
+        raise ValueError(f"{header.name} lacks expected WASI declarations for {', '.join(missing)}")
     stubs = ["#include <wasi/api.h>", ""]
     wrappers = []
     for operation in DENIED_WASI:
@@ -128,30 +149,28 @@ def logged(argv: list[str | Path], cwd: Path, env: dict, log: Path, limit: int) 
         try:
             status = result.wait(timeout=limit)
         except subprocess.TimeoutExpired:
-            os.killpg(result.pid, signal.SIGKILL)
+            with suppress(ProcessLookupError):
+                os.killpg(result.pid, signal.SIGKILL)
             result.wait()
             raise
     if status:
-        raise RuntimeError(f"{log.name} exit {status}\n"
-                           + log.read_text(errors="replace")[-3200:])
+        output = log.read_text(errors="replace")
+        errors = [line for line in output.splitlines() if "error:" in line][:4]
+        diagnostic = "\n".join(errors) if errors else output[-3200:].strip()
+        raise RuntimeError(f"{log.name} exit {status}\n{diagnostic}")
 
 
 def check_tag_operations(opts: argparse.Namespace, artifact: Path, env: dict, report: dict) -> None:
     """Count decoded managed-owner instructions, if the producer built that profile."""
     if not opts.mte:
         return
-    disassembly = subprocess.Popen(
+    disassembly = subprocess.run(
         [opts.toolchain / "bin/llvm-objdump", "-d", "--mattr=+memtag", artifact],
-        env=env, stdout=subprocess.PIPE, text=True,
+        env=env, stdout=subprocess.PIPE, timeout=60, check=True,
     )
-    format_owner = re.compile(r"\bmemtag\.(claimz?|reserve|activate|release)\s+\d+")
-    counts: Counter[str] = Counter()
-    with disassembly.stdout as lines:
-        for line in lines:
-            match = format_owner.search(line)
-            if match:
-                counts[match[1]] += 1
-    if disassembly.wait(timeout=60) or not (counts["claim"] + counts["claimz"]) or not counts["release"]:
+    owner = re.compile(rb"\bmemtag\.(claimz?|reserve|activate|release)\s+\d+")
+    counts = Counter(match[1].decode("ascii") for match in owner.finditer(disassembly.stdout))
+    if not (counts["claim"] + counts["claimz"]) or not counts["release"]:
         raise ValueError("requested MTE module lacks decoded allocation and release operations")
     report["managed_owner_instructions"] = dict(counts)
 
@@ -165,9 +184,8 @@ def build(opts: argparse.Namespace, work: Path, report: dict) -> Path:
     cc, closure = make_command(opts.toolchain, [opts.sysroots], profile, "c", ["-c"], verify=True)
     report.update(sdk_c_closure=closure, producer_allocation_policy=policy)
     cc = cc[:-1] + ["-mllvm", "-wasm-enable-sjlj"]
-    source, overlay, runtime = prepare_sources(work, opts.php_source, opts.wasi_source, opts.mte)
-    report.update(php_archive_sha256=PHP_SOURCE_SHA256,
-                  wasi_libc_archive_sha256=digest(opts.wasi_source), stage="configuring")
+    source, overlay, runtime = prepare_sources(work, opts.php_source, opts.wasi_source, opts.mte, report)
+    report["stage"] = "configuring"
     target = work / "target"
     target.mkdir()
     staging = work / "transient"
@@ -255,7 +273,7 @@ def execute(opts: argparse.Namespace, artifact: Path, report: dict) -> None:
             print(f"PHP {PHP_RELEASE} {label} passed", flush=True)
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("php-source", "wasi-source", "toolchain", "sysroots", "output", "vm"):
         parser.add_argument("--" + name, type=lambda value: Path(value).resolve(), required=True)
@@ -269,18 +287,25 @@ def main() -> None:
     report = {"php_version": PHP_RELEASE, "guest": "Core 3.0 wasm32 single-threaded EH",
               "debug_info": "DWARF line tables", "mte_requested": opts.mte,
               "cgroup": group, "passed_engines": [], "stage": "checking-inputs",
-              "vm_sha256": digest(opts.vm), "complete": False}
+              "complete": False}
     try:
+        if not opts.vm.is_file() or not os.access(opts.vm, os.X_OK):
+            raise ValueError(f"the VM must be a regular executable file: {opts.vm}")
+        if not opts.sysroots.is_file():
+            raise ValueError(f"the sysroot receipt must be a regular file: {opts.sysroots}")
+        report["vm_sha256"] = digest(opts.vm)
         with tempfile.TemporaryDirectory(dir=opts.output) as scratch:
             artifact = build(opts, Path(scratch), report)
         execute(opts, artifact, report)
         report.update(stage="executed", complete=True)
-    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        return 0
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError, tarfile.TarError) as error:
         report["failure"] = str(error)
-        raise
+        print(f"PHP {PHP_RELEASE} {report['stage']}: {error}", file=sys.stderr)
+        return 1
     finally:
         (opts.output / "results.json").write_text(json.dumps(report, indent=2) + "\n")
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
