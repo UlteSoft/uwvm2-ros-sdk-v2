@@ -40,7 +40,7 @@ def large_source(deadline):
     """@brief Stage a small ROS parameter.get request and verify the large reply."""
     request = encode_request(deadline)
     writes = [f"writeByte({offset}, {value});" for offset, value in enumerate(request)]
-    return """import { writeByte, open, opened, connect, submit, result, resultWithCapacity,
+    source = """import { writeByte, writeWord, open, opened, connect, submit, result, resultWithCapacity,
     disconnect, replySize, replyRequired, clearReply, readWord } from "./wros";
 const REQUIRED: u32 = 784;
 const RESULT_BYTES: u32 = 753;
@@ -75,7 +75,9 @@ export function _start(): void {
     if (resultWithCapacity(handle, 1, REQUIRED) != 11 || replySize() != 0) unreachable();
     if (disconnect(handle) != 0) unreachable();
 }
-""".replace("const REQUIRED: u32", f"const REQUEST_BYTES: u32 = {len(request)};\nconst REQUIRED: u32")
+"""
+    return source.replace("const REQUIRED: u32",
+                          f"const REQUEST_BYTES: u32 = {len(request)};\nconst REQUIRED: u32")
 
 
 def parse_header(packet):
