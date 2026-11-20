@@ -110,3 +110,21 @@ git clone --depth 1 --branch 0.7.7 https://github.com/bluss/arrayvec.git "$SOURC
 
 QuickJS 和 mruby 复验独立记录源码提交及适配范围。
 [解释器库复验说明](../../tests/script-libraries/README.zh-CN.md)。
+
+### Lua JSON 库
+
+先在原生 Lua 5.4 上运行 json.lua 0.1.2 的上游测试，再用已安装的
+Wasm Lua 解释器构建同一套测试。库实现和 14 组启用的测试函数保持原样。
+测试入口把库嵌入程序，替代文件加载，并在任意一条断言失败时使测试失败，
+共核对 74 条断言。
+
+~~~sh
+git clone --depth 1 --branch v0.1.2 https://github.com/rxi/json.lua.git "$SOURCES/json.lua"
+"$GATE" /usr/bin/python3 -B tests/upstream_lua_library.py --sdk "$PWD" \
+  --source "$SOURCES/json.lua" --commit "$SDK_COMMIT" --site "$SIGNED_LUA_SITE" \
+  --vm "$WROS_VM" --output "$LUA_OUTPUT"
+~~~
+
+签名站点选用 wasm32 Core 3.0、EH、MTE 和 -O3 -g。测试程序使用固定的公开
+种子，无宿主导入，在解释器和 AOT 中分别运行。上游禁用的严格解码测试仍保持
+禁用。

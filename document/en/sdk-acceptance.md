@@ -119,3 +119,23 @@ instructions, the signed VM identity and the results from both engines.
 
 The QuickJS and mruby replays have their own input pins and adaptation
 boundaries. [Interpreter library replay instructions](../../tests/script-libraries/README.md).
+
+### Lua JSON library
+
+The replay runs the upstream json.lua 0.1.2 suite on native Lua 5.4,
+then builds it with the installed Wasm Lua interpreter. The library and
+all 14 active test bodies are unchanged. The guest harness embeds the
+library in place of the file loader and makes each of the 74 assertions
+fail the test process on error.
+
+~~~sh
+git clone --depth 1 --branch v0.1.2 https://github.com/rxi/json.lua.git "$SOURCES/json.lua"
+"$GATE" /usr/bin/python3 -B tests/upstream_lua_library.py --sdk "$PWD" \
+  --source "$SOURCES/json.lua" --commit "$SDK_COMMIT" --site "$SIGNED_LUA_SITE" \
+  --vm "$WROS_VM" --output "$LUA_OUTPUT"
+~~~
+
+The signed site selects wasm32 Core 3.0 with EH and MTE at -O3 -g. The
+guest uses a fixed non-secret seed, has no host imports, and runs under
+both the interpreter and AOT. The upstream disabled strict-decoding
+test remains disabled.
