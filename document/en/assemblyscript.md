@@ -31,3 +31,31 @@ The development package supports scalar functions and control flow in a single w
 Each platform selection also installs a migration example at `examples/platform/<platform>/migration/as`. It ports the unsigned grid index used by ROS Noetic Costmap2D. Run `xmake build` and `xmake test -j1` in that directory to check row boundaries, wrapping arithmetic and seeded inputs in both VM engines. The resulting Wasm has no imports. The caller supplies valid coordinates when using the result to access a grid. [ROS Noetic Costmap2D source](https://github.com/ros-planning/navigation/blob/f44bb1fc2810399165115cc98b530fe4b9397c18/costmap_2d/include/costmap_2d/costmap_2d.h)
 
 Managed objects, a general AssemblyScript runtime, wasm64, threads, exception handling and vendor-specific operations remain outside this profile.
+
+## MuJoCo simulation
+
+The source-tree replay builds an import-free, memory-free controller with the
+selectively installed `wras`. UWVM preloads this controller under an explicit
+module name. A separate WAT main module calls the scalar `jointTarget` export,
+serializes its result, and submits it through its own ROSv2 driver capability.
+Both modules run with WASIp1 disabled. Only the WAT module receives scene
+authorization.
+
+Run from the SDK source checkout and use the existing 64 GiB, zero-swap
+execution gate. Set the paths to the matching VM checkout and binary, the
+official MuJoCo distribution, the VM's OpenSSL prefix, and the upstream model
+profile and assets.
+
+```sh
+PATH_TO_GATE python3 -B tests/assemblyscript_mujoco.py \
+    --commit "$REV" --vm-source "$VM_SOURCE" --runtime "$VM" \
+    --mujoco "$MUJOCO" --openssl-root "$OPENSSL_PREFIX" \
+    --vendor-model "$VM_SOURCE/test/0084.ros-runtime/mujoco_profiles/unitree-go2.json" \
+    --vendor-assets "$GO2_ASSETS" --output .tmp/assemblyscript-go2
+```
+
+The replay compares 128 simulated steps with direct native MuJoCo stepping.
+It also checks that an out-of-range command applies zero steps and that an
+external receiver crash after one step leaves the VM able to inspect the
+failed channel and disconnect. The receipt records all three cases in both
+INT and AOT, the exact assets, build hashes, and the driver-call audit.
