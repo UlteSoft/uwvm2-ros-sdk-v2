@@ -83,11 +83,48 @@ def main():
             raise ValueError("the primitive bit guest requires no host imports")
         report["products"][name] = dict(guest_sha256=hashlib.sha256(product).hexdigest(),
             source_sha256={path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in files})
-        run(name + "-wasm-disassembly", [toolchain / "bin/llvm-objdump", "-d", guest])
+        disassembly = run(name + "-wasm-disassembly", [toolchain / "bin/llvm-objdump", "-d", guest])
         runner = [sys.executable, "-B", sdk / "tools/xmake/run_guest.py", guest, "wasm32", "3.0", "single",
                   "--exceptions", "eh", "--check-tags"]
         for engine in ("int", "aot"):
             run(name + "-wasm-" + engine, [*runner, "--engine", engine])
+        return disassembly
+
+    matrix = fixtures / "ShiftMatrix.java"
+    reference = out / "ShiftOracle.java"
+    reference.write_text("""import example.ShiftMatrix;
+public class ShiftOracle {
+    public static void main(String[] args) {
+        for (int i = 0; i < ShiftMatrix.CASES; ++i)
+            System.out.println(ShiftMatrix.result(i));
+    }
+}
+""")
+    native = out / "shift-oracle-native"
+    native.mkdir()
+    run("shift-oracle-native-javac", [*javac, "-d", native, matrix, reference], environment=native_env)
+    oracle = run("shift-oracle-native-run", [*java, "-cp", native, "ShiftOracle"], environment=native_env)
+    values = oracle.decode("ascii").splitlines()
+    if len(values) != 1380 or any(not re.fullmatch(r"-?[0-9]+", value) for value in values):
+        raise ValueError("the JDK did not emit all 1380 signed shift results")
+    shift = out / "ShiftExpected.java"
+    shift.write_text(
+        "package example;\npublic class ShiftExpected {\n"
+        "    public static void main(String[] args) {\n"
+        "        long[] expected = {\n"
+        + "".join(f"            {value}L,\n" for value in values)
+        + "        };\n"
+        "        if (expected.length != ShiftMatrix.CASES) throw new AssertionError();\n"
+        "        for (int i = 0; i < expected.length; ++i)\n"
+        "            if (expected[i] != ShiftMatrix.result(i)) throw new AssertionError();\n"
+        "    }\n}\n")
+    disassembly = check_fixture("shifts", "example.ShiftExpected", (matrix, shift))
+    opcodes = [f"i{bits}.{op}" for bits in (32, 64) for op in ("shl", "shr_s", "shr_u")]
+    if any(re.search(rb"\b" + re.escape(op.encode()) + rb"\b", disassembly) is None for op in opcodes):
+        raise ValueError("the optimized Wasm is missing a dynamic shift operation")
+    report["shift_matrix"] = dict(cases=len(values), oracle_sha256=hashlib.sha256(oracle).hexdigest(),
+                                  wasm_opcodes=opcodes)
+    save()
 
     original = out / "sources/fastutil/HashCommon.java"
     body = original.read_text()

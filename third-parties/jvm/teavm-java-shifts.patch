@@ -1,0 +1,91 @@
+--- a/core/src/main/java/org/teavm/backend/c/generate/CodeGenerationVisitor.java
++++ b/core/src/main/java/org/teavm/backend/c/generate/CodeGenerationVisitor.java
+@@ -16,11 +16,6 @@
+ package org.teavm.backend.c.generate;
+
+ import static org.teavm.model.lowlevel.ExceptionHandlingUtil.isManagedMethodCall;
+-import com.carrotsearch.hppc.IntContainer;
+-import com.carrotsearch.hppc.IntHashSet;
+-import com.carrotsearch.hppc.IntSet;
+-import com.carrotsearch.hppc.ObjectIntHashMap;
+-import com.carrotsearch.hppc.ObjectIntMap;
+ import java.nio.ByteBuffer;
+ import java.nio.CharBuffer;
+ import java.nio.DoubleBuffer;
+@@ -42,6 +37,7 @@
+ import org.teavm.ast.ArrayType;
+ import org.teavm.ast.AssignmentStatement;
+ import org.teavm.ast.BinaryExpr;
++import org.teavm.ast.BinaryOperation;
+ import org.teavm.ast.BlockStatement;
+ import org.teavm.ast.BoundCheckExpr;
+ import org.teavm.ast.BreakStatement;
+@@ -84,6 +80,11 @@
+ import org.teavm.backend.c.util.InteropUtil;
+ import org.teavm.backend.lowlevel.generate.NameProvider;
+ import org.teavm.diagnostics.Diagnostics;
++import org.teavm.hppc.IntContainer;
++import org.teavm.hppc.IntHashSet;
++import org.teavm.hppc.IntSet;
++import org.teavm.hppc.ObjectIntHashMap;
++import org.teavm.hppc.ObjectIntMap;
+ import org.teavm.interop.Address;
+ import org.teavm.interop.DelegateTo;
+ import org.teavm.interop.c.Char16;
+@@ -220,17 +221,11 @@
+                     expr.getSecondOperand().acceptVisitor(this);
+                     writer.print(")");
+                     return;
+-                case UNSIGNED_RIGHT_SHIFT: {
+-                    String type = expr.getType() == OperationType.LONG ? "int64_t" : "int32_t";
+-                    writer.print("((" + type + ") ((u" + type + ") ");
+-
+-                    expr.getFirstOperand().acceptVisitor(this);
+-                    writer.print(" >> ");
+-                    expr.getSecondOperand().acceptVisitor(this);
+-
+-                    writer.print("))");
++                case LEFT_SHIFT:
++                case RIGHT_SHIFT:
++                case UNSIGNED_RIGHT_SHIFT:
++                    generateJavaShift(expr);
+                     return;
+-                }
+
+                 case MODULO: {
+                     switch (expr.getType()) {
+@@ -287,12 +282,6 @@
+                 case BITWISE_XOR:
+                     op = "^";
+                     break;
+-                case LEFT_SHIFT:
+-                    op = "<<";
+-                    break;
+-                case RIGHT_SHIFT:
+-                    op = ">>";
+-                    break;
+                 case EQUALS:
+                     op = "==";
+                     break;
+@@ -329,6 +318,21 @@
+         }
+     }
+
++    /** @brief Lower the Java shift operators to fixed-width Clang Wasm C expressions. */
++    private void generateJavaShift(BinaryExpr expr) {
++        boolean isLong = expr.getType() == OperationType.LONG;
++        String signedType = isLong ? "int64_t" : "int32_t";
++        // Java masks the distance even for negative or oversized counts.
++        // Shift left through the unsigned type so high bits and negative values do not cause C UB.
++        String operandType = expr.getOperation() == BinaryOperation.RIGHT_SHIFT ? signedType : "u" + signedType;
++        writer.print("((").print(signedType).print(") ((").print(operandType).print(") (");
++        expr.getFirstOperand().acceptVisitor(this);
++        writer.print(expr.getOperation() == BinaryOperation.LEFT_SHIFT ? ") << " : ") >> ");
++        writer.print("((uint32_t) (");
++        expr.getSecondOperand().acceptVisitor(this);
++        writer.print(isLong ? ") & 63u)))" : ") & 31u)))");
++    }
++
+     private void visitReference(Expr expr) {
+         if (context.isVmAssertions()) {
+             writer.print("TEAVM_VERIFY(");

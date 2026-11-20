@@ -17,3 +17,5 @@ Java replays fastutil 8.5.16's hash inverse case. The harness keeps the four mix
 Results record checked source digests, the VM digest, actual imports, product digests and logs from both engines. The controls verify that hiding the ROS ABI denies guest instantiation. Xmake builds and executes the same cases through the installed project rules.
 
 Run tests/jvm_raw_bits.py with --repository, --commit, --vm, --site and --output to verify Java's exact float, double and integer bit operations. Use the Java site for --site. The check runs on the pinned JDK and on both VM engines. It also exercises fastutil's unmodified nextPowerOfTwo method bodies and submits the full class to the closed compiler to record its first unsupported dependency.
+
+The shift matrix compares 1,380 values from the pinned JDK with dynamic signed and unsigned 32-bit and 64-bit shifts in both VM engines. It covers negative counts, counts at and beyond the width, and signed overflow on left shifts. The Wasm disassembly must retain all six scalar shift instructions at -O3 with debug information.

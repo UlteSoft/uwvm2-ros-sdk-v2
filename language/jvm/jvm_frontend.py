@@ -60,7 +60,8 @@ def compile_guest(opts, language, work):
             raise RuntimeError(f"{name} failed; {result.stdout.decode(errors='replace')[-1800:]}")
     javac = java + ["-m", "jdk.compiler/com.sun.tools.javac.Main", "-proc:none", "-g"]
     run("host-translator", javac + ["-cp", cp, "-d", work/"host", s/"Translate.java", s/"Admit.java",
-        vendor/"java/org/teavm/backend/c/CTarget.java", vendor/"java/org/teavm/backend/c/generate/ClassGenerator.java"])
+        vendor/"java/org/teavm/backend/c/CTarget.java", vendor/"java/org/teavm/backend/c/generate/ClassGenerator.java",
+        vendor/"java/org/teavm/backend/c/generate/CodeGenerationVisitor.java"])
     run("guest-runtime", javac + ["-cp",cp,"-d",work/"runtime",vendor/"java/org/teavm/runtime/GC.java",
         vendor/"java/org/teavm/runtime/Allocator.java",s/"java/wros/scene/MessageFrame.java",*bridge,s/"java/wros/scene/Driver.java",s/"java/wros/scene/Guard.java", s/"java/wros/scene/Scene.java"])
     app_cp = str(work/"runtime") + ":" + cp

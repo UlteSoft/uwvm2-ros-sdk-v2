@@ -17,6 +17,12 @@
       "patched_sha256": "4ea82fcf80a7b014b65d653b71d7a9b7cc100b975e1177db8c3f843bca905ace"
     },
     {
+      "file": "java/org/teavm/backend/c/generate/CodeGenerationVisitor.java",
+      "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/java/org/teavm/backend/c/generate/CodeGenerationVisitor.java",
+      "upstream_sha256": "0bc25772920558f4c2a15ec203b7fd63bb57e35e9558db7252e13e6d9f939640",
+      "patched_sha256": "00d19576e33f7446ff570df40d695a70c91b9add158fcb18b9be34a00ab9a55d"
+    },
+    {
       "file": "java/org/teavm/runtime/GC.java",
       "upstream": "https://github.com/konsoletyper/teavm/blob/b3a245b7d9034ff35cdfab2def057a3d4f256efb/core/src/main/java/org/teavm/runtime/GC.java",
       "upstream_sha256": "3c2e4ec760f015ad165fa6a9d6eaebf228b297ecc1080edc596689a1e68bc9e4",

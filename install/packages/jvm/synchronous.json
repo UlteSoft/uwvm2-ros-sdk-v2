@@ -80,9 +80,9 @@
     },
     {
       "path": "language/jvm/jvm_frontend.py",
-      "bytes": 8990,
+      "bytes": 9069,
       "mode": 420,
-      "sha256": "9cf33f376c8597519fb9195c41a8631d6d84483c5f1a35053c1fbd5b2d8c2378"
+      "sha256": "ac2a6ad9662f92941ea27ab58c9d1576bdd69e104abb81d59a47bab935ef9d3c"
     },
     {
       "path": "language/jvm/operations.py",
@@ -116,15 +116,15 @@
     },
     {
       "path": "third-parties/jvm/README.md",
-      "bytes": 627,
+      "bytes": 830,
       "mode": 420,
-      "sha256": "1eac6bc81f2e0d8313549c3efc6a3783c07c96ae0958eaff36097055d166c4bc"
+      "sha256": "34acb2d7fb29210b53f8830116e286fef14760c7b83808854ac3620c3f468efe"
     },
     {
       "path": "third-parties/jvm/UPSTREAM.json",
-      "bytes": 5911,
+      "bytes": 6366,
       "mode": 420,
-      "sha256": "df36dd55e5f1632307005cfd454e38e1943bc1e8a0ae9f510ce63dbb2beb7e2c"
+      "sha256": "b0da6a69ae12b957035c26305fc92c8cebda3dd76359e17632d06235d05305c3"
     },
     {
       "path": "third-parties/jvm/java/org/teavm/backend/c/CTarget.java",
@@ -137,6 +137,12 @@
       "bytes": 60934,
       "mode": 420,
       "sha256": "4ea82fcf80a7b014b65d653b71d7a9b7cc100b975e1177db8c3f843bca905ace"
+    },
+    {
+      "path": "third-parties/jvm/java/org/teavm/backend/c/generate/CodeGenerationVisitor.java",
+      "bytes": 59901,
+      "mode": 420,
+      "sha256": "00d19576e33f7446ff570df40d695a70c91b9add158fcb18b9be34a00ab9a55d"
     },
     {
       "path": "third-parties/jvm/java/org/teavm/runtime/Allocator.java",
@@ -209,6 +215,12 @@
       "bytes": 514,
       "mode": 420,
       "sha256": "acabef1d6822a740f86c41508e5f8ffaa9b5b1d133408ac62bdf0f3994413650"
+    },
+    {
+      "path": "third-parties/jvm/teavm-java-shifts.patch",
+      "bytes": 3754,
+      "mode": 420,
+      "sha256": "0770751fbd54a8b4dc3befdeb3dd1c7eabb696faab894406462fcbe1fa53f708"
     },
     {
       "path": "third-parties/jvm/teavm-wros.patch",
