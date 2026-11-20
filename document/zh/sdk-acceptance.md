@@ -40,3 +40,51 @@ $GATE python3 -B tests/sdk_acceptance.py \
 - not_exercised 记录缺少示例或仅生成计划。
 
 普通运行只在所选行均为 executable 时返回零。输出目录保留测试日志与子验收记录，每个用例结束后会清理临时安装文件和构建中间产物。扩展测试验证 SDK 的本机认证权限边界，官方仿真和实体厂商驱动由单独的测试覆盖。
+
+## 上游 C 库测试
+
+上游复验使用 GitHub 固定提交的库源码和原测试实现。结果记录原生对照、
+严格 `wrc` 构建凭据、访客导入、反汇编确认的 WasmMTE 指令，以及两种 VM
+引擎的结果。把上游源码放在本地测试工作区的独立目录，并通过共用的
+64 GiB 测试入口执行。
+
+```sh
+mkdir -p "$SOURCES"
+git clone --depth 1 --branch 6.7.3 https://github.com/ros2/rcutils.git "$SOURCES/rcutils"
+git clone --depth 1 --branch v1.7.19 https://github.com/DaveGamble/cJSON.git "$SOURCES/cjson"
+git clone --depth 1 --branch v1.3.2 https://github.com/madler/zlib.git "$SOURCES/zlib"
+"$GATE" /usr/bin/python3 -B tests/upstream_c_libraries.py \
+  --sdk "$PWD" --sources "$SOURCES" --commit "$SDK_COMMIT" \
+  --site "$SIGNED_C_SITE" --vm "$WROS_VM" --output "$OUTPUT"
+```
+
+C 本地签名配置须授权 wasm32 Core 3.0、标准 EH、`-O3 -g` 和 MTE。
+可用 `--case` 重跑单项。适配层保留 rcutils 字节数组的上游断言并禁用
+标准错误输出，在访客内丢弃 cJSON 的 Unity 日志并核对原始测试计数，同时用 zlib
+上游的 `Z_SOLO` 配置执行其官方样例。运行权限只包含声明的只读时钟。
+cJSON 语料测试把上游 JSON 输入和期望输出按原字节嵌入访客。
+gzip 文件读取和其他 ROS 中间件仍需单独移植验收。
+
+静态归档复验使用上一步的输出，逐个编译 zlib 的八个源文件，用 SDK 的
+`wrar` 打包，然后重新链接和执行同一个上游测试。
+
+```sh
+"$GATE" /usr/bin/python3 -B tests/upstream_zlib_archive.py "$PWD" "$OUTPUT" \
+  "$SOURCES/zlib" "$SIGNED_C_SITE" "$WROS_VM" "$ARCHIVE_OUTPUT"
+```
+
+## 上游 Go 和 Python 库
+
+用已签名的 wasm32 TinyGo EH 和 MTE 配置复验 `xxHash` v2.3.0。
+访客适配层保留上游功能测试和断言，包括 `TestAll` 的 148 个子用例。
+上游对宿主分配次数的测量在原生对照中运行。
+
+```sh
+git clone --depth 1 --branch v2.3.0 https://github.com/cespare/xxhash.git "$SOURCES/xxhash"
+"$GATE" /usr/bin/python3 -B tests/upstream_go_libraries.py --sdk "$PWD" \
+  --source "$SOURCES/xxhash" --commit "$SDK_COMMIT" --site "$SIGNED_TINYGO_SITE" \
+  --vm "$WROS_VM" --output "$GO_OUTPUT"
+```
+
+CPython 复验采用 ROS `angles` 的原始 unittest 方法和 PyPA `packaging`
+的版本用例。 [Python 复验说明](../../tests/cpython/upstream-libraries.zh-CN.md)。

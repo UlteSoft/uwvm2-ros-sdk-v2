@@ -40,3 +40,57 @@ The versioned results.json distinguishes three outcomes.
 - not_exercised records an absent example or a plan-only case.
 
 A normal run returns zero only when every requested row is executable. Logs and child fixture receipts remain in the output directory. Temporary installations and objects are removed after each case. The platform extension fixture covers the SDK's authenticated local permission boundary. Official simulation and physical vendor drivers use dedicated acceptance fixtures.
+
+## Upstream C library tests
+
+The upstream replay builds library sources from pinned GitHub commits and uses
+the upstream test implementations. It records the native control, strict
+`wrc` build receipt, guest imports, decoded WasmMTE operations and both VM
+engine results. Use a separate source directory inside the local test
+workspace, and run the suite through the shared 64 GiB test gate.
+
+```sh
+mkdir -p "$SOURCES"
+git clone --depth 1 --branch 6.7.3 https://github.com/ros2/rcutils.git "$SOURCES/rcutils"
+git clone --depth 1 --branch v1.7.19 https://github.com/DaveGamble/cJSON.git "$SOURCES/cjson"
+git clone --depth 1 --branch v1.3.2 https://github.com/madler/zlib.git "$SOURCES/zlib"
+"$GATE" /usr/bin/python3 -B tests/upstream_c_libraries.py \
+  --sdk "$PWD" --sources "$SOURCES" --commit "$SDK_COMMIT" \
+  --site "$SIGNED_C_SITE" --vm "$WROS_VM" --output "$OUTPUT"
+```
+
+The selected C site must authorize the wasm32 Core 3.0 EH profile at
+`-O3 -g` with MTE. A case can be repeated with `--case`. The wrapper
+uses the upstream rcutils byte-array assertions with stderr diagnostics
+disabled, the cJSON in-memory Unity tests with a guest output sink, and
+the upstream zlib example with the project's `Z_SOLO` option. The guest
+import policy grants only the declared read-only clocks. The cJSON corpus
+replay embeds the exact upstream JSON inputs and expected outputs in the
+guest. Gzip file access and the rest of the ROS middleware have separate
+porting requirements.
+
+The static archive replay takes the preceding output, compiles the eight
+zlib source files separately, runs the SDK's `wrar`, and relinks the same
+upstream test.
+
+```sh
+"$GATE" /usr/bin/python3 -B tests/upstream_zlib_archive.py "$PWD" "$OUTPUT" \
+  "$SOURCES/zlib" "$SIGNED_C_SITE" "$WROS_VM" "$ARCHIVE_OUTPUT"
+```
+
+## Upstream Go and Python libraries
+
+Use the signed wasm32 TinyGo EH and MTE site to replay the `xxHash` v2.3.0
+library. The guest adapter preserves the upstream functional test bodies and
+assertions, including all 148 `TestAll` subtests. The upstream host allocation
+measurement remains in the native control.
+
+```sh
+git clone --depth 1 --branch v2.3.0 https://github.com/cespare/xxhash.git "$SOURCES/xxhash"
+"$GATE" /usr/bin/python3 -B tests/upstream_go_libraries.py --sdk "$PWD" \
+  --source "$SOURCES/xxhash" --commit "$SDK_COMMIT" --site "$SIGNED_TINYGO_SITE" \
+  --vm "$WROS_VM" --output "$GO_OUTPUT"
+```
+
+The CPython replay uses the original ROS `angles` unittest methods and PyPA
+`packaging` version cases. [Python replay instructions](../../tests/cpython/upstream-libraries.md).
