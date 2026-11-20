@@ -12,6 +12,7 @@ import socket
 import struct
 import subprocess
 import sys
+import tempfile
 import time
 
 from separate_compilation import cgroup_record, sha
