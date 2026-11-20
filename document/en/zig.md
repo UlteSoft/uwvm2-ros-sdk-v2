@@ -3,15 +3,16 @@
 Install the `zig` development selection with the platform you intend to
 authorize. The development driver compiles one Zig 0.16.0 source file to
 Core WebAssembly 3.0 with the SDK's WasmMTE backend. It supports wasm32
-and wasm64, one thread, Zig error unions, and freestanding applications
-that can link without a runtime archive. Import the generated module
+and wasm64, one thread, Zig error unions, and freestanding applications.
+Import the generated module
 with `const scene = @import("wros_scene.zig");` and call functions such
 as `scene.wr_abi()`. `wrzig` stages this module from its installed SDK.
 The generated functions retain the fixed-width signatures documented
 in the ABI catalogue.
 
-This profile has no WASI imports, optional target intrinsics, inline assembly,
-dynamic loading, language runtime or native dependencies. Zig's heap
+The linker can resolve wide-integer operations from the selected sysroot's
+verified compiler-rt builtins. This profile has no WASI imports, optional
+target intrinsics, inline assembly, dynamic loading, or native dependencies. Zig's heap
 allocators, threads and libc-dependent applications need a separately
 qualified closure. The compiler rejects unresolved runtime symbols.
 The backend optimizes with `-O3` and keeps `-g` diagnostics. The Zig

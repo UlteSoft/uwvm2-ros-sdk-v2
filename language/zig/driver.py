@@ -12,7 +12,7 @@ import tempfile
 from release import (ARCHIVE, PRODUCER, SDK, authorized, digest, local_release,
                      marker_path, producer_archive, profile_for, qualification, receipt)
 from artifacts import read_bounded
-from compiler import compiler_environment, make_command
+from compiler import compiler_environment, make_command, select_closure
 from frontend import audit
 from imports import inspect
 
@@ -59,17 +59,21 @@ def build(source, output, toolchain, sysroots, profile, work, marker_digest=None
         subprocess.run(argv, cwd=work, env=env, check=True, timeout=120)
 
     # Preserve Zig's checked semantics while deferring LLVM optimization to
-    # the SDK's tagged backend. Include no host compiler or runtime archives.
+    # the SDK's tagged backend.
     run([producer / "zig", "build-obj", app, "--zig-lib-dir", producer / "lib", "-target",
          f"wasm{bits}-freestanding", "-O", "Debug", "-fllvm", "-fno-emit-bin", "-femit-llvm-bc=" + str(raw),
          "-fno-compiler-rt", "-fno-stack-protector", "-fno-error-tracing"])
     run([marker, str(bits), "on" if profile.mte else "off", raw, marked, source.resolve()])
-    command, _ = make_command(toolchain, sysroots, profile, "c",
-                              ["-O3", "-g", "-Wno-override-module", "-c", str(marked), "-o", str(obj)], verify=True)
+    command, closure = make_command(toolchain, sysroots, profile, "c",
+                                    ["-O3", "-g", "-Wno-override-module", "-c", str(marked), "-o", str(obj)], verify=True)
     run(command)
+    # Freestanding wide integer operations may require compiler-rt.
+    _, _, _, _, resource = select_closure(sysroots, profile, closure["compiler_sha256"])
+    builtin_target = profile.triple.replace("-wasip1", "-unknown-wasip1")
+    builtins = resource / "lib" / builtin_target / "libclang_rt.builtins.a"
     command, _ = make_command(toolchain, sysroots, profile, "c",
                               ["-O3", "-g", "-nostdlib", "-Wl,--no-entry,--export=_start,--max-memory=16777216",
-                               str(obj), "-o", str(output)])
+                               str(obj), str(builtins), "-o", str(output)])
     run(command)
     data = read_bounded(output)
     audit(data, profile)

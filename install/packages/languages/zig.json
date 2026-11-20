@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/zig.md",
-      "bytes": 3085,
+      "bytes": 3134,
       "mode": 420,
-      "sha256": "b36c26e99c2d393159781fcd3d13fc455d0513723fa0f6ebce13e7bbc4566df6"
+      "sha256": "e6e25cfc2547dfbfb263e6d6745826f9f00c68202aee7a38e609776f724d990f"
     },
     {
       "path": "document/zh/zig.md",
-      "bytes": 2683,
+      "bytes": 2715,
       "mode": 420,
-      "sha256": "751ec4588b3c8b68dbc031df1ac53f4f389db986b12d77f0ece10245e843a4d9"
+      "sha256": "90d4542516d03b69b4327f857e9b43c173714bd5dcde8976db50a6b152d596c5"
     },
     {
       "path": "language/zig/check_site.py",
@@ -26,9 +26,9 @@
     },
     {
       "path": "language/zig/driver.py",
-      "bytes": 7056,
+      "bytes": 7360,
       "mode": 420,
-      "sha256": "40724a06428525de8ba5d24de12dd74d185df849346235120b94db81e9114ae0"
+      "sha256": "a8cf1f4cb49aea0e6863d66ffa7c6cd53804b6cb3b7a7db92f456b1903f88592"
     },
     {
       "path": "language/zig/mark_mte.cpp",

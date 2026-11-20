@@ -1,6 +1,8 @@
 //! Check that independently addressable Zig storage receives distinct tags.
 var global_left: [48]u8 = @splat(19);
 var global_right: [48]u8 = @splat(23);
+var shift_operand: u80 = 0xabcdef123456fedcba98;
+var shift_distance: u7 = 64;
 const read_only: [48]u8 = @splat(7);
 const shift = if (@sizeOf(usize) == 4) 28 else 56;
 
@@ -16,6 +18,9 @@ noinline fn checkReadOnly(address: *const volatile u8) void {
 }
 
 export fn _start() void {
+    const operand = @as(*volatile u80, &shift_operand).*;
+    const distance = @as(*volatile u7, &shift_distance).*;
+    if (operand >> distance != 0xabcd) @trap();
     var stack_left: [48]u8 = @splat(11);
     var stack_right: [48]u8 = @splat(13);
     distinct(&global_left[0], &global_right[0], 19, 23);

@@ -2,13 +2,14 @@
 
 选择目标平台并安装 `zig` 开发包。该驱动把单个 Zig 0.16.0
 源码文件经 SDK 的 WasmMTE 后端编译为 Core WebAssembly 3.0。
-配置支持 wasm32、wasm64、单线程、Zig 错误联合，以及无需运行时归档
-即可链接的独立应用。通过 `const scene = @import("wros_scene.zig");`
+配置支持 wasm32、wasm64、单线程、Zig 错误联合和独立应用。
+通过 `const scene = @import("wros_scene.zig");`
 使用生成的绑定，例如 `scene.wr_abi()`。`wrzig` 从已安装 SDK 载入绑定模块。
 函数参数和返回类型与 ROSv2 ABI 目录中的固定宽度签名一致。
 
-目前不提供 WASI 导入、可选目标 intrinsic、内联汇编、动态加载、
-语言运行时或原生依赖。Zig 堆分配器、多线程和依赖 libc 的应用需要
+宽整数操作可从所选 sysroot 中已校验的 compiler-rt 内建函数归档解析。
+目前不提供 WASI 导入、可选目标 intrinsic、内联汇编、动态加载或原生依赖。
+Zig 堆分配器、多线程和依赖 libc 的应用需要
 单独认证的闭包。未解析的运行时符号会导致构建失败。Zig 前端以保留检查的
 调试语义生成 IR，再由 SDK 后端执行 `-O3` 并保留 `-g` 调试信息。
 
