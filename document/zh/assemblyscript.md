@@ -67,6 +67,15 @@ wras controller.ts --ros-driver --ros-operation capability.open \
 调用、打开或关闭权限、或显式调用 `clearReply()` 都会覆盖上一次响应。
 状态码 90 的所需空间由 `replyRequired` 单独报告。越界读写触发 trap。
 
+以下源码仓库回归需要现有的 64 GiB、零 swap 门禁。脚本检查暂存区擦除、
+导入选项和失败行为，分别验证同步 MTE、运行时关闭 MTE 和无标签构建。
+可选的 Xmake 测试还验证两种权限拒绝配置。
+
+```sh
+PATH_TO_GATE python3 -B tests/assemblyscript_driver.py \
+    --commit "$REV" --vm "$VM" --xmake "$XMAKE" --output .tmp/assemblyscript-driver
+```
+
 ## MuJoCo 仿真
 
 源码仓库中的复跑脚本使用选择式安装的 `wras` 构建控制器。生成的

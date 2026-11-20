@@ -73,6 +73,16 @@ next driver call, capability open or close, or an explicit `clearReply()`
 overwrites it. `replyRequired` returns a separate required length after
 status 90. Reads beyond a successful reply and writes outside the request trap.
 
+Run the source-tree regression through the existing 64 GiB, zero-swap gate.
+The replay checks staging erasure, import selection, and failures in both
+engines with synchronous MTE, runtime MTE disabled, and an untagged build.
+The optional Xmake path also verifies both permission denial configurations.
+
+```sh
+PATH_TO_GATE python3 -B tests/assemblyscript_driver.py \
+    --commit "$REV" --vm "$VM" --xmake "$XMAKE" --output .tmp/assemblyscript-driver
+```
+
 ## MuJoCo simulation
 
 The source-tree replay builds an import-free, memory-free controller with the
