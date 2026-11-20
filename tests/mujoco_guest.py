@@ -179,8 +179,10 @@ def main():
         if a.language == "objectc" and not site:
             options += ["--objc-clang", a.objc_clang.resolve(), "--objc-runtime", objc_runtimes[width].resolve()]
         if steady_deadlines:
-            operations = ("capability.open", "clock.create", "clock.read", "driver.connect", "driver.submit", "driver.result",
-                          "driver.describe", "driver.disconnect")
+            operations = ("capability.open", "clock.create", "clock.read", "driver.connect", "driver.submit",
+                          "driver.result", "driver.disconnect")
+            if a.language != "ruby" or mode == "crash":
+                operations += ("driver.describe",)
             options = [arg for op in operations for arg in ("--ros-operation", op)]
         if a.language == "js":
             app.write_text("const template = " + json.dumps(list(request)) + ";\n" +
@@ -234,6 +236,15 @@ def main():
         tool_args = ["--build-receipt"] if site else ["--toolchain", toolchains[width], "--sysroots", sysroots[width].resolve()]
         run(wasm.stem + "-compile", [sys.executable, compiler, "--target", f"wasm{width}", *tool_args, *(["--legacy-mte"] if a.candidate_mte else []),
                                     *options, app, *objects, "-o", wasm])
+        if a.language == "ruby":
+            module = wasm.read_bytes()
+            imports = sorted((entry["module"], entry["name"], entry["kind"]) for entry in inspect(module))
+            expected = sorted(("uwvm_ros_v2", name, 0) for name in operations)
+            interpreter = json.loads(wasm.with_suffix(".wasm.wros-ruby.json").read_bytes())
+            if (imports != expected or interpreter["imports"] != sorted(operations)
+                    or interpreter["script_sha256"] != hashlib.sha256(app.read_bytes()).hexdigest()
+                    or interpreter["wasm_sha256"] != hashlib.sha256(module).hexdigest()):
+                raise ValueError("Ruby controller imports or interpreter receipt differ from the reviewed simulation")
         if site:
             receipt = Path(str(wasm) + ".wros-build.json")
             verifier = [compiler_root / "install/qualification.py"]

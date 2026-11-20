@@ -66,10 +66,16 @@ the installed migration example against Noetic's native index method. Supply
 a Ruby migration installation, the VM, the pinned upstream header and a C++
 compiler. The probe uses both VM engines and has zero host imports.
 
-The source tree includes a Go2 controller for the official MuJoCo fixture.
-Use the same signed Unitree SDK installation with
-`tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`.
-Supply the VM sources, executable, OpenSSL and vendor model specified in the
-[simulation instructions](README.md#run-the-external-driver-simulation).
-The controller obtains command deadlines through an explicitly granted
-ROSv2 steady clock. Its Wasm imports no WASI operations.
+The source tree includes a Ruby controller for MuJoCo. Install the Ruby
+development component for the platform named in the vendor model manifest.
+Run `tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`
+with the reviewed C release and the VM sources, executable, OpenSSL, model
+manifest and assets from the [simulation instructions](README.md#run-the-external-driver-simulation).
+`tests/mujoco_matrix.py` can run the same replay for multiple platform selections.
+
+The controller obtains command deadlines through an explicitly granted ROSv2
+steady clock. The runner checks the Wasm import table and the mruby build
+receipt before execution. The normal and out-of-range controllers import only
+the clock, capability and driver functions they call. The crash controller
+additionally imports `driver.describe` to check the unresolved effect. None
+of the three controllers has a WASI import.

@@ -56,9 +56,14 @@ GC 对象各自通过带标签的 libc 分配。解析器使用堆栈，AST 节�
 核对已安装的 Ruby 移植示例。提供 Ruby 移植安装目录、VM、固定版本的原版头文件和
 C++ 编译器即可。探针在两种 VM 引擎中运行，且没有宿主导入。
 
-源码目录提供官方 MuJoCo 夹具的 Go2 控制器。用同一份已签名的
-Unitree SDK 安装运行
-`tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`，
-并按[仿真说明](README.md#运行外置驱动仿真)提供 VM 源码、可执行文件、
-OpenSSL 和原厂模型。控制器从显式授权的 ROSv2 稳态时钟获取命令期限，
-生成的 Wasm 不导入 WASI 操作。
+源码目录提供 MuJoCo 的 Ruby 控制器。按厂商模型清单中的平台安装 Ruby
+开发组件，使用已审阅的 C 资格签名运行
+`tests/mujoco_guest.py --language ruby --installed-sdk "$UWVM_ROS_SDK_ROOT"`。
+按[仿真说明](README.md#运行外置驱动仿真)指定 VM 源码、可执行文件、
+OpenSSL、模型清单和模型资产。跨平台的批量复测使用
+`tests/mujoco_matrix.py`。
+
+控制器从显式授权的 ROSv2 稳态时钟获取命令期限。仿真在执行前核对
+Wasm 导入表和 mruby 构建回执。正常与越界测试只导入实际调用的时钟、
+能力与驱动函数。崩溃场景额外导入 `driver.describe`，用于检查结果不明
+的操作。三种控制器均无 WASI 导入。
