@@ -26,6 +26,12 @@ require that width. The compiler uses `-O3 -g`. To explicitly opt out of MTE,
 supply `--no-mte --toolchain PATH --sysroots FILE` with a matching plain
 C/C++ sysroot. The interpreter needs standard EH for Ruby exceptions.
 
+`wrrb --jobs N` bounds the host compiler jobs used to preprocess and build
+mruby. The default is four. Use `--jobs 1` for a serial build or when the
+outer build already runs many targets in parallel. This setting leaves the
+guest single-threaded. The linker consumes objects in the same order at
+every job count.
+
 Ruby's GC objects use separate allocations from the selected tagged libc.
 The parser uses a heap stack and places its AST storage in individually
 allocated blocks that keep their ownership until the parser closes. The

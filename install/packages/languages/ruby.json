@@ -8,21 +8,21 @@
     },
     {
       "path": "bin/wrrb",
-      "bytes": 10323,
+      "bytes": 10970,
       "mode": 493,
-      "sha256": "62e254a0070cff9f473d5905500417cb09d87d1e5db117ea9301e989d91236be"
+      "sha256": "072629c89bb93bc755d085d9cab0977ad7340eeae6df763e8a7489ac20d193fe"
     },
     {
       "path": "document/en/ruby.md",
-      "bytes": 4531,
+      "bytes": 4845,
       "mode": 420,
-      "sha256": "63efcb83005427de41581fde3207287b8fc94bfd32adf54d23b39092a50c2263"
+      "sha256": "748eef788ebf47d57af73dea613efb7a14b0951067513ac5fc0f3d6f6ba8543a"
     },
     {
       "path": "document/zh/ruby.md",
-      "bytes": 4089,
+      "bytes": 4349,
       "mode": 420,
-      "sha256": "20347c07b36b2bae1889d051ad80af7da9724df2959a60e9892c711b0bd43de1"
+      "sha256": "6a4bb42f3c7feb413956248661ecf6758ffde3c404b1d144f6d5f68224b5cd00"
     },
     {
       "path": "include/wros/scene.h",

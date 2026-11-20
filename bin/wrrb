@@ -3,6 +3,7 @@
 @brief Build an embedded mruby application as a WebAssembly Core module.
 """
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import io
 import json
@@ -117,6 +118,8 @@ def main():
     p.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--ros-operation", action="append", default=[])
     p.add_argument("--ros-abi", action="store_true")
+    p.add_argument("--jobs", type=int, choices=range(1, 33), metavar="1..32", default=4,
+                   help="maximum concurrent host compiler jobs (default: 4)")
     p.add_argument("--build-receipt", action="store_true")
     a = p.parse_args()
     if a.output.suffix != ".wasm" or a.output.resolve() == a.script.resolve():
@@ -158,18 +161,27 @@ def main():
         cmd, backend = make_command(tc, a.sysroots, profile, "cpp", flags + ["-E"], verify=True)
         # The generator processes only the trusted upstream C++ symbol inventory.
         # The application's Ruby source is parsed only after the Wasm guest starts.
-        preprocessed = []
-        for unit in units:
+        def preprocess(unit):
             path = work / (unit.name + ".ii")
-            subprocess.run([*cmd, "-DMRB_PRESYM_SCANNING", unit, "-o", path], env=env, check=True)
-            preprocessed.append(path)
-        subprocess.run(["/usr/bin/ruby", LANG / "presym.rb", source, work, *preprocessed],
-                       env=env, cwd=work, check=True)
+            subprocess.run([*cmd, "-DMRB_PRESYM_SCANNING", unit, "-o", path], env=env, cwd=work, check=True)
+            return path
+
+        compile_unit, _ = make_command(tc, a.sysroots, profile, "cpp", [*flags, "-c"])
+
+        def compile_object(unit):
+            obj = work / (unit.name + ".o")
+            subprocess.run([*compile_unit, unit, "-o", obj], env=env, cwd=work, check=True)
+            return obj
+
+        with ThreadPoolExecutor(max_workers=a.jobs) as workers:
+            preprocessed = list(workers.map(preprocess, units))
+            subprocess.run(["/usr/bin/ruby", LANG / "presym.rb", source, work, *preprocessed],
+                           env=env, cwd=work, check=True)
+            objects = list(workers.map(compile_object, [*units, LANG / "entry.cpp"]))
 
         artifact = work / "body.wasm"
-        link = [*flags, "-nostartfiles", "-Wl,--no-entry,--export=_start", "-Wl,-z,stack-size=4194304",
-                "-Wl,--max-memory=134217728", *map(str, units), str(LANG / "entry.cpp"),
-                "-x", "none", "-lc-printscan-long-double", "-o", str(artifact)]
+        link = ["-O3", "-g", "-nostartfiles", "-Wl,--no-entry,--export=_start", "-Wl,-z,stack-size=4194304",
+                "-Wl,--max-memory=134217728", *map(str, objects), "-lc-printscan-long-double", "-o", str(artifact)]
         command, _ = make_command(tc, a.sysroots, profile, "cpp", link)
         subprocess.run(command, env=env, cwd=work, check=True)
         data = read_bounded(artifact)

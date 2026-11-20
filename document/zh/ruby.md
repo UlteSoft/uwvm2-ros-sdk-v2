@@ -24,6 +24,10 @@ export UWVM_ROS_SDK_ROOT="$PWD/sdk/$SDK_COMMIT/unitree/ruby/development"
 `--no-mte --toolchain PATH --sysroots FILE`，并选择匹配的无插装 C/C++
 sysroot。解释器处理 Ruby 异常需要标准 EH。
 
+`wrrb --jobs N` 限制预处理及构建 mruby 时的宿主编译任务数，默认为 4。
+外部构建已并行运行多个目标，或需要串行构建时，可指定 `--jobs 1`。
+该选项保留 guest 的单线程配置，链接顺序也保持一致。
+
 GC 对象各自通过带标签的 libc 分配。解析器使用堆栈，AST 节点分别分配，
 由本次解析持有，解析结束时统一回收。VM 单独配置运行时的标签检查策略。
 两个地址宽度均内置 mruby 多精度整数，支持宽整数字面量和算术。MTE 构建
