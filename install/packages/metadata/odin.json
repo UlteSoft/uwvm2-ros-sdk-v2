@@ -2,9 +2,9 @@
   "files": [
     {
       "path": "share/language/odin.json",
-      "bytes": 200,
+      "bytes": 199,
       "mode": 420,
-      "sha256": "22f0f6b6343e61867bc5d09458df5f4d7fc3cbbf416c03b53f22a85145c0f63b"
+      "sha256": "3c7472a41d7b7a655d0a3337db46de47ec3dbdca29aa08c772406906bdc7b070"
     }
   ]
 }

@@ -1,8 +1,8 @@
-# Odin 独立 wasm32
+# Odin 独立 Wasm
 
 [English](../en/odin.md)
 
-`wrodin` 把单文件 Odin 应用编译为 core Wasm 3.0。Linux x86-64 编译器由 Odin 官方月度标签 `dev-2026-11a` 的源码通过上游 `make release` 重建，版本显示为 `dev-2026-11:9a69916`，依赖系统的 `libLLVM.so.20.1`。Odin 1.0 GA 不在本次发布范围内。 [上游发布](https://github.com/odin-lang/Odin/releases/tag/dev-2026-11a) · [编译器输入](../../third-parties/odin/release.json)
+`wrodin` 把单文件 Odin 应用编译为 core Wasm 3.0。Linux x86-64 编译器由 Odin 官方月度标签 `dev-2026-11a` 的源码通过上游 `make release` 重建，版本显示为 `dev-2026-11:9a69916`，依赖系统的 `libLLVM.so.20.1`。SDK 在该月度源码上应用补丁，新增真正的独立 memory64 目标。Odin 1.0 GA 不在本次发布范围内。 [上游发布](https://github.com/odin-lang/Odin/releases/tag/dev-2026-11a) · [编译器输入](../../third-parties/odin/release.json)
 
 ## 安装与运行
 
@@ -30,6 +30,10 @@ xmake test -j1
 
 源码须导出 `_start() -> ()`。指定 `--ros-abi` 时只允许精确匹配的 `uwvm_ros_v2.abi`，省略时导入列表必须为空。导入声明本身不授予运行时权限。编译使用 SDK 的 LLVM 后端和 `-O3 -g`，默认启用 MTE。显式关闭时，直接编译用 `--no-mte` 及匹配的编译器和未标记 sysroot。Xmake 使用 `mte = false` 和 `WROS_SYSROOTS_NO_MTE`。可选构建记录包含配置、源码摘要和编译器输入。
 
-当前提供基础运行库以及单编译单元内经后端支持的栈与全局存储。堆分配、通用 Odin 标准库、线程、异常、真 memory64、对象相邻标签完整鉴定和厂商专属运行仍不在此开发配置中。上游 `wasm64p32` 保留 32 位指针。带标签栈所有权的函数若包含后端无法分类的宿主调用，编译会被拒绝。示例把使用栈内存的计算放在单独的函数中。
+默认地址宽度是 wasm32。使用 `--target wasm64` 或 `xmake f -a wasm64` 可选择真正的 64 位指针和内存索引。须提供与该位宽、MTE 模式和无异常配置匹配的 sysroot 记录。SDK 同时验证 LLVM 指针与索引宽度，以及最终 Wasm 的内存标志。
 
-安装时选用 `compiler-source` 组件，可按需同时拉取固定版本的 Odin 构建文件和基础运行库源码。宿主 LLVM 的版本和其余构建输入见编译器清单及标记器源码。
+当前提供基础运行库以及单编译单元内经后端支持的栈与全局存储。堆分配、通用 Odin 标准库、线程、异常、对象相邻标签完整鉴定和厂商专属运行仍不在此开发配置中。 SDK 的独立配置会拒绝显式 LLVM Wasm 内存内建操作。上游 `wasm64p32` 保留 32 位指针。带标签栈所有权的函数若包含后端无法分类的宿主调用，编译会被拒绝。示例把使用栈内存的计算放在单独的函数中。
+
+安装时选用 `compiler-source` 组件，可按需同时拉取固定版本的 Odin 构建文件、基础运行库源码及 SDK 补丁。解包后在固定 Odin 源码目录内执行 `patch -p1 < /path/to/wasm64.patch`，再构建编译器。宿主 LLVM 的版本和其余构建输入见编译器清单及标记器源码。
+
+如需重建清单里带提交哈希的编译器版本，请在固定的上游 Git 检出目录应用补丁后构建。可选源码包提供源文件，不含 Git 元数据。

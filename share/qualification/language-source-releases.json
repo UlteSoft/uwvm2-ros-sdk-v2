@@ -320,15 +320,19 @@
       "checks": [
         {
           "path": "third-parties/odin/release.json",
-          "sha256": "d73aaa13d945203a7d269c0c7a3bf1f723efa6ef6ca2b810f73d66232ffa94ce"
+          "sha256": "816d48f3d3d76a84ef6744ad8baceecbe26952ae2614c3c5e029c3666239ccc8"
         },
         {
           "path": "third-parties/odin/producer.tar.xz",
-          "sha256": "94d976938395490a7764c1265fe217f9673fdd2e3c5356b6a9ddbc8287da386c"
+          "sha256": "da81b389f1ed8aec8865b4f1d1a43e670bd28b4dd08d6ab77f7f076bc9f6e2b3"
         },
         {
           "path": "third-parties/odin/source.tar.xz",
           "sha256": "a68abc609e1766bf650e878d2463f4c0f44381f1536fd4a9fa2266e9fdc7f0ce"
+        },
+        {
+          "path": "third-parties/odin/wasm64.patch",
+          "sha256": "de89e87d87456a3e5ae4fc0b08b55fe5ac723028f3638556aa56d4679597c6d4"
         }
       ]
     }

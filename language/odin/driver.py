@@ -1,4 +1,4 @@
-"""Build one freestanding Odin program to audited wasm32 Core Wasm."""
+"""Build one freestanding Odin program to audited Core Wasm."""
 import argparse
 from hashlib import sha256
 import io
@@ -19,13 +19,15 @@ from artifacts import read_bounded, unique_object
 from compiler import compiler_environment, digest, make_command
 from frontend import audit
 from guest_profile import Profile
-from imports import inspect
+from imports import Reader, inspect, require_core
 from local_release import read_file
 from qualification import finish
 
 VENDOR = ROOT / "third-parties/odin"
-RELEASE_SHA256 = "d73aaa13d945203a7d269c0c7a3bf1f723efa6ef6ca2b810f73d66232ffa94ce"
+RELEASE_SHA256 = "816d48f3d3d76a84ef6744ad8baceecbe26952ae2614c3c5e029c3666239ccc8"
 PRODUCER = {"odin", "wros-odin-mte"}
+MAX_PAGES = 256
+PAGE_BYTES = 65536
 ABI = {"module": "uwvm_ros_v2", "name": "abi", "kind": 0, "params": [], "results": ["i32"]}
 
 
@@ -62,6 +64,29 @@ def unpack(work):
     return producer, release
 
 
+def check_memory(data, address_bits):
+    """Require the selected address width and finite local memory in the final binary."""
+    reader = Reader(data)
+    require_core(reader)
+    found = False
+    while reader.position < len(reader.data):
+        section = reader.byte()
+        body = reader.take(reader.uint())
+        if section != 5:
+            continue
+        memory = Reader(body)
+        expected = 0b001 if address_bits == 32 else 0b101
+        if found or memory.uint() != 1 or memory.uint() != expected:
+            raise ValueError("Odin output must define one bounded memory of the selected address width")
+        minimum, maximum = memory.uint(address_bits), memory.uint(address_bits)
+        if not 0 < minimum <= maximum <= MAX_PAGES:
+            raise ValueError("Odin output memory exceeds the configured page bounds")
+        memory.end()
+        found = True
+    if not found:
+        raise ValueError("Odin output has no defined memory")
+
+
 def build(args):
     """Link audited core Wasm and publish the artifact from private staging."""
     if platform.system() != "Linux" or platform.machine() not in ("x86_64", "amd64"):
@@ -73,7 +98,7 @@ def build(args):
     original = args.source.resolve(strict=True)
     source = read_file(original, 1 << 20)
     source.decode("utf-8", errors="strict")
-    profile = Profile(exceptions="noeh", mte=args.mte)
+    profile = Profile(address_bits=int(args.target[4:]), exceptions="noeh", mte=args.mte)
     tools = args.toolchain.resolve(strict=True)
     output = args.output.absolute()
     with tempfile.TemporaryDirectory(dir=output.parent) as directory:
@@ -90,22 +115,25 @@ def build(args):
         def run(command):
             subprocess.run(command, cwd=work, env=env, stdin=subprocess.DEVNULL, check=True, timeout=120)
 
-        run([producer / "odin", "build", app, "-file", "-target:freestanding_wasm32", "-build-mode:llvm-ir",
+        run([producer / "odin", "build", app, "-file", "-target:freestanding_" + args.target, "-build-mode:llvm-ir",
              "-no-entry-point", "-no-crt", "-no-rtti", "-default-to-nil-allocator", "-debug", "-o:none", "-out:" + str(ir)])
         files = list(ir.glob("*.ll"))
         if len(files) != 1:
             raise ValueError("expected one LLVM IR module from one Odin source file")
-        run([producer / "wros-odin-mte", "32", "on" if args.mte else "off", files[0], marked, original])
+        run([producer / "wros-odin-mte", str(profile.address_bits), "on" if args.mte else "off", files[0], marked, original])
         command, closure = make_command(tools, args.sysroots, profile, "c",
                                         ["-O3", "-g", "-Wno-override-module", "-c", str(marked), "-o", str(obj)],
                                         verify=True)
         run(command)
         linker = tools / "bin/wasm-ld"
-        run([linker, "--no-entry", "--export=_start", "--max-memory=16777216", obj, "-o", module])
+        machine = ["-mwasm64"] if profile.address_bits == 64 else []
+        run([linker, *machine, "--no-entry", "--export=_start",
+             f"--max-memory={MAX_PAGES * PAGE_BYTES}", obj, "-o", module])
         data = read_bounded(module)
         audit(data, profile)
         if inspect(data) != ([ABI] if args.ros_abi else []):
             raise ValueError("Odin guest must import precisely the selected ROSv2 ABI function, or nothing")
+        check_memory(data, profile.address_bits)
         finish({"format": "wros-odin-freestanding-development-v1", "language": "odin",
                 "mode": "instrumented" if args.mte else "off", "profile": profile.to_dict(),
                 "source_sha256": sha256(source).hexdigest(), "producer_release_sha256": RELEASE_SHA256,
@@ -118,7 +146,7 @@ def main():
     parser = argparse.ArgumentParser(prog="wrodin", description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("-o", "--output", required=True, type=Path)
-    parser.add_argument("--target", choices=("wasm32",), default="wasm32")
+    parser.add_argument("--target", choices=("wasm32", "wasm64"), default="wasm32")
     parser.add_argument("--toolchain", type=Path)
     parser.add_argument("--sysroots", action="append", type=Path)
     parser.add_argument("--mte", action=argparse.BooleanOptionalAction, default=True)

@@ -4,6 +4,11 @@
   "upstream_revision": "9a6991685ddf663956d9836602eb421e141fc443",
   "upstream_release_url": "https://github.com/odin-lang/Odin/releases/tag/dev-2026-11a",
   "upstream_build": "make release",
+  "wasm64_patch_sha256": "de89e87d87456a3e5ae4fc0b08b55fe5ac723028f3638556aa56d4679597c6d4",
+  "targets": [
+    "freestanding_wasm32",
+    "freestanding_wasm64"
+  ],
   "producer_version": "dev-2026-11:9a69916",
   "host_llvm_release": "20.1.8",
   "host_llvm_ubuntu_package": "1:20.1.8-2ubuntu8",
@@ -11,10 +16,10 @@
   "host_llvm_dev_sha256": "2451a82b35591d4a1b8f8852b6b3605d904588e14b08c1de8c113569c735b27b",
   "host_llvm_tools_sha256": "9960ef59508f8d3608f41d4c6470907a1c3864317d2aff5377bb23275633027c",
   "ir_marker_llvm_release": "23.1.5",
-  "ir_marker_source_sha256": "c72951aa81be61c86a2c4e50a197dc99f932bd224e260960fa540d7ce107edec",
-  "producer_sha256": "9702b875de44cdf89c234f97e116e218b4e4f0544b17f2b45b0e3ab9feaa4a6b",
-  "ir_marker_sha256": "69f90205a44d6c1d8c763f88f867a6d150757fb1af01dc39d80c991362e7bf8a",
-  "archive_bytes": 9394200,
-  "archive_sha256": "94d976938395490a7764c1265fe217f9673fdd2e3c5356b6a9ddbc8287da386c",
-  "unpacked_bytes": 35585275
+  "ir_marker_source_sha256": "b64b5b36d1f673c2f9a7a5af6fa7e50a6df464bb1e003e9258dfc3674e4cadd9",
+  "producer_sha256": "018302be94f418f5c47e814c66fdbfdcc70e4d296a010e36439da0265e5c83b5",
+  "ir_marker_sha256": "82b99918ccd29e6461abb70520c4f2d574443e697689bd79457ecbca04fc8360",
+  "archive_bytes": 9392120,
+  "archive_sha256": "da81b389f1ed8aec8865b4f1d1a43e670bd28b4dd08d6ab77f7f076bc9f6e2b3",
+  "unpacked_bytes": 35575925
 }

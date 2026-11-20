@@ -1,0 +1,177 @@
+diff --git a/base/runtime/core.odin b/base/runtime/core.odin
+index cd717dd..b13ccd7 100644
+--- a/base/runtime/core.odin
++++ b/base/runtime/core.odin
+@@ -626,0 +627 @@ Odin_OS_Type :: type_of(ODIN_OS)
++		wasm64,
+@@ -640,0 +642 @@ ALL_ODIN_ARCH_TYPES :: Odin_Arch_Types{
++	.wasm64,
+diff --git a/base/runtime/default_allocators_general.odin b/base/runtime/default_allocators_general.odin
+index 64af6c9..46ad7e8 100644
+--- a/base/runtime/default_allocators_general.odin
++++ b/base/runtime/default_allocators_general.odin
+@@ -9 +9 @@ when ODIN_DEFAULT_TO_NIL_ALLOCATOR {
+-} else when ODIN_OS != .Orca && (ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32) {
++} else when ODIN_OS != .Orca && (ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 || ODIN_ARCH == .wasm64) {
+diff --git a/base/runtime/entry_wasm.odin b/base/runtime/entry_wasm.odin
+index 52bb0e0..7c05727 100644
+--- a/base/runtime/entry_wasm.odin
++++ b/base/runtime/entry_wasm.odin
+@@ -2 +2 @@
+-#+build wasm32, wasm64p32
++#+build wasm32, wasm64p32, wasm64
+diff --git a/base/runtime/internal.odin b/base/runtime/internal.odin
+index e43a53b..c634d96 100644
+--- a/base/runtime/internal.odin
++++ b/base/runtime/internal.odin
+@@ -7 +7 @@ import "base:intrinsics"
+-IS_WASM :: ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32
++IS_WASM :: ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 || ODIN_ARCH == .wasm64
+@@ -22 +22 @@ HAS_HARDWARE_SIMD :: false when (ODIN_ARCH == .amd64 || ODIN_ARCH == .i386) && !
+-	false when (ODIN_ARCH == .wasm64p32 || ODIN_ARCH == .wasm32) && !intrinsics.has_target_feature("simd128") else
++	false when IS_WASM && !intrinsics.has_target_feature("simd128") else
+diff --git a/base/runtime/internal_i128.odin b/base/runtime/internal_i128.odin
+index 8c70002..de7bd37 100644
+--- a/base/runtime/internal_i128.odin
++++ b/base/runtime/internal_i128.odin
+@@ -8 +8 @@ import "base:intrinsics"
+-IS_WASM :: ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32
++IS_WASM :: ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 || ODIN_ARCH == .wasm64
+diff --git a/base/runtime/procs.odin b/base/runtime/procs.odin
+index 002a650..526921e 100644
+--- a/base/runtime/procs.odin
++++ b/base/runtime/procs.odin
+@@ -28 +28 @@ when ODIN_NO_CRT && ODIN_OS == .Windows {
+-} else when ODIN_NO_CRT || (ODIN_OS != .Orca && (ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32)) {
++} else when ODIN_NO_CRT || (ODIN_OS != .Orca && (ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 || ODIN_ARCH == .wasm64)) {
+diff --git a/base/runtime/procs_wasm.odin b/base/runtime/procs_wasm.odin
+index 7e03656..b726177 100644
+--- a/base/runtime/procs_wasm.odin
++++ b/base/runtime/procs_wasm.odin
+@@ -1 +1 @@
+-#+build wasm32, wasm64p32
++#+build wasm32, wasm64p32, wasm64
+diff --git a/base/runtime/wasm_allocator.odin b/base/runtime/wasm_allocator.odin
+index d5fd71b..26585f1 100644
+--- a/base/runtime/wasm_allocator.odin
++++ b/base/runtime/wasm_allocator.odin
+@@ -1 +1 @@
+-#+build wasm32, wasm64p32
++#+build wasm32, wasm64p32, wasm64
+diff --git a/src/build_settings.cpp b/src/build_settings.cpp
+index 30c86bc..ef71191 100644
+--- a/src/build_settings.cpp
++++ b/src/build_settings.cpp
+@@ -58,0 +59 @@ enum TargetArchKind : u16 {
++	TargetArch_wasm64,
+@@ -71,0 +73 @@ gb_global String target_arch_names[TargetArch_COUNT] = {
++	str_lit("wasm64"),
+@@ -892,0 +895,7 @@ gb_global TargetMetrics target_freestanding_wasm64p32 = {
++gb_global TargetMetrics target_freestanding_wasm64 = {
++	TargetOs_freestanding,
++	TargetArch_wasm64,
++	8, 8, 16, 512,
++	str_lit("wasm64-unknown-unknown"),
++};
++
+@@ -987,0 +997 @@ gb_global NamedTargetMetrics named_targets[] = {
++	{ str_lit("freestanding_wasm64"),    &target_freestanding_wasm64 },
+@@ -1128,0 +1139,5 @@ gb_internal bool find_library_collection_path(String name, String *path) {
++// WebAssembly CPU feature tables are common to both pointer widths.
++gb_internal TargetArchKind wasm_feature_arch(TargetArchKind arch) {
++	return arch == TargetArch_wasm64 ? TargetArch_wasm32 : arch;
++}
++
+@@ -1132,0 +1148 @@ gb_internal bool is_arch_wasm(void) {
++	case TargetArch_wasm64:
+@@ -2208 +2224 @@ gb_internal bool check_target_feature_is_valid(String const &feature, TargetArch
+-	String feature_list = target_features_list[arch];
++	String feature_list = target_features_list[wasm_feature_arch(arch)];
+diff --git a/src/checker.cpp b/src/checker.cpp
+index 8e2f7f8..c49ad16 100644
+--- a/src/checker.cpp
++++ b/src/checker.cpp
+@@ -1331,0 +1332 @@ gb_internal void init_universal(void) {
++			{"wasm64",    TargetArch_wasm64},
+diff --git a/src/llvm_abi.cpp b/src/llvm_abi.cpp
+index 66fa66d..1133c5c 100644
+--- a/src/llvm_abi.cpp
++++ b/src/llvm_abi.cpp
+@@ -2749,0 +2750 @@ gb_internal LB_ABI_INFO(lb_get_abi_info_internal) {
++	case TargetArch_wasm64:
+diff --git a/src/llvm_backend.cpp b/src/llvm_backend.cpp
+index 9cfe1f4..f2e6235 100644
+--- a/src/llvm_backend.cpp
++++ b/src/llvm_backend.cpp
+@@ -91,0 +92 @@ gb_internal String get_default_features() {
++	TargetArchKind feature_arch = wasm_feature_arch(bc->metrics.arch);
+@@ -93 +94 @@ gb_internal String get_default_features() {
+-	for (int i = 0; i < bc->metrics.arch; i += 1) {
++	for (int i = 0; i < feature_arch; i += 1) {
+@@ -118 +119 @@ gb_internal String get_default_features() {
+-	for (int i = off; i < off+target_microarch_counts[bc->metrics.arch]; i += 1) {
++	for (int i = off; i < off+target_microarch_counts[feature_arch]; i += 1) {
+@@ -3620,0 +3622 @@ gb_internal bool lb_generate_code(lbGenerator *gen) {
++	case TargetArch_wasm64:
+diff --git a/src/llvm_backend_expr.cpp b/src/llvm_backend_expr.cpp
+index a653338..1e757d6 100644
+--- a/src/llvm_backend_expr.cpp
++++ b/src/llvm_backend_expr.cpp
+@@ -808,0 +809 @@ gb_internal bool lb_is_matrix_simdable(Type *t, bool ignore_layout=false) {
++			case TargetArch_wasm64:
+diff --git a/src/llvm_backend_proc.cpp b/src/llvm_backend_proc.cpp
+index e422820..980349a 100644
+--- a/src/llvm_backend_proc.cpp
++++ b/src/llvm_backend_proc.cpp
+@@ -2388 +2388 @@ gb_internal lbValue lb_build_builtin_simd_proc(lbProcedure *p, Ast *expr, TypeAn
+-				} else if (build_context.metrics.arch == TargetArch_wasm32 || build_context.metrics.arch == TargetArch_wasm64p32) {
++				} else if (is_arch_wasm()) {
+@@ -5100,0 +5101 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
++			Type *page_count = build_context.metrics.arch == TargetArch_wasm64 ? t_i64 : t_i32;
+@@ -5102 +5103 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
+-				lb_type(p->module, t_i32),
++				lb_type(p->module, page_count),
+@@ -5106,2 +5107,2 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
+-			args[0] = lb_emit_conv(p, lb_build_expr(p, ce->args[0]), t_uintptr).value;
+-			args[1] = lb_emit_conv(p, lb_build_expr(p, ce->args[1]), t_uintptr).value;
++			args[0] = lb_emit_conv(p, lb_build_expr(p, ce->args[0]), t_u32).value;
++			args[1] = lb_emit_conv(p, lb_build_expr(p, ce->args[1]), page_count).value;
+@@ -5110 +5111 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
+-			res.type = t_i32;
++			res.type = page_count;
+@@ -5116,0 +5118 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
++			Type *page_count = build_context.metrics.arch == TargetArch_wasm64 ? t_i64 : t_i32;
+@@ -5118 +5120 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
+-				lb_type(p->module, t_i32),
++				lb_type(p->module, page_count),
+@@ -5122 +5124 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
+-			args[0] = lb_emit_conv(p, lb_build_expr(p, ce->args[0]), t_uintptr).value;
++			args[0] = lb_emit_conv(p, lb_build_expr(p, ce->args[0]), t_u32).value;
+@@ -5125 +5127 @@ gb_internal lbValue lb_build_builtin_proc(lbProcedure *p, Ast *expr, TypeAndValu
+-			res.type = t_i32;
++			res.type = page_count;
+diff --git a/src/llvm_backend_utility.cpp b/src/llvm_backend_utility.cpp
+index dbdd84e..961bf67 100644
+--- a/src/llvm_backend_utility.cpp
++++ b/src/llvm_backend_utility.cpp
+@@ -2163,0 +2164 @@ gb_internal lbValue lb_emit_mul_add(lbProcedure *p, lbValue a, lbValue b, lbValu
++		case TargetArch_wasm64:
+diff --git a/src/main.cpp b/src/main.cpp
+index 14fde3c..773afa0 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -4614 +4614 @@ int main(int arg_count, char const **arg_ptr) {
+-		String march_list = target_microarch_list[build_context.metrics.arch];
++		String march_list = target_microarch_list[wasm_feature_arch(build_context.metrics.arch)];
+@@ -4639 +4639 @@ int main(int arg_count, char const **arg_ptr) {
+-		String march_list  = target_microarch_list[build_context.metrics.arch];
++		String march_list  = target_microarch_list[wasm_feature_arch(build_context.metrics.arch)];
+@@ -4694 +4694 @@ int main(int arg_count, char const **arg_ptr) {
+-				String feature_list = target_features_list[build_context.metrics.arch];
++				String feature_list = target_features_list[wasm_feature_arch(build_context.metrics.arch)];
+diff --git a/src/types.cpp b/src/types.cpp
+index 4e5499f..7bfe456 100644
+--- a/src/types.cpp
++++ b/src/types.cpp
+@@ -2955,0 +2956 @@ gb_internal i64 target_max_atomic_size(void) {
++	case TargetArch_wasm64:

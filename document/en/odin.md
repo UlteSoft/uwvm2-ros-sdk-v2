@@ -1,8 +1,8 @@
-# Odin freestanding wasm32
+# Odin freestanding Wasm
 
 [中文](../zh/odin.md)
 
-`wrodin` builds one freestanding Odin source to core Wasm 3.0. The Linux x86-64 producer was rebuilt with upstream `make release` from the official `dev-2026-11a` monthly source tag. It reports `dev-2026-11:9a69916` and uses the distribution's `libLLVM.so.20.1` runtime. Odin 1.0 GA is outside this release. [Upstream release](https://github.com/odin-lang/Odin/releases/tag/dev-2026-11a) · [Producer inputs](../../third-parties/odin/release.json)
+`wrodin` builds one freestanding Odin source to core Wasm 3.0. The Linux x86-64 producer was rebuilt with upstream `make release` from the official `dev-2026-11a` monthly source tag. It reports `dev-2026-11:9a69916` and uses the distribution's `libLLVM.so.20.1` runtime. The SDK source patch adds a true freestanding memory64 target to that monthly compiler. Odin 1.0 GA is outside this release. [Upstream release](https://github.com/odin-lang/Odin/releases/tag/dev-2026-11a) · [Producer inputs](../../third-parties/odin/release.json)
 
 ## Install and run
 
@@ -30,6 +30,10 @@ The common application checks the ROSv2 ABI with an explicit test grant and comp
 
 Export `_start() -> ()` from source. The compiler admits only the exact `uwvm_ros_v2.abi` function with `--ros-abi` and an empty import list otherwise. A module's imports grant no runtime authority. The SDK uses its audited LLVM backend at `-O3 -g`. MTE instrumentation is enabled by default. Use `--no-mte` with a matching untagged compiler and sysroot, or `mte = false` and `WROS_SYSROOTS_NO_MTE` in Xmake. The optional receipt records the selected profile, source and compiler inputs.
 
-The scoped producer supplies Odin's base language runtime for a single freestanding translation unit. The development profile covers stack and global storage accepted by the SDK Wasm backend. Heap allocation, general Odin standard libraries, threads, EH, true memory64, managed-neighbor qualification and vendor-specific execution remain outside this release. Upstream's `wasm64p32` still uses 32-bit pointers. The WasmMTE backend may reject foreign calls in frames with tagged stack owners. The common project keeps its stack-backed computation in a separate helper.
+The default address width is wasm32. Pass `--target wasm64` or configure Xmake with `xmake f -a wasm64` to select true 64-bit pointers and memory indices. Supply the matching wasm64, no-EH sysroot receipt for the selected MTE mode. The SDK checks the LLVM pointer and index widths and the memory flag in the final Wasm binary.
 
-The optional installer component `compiler-source` fetches the pinned Odin build files and base runtime alongside the development package. The release provenance and marker source identify the remaining host LLVM inputs.
+The scoped producer supplies Odin's base language runtime for a single freestanding translation unit. The development profile covers stack and global storage accepted by the SDK Wasm backend. Heap allocation, general Odin standard libraries, threads, EH, managed-neighbor qualification and vendor-specific execution remain outside this release. The SDK freestanding profile excludes explicit LLVM Wasm memory intrinsics. Upstream's `wasm64p32` still uses 32-bit pointers. The WasmMTE backend may reject foreign calls in frames with tagged stack owners. The common project keeps its stack-backed computation in a separate helper.
+
+The optional installer component `compiler-source` fetches the pinned Odin build files and base runtime alongside the development package. In the extracted, pinned Odin source directory, apply the SDK patch with `patch -p1 < /path/to/wasm64.patch` before building. The release provenance and marker source identify the remaining host LLVM inputs.
+
+To reproduce the producer version identity, build the patched compiler from the pinned upstream Git checkout. The optional source archive provides the source files and omits Git metadata.

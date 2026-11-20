@@ -13,7 +13,7 @@ from separate_compilation import cgroup_record, sha
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "install"))
 from bootstrap import Source, install
-from imports import inspect
+from imports import Reader, inspect, require_core
 
 ABI = {"module": "uwvm_ros_v2", "name": "abi", "kind": 0, "params": [], "results": ["i32"]}
 
@@ -23,13 +23,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--commit", required=True)
     parser.add_argument("--platform", action="append")
+    parser.add_argument("--target", choices=("wasm32", "wasm64"), default="wasm32")
     for label in ("tagged-toolchain", "tagged-sysroots", "plain-toolchain", "plain-sysroots", "xmake", "vm", "output"):
         parser.add_argument("--" + label, required=True, type=Path)
     args = parser.parse_args()
     source = Source(args.commit, ROOT)
     platforms = args.platform or list(json.loads((ROOT / "share/targets.json").read_text())["platforms"])
     args.output.mkdir(mode=0o700)
-    evidence = {"commit": args.commit, "cgroup": cgroup_record(), "platforms": {}}
+    evidence = {"commit": args.commit, "target": args.target, "cgroup": cgroup_record(), "platforms": {}}
 
     def run(label, command, cwd, env, refused=None):
         proc = subprocess.run(command, cwd=cwd, env=env, stdout=subprocess.PIPE,
@@ -41,6 +42,19 @@ def main():
             raise ValueError(f"unexpected command exit {proc.returncode}. See {log}")
         return proc.stdout.decode(errors="replace")
 
+    def memory_flags(path):
+        reader = Reader(path.read_bytes())
+        require_core(reader)
+        while reader.position < len(reader.data):
+            section = reader.byte()
+            content = reader.take(reader.uint())
+            if section == 5:
+                limits = Reader(content)
+                assert limits.uint() == 1
+                return limits.uint()
+        raise ValueError("missing memory section")
+
+    expected_flags = 5 if args.target == "wasm64" else 1
     for platform in platforms:
         with tempfile.TemporaryDirectory(dir=args.output) as scratch:
             work = Path(scratch)
@@ -58,10 +72,13 @@ def main():
             checks = {}
             for case in ("common", "migration"):
                 project = projects / case / "odin"
+                run(platform + "-" + case + "-configure",
+                    [args.xmake, "f", "-a", args.target, "-c", "-y"], project, env)
                 run(platform + "-" + case + "-build", [args.xmake, "build", "-j1"], project, env)
                 result = run(platform + "-" + case + "-test", [args.xmake, "test", "-j1"], project, env)
                 artifact, = list((project / "build").rglob("*.wasm"))
                 assert inspect(artifact.read_bytes()) == ([ABI] if case == "common" else [])
+                assert memory_flags(artifact) == expected_flags
                 checks[case] = {"engines": passed_engines(result, [artifact]), "sha256": sha(artifact)}
                 if not evidence["platforms"] and case == "common":
                     disasm = run("tagged-disassembly", [args.tagged_toolchain / "bin/llvm-objdump", "-d", artifact],
@@ -74,24 +91,27 @@ def main():
                 wrodin = root / "bin/wrodin"
                 runner = root / "tools/xmake/run_guest.py"
                 output = work / "application.wasm"
-                plain = [wrodin, common, "--toolchain", args.plain_toolchain, "--sysroots", args.plain_sysroots,
+                plain = [wrodin, common, "--target", args.target, "--toolchain", args.plain_toolchain, "--sysroots", args.plain_sysroots,
                          "--no-mte", "--ros-abi", "--build-receipt", "-o", output]
                 run("untagged-build", plain, work, env)
                 proof = json.loads(output.with_suffix(".wasm.wros-build.json").read_text())
                 assert proof["mode"] == "off" and proof["profile"]["mte"] is False and proof["artifact_sha256"] == sha(output)
+                assert proof["profile"]["address_bits"] == int(args.target[4:])
+                assert memory_flags(output) == expected_flags
                 disasm = run("untagged-disassembly", [args.plain_toolchain / "bin/llvm-objdump", "-d", output], work, env)
                 assert "memtag." not in disasm
                 for engine in ("int", "aot"):
-                    launch = [sys.executable, runner, output, "wasm32", "3.0", "single",
+                    launch = [sys.executable, runner, output, args.target, "3.0", "single",
                               "--disable-tags", "--engine", engine]
                     run("untagged-" + engine, [*launch, "--queries", "abi"], work, env)
                     run("untagged-refuse-" + engine, launch, work, env, b"ROS scene interface is hidden")
                     tagged, = list((common.parent / "build").rglob("*.wasm"))
                     run("tagged-refuse-" + engine,
-                        [sys.executable, runner, tagged, "wasm32", "3.0", "single", "--check-tags", "--engine", engine],
+                        [sys.executable, runner, tagged, args.target, "3.0", "single", "--check-tags", "--engine", engine],
                         work, env, b"ROS scene interface is hidden")
                 rejected = work / "rejected.wasm"
-                default = [wrodin, common, "--toolchain", args.tagged_toolchain, "--sysroots", args.tagged_sysroots, "-o", rejected]
+                default = [wrodin, common, "--target", args.target, "--toolchain", args.tagged_toolchain,
+                           "--sysroots", args.tagged_sysroots, "-o", rejected]
                 run("undeclared-abi", default, work, env, b"must import precisely the selected ROSv2 ABI")
                 assert not rejected.exists()
                 bogus = work / "undeclared.odin"
@@ -104,13 +124,34 @@ def main():
                 run("wrong-entry", [wrodin, bogus, *default[2:], "--ros-abi"], work, env,
                     b"must define _start() -> ()")
                 assert not rejected.exists()
-                run("unsupported-wasm64", [*default, "--target", "wasm64"], work, env, b"invalid choice")
+                other = "wasm64" if args.target == "wasm32" else "wasm32"
+                run("reject-pseudo-memory64", [*default, "--target", "wasm64p32"], work, env, b"invalid choice")
+                run("wrong-width-sysroot", [*default, "--target", other], work, env, b"no sysroot built by this compiler")
+                assert not rejected.exists()
+                if args.target == "wasm64":
+                    pointer = ROOT / "tests/odin/memory64.odin"
+                    for enabled, tools, sysroots in ((True, args.tagged_toolchain, args.tagged_sysroots),
+                                                    (False, args.plain_toolchain, args.plain_sysroots)):
+                        mode = "on" if enabled else "off"
+                        artifact = work / ("width-" + mode + ".wasm")
+                        flags = [] if enabled else ["--no-mte"]
+                        run("width-build-" + mode,
+                            [wrodin, pointer, "--target", "wasm64", "--toolchain", tools, "--sysroots", sysroots,
+                             *flags, "-o", artifact], work, env)
+                        assert inspect(artifact.read_bytes()) == [] and memory_flags(artifact) == 5
+                        run_flag = "--check-tags" if enabled else "--disable-tags"
+                        for engine in ("int", "aot"):
+                            run("width-" + mode + "-" + engine,
+                                [sys.executable, runner, artifact, "wasm64", "3.0", "single", run_flag, "--engine", engine],
+                                work, env)
+                    checks["memory64"] = ["tagged-int", "tagged-aot", "untagged-int", "untagged-aot"]
+
                 plan = install(source, platform, "odin", work / "source-sdk",
                                ["--component", "compiler-source"], plan=True)
                 assert "odin/compiler-source" in plan["packages"] and "compiler-source" not in plan["packages"]
                 checks["additional"] = ["default-mte", "debug-line", "untagged-build", "untagged-int", "untagged-aot",
                                         "no-grant-refusal", "undeclared-abi-refusal", "unknown-import-refusal",
-                                        "entry-signature-refusal", "wasm64-refusal", "source-selection"]
+                                        "entry-signature-refusal", "wrong-width-sysroot-refusal", "pseudo-memory64-refusal", "source-selection"]
             evidence["platforms"][platform] = {"checks": checks, "transfer_paths": selected}
             (args.output / "results.json").write_text(json.dumps(evidence, indent=2) + "\n")
             print(platform, "common and migration passed INT/AOT", flush=True)

@@ -5,8 +5,8 @@ end
 
 --- @brief Restrict the Wasm target to the reviewed Odin profile.
 function validate(target, req)
-    assert(req.arch == "wasm32" and req.core == "3.0" and not req.eh and not req.threads and not req.std,
-           "Odin requires single-threaded wasm32 Core 3.0 without EH")
+    assert((req.arch == "wasm32" or req.arch == "wasm64") and req.core == "3.0" and not req.eh and not req.threads and not req.std,
+           "Odin requires single-threaded wasm32 or wasm64 Core 3.0 without EH")
     assert(req.mte_flag ~= "--legacy-mte" and #req.exports == 0,
            "Odin derives exports from source and accepts the tagged and untagged profiles")
     assert(#req.operations == 0 or (#req.operations == 1 and req.operations[1] == "abi"),

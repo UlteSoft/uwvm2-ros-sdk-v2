@@ -2,7 +2,7 @@
   "id": "odin",
   "development_package": true,
   "command_name": "wrodin",
-  "development_scope": "freestanding-odin-wasm32",
+  "development_scope": "freestanding-odin-core3",
   "optional_components": [
     "compiler-source",
     "migration"

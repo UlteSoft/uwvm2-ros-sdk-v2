@@ -81,9 +81,9 @@ int main(int argc, char **argv) {
     if (argc != 6) return 2;
     llvm::StringRef width(argv[1]);
     llvm::StringRef mode(argv[2]);
-    if (width != "32" || (mode != "on" && mode != "off")) return 2;
+    if ((width != "32" && width != "64") || (mode != "on" && mode != "off")) return 2;
     const bool tagged = mode == "on";
-    constexpr unsigned pointerBits = 32;
+    const unsigned pointerBits = width == "32" ? 32 : 64;
 
     llvm::LLVMContext context;
     llvm::SMDiagnostic diagnostic;
@@ -94,8 +94,10 @@ int main(int argc, char **argv) {
         diagnostic.print("wrodin", llvm::errs());
         return 1;
     }
-    if (module->getTargetTriple().getArch() != llvm::Triple::wasm32 ||
-        module->getDataLayout().getPointerSizeInBits() != pointerBits ||
+    const auto target = pointerBits == 32 ? llvm::Triple::wasm32 : llvm::Triple::wasm64;
+    const auto &layout = module->getDataLayout();
+    if (module->getTargetTriple().getArch() != target ||
+        layout.getPointerSizeInBits(0) != pointerBits || layout.getIndexSizeInBits(0) != pointerBits ||
         !module->getModuleInlineAsm().empty() || !module->ifuncs().empty()) {
         llvm::errs() << "unexpected Odin target layout or module assembly\n";
         return 1;

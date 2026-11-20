@@ -145,7 +145,7 @@ def main():
         if language == "as":
             metadata.update(development_scope="scalar-wasm32")
         if language == "odin":
-            metadata.update(development_scope="freestanding-odin-wasm32", optional_components=["compiler-source", "migration"])
+            metadata.update(development_scope="freestanding-odin-core3", optional_components=["compiler-source", "migration"])
         if language == "wat":
             metadata.update(development_scope="core-wasm-assembler")
         if language == "zig":
@@ -181,7 +181,7 @@ def main():
         examples = sorted((ROOT / "examples" / language / "synchronous-aot").iterdir())
         package("jvm/" + language, ["bin/" + COMPILER_COMMANDS[language], f"language/{language}/xmake/adapter.lua",
                                    f"language/{language}/host-inputs.json", *(p.relative_to(ROOT).as_posix() for p in examples)])
-    package("odin/compiler-source", ["third-parties/odin/source.tar.xz"])
+    package("odin/compiler-source", ["third-parties/odin/source.tar.xz", "third-parties/odin/wasm64.patch"])
     policy = ["install/" + name for name in ("frontend.py", "imports.py", "guest_profile.py", "compiler.py", "artifacts.py", "qualification.py", "local_release.py")]
     package("frontend", [*policy, "share/qualification/memory-neighbors.json", "bin/wrar", "install/archiver.py", "document/en/memtag.md", "document/zh/memtag.md",
                          "document/en/memory-qualification.md", "document/zh/memory-qualification.md"])

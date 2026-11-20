@@ -8,33 +8,33 @@
     },
     {
       "path": "document/en/odin.md",
-      "bytes": 3087,
+      "bytes": 3877,
       "mode": 420,
-      "sha256": "4d8a6ab03ee40afb7062f597ed3c823274f61db1cb8091b1b2bc884dbb6e9058"
+      "sha256": "98139c4af16c23ed01a9fd741a69041fc98fe7e0c2b639b928da5f016d8148e1"
     },
     {
       "path": "document/zh/odin.md",
-      "bytes": 2810,
+      "bytes": 3528,
       "mode": 420,
-      "sha256": "94f1775116ca70ce12aa5c2cb439cb260ae3e991bddc6e2949a3042e0bfdc123"
+      "sha256": "ffea8702f46060308d778857e812caf534cf117824d6eda234294a4cbe497933"
     },
     {
       "path": "language/odin/driver.py",
-      "bytes": 6722,
+      "bytes": 7970,
       "mode": 420,
-      "sha256": "96c01ec0af92bed071074be5840352321f6252d60d45105239f980f21f99da68"
+      "sha256": "6547737791aa16c04a0b32198b9b90955e79543d74dd98985ad139bc8bbb8491"
     },
     {
       "path": "language/odin/mark_mte.cpp",
-      "bytes": 8139,
+      "bytes": 8331,
       "mode": 420,
-      "sha256": "c72951aa81be61c86a2c4e50a197dc99f932bd224e260960fa540d7ce107edec"
+      "sha256": "b64b5b36d1f673c2f9a7a5af6fa7e50a6df464bb1e003e9258dfc3674e4cadd9"
     },
     {
       "path": "language/odin/xmake/adapter.lua",
-      "bytes": 1857,
+      "bytes": 1893,
       "mode": 420,
-      "sha256": "c1cda1f23edf92e43c56f3fd6f4d00a06f3b371fe0fa87c0f0c6d3318c2aedba"
+      "sha256": "4473009099007d3844633670eb9f229224eb55db1ad0445aaf988e57208363aa"
     },
     {
       "path": "third-parties/odin/LICENSE",
@@ -50,15 +50,15 @@
     },
     {
       "path": "third-parties/odin/producer.tar.xz",
-      "bytes": 9394200,
+      "bytes": 9392120,
       "mode": 420,
-      "sha256": "94d976938395490a7764c1265fe217f9673fdd2e3c5356b6a9ddbc8287da386c"
+      "sha256": "da81b389f1ed8aec8865b4f1d1a43e670bd28b4dd08d6ab77f7f076bc9f6e2b3"
     },
     {
       "path": "third-parties/odin/release.json",
-      "bytes": 1080,
+      "bytes": 1246,
       "mode": 420,
-      "sha256": "d73aaa13d945203a7d269c0c7a3bf1f723efa6ef6ca2b810f73d66232ffa94ce"
+      "sha256": "816d48f3d3d76a84ef6744ad8baceecbe26952ae2614c3c5e029c3666239ccc8"
     }
   ]
 }

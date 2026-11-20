@@ -5,6 +5,12 @@
       "bytes": 1144424,
       "mode": 420,
       "sha256": "a68abc609e1766bf650e878d2463f4c0f44381f1536fd4a9fa2266e9fdc7f0ce"
+    },
+    {
+      "path": "third-parties/odin/wasm64.patch",
+      "bytes": 9124,
+      "mode": 420,
+      "sha256": "de89e87d87456a3e5ae4fc0b08b55fe5ac723028f3638556aa56d4679597c6d4"
     }
   ]
 }
