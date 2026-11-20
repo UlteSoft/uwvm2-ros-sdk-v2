@@ -39,7 +39,7 @@ def main():
     shutil.copytree(sdk / "examples/wat/thread-mte", project)
     env = {k: v for k, v in os.environ.items() if not k.startswith(("WROS_", "UWVM_", "XMAKE_"))}
     env.update(PATH="/usr/bin:/bin", UWVM_ROS_SDK_ROOT=str(sdk), WROS_PLATFORM=args.platform,
-               XMAKE_GLOBALDIR=str(out / "xmake"))
+               XMAKE_GLOBALDIR=str(out / "xmake"), XMAKE_STATS="false")
     report = {"complete": False, "commit": args.commit, "platform": args.platform,
               "cgroup": group, "vm_sha256": digest(vm), "checks": {}}
 

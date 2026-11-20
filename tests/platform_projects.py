@@ -84,7 +84,8 @@ def main():
     if "docker-af71cb24aa7993383f76ad9c06750b17eb66fd090a2c9ba64b544b19cda9c913.scope" not in cgroup:
         p.error("run in the designated 64 GiB test cgroup")
     env = {k:v for k,v in os.environ.items() if not k.startswith(("WROS_", "UWVM_", "XMAKE_"))}
-    env.update(PATH="/usr/bin:/bin", WROS_VM=str(vm), TMPDIR=str(out), XMAKE_GLOBALDIR=str(out/"global"))
+    env.update(PATH="/usr/bin:/bin", WROS_VM=str(vm), TMPDIR=str(out),
+               XMAKE_GLOBALDIR=str(out / "global"), XMAKE_STATS="false")
     if a.language in ("csharp", "fsharp", "vbnet"):
         if a.managed_host is None or a.managed_toolchain is None:
             p.error("a managed example requires --managed-host and --managed-toolchain")
