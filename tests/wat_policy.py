@@ -27,6 +27,7 @@ def main():
     cli.add_argument("--commit", required=True)
     cli.add_argument("--vm", type=Path, required=True)
     cli.add_argument("--output", type=Path, required=True)
+    cli.add_argument("--platform", default="unitree")
     args = cli.parse_args()
     group = cgroup_record()
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
@@ -48,9 +49,9 @@ def main():
     with tempfile.TemporaryDirectory(dir=args.output) as directory:
         work = Path(directory)
         source = Source(args.commit, ROOT)
-        sdk = Path(install(source, "unitree", "wat", work / "sdk", [])["directory"])
+        sdk = Path(install(source, args.platform, "wat", work / "sdk", [])["directory"])
         assert all(path.startswith("language/wat/") for path in source.requested if path.startswith("language/"))
-        assert all(path.startswith("platform/unitree/") for path in source.requested if path.startswith("platform/"))
+        assert all(path.startswith(f"platform/{args.platform}/") for path in source.requested if path.startswith("platform/"))
         assembler = sdk / "bin/wrwat"
         module = work / "test.wasm"
         text = work / "input.wat"
@@ -169,7 +170,8 @@ def main():
         text.write_text("(invalid)")
         run("reject-preserve", [assembler, text, "-o", module], denial=b"expected valid module field")
         assert module.read_bytes() == previous
-    report = {"complete": True, "commit": args.commit, "cgroup": group, "checks": results}
+    report = {"complete": True, "commit": args.commit, "platform": args.platform,
+              "cgroup": group, "checks": results}
     (args.output / "results.json").write_text(json.dumps(report, indent=2) + "\n")
 
 

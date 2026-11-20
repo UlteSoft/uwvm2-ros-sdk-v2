@@ -91,7 +91,12 @@ def main():
     bits = int(args.arch[4:])
     profile = Profile(bits, "1.0" if args.core == "mvp" else "3.0",
                       args.thread_mode == "threads", mte=not args.disable_tags, exceptions=args.exceptions)
-    argv = [str(vm), *profile.uwvm_feature_flags(), "--wasm-set-main-module-name", "main"]
+    feature_flags = profile.uwvm_feature_flags()
+    exceptions_enabled = "--wasm-feature-enable-exceptions"
+    # Core 3 makes EH available, while local test policy may prohibit it.
+    if args.exceptions == "noeh" and exceptions_enabled in feature_flags:
+        feature_flags[feature_flags.index(exceptions_enabled)] = "--wasm-feature-disable-exceptions"
+    argv = [str(vm), *feature_flags, "--wasm-set-main-module-name", "main"]
     if args.engine:
         workers = os.getenv("WROS_TEST_AOT_WORKERS", "0") if args.engine == "aot" else "0"
         if not workers.isascii() or not workers.isdecimal():

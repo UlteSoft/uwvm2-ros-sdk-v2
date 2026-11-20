@@ -14,6 +14,8 @@ $GATE python3 -B tests/sdk_acceptance.py \
 
 Repeat the language and platform options to select a subset. Omitting either option selects every registered value for that dimension. The first selected platform is the common example location unless you set --contract-platform. The second tier executes the extension and migration projects for each selected pair by default. Repeat --platform-case to choose the desired categories. Use --plan to list the requested cases and known prerequisites without starting build or execution jobs.
 
+Installed platform projects run after the corresponding language check passes. A supplied artifact can be tested independently. For an SDK revision containing the WAT profile fixtures, the WAT language check additionally runs the Core 3.0, shared-memory, WasmMTE and real-child cases once. Language checks without a joint-profile fixture record `joint_profile.outcome` as `not_exercised`. The aggregate `all_joint_profiles_passed` requires explicit joint evidence for every selected language.
+
 The optional --inputs file uses the wros-sdk-acceptance-inputs-v1 schema. Site and artifact paths are relative to that file, or absolute. A platform-specific profile overrides the language default. For signed sites, provide the configuration that the SDK installer already verifies. For C#, F# and Visual Basic, provide managed_host from the matching host preparation command and managed_toolchain for the matching Wasm LLVM. Bundled AssemblyScript, standard Go and WAT can run without a site.
 
 A producer that uses explicit local tools may select toolchain and sysroots instead of a site. Give the Wasm LLVM prefix and the matching sysroot manifest. The selected compiler still checks its own profile and admission rules.

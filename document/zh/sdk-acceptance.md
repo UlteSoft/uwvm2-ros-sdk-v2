@@ -2,6 +2,8 @@
 
 [English](../en/sdk-acceptance.md)
 
+每种语言先执行独立验收，成功后再运行该语言的已安装平台工程。指定产物可单独验证。选定修订包含 WAT 配置夹具时，WAT 语言验收会额外执行一次 Core 3.0、共享内存、WasmMTE 和真实子线程的联合测试。缺少联合夹具的语言记录为 `joint_profile.outcome = not_exercised`。`all_joint_profiles_passed` 要求每个所选语言都有实际联合验证结果。
+
 从源码检出目录运行，确保本地已有指定的 Git 提交，并通过指定的 64 GiB、零 swap 测试 cgroup。编译与 VM 测试串行执行。结果记录所选 SDK 提交、cgroup、测试脚本摘要以及 Xmake 和 VM 的身份。
 
 ~~~sh

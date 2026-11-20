@@ -24,6 +24,7 @@ def main():
     """@brief Test the default checked build, deterministic tag failure and execution-only opt out."""
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("--commit", required=True)
+    cli.add_argument("--platform", default="unitree")
     for flag in ("vm", "xmake", "output"):
         cli.add_argument("--" + flag, type=Path, required=True)
     args = cli.parse_args()
@@ -33,13 +34,14 @@ def main():
     out.mkdir(mode=0o700)
     vm = args.vm.resolve(strict=True)
     source = Source(args.commit, ROOT)
-    sdk = Path(install(source, "unitree", "wat", out / "sdk", [])["directory"])
+    sdk = Path(install(source, args.platform, "wat", out / "sdk", [])["directory"])
     project = out / "project"
     shutil.copytree(sdk / "examples/wat/thread-mte", project)
     env = {k: v for k, v in os.environ.items() if not k.startswith(("WROS_", "UWVM_", "XMAKE_"))}
-    env.update(PATH="/usr/bin:/bin", UWVM_ROS_SDK_ROOT=str(sdk), WROS_PLATFORM="unitree",
+    env.update(PATH="/usr/bin:/bin", UWVM_ROS_SDK_ROOT=str(sdk), WROS_PLATFORM=args.platform,
                XMAKE_GLOBALDIR=str(out / "xmake"))
-    report = {"complete": False, "commit": args.commit, "cgroup": group, "vm_sha256": digest(vm), "checks": {}}
+    report = {"complete": False, "commit": args.commit, "platform": args.platform,
+              "cgroup": group, "vm_sha256": digest(vm), "checks": {}}
 
     def run(label, argv, *, denial=None):
         proc = subprocess.run(list(map(str, argv)), cwd=project, env=env, capture_output=True, timeout=90)

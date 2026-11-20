@@ -28,6 +28,7 @@ PROFILE_PATHS = {"site", *TOOLS, *HOSTS}
 INPUT_SCHEMA = "wros-sdk-acceptance-inputs-v1"
 RESULT_SCHEMA = "wros-sdk-acceptance-results-v1"
 FIXTURE = ROOT / "tests/platform_projects.py"
+WAT_PROFILE_TESTS = ("tests/wat_policy.py", "tests/wat_thread_mte.py")
 MAX_ARTIFACT = 64 << 20
 
 
@@ -165,6 +166,35 @@ def execute_fixture(row, entry, args, evidence, work):
             "site_sha256": result["site_sha256"]}
 
 
+def execute_wat_profile(args, platform, source, evidence, work):
+    """@brief Qualify the WAT compiler's joint profile once before platform tests."""
+    proof = {}
+    for path in WAT_PROFILE_TESTS:
+        fixture = ROOT / path
+        if fixture.read_bytes() != source.read(path, MAX_METADATA):
+            raise ValueError("WAT profile test source differs from the selected SDK commit")
+        output = work / fixture.stem
+        command = [sys.executable, "-B", fixture, "--commit", args.commit, "--platform", platform,
+                   "--vm", args.vm, "--output", output]
+        if path.endswith("wat_thread_mte.py"):
+            command.extend(("--xmake", args.xmake))
+        with (evidence / (fixture.stem + ".log")).open("xb") as log:
+            process = subprocess.run(list(map(str, command)), cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
+                                     timeout=240)
+        retained = evidence / fixture.stem
+        retained.mkdir()
+        for pattern in ("*.log", "results.json"):
+            for item in output.glob(pattern):
+                shutil.copyfile(item, retained / item.name)
+        if process.returncode:
+            return {"outcome": "blocked", "fixture": path, "exit": process.returncode}
+        receipt = json.loads((retained / "results.json").read_text())
+        if not receipt["complete"] or receipt["commit"] != args.commit or receipt["platform"] != platform:
+            raise ValueError("missing exact WAT joint-profile receipt")
+        proof[path] = {"checks": len(receipt["checks"]), "result_sha256": sha(retained / "results.json")}
+    return {"outcome": "passed", "tests": proof}
+
+
 def snapshot_runner(source, root):
     """@brief Materialize the exact commit's audited test runner without a compiler install."""
     paths = {"frontend": lambda p: p.startswith("install/"),
@@ -256,7 +286,7 @@ def main():
         cli.error(str(error))
 
     inventory = subprocess.check_output(
-        ["git", "ls-tree", "-r", "-z", "--name-only", args.commit, "--", "examples/platform"], cwd=ROOT,
+        ["git", "ls-tree", "-r", "-z", "--name-only", args.commit, "--", "examples/platform", *WAT_PROFILE_TESTS], cwd=ROOT,
     ).decode().split("\0")
     shipped = set(inventory)
     cases = list(dict.fromkeys(args.platform_case or ("extension", "migration")))
@@ -277,6 +307,7 @@ def main():
     save()
     for language in languages:
         meta = json.loads(source.read(f"share/language/{language}.json", MAX_METADATA))
+        language_outcome = None
         routes = [("language-contract", contract_platform, "common"),
                   *(("platform", platform, case) for platform in platforms for case in cases)]
         for tier, platform, case in routes:
@@ -295,6 +326,8 @@ def main():
                 row.update(outcome="not_exercised", reason="no-shipped-example")
             elif args.plan:
                 row.update(outcome="not_exercised", reason="plan-only")
+            elif tier == "platform" and artifact is None and language_outcome != "executable":
+                row.update(outcome="blocked", reason="language-contract-not-passed")
             else:
                 evidence = output / tier / platform / language / case
                 evidence.mkdir(parents=True)
@@ -305,14 +338,25 @@ def main():
                         result = (execute_artifact(artifact, args.vm, source, evidence, work) if artifact
                                   else execute_fixture(row, entry, args, evidence, work))
                         row.update(result)
+                        if (tier == "language-contract" and language == "wat" and row["outcome"] == "executable"
+                                and set(WAT_PROFILE_TESTS) <= shipped):
+                            profile = execute_wat_profile(args, platform, source, evidence, work)
+                            row["joint_profile"] = profile
+                            if profile["outcome"] != "passed":
+                                row.update(outcome="blocked", reason="joint-profile-test-failed")
                 except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
                     row.update(outcome="blocked", reason="artifact-or-fixture-error", detail=str(error))
+            if tier == "language-contract":
+                language_outcome = row["outcome"]
+                row.setdefault("joint_profile", {"outcome": "not_exercised"})
             state["rows"].append(row)
             if not args.plan:
                 save()
     state["complete"] = True
     state["counts"] = dict(Counter(row["outcome"] for row in state["rows"]))
     state["all_executable"] = all(row["outcome"] == "executable" for row in state["rows"])
+    state["all_joint_profiles_passed"] = all(row["joint_profile"]["outcome"] == "passed"
+                                             for row in state["rows"] if row["tier"] == "language-contract")
     save()
     print(json.dumps(state["counts"], sort_keys=True))
     return 0 if args.plan or state["all_executable"] else 1
