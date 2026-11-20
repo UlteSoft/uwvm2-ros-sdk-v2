@@ -46,3 +46,15 @@ LLVM 降低模块前，对受支持的函数和可寻址全局对象加标记，
 默认构建遇到缺失、错误或失效的签名站点直接退出。
 
 [Zig 官方归档及摘要](https://ziglang.org/download/)
+
+## 上游 GCD 回放
+
+回放先在 Linux 运行标准库的原始测试，再针对两种 Wasm 地址宽度编译
+11 条原始断言，以及与欧几里得算法对照的 8,192 组确定性输入。
+两个 VM 引擎均启用同步 WasmMTE。测试要求产物的导入表为空。
+
+```sh
+"$GATE" /usr/bin/python3 -B tests/upstream_zig_gcd.py --sdk "$PWD" \
+  --commit "$SDK_COMMIT" --producer "$PRODUCER" --site32 "$SITE32" \
+  --site64 "$SITE64" --vm "$WROS_VM" --output "$PWD/.tmp/zig-gcd"
+```

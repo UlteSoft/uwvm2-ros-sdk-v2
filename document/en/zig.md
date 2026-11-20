@@ -59,3 +59,16 @@ cannot satisfy the signed `wrzig verify` deployment check. An invalid
 or missing signed site stops a default build.
 
 [Official Zig archive and checksums](https://ziglang.org/download/)
+
+## Upstream gcd replay
+
+The replay runs the original standard library test on Linux, then builds
+its 11 assertions and 8,192 deterministic comparisons against Euclid's
+algorithm for each Wasm address width. Both VM engines run with synchronous
+WasmMTE. The test requires an empty Wasm import table.
+
+```sh
+"$GATE" /usr/bin/python3 -B tests/upstream_zig_gcd.py --sdk "$PWD" \
+  --commit "$SDK_COMMIT" --producer "$PRODUCER" --site32 "$SITE32" \
+  --site64 "$SITE64" --vm "$WROS_VM" --output "$PWD/.tmp/zig-gcd"
+```
