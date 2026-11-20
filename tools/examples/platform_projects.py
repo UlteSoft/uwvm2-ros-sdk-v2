@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SHARED = ROOT / "examples/shared"
 INDEX = ROOT / "examples/platform"
-LANGUAGES = set("c cpp csharp d fortran fsharp go java js kotlin lua nim objectc py rs ruby tinygo typescript vbnet zig".split())
+LANGUAGES = set("as c cpp csharp d fortran fsharp go java js kotlin lua nim objectc py rs ruby tinygo typescript vbnet zig".split())
 # The .NET and C migration projects use independently maintained, platform-selected ROS fixtures.
 SEPARATE = ({("migration", lang) for lang in ("c", "fsharp", "csharp", "vbnet")} |
             {("extension", lang) for lang in ("fsharp", "csharp", "vbnet", "go")})
@@ -32,15 +32,17 @@ def target(area, lang, platform, name, source_names, *, sensor=False):
     lines = [f'target("{name}")', '    set_kind("binary")', f'    set_language("{lang}")',
              f'    set_ros_platform("{platform}")']
     if lang not in ("csharp", "fsharp", "vbnet"):
-        eh = "false" if lang in ("rs", "zig") else "true"
+        eh = "false" if lang in ("as", "rs", "zig") else "true"
         lines.append('    set_wros_profile({core = "3.0", eh = ' + eh + ', mte = true})')
     if lang in C_OPTIONS or lang in ("csharp", "fsharp", "vbnet"):
         lines.extend(['    set_optimize("fastest")', '    set_symbols("debug")'])
+    if lang == "as":
+        lines.append('    set_symbols("debug")')
     if lang in ("java", "kotlin"):
         lines.append('    set_wros_jvm_main("example.Main")')
     if lang in ("csharp", "fsharp", "vbnet"):
         lines.append('    add_wros_exports("Robot.Start")')
-    if lang in ("js", "typescript", "java", "kotlin", "csharp", "fsharp", "vbnet", "lua", "py", "ruby") and operations:
+    if lang in ("as", "js", "typescript", "java", "kotlin", "csharp", "fsharp", "vbnet", "lua", "py", "ruby") and operations:
         lines.append("    add_wros_operations(" + strings(operations) + ")")
     if lang == "typescript" and len(source_names) > 1:
         lines.append('    set_wros_typescript_entry("main.ts")')

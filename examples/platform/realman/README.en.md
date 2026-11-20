@@ -10,7 +10,7 @@ Install the platform and language, run xmake build inside the project to emit Wa
 
 | Language | Common | Platform permissions | ROS source migration |
 | --- | --- | --- | --- |
-| as | — | — | — |
+| as | [common/as](common/as/) | — | [migration/as](migration/as/) |
 | c | [common/c](common/c/) | [extension/c](extension/c/) | [migration/c](migration/c/) |
 | c_ffi_bridge | — | — | — |
 | cpp | [common/cpp](common/cpp/) | [extension/cpp](extension/cpp/) | [migration/cpp](migration/cpp/) |

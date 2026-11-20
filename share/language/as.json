@@ -1,5 +1,6 @@
 {
   "id": "as",
-  "development_package": false,
-  "command_name": "wras"
+  "development_package": true,
+  "command_name": "wras",
+  "development_scope": "scalar-wasm32"
 }

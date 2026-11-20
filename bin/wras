@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+"""@file wras
+@brief Compile scalar AssemblyScript applications to core Wasm."""
+from pathlib import Path
+import runpy
+
+runpy.run_path(str(Path(__file__).resolve().parents[1] / "language/as/driver.py"),
+              run_name="__main__")

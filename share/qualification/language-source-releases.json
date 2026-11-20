@@ -233,6 +233,23 @@
         }
       ]
     },
+    "assemblyscript": {
+      "version": "0.28.20",
+      "release_url": "https://github.com/AssemblyScript/assemblyscript/releases/tag/v0.28.20",
+      "commit": "b6bda05c29c9eb7d07d7f6cb2703508483b30493",
+      "draft": false,
+      "prerelease": false,
+      "checks": [
+        {
+          "path": "third-parties/assemblyscript/release.json",
+          "sha256": "2485652b4d05b60a9f48afa0f3b42a897f3ab380cf40564f44923401e0d425b7"
+        },
+        {
+          "path": "third-parties/assemblyscript/compiler.tar.xz",
+          "sha256": "3598b453cae942247d95afdc29c6b2a7840612eb0c5958718f67b5687149a376"
+        }
+      ]
+    },
     "typescript": {
       "version": "5.9.3",
       "release_url": "https://github.com/microsoft/TypeScript/releases/tag/v5.9.3",
@@ -274,6 +291,12 @@
     }
   },
   "languages": {
+    "as": {
+      "components": [
+        "assemblyscript",
+        "node-typescript"
+      ]
+    },
     "c": {
       "components": [
         "llvm",

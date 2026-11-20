@@ -60,7 +60,7 @@ function configure(target, entry)
     assert(not target:values("wros.py_modules") or language == "py", "add_wros_python_modules requires Python")
     local core = target:values("wros.core") or "3.0"
     assert(core == "3.0" or core == "mvp", "core expects 3.0 or mvp")
-    local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs")
+    local eh = boolean(target, "eh", core ~= "mvp" and language ~= "rs" and language ~= "as")
     assert(target:values("wros.herbceptions") == nil or language == "cpp",
            "herbceptions is a C++ profile option")
     local legacy_mte = target:values("wros.mte") == "legacy"
@@ -79,7 +79,7 @@ function configure(target, entry)
     assert(not build_receipt or kind == "binary", "Deployment build receipts require a linked Wasm binary")
     local exports = table.wrap(target:values("wros.exports"))
     local operations = table.wrap(target:values("wros.operations"))
-    assert(language == "go" or language == "lua" or language == "js" or language == "typescript" or language == "py" or language == "ruby" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or language == "fsharp" or #operations == 0,
+    assert(language == "as" or language == "go" or language == "lua" or language == "js" or language == "typescript" or language == "py" or language == "ruby" or language == "java" or language == "kotlin" or language == "csharp" or language == "vbnet" or language == "fsharp" or #operations == 0,
            "add_wros_operations requires a target with selectable ROS imports")
     local lua_operations = table.wrap(target:values("wros.lua_operations"))
     assert(language == "lua" or #lua_operations == 0, "add_wros_lua_operations requires a Lua target")

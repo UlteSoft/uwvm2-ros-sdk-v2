@@ -1,0 +1,82 @@
+{
+  "files": [
+    {
+      "path": "bin/wras",
+      "bytes": 261,
+      "mode": 493,
+      "sha256": "2ae584457b22e52bbb34e241d83dda47ece170d9b4b21f2dc9b09e8af20dba0f"
+    },
+    {
+      "path": "document/en/assemblyscript.md",
+      "bytes": 2811,
+      "mode": 420,
+      "sha256": "9806f3ef2693f58fbe443793c3afcdd3361f8bb2a7751a68a9d942cf71098cc1"
+    },
+    {
+      "path": "document/zh/assemblyscript.md",
+      "bytes": 2461,
+      "mode": 420,
+      "sha256": "660b432629928e9a3f19f4f0b0841dfed995cfae73f8f9014cfa81832419abce"
+    },
+    {
+      "path": "language/as/compile.mjs",
+      "bytes": 1532,
+      "mode": 420,
+      "sha256": "63bb769c7116127966b2bd9d91d3d378e7e9d883ff148250156225a9f34795b4"
+    },
+    {
+      "path": "language/as/driver.py",
+      "bytes": 7176,
+      "mode": 420,
+      "sha256": "54533fb47c8f62bee5bf1ad082e03e1c36fc280f87b2defebdcc0fbb8c499f47"
+    },
+    {
+      "path": "language/as/xmake/adapter.lua",
+      "bytes": 1726,
+      "mode": 420,
+      "sha256": "263788816206e913b05db1c79f0ef99f2ee7942ab0f7185443f41d7e31a74785"
+    },
+    {
+      "path": "third-parties/assemblyscript/assemblyscript.LICENSE",
+      "bytes": 11357,
+      "mode": 420,
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+    },
+    {
+      "path": "third-parties/assemblyscript/binaryen.LICENSE",
+      "bytes": 11356,
+      "mode": 420,
+      "sha256": "c5accbbd8546e94c34aed24afe689a617627d18eed5a6c48277e48db57c23851"
+    },
+    {
+      "path": "third-parties/assemblyscript/compiler.tar.xz",
+      "bytes": 1867816,
+      "mode": 420,
+      "sha256": "3598b453cae942247d95afdc29c6b2a7840612eb0c5958718f67b5687149a376"
+    },
+    {
+      "path": "third-parties/assemblyscript/long.LICENSE",
+      "bytes": 11358,
+      "mode": 420,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "third-parties/assemblyscript/release.json",
+      "bytes": 1143,
+      "mode": 420,
+      "sha256": "2485652b4d05b60a9f48afa0f3b42a897f3ab380cf40564f44923401e0d425b7"
+    },
+    {
+      "path": "third-parties/typescript/LICENSE-node",
+      "bytes": 145485,
+      "mode": 420,
+      "sha256": "c738ae413cf561f174e34f6961f8ca458aae2369a73640dda6234c629b98bcc4"
+    },
+    {
+      "path": "third-parties/typescript/node-linux-x64.xz",
+      "bytes": 33109116,
+      "mode": 420,
+      "sha256": "7c3cd057e0411ee6c4508cb258efc01a2322f6f7d8261ead36b4558e242b3d8f"
+    }
+  ]
+}

@@ -142,6 +142,8 @@ def main():
             metadata["optional_components"] = ["migration"]
         if language == "go":
             metadata.update(development_scope="register-only-wasm32", optional_components=["compiler-source"])
+        if language == "as":
+            metadata.update(development_scope="scalar-wasm32")
         if language == "zig":
             metadata.update(development_scope="freestanding-zig-core3")
         if language == "ruby":
@@ -182,6 +184,10 @@ def main():
                              "document/en/xmake.md", "document/zh/xmake.md",
                              "document/en/xmake-api-index.md", "document/zh/xmake-api-index.md"])
     language_files = {
+        "as": ["bin/wras", "language/as/driver.py", "language/as/compile.mjs",
+               "document/en/assemblyscript.md", "document/zh/assemblyscript.md",
+               "third-parties/typescript/node-linux-x64.xz", "third-parties/typescript/LICENSE-node",
+               *[p.relative_to(ROOT).as_posix() for p in (ROOT / "third-parties/assemblyscript").iterdir() if p.is_file()]],
         "c": ["bin/wrc", "include/wros/scene.h", "examples/c/body.c", "examples/c/xmake.lua"],
         "cpp": ["bin/wrc", "bin/wrcc", "include/wros/scene.h", "document/en/cpp.md", "document/zh/cpp.md",
                 "examples/cpp/herbceptions/channel.cpp", "examples/cpp/herbceptions/xmake.lua"],

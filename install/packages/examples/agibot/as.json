@@ -1,0 +1,52 @@
+{
+  "files": [
+    {
+      "path": "document/en/platform-examples.md",
+      "bytes": 4469,
+      "mode": 420,
+      "sha256": "e8f7f23c50e621bb5187d46f20da6a7cc93e5684c32f993fba5844a4c7656501"
+    },
+    {
+      "path": "document/source/Doxyfile",
+      "bytes": 346,
+      "mode": 420,
+      "sha256": "28ad70c1e118ef03d507c08b0f9f1231f14ae936f24aa3f1fbf7930b2ba12530"
+    },
+    {
+      "path": "document/source/ros-abi.dox",
+      "bytes": 191816,
+      "mode": 420,
+      "sha256": "7c0bcd45ccf0e3f0f173824a5ad403e5b9bf0d5516c5b0a274cacc8abb8a5e50"
+    },
+    {
+      "path": "document/zh/platform-examples.md",
+      "bytes": 3877,
+      "mode": 420,
+      "sha256": "edd551a9302d641d338cc6eedda395364c58c42dad88749979e30bba40ef0510"
+    },
+    {
+      "path": "examples/platform/agibot/common/as/controller.ts",
+      "bytes": 506,
+      "mode": 420,
+      "sha256": "84087399b28f8f2c1d6744d2edb2c7efcfd00d39219cc5717e663639a1e84b5b"
+    },
+    {
+      "path": "examples/platform/agibot/common/as/xmake.lua",
+      "bytes": 504,
+      "mode": 420,
+      "sha256": "1926ac9cb7485cd4010fe626eae923a894573afb2dfae76ced4de4f43c95ba3e"
+    },
+    {
+      "path": "examples/platform/agibot/migration/as/grid.ts",
+      "bytes": 948,
+      "mode": 420,
+      "sha256": "bf8e2eca4b1e4b72389e753ef06be27f27ee5ec4bd82c19cf9bd232ccdb790f4"
+    },
+    {
+      "path": "examples/platform/agibot/migration/as/xmake.lua",
+      "bytes": 440,
+      "mode": 420,
+      "sha256": "dd7756337fbcd7e28bd148bf43117702b224ee857e3a91f2478e7e9281c8f3ca"
+    }
+  ]
+}
