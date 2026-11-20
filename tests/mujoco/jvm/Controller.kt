@@ -2,6 +2,7 @@
 package simulation
 
 import wros.scene.Driver
+import wros.scene.Calls
 
 private fun requireThat(value: Boolean) {
     if (!value) throw AssertionError()
@@ -21,23 +22,34 @@ private fun get(source: ByteArray): Long {
 
 fun main(args: Array<String>) {
     val driver = Driver()
+    val steady = Calls(8,32)
     val body = payload()
     val reply = ByteArray(256)
     val result = LongArray(2)
     val state = LongArray(4)
+    val clock = ByteArray(8)
+    val sample = ByteArray(32)
+    val clockWritten = LongArray(1)
+    requireThat(steady.capabilityOpen(byteArrayOf(115,116,101,97,100,121)) == 0)
+    requireThat(steady.clockCreate(ByteArray(8),clock,clockWritten) == 0 && clockWritten[0] == 8L)
     requireThat(driver.connect() == 9)
     requireThat(driver.open(byteArrayOf(106,111,105,110,116),4096,256) == 0)
     var status=11
     var tries=0
     while (status==11 && tries++<10000000) status=driver.connect()
     requireThat(status==0)
-    requireThat(driver.submit(0,DEADLINE,body)==22)
+    requireThat(driver.submit(0,1L,body)==22)
     var sequence=1L
     while (sequence<=STEPS) {
+        requireThat(steady.clockRead(clock,sample,clockWritten) == 0 && clockWritten[0] == 32L)
+        val now = get(sample)
+        requireThat(now >= 0 && now <= 0x7fff_ffff_ffff_ffffL - 5_000_000_000L)
+        val deadline = now + 5_000_000_000L
         put(body,8,sequence)
+        put(body,body.size-8,deadline)
         if (SUCCESS) body[TARGET+7]=(if ((sequence and 1L)==1L) 63 else 191).toByte()
         status=11; tries=0
-        while (status==11 && tries++<10000000) status=driver.submit(sequence,DEADLINE,body)
+        while (status==11 && tries++<10000000) status=driver.submit(sequence,deadline,body)
         requireThat(status==0)
         requireThat(driver.result(sequence,ByteArray(0),result)==22)
         status=11; tries=0

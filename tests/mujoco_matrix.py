@@ -51,7 +51,7 @@ def plan(path):
     return selections
 
 
-def execute(args, key, selection, evidence, env, vm_digest):
+def execute(args, key, selection, evidence, env, vm_digest, controller_cache):
     """@brief Install one signed selection and verify the six independent scenarios."""
     platform, language, bits = key
     model_bytes, assets, site_bytes, limit = selection
@@ -81,7 +81,8 @@ def execute(args, key, selection, evidence, env, vm_digest):
         simulated = evidence / "simulation"
         jvm = language in JVM_LANGUAGES
         runner = "jvm_mujoco.py" if jvm else "mujoco_guest.py"
-        compiler_args = ["--sdk", installed] if jvm else ["--address-bits", bits, "--installed-sdk", installed]
+        compiler_args = (["--sdk", installed, "--controller-cache", controller_cache] if jvm else
+                         ["--address-bits", bits, "--installed-sdk", installed])
         try:
             run("driver", [sys.executable, "-B", ROOT / "tests" / runner, "--runtime", args.runtime,
                 "--vm-source", args.vm_source, "--mujoco", args.mujoco, "--openssl-root", args.openssl_root,
@@ -140,16 +141,17 @@ def main():
         temp.replace(args.output / "results.json")
 
     save()
-    for key, selection in rows.items():
-        name = "-".join(map(str, key))
-        evidence = args.output / name
-        try:
-            row = execute(args, key, selection, evidence, env, vm_digest)
-        except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
-            row = dict(status="failed", reason=str(error), evidence=name)
-        result["rows"][name] = row
-        save()
-        print(name, row["status"], flush=True)
+    with tempfile.TemporaryDirectory(dir=args.output, prefix="jvm-cache-") as cache:
+        for key, selection in rows.items():
+            name = "-".join(map(str, key))
+            evidence = args.output / name
+            try:
+                row = execute(args, key, selection, evidence, env, vm_digest, cache)
+            except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
+                row = dict(status="failed", reason=str(error), evidence=name)
+            result["rows"][name] = row
+            save()
+            print(name, row["status"], flush=True)
     result["complete"] = True
     result["passed"] = all(row["status"] == "passed" for row in result["rows"].values())
     save()

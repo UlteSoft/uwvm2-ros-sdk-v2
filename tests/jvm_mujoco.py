@@ -26,6 +26,8 @@ def main():
                         help="compiled model size limit for the selected vendor fixture")
     parser.add_argument("--language", required=True, choices=("java", "kotlin"))
     parser.add_argument("--sdk",type=Path,default=ROOT,help="installed synchronous-aot source package for this language")
+    parser.add_argument("--controller-cache", type=Path,
+                        help="private scratch directory shared only by this signed simulation batch")
     args = parser.parse_args()
     sdk = args.sdk.resolve()
     if bool(args.vendor_model) != bool(args.vendor_assets):
@@ -53,6 +55,9 @@ def main():
         sysroot = args.sysroots.resolve(strict=True)
         tools = ["--toolchain", backend, "--sysroots", sysroot, "--bundle", args.bundle.resolve(strict=True), "--legacy-mte"]
         reviewed = ()
+    cache = args.controller_cache
+    if cache and (not site or not cache.is_dir() or (cache.stat().st_mode & 0o077)):
+        parser.error("controller cache requires a signed site and a private directory")
     sys.path.insert(0, str(args.vm_source.resolve() / "test/0084.ros-runtime"))
     import run_driver_mujoco as suite
 
@@ -60,8 +65,40 @@ def main():
     ext = "java" if java else "kt"
     controller = ROOT / "tests/mujoco/jvm" / ("Controller." + ext)
     compiler = sdk / "bin" / {"java":"wrjava","kotlin":"wrkt"}[args.language]
+    operations = ("capability.open", "clock.create", "clock.read",
+                  "driver.connect", "driver.submit", "driver.result", "driver.disconnect")
+    build_inputs = Path(__file__).read_bytes()
+    if cache:
+        build_inputs += json.dumps(row, sort_keys=True).encode()
+
+    def build(wasm, label, sources, flags, run):
+        """@brief Cache controller bytes only within one signed replay."""
+        command = [sys.executable, compiler, *tools, *flags, *sources, "-o", wasm]
+        if not cache:
+            run(label, command)
+            return
+        identity = hashlib.sha256(build_inputs)
+        for source in sources:
+            identity.update(hashlib.sha256(source.read_bytes()).digest())
+        identity.update(json.dumps(flags).encode())
+        artifact = cache / (identity.hexdigest() + ".wasm")
+        digest = artifact.with_suffix(".sha256")
+        if artifact.exists():
+            data = artifact.read_bytes()
+            if hashlib.sha256(data).hexdigest() != digest.read_text():
+                raise ValueError("cached controller differs from the compiled digest")
+            wasm.write_bytes(data)
+            print(label + " reused " + digest.read_text(), flush=True)
+            return
+        run(label, command)
+        data = wasm.read_bytes()
+        with artifact.open("xb") as file:
+            file.write(data)
+        digest.write_text(hashlib.sha256(data).hexdigest())
 
     def compile_guest(wasm, width, deadline, mode, count, run):
+        if width != 32 or deadline != 0:
+            raise ValueError("JVM fixture requires wasm32 and guest-generated deadlines")
         prefix = b"".join(suite.u64(1) for _ in range(6))
         prefix += suite.profile("simulation.position") + suite.profile("simulation.radian.logical")
         prefix += suite.text("simulation.joint") + suite.text("le64")
@@ -73,22 +110,22 @@ def main():
         directory.mkdir()
         settings = directory / ("Settings." + ext)
         if java:
-            contents = (f"package simulation; final class Settings {{static final long DEADLINE={deadline}L; "
+            contents = ("package simulation; final class Settings {"
                         f"static final int TARGET={len(prefix)+8}, STEPS={count}; "
                         f"static final boolean SUCCESS={success}, CRASH={crash}; "
                         f"static byte[] payload(){{return new byte[]{{{data}}};}} }}")
         else:
-            contents = (f"package simulation\nconst val DEADLINE={deadline}L\nconst val TARGET={len(prefix)+8}\n"
+            contents = (f"package simulation\nconst val TARGET={len(prefix)+8}\n"
                         f"const val STEPS={count}\nconst val SUCCESS={success}\nconst val CRASH={crash}\n"
                         f"fun payload()=byteArrayOf({data})\n")
         settings.write_text(contents)
-        run(wasm.stem+"-compile", [sys.executable, compiler, *tools,
-                                   "--main-class", "simulation.Controller", controller, settings, "-o", wasm])
+        allowed = (*operations, "driver.describe") if mode == "crash" else operations
+        operation_flags = [arg for operation in allowed for arg in ("--ros-operation", operation)]
+        build(wasm, wasm.stem+"-compile", (controller, settings),
+              ["--main-class", "simulation.Controller", *operation_flags], run)
         imports = {(x["module"],x["name"]) for x in inspect(wasm.read_bytes())}
-        allowed = {"capability.open","driver.connect","driver.submit","driver.result","driver.disconnect"}
-        if mode == "crash": allowed.add("driver.describe")
         assert imports == {("uwvm_ros_v2",name) for name in allowed}, imports
-        return Profile().uwvm_feature_flags()
+        return [*Profile().uwvm_feature_flags(), "--runtime-memtag-mode", "sync"]
 
     argv=[]
     for key,value in (("source-root",args.vm_source),("runtime",args.runtime),("openssl-root",args.openssl_root),
@@ -100,6 +137,7 @@ def main():
                      "--platform-targets",str(ROOT / "share/targets.json"),"--audit-calls"])
     sources = sdk / "language/jvm"
     suite.main(argv, compile_guest=compile_guest,guest_name=args.language,guest_widths=(32,),
+               guest_steady_deadlines=True,
                guest_inputs=(controller, Path(__file__), compiler, sysroot, *reviewed, sources/"Admit.java",
                              sources/"jvm_frontend.py", sources/"contracts.h", sources/"java/wros/scene/Driver.java",
                              sdk/"language"/args.language/"host-inputs.json", sdk/"include/wros/scene.h",
@@ -116,7 +154,9 @@ def main():
         report["cases"].append({"name":label,"argv":list(map(str,argv)),"status":proc.returncode})
         (out/"driver-permissions.json").write_text(json.dumps(report,indent=2)+"\n")
         if proc.returncode: raise RuntimeError(label+": "+proc.stderr[-2000:].decode(errors="replace"))
-    check("compile",[sys.executable,compiler,*tools,"--main-class","simulation.Denied",denied,"-o",guest])
+    build(guest, "compile", (denied,), ["--main-class", "simulation.Denied"], check)
+    if not report["cases"]:
+        report["cases"].append({"name":"compile", "status":0, "cached_sha256":hashlib.sha256(guest.read_bytes()).hexdigest()})
     assert {i["name"] for i in inspect(guest.read_bytes())} == {"capability.open","capability.close","driver.connect"}
     for engine in ("int","aot"):
         vm=[args.runtime.resolve(),*Profile().uwvm_feature_flags(),"--debug-fault-action","exit","--runtime-"+engine,
