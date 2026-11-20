@@ -14,15 +14,15 @@
     },
     {
       "path": "document/en/ruby.md",
-      "bytes": 4099,
+      "bytes": 4531,
       "mode": 420,
-      "sha256": "e89b639b3e5b54993510213a13ef1eb4aa1d11bf834a32c2b11e59304bfcb46d"
+      "sha256": "63efcb83005427de41581fde3207287b8fc94bfd32adf54d23b39092a50c2263"
     },
     {
       "path": "document/zh/ruby.md",
-      "bytes": 3758,
+      "bytes": 4089,
       "mode": 420,
-      "sha256": "5bb8a0aa1152cd959f34ab117b4e187b8c9f595e1bd8a39680c1059b4008e362"
+      "sha256": "20347c07b36b2bae1889d051ad80af7da9724df2959a60e9892c711b0bd43de1"
     },
     {
       "path": "include/wros/scene.h",
