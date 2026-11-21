@@ -20,15 +20,15 @@
     },
     {
       "path": "document/en/fortran.md",
-      "bytes": 15911,
+      "bytes": 16127,
       "mode": 420,
-      "sha256": "0aa495326a624ade407ba7f073102de10ef68b70ffc25dc721ed2c9bebb5050a"
+      "sha256": "f9e56f8ff03dff730e9fffe739e5855ad15f308426d4b053abc7b24ccc9a026f"
     },
     {
       "path": "document/zh/fortran.md",
-      "bytes": 14236,
+      "bytes": 14435,
       "mode": 420,
-      "sha256": "9628c75c765e31ed6928cf9629391cfdc1f9b2182ff67b6bc98357fc700970b9"
+      "sha256": "d10fdfdcacaa43c4cd0fc07008615a7e085333b8f252d92d8e08ab7b50055bfb"
     },
     {
       "path": "examples/fortran/body.f90",
@@ -98,9 +98,9 @@
     },
     {
       "path": "language/fortran/frontend_fortran.py",
-      "bytes": 17134,
+      "bytes": 16818,
       "mode": 420,
-      "sha256": "f0bcdba2a445c25b5d60dfdebf1a81fe7e9ba1ef5ca835fccb48b3528bfaea04"
+      "sha256": "5c00c94196216bcf181ab215f464f21e96825b020ca57887024721d0f6bd69a2"
     },
     {
       "path": "language/fortran/mark_mte.cpp",

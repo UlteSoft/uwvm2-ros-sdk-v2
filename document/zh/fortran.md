@@ -109,6 +109,8 @@ target_end()
 
 Fortran 前端使用 C 和 C++ 前端构建语言运行库与 ROS 导入适配器。应为同一 VM、编译器、sysroot、`-O3 -g` 及 EH 配置生成 C、C++ 两份凭据，与 Fortran 凭据一同打包并由本地发布机构签名。生产开发环境必须配置该签名包及信任策略。[共享发布流程](../../tools/wasm/memtag/README.md) · [验收脚本](../../tools/wasm/memtag/qualify_local_c.py) · [签名安装测试](../../tests/local_release_wsea.py)
 
+Flang 运行库中的 C++ 源码使用常规 C++ 语义。Fortran 前端在构建运行库和最终链接时均使用常规 C++ ABI。生成模块的 Wasm EH 和 WasmMTE 仍由所选配置决定。
+
 ## 数组内在过程
 
 前端检查程序、已封装目标文件和静态归档中的待解析符号。程序调用数组内在过程时，前端按选定的指针位宽、异常 ABI 和内存标签模式编译对应的 Flang 来宾运行库。包括实数和整数点积，实数、整数及逻辑矩阵乘法，带掩码或按维的求和，逻辑归约与数组重塑。仅执行标量运算的程序不编译这些源文件。

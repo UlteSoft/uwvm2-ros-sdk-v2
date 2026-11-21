@@ -171,14 +171,14 @@ def guest_runtime(compile_unit, env, work, toolchain, descriptors, intrinsics):
     return archive
 
 
-def link_plain_runtime(sources, output, work, env, toolchain, receipts, profile, settings):
-    """Link explicitly uninstrumented Fortran descriptor programs against the verified C++ sysroot."""
+def link_descriptor_program(sources, output, work, env, toolchain, receipts, profile, settings, admission):
+    """@brief Link Fortran descriptor programs with the verified conventional C++ runtime."""
     command, closure = make_command(toolchain, receipts, profile, "cpp", [
         *settings, "-nostartfiles", "-Wl,--no-entry", "-Wl,--export=_start",
         "-o", str(output),
     ], verify=True)
     inputs = stage_inputs(sources, work, profile.to_dict(), closure["compiler_sha256"],
-                          closure["closure_sha256"], toolchain)
+                          closure["closure_sha256"], toolchain, qualification.object_releases(admission))
     command.extend(map(str, inputs))
     command.append("-lc-printscan-long-double")
     if "-lunwind" in command:
@@ -262,23 +262,18 @@ def main():
                 flags.append("-g")
             descriptors, intrinsics, clocks = runtime_requirements([*units, *objects])
             cc = [sys.executable, "-B", ROOT / "bin/wrc", *flags]
-            cxx = [sys.executable, "-B", ROOT / "bin/wrcc", *flags]
             settings = ["-O" + opts.O, *(["-g"] if opts.g else [])]
-            if profile.mte:
-                def compile_runtime(source, obj, defines, includes):
-                    subprocess.run([*cxx, "--std", "c++17", *defines,
-                                    *(arg for path in includes for arg in ("-I", path)),
-                                    "-c", source, "-o", obj], check=True, env=env, cwd=work)
-            else:
-                # The fixed upstream runtime C++ uses conventional semantics.
-                plain_cpp, closure = make_command(toolchain, receipts, profile, "cpp",
-                                                  [*settings, "-std=c++17", "-c"], verify=True)
+            # The verified backend uses conventional C++ semantics by default.
+            cpp, closure = make_command(toolchain, receipts, profile, "cpp",
+                                        [*settings, "-std=c++17", "-c"], verify=True)
+            cpp_release = qualification.admit("cpp", opts, profile) if admission["mode"] == "strict" else {}
 
-                def compile_runtime(source, obj, defines, includes):
-                    subprocess.run([*plain_cpp, *defines, *("-I" + str(path) for path in includes),
-                                    source, "-o", obj], check=True, env=env, cwd=work)
-                    obj.write_bytes(seal_object(read_bounded(obj), profile.to_dict(),
-                                                closure["compiler_sha256"], closure["closure_sha256"]))
+            def compile_runtime(source, obj, defines, includes):
+                subprocess.run([*cpp, *defines, *("-I" + str(path) for path in (ROOT / "include", *includes)),
+                                source, "-o", obj], check=True, env=env, cwd=work)
+                obj.write_bytes(seal_object(read_bounded(obj), profile.to_dict(), closure["compiler_sha256"],
+                                            closure["closure_sha256"], cpp_release.get("release_sha256")))
+
             runtime = guest_runtime(compile_runtime, env, work, toolchain, descriptors, intrinsics)
             stubs = []
             bridge_sources = [work / "wros_imports.c", ROOT / "language/fortran/entry.c"]
@@ -289,13 +284,12 @@ def main():
                 subprocess.run([*cc, "-c", source, "-o", obj], check=True, cwd=work, env=env)
                 stubs.append(obj)
             # The upstream descriptor work queue uses libc++'s std::variant.
-            linker = cxx if descriptors else cc
             staged = work / "guest.wasm"
-            if descriptors and not profile.mte:
-                link_plain_runtime([*units, *stubs, *objects, runtime], staged, work, env,
-                                   toolchain, receipts, profile, settings)
+            if descriptors:
+                link_descriptor_program([*units, *stubs, *objects, runtime], staged, work, env,
+                                        toolchain, receipts, profile, settings, admission)
             else:
-                link_program([*linker, "--reactor", "--export", "_start", *units, *stubs,
+                link_program([*cc, "--reactor", "--export", "_start", *units, *stubs,
                               *objects, runtime, "-o", staged], work, env)
             qualification.finish(admission, opts, staged, output)
         return 0

@@ -109,6 +109,8 @@ The default MTE mode requires a locally trusted, signed release for the requeste
 
 Generate C and C++ release rows for the same VM, compiler, sysroot, `-O3 -g` and EH profile. The Fortran frontend uses those frontends for its language runtime and ROS import adapters. Bundle all three rows and sign the bundle using your local release authority. Production development installs require the signed bundle and trust configuration. [Shared release procedure](../../tools/wasm/memtag/README.md) · [Qualification command](../../tools/wasm/memtag/qualify_local_c.py) · [Signed installation test](../../tests/local_release_wsea.py)
 
+Flang's runtime uses conventional C++ semantics for its C++ sources. The Fortran frontend selects that ABI for the runtime and final link. The guest's Wasm EH and WasmMTE settings still follow the selected profile.
+
 ## Array intrinsics
 
 The frontend inspects unresolved symbols in the program and its sealed object and archive inputs. When a program calls array intrinsics, it compiles the corresponding Flang guest procedures with the selected pointer width, exception ABI and memory-tagging mode. This includes real and integer dot products, real, integer and logical matrix products, masked and dimensioned sums, logical reductions and array reshaping. An application that needs only scalar arithmetic omits these translation units.
