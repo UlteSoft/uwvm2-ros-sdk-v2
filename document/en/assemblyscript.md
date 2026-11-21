@@ -30,7 +30,11 @@ The default scalar profile supports functions and control flow in a single wasm3
 
 Each platform selection also installs a migration example at `examples/platform/<platform>/migration/as`. It ports the unsigned grid index used by ROS Noetic Costmap2D. Run `xmake build` and `xmake test -j1` in that directory to check row boundaries, wrapping arithmetic and seeded inputs in both VM engines. The resulting Wasm has no imports. The caller supplies valid coordinates when using the result to access a grid. [ROS Noetic Costmap2D source](https://github.com/ros-planning/navigation/blob/f44bb1fc2810399165115cc98b530fe4b9397c18/costmap_2d/include/costmap_2d/costmap_2d.h)
 
-Managed objects, a general AssemblyScript runtime, wasm64, threads, exception handling and vendor-specific operations remain outside these profiles.
+Each platform also includes `examples/platform/<platform>/extension/as`. Its
+Xmake tests exercise the platform and parent permission gates with a private
+test channel. Managed objects, a general AssemblyScript runtime, wasm64,
+threads, exception handling and vendor-specific operations remain outside
+these profiles.
 
 ## Bounded ROSv2 driver calls
 
@@ -72,6 +76,9 @@ Stage the bytes again to retry, or explicitly select
 next driver call, capability open or close, or an explicit `clearReply()`
 overwrites it. `replyRequired` returns a separate required length after
 status 90. Reads beyond a successful reply and writes outside the request trap.
+If the required capacity exceeds 512 bytes, call
+`resultWithCapacity(capability, sequence, capacity)` with the same sequence
+and the required capacity, up to 4096 bytes.
 
 Run the source-tree regression through the existing 64 GiB, zero-swap gate.
 The replay checks staging erasure, import selection, and failures in both

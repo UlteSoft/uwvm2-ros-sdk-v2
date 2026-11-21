@@ -37,6 +37,18 @@
       "sha256": "1926ac9cb7485cd4010fe626eae923a894573afb2dfae76ced4de4f43c95ba3e"
     },
     {
+      "path": "examples/platform/agibot/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/agibot/extension/as/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "af1393407f979ce4b9520147d84cd768e5198914339552180ff6adfb92247172"
+    },
+    {
       "path": "examples/platform/agibot/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

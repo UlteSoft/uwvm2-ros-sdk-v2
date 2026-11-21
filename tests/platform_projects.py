@@ -13,6 +13,8 @@ import shutil
 import subprocess
 import sys
 
+from separate_compilation import cgroup_record
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -72,6 +74,10 @@ def main():
                    help="build fresh example targets through xmake test")
     p.add_argument("--check-failure", action="store_true", help="also execute a deliberately failing local C assertion")
     a = p.parse_args()
+    try:
+        cgroup = cgroup_record()
+    except RuntimeError as error:
+        p.error(str(error))
     out = a.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
     vm = a.vm.resolve(strict=True)
@@ -82,9 +88,6 @@ def main():
     platforms = a.platform or sorted(registry["platforms"])
     if not set(platforms) <= set(registry["platforms"]) or a.language not in registry["languages"]:
         p.error("unknown platform or language")
-    cgroup = Path("/proc/self/cgroup").read_text().strip()
-    if "docker-af71cb24aa7993383f76ad9c06750b17eb66fd090a2c9ba64b544b19cda9c913.scope" not in cgroup:
-        p.error("run in the designated 64 GiB test cgroup")
     env = {k:v for k,v in os.environ.items() if not k.startswith(("WROS_", "UWVM_", "XMAKE_"))}
     env.update(PATH="/usr/bin:/bin", WROS_VM=str(vm), TMPDIR=str(out),
                XMAKE_GLOBALDIR=str(out / "global"), XMAKE_STATS="false")

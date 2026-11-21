@@ -37,6 +37,18 @@
       "sha256": "2bd1bbd7a7f46a58dbafaca8e4671a3f9bd83313215a9eddf0c747ea3ed7dae5"
     },
     {
+      "path": "examples/platform/fanuc/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/fanuc/extension/as/xmake.lua",
+      "bytes": 572,
+      "mode": 420,
+      "sha256": "ac9c804a4cf4ffd2c2854176c0c35ed939f799778e351e430cbc1faa9f6b1114"
+    },
+    {
       "path": "examples/platform/fanuc/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

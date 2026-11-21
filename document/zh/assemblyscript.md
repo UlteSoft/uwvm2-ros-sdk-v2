@@ -30,7 +30,9 @@ xmake test -j1
 
 每个平台的安装包也提供 `examples/platform/<platform>/migration/as`，演示如何移植 ROS Noetic Costmap2D 的无符号栅格索引。在目录内运行 `xmake build` 和 `xmake test -j1`，两个 VM 引擎都会测试行边界、回绕和固定种子的输入。生成的 Wasm 无导入。调用者用该索引访问栅格时，须确保坐标有效。[ROS Noetic Costmap2D 源码](https://github.com/ros-planning/navigation/blob/f44bb1fc2810399165115cc98b530fe4b9397c18/costmap_2d/include/costmap_2d/costmap_2d.h)
 
-托管对象、完整 AssemblyScript 运行时、wasm64、线程、异常处理和厂商专属操作仍待支持。
+每个平台的 `examples/platform/<platform>/extension/as` 都带有 Xmake
+测试，使用本地测试通道分别核验平台权限和上一级驱动授权。托管对象、完整
+AssemblyScript 运行时、wasm64、线程、异常处理和厂商专属操作仍待支持。
 
 ## 定长 ROSv2 驱动调用
 
@@ -66,6 +68,8 @@ wras controller.ts --ros-driver --ros-operation capability.open \
 `replySize` 和 `readWord` 只访问最近一次成功调用的响应。下一次驱动
 调用、打开或关闭权限、或显式调用 `clearReply()` 都会覆盖上一次响应。
 状态码 90 的所需空间由 `replyRequired` 单独报告。越界读写触发 trap。
+所需容量超过 512 字节时，使用相同序列号和所需容量调用
+`resultWithCapacity(capability, sequence, capacity)`，上限为 4096 字节。
 
 以下源码仓库回归需要现有的 64 GiB、零 swap 门禁。脚本检查暂存区擦除、
 导入选项和失败行为，分别验证同步 MTE、运行时关闭 MTE 和无标签构建。

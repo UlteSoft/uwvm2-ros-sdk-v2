@@ -37,6 +37,18 @@
       "sha256": "fa378025a9e9932b03397f43aa790b987b74bd477b764590ac2edc39f73da507"
     },
     {
+      "path": "examples/platform/realman/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/realman/extension/as/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "8de43f8c31416d82b9a4cea973fbfd17a3ecaae82a2bd8c7b78b909c2685b9cf"
+    },
+    {
       "path": "examples/platform/realman/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

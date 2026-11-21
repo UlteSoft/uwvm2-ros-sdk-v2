@@ -37,6 +37,18 @@
       "sha256": "d3f88a60be22b6d024718ee0a99b42dde290b4536ad1b53e67e007a9eefb0dbc"
     },
     {
+      "path": "examples/platform/elephant/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/elephant/extension/as/xmake.lua",
+      "bytes": 578,
+      "mode": 420,
+      "sha256": "0b90081feba9220a391bfa61c2cae60e91ec6a2db223e2c34231baa9535e6906"
+    },
+    {
       "path": "examples/platform/elephant/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

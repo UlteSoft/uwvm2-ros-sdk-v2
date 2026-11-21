@@ -37,6 +37,18 @@
       "sha256": "f11563154428b531809282db9137dba431dd15b5157f27093ca8cff132559ed4"
     },
     {
+      "path": "examples/platform/hello_robot/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/hello_robot/extension/as/xmake.lua",
+      "bytes": 584,
+      "mode": 420,
+      "sha256": "7d16c6fdae4f92b4f897ef81f10081186b4ff1285c69d0f41b4576c5ffd91ece"
+    },
+    {
       "path": "examples/platform/hello_robot/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

@@ -37,6 +37,18 @@
       "sha256": "21df03922c7112ed05f0037e3ff372b3943d266c6119bd0aa674048bc9948bfe"
     },
     {
+      "path": "examples/platform/agilex/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/agilex/extension/as/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "d2d60f94c05183e98ee0d72e39f35538da273caccc3aa378c382a13dedc8d525"
+    },
+    {
       "path": "examples/platform/agilex/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

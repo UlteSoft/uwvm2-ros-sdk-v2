@@ -37,6 +37,18 @@
       "sha256": "f1a6dbd93988747cc34bb1fa4a2c08dafa0db2fd4421c73b7010e728307888b8"
     },
     {
+      "path": "examples/platform/nvidia-groot/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/nvidia-groot/extension/as/xmake.lua",
+      "bytes": 586,
+      "mode": 420,
+      "sha256": "ae00161374c3f20ed6b2d56d643852d8e8bc0b9a4008f2d5087ea8a1f2794dab"
+    },
+    {
       "path": "examples/platform/nvidia-groot/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

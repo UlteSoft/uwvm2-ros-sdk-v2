@@ -37,6 +37,18 @@
       "sha256": "77bed401356a979c748ff9ead2f75abb671decc2200f8923def93c02e495d10e"
     },
     {
+      "path": "examples/platform/universal_robots/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/universal_robots/extension/as/xmake.lua",
+      "bytes": 594,
+      "mode": 420,
+      "sha256": "97de9a23ce7a04ffdaacbc952a5240980743b7b885ac82db163e40859f2567c7"
+    },
+    {
       "path": "examples/platform/universal_robots/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

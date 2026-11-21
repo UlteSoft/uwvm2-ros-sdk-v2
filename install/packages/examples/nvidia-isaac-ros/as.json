@@ -37,6 +37,18 @@
       "sha256": "246a6ecd40cd3b3299efbb0bdd8b53d91008eaef971afb74eb297143fd8cf86e"
     },
     {
+      "path": "examples/platform/nvidia-isaac-ros/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/nvidia-isaac-ros/extension/as/xmake.lua",
+      "bytes": 594,
+      "mode": 420,
+      "sha256": "25dbd28d8c1590ee4f48f35d374f1bb1ee39f78ccddaddffd1a97cdacb886a37"
+    },
+    {
       "path": "examples/platform/nvidia-isaac-ros/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

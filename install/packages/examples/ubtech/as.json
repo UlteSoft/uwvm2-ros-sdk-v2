@@ -37,6 +37,18 @@
       "sha256": "9da2cb9237a0b34c1b00312749d0c5f0c9bbdbc9ee3e44220c136bc43757db86"
     },
     {
+      "path": "examples/platform/ubtech/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/ubtech/extension/as/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "3f628c04635247400e0afc2f33ba97cd0ce846695345d568140a0a1fe60a1e0e"
+    },
+    {
       "path": "examples/platform/ubtech/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

@@ -37,6 +37,18 @@
       "sha256": "c4bfa5aad6fd2a3ff270ed47ce34e8d09ddeba2666e123b697c7bd5e3e68927b"
     },
     {
+      "path": "examples/platform/kuka/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/kuka/extension/as/xmake.lua",
+      "bytes": 570,
+      "mode": 420,
+      "sha256": "3b176a92527c69695d689990fe08ed6ffd146834bdd7d102e071affea26e26d3"
+    },
+    {
       "path": "examples/platform/kuka/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

@@ -37,6 +37,18 @@
       "sha256": "e9ae1de710ed89ee0b3074bab3ef0d821b2491ebfbc1720467be81a8983b32be"
     },
     {
+      "path": "examples/platform/limx/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/limx/extension/as/xmake.lua",
+      "bytes": 570,
+      "mode": 420,
+      "sha256": "0f441cc2561cd83acf2c22490a956371dfe5e35343ed59302ed4eba19a169a97"
+    },
+    {
       "path": "examples/platform/limx/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

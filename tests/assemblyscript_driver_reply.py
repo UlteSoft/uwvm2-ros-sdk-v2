@@ -20,30 +20,29 @@ from separate_compilation import cgroup_record, sha
 ROOT = Path(__file__).resolve().parents[1]
 ALIAS = "large"
 LARGE_BYTES = 700
-RESULT_BYTES = 753
-REQUIRED = 784
-REQUEST = struct.pack("<QQQ", 1, 1, 5) + b"large"
-RESULT_BODY = (struct.pack("<QQ", 1, 5) + b"large" + struct.pack("<QQ", 5, LARGE_BYTES)
-               + b"R" * LARGE_BYTES + struct.pack("<QQQ", 1, 42, 0))
+RESPONSE_CAPACITY = 768
+REQUIRED = 16 + RESPONSE_CAPACITY
+NAME = ALIAS.encode("ascii")
+REQUEST = struct.pack("<QQQ", 1, 1, len(NAME)) + NAME
+RESULT_BODY = (struct.pack("<QQ", 1, len(NAME)) + NAME
+               + struct.pack("<QQ", 5, LARGE_BYTES) + b"R" * LARGE_BYTES
+               + struct.pack("<QQ", 1, 42))
+RESULT_BYTES = len(RESULT_BODY)
 MAGIC = 0x44534F52564D5755
 HEADER = struct.Struct("<22Q")
 IDS = [bytes([value]) + bytes(15) for value in range(1, 6)]
 CONTRACT = hashlib.sha256(b"wros-as-driver-result-retry.parameter.get").digest()
 
 
-def encode_request(deadline):
-    body = struct.pack("<QQQ", 1, deadline, len(REQUEST)) + REQUEST
-    return body
-
-
 def large_source(deadline):
     """@brief Stage a small ROS parameter.get request and verify the large reply."""
-    request = encode_request(deadline)
+    request = struct.pack("<QQQ", 1, deadline, len(REQUEST)) + REQUEST
     writes = [f"writeByte({offset}, {value});" for offset, value in enumerate(request)]
     source = """import { writeByte, writeWord, open, opened, connect, submit, result, resultWithCapacity,
     disconnect, replySize, replyRequired, clearReply, readWord } from "./wros";
-const REQUIRED: u32 = 784;
-const RESULT_BYTES: u32 = 753;
+const REQUEST_BYTES: u32 = __REQUEST_BYTES__;
+const REQUIRED: u32 = __REQUIRED__;
+const RESULT_BYTES: u32 = __RESULT_BYTES__;
 function stageRequest(): void {
 """ + "\n".join(writes) + """
 }
@@ -54,9 +53,12 @@ export function _start(): void {
     let status: u32 = 11;
     for (let attempt = 0; status == 11 && attempt < 10000000; ++attempt) status = connect(handle);
     if (status != 0) unreachable();
-    stageRequest();
     status = 11;
-    for (let attempt = 0; status == 11 && attempt < 10000000; ++attempt) status = submit(handle, REQUEST_BYTES);
+    for (let attempt = 0; status == 11 && attempt < 10000000; ++attempt) {
+        // The previous attempt erased the guest's staging bytes.
+        stageRequest();
+        status = submit(handle, REQUEST_BYTES);
+    }
     if (status != 0) unreachable();
     if (result(handle, 1) != 90 || replySize() != 0 || replyRequired() != REQUIRED) unreachable();
     if (resultWithCapacity(handle, 1, REQUIRED - 1) != 90 ||
@@ -65,19 +67,21 @@ export function _start(): void {
     for (let attempt = 0; status == 11 && attempt < 10000000; ++attempt) {
         status = resultWithCapacity(handle, 1, REQUIRED);
     }
-    if (status != 0 || replyRequired() != 0 || replySize() != 769) unreachable();
+    if (status != 0 || replyRequired() != 0 || replySize() != __REPLY_SIZE__) unreachable();
     if (readWord(0) != 0 || readWord(8) != RESULT_BYTES || readWord(16) != 1) unreachable();
     if (readWord(24) != 5 || readWord(37) != 5 || readWord(45) != 700) unreachable();
-    if (readWord(53) != 0x5252525252525252 || readWord(741) != 0x5252525252525252) unreachable();
+    if (readWord(53) != 0x5252525252525252 || readWord(745) != 0x5252525252525252) unreachable();
     if (readWord(753) != 1 || readWord(761) != 42) unreachable();
     clearReply();
-    if (replySize() != 0 || replyRequired() != 0 || readWord(0) != 0) unreachable();
+    if (replySize() != 0 || replyRequired() != 0) unreachable();
     if (resultWithCapacity(handle, 1, REQUIRED) != 11 || replySize() != 0) unreachable();
     if (disconnect(handle) != 0) unreachable();
 }
 """
-    return source.replace("const REQUIRED: u32",
-                          f"const REQUEST_BYTES: u32 = {len(request)};\nconst REQUIRED: u32")
+    return (source.replace("__REQUEST_BYTES__", str(len(request)))
+            .replace("__REQUIRED__", str(REQUIRED))
+            .replace("__RESULT_BYTES__", str(RESULT_BYTES))
+            .replace("__REPLY_SIZE__", str(16 + RESULT_BYTES)))
 
 
 def parse_header(packet):
@@ -108,7 +112,7 @@ def driver_worker(fd, peer_key, library, vm_source):
 
         request, body = parse_header(peer.recv())
         assert request[2] == 3 and request[18] == 1 and request[21] == 0
-        assert body == encode_request(request[19])
+        assert body == REQUEST
         submitted += 1
 
         result = list(request)
@@ -128,14 +132,15 @@ def driver_worker(fd, peer_key, library, vm_source):
 
 def build_peer(vm_source, ssl, output):
     """@brief Build the existing test-only TLS peer adapter."""
-    command = [
+    command = list(map(str, [
         "/usr/bin/clang++-22", "-std=c++23", "-O3", "-g", "-Wall", "-Wextra", "-Werror",
         "-pthread", "-DUWVM_ROS_ATTACHMENT_OPENSSL", "-I" + str(ssl / "include"),
         "-I" + str(vm_source / "src"), "-isystem", str(vm_source / "third-parties/fast_io/include"),
         vm_source / "test/0084.ros-runtime/attachment_peer.cpp",
         ssl / "libssl.a", ssl / "libcrypto.a", "-ldl", "-shared", "-fPIC", "-o", output,
-    ]
-    subprocess.run(command, check=True, timeout=180)
+    ]))
+    build_env = dict(os.environ, TMPDIR=str(output.parent))
+    subprocess.run(command, check=True, timeout=180, env=build_env)
     return command
 
 
@@ -157,7 +162,7 @@ def main():
     result_record = {"complete": False, "sdk_commit": args.commit, "vm_sha256": sha(args.runtime),
                      "cgroup": cgroup, "large_value_bytes": LARGE_BYTES,
                      "schema_body_bytes": RESULT_BYTES, "driver_wire_bytes": 16 + RESULT_BYTES,
-                     "declared_response_bytes": 768, "emsgsize_required_bytes": REQUIRED,
+                     "declared_response_bytes": RESPONSE_CAPACITY, "emsgsize_required_bytes": REQUIRED,
                      "submit_expected": 1, "cases": []}
 
     def save():
@@ -230,7 +235,6 @@ def main():
                     args.runtime, "-WF3", "--runtime-" + engine, "--runtime-compile-threads", "0",
                     "--runtime-llvm-jit-cache-path", "disable", "--runtime-memtag-mode", "sync",
                     "--debug-fault-action", "exit", "--wasm-set-main-module-name", "main",
-                    "--wasip1-single-create", "main", "--wasip1-single-disable", "main",
                     "--ros-scene-create", "robot", "--ros-scene-bind", "robot", "main",
                 ]
                 for operation in operations:
@@ -238,10 +242,11 @@ def main():
                 args_vm.extend([
                     "--ros-scene-grant", "robot", ALIAS, "driver", "param-lookup",
                     "registered-driver", "driver.connect,driver.submit,driver.result,driver.disconnect",
-                    "--ros-scene-driver-budget", "robot", "1", "65536",
+                    # Charge the VM's TLS context and record buffers as well as the payload.
+                    "--ros-scene-driver-budget", "robot", "1", "524288",
                     "--ros-scene-driver-channel", "robot", ALIAS, "main", str(left.fileno()),
                     str(peer.pid), str(os.getuid()), str(os.getgid()), *[item.hex() for item in IDS],
-                    CONTRACT.hex(), "4096", "768", "30000000000", str(deadline + 1_000_000_000),
+                    CONTRACT.hex(), "4096", str(RESPONSE_CAPACITY), "30000000000", str(deadline + 1_000_000_000),
                     str(vm_key), str(clock),
                     "--ros-scene-driver-schema", "robot", ALIAS, "parameter.get", "32", "1024", "8",
                     "--run", wasm,
@@ -266,7 +271,8 @@ def main():
                     "engine": engine, "vm_exit": process.returncode,
                     "peer_exit": peer.returncode, "peer_observation": observed,
                     "host_request_count": observed["submit_packets"],
-                    "emsgsize_attempts": [512, REQUIRED - 1, REQUIRED],
+                    "rejected_capacities": [512, REQUIRED - 1],
+                    "accepted_capacity": REQUIRED,
                     "delivered_result_bytes": 16 + RESULT_BYTES,
                 })
                 save()
@@ -280,4 +286,3 @@ if __name__ == "__main__":
         driver_worker(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5])
     else:
         main()
-

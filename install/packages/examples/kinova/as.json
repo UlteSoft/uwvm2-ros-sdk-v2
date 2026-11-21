@@ -37,6 +37,18 @@
       "sha256": "0922e6e18335b5b9c922a1ea0a27668b32f116a09e298cf8b165b8f00da7546c"
     },
     {
+      "path": "examples/platform/kinova/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/kinova/extension/as/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "5a58b983753d7410cb5d22a71de1c410126c769ef1d4da32d19020d7e42031b3"
+    },
+    {
       "path": "examples/platform/kinova/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

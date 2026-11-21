@@ -37,6 +37,18 @@
       "sha256": "c9e5b632b87500eb37a965588165b7799ce0cc668c9efc4e024d05ddccb0977b"
     },
     {
+      "path": "examples/platform/yaskawa/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/yaskawa/extension/as/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "1d877ea8aa980e0876b2fe43d3e8d1f806a04a682e321166fedc2167165cb18d"
+    },
+    {
       "path": "examples/platform/yaskawa/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

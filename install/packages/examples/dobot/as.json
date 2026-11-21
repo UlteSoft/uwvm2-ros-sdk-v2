@@ -37,6 +37,18 @@
       "sha256": "b76df721f3bc702029896ca14e11a0fe5090ee8bcea4a03f7371d9ab54f52805"
     },
     {
+      "path": "examples/platform/dobot/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/dobot/extension/as/xmake.lua",
+      "bytes": 572,
+      "mode": 420,
+      "sha256": "ed7ab9db362bdde9a9cf755b1848bea6629f923f2a973fd16f6c8ccac55a9102"
+    },
+    {
       "path": "examples/platform/dobot/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

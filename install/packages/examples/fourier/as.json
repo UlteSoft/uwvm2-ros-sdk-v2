@@ -37,6 +37,18 @@
       "sha256": "bc38b2207401f7a82ec9ee9ad851e6719d4b73139078cf44c76a9d7b93b538de"
     },
     {
+      "path": "examples/platform/fourier/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/fourier/extension/as/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "f16dea4f7e3293d6ce260bc9a5f33d73071f51ba37b4ab0311f5c7f568715076"
+    },
+    {
       "path": "examples/platform/fourier/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

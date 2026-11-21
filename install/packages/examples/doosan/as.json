@@ -37,6 +37,18 @@
       "sha256": "0d92feb84734be9d0e29ad277429e107250e0d1fe72eea27e3a23771e6f9ad13"
     },
     {
+      "path": "examples/platform/doosan/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/doosan/extension/as/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "dba62ef2cc1b5b2c70adb9065bee4efe2ffab37c778509d86979923c1dae7b94"
+    },
+    {
       "path": "examples/platform/doosan/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

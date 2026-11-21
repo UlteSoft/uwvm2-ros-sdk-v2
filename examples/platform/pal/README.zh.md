@@ -10,7 +10,7 @@
 
 | 语言 | 通用 | 平台权限扩展 | ROS 源码移植 |
 | --- | --- | --- | --- |
-| as | [common/as](common/as/) | — | [migration/as](migration/as/) |
+| as | [common/as](common/as/) | [extension/as](extension/as/) | [migration/as](migration/as/) |
 | c | [common/c](common/c/) | [extension/c](extension/c/) | [migration/c](migration/c/) |
 | c_ffi_bridge | — | — | — |
 | cpp | [common/cpp](common/cpp/) | [extension/cpp](extension/cpp/) | [migration/cpp](migration/cpp/) |

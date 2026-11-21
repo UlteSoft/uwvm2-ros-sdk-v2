@@ -37,6 +37,18 @@
       "sha256": "356e2f430d991ff8338aaacb76b52996e07f3adc60e2962dd91d3878652fa595"
     },
     {
+      "path": "examples/platform/unitree/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/unitree/extension/as/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "72687c9d788b7c72adc19e23c15bc2282c1dfb90bf6804b75099ccde2e30afbe"
+    },
+    {
       "path": "examples/platform/unitree/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

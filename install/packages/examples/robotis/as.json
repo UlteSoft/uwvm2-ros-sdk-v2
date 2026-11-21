@@ -37,6 +37,18 @@
       "sha256": "9d6e6a61d41bef2e80628aa4445678be350afbc454fac5f48f9e7e009698cbec"
     },
     {
+      "path": "examples/platform/robotis/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/robotis/extension/as/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "72a47a8d4961119d46e6ab33144faf8d927ac4a0fa2a9d15920fb8f58bd0e56a"
+    },
+    {
       "path": "examples/platform/robotis/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

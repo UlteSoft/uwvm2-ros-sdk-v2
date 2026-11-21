@@ -37,6 +37,18 @@
       "sha256": "89786a5c3a942ef7f2f2a144d295d290bc73ba0d665eeb23d7ae2bf9cc547e22"
     },
     {
+      "path": "examples/platform/abb/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/abb/extension/as/xmake.lua",
+      "bytes": 568,
+      "mode": 420,
+      "sha256": "d2dd126547ea552425cbb82ed5b91159716673e394ef0648d64d8cdd0a60a997"
+    },
+    {
       "path": "examples/platform/abb/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

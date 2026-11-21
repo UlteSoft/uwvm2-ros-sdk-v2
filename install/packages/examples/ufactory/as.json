@@ -37,6 +37,18 @@
       "sha256": "c0de4dc6cd6d2bca4d97a82594592b453f737f103797b1cef91c5db558dae209"
     },
     {
+      "path": "examples/platform/ufactory/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/ufactory/extension/as/xmake.lua",
+      "bytes": 578,
+      "mode": 420,
+      "sha256": "7aa66a5ebfd8c78911d7bde7f503c9048605f7e007fb51f657e5b5598c767ddd"
+    },
+    {
       "path": "examples/platform/ufactory/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

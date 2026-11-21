@@ -37,6 +37,18 @@
       "sha256": "ede70e313ca316d83f3dbbfae721070e4f27a000a44e6f07d049a3c8622d5306"
     },
     {
+      "path": "examples/platform/leju/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/leju/extension/as/xmake.lua",
+      "bytes": 570,
+      "mode": 420,
+      "sha256": "cce1904a86df9120f8a7da6432e8678ef7d2fb89945c7a1b7c0d496f73d363ac"
+    },
+    {
       "path": "examples/platform/leju/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

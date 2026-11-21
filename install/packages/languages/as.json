@@ -8,15 +8,15 @@
     },
     {
       "path": "document/en/assemblyscript.md",
-      "bytes": 6695,
+      "bytes": 7033,
       "mode": 420,
-      "sha256": "3ad17df07584e3ba880faa078656d7197c5595133ed10301399e96ad8c6f90d6"
+      "sha256": "2b5a78da3d67e3e99233d851bb2c68b2e9ac93d2cf852f86387b7d89a70da00b"
     },
     {
       "path": "document/zh/assemblyscript.md",
-      "bytes": 5989,
+      "bytes": 6307,
       "mode": 420,
-      "sha256": "13561f8d47470934f1ff5f7d9208603268d5d1fd86415188f07673b26790497f"
+      "sha256": "bc96e2bf37323714d0f01003b8fde6bd68cef6552e0f0e0529d6e010a56b4547"
     },
     {
       "path": "language/as/compile.mjs",

@@ -37,6 +37,18 @@
       "sha256": "93513dd3bd357a03aa0126d7a4b9032e9e384d7db107da3b94e67d0a6ed46527"
     },
     {
+      "path": "examples/platform/deep_robotics/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/deep_robotics/extension/as/xmake.lua",
+      "bytes": 588,
+      "mode": 420,
+      "sha256": "ba5a446a29e3a79d393275de99890827e215ccd16a3d39aa582208d7fc04db8d"
+    },
+    {
       "path": "examples/platform/deep_robotics/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

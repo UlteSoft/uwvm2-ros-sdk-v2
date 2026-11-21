@@ -37,6 +37,18 @@
       "sha256": "a538a7908406723aa2f29ca933d45a9368010dcc49a11b49e207abadea19e448"
     },
     {
+      "path": "examples/platform/clearpath/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/clearpath/extension/as/xmake.lua",
+      "bytes": 580,
+      "mode": 420,
+      "sha256": "fa5eda5a5cd73f1c14b4beb604073c2c0f54dd78b25066f3ec2e890fb15ec372"
+    },
+    {
       "path": "examples/platform/clearpath/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

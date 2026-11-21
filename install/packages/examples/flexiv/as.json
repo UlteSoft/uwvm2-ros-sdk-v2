@@ -37,6 +37,18 @@
       "sha256": "6d92c792a54286f5d7b866afd6bbaeba5a2b574d0594e8ea62ae668ce3dbefec"
     },
     {
+      "path": "examples/platform/flexiv/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/flexiv/extension/as/xmake.lua",
+      "bytes": 574,
+      "mode": 420,
+      "sha256": "5a0bcef72fd39513e3cf2118aa19f0036babbe371c6451ff34d03c06284a03c2"
+    },
+    {
       "path": "examples/platform/flexiv/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,

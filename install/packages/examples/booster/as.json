@@ -37,6 +37,18 @@
       "sha256": "b56bfe484788d881ea6a249e9290633b50bf0c8411126666469ee48353f60502"
     },
     {
+      "path": "examples/platform/booster/extension/as/driver.ts",
+      "bytes": 518,
+      "mode": 420,
+      "sha256": "69dbe055227da451ef8a42814b9ce22400c4aa39d1e9f622354bf625fb4c3d41"
+    },
+    {
+      "path": "examples/platform/booster/extension/as/xmake.lua",
+      "bytes": 576,
+      "mode": 420,
+      "sha256": "a3dc102b9a75f5a57861af79b03c38e9d873f5d1c7c5dddf0775b7b47bb2f391"
+    },
+    {
       "path": "examples/platform/booster/migration/as/grid.ts",
       "bytes": 948,
       "mode": 420,
