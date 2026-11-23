@@ -4,6 +4,17 @@
 
 Each entry identifies the revision that produced the result. Tests used Linux x86-64, a clean home and cache, a mount namespace and nested cgroups with a 64 GiB aggregate limit and zero swap. Guest execution and the independent offline rebuilds used a separate network namespace. The development checkouts, host temporary directory and shared-memory directory were unavailable for writes.
 
+## Language debugging, dump restore and live update
+
+C and C++ qualification includes each of the five Linux host ABIs and all sixteen guest profiles. Each language uses its installed SDK frontend to build a program with debug information and a second version with an observable change. The receipt identifies the SDK commit, VM commit and tree, host executable, guest hashes, profile and requested engine.
+
+- Requesting INT with DBG must exit with an explicit unsupported-mode error. Count this as an expected rejection. The source breakpoint, step and inspection checks run on LLVM AOT.
+- For source debugging, hit a breakpoint on an executable C or C++ line, inspect a source value, and step to a second mapped line.
+- For dump restore, capture a full snapshot at a cooperative stop, advance or change observable state, restore the snapshot, and verify the recovered state and subsequent execution.
+- For live update, run both versions in the same VM process under the production signed update coordinator. Record the result of calling the same export before and after commit, together with the published epoch.
+
+The restore and signed update tests use their respective VM launch profiles. The test records each capability separately for INT and LLVM AOT, including unsupported requests, failures and untested configurations. Public SDK installation, source compilation and DWARF inspection have their own results. [VM snapshot contract](https://github.com/UlteSoft/uwvm2-ros/blob/454a19a3c8c1ea388472d44589a126554067ef8b/documents/runtime/unified-snapshot.md) · [VM production update contract](https://github.com/UlteSoft/uwvm2-ros/blob/454a19a3c8c1ea388472d44589a126554067ef8b/documents/runtime/production-update.md)
+
 ## ABB standard Go candidate a5863c63
 
 The public source installer built its host launcher with the original Go 1.24.2 host before applying the guest runtime changes. The independently rebuilt wrgo, asm, compile and link ELFs and all four tar.xz packages matched the public binary selection byte for byte. This revision closes the wrgo difference recorded below for 28466433. Independent projects also compiled 140 ROS 1 reference vectors and a RAPID/EGM application using each installation. They ran under INT and AOT directly and through Xmake. [Package hashes and isolation](../qualification/abb-a5863c63.json)

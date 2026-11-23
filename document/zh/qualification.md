@@ -4,6 +4,17 @@
 
 以下结果分别对应指定的冻结提交。宿主为 Linux x86-64。净室使用空 HOME 和缓存、独立挂载 namespace 与嵌套 cgroup，父组和子组均限制 64 GiB、零 swap。运行 guest 和独立重建时切换到断网 namespace。开发检出不可见，宿主临时目录和共享内存目录不可写。
 
+## 语言调试、dump 还原和热更新
+
+本轮 C 和 C++ 验收覆盖五种 Linux 宿主 ABI 和十六档 guest 配置。每种语言都用安装所得的 SDK 编译器生成带调试信息的程序，再编译一个能观察到行为变化的版本。收据记录 SDK 提交、VM 提交及源码树、宿主可执行文件摘要、guest 摘要、配置和请求的引擎。
+
+- 同时指定 INT 和 DBG 时，VM 必须明确报告该组合不受支持并退出。这一项按预期拒绝计数。LLVM AOT 承担源码断点、单步和变量检查的正向验收。
+- 源码调试需要命中可执行的 C 或 C++ 源码行，检查变量值，再单步到另一行。
+- dump 还原需要在协作停止点保存完整快照，让程序继续或改变可观测状态，随后恢复快照，核对恢复后的状态和继续执行的结果。
+- 热更新需要在同一 VM 进程中通过生产签名更新通道提交新版本，记录提交前后调用同一导出函数的返回值及版本代数。
+
+还原与签名更新分别使用各自的 VM 启动配置。每项能力均按 INT 和 LLVM AOT 记录实际通过、拒绝、不支持、失败和未测试的情况。公开安装、源码编译和 DWARF 检查也分别保留证据。[VM 快照契约](https://github.com/UlteSoft/uwvm2-ros/blob/454a19a3c8c1ea388472d44589a126554067ef8b/documents/runtime/unified-snapshot.md) · [VM 生产更新契约](https://github.com/UlteSoft/uwvm2-ros/blob/454a19a3c8c1ea388472d44589a126554067ef8b/documents/runtime/production-update.md)
+
 ## ABB 标准 Go 候选 a5863c63
 
 公开源码安装器先用原始 Go 1.24.2 构建宿主启动器，再应用客体运行时修改。独立断网重建的 wrgo、asm、compile、link 四个 ELF 和四个 tar.xz 均与公开二进制安装逐字节相同。上一版 28466433 的 wrgo 字节差异已在这个提交修复并实测。两套安装各自直接编译并通过 Xmake 构建了 140 个 ROS 1 参考向量及 RAPID/EGM 应用。所得 Wasm 经 INT 和 AOT 实际运行。[逐包摘要和隔离配置](../qualification/abb-a5863c63.json)
