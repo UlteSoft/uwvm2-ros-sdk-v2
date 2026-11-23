@@ -58,21 +58,37 @@ def native_vm(origin, host, work, xmake, env, jobs):
     command(["git", "sparse-checkout", "set", "--cone", *VM_DIRECTORIES], source, env)
     command(["git", "checkout", "--detach", origin["commit"]], source, env)
     build = work / "vm-build"
-    arch = host.removeprefix("linux-")
-    command([xmake, "f", "-y", "-p", "linux", "-a", arch, "-m", "release", "-o", build,
+    options = []
+    if host in ("linux-arm", "linux-armhf"):
+        # Xmake reports the ARM ISA, even when two userspaces have different
+        # float calling conventions. The VM checks that ABI in its C++ headers.
+        arch = "armhf" if host == "linux-armhf" else "arm"
+        triple = "armv7-linux-gnueabihf" if arch == "armhf" else "armv7-linux-gnueabi"
+        toolchain = work / "native-arm.cmake"
+        toolchain.write_text("".join(f"set(CMAKE_{language}_COMPILER_TARGET {triple})\n"
+                                     for language in ("C", "CXX", "ASM")) +
+                             f'set(LLVM_HOST_TRIPLE {triple} CACHE STRING "VM host triple" FORCE)\n' +
+                             f'set(LLVM_DEFAULT_TARGET_TRIPLE {triple} CACHE STRING "VM target triple" FORCE)\n')
+        options = ["-a", arch, "--target=" + triple, "--llvm-target=" + triple,
+                   "--llvm-cmake-toolchain=" + str(toolchain)]
+    command([xmake, "f", "-y", "-p", "linux", *options, "-m", "release", "-o", build,
              "--use-llvm-compiler=y", "--use-cxx-module=n", "--execution-int=uwvm-int",
              "--execution-jit=llvm", "--import-u2rosv2=y", "--llvm-runtimes-provider=bundled",
              "--openssl-provider=bundled", "--llvm-build-jobs=" + str(jobs), "--openssl-build-jobs=" + str(jobs)], source, env)
     command([xmake, "build", "-j", str(jobs), "uwvm2-ros"], source, env)
-    return build / "linux" / arch / "release/uwvm2-ros"
+    products = [p for p in build.glob("linux/*/release/uwvm2-ros") if p.is_file()]
+    if len(products) != 1:
+        raise ValueError(f"expected one native uwvm2-ros executable under {build}, found {len(products)}")
+    return products[0]
 
 
 def install(host, cache, work, jobs):
     installer = runpy.run_path(str(SDK / "install/install.py"))
     env = dict(os.environ, TMPDIR=str(work), TEMP=str(work), TMP=str(work), XMAKE_TMPDIR=str(work),
-               XMAKE_GLOBALDIR=str(work / "global"), XMAKE_CONFIGDIR=str(work / "config"),
+               XMAKE_GLOBALDIR=str(work / "global"),
                GIT_TERMINAL_PROMPT="0", GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
     env.pop("XMAKE_PROGRAM_DIR", None)
+    env.pop("XMAKE_CONFIGDIR", None)  # Each checkout owns its Xmake project configuration.
     env.pop("UWVM_ROS_QUALIFIED_PREBUILT_LLVM", None)
     downloads = cache / "sha256"
     bindir = SDK / "bin"
