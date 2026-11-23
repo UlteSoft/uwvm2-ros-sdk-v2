@@ -237,7 +237,49 @@
       }
     },
     "aarch64": {
-      "status": "pending"
+      "status": "runtime-matrix-pending",
+      "execution": "Linux AArch64 under system QEMU",
+      "public_binary_install": {
+        "status": "completed-after-resume",
+        "initial_cache_entries": {
+          "/work/prefix/.cache/host-tools": 0,
+          "/work/prefix/.cache/sha256": 0
+        },
+        "interrupted_first_selection": "cpp",
+        "recovery": "C completed on the first disk. The C++ and WAT selections completed using the same public root installer, pinned commit and retained download cache on a copy of the disk.",
+        "observed_installer_programs": [
+          "Python",
+          "Git",
+          "git-remote-https"
+        ],
+        "vm_provider": "github-release",
+        "vm_archive_sha256": "a853093821b15e98978b215d80c282aeee414bcd0024c6e0d6112213b1c5be53",
+        "vm_elf_sha256": "31b87349fe0a7b55a39f113706cb827d01a694e53ef2380d23290eb37922594f",
+        "xmake_provider": "debian",
+        "languages": {
+          "c": {
+            "phase": "first",
+            "selection_sha256": "13274dfc467f5c19362befbfeb075ff019698755551258426361f00d6365db17",
+            "prebuilt_receipt_sha256": "aa46423082d030e782440398b2cb59c893f67cdedd92c3d24acda654c9bfee3e",
+            "exec_trace_sha256": "30fe5894cf1981b7062f49a0c8e11ebeb77c1c01789f5897072db9823137c424"
+          },
+          "cpp": {
+            "phase": "resume",
+            "selection_sha256": "f15650361e3137bc818b812549d5256c3ed4bfb0d6e1749cc0458f8e353bc7af",
+            "prebuilt_receipt_sha256": "ac290345a9d4ab7ca0937f7f2495e210ee8a09a9d65a003b722ba26a1fc80fca",
+            "exec_trace_sha256": "d622db9efe4232ac43b1e950e2bef6a855ddb80e5e435c04310288377ce041fd"
+          },
+          "wat": {
+            "phase": "resume",
+            "selection_sha256": "e934a4dc90b88683e8cfb99fb5af61455d32763c8271b98f4ca4eee249134053",
+            "prebuilt_receipt_sha256": "1e805cc08140026c8e1f4db31ecc46991a82370b9b22245e1c2b2f16be4cd224",
+            "exec_trace_sha256": "85b178ac16f2f3ce653a648fad2b60095a881bd843e840955ab637fa4bd82386"
+          }
+        },
+        "first_console_sha256": "36252abefb7a4cccf3f749c59561885703c06326c5ed6e545389577ddeda2404",
+        "resume_console_sha256": "6d8c4331541794fd174324333db912fb9e1b54377d3c5aaef7f0d8619dfe7c77",
+        "combined_receipt_sha256": "2136967db1a53a1df16a056e860f881655e54ff7e82913669c2e6562fd45facc"
+      }
     },
     "arm": {
       "status": "pending"
