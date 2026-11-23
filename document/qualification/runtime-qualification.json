@@ -1,8 +1,8 @@
 {
   "status": "requalification-in-progress",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros",
-  "vm_commit": "20e1c2d245832eaaba6c92b0ac419efaa62f0505",
-  "vm_tree": "228a1f96120ea6017ca06f8b0c81b22fc0b2b3ca",
+  "vm_commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
+  "vm_tree": "5b21dae0134c9a69a0c50780c7f398a099040711",
   "current_runtime_records": [
     "cfamily-open-library-matrix.json",
     "objc-library-matrix.json"
