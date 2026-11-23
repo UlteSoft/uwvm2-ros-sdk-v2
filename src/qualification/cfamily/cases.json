@@ -292,7 +292,13 @@
     },
     {
       "family": "libc++",
-      "path": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp"
+      "path": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
+      "threaded_profiles": {
+        "wasm32-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304"},
+        "wasm32-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304"},
+        "wasm64-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304"},
+        "wasm64-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304"}
+      }
     },
     {
       "family": "libc++",
@@ -309,7 +315,13 @@
     },
     {
       "family": "libc++",
-      "path": "upstream/llvm/libcxx/test/std/algorithms/alg.modifying.operations/alg.rotate/rotate.pass.cpp"
+      "path": "upstream/llvm/libcxx/test/std/algorithms/alg.modifying.operations/alg.rotate/rotate.pass.cpp",
+      "threaded_profiles": {
+        "wasm32-wasip1-threads-eh-nomte": {"aot_stack_mib": 2},
+        "wasm32-wasip1-threads-eh-mte": {"aot_stack_mib": 2},
+        "wasm64-wasip1-threads-eh-nomte": {"aot_stack_mib": 2},
+        "wasm64-wasip1-threads-eh-mte": {"aot_stack_mib": 2}
+      }
     },
     {
       "family": "libc++",
@@ -341,7 +353,17 @@
     },
     {
       "family": "libc++",
-      "path": "upstream/llvm/libcxx/test/std/algorithms/alg.sorting/alg.heap.operations/is.heap/is_heap.pass.cpp"
+      "path": "upstream/llvm/libcxx/test/std/algorithms/alg.sorting/alg.heap.operations/is.heap/is_heap.pass.cpp",
+      "threaded_profiles": {
+        "wasm32-wasip1-threads-noeh-nomte": {"aot_stack_mib": 2},
+        "wasm32-wasip1-threads-eh-nomte": {"aot_stack_mib": 2},
+        "wasm32-wasip1-threads-noeh-mte": {"aot_stack_mib": 3},
+        "wasm32-wasip1-threads-eh-mte": {"aot_stack_mib": 4},
+        "wasm64-wasip1-threads-noeh-nomte": {"aot_stack_mib": 2},
+        "wasm64-wasip1-threads-eh-nomte": {"aot_stack_mib": 2},
+        "wasm64-wasip1-threads-noeh-mte": {"aot_stack_mib": 3},
+        "wasm64-wasip1-threads-eh-mte": {"aot_stack_mib": 4}
+      }
     },
     {
       "family": "libc++",
@@ -389,7 +411,12 @@
     },
     {
       "family": "libc++",
-      "path": "upstream/llvm/libcxx/test/std/utilities/template.bitset/bitset.members/count.pass.cpp"
+      "path": "upstream/llvm/libcxx/test/std/utilities/template.bitset/bitset.members/count.pass.cpp",
+      "threaded_profiles": {
+        "wasm32-wasip1-threads-eh-mte": {"aot_stack_mib": 2},
+        "wasm64-wasip1-threads-eh-nomte": {"aot_stack_mib": 2},
+        "wasm64-wasip1-threads-eh-mte": {"aot_stack_mib": 2}
+      }
     },
     {
       "family": "libc++",
@@ -497,6 +524,16 @@
     },
     {
       "family": "Open POSIX",
+      "path": "sysroot/pthread_rwlock_init_join.c",
+      "sdk_case": {
+        "kind": "companion",
+        "upstream_cases": [
+          "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c"
+        ]
+      }
+    },
+    {
+      "family": "Open POSIX",
       "path": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_destroy/1-1.c"
     },
     {
@@ -530,6 +567,17 @@
     {
       "family": "Open POSIX",
       "path": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c"
+    },
+    {
+      "family": "Open POSIX",
+      "path": "sysroot/sem_getvalue_unnamed.c",
+      "sdk_case": {
+        "kind": "companion",
+        "upstream_cases": [
+          "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c",
+          "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_init/1-1.c"
+        ]
+      }
     },
     {
       "family": "libc-test",
@@ -582,6 +630,16 @@
     {
       "family": "libc-test",
       "path": "upstream/libc-test/src/functional/search_lsearch.c"
+    },
+    {
+      "family": "libc-test",
+      "path": "sysroot/search_lsearch_full_width.c",
+      "sdk_case": {
+        "kind": "port",
+        "upstream_cases": [
+          "upstream/libc-test/src/functional/search_lsearch.c"
+        ]
+      }
     },
     {
       "family": "libc-test",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile upstream tests with installed WROS frontends and run each Wasm on both u2ros engines."""
+"""Compile library tests with installed WROS frontends and run each Wasm on both u2ros engines."""
 import argparse
 import hashlib
 import itertools
@@ -27,6 +27,7 @@ PERMISSIONS = {
     "fd_prestat_get": [], "fd_prestat_dir_name": [],
 }
 SHARED_MEMORY_PAGES = 128
+MAX_LLVM_IR_INSTRUCTIONS = 4194304
 
 
 def digest(path):
@@ -71,6 +72,32 @@ class Target:
         return triple + ("-eh" if self.eh else "-noeh") + ("-mte" if self.mte else "-nomte")
 
 
+def validate_thread_budgets(cases):
+    threaded = {Target(bits, True, mte, eh).name for bits, mte, eh in
+                itertools.product((32, 64), (False, True), (False, True))}
+    for case in cases:
+        overrides = case.get("threaded_profiles", {})
+        if not isinstance(overrides, dict):
+            raise ValueError(f"{case['path']}: threaded_profiles must be a profile map")
+        for profile, limits in overrides.items():
+            label = f"{case['path']} ({profile})"
+            if profile not in threaded or not isinstance(limits, dict) or not limits:
+                raise ValueError(f"{label}: invalid threaded profile or empty limits")
+            if limits.keys() - {"code_budget", "aot_stack_mib"}:
+                raise ValueError(f"{label}: unknown threaded budget field")
+            if "aot_stack_mib" in limits:
+                stack = limits["aot_stack_mib"]
+                if type(stack) is not int or not 0 < stack * 1024**2 <= 2 * sys.maxsize:
+                    raise ValueError(f"{label}: expected a positive finite AOT stack size in MiB")
+            if "code_budget" in limits:
+                code = limits["code_budget"]
+                match = re.fullmatch(r"([0-9]+)(?::([0-9]+))?", code) if isinstance(code, str) else None
+                if (not match or not 0 < int(match[1]) <= 2 * sys.maxsize
+                        or (match[2] is not None and not 0 < int(match[2]) <= MAX_LLVM_IR_INSTRUCTIONS)):
+                    raise ValueError(f"{label}: expected positive finite code bytes with an optional "
+                                     f":instruction-count in 1..{MAX_LLVM_IR_INSTRUCTIONS}")
+
+
 def capture(command, directory, name, timeout):
     argv = list(map(str, command))
     output, errors = directory / (name + ".out"), directory / (name + ".err")
@@ -83,7 +110,7 @@ def capture(command, directory, name, timeout):
     return {**result, "argv": argv}
 
 
-def runtime_args(vm, engine, target, imports, owner, wasm, *, thread_stack_mib=1, thread_storage_mib=16):
+def runtime_args(vm, engine, target, imports, owner, wasm, *, case=None, thread_stack_mib=1, thread_storage_mib=16):
     cmd = [vm, "--runtime-" + engine, "--runtime-compile-threads", "0",
            "--debug-fault-action", "exit", "--wasm-feature-wasm3",
            "--wasm-feature-" + ("enable" if target.threads else "disable") + "-threads",
@@ -100,8 +127,14 @@ def runtime_args(vm, engine, target, imports, owner, wasm, *, thread_stack_mib=1
             "--wasip1-single-enable", "main", "--wasip1-single-hide-host-api", "main",
             "--wasip1-single-noinherit-system-environment", "main"]
     if target.threads:
+        case = case or {}
+        profile = case.get("threaded_profiles", {}).get(target.name, {})
+        thread_stack_mib = case.get("thread_stack_mib", thread_stack_mib)
+        thread_storage_mib = case.get("thread_storage_mib", thread_storage_mib)
+        if engine == "aot":
+            thread_stack_mib = profile.get("aot_stack_mib", thread_stack_mib)
         cmd += ["--wasi-threads", "4", "16", str(thread_stack_mib * 1024**2), str(thread_storage_mib * 1024**2),
-                "67108864", str(SHARED_MEMORY_PAGES * 65536),
+                profile.get("code_budget", "67108864"), str(SHARED_MEMORY_PAGES * 65536),
                 "--wasithread-single-create", "main", "--wasithread-single-enable", "main",
                 "--wasithread-single-interface", "main", "thread-spawn", "allow",
                 "--wasithread-single-limit", "main", "max-extra-threads", "4",
@@ -126,7 +159,7 @@ def check_case(args, case, target, inspect):
     path = Path(case["path"])
     posix = case["family"] == "Open POSIX"
     cxx = case.get("language") == "cpp" or case["family"] == "libc++"
-    source = (args.compiler_sources if posix else HERE) / path
+    source = (args.compiler_sources if posix and "sdk_case" not in case else HERE) / path
     out = args.work / target.name / case["family"] / path.parent.name / path.name
     out.mkdir(parents=True, exist_ok=True)
     row = {"profile": target.name, "family": case["family"], "source": path.as_posix(),
@@ -214,18 +247,21 @@ def check_case(args, case, target, inspect):
         build["sha256"] = digest(owner)
     row["status"] = "linked"
     for engine in ("int", "aot"):
-        argv = runtime_args(args.vm, engine, target, imports, owner, wasm,
-                            thread_stack_mib=case.get("thread_stack_mib", 1),
-                            thread_storage_mib=case.get("thread_storage_mib", 16))
+        argv = runtime_args(args.vm, engine, target, imports, owner, wasm, case=case)
         run = capture(argv, out, engine, args.run_timeout)
         status = run.get("returncode")
         output = (out / (engine + ".out")).read_text(errors="replace")
         if "timeout_seconds" in run:
             verdict = "timeout"
+        elif (target.threads and status == 126 and re.search(
+                r"^uwvm: \[error\] WASI Threads [^\n]* exceeded a preparation resource limit \(per-child-storage=",
+                (out / (engine + ".err")).read_text(errors="replace"), re.M)):
+            verdict = "runtime-budget-rejected"
         elif status == 0 and "expected_stdout" in case:
             expected = HERE / "upstream" / case["family"] / case["expected_stdout"]
             verdict = "pass" if (out / (engine + ".out")).read_bytes() == expected.read_bytes() else "output-mismatch"
-        elif "units" not in case and (re.search(r"\bskipped\b", output, re.I) or (posix and status in (4, 5))):
+        elif "units" not in case and ((status == 0 and re.search(r"\bskipped\b", output, re.I))
+                                      or (posix and status in (4, 5))):
             verdict = "upstream-skip"
         elif posix and status == 2:
             verdict = "upstream-unresolved"
@@ -251,6 +287,7 @@ def main():
     args.work.mkdir(parents=True, exist_ok=True)
     manifest_file = HERE / ("external-libraries.json" if args.suite == "external" else "cases.json")
     manifest = json.loads(manifest_file.read_bytes())
+    validate_thread_budgets(manifest["cases"])
     if args.suite == "external":
         upstream_hashes = {name: repo["git_blobs"] for name, repo in manifest["upstreams"].items()}
     else:
@@ -279,6 +316,8 @@ def main():
             except Exception as exc:
                 row = {"profile": target.name, "family": case["family"], "source": case["path"],
                        "status": "harness-error", "error": repr(exc), "runs": {}}
+            if "sdk_case" in case:
+                row["sdk_case"] = case["sdk_case"]
             row["vm"] = vm
             print(json.dumps(row, separators=(",", ":")), file=log, flush=True)
             builds[row["status"]] += 1

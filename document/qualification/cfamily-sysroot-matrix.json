@@ -1,0 +1,172 @@
+{
+  "schema": 3,
+  "language": "C/C++",
+  "suite": "sysroot",
+  "status": "pending-full-candidate-run",
+  "sdk_repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git",
+  "vm_repository": "https://github.com/UlteSoft/uwvm2-ros.git",
+  "vm_commit": "70c799347e7b88d8f16c493ae046e7450c88e2b8",
+  "vm_tree": "e280e780a3e2e9f057eb3bd104088d4926e8bba6",
+  "candidate_corpus": {
+    "case_manifest": "src/qualification/cfamily/cases.json",
+    "case_manifest_sha256": "11b259c60a6f210318ff14cb8a404e73a77fc8cecbf46447ab2dadb0fc2c3d2c",
+    "runner": "src/qualification/cfamily/sysroot_suite.py",
+    "runner_sha256": "5b11214dddd8e6d5660321b280595d629850abc9c0ef9fc8d4c04dd1a1c20d19",
+    "sources": {"compiler-rt": 71, "libc++": 30, "Open POSIX": 32, "libc-test": 37},
+    "distinct_sources": 170,
+    "planned_builds_per_host": 2464,
+    "scope": "Run all 2464 case/profile combinations from this manifest on each host. Each linked row requires fresh INT and AOT outcomes tied to the same guest, the threaded memory owner where applicable, and the host VM receipt. Each original upstream case and each SDK-authored case has its own row.",
+    "threaded_budgets": {
+      "find": "Four threaded MTE profiles use 536870912 code bytes per child and up to 4194304 LLVM IR instructions per module. The original INT replays passed with 512 MiB code and 16 MiB storage. Candidate LLVM results are pending.",
+      "aot_stack": "The 15 original native-stack refusals determine the per-profile AOT stack sizes in the manifest. Round the required bytes of proven native frames plus 8192 bytes of observed guard pages up to the next whole MiB. The original interpreter runs passed these rows with 1 MiB."
+    }
+  },
+  "hosts": {
+    "x86_64": {"status": "pending"},
+    "i686": {"status": "pending"},
+    "aarch64": {"status": "pending"},
+    "arm": {"status": "pending"},
+    "armhf": {"status": "pending"}
+  },
+  "original_environment": {
+    "status": "closed-interrupted",
+    "sdk_commit": "1a88ebbf29a0dedba6385a6079e92b0aaf860070",
+    "sdk_tree": "1dfc5c6146857fc7458a30924b6905be81477516",
+    "vm_commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
+    "vm_tree": "5b21dae0134c9a69a0c50780c7f398a099040711"
+  },
+  "original_corpus": {
+    "case_manifest": "src/qualification/cfamily/cases.json",
+    "case_manifest_sha256": "d3131b2e259fe3e9a608d0c5e9e2a766cc7cd13c078a1123b4ae9c4f1fe3ca05",
+    "runner_sha256": "8c335def6aeb62fba8acf79dc7a511601203f155740d29b8746c865b2f5e3539",
+    "source_archive_sha256": "a8580a3e40ed1286c919772e78b92e8ecd18edf622bb5bdd99e0c0cfed7889a3",
+    "upstreams": {
+      "llvm": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
+      "wasi-libc": "2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13",
+      "libc-test": "18e28496adee3d84fefdda6efcb9c5b8996a2398"
+    },
+    "sources": {"compiler-rt": 71, "libc++": 30, "Open POSIX": 30, "libc-test": 36},
+    "distinct_sources": 167,
+    "profile_dimensions": "wasm32/wasm64 × threads off/on × EH off/on × MTE off/on. Open POSIX uses the eight threaded profiles.",
+    "planned_builds_per_host": 2432
+  },
+  "original_hosts": {
+    "x86_64": {
+      "status": "interrupted",
+      "execution": "native Linux x86_64, INT and LLVM AOT",
+      "interrupted_at": "2026-11-24T00:45:58+08:00",
+      "inputs_sha256": "85a704084ebe97584939c086e7f61593115cb40fd129840be4450d31ec990df2",
+      "results_jsonl_sha256": "272954f1bdf51598e6f3cb432b0e1f2b46ccb71fa5219807f0d90f77ea3259c9",
+      "vm_sha256": "64c6e62cc1d8d6d447fe58b563384594c5da33159d6f5cdce3822a239b8a40e8",
+      "vm_receipt_sha256": "c6e8d39b348c1418af081bf3f360761c49526ba1e650f74f5d5451d27e8f6dc9",
+      "recorded_rows": 2414,
+      "missing_rows": 18,
+      "summary_json_produced": false,
+      "recorded_builds": {"linked": 2406, "compile-failed": 8},
+      "recorded_runs": {
+        "int": {"pass": 2370, "failed": 12, "upstream-skip": 16, "upstream-unresolved": 8},
+        "aot": {"pass": 2362, "failed": 27, "upstream-skip": 16, "upstream-unresolved": 1}
+      },
+      "recorded_rows_passing_both_engines": 2355,
+      "unrecorded_original_rows": [
+        {
+          "source": "upstream/libc-test/src/functional/wcstol.c",
+          "profiles": ["wasm64-wasip1-threads-noeh-nomte", "wasm64-wasip1-threads-eh-nomte", "wasm64-wasip1-threads-noeh-mte", "wasm64-wasip1-threads-eh-mte"]
+        },
+        {
+          "source": "upstream/libc-test/src/regression/malloc-0.c",
+          "profiles": [
+            "wasm32-wasip1-noeh-mte", "wasm32-wasip1-eh-mte",
+            "wasm32-wasip1-threads-noeh-nomte", "wasm32-wasip1-threads-eh-nomte", "wasm32-wasip1-threads-noeh-mte", "wasm32-wasip1-threads-eh-mte",
+            "wasm64-wasip1-noeh-nomte", "wasm64-wasip1-eh-nomte", "wasm64-wasip1-noeh-mte", "wasm64-wasip1-eh-mte",
+            "wasm64-wasip1-threads-noeh-nomte", "wasm64-wasip1-threads-eh-nomte", "wasm64-wasip1-threads-noeh-mte", "wasm64-wasip1-threads-eh-mte"
+          ]
+        }
+      ],
+      "disposition": "The original run closed at 2414 of 2432 rows. The 18 missing rows remain unrecorded. Each candidate host starts a full 2464-row run under its own VM and suite receipts."
+    },
+    "i686": {"status": "unrecorded"},
+    "aarch64": {"status": "unrecorded"},
+    "arm": {"status": "unrecorded"},
+    "armhf": {"status": "unrecorded"}
+  },
+  "original_case_diagnostics_x86_64": [
+    {
+      "source": "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c",
+      "result": "Both engines returned 0 and printed 'skipped' in all 16 profiles. The guarded upstream test requires CRT_HAS_128BIT and HAS_80_BIT_LONG_DOUBLE. The runner recorded 32 upstream-skip verdicts."
+    },
+    {
+      "source": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c",
+      "result": "All eight threaded builds returned 1. wasm-ld reported an undefined symbol for sem_unlink in the named-semaphore test. The builds produced no engine verdicts."
+    },
+    {
+      "source": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c",
+      "result": "The test polls an unsynchronized thread_state flag and calls sleep. The runner denied poll_oneoff. All eight INT runs and the wasm32-wasip1-threads-noeh-nomte AOT run returned PTS_UNRESOLVED (2) with 'Unexpected thread state'. The other seven AOT runs returned 0."
+    },
+    {
+      "source": "upstream/libc-test/src/functional/search_lsearch.c",
+      "result": "Both engines returned 122 with 'memory tag mismatch' in all eight MTE profiles. The upstream test supplies short string literal objects to an 80-byte lsearch insertion. musl copies the full width. Both engines returned 0 in the eight non-MTE profiles."
+    },
+    {
+      "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
+      "profiles": "All four threaded MTE profiles",
+      "process_returncode": -4,
+      "signal": "SIGILL",
+      "vm_reported_exit_status": 123,
+      "int": "Interpreter preparation rejected with code 4 using the original 64 MiB code budget.",
+      "aot": "LLVM preparation rejected with code 3. The four instruction counts reached 1048579 to 1048621 against a 1048576 limit.",
+      "diagnostic_replays": {
+        "results_sha256": {
+          "find-storage-code": "59eb5adb198c1c9603ba4de1059affb52a8a2ea3a504b582c24149c753180162",
+          "find-high-code": "e5c66c16c30a2a7f62604784aefa1bc6e603df849841c3a0791a14748f85560b"
+        },
+        "result": "The 32 separate INT/AOT runs crossing 16/64 MiB storage and 64/128 MiB code all reproduced SIGILL. All four INT guests returned 0 at 512 MiB and 1024 MiB code with 16 MiB storage, and at 1024 MiB code with 64 MiB storage. Original matrix counts use the original budgets."
+      }
+    },
+    {
+      "issue": "WASI Threads LLVM native stack quota",
+      "engine": "aot",
+      "process_returncode": -4,
+      "signal": "SIGILL",
+      "vm_reported_exit_status": 123,
+      "sources": {
+        "upstream/llvm/libcxx/test/std/algorithms/alg.modifying.operations/alg.rotate/rotate.pass.cpp": 4,
+        "upstream/llvm/libcxx/test/std/algorithms/alg.sorting/alg.heap.operations/is.heap/is_heap.pass.cpp": 8,
+        "upstream/llvm/libcxx/test/std/utilities/template.bitset/bitset.members/count.pass.cpp": 3
+      },
+      "required_native_frame_bytes": {
+        "rotate": {
+          "wasm32-wasip1-threads-eh-nomte": 1052672,
+          "wasm32-wasip1-threads-eh-mte": 1455648,
+          "wasm64-wasip1-threads-eh-nomte": 1089680,
+          "wasm64-wasip1-threads-eh-mte": 1496768
+        },
+        "is_heap": {
+          "wasm32-wasip1-threads-noeh-nomte": 1377520,
+          "wasm32-wasip1-threads-eh-nomte": 1377520,
+          "wasm32-wasip1-threads-noeh-mte": 2380848,
+          "wasm32-wasip1-threads-eh-mte": 3491088,
+          "wasm64-wasip1-threads-noeh-nomte": 1636576,
+          "wasm64-wasip1-threads-eh-nomte": 1636576,
+          "wasm64-wasip1-threads-noeh-mte": 2401408,
+          "wasm64-wasip1-threads-eh-mte": 3470528
+        },
+        "bitset_count": {
+          "wasm32-wasip1-threads-eh-mte": 1217152,
+          "wasm64-wasip1-threads-eh-nomte": 1245936,
+          "wasm64-wasip1-threads-eh-mte": 1439200
+        }
+      },
+      "result": "Fifteen original AOT runs reported a native stack witness of 1052672 to 3491088 bytes against 1040384 usable bytes. The corresponding INT runs passed."
+    }
+  ],
+  "additional_sdk_cases": {
+    "status": "pending-independent-execution",
+    "scope": "The revised manifest adds 32 case/profile rows to the 2432 original rows. Its three SDK-authored cases require independent INT and AOT results.",
+    "cases": [
+      {"source": "sysroot/search_lsearch_full_width.c", "kind": "port", "profiles": 16, "source_sha256": "6ee21c85b0ede2bc82679638651e4475f8cab87107e0448560f7362ab88fcef5"},
+      {"source": "sysroot/sem_getvalue_unnamed.c", "kind": "companion", "profiles": 8, "source_sha256": "f8dd080fbb23e6c5e499232e65b818b7dcc88571c77effe11f2ba6412fb6411b"},
+      {"source": "sysroot/pthread_rwlock_init_join.c", "kind": "companion", "profiles": 8, "source_sha256": "1036ec6ad13ec0e3d1fd658eceb867e72983f624f6223669a58000d5942dc76c"}
+    ]
+  }
+}

@@ -14,7 +14,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SUITE = HERE.parent
 sys.path.insert(0, str(SUITE))
-from sysroot_suite import SHARED_MEMORY_PAGES, Target, digest, runtime_args
+from sysroot_suite import SHARED_MEMORY_PAGES, Target, digest, runtime_args, validate_thread_budgets
 
 REFERENCE = "Wasmtime 42.0.1 C API with the external C-family qualification adapter"
 
@@ -35,9 +35,7 @@ def recorded_policy(row, target, case):
     guest = row["compile"]["argv"][-1]
     for engine in ("int", "aot"):
         recorded = row["runs"][engine]["argv"]
-        expected = runtime_args(recorded[0], engine, target, row["imports"], owner, guest,
-                                thread_stack_mib=case.get("thread_stack_mib", 1),
-                                thread_storage_mib=case.get("thread_storage_mib", 16))
+        expected = runtime_args(recorded[0], engine, target, row["imports"], owner, guest, case=case)
         require(recorded == expected, f"recorded {engine} arguments differ from the suite profile")
     options = []
     for i, flag in enumerate(recorded):
@@ -146,6 +144,7 @@ def main():
         parser.error("choose an empty adapter output directory to preserve evidence")
     manifest_file = SUITE / "external-libraries.json"
     manifest = json.loads(manifest_file.read_bytes())
+    validate_thread_budgets(manifest["cases"])
     cases = {case["path"]: case for case in manifest["cases"]}
     profiles = {t.name: t for t in (Target(bits, threads, False, eh) for bits, threads, eh in
                 itertools.product((32, 64), (False, True), (False, True)))}
