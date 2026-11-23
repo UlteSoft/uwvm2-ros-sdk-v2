@@ -15,7 +15,58 @@
     },
     "uwvm2-ros": {
       "commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
-      "hosts": {}
+      "hosts": {
+        "linux-x86_64": {
+          "tag": "wros-vm-6de97ade53a7",
+          "asset": "uwvm2-ros-linux-x86_64.tar.xz",
+          "format": "tar.xz",
+          "member": "uwvm2-ros",
+          "compressed_bytes": 27343368,
+          "compressed_sha256": "0097440870d1b1e1b98f66688a64804216bb590b9e72ea1ca5c7f500889cd61e",
+          "bytes": 130875992,
+          "sha256": "64c6e62cc1d8d6d447fe58b563384594c5da33159d6f5cdce3822a239b8a40e8"
+        },
+        "linux-i686": {
+          "tag": "wros-vm-6de97ade53a7",
+          "asset": "uwvm2-ros-linux-i686.tar.xz",
+          "format": "tar.xz",
+          "member": "uwvm2-ros",
+          "compressed_bytes": 30655828,
+          "compressed_sha256": "55bc12fdb182cc85a9344ec4d6c8c4087c6354c9f021203c8064c83de033b0e6",
+          "bytes": 141180336,
+          "sha256": "1310b66db36d944396b582d96d0bfdcee1b94f0bc51fd03182f5aaa96e394993"
+        },
+        "linux-aarch64": {
+          "tag": "wros-vm-6de97ade53a7",
+          "asset": "uwvm2-ros-linux-aarch64.tar.xz",
+          "format": "tar.xz",
+          "member": "uwvm2-ros",
+          "compressed_bytes": 25575484,
+          "compressed_sha256": "a853093821b15e98978b215d80c282aeee414bcd0024c6e0d6112213b1c5be53",
+          "bytes": 132061232,
+          "sha256": "31b87349fe0a7b55a39f113706cb827d01a694e53ef2380d23290eb37922594f"
+        },
+        "linux-arm": {
+          "tag": "wros-vm-6de97ade53a7",
+          "asset": "uwvm2-ros-linux-arm.tar.xz",
+          "format": "tar.xz",
+          "member": "uwvm2-ros",
+          "compressed_bytes": 24250436,
+          "compressed_sha256": "6603c26a0dfea5676f845445ffb471ef180ca04b46f0530b99ae5254e072c3d1",
+          "bytes": 111705204,
+          "sha256": "fbdd58dddffffe3b3fe8f4d73f4baa20037d6d089af70686df9f2d433a8b3b6a"
+        },
+        "linux-armhf": {
+          "tag": "wros-vm-6de97ade53a7",
+          "asset": "uwvm2-ros-linux-armhf.tar.xz",
+          "format": "tar.xz",
+          "member": "uwvm2-ros",
+          "compressed_bytes": 24482768,
+          "compressed_sha256": "3c1cb27ac3b873a873daa1549337e27041637693638e25fead73d403cf3d4c87",
+          "bytes": 111572088,
+          "sha256": "5528d6baecf923fe723cdb28776e2d54ad74fd13a3ec08ca57bbbd0bbc0c7019"
+        }
+      }
     }
   }
 }
