@@ -294,10 +294,10 @@
       "family": "libc++",
       "path": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
       "threaded_profiles": {
-        "wasm32-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576"},
-        "wasm32-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576"},
-        "wasm64-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576"},
-        "wasm64-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576"}
+        "wasm32-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-x86_64": 104113}},
+        "wasm32-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-x86_64": 117849}},
+        "wasm64-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-x86_64": 106628}},
+        "wasm64-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-x86_64": 120802}}
       }
     },
     {

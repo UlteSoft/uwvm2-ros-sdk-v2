@@ -29,11 +29,26 @@ PERMISSIONS = {
 SHARED_MEMORY_PAGES = 128
 MAX_LLVM_IR_INSTRUCTIONS = 4194304
 MAX_LLVM_BASIC_BLOCKS = 1048576
+DEFAULT_ELF_RELOCATIONS = 65536
+RELOCATION_CHARGE_BYTES = 512
+ELF_HOSTS = {(2, 62, 0): "linux-x86_64", (1, 3, 0): "linux-i686", (2, 183, 0): "linux-aarch64",
+             (1, 40, 0): "linux-arm", (1, 40, 0x200): "linux-arm", (1, 40, 0x400): "linux-armhf"}
 
 
 def digest(path):
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def vm_elf_host(path):
+    """Select native code budgets using the VM binary, including the ARM float ABI."""
+    with Path(path).open("rb") as stream:
+        header = stream.read(64)
+    if len(header) < 52 or header[:4] != b"\x7fELF" or header[5:7] != b"\x01\x01":
+        raise ValueError(f"expected a little-endian Linux VM executable: {path}")
+    machine = int.from_bytes(header[18:20], "little")
+    float_abi = int.from_bytes(header[36:40], "little") & 0x600 if machine == 40 else 0
+    return ELF_HOSTS.get((header[4], machine, float_abi))
 
 
 def add_vm_identity_options(parser):
@@ -84,7 +99,7 @@ def validate_thread_budgets(cases):
             label = f"{case['path']} ({profile})"
             if profile not in threaded or not isinstance(limits, dict) or not limits:
                 raise ValueError(f"{label}: invalid threaded profile or empty limits")
-            if limits.keys() - {"code_budget", "aot_stack_mib"}:
+            if limits.keys() - {"code_budget", "aot_stack_mib", "aot_relocations_by_host"}:
                 raise ValueError(f"{label}: unknown threaded budget field")
             if "aot_stack_mib" in limits:
                 stack = limits["aot_stack_mib"]
@@ -101,6 +116,15 @@ def validate_thread_budgets(cases):
                     if (not re.fullmatch(r"[0-9]+", digits) or len(digits) > len(str(maximum))
                             or int(digits) > maximum):
                         raise ValueError(f"{label}: expected a decimal count in 1..{maximum}, got {field!r}")
+            if "aot_relocations_by_host" in limits:
+                counts = limits["aot_relocations_by_host"]
+                if not isinstance(counts, dict) or not counts or counts.keys() - set(ELF_HOSTS.values()):
+                    raise ValueError(f"{label}: expected relocation counts keyed by Linux VM host")
+                code_bytes = int(limits.get("code_budget", "67108864").split(":")[0].lstrip("0"))
+                maximum = max(DEFAULT_ELF_RELOCATIONS, code_bytes // RELOCATION_CHARGE_BYTES)
+                for host, count in counts.items():
+                    if type(count) is not int or not 0 < count <= maximum:
+                        raise ValueError(f"{label} {host}: expected an AOT relocation count in 1..{maximum}")
 
 
 def capture(command, directory, name, timeout):
@@ -134,12 +158,17 @@ def runtime_args(vm, engine, target, imports, owner, wasm, *, case=None, thread_
     if target.threads:
         case = case or {}
         profile = case.get("threaded_profiles", {}).get(target.name, {})
+        code_budget = profile.get("code_budget", "67108864")
         thread_stack_mib = case.get("thread_stack_mib", thread_stack_mib)
         thread_storage_mib = case.get("thread_storage_mib", thread_storage_mib)
         if engine == "aot":
             thread_stack_mib = profile.get("aot_stack_mib", thread_stack_mib)
+            if "aot_relocations_by_host" in profile:
+                count = profile["aot_relocations_by_host"].get(vm_elf_host(vm))
+                if count is not None:
+                    code_budget += f",relocations={count}"
         cmd += ["--wasi-threads", "4", "16", str(thread_stack_mib * 1024**2), str(thread_storage_mib * 1024**2),
-                profile.get("code_budget", "67108864"), str(SHARED_MEMORY_PAGES * 65536),
+                code_budget, str(SHARED_MEMORY_PAGES * 65536),
                 "--wasithread-single-create", "main", "--wasithread-single-enable", "main",
                 "--wasithread-single-interface", "main", "thread-spawn", "allow",
                 "--wasithread-single-limit", "main", "max-extra-threads", "4",

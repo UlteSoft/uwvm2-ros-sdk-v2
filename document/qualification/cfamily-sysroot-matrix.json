@@ -5,19 +5,19 @@
   "status": "pending-full-candidate-run",
   "sdk_repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros.git",
-  "vm_commit": "348f5716c0089fc6508ae6cc681b7ced4e8b0bf9",
-  "vm_tree": "8abb2368f0e6404ae63e38d22f345a7726b5e77d",
+  "vm_commit": "454a19a3c8c1ea388472d44589a126554067ef8b",
+  "vm_tree": "5c9e930f33bc3f7df758bc3f9667e6cd13227a1c",
   "candidate_corpus": {
     "case_manifest": "src/qualification/cfamily/cases.json",
-    "case_manifest_sha256": "e6479ca37e01d7b26f5c7fbdab0da6107de6b446ed0cb63242c1aa48855e71a7",
+    "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699",
     "runner": "src/qualification/cfamily/sysroot_suite.py",
-    "runner_sha256": "5cd800c7a7b912860c4454762631c0bd6f7af5cd718274953890daa5f72b06e9",
+    "runner_sha256": "c6220d89114e934833156572a903640688924f10544d0418474a698814425c50",
     "sources": {"compiler-rt": 71, "libc++": 30, "Open POSIX": 32, "libc-test": 37},
     "distinct_sources": 170,
     "planned_builds_per_host": 2464,
     "scope": "Run all 2464 case/profile combinations from this manifest on each host. Each linked row requires fresh INT and AOT outcomes tied to the same guest, the threaded memory owner where applicable, and the host VM receipt. Each original upstream case and each SDK-authored case has its own row.",
     "threaded_budgets": {
-      "find": "The four threaded MTE profiles select 536870912:4194304:1048576, granting 512 MiB code storage per child and up to 4194304 LLVM instructions and 1048576 basic blocks per module. Results on the pinned VM are pending.",
+      "find": "Four threaded MTE profiles use 536870912:4194304:1048576. On Linux x86_64 only, AOT appends ,relocations=N with the exact per-profile count in previous_find_elf_x86_64. All four keep the 1 MiB Guest stack and 16 MiB child storage. Execution on the pinned candidate is pending.",
       "aot_stack": "The 15 original native-stack refusals determine the per-profile AOT stack sizes in the manifest. Round the required bytes of proven native frames plus 8192 bytes of observed guard pages up to the next whole MiB. The original interpreter runs passed these rows with 1 MiB."
     }
   },
@@ -27,6 +27,86 @@
     "aarch64": {"status": "pending"},
     "arm": {"status": "pending"},
     "armhf": {"status": "pending"}
+  },
+  "previous_find_elf_x86_64": {
+    "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
+    "source_sha256": "dc3fb84be843d0272dfec154d8be959d0136b4bb5580490ee51c7d6ef362b240",
+    "sdk_qualification_commit": "d6d85b9a26454812ceca89455292d960dd063e68",
+    "sdk_qualification_tree": "2e823649cc7b2c832095ea9b09ef88280b2539f5",
+    "sdk_install_commit": "1a88ebbf29a0dedba6385a6079e92b0aaf860070",
+    "sdk_install_tree": "1dfc5c6146857fc7458a30924b6905be81477516",
+    "vm_commit": "348f5716c0089fc6508ae6cc681b7ced4e8b0bf9",
+    "vm_tree": "8abb2368f0e6404ae63e38d22f345a7726b5e77d",
+    "vm_sha256": "c0ff89d785c890ddf9d62463ec41a6b2af858a3b15df2969ac6ad6617278ee02",
+    "vm_receipt_sha256": "e03fd38187c84ac772d1193004a48be651085ae0bdef18e42176780f161d6a74",
+    "case_manifest_sha256": "e6479ca37e01d7b26f5c7fbdab0da6107de6b446ed0cb63242c1aa48855e71a7",
+    "runner_sha256": "5cd800c7a7b912860c4454762631c0bd6f7af5cd718274953890daa5f72b06e9",
+    "capture": "The Linux x86_64 fast-compile run captured the completed object passed by ThreadedLlvmChild::build to LLVM MemoryBuffer::getMemBufferCopy. Count every ELF relocation table, all section headers, and static symbols excluding entry zero.",
+    "evidence": {
+      "sdk_run_path_in_vm_checkout": ".tmp/cfamily-candidate-348f5716-sol/find-r1",
+      "objects_path_in_vm_checkout": ".tmp/vm-candidate-348f5716c008/object-evidence",
+      "audit_json_sha256": "15a24b52ab5f17ff67df05e8e31854c829ab07de5315f4d1b805c7a30f05ce6e",
+      "prior_vm_comparison_json_sha256": "fa8639db1d62392d57ea6c4b9e931143efb776554c190812eaa0526858902195",
+      "inputs_json_sha256": "03675f04c4b316d7ab9bd573c6a31e9af6e7ac1695f248a853fc45e3877c6dd8",
+      "results_jsonl_sha256": "b089e3f3a6d6e61d29328dbfa236a05f9e87f7a6d744c6cd94bf743ed27ff997",
+      "verified_object_summary_sha256": "1c0856e4b7ec293f84ca04232cebe5202abe0f5e7fe1ea014d4cc41bfefe1806"
+    },
+    "thread_code_argument": "536870912:4194304:1048576",
+    "guest_native_stack_argument_bytes": 1048576,
+    "per_child_storage_argument_bytes": 16777216,
+    "int_exit_each": 0,
+    "aot_exit_each": 126,
+    "old_refusal": "All four stopped on relocation 65537 while processing the fifth section. Native stack admission had not yet run. Rounded arena bytes below are the loader charges computed from the captured objects.",
+    "profiles": {
+      "wasm32-wasip1-threads-eh-mte": {
+        "wasm_sha256": "49a14501b2e5f19fb2c64594b114813ba2c026d62723bd6c378900749be7b405",
+        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
+        "elf_sha256": "c388ce7c1fb418628564681a573fdddcbf3c77a705ebea022404469b35ad6d28",
+        "sections": 14,
+        "symbols": 1653,
+        "relocations": 117849,
+        "charged_bytes": 77099137,
+        "rounded_arena_bytes": 77135872,
+        "stack_size_records": 1604,
+        "largest_recorded_frame_bytes": 2216
+      },
+      "wasm32-wasip1-threads-noeh-mte": {
+        "wasm_sha256": "a85a404cf920b5fb241aee84f9e1b4f8083af8fbbd41a76eac00824202259d97",
+        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
+        "elf_sha256": "6c506ab32cd09ee54c91e478c247004b12a6e5a0c5544b9827b249140423d50e",
+        "sections": 14,
+        "symbols": 1520,
+        "relocations": 104113,
+        "charged_bytes": 67634524,
+        "rounded_arena_bytes": 67698688,
+        "stack_size_records": 1478,
+        "largest_recorded_frame_bytes": 1944
+      },
+      "wasm64-wasip1-threads-eh-mte": {
+        "wasm_sha256": "a3137af44f9c5cb0ac565415db45daeea17f16a168e942717295803ecd3c8d41",
+        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
+        "elf_sha256": "6bc4e98b566fc88ac9da5b9ed8bc56f455968850c77c4f1dd777e622cba58383",
+        "sections": 14,
+        "symbols": 1663,
+        "relocations": 120802,
+        "charged_bytes": 79436612,
+        "rounded_arena_bytes": 79495168,
+        "stack_size_records": 1608,
+        "largest_recorded_frame_bytes": 2920
+      },
+      "wasm64-wasip1-threads-noeh-mte": {
+        "wasm_sha256": "c6b51c4ed63fcfcf01a2308ca7e34cfadd9f9574ad9fd7240b90a18e6c09333a",
+        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
+        "elf_sha256": "c49cf71b3e2d5cff6dba98bf6be351dd9c8f0aa9f77b989605b4e905a6a8c266",
+        "sections": 14,
+        "symbols": 1526,
+        "relocations": 106628,
+        "charged_bytes": 69510404,
+        "rounded_arena_bytes": 69533696,
+        "stack_size_records": 1480,
+        "largest_recorded_frame_bytes": 1736
+      }
+    }
   },
   "previous_find_replay_x86_64": {
     "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
