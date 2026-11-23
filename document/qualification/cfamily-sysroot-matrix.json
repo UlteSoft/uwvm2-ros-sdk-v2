@@ -5,14 +5,19 @@
   "status": "pending-full-candidate-run",
   "sdk_repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros.git",
-  "vm_commit": "454a19a3c8c1ea388472d44589a126554067ef8b",
-  "vm_tree": "5c9e930f33bc3f7df758bc3f9667e6cd13227a1c",
+  "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
+  "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
   "candidate_corpus": {
     "case_manifest": "src/qualification/cfamily/cases.json",
     "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699",
     "runner": "src/qualification/cfamily/sysroot_suite.py",
     "runner_sha256": "c6220d89114e934833156572a903640688924f10544d0418474a698814425c50",
-    "sources": {"compiler-rt": 71, "libc++": 30, "Open POSIX": 32, "libc-test": 37},
+    "sources": {
+      "compiler-rt": 71,
+      "libc++": 30,
+      "Open POSIX": 32,
+      "libc-test": 37
+    },
     "distinct_sources": 170,
     "planned_builds_per_host": 2464,
     "scope": "Run all 2464 case/profile combinations from this manifest on each host. Each linked row requires fresh INT and AOT outcomes tied to the same guest, the threaded memory owner where applicable, and the host VM receipt. Each original upstream case and each SDK-authored case has its own row.",
@@ -22,11 +27,21 @@
     }
   },
   "hosts": {
-    "x86_64": {"status": "pending"},
-    "i686": {"status": "pending"},
-    "aarch64": {"status": "pending"},
-    "arm": {"status": "pending"},
-    "armhf": {"status": "pending"}
+    "x86_64": {
+      "status": "pending"
+    },
+    "i686": {
+      "status": "pending"
+    },
+    "aarch64": {
+      "status": "pending"
+    },
+    "arm": {
+      "status": "pending"
+    },
+    "armhf": {
+      "status": "pending"
+    }
   },
   "previous_find_elf_x86_64": {
     "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
@@ -143,9 +158,14 @@
       "wasi-libc": "2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13",
       "libc-test": "18e28496adee3d84fefdda6efcb9c5b8996a2398"
     },
-    "sources": {"compiler-rt": 71, "libc++": 30, "Open POSIX": 30, "libc-test": 36},
+    "sources": {
+      "compiler-rt": 71,
+      "libc++": 30,
+      "Open POSIX": 30,
+      "libc-test": 36
+    },
     "distinct_sources": 167,
-    "profile_dimensions": "wasm32/wasm64 × threads off/on × EH off/on × MTE off/on. Open POSIX uses the eight threaded profiles.",
+    "profile_dimensions": "wasm32/wasm64 \u00d7 threads off/on \u00d7 EH off/on \u00d7 MTE off/on. Open POSIX uses the eight threaded profiles.",
     "planned_builds_per_host": 2432
   },
   "original_hosts": {
@@ -160,33 +180,69 @@
       "recorded_rows": 2414,
       "missing_rows": 18,
       "summary_json_produced": false,
-      "recorded_builds": {"linked": 2406, "compile-failed": 8},
+      "recorded_builds": {
+        "linked": 2406,
+        "compile-failed": 8
+      },
       "recorded_runs": {
-        "int": {"pass": 2370, "failed": 12, "upstream-skip": 16, "upstream-unresolved": 8},
-        "aot": {"pass": 2362, "failed": 27, "upstream-skip": 16, "upstream-unresolved": 1}
+        "int": {
+          "pass": 2370,
+          "failed": 12,
+          "upstream-skip": 16,
+          "upstream-unresolved": 8
+        },
+        "aot": {
+          "pass": 2362,
+          "failed": 27,
+          "upstream-skip": 16,
+          "upstream-unresolved": 1
+        }
       },
       "recorded_rows_passing_both_engines": 2355,
       "unrecorded_original_rows": [
         {
           "source": "upstream/libc-test/src/functional/wcstol.c",
-          "profiles": ["wasm64-wasip1-threads-noeh-nomte", "wasm64-wasip1-threads-eh-nomte", "wasm64-wasip1-threads-noeh-mte", "wasm64-wasip1-threads-eh-mte"]
+          "profiles": [
+            "wasm64-wasip1-threads-noeh-nomte",
+            "wasm64-wasip1-threads-eh-nomte",
+            "wasm64-wasip1-threads-noeh-mte",
+            "wasm64-wasip1-threads-eh-mte"
+          ]
         },
         {
           "source": "upstream/libc-test/src/regression/malloc-0.c",
           "profiles": [
-            "wasm32-wasip1-noeh-mte", "wasm32-wasip1-eh-mte",
-            "wasm32-wasip1-threads-noeh-nomte", "wasm32-wasip1-threads-eh-nomte", "wasm32-wasip1-threads-noeh-mte", "wasm32-wasip1-threads-eh-mte",
-            "wasm64-wasip1-noeh-nomte", "wasm64-wasip1-eh-nomte", "wasm64-wasip1-noeh-mte", "wasm64-wasip1-eh-mte",
-            "wasm64-wasip1-threads-noeh-nomte", "wasm64-wasip1-threads-eh-nomte", "wasm64-wasip1-threads-noeh-mte", "wasm64-wasip1-threads-eh-mte"
+            "wasm32-wasip1-noeh-mte",
+            "wasm32-wasip1-eh-mte",
+            "wasm32-wasip1-threads-noeh-nomte",
+            "wasm32-wasip1-threads-eh-nomte",
+            "wasm32-wasip1-threads-noeh-mte",
+            "wasm32-wasip1-threads-eh-mte",
+            "wasm64-wasip1-noeh-nomte",
+            "wasm64-wasip1-eh-nomte",
+            "wasm64-wasip1-noeh-mte",
+            "wasm64-wasip1-eh-mte",
+            "wasm64-wasip1-threads-noeh-nomte",
+            "wasm64-wasip1-threads-eh-nomte",
+            "wasm64-wasip1-threads-noeh-mte",
+            "wasm64-wasip1-threads-eh-mte"
           ]
         }
       ],
       "disposition": "The original run closed at 2414 of 2432 rows. The 18 missing rows remain unrecorded. Each candidate host starts a full 2464-row run under its own VM and suite receipts."
     },
-    "i686": {"status": "unrecorded"},
-    "aarch64": {"status": "unrecorded"},
-    "arm": {"status": "unrecorded"},
-    "armhf": {"status": "unrecorded"}
+    "i686": {
+      "status": "unrecorded"
+    },
+    "aarch64": {
+      "status": "unrecorded"
+    },
+    "arm": {
+      "status": "unrecorded"
+    },
+    "armhf": {
+      "status": "unrecorded"
+    }
   },
   "original_case_diagnostics_x86_64": [
     {
@@ -262,9 +318,53 @@
     "status": "pending-independent-execution",
     "scope": "The revised manifest adds 32 case/profile rows to the 2432 original rows. Its three SDK-authored cases require independent INT and AOT results.",
     "cases": [
-      {"source": "sysroot/search_lsearch_full_width.c", "kind": "port", "profiles": 16, "source_sha256": "6ee21c85b0ede2bc82679638651e4475f8cab87107e0448560f7362ab88fcef5"},
-      {"source": "sysroot/sem_getvalue_unnamed.c", "kind": "companion", "profiles": 8, "source_sha256": "f8dd080fbb23e6c5e499232e65b818b7dcc88571c77effe11f2ba6412fb6411b"},
-      {"source": "sysroot/pthread_rwlock_init_join.c", "kind": "companion", "profiles": 8, "source_sha256": "1036ec6ad13ec0e3d1fd658eceb867e72983f624f6223669a58000d5942dc76c"}
+      {
+        "source": "sysroot/search_lsearch_full_width.c",
+        "kind": "port",
+        "profiles": 16,
+        "source_sha256": "6ee21c85b0ede2bc82679638651e4475f8cab87107e0448560f7362ab88fcef5"
+      },
+      {
+        "source": "sysroot/sem_getvalue_unnamed.c",
+        "kind": "companion",
+        "profiles": 8,
+        "source_sha256": "f8dd080fbb23e6c5e499232e65b818b7dcc88571c77effe11f2ba6412fb6411b"
+      },
+      {
+        "source": "sysroot/pthread_rwlock_init_join.c",
+        "kind": "companion",
+        "profiles": 8,
+        "source_sha256": "1036ec6ad13ec0e3d1fd658eceb867e72983f624f6223669a58000d5942dc76c"
+      }
     ]
+  },
+  "previous_exact_relocation_replay_x86_64": {
+    "vm_commit": "454a19a3c8c1ea388472d44589a126554067ef8b",
+    "vm_tree": "5c9e930f33bc3f7df758bc3f9667e6cd13227a1c",
+    "vm_sha256": "aefe827c18540bd54d261f2e544aa79e18c630c62bf62336afecdb9d2738f8b3",
+    "sdk_qualification_commit": "5af72d70e772c1a55c82b53a26de82a68bc5ab29",
+    "paired_pass": 4,
+    "guest_and_owner_hash_pairs_verified": 4,
+    "int_exit_codes": {
+      "0": 4
+    },
+    "aot_exit_codes": {
+      "0": 4
+    },
+    "results_sha256": "deeda534afdff676d93a8ce3f15f33f3067b5cd22211a3b2029ee51d7aec6aee",
+    "audit_sha256": "00872f5b9994aa2341265eeea007b1a7ea404ec48b9781fbfe8587c8714ae2c0",
+    "prior_vm_comparison_sha256": "e4c7a625e4b66d4b6428c21f7a312238f9a064f20403135e5660b385009bf25d",
+    "partial_matrices": {
+      "sysroot": {
+        "completed_rows_at_interruption": 375,
+        "raw_results_sha256": "b544be596593c10a13aed297d5d6eac8f4c5f15359b0c92ccba94ef558d46eca",
+        "interruption_receipt_sha256": "02350e7644699ab6f1ceeef9f7888cf517c17e4f3476af5a56061d1b83ead387"
+      },
+      "external": {
+        "completed_rows_at_interruption": 112,
+        "raw_results_sha256": "af36451f9973d25b9f8dee8c40ccf31452e1f1515d7fc35f2c12e65e040b54f2",
+        "interruption_receipt_sha256": "be4f639ed86faa811688cf56432f8f6c4b2fd2e31b95aa3ac0129c56034e3403"
+      }
+    }
   }
 }
