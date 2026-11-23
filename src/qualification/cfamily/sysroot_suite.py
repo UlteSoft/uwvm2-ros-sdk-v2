@@ -28,6 +28,7 @@ PERMISSIONS = {
 }
 SHARED_MEMORY_PAGES = 128
 MAX_LLVM_IR_INSTRUCTIONS = 4194304
+MAX_LLVM_BASIC_BLOCKS = 1048576
 
 
 def digest(path):
@@ -91,11 +92,15 @@ def validate_thread_budgets(cases):
                     raise ValueError(f"{label}: expected a positive finite AOT stack size in MiB")
             if "code_budget" in limits:
                 code = limits["code_budget"]
-                match = re.fullmatch(r"([0-9]+)(?::([0-9]+))?", code) if isinstance(code, str) else None
-                if (not match or not 0 < int(match[1]) <= 2 * sys.maxsize
-                        or (match[2] is not None and not 0 < int(match[2]) <= MAX_LLVM_IR_INSTRUCTIONS)):
-                    raise ValueError(f"{label}: expected positive finite code bytes with an optional "
-                                     f":instruction-count in 1..{MAX_LLVM_IR_INSTRUCTIONS}")
+                fields = code.split(":") if isinstance(code, str) else []
+                maxima = (2 * sys.maxsize, MAX_LLVM_IR_INSTRUCTIONS, MAX_LLVM_BASIC_BLOCKS)
+                if not 1 <= len(fields) <= len(maxima):
+                    raise ValueError(f"{label}: expected CODE[:INSTRUCTIONS[:BLOCKS]]")
+                for field, maximum in zip(fields, maxima):
+                    digits = field.lstrip("0")
+                    if (not re.fullmatch(r"[0-9]+", digits) or len(digits) > len(str(maximum))
+                            or int(digits) > maximum):
+                        raise ValueError(f"{label}: expected a decimal count in 1..{maximum}, got {field!r}")
 
 
 def capture(command, directory, name, timeout):

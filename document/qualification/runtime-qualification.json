@@ -1,8 +1,8 @@
 {
   "status": "requalification-in-progress",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros",
-  "vm_commit": "70c799347e7b88d8f16c493ae046e7450c88e2b8",
-  "vm_tree": "e280e780a3e2e9f057eb3bd104088d4926e8bba6",
+  "vm_commit": "348f5716c0089fc6508ae6cc681b7ced4e8b0bf9",
+  "vm_tree": "8abb2368f0e6404ae63e38d22f345a7726b5e77d",
   "candidate_release_status": "pending-five-host-release-and-sdk-binding",
   "candidate_sysroot_plan": "cfamily-sysroot-matrix.json",
   "current_runtime_records": [],

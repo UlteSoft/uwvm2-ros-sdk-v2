@@ -5,19 +5,19 @@
   "status": "pending-full-candidate-run",
   "sdk_repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros.git",
-  "vm_commit": "70c799347e7b88d8f16c493ae046e7450c88e2b8",
-  "vm_tree": "e280e780a3e2e9f057eb3bd104088d4926e8bba6",
+  "vm_commit": "348f5716c0089fc6508ae6cc681b7ced4e8b0bf9",
+  "vm_tree": "8abb2368f0e6404ae63e38d22f345a7726b5e77d",
   "candidate_corpus": {
     "case_manifest": "src/qualification/cfamily/cases.json",
-    "case_manifest_sha256": "11b259c60a6f210318ff14cb8a404e73a77fc8cecbf46447ab2dadb0fc2c3d2c",
+    "case_manifest_sha256": "e6479ca37e01d7b26f5c7fbdab0da6107de6b446ed0cb63242c1aa48855e71a7",
     "runner": "src/qualification/cfamily/sysroot_suite.py",
-    "runner_sha256": "5b11214dddd8e6d5660321b280595d629850abc9c0ef9fc8d4c04dd1a1c20d19",
+    "runner_sha256": "5cd800c7a7b912860c4454762631c0bd6f7af5cd718274953890daa5f72b06e9",
     "sources": {"compiler-rt": 71, "libc++": 30, "Open POSIX": 32, "libc-test": 37},
     "distinct_sources": 170,
     "planned_builds_per_host": 2464,
     "scope": "Run all 2464 case/profile combinations from this manifest on each host. Each linked row requires fresh INT and AOT outcomes tied to the same guest, the threaded memory owner where applicable, and the host VM receipt. Each original upstream case and each SDK-authored case has its own row.",
     "threaded_budgets": {
-      "find": "Four threaded MTE profiles use 536870912 code bytes per child and up to 4194304 LLVM IR instructions per module. The original INT replays passed with 512 MiB code and 16 MiB storage. Candidate LLVM results are pending.",
+      "find": "The four threaded MTE profiles select 536870912:4194304:1048576, granting 512 MiB code storage per child and up to 4194304 LLVM instructions and 1048576 basic blocks per module. Results on the pinned VM are pending.",
       "aot_stack": "The 15 original native-stack refusals determine the per-profile AOT stack sizes in the manifest. Round the required bytes of proven native frames plus 8192 bytes of observed guard pages up to the next whole MiB. The original interpreter runs passed these rows with 1 MiB."
     }
   },
@@ -27,6 +27,24 @@
     "aarch64": {"status": "pending"},
     "arm": {"status": "pending"},
     "armhf": {"status": "pending"}
+  },
+  "previous_find_replay_x86_64": {
+    "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
+    "vm_commit": "70c799347e7b88d8f16c493ae046e7450c88e2b8",
+    "vm_tree": "e280e780a3e2e9f057eb3bd104088d4926e8bba6",
+    "vm_sha256": "49ba0a51eba6fc81e94a2d32157d44584b2f9eb0559e6dc737d828d6f446efb8",
+    "case_manifest_sha256": "11b259c60a6f210318ff14cb8a404e73a77fc8cecbf46447ab2dadb0fc2c3d2c",
+    "runner_sha256": "5b11214dddd8e6d5660321b280595d629850abc9c0ef9fc8d4c04dd1a1c20d19",
+    "sysroot_inputs_sha256": "b832e3d647c0973f22b1e6bff83f022504b63cee65e6347ca614c1f9c5946800",
+    "relocation_json_sha256": "8f529b165636360bec8e73f81a627d633074a0b5f07e63ba3bedbe87b1ae8ca4",
+    "int": "All four INT replays returned 0 with 512 MiB code and 16 MiB storage per child.",
+    "aot": "All four AOT replays returned 126 with 536870912:4194304. Each stopped after control insertion at block 262145 against the limit of 262144. The instruction counts include blocks up to and including that first excess block.",
+    "instructions_at_refusal": {
+      "wasm32-wasip1-threads-noeh-mte": 960683,
+      "wasm32-wasip1-threads-eh-mte": 967136,
+      "wasm64-wasip1-threads-noeh-mte": 891753,
+      "wasm64-wasip1-threads-eh-mte": 894108
+    }
   },
   "original_environment": {
     "status": "closed-interrupted",
