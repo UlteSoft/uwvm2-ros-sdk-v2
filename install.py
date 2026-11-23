@@ -207,7 +207,7 @@ def main():
     parser.add_argument("--prefix", type=Path, default=Path.home() / ".local/share/wros-sdk")
     parser.add_argument("--bootstrap", type=Path, help="host LLVM installation for a C/C++ or TinyGo source build")
     parser.add_argument("--rust-bin", type=Path, help="use installed official Rust host tools for a Rust compiler build (1.97.1) or wrwat build (1.98.0)")
-    parser.add_argument("--jobs", type=int, metavar="N", help="parallel jobs for native C, C++, Rust, Go, TinyGo or CPython source builds")
+    parser.add_argument("--jobs", type=int, metavar="N", help="parallel jobs for building native host tools (including the VM) and language components")
     args = parser.parse_args()
     if args.action != "list" and not args.language:
         parser.error("--language is required for install and plan")
@@ -215,6 +215,8 @@ def main():
         parser.error("--commit requires a complete lowercase 40-character commit ID")
     if args.jobs is not None and args.jobs < 1:
         parser.error("--jobs must be positive")
+    if args.jobs is not None and args.action == "list":
+        parser.error("--jobs applies to install and plan")
 
     prefix = args.prefix.expanduser().resolve()
     scratch = prefix / ".work"

@@ -688,8 +688,9 @@ def selection(args, tree):
             raise ValueError("this revision has no published " + COMMANDS[language] + " native package; select --mode source")
     if args.bootstrap and (mode != "source" or language not in ("c", "cpp", "objc", "objcpp", "tinygo")):
         raise ValueError("--bootstrap applies to C/C++ and TinyGo source builds")
-    if args.jobs and (mode != "source" or language not in ("c", "cpp", "objc", "objcpp", "rust", "py", *GO_COMMANDS)):
-        raise ValueError("--jobs applies to native C/C++, Rust, Go, TinyGo or CPython source builds")
+    if args.jobs and current_host() not in HOSTS and not (
+            mode == "source" and language in ("c", "cpp", "objc", "objcpp", "rust", "wat", "py", *GO_COMMANDS)):
+        raise ValueError("--jobs requires a native host-tool or language build")
     if args.rust_bin and (mode != "source" or language not in ("wat", "rust")):
         raise ValueError("--rust-bin applies to a native Rust or wrwat source build")
     return language, mode
@@ -1091,8 +1092,12 @@ def main():
     parser.add_argument("--no-mte", action="store_true")
     parser.add_argument("--bootstrap", type=Path)
     parser.add_argument("--rust-bin", type=Path)
-    parser.add_argument("--jobs", type=int)
+    parser.add_argument("--jobs", type=int, metavar="N", help="parallel jobs for building native host tools (including the VM) and language components")
     args = parser.parse_args()
+    if args.jobs is not None and args.jobs < 1:
+        parser.error("--jobs must be positive")
+    if args.jobs is not None and args.action == "list":
+        parser.error("--jobs applies to install and plan")
     if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
         parser.error("expected an immutable Git commit")
     if args.action == "list":
