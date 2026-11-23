@@ -282,10 +282,92 @@
       }
     },
     "arm": {
-      "status": "pending"
+      "status": "runtime-matrix-pending",
+      "execution": "Linux arm under system QEMU",
+      "public_binary_install": {
+        "status": "completed",
+        "initial_cache_entries": {
+          "/work/cache": 0,
+          "/work/config": 0,
+          "/work/data": 0,
+          "/work/home": 0,
+          "/work/prefix": 0,
+          "/work/scratch": 0,
+          "/work/state": 0
+        },
+        "observed_installer_programs": [
+          "/usr/bin/git",
+          "/usr/bin/python3",
+          "/usr/lib/git-core/git",
+          "/usr/lib/git-core/git-remote-https"
+        ],
+        "vm_provider": "github-release",
+        "vm_archive_sha256": "6603c26a0dfea5676f845445ffb471ef180ca04b46f0530b99ae5254e072c3d1",
+        "vm_elf_sha256": "fbdd58dddffffe3b3fe8f4d73f4baa20037d6d089af70686df9f2d433a8b3b6a",
+        "xmake_provider": "debian",
+        "languages": {
+          "c": {
+            "selection_sha256": "9ca437d6a994d6282d45d18d462d9570e8a624ddde959b4635c733b8b9c0bd57",
+            "prebuilt_receipt_sha256": "57f469975b1fa04d75c7fd1fb8a56b649927ab74c5e5de8bc2019e9d810fe73d",
+            "exec_trace_sha256": "c02f05403ee170c1339198e16c307a75a7f32edc9d831dc2e3bf9693755c5ebe"
+          },
+          "cpp": {
+            "selection_sha256": "b8f7fe55d8f32f49753eb829373fee9e3820204cb9f2647e61ef1f44c706e48e",
+            "prebuilt_receipt_sha256": "b9eeb4d16fb4bca9a3d64bffd39200cbccbfe23eaefaa74aa9d714686b2aa82e",
+            "exec_trace_sha256": "50b3572432db60b67e2f8c5d3baa8499035a65a9a3b61233ca4bd1eebe2bc9a1"
+          },
+          "wat": {
+            "selection_sha256": "84ded97d9c95f4390646dec4b28cd59f0d1cf752c96022ad610c54c230f7ea0e",
+            "prebuilt_receipt_sha256": "d55682af320d0b301060347c14027b9a52b588d51cd0615d17a8efee8b236393",
+            "exec_trace_sha256": "562f44e86a9912fc8b7aa4b9d4bcec5ab78ec20985e3228a3113ebcd1e8802c8"
+          }
+        },
+        "console_sha256": "e38d145a8ae7c73e9fcd252cf37cefcccd7e4512c8e10331b3ad1be34bb28e86"
+      }
     },
     "armhf": {
-      "status": "pending"
+      "status": "runtime-matrix-pending",
+      "execution": "Linux armhf under system QEMU",
+      "public_binary_install": {
+        "status": "completed",
+        "initial_cache_entries": {
+          "/work/cache": 0,
+          "/work/config": 0,
+          "/work/data": 0,
+          "/work/home": 0,
+          "/work/prefix": 0,
+          "/work/scratch": 0,
+          "/work/state": 0
+        },
+        "observed_installer_programs": [
+          "/usr/bin/git",
+          "/usr/bin/python3",
+          "/usr/lib/git-core/git",
+          "/usr/lib/git-core/git-remote-https"
+        ],
+        "vm_provider": "github-release",
+        "vm_archive_sha256": "3c1cb27ac3b873a873daa1549337e27041637693638e25fead73d403cf3d4c87",
+        "vm_elf_sha256": "5528d6baecf923fe723cdb28776e2d54ad74fd13a3ec08ca57bbbd0bbc0c7019",
+        "xmake_provider": "debian",
+        "languages": {
+          "c": {
+            "selection_sha256": "7954f05da6f3883573dee2ff17e359265e45dff15fb2b4bf27c96e9aaf61abcb",
+            "prebuilt_receipt_sha256": "9dca97d6ce946f9d7a44ff557a8fb273e5dcabe67d5bedb09a5d4b727ef7b7a0",
+            "exec_trace_sha256": "adc782a771657831489227be37150324a9d76c18abe42320b39ecf431041fb8f"
+          },
+          "cpp": {
+            "selection_sha256": "8c39613304efaca9ebb8d292c9918640984dbd15b40c95f94395588a69d3b69e",
+            "prebuilt_receipt_sha256": "64b333b4685239f56d8775e01d6e3e1d65b6e7c6940e20821bf216d22d186f54",
+            "exec_trace_sha256": "55ec28a9e444193800665643305d28c2f5a3cc5fbc72fe70b48be0dbe4c4f23c"
+          },
+          "wat": {
+            "selection_sha256": "821c09da3c760764b1d4f0a5c4bad0515ff476cd6f7a36b4102040fe7474a2cb",
+            "prebuilt_receipt_sha256": "c20314ac850e5c7b8011558435f00ba7782713ffba609581fa032938d1b6ad16",
+            "exec_trace_sha256": "e4b567db7f6fc1e37a23d4025ab5657648df060ab9885a652626f793a56e1ab8"
+          }
+        },
+        "console_sha256": "a4dc13ab5444e6776782f5b0bcab91b319413a6186b1e5462c21eca70a4fec50"
+      }
     }
   }
 }

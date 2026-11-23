@@ -32,7 +32,7 @@
     ],
     "capabilities": [
       "source-debug",
-      "dump-restore",
+      "full-dump-restore",
       "signed-hot-update"
     ],
     "int_dbg": "Expected rejection with an explicit unsupported-mode diagnostic before guest execution.",
