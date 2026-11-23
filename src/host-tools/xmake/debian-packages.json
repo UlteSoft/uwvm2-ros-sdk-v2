@@ -1,0 +1,488 @@
+{
+  "schema": 1,
+  "snapshot": "https://snapshot.debian.org/archive/debian/20260112T000000Z/",
+  "suites": {
+    "trixie-backports": {
+      "inrelease_sha256": "06ad0187b3957328f0b6b2091668a24c15686e3e77533abb736176e87062c628",
+      "inrelease_signing_fingerprints": [
+        "4CB50190207B4758A3F73A796ED0E7B82643E131",
+        "B8E5F13176D2A7A75220028078DBA3BC47EF2265"
+      ],
+      "indexes": {
+        "i386": {
+          "path": "main/binary-i386/Packages.xz",
+          "sha256": "fbafb2d6cdce87ae6811fda9eed2d740fc3a44d2f6c30b72d862386ab10083bf"
+        },
+        "arm64": {
+          "path": "main/binary-arm64/Packages.xz",
+          "sha256": "7315182aa3f913d95fe40dfca49b6de7ecdc76d0c74a592a3f0cda9767f82a40"
+        },
+        "armel": {
+          "path": "main/binary-armel/Packages.xz",
+          "sha256": "9b2c9c41a6fa39d086e3d4457d1819c0845fe9a81863fd92d4d21d4ad54c8fdd"
+        },
+        "armhf": {
+          "path": "main/binary-armhf/Packages.xz",
+          "sha256": "b3a969097b06b5529006444040c881ae7524aa8117949c47a5abb3d2cec67c0f"
+        }
+      }
+    },
+    "trixie": {
+      "inrelease_sha256": "59bcb7bc2e221c6e7d2361adf8f82dfbd28ad8d755f2fe42f56d3be42fd25a4c",
+      "inrelease_signing_fingerprints": [
+        "4CB50190207B4758A3F73A796ED0E7B82643E131",
+        "B8E5F13176D2A7A75220028078DBA3BC47EF2265",
+        "41587F7DB8C774BCCF131416762F67A0B2C39DE4"
+      ],
+      "indexes": {
+        "i386": {
+          "path": "main/binary-i386/Packages.xz",
+          "sha256": "78c3ee668526052a8920c0c2bafdd60fbb96b284fc358518a56e5cf6e39be352"
+        },
+        "arm64": {
+          "path": "main/binary-arm64/Packages.xz",
+          "sha256": "e1aa214ae4d80852f567a3081fa0a300abff8165c3eed0119380ff457277eaaf"
+        },
+        "armel": {
+          "path": "main/binary-armel/Packages.xz",
+          "sha256": "0bc406b97700e4b86a498642fc4ae71681749f76b6a67123f49f30f67fb8a005"
+        },
+        "armhf": {
+          "path": "main/binary-armhf/Packages.xz",
+          "sha256": "77bb2808f076960e084a6845857a449d4e2ec86e28c83506952ac003e8762274"
+        }
+      }
+    }
+  },
+  "members": {
+    "base-files": {
+      "usr/share/common-licenses/Apache-2.0": "licenses/common-licenses/Apache-2.0",
+      "usr/share/common-licenses/Artistic": "licenses/common-licenses/Artistic",
+      "usr/share/common-licenses/GFDL-1.2": "licenses/common-licenses/GFDL-1.2",
+      "usr/share/common-licenses/GFDL-1.3": "licenses/common-licenses/GFDL-1.3",
+      "usr/share/common-licenses/GPL-2": "licenses/common-licenses/GPL-2",
+      "usr/share/common-licenses/GPL-3": "licenses/common-licenses/GPL-3",
+      "usr/share/common-licenses/LGPL-2": "licenses/common-licenses/LGPL-2",
+      "usr/share/common-licenses/LGPL-2.1": "licenses/common-licenses/LGPL-2.1",
+      "usr/share/common-licenses/LGPL-3": "licenses/common-licenses/LGPL-3"
+    },
+    "gcc-14-base": {
+      "usr/share/doc/gcc-14-base/copyright": "licenses/gcc-14-base/copyright"
+    },
+    "libatomic1": {
+      "usr/lib/{multiarch}/libatomic.so.1.2.0": "lib/libatomic.so.1"
+    },
+    "libc6": {
+      "usr/lib/{multiarch}/{loader}": "lib/{loader}",
+      "usr/lib/{multiarch}/libc.so.6": "lib/libc.so.6",
+      "usr/lib/{multiarch}/libm.so.6": "lib/libm.so.6",
+      "usr/share/doc/libc6/copyright": "licenses/libc6/copyright"
+    },
+    "libgcc-s1": {
+      "usr/lib/{multiarch}/libgcc_s.so.1": "lib/libgcc_s.so.1"
+    },
+    "liblua5.4-0": {
+      "usr/lib/{multiarch}/liblua5.4.so.0.0.0": "lib/liblua5.4.so.0",
+      "usr/share/doc/liblua5.4-0/copyright": "licenses/liblua5.4-0/copyright"
+    },
+    "liblz4-1": {
+      "usr/lib/{multiarch}/liblz4.so.1.10.0": "lib/liblz4.so.1",
+      "usr/share/doc/liblz4-1/copyright": "licenses/liblz4-1/copyright"
+    },
+    "libncurses6": {
+      "usr/lib/{multiarch}/libncurses.so.6.5": "lib/libncurses.so.6"
+    },
+    "libreadline8t64": {
+      "usr/lib/{multiarch}/libreadline.so.8.2": "lib/libreadline.so.8",
+      "usr/share/doc/libreadline8t64/copyright": "licenses/libreadline8t64/copyright"
+    },
+    "libsv1": {
+      "usr/lib/{multiarch}/libsv.so.1.0.0": "lib/libsv.so.1",
+      "usr/share/doc/libsv1/copyright": "licenses/libsv1/copyright"
+    },
+    "libtinfo6": {
+      "usr/lib/{multiarch}/libtinfo.so.6.5": "lib/libtinfo.so.6",
+      "usr/share/doc/libtinfo6/copyright": "licenses/libtinfo6/copyright"
+    },
+    "libxxhash0": {
+      "usr/lib/{multiarch}/libxxhash.so.0.8.3": "lib/libxxhash.so.0",
+      "usr/share/doc/libxxhash0/copyright": "licenses/libxxhash0/copyright"
+    },
+    "lua-cjson": {
+      "usr/lib/{multiarch}/liblua5.4-cjson.so.0.0.0": "lib/liblua5.4-cjson.so.0",
+      "usr/share/doc/lua-cjson/copyright": "licenses/lua-cjson/copyright"
+    },
+    "xmake": {
+      "usr/bin/xmake": "bin/xmake",
+      "usr/share/doc/xmake/copyright": "licenses/xmake/copyright"
+    },
+    "xmake-data": {
+      "usr/share/doc/xmake-data/copyright": "licenses/xmake-data/copyright"
+    }
+  },
+  "shared_packages": {
+    "xmake-data": {
+      "suite": "trixie-backports",
+      "pool_path": "pool/main/x/xmake/xmake-data_3.0.5+ds-1~bpo13+1_all.deb",
+      "size": 839064,
+      "sha256": "ad0955aa00d281f6e69d7db1452b26498ed7ea80cfb464ba67fee9733d411ae3"
+    }
+  },
+  "hosts": {
+    "linux-i686": {
+      "version": "3.0.5+ds-1~bpo13+1",
+      "architecture": "i386",
+      "multiarch": "i386-linux-gnu",
+      "loader": "ld-linux.so.2",
+      "elf_sha256": "312865667ebd05584da4aeb70d74cef5db18e2cf6160791063a433bc8736e6f5",
+      "packages": {
+        "base-files": {
+          "suite": "trixie",
+          "pool_path": "pool/main/b/base-files/base-files_13.8+deb13u3_i386.deb",
+          "size": 73220,
+          "sha256": "7a4eb2e0d7987218049d1df06a445b49cb5370f31f659e0a604f86459ed8f3d4"
+        },
+        "gcc-14-base": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/gcc-14-base_14.2.0-19_i386.deb",
+          "size": 49376,
+          "sha256": "cab3cc6782d6cd3445d184ad317bbd8cc46395eb2675ccd75f4b57147469887a"
+        },
+        "libc6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/glibc/libc6_2.41-12+deb13u1_i386.deb",
+          "size": 2723672,
+          "sha256": "15c9d74dcedb1f274fae2ab803615c1f384f4bb3830ca77088354d20c6b71dbc"
+        },
+        "libgcc-s1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/libgcc-s1_14.2.0-19_i386.deb",
+          "size": 88164,
+          "sha256": "a4c71fd856d2a48a7505a087b4186e3cca23f94603c05e3fb7c799b27e72f761"
+        },
+        "liblua5.4-0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua5.4/liblua5.4-0_5.4.7-1+b2_i386.deb",
+          "size": 170392,
+          "sha256": "e312be4a2e5431bcf888dfc3d79195d1883d1e3fa5eb66a07ae720a1948b1fef"
+        },
+        "liblz4-1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lz4/liblz4-1_1.10.0-4_i386.deb",
+          "size": 64328,
+          "sha256": "fe6cd86290b0abbebf356f3ac5e876cabcc736711615c3e0ae74ad8c0b494b12"
+        },
+        "libncurses6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libncurses6_6.5+20250216-2_i386.deb",
+          "size": 112268,
+          "sha256": "c7d36a0324dcd06127d8e730e9c219c5950def935da0e362fd2506a1b92bda55"
+        },
+        "libreadline8t64": {
+          "suite": "trixie",
+          "pool_path": "pool/main/r/readline/libreadline8t64_8.2-6_i386.deb",
+          "size": 173208,
+          "sha256": "87f68eeeadde39bc92baff9928b8d392b48b03a45f8027173dcfc46670cd1912"
+        },
+        "libsv1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/libs/libsv/libsv1_1.2-1+b2_i386.deb",
+          "size": 11412,
+          "sha256": "150d6efb0ebab7ee48015bfe332328f379e703e2562673159c4eba1902c4649a"
+        },
+        "libtinfo6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libtinfo6_6.5+20250216-2_i386.deb",
+          "size": 349776,
+          "sha256": "3488ab080c07056b2ddef81f3d75fac7358ebfd63ac04a224fa87571152f39b7"
+        },
+        "libxxhash0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/x/xxhash/libxxhash0_0.8.3-2_i386.deb",
+          "size": 39408,
+          "sha256": "78feb19b3eaecf7c539c85c013fcd35e91a197836ce9e7703522842d1d75d918"
+        },
+        "lua-cjson": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua-cjson/lua-cjson_2.1.0+dfsg-2.2+b2_i386.deb",
+          "size": 21748,
+          "sha256": "486b226dca2192e2d6cffedc97756a6b0d61ca56f67dd16d145c311f14bde6c4"
+        },
+        "xmake": {
+          "suite": "trixie-backports",
+          "pool_path": "pool/main/x/xmake/xmake_3.0.5+ds-1~bpo13+1_i386.deb",
+          "size": 302272,
+          "sha256": "15775aae8b80ae3cd4a901b6c6de68b8505aeb908e629bec55258e6702238af3"
+        }
+      }
+    },
+    "linux-aarch64": {
+      "version": "3.0.5+ds-1~bpo13+1",
+      "architecture": "arm64",
+      "multiarch": "aarch64-linux-gnu",
+      "loader": "ld-linux-aarch64.so.1",
+      "elf_sha256": "25dcaaa38fa581b15c8b8de75d7f74479712512b13b914b300f2d9a6f662d845",
+      "packages": {
+        "base-files": {
+          "suite": "trixie",
+          "pool_path": "pool/main/b/base-files/base-files_13.8+deb13u3_arm64.deb",
+          "size": 73216,
+          "sha256": "02832c35c1588ea5cba07bb965946ccee0d71b9dd8cf0dee9ed7f138402abbef"
+        },
+        "gcc-14-base": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/gcc-14-base_14.2.0-19_arm64.deb",
+          "size": 49444,
+          "sha256": "34ee90679b018c0e64234747a4c4c0ae6b7f63541115037465a8627c2dfbc594"
+        },
+        "libc6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/glibc/libc6_2.41-12+deb13u1_arm64.deb",
+          "size": 2484088,
+          "sha256": "19c43436854a1207a9bf0cea32fa3c0a069fd26f82ab23302d20b0574b635395"
+        },
+        "libgcc-s1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/libgcc-s1_14.2.0-19_arm64.deb",
+          "size": 54104,
+          "sha256": "1108bc87879833d6d9a145f22a4a15cddb34e065b4b5f4b97bee586adbac2851"
+        },
+        "liblua5.4-0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua5.4/liblua5.4-0_5.4.7-1+b2_arm64.deb",
+          "size": 133868,
+          "sha256": "56c90caee447f0c9bc9390f822cb1d8ffd37e44041c736e2d8d86040c23547d8"
+        },
+        "liblz4-1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lz4/liblz4-1_1.10.0-4_arm64.deb",
+          "size": 59988,
+          "sha256": "f86fa7f8112d56b74f99c4a8baade57a9962d187d7c8e319428e171b2a34d223"
+        },
+        "libncurses6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libncurses6_6.5+20250216-2_arm64.deb",
+          "size": 96112,
+          "sha256": "259fe5736ebb105df7c6a7b5cc6231a8743666f5f57885f6c7989babe2fc0082"
+        },
+        "libreadline8t64": {
+          "suite": "trixie",
+          "pool_path": "pool/main/r/readline/libreadline8t64_8.2-6_arm64.deb",
+          "size": 159264,
+          "sha256": "f78ff432b2a627bc04f7eef0e6e2696501c9e06feca748a5b741d5e594429033"
+        },
+        "libsv1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/libs/libsv/libsv1_1.2-1+b2_arm64.deb",
+          "size": 10396,
+          "sha256": "68352d70432df987328ef56f81776aed6cca5d1757aa510763e67597a4ef385a"
+        },
+        "libtinfo6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libtinfo6_6.5+20250216-2_arm64.deb",
+          "size": 341360,
+          "sha256": "2a747f7fff3c2347c357387a7133df997410f07ba1b1df1a1461a97bd7fbc2fc"
+        },
+        "libxxhash0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/x/xxhash/libxxhash0_0.8.3-2_arm64.deb",
+          "size": 22276,
+          "sha256": "66665776740ced6c5ddcb48a89a92b056d0dcb13851e1ff573d2b99b766e5c6c"
+        },
+        "lua-cjson": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua-cjson/lua-cjson_2.1.0+dfsg-2.2+b2_arm64.deb",
+          "size": 19792,
+          "sha256": "8ba92decf07bd8e34a69d9295cdec9f79e5ad6c7fd88825cdb06965201986794"
+        },
+        "xmake": {
+          "suite": "trixie-backports",
+          "pool_path": "pool/main/x/xmake/xmake_3.0.5+ds-1~bpo13+1_arm64.deb",
+          "size": 265808,
+          "sha256": "15efd3a6aabe825acab61b2b3ad71d472924ac27308a7349cbf5b0ec675d61a1"
+        }
+      }
+    },
+    "linux-arm": {
+      "version": "3.0.5+ds-1~bpo13+1",
+      "architecture": "armel",
+      "multiarch": "arm-linux-gnueabi",
+      "loader": "ld-linux.so.3",
+      "elf_sha256": "65c6fdddb6d4ed1d21cf42cecf23e52faa6cbfb4a10442695be8dfb3d301085c",
+      "packages": {
+        "base-files": {
+          "suite": "trixie",
+          "pool_path": "pool/main/b/base-files/base-files_13.8+deb13u3_armel.deb",
+          "size": 73220,
+          "sha256": "970e86712214afbbbda30dcd5a9490fe64862b5457fb7817dcc9d205de8eb042"
+        },
+        "gcc-14-base": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/gcc-14-base_14.2.0-19_armel.deb",
+          "size": 49416,
+          "sha256": "b9ac33286aa26604220514f129d4238d0f3b2e90399bec28dc46aa193bc243f9"
+        },
+        "libatomic1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/libatomic1_14.2.0-19_armel.deb",
+          "size": 9572,
+          "sha256": "133a0a2dbaeff15a8264b15b13c557f23fcd67cdc85c001c9bfc04ecaef953b3"
+        },
+        "libc6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/glibc/libc6_2.41-12+deb13u1_armel.deb",
+          "size": 2262708,
+          "sha256": "12744834ca733d893589e906f4cdb8dbac8a59627a1a27cd69c8b5abf97eaee6"
+        },
+        "libgcc-s1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/libgcc-s1_14.2.0-19_armel.deb",
+          "size": 38856,
+          "sha256": "2a7efceac4acc13ee23ff73fee1ca3e865baa2b09b9537f0d8496fac7dff7d4f"
+        },
+        "liblua5.4-0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua5.4/liblua5.4-0_5.4.7-1+b2_armel.deb",
+          "size": 122120,
+          "sha256": "6375fbd1749c11baee3c01db930d4c9bbb7d899cb9c9bcacac9ca3deff45c5ba"
+        },
+        "liblz4-1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lz4/liblz4-1_1.10.0-4_armel.deb",
+          "size": 54084,
+          "sha256": "b87eaee1b15424f4b336b099543c17bdfc271305bee9d8ef5f307db190323848"
+        },
+        "libncurses6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libncurses6_6.5+20250216-2_armel.deb",
+          "size": 83412,
+          "sha256": "cb79b62ccdb60de8fa6c2a1c63a9f579ea1d95bc0b0660961b7dfbe40b644c92"
+        },
+        "libreadline8t64": {
+          "suite": "trixie",
+          "pool_path": "pool/main/r/readline/libreadline8t64_8.2-6_armel.deb",
+          "size": 144704,
+          "sha256": "b6dbc299d2ed267e93e17ed3108f767b3bbf2a00664802577c1f9329e4ee5dbc"
+        },
+        "libsv1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/libs/libsv/libsv1_1.2-1+b2_armel.deb",
+          "size": 8780,
+          "sha256": "3193d2f1daa9ad3d31125a3db2e310b49c89e72e8ccb6f49a022f8d5c900efc8"
+        },
+        "libtinfo6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libtinfo6_6.5+20250216-2_armel.deb",
+          "size": 331936,
+          "sha256": "a8196df15ce50db6bad576084e40bdba45b767ed2041bc75307acc61d86b2caa"
+        },
+        "libxxhash0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/x/xxhash/libxxhash0_0.8.3-2_armel.deb",
+          "size": 31032,
+          "sha256": "97c1acf5414660495c98d674ba94f1631d7c5ec0bf6f1b5d4cfce8f02fb4487d"
+        },
+        "lua-cjson": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua-cjson/lua-cjson_2.1.0+dfsg-2.2+b2_armel.deb",
+          "size": 19136,
+          "sha256": "b2a597d64e61b74443613b487fedc49b36006f0c1f3d7a1f6128465850e9b592"
+        },
+        "xmake": {
+          "suite": "trixie-backports",
+          "pool_path": "pool/main/x/xmake/xmake_3.0.5+ds-1~bpo13+1_armel.deb",
+          "size": 243128,
+          "sha256": "77bdba93b62a8daafb8189cdde54ca91edbab8a3603fbc9c46e13a2c4ac611d4"
+        }
+      }
+    },
+    "linux-armhf": {
+      "version": "3.0.5+ds-1~bpo13+1",
+      "architecture": "armhf",
+      "multiarch": "arm-linux-gnueabihf",
+      "loader": "ld-linux-armhf.so.3",
+      "elf_sha256": "c6d5b99e724fb67c2cf4c1d8dc2d184904aae7e9da11d738309db9ca136370b5",
+      "packages": {
+        "base-files": {
+          "suite": "trixie",
+          "pool_path": "pool/main/b/base-files/base-files_13.8+deb13u3_armhf.deb",
+          "size": 73220,
+          "sha256": "107ece7f54870c1ddc3d1aa568a8e2748d9504bd11ace632b2a6e096e62775c8"
+        },
+        "gcc-14-base": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/gcc-14-base_14.2.0-19_armhf.deb",
+          "size": 49392,
+          "sha256": "0f702fdd5e5471efda9fece892e09ce73e3447968083e1f8c341f8b66b1fb340"
+        },
+        "libc6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/glibc/libc6_2.41-12+deb13u1_armhf.deb",
+          "size": 2251520,
+          "sha256": "72e88cc59f686fa80c4b718ef2c5d36ea680f80c76770eb4bac25da99ac3ae2b"
+        },
+        "libgcc-s1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/g/gcc-14/libgcc-s1_14.2.0-19_armhf.deb",
+          "size": 37008,
+          "sha256": "25910c3a0bce3985e388de445244578b7922dc670c9bba1c8673779b89447873"
+        },
+        "liblua5.4-0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua5.4/liblua5.4-0_5.4.7-1+b2_armhf.deb",
+          "size": 122912,
+          "sha256": "1e21b2d89eabca43399002bae0ba42db6f01fa2d23e2a90f02f0805c8d79a5f4"
+        },
+        "liblz4-1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lz4/liblz4-1_1.10.0-4_armhf.deb",
+          "size": 52848,
+          "sha256": "31f23e8bef1bda2cc31a73cda616fba70b132fbe40e346b8df8145eb7f044262"
+        },
+        "libncurses6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libncurses6_6.5+20250216-2_armhf.deb",
+          "size": 82784,
+          "sha256": "8927d9062b6feff7a0dbaf3f91bcc2573754641f9050ff9d694da493846051d6"
+        },
+        "libreadline8t64": {
+          "suite": "trixie",
+          "pool_path": "pool/main/r/readline/libreadline8t64_8.2-6_armhf.deb",
+          "size": 146436,
+          "sha256": "36fc38fd7d2120f4ac4f40174a731fcef112a07d21f7b71a511031c2078c8396"
+        },
+        "libsv1": {
+          "suite": "trixie",
+          "pool_path": "pool/main/libs/libsv/libsv1_1.2-1+b2_armhf.deb",
+          "size": 8724,
+          "sha256": "b7f853794d49a9322cb35678bd438b51ee8a06ecf5241852005f67d6d17ef533"
+        },
+        "libtinfo6": {
+          "suite": "trixie",
+          "pool_path": "pool/main/n/ncurses/libtinfo6_6.5+20250216-2_armhf.deb",
+          "size": 333044,
+          "sha256": "d8965ad5782c6e1c69383dbedc722c561c662b0930586a26e937a23a19776e06"
+        },
+        "libxxhash0": {
+          "suite": "trixie",
+          "pool_path": "pool/main/x/xxhash/libxxhash0_0.8.3-2_armhf.deb",
+          "size": 31232,
+          "sha256": "19cc1c22879cb61474607c6dd2d9803b419ecfd8ccb5a808b2fb534b39fc65cc"
+        },
+        "lua-cjson": {
+          "suite": "trixie",
+          "pool_path": "pool/main/l/lua-cjson/lua-cjson_2.1.0+dfsg-2.2+b2_armhf.deb",
+          "size": 18232,
+          "sha256": "fd6a2961760b8fac1c17d5c3188ce3c3789a686cbf824ea76a8519b53d8f4fdb"
+        },
+        "xmake": {
+          "suite": "trixie-backports",
+          "pool_path": "pool/main/x/xmake/xmake_3.0.5+ds-1~bpo13+1_armhf.deb",
+          "size": 246860,
+          "sha256": "79411c702d1249e32dff2aa33f7fa9be164fb042f2a8127af0ea715aa4841fba"
+        }
+      }
+    }
+  },
+  "script_files": 1881
+}
