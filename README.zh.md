@@ -2,19 +2,22 @@
 
 [English](README.md)
 
-WROS SDK v2 把用户工程编译为在 uwvm2-ros 中运行的 Core Wasm。Linux x86-64 安装器按完整提交、语言和平台取得所选文件。[语言进度](document/zh/language-coverage.md) · [平台进度](platform/README.zh.md)
+WROS SDK v2 把用户工程编译为在 uwvm2-ros 中运行的 Core Wasm。安装器按固定的 SDK 提交、Linux 用户态 ABI、语言和平台选择所需文件。[语言进度](document/zh/language-coverage.md) · [平台进度](platform/README.zh.md)
 
 ## 从当前 main 安装
 
-在空工程目录执行。两级安装器使用同一个已发布的 SDK 提交。安装器按固定提交从官方源码构建 VM。五宿主 INT 和 AOT 验收待完成。
+在空工程目录准备 Python 3.11 或更高版本、Git 和 curl。两级安装器使用同一个 SDK 提交。`plan` 解析所选宿主的预建依赖，`install` 下载、校验并按 SDK 布局放置文件。缺少发行资产时，这两个命令都会报告缺件，安装目录只在全部文件就绪后发布。
 
 ```sh
 mkdir -p .tmp
 export TMPDIR="$PWD/.tmp" TMP="$PWD/.tmp" TEMP="$PWD/.tmp"
 revision=$(git ls-remote --exit-code https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git refs/heads/main | cut -f1)
 curl -fsSL --retry 3 "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$revision/install.py" -o install.py
+python3 -I -B install.py plan --commit "$revision" --platform generic --language c --prefix "$PWD/sdk"
 python3 -I -B install.py install --commit "$revision" --platform generic --language c --prefix "$PWD/sdk"
 ```
+
+五种 Linux ABI 的官方 VM 二进制正在等待发布。SDK 固定某一宿主的发行资产后，该宿主即可安装。需要从源码构建时，使用独立命令 `rebuild`，可先用 `plan --mode source` 查看重建输入。[宿主工具](document/zh/host-tools.md) · [源码重建说明](document/zh/install-xmake.md#从源码重建编译器)
 
 ## 二进制发行规则
 

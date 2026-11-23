@@ -10,6 +10,7 @@ import urllib.request
 def fetch_archive(url, sha256, cache, *, size=None):
     """Return the verified archive, reusing an earlier download with the same digest."""
     origins = ("https://static.rust-lang.org/dist/", "https://github.com/xmake-io/xmake/releases/download/",
+               "https://github.com/UlteSoft/uwvm2-ros/releases/download/",
                "https://go.dev/dl/", "https://github.com/tinygo-org/tinygo/releases/download/",
                "https://ziglang.org/download/", "https://nodejs.org/dist/", "https://repo.maven.apache.org/maven2/",
                "https://github.com/adoptium/temurin21-binaries/releases/download/", "https://snapshot.debian.org/archive/")

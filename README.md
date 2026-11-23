@@ -2,19 +2,22 @@
 
 [简体中文](README.zh.md)
 
-WROS SDK v2 builds Core WebAssembly guests for uwvm2-ros. The Linux x86-64 installer selects the language and platform at an immutable Git revision. [Language coverage](document/en/language-coverage.md) · [Platform coverage](platform/README.md)
+WROS SDK v2 builds Core WebAssembly guests for uwvm2-ros. The installer selects the Linux userspace ABI, language and platform at an immutable Git revision. [Language coverage](document/en/language-coverage.md) · [Platform coverage](platform/README.md)
 
 ## Install from the current main revision
 
-Start in an empty project directory. This command pins both installer stages to the same published SDK revision. The installer builds the VM from its pinned official source. Five-host INT and AOT qualification is pending.
+Start in an empty project directory with Python 3.11+, Git and curl. Both installer stages use the same SDK revision. `plan` resolves the prebuilt inputs for the selected host. `install` downloads, verifies and lays them out under the prefix. A missing release asset stops both commands before they publish a selection.
 
 ```sh
 mkdir -p .tmp
 export TMPDIR="$PWD/.tmp" TMP="$PWD/.tmp" TEMP="$PWD/.tmp"
 revision=$(git ls-remote --exit-code https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git refs/heads/main | cut -f1)
 curl -fsSL --retry 3 "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$revision/install.py" -o install.py
+python3 -I -B install.py plan --commit "$revision" --platform generic --language c --prefix "$PWD/sdk"
 python3 -I -B install.py install --commit "$revision" --platform generic --language c --prefix "$PWD/sdk"
 ```
+
+The official VM binaries are awaiting publication for the five Linux ABIs. Each host becomes installable when this SDK pins its published asset. To build from source, use the separate `rebuild` command. `plan --mode source` previews its inputs. [Host tools](document/en/host-tools.md) · [Source rebuild instructions](document/en/install-xmake.md#rebuild-a-compiler-from-source)
 
 ## Binary distribution
 

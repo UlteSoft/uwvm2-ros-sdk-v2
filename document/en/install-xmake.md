@@ -2,9 +2,7 @@
 
 [中文](../zh/install-xmake.md)
 
-The installer obtains its host tools from their pinned official projects. [Host tools](host-tools.md)
-
-Use Python 3.11 or later and Git on the build host. The native compiler packages target Linux x86-64. Install Xmake to build the example projects. To execute them, provide a local `uwvm2-ros` with the interpreter and LLVM engines enabled. The VM project documents its host prerequisites and the `xmake build uwvm2-ros` target. [Xmake installation](https://xmake.io/guide/quick-start.html) · [VM build instructions](https://github.com/UlteSoft/uwvm2-ros)
+Use Python 3.11 or later and Git. The current installer resolves prebuilt packages for the selected language and Linux userspace. It verifies and expands the compiler, sysroots and interfaces, then places Xmake and uwvm2-ros under the selected prefix. A host still awaiting a pinned VM release reports the missing asset at both `plan` and `install`. Earlier pinned examples below use the installer shipped at their respective revisions. [Current quick start](../../README.md#install-from-the-current-main-revision) · [Host tools](host-tools.md)
 
 ## Identify the Linux host ABI
 
@@ -89,22 +87,22 @@ The public include roots are `include/u2rosv2/universal/<language>` and `include
 
 Choose any other platform ID printed by `install.py list` to install its read-only guest decoder and an Xmake project at `examples/<platform>/<language>`. For example, `--platform agilex` reads the Scout battery management message, while `--platform fourier` reads the Aurora simulator's LCM feedback. The platform guide identifies the input boundary, representation, named fields and immutable upstream sources. The sample program uses constructed inputs and runs offline.
 
-Git object IDs bind the fetched installation files to the selected commit. The installer verifies each LFS payload's size and SHA-256. Each native program uses a single-member USTAR `.tar.xz` with separate compressed and executable hashes. The installer checks the member name, size, executable mode and ELF architecture, stages the selected tree privately, then publishes it under `<prefix>/<commit>/<platform>/<language>/<mode>`. A repeated installation checks the installed files. `selection.json` inside the selection records the installed paths, sizes, modes and hashes.
+Git object IDs bind the fetched installation files to the selected commit. The installer verifies each LFS payload's size and SHA-256. Each SDK-built native compiler archive uses a single-member USTAR `.tar.xz` with separate compressed and executable hashes. The installer checks the member name, size, executable mode and ELF architecture, stages the selected tree privately, then publishes it under `<prefix>/<commit>/<platform>/<language>/<mode>` on x86-64. Other Linux hosts add their ABI directory after the commit. A repeated installation checks the installed files. `selection.json` inside the selection records the installed paths, sizes, modes and hashes.
 
 ## Rebuild a compiler from source
 
-For C, C++ and WAT, `--mode source` retrieves the selected compiler's editable source and builds its executable. The script frontends use pinned compiler packages in both modes. Their source selections additionally include their development sources and fixtures. For WAT on Linux x86-64, the default source selection downloads the official Rust 1.98.0 compiler, Cargo and host standard library from the selected SDK commit, together with the locked Cargo workspace. The build verifies the archives and selected member hashes in `src/compilers/wrwat/bootstrap.json` before using them. The installer records the actual executable hash.
+Use the current root installer and pin the same SDK revision for a source rebuild. The separate `rebuild` action retrieves the selected compiler's editable source and builds its executable for C, C++ and WAT. Preview the operation with `plan --mode source`. The script frontends use pinned compiler packages in both modes. Their source selections additionally include their development sources and fixtures. For WAT on Linux x86-64, the default source selection downloads the official Rust 1.98.0 compiler, Cargo and host standard library from the selected SDK commit, together with the locked Cargo workspace. The build verifies the archives and selected member hashes in `src/compilers/wrwat/bootstrap.json` before using them. The installer records the actual executable hash.
 
 ```sh
-python3 install.py install --commit "$REV" --platform franka --language wat --mode source --prefix "$PWD/sdk"
+python3 install.py rebuild --commit "$REV" --platform franka --language wat --prefix "$PWD/sdk"
 ```
 
-The initial download needs Python 3.11+, Git, HTTPS access to GitHub, and trusted CA certificates. After download the native WAT build can run offline. Supply a GNU/Linux x86-64 host with a working `cc` linker driver in `/usr/bin:/bin`, glibc development startup objects and libraries, libgcc, zlib, and GNU `/usr/bin/strip`. The Rust compiler, its LLVM libraries, GNU-flavor LLD and Cargo come from the selected archives. For a later offline rebuild, run `python3 -I -B "$UWVM_ROS_SDK_ROOT/src/compilers/wrwat/rebuild.py" --output "$PWD/wrwat"` with a new output path. To use an existing matching official toolchain instead, pass `--rust-bin /path/to/rust/bin` at install or rebuild time. An installation with this override omits the three archives. [Official Rust 1.98.0 host distributions](https://static.rust-lang.org/dist/2026-08-20/channel-rust-1.98.0.toml)
+The initial download needs Python 3.11+, Git, HTTPS access to GitHub, and trusted CA certificates. After download the native WAT build can run offline. Supply a GNU/Linux x86-64 host with a working `cc` linker driver in `/usr/bin:/bin`, glibc development startup objects and libraries, libgcc, zlib, and GNU `/usr/bin/strip`. The Rust compiler, its LLVM libraries, GNU-flavor LLD and Cargo come from the selected archives. For a later offline rebuild, run `python3 -I -B "$UWVM_ROS_SDK_ROOT/src/compilers/wrwat/rebuild.py" --output "$PWD/wrwat"` with a new output path. To use an existing matching official toolchain instead, pass `--rust-bin /path/to/rust/bin` when rebuilding. This override skips the three archives. [Official Rust 1.98.0 host distributions](https://static.rust-lang.org/dist/2026-08-20/channel-rust-1.98.0.toml)
 
-For C/C++, provision CMake 3.26 or later, Ninja and a working native LLVM prefix with `bin/clang`, `bin/clang++` and `bin/ld.lld`. The installer builds the vendored native compiler, linker and archiver once, then builds the sixteen WASIp1 profiles from the selected revision. Use `--jobs` to set the C/C++ rebuild parallelism.
+For C/C++, provision CMake 3.26 or later, Ninja and a working native LLVM prefix with `bin/clang`, `bin/clang++` and `bin/ld.lld`. The rebuild compiles the vendored native compiler, linker and archiver once, then builds the sixteen WASIp1 profiles from the selected revision. Use `--jobs` to set the C/C++ rebuild parallelism.
 
 ```sh
-python3 install.py install --commit "$REV" --platform generic --language cpp --mode source \
+python3 install.py rebuild --commit "$REV" --platform generic --language cpp \
     --bootstrap /path/to/host-llvm --jobs 4 --prefix "$PWD/sdk"
 ```
 

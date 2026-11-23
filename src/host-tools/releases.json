@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "tools": {
+    "xmake": {
+      "commit": "f20295f255d967af9d91de6f1ed5eeadf17d30a7",
+      "hosts": {
+        "linux-x86_64": {
+          "tag": "v3.0.5",
+          "asset": "xmake-bundle-v3.0.5.linux.x86_64",
+          "format": "elf",
+          "bytes": 2823008,
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+        }
+      }
+    },
+    "uwvm2-ros": {
+      "commit": "20e1c2d245832eaaba6c92b0ac419efaa62f0505",
+      "hosts": {}
+    }
+  }
+}

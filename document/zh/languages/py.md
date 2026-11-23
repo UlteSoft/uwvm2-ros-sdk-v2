@@ -68,6 +68,6 @@ Unitree 平台包含 `unitree_api.msg`、`unitree_go.msg` 和 `unitree_hg.msg` �
 
 ## 从源码重建
 
-对同一提交和平台使用 `install.py install --mode source --jobs 2`。安装器读取可编辑的 3.14.8 源码，先构建同版本的宿主冻结工具，再用随 SDK 分发的 WasmMTE C 编译器和 WASI sysroot 生成目标静态库、头文件和共享解释器。宿主需要 Linux C 工具链、libc 开发头文件、GNU Make 和 CPython configure 所需的常用工具。源码锁记录了分配器 freelist 和 WASI 时钟的移植改动以及上游文件摘要。
+使用当前 SDK 时，请固定同一版根安装器和 SDK 提交，以 `install.py rebuild --jobs 2` 重建所选平台的 Python 运行时。安装器读取可编辑的 3.14.8 源码，先构建同版本的宿主冻结工具，再用随 SDK 分发的 WasmMTE C 编译器和 WASI sysroot 生成目标静态库、头文件和共享解释器。宿主需要 Linux C 工具链、libc 开发头文件、GNU Make 和 CPython configure 所需的常用工具。源码锁记录了分配器 freelist 和 WASI 时钟的移植改动以及上游文件摘要。
 
 二进制安装提供 `lib/wasm32-wasip1/cpython3.14/libpython3.14.a`。同目录收据保存旧目标库的原始编译器、闭包和内容摘要。共享命令另有独立收据，记录当前 SDK 的链接编译器、实际导入类型与模块摘要。[CPython 源码清单](../../../src/runtimes/cpython/upstream.json)

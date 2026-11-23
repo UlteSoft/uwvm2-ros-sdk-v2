@@ -2,9 +2,7 @@
 
 [English](../en/install-xmake.md)
 
-安装器从固定的官方项目获取宿主工具。[宿主工具](host-tools.md)
-
-构建主机需要 Python 3.11 或更高版本和 Git。原生编译器二进制面向 Linux x86-64。构建示例需要 Xmake，运行示例需要带解释器和 LLVM 引擎的 `uwvm2-ros`。VM 仓库列出了宿主依赖，构建命令为 `xmake build uwvm2-ros`。[Xmake 安装指南](https://xmake.io/guide/quick-start.html) · [VM 构建说明](https://github.com/UlteSoft/uwvm2-ros)
+宿主需要 Python 3.11 或更高版本和 Git。当前安装器按语言和 Linux 用户态选择预建包，校验并展开编译工具、sysroot 及开发接口，将 Xmake 和 uwvm2-ros 放在所选前缀下。若宿主的 VM 发行资产仍待登记，`plan` 和 `install` 都会报告缺件。下文固定到较早提交的例子使用各自版本当时的安装器。[当前快速入门](../../README.zh.md#从当前-main-安装) · [宿主工具](host-tools.md)
 
 ## 确认 Linux 宿主 ABI
 
@@ -89,22 +87,22 @@ python3 install.py install --commit "$REV" --platform unitree --language cpp --p
 
 使用 `install.py list` 中的其他平台 ID，即可安装对应的只读 guest 解码库和 `examples/<platform>/<language>` 用户工程。例如，`--platform agilex` 读取 Scout 电池管理消息，`--platform fourier` 读取 Aurora 仿真器的 LCM 反馈。各平台手册标明输入范围、编码方式、已提供的字段及固定版本的上游定义。示例在离线环境中使用按定义构造的数据。
 
-安装器校验 Git 对象以确认每个文件来自所选提交，并按长度和 SHA-256 核验 LFS 内容。每个原生程序采用单成员 USTAR `.tar.xz`，压缩包和解压后的 ELF 各有独立摘要。解包会核对成员名、权限、长度和 ELF 架构。所有所选文件完成后才发布到 `<prefix>/<commit>/<platform>/<language>/<mode>`。重复安装会检查现有文件。安装目录中的 `selection.json` 保留路径、长度、权限和 SHA-256。
+安装器校验 Git 对象以确认每个文件来自所选提交，并按长度和 SHA-256 核验 LFS 内容。SDK 构建的原生编译工具包采用单成员 USTAR `.tar.xz`，压缩包和解压后的 ELF 各有独立摘要。解包会核对成员名、权限、长度和 ELF 架构。所有所选文件完成后才发布到所选目录。x86-64 使用 `<prefix>/<commit>/<platform>/<language>/<mode>`，其他 Linux 宿主在提交号后增加 ABI 目录。重复安装会检查现有文件。安装目录中的 `selection.json` 保留路径、长度、权限和 SHA-256。
 
 ## 从源码重建编译器
 
-C、C++ 和 WAT 的 `--mode source` 获取所选编译器的可编辑源码，并构建其可执行程序。脚本语言的两种安装模式均使用固定版本的编译器或解释器，源码安装额外提供开发源码和验证材料。Linux x86-64 上的 WAT 源码安装默认从所选 SDK 提交下载 Rust 1.98.0 官方编译器、Cargo、宿主标准库及锁定的 Cargo 工程。构建前按照 `src/compilers/wrwat/bootstrap.json` 逐一核验压缩包及所选成员的摘要。安装器记录本地生成的可执行文件摘要。
+使用当前根安装器并固定同一 SDK 提交。独立命令 `rebuild` 可重建 C、C++ 和 WAT，`plan --mode source` 可预览重建输入。重建时获取所选编译器的可编辑源码，并构建其可执行程序。脚本语言的两种安装模式均使用固定版本的编译器或解释器，源码安装额外提供开发源码和验证材料。Linux x86-64 上的 WAT 源码安装默认从所选 SDK 提交下载 Rust 1.98.0 官方编译器、Cargo、宿主标准库及锁定的 Cargo 工程。构建前按照 `src/compilers/wrwat/bootstrap.json` 逐一核验压缩包及所选成员的摘要。安装器记录本地生成的可执行文件摘要。
 
 ```sh
-python3 install.py install --commit "$REV" --platform franka --language wat --mode source --prefix "$PWD/sdk"
+python3 install.py rebuild --commit "$REV" --platform franka --language wat --prefix "$PWD/sdk"
 ```
 
-首次下载需要 Python 3.11 或更高版本、Git、可访问 GitHub 的 HTTPS 连接和可信 CA 证书。下载完成后即可断网构建。宿主需要 GNU/Linux x86-64、位于 `/usr/bin:/bin` 的可用 `cc` 链接驱动、glibc 的开发库及启动文件、libgcc、zlib 和 GNU `/usr/bin/strip`。Rust 编译器及配套 LLVM 库、GNU 风格 LLD 和 Cargo 均随选定压缩包提供。日后离线重建时，使用新输出路径执行 `python3 -I -B "$UWVM_ROS_SDK_ROOT/src/compilers/wrwat/rebuild.py" --output "$PWD/wrwat"`。已有匹配的官方工具链时，可以在安装或重建时指定 `--rust-bin /path/to/rust/bin`。使用该参数安装时将跳过三个引导包。[Rust 1.98.0 官方宿主发行清单](https://static.rust-lang.org/dist/2026-08-20/channel-rust-1.98.0.toml)
+首次下载需要 Python 3.11 或更高版本、Git、可访问 GitHub 的 HTTPS 连接和可信 CA 证书。下载完成后即可断网构建。宿主需要 GNU/Linux x86-64、位于 `/usr/bin:/bin` 的可用 `cc` 链接驱动、glibc 的开发库及启动文件、libgcc、zlib 和 GNU `/usr/bin/strip`。Rust 编译器及配套 LLVM 库、GNU 风格 LLD 和 Cargo 均随选定压缩包提供。日后离线重建时，使用新输出路径执行 `python3 -I -B "$UWVM_ROS_SDK_ROOT/src/compilers/wrwat/rebuild.py" --output "$PWD/wrwat"`。已有匹配的官方工具链时，可以在重建时指定 `--rust-bin /path/to/rust/bin`。使用该参数安装时将跳过三个引导包。[Rust 1.98.0 官方宿主发行清单](https://static.rust-lang.org/dist/2026-08-20/channel-rust-1.98.0.toml)
 
-C/C++ 源码构建需要 CMake 3.26 或更高版本、Ninja，以及包含 `bin/clang`、`bin/clang++`、`bin/ld.lld` 的宿主 LLVM。安装器从仓内源码构建一次原生编译器、链接器和归档工具，再分别构建 16 档 WASIp1 sysroot。`--jobs` 控制 C/C++ 重建的并行度。
+C/C++ 源码构建需要 CMake 3.26 或更高版本、Ninja，以及包含 `bin/clang`、`bin/clang++`、`bin/ld.lld` 的宿主 LLVM。重建命令从仓内源码构建一次原生编译器、链接器和归档工具，再分别构建 16 档 WASIp1 sysroot。`--jobs` 控制 C/C++ 重建的并行度。
 
 ```sh
-python3 install.py install --commit "$REV" --platform generic --language cpp --mode source \
+python3 install.py rebuild --commit "$REV" --platform generic --language cpp \
     --bootstrap /path/to/host-llvm --jobs 4 --prefix "$PWD/sdk"
 ```
 

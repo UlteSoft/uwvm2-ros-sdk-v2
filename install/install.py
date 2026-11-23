@@ -9,6 +9,7 @@ import lzma
 import os
 from pathlib import Path, PurePosixPath
 import re
+import runpy
 import shutil
 import subprocess
 import sys
@@ -41,6 +42,10 @@ unitree universal_robots wasi yaskawa""".split())
 COMMANDS = {"c": "wrc", "cpp": "wrcc", "objc": "wroc", "objcpp": "wrocxx", "wat": "wrwat", "rust": "wrrs", "go": "wrgo", "tinygo": "wrtg", "java": "wrjava"}
 GO_COMMANDS = ("go", "tinygo")
 GO_PLATFORMS = ("generic", "abb", "franka", "unitree")
+HOST_TOOLS = {"xmake": "https://github.com/xmake-io/xmake", "uwvm2-ros": "https://github.com/UlteSoft/uwvm2-ros"}
+HOST_RELEASES = "src/host-tools/releases.json"
+DEBIAN_XMAKE = "src/host-tools/xmake/debian-packages.json"
+DEBIAN_INSTALLER = "src/host-tools/xmake/debian.py"
 ABI = "src/abi/contract.json"
 ABI_INSTALLED = "share/abi/ros.json"
 CHUNK = 1024 * 1024
@@ -604,6 +609,78 @@ def require_host(path, expected):
         raise ValueError(f"{path} is {actual}; the selected host is {expected}")
 
 
+def github_tool_release(tool, host, repository, asset):
+    """Resolve a pinned release asset without consulting a mutable release index."""
+    for key in ("tag", "asset"):
+        if not re.fullmatch(r"[a-zA-Z0-9_+-][a-zA-Z0-9_.+-]*", asset[key]):
+            raise ValueError(f"invalid GitHub release {key} for {tool}/{host}")
+    url = f"{repository}/releases/download/{asset['tag']}/{asset['asset']}"
+    if asset["tag"].lower() == "latest" or asset["format"] not in ("elf", "tar.xz"):
+        raise ValueError("expected a pinned ELF or tar.xz release asset: " + url)
+    checks = [("bytes", "sha256")]
+    fields = {"tag", "asset", "format", "bytes", "sha256", "required_hwcap"}
+    if asset["format"] == "tar.xz":
+        if asset.get("member") != tool:
+            raise ValueError("unexpected host tool archive member: " + url)
+        checks.append(("compressed_bytes", "compressed_sha256"))
+        fields.update(("member", "compressed_bytes", "compressed_sha256"))
+    if set(asset) - fields:
+        raise ValueError("unexpected host release metadata: " + url)
+    for size, sha in checks:
+        if type(asset[size]) is not int or not 0 < asset[size] <= MAX_LFS or not HEX.fullmatch(asset[sha]):
+            raise ValueError("invalid host tool release size or digest: " + url)
+    require_cpu(asset, host)
+    return dict(asset, provider="github-release", url=url, path="bin/" + tool)
+
+
+def official_host_plan(tree, host, mode):
+    releases = {}
+    if mode != "source":
+        if not tree.contains(HOST_RELEASES):
+            raise ValueError(f"no official host binary release manifest for {host} at SDK commit {tree.commit}")
+        lock = tree.json(HOST_RELEASES)
+        if lock["schema"] != 1:
+            raise ValueError("unsupported official host tool release manifest")
+        releases = lock["tools"]
+    result, missing = {}, []
+    for tool, repository in HOST_TOOLS.items():
+        origin = tree.json(f"src/host-tools/{tool}/UPSTREAM.json")
+        commit = origin["commit"]
+        if origin["repository"] != repository or not re.fullmatch("[0-9a-f]{40}", commit):
+            raise ValueError("invalid upstream host tool origin: " + tool)
+        record = dict(host=host, repository=repository, commit=commit, installed_as="bin/" + tool)
+        if tool == "uwvm2-ros":
+            if not re.fullmatch("[0-9a-f]{40}", origin["tree"]):
+                raise ValueError("invalid upstream VM tree")
+            record["tree"] = origin["tree"]
+        release = releases.get(tool, {})
+        asset = release.get("hosts", {}).get(host) if release.get("commit") == commit else None
+        if mode == "source":
+            record["provider"] = "source"
+        elif asset is not None:
+            record.update(github_tool_release(tool, host, repository, asset))
+        elif tool == "xmake" and host != "linux-x86_64":
+            debian = tree.json(DEBIAN_XMAKE) if tree.contains(DEBIAN_XMAKE) else {}
+            if debian and debian.get("schema") != 1:
+                raise ValueError("unsupported Debian Xmake package manifest")
+            package = debian.get("hosts", {}).get(host)
+            if not package:
+                missing.append(f"Xmake (Debian) for {host}")
+                continue
+            if not package.get("version") or not HEX.fullmatch(package["elf_sha256"]):
+                raise ValueError("incomplete Debian Xmake release for " + host)
+            # Debian's package version and signed archive identify this build.
+            record = dict(provider="debian", host=host, package=package, sha256=package["elf_sha256"],
+                          installed_as="bin/xmake", path="libexec/xmake/bin/xmake")
+        else:
+            missing.append(f"{tool} for {host} at upstream commit {commit}")
+            continue
+        result[tool] = record
+    if missing:
+        raise ValueError("no pinned official prebuilt release in this SDK revision: " + ", ".join(missing))
+    return result
+
+
 def extra_selection_paths(tree, manifest, languages):
     selections = manifest["selections"]
     paths = {}
@@ -653,28 +730,21 @@ def selection(args, tree):
     language = ALIASES.get(args.language, args.language)
     if language not in LANGUAGES or args.platform not in PLATFORMS:
         raise ValueError("unknown language or platform; use 'list' for available selections")
-    mode = args.mode or "binary"
+    if args.action == "install" and args.mode == "source":
+        raise ValueError("install only installs prebuilt inputs; use the rebuild action for a source build")
+    if args.action == "rebuild" and args.mode not in (None, "source"):
+        raise ValueError("rebuild requires source mode")
+    mode = args.mode or ("source" if args.action == "rebuild" else "binary")
     if language in ("objc", "objcpp"):
         if args.platform != "generic":
             raise ValueError("this revision packages the universal GNUstep interfaces for generic")
-        entry = host_manifest(tree, language)["selections"].get(language)
-        if not entry:
-            raise ValueError("the selected host has no C-family toolchain")
-        if not entry["artifacts"] and mode == "binary":
-            if args.mode == "binary":
-                raise ValueError("this host has no published GNUstep binary package; select --mode source")
-            mode = "source"
     if language == "rust":
         if args.no_mte:
-            if args.mode not in (None, "bindings"):
+            if args.mode not in (None, "bindings") or args.action == "rebuild":
                 raise ValueError("--no-mte at install time selects the upstream Rust bindings mode")
             mode = "bindings"
         elif mode == "bindings":
             raise ValueError("select --mode bindings --no-mte for the upstream Rust bindings")
-        elif mode == "binary" and not host_manifest(tree, language)["selections"].get("rust", {}).get("artifacts"):
-            if args.mode == "binary":
-                raise ValueError("this revision has no published wrrs binary; select --mode source")
-            mode = "source"
     elif mode == "bindings" or args.no_mte:
         raise ValueError("the --mode bindings and --no-mte install options are specific to upstream Rust")
     if language == "java" and args.platform not in JAVA_PLATFORMS:
@@ -684,8 +754,6 @@ def selection(args, tree):
     if language in GO_COMMANDS:
         if args.platform not in GO_PLATFORMS:
             raise ValueError("this revision has no " + language + " bindings for platform " + args.platform)
-        if mode == "binary" and not ((entry := host_manifest(tree, language)["selections"].get(language)) and go_release(tree, language, entry)):
-            raise ValueError("this revision has no published " + COMMANDS[language] + " native package; select --mode source")
     if args.bootstrap and (mode != "source" or language not in ("c", "cpp", "objc", "objcpp", "tinygo")):
         raise ValueError("--bootstrap applies to C/C++ and TinyGo source builds")
     if args.jobs and current_host() not in HOSTS and not (
@@ -693,6 +761,8 @@ def selection(args, tree):
         raise ValueError("--jobs requires a native host-tool or language build")
     if args.rust_bin and (mode != "source" or language not in ("wat", "rust")):
         raise ValueError("--rust-bin applies to a native Rust or wrwat source build")
+    if mode == "source" and args.prebuilt_only:
+        raise ValueError("the bootstrap requires prebuilt inputs")
     return language, mode
 
 
@@ -737,6 +807,31 @@ def native_packages(manifest, artifacts, command=None, prefix=""):
     return packages
 
 
+def cc_release_inputs(tree, entry, *, private):
+    """Select the published resource archive, receipt, CRT and libraries for each C sysroot."""
+    catalog_path, = (src for src, dest in entry["support_map"].items()
+                     if dest == "share/toolchains/portable/distribution.json")
+    catalog = tree.json(catalog_path)
+    inputs = []
+    for key in (["wasm32-wasip1"] if private else catalog["libraries"]):
+        library = catalog["libraries"][key]
+        triple, _, flavor = key.partition("/")
+        profile = safe_path(triple + "/" + (flavor or "core3.0-eh-mte"))
+        directory = "share/toolchains/portable/sysroots/" + profile
+        receipt = directory + "/sysroots.json"
+        inputs.extend((receipt, directory + "/" + safe_path(library["archive"])))
+        target, = tree.json(receipt)["targets"]
+        if target["triple"] != triple:
+            raise ValueError("unexpected target triple in " + receipt)
+        guest_lib = PurePosixPath(target["sysroot"]) / "lib" / triple
+        for name in target["files"]:
+            member = PurePosixPath(name)
+            if (member.parent == guest_lib and member.suffix in (".o", ".a")
+                    or member.name == "libclang_rt.builtins.a"):
+                inputs.append(f"lib/{profile}/{member.name}")
+    return inputs
+
+
 def package_plan(tree, platform_name, language, mode, *, tinygo_llvm=None, rust_bin=None):
     platform_manifest = f"platform/{platform_name}/platform.json"
     roots = ["LICENSE", "src/xmake", ABI, "src/examples/" + language, platform_manifest,
@@ -754,17 +849,27 @@ def package_plan(tree, platform_name, language, mode, *, tinygo_llvm=None, rust_
     if platform_name == "unitree":
         roots.append("platform/unitree/go2-low-state.contract")
     packages, source_roots = {}, []
+    cc_release = None
     if mode != "bindings":
         manifest = host_manifest(tree, language)
         if language not in manifest["selections"]:
-            raise ValueError(f"this release has no {language} selection for {manifest['host']}")
+            raise ValueError(f"this SDK revision has no {language} {mode} selection for {manifest['host']}")
         entry = manifest["selections"][language]
         if language in GO_COMMANDS and mode == "binary":
             published = go_release(tree, language, entry)
+            if not published:
+                raise ValueError(f"no published {COMMANDS[language]} native package for {manifest['host']} at this SDK revision")
             manifest = dict(manifest, packages={**manifest["packages"], **published})
             entry = dict(entry, artifacts=entry["native_outputs"])
+        if mode == "binary" and language in COMMANDS and not entry.get("artifacts"):
+            raise ValueError(f"no published {COMMANDS[language]} binary for {manifest['host']} at this SDK revision")
+        if mode == "binary" and language == "java":
+            raise ValueError(f"Java for {manifest['host']} has a wrjava launcher, but the WROS TeaVM driver and "
+                             "runtime classes have no published binary package at this SDK revision; use rebuild")
         binary_only = set(entry.get("binary_support_roots", [])) if mode == "source" else set()
         roots.extend(root for root in entry["support_roots"] if root not in binary_only)
+        if mode == "binary" and language in ("c", "cpp", "objc", "objcpp"):
+            cc_release = entry
         for origin, target in entry.get("support_map", {}).items():
             safe_path(origin)
             safe_path(target)
@@ -783,6 +888,7 @@ def package_plan(tree, platform_name, language, mode, *, tinygo_llvm=None, rust_
             if entry["native_backend"] != "c" or language not in ("js", "typescript", "py", "java"):
                 raise ValueError("unexpected native script backend")
             backend = manifest["selections"]["c"]
+            cc_release = backend
             backend_dir = {"py": PY_BACKEND, "java": JAVA_BACKEND}.get(language, C_BACKEND)
             packages.update(native_packages(manifest, backend["artifacts"], "wrc", backend_dir + "/"))
             for root in [*backend["support_roots"], *binding_roots("generic", "c")]:
@@ -799,10 +905,22 @@ def package_plan(tree, platform_name, language, mode, *, tinygo_llvm=None, rust_
                 roots.append(root)
                 mappings[root] = JS_BACKEND + "/" + root
         roots.extend(packages)
+    dependencies = {}
     if current_host() in HOSTS:
-        roots.extend(("src/host-tools/install_official.py", "src/host-tools/xmake/UPSTREAM.json",
+        dependencies = official_host_plan(tree, current_host(), mode)
+        roots.extend(("src/host-tools/xmake/UPSTREAM.json",
                       "src/host-tools/uwvm2-ros/UPSTREAM.json", "src/compilers/official_dist.py", "install/install.py",
                       "document/en/host-tools.md", "document/zh/host-tools.md"))
+        if mode == "source":
+            roots.append("src/host-tools/install_official.py")
+        else:
+            roots.append(HOST_RELEASES)
+            if dependencies["xmake"]["provider"] == "debian":
+                roots.extend((DEBIAN_XMAKE, DEBIAN_INSTALLER))
+    if cc_release is not None:
+        resources = "share/toolchains/portable/sysroots"
+        roots = [root for root in roots if root != resources and not root.startswith(resources + "/")]
+        roots.extend(cc_release_inputs(tree, cc_release, private=language in ("js", "typescript", "py", "java")))
     files = tree.files(roots)
     if language in ("js", "typescript", "py", "java"):
         # The private C backend prepares only wasm32-wasip1/core3.0-eh-mte.
@@ -817,7 +935,7 @@ def package_plan(tree, platform_name, language, mode, *, tinygo_llvm=None, rust_
         script = PY_ENTRY if language == "py" else SCRIPT_ENTRY
         if mappings.get(script) != command or files[script][1] != 0o755:
             raise ValueError("release is missing its executable script launcher: " + command)
-    return files, packages, mappings, source_roots
+    return files, packages, mappings, source_roots, dependencies
 
 
 def unpack_executable(archive, metadata, output, *, host=None):
@@ -923,7 +1041,7 @@ def source_build(directory, scratch, language, args):
             os.replace(replacement, lock)
 
 
-def check_installed(directory, expected):
+def check_installed(directory, expected, host_tools):
     receipt = json.loads((directory / "selection.json").read_text())
     if any(receipt.get(key) != value for key, value in expected.items()):
         raise ValueError("selection directory belongs to a different installation: " + str(directory))
@@ -931,11 +1049,49 @@ def check_installed(directory, expected):
         target = directory / safe_path(name)
         if not manifest_file(target, item["bytes"], item["sha256"]) or target.stat().st_mode & 0o777 != item["mode"]:
             raise ValueError("installed file has changed: " + str(target))
+    if expected["mode"] != "source":
+        for tool in host_tools.values():
+            check_prebuilt_tool(directory, tool)
     return receipt
 
 
+def check_prebuilt_tool(directory, tool):
+    program = directory / tool["path"]
+    if (not program.is_file() or program.is_symlink() or not os.access(program, os.X_OK)
+            or "bytes" in tool and program.stat().st_size != tool["bytes"]
+            or digest(program) != tool["sha256"]):
+        raise ValueError("installed host tool differs from its pinned prebuilt release: " + str(program))
+    require_host(program, tool["host"])
+
+
+def install_prebuilt_tools(stage, work, cache, dependencies):
+    fetch = runpy.run_path(str(stage / "src/compilers/official_dist.py"))["fetch_archive"]
+    receipts = {}
+    for name, tool in dependencies.items():
+        if tool["provider"] == "debian":
+            install_deb = runpy.run_path(str(stage / DEBIAN_INSTALLER))["install"]
+            saved = install_deb(tool["host"], stage, work, cache)
+            if saved["path"] != tool["path"] or saved["sha256"] != tool["sha256"]:
+                raise ValueError("Debian Xmake differs from its locked ELF")
+            receipts[name] = dict(saved, provider="debian", installed_as=tool["installed_as"])
+        else:
+            program = stage / tool["path"]
+            program.parent.mkdir(parents=True, exist_ok=True)
+            if tool["format"] == "tar.xz":
+                archive = fetch(tool["url"], tool["compressed_sha256"], cache, size=tool["compressed_bytes"])
+                unpack_executable(archive, tool, program, host=tool["host"])
+            else:
+                downloaded = fetch(tool["url"], tool["sha256"], cache, size=tool["bytes"])
+                shutil.copyfile(downloaded, program)
+                program.chmod(0o755)
+            receipts[name] = tool
+        check_prebuilt_tool(stage, tool)
+    dest = stage / "share/host-tools"
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / "origins.json").write_text(json.dumps(receipts, indent=2) + "\n")
+
+
 def install_official_node(stage, cache, host):
-    import runpy
     fetch = runpy.run_path(str(stage / "src/compilers/official_dist.py"))["fetch_archive"]
     origin = json.loads((stage / "src/compilers/node/UPSTREAM.json").read_bytes())
     package = fetch(origin["distribution"] + origin["host_archive"], origin["host_archive_sha256"], cache)
@@ -957,7 +1113,7 @@ def install_official_node(stage, cache, host):
 
 def install(tree, args):
     language, mode = selection(args, tree)
-    selected, packages, mappings, source_roots = package_plan(tree, args.platform, language, mode,
+    selected, packages, mappings, source_roots, dependencies = package_plan(tree, args.platform, language, mode,
         tinygo_llvm=args.bootstrap or os.getenv("WROS_LLVM_CONFIG"), rust_bin=args.rust_bin)
     host = current_host()
     identity = dict(schema=1, commit=tree.commit, host=host, platform=args.platform, language=language, mode=mode)
@@ -972,15 +1128,9 @@ def install(tree, args):
         if language in SCRIPT_COMMANDS:
             script = PY_ENTRY if language == "py" else SCRIPT_ENTRY
             executables[script] = [mappings[script]]
-        dependencies = {}
-        if host in HOSTS:
-            for name in ("xmake", "uwvm2-ros"):
-                origin = tree.json(f"src/host-tools/{name}/UPSTREAM.json")
-                dependencies[name] = {"repository": origin["repository"], "commit": origin["commit"],
-                                      "installed_as": "bin/" + name}
         return dict(**result, files=sorted(selected), executables=executables, official_host_tools=dependencies)
     if destination.exists():
-        receipt = check_installed(destination, identity)
+        receipt = check_installed(destination, identity, dependencies)
         if "python_shared" in receipt:
             result["python_shared"] = receipt["python_shared"]
         return result
@@ -1019,7 +1169,7 @@ def install(tree, args):
                 os.link(first, target)
         if mode != "bindings" and language in ("as", "typescript"):
             install_official_node(stage, cache, host)
-        if mode == "source" and language in COMMANDS and language != "java":
+        if args.action == "rebuild" and language in COMMANDS and language != "java":
             source_build(stage, work, language, args)
         if mode == "binary" and language in GO_COMMANDS:
             subprocess.run(go_install_command(stage, work, language, mode, args), check=True, stdout=sys.stderr,
@@ -1032,12 +1182,12 @@ def install(tree, args):
             subprocess.run([sys.executable, "-I", "-B", backend / "install/portable_cc.py",
                             "--language", "c", "--sdk", backend, "--target", "wasm32-wasip1"],
                            check=True, stdout=sys.stderr)
-        if language == "java":
+        if args.action == "rebuild" and language == "java":
             subprocess.run([sys.executable, "-I", "-B", stage / "src/compilers/jvm/prepare.py",
                             "--sdk", stage, "--work", work, "--download-cache", cache,
                             "--mode", mode, "--platform", args.platform, "--host", host],
                            env=dict(os.environ, TMPDIR=str(work)), check=True, stdout=sys.stderr)
-        if language == "py" and mode == "source":
+        if args.action == "rebuild" and language == "py":
             subprocess.run([sys.executable, "-I", "-B", stage / "src/runtimes/cpython/build_runtime.py",
                             "--sdk", stage, "--work", work, "--from-source", "--jobs", str(args.jobs or 2)],
                            env=dict(os.environ, TMPDIR=str(work)), check=True, stdout=sys.stderr)
@@ -1045,10 +1195,13 @@ def install(tree, args):
             # Fully validate and expand the guest sysroot before publishing a read-only installation.
             subprocess.run([sys.executable, "-I", "-B", stage / "install/portable_cc.py",
                             "--language", "c" if language == "c" else "cpp", "--sdk", stage], check=True, stdout=sys.stderr)
-        if host in HOSTS:
+        if dependencies and args.action == "rebuild":
             subprocess.run([sys.executable, "-I", "-B", stage / "src/host-tools/install_official.py",
-                            "--host", host, "--cache", cache.parent, "--work", work, "--jobs", str(args.jobs or 2)],
+                            "--mode", "source", "--host", host, "--cache", cache.parent, "--work", work,
+                            "--jobs", str(args.jobs or 2)],
                            check=True, stdout=sys.stderr)
+        elif dependencies:
+            install_prebuilt_tools(stage, work, cache, dependencies)
         inventory = {}
         hashes = {}
         for item in sorted(stage.rglob("*")):
@@ -1074,7 +1227,7 @@ def install(tree, args):
         except OSError:
             if not destination.is_dir():
                 raise
-            installed = check_installed(destination, identity)
+            installed = check_installed(destination, identity, dependencies)
             if "python_shared" in installed:
                 result["python_shared"] = installed["python_shared"]
     return result
@@ -1085,19 +1238,22 @@ def main():
     parser.add_argument("repository", type=Path)
     parser.add_argument("commit")
     parser.add_argument("prefix", type=Path)
-    parser.add_argument("action", choices=("list", "plan", "install"))
+    parser.add_argument("action", choices=("list", "plan", "install", "rebuild"))
     parser.add_argument("--language")
     parser.add_argument("--platform", required=True)
-    parser.add_argument("--mode", choices=("binary", "source", "bindings"))
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--mode", choices=("binary", "source", "bindings"))
+    modes.add_argument("--source", dest="mode", action="store_const", const="source", help="alias for --mode source")
+    parser.add_argument("--prebuilt-only", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-mte", action="store_true")
     parser.add_argument("--bootstrap", type=Path)
     parser.add_argument("--rust-bin", type=Path)
-    parser.add_argument("--jobs", type=int, metavar="N", help="parallel jobs for building native host tools (including the VM) and language components")
+    parser.add_argument("--jobs", type=int, metavar="N", help="parallel jobs for source rebuilds")
     args = parser.parse_args()
     if args.jobs is not None and args.jobs < 1:
         parser.error("--jobs must be positive")
     if args.jobs is not None and args.action == "list":
-        parser.error("--jobs applies to install and plan")
+        parser.error("--jobs applies to rebuild or a selection")
     if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
         parser.error("expected an immutable Git commit")
     if args.action == "list":
@@ -1118,7 +1274,8 @@ def main():
             extra = extra_selection_paths(tree, catalog, {"objc", "objcpp", "java"})
             result["host_selections"] = sorted(catalog["selections"].keys() | extra.keys())
             if "java" in result["host_selections"]:
-                result["java"] = {"command": "wrjava", "platforms": JAVA_PLATFORMS, "modes": ["binary", "source"],
+                result["java"] = {"command": "wrjava", "platforms": JAVA_PLATFORMS, "modes": ["source"],
+                                  "binary_unavailable": "WROS TeaVM driver and runtime classes are not published",
                                   "target": "wasm32-wasip1/core3.0-eh-mte"}
             result["go_modes"] = {lang: ["source"] + (["binary"] if go_release(tree, lang, catalog["selections"][lang]) else [])
                                   for lang in GO_COMMANDS if lang in catalog["selections"]}

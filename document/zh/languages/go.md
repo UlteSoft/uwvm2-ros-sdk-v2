@@ -1,6 +1,6 @@
 # 标准 Go
 
-选择 `--platform unitree --language go --mode source` 安装原生命令 `wrgo`。它使用 Go 1.24.2 的模块加载器、编译器、汇编器、链接器和标准库。源码模式用固定的 Linux x86-64 Go 引导包重建编译器、汇编器、链接器和 SDK 命令。下方固定的公开候选默认使用已验证的四个原生二进制包。旧项目的寄存器标量表达式生产器只支持 Go 语法子集，其测试记录属于旧实现。
+选择 `--platform unitree --language go` 安装原生命令 `wrgo`。它使用 Go 1.24.2 的模块加载器、编译器、汇编器、链接器和标准库。源码模式用固定的 Linux x86-64 Go 引导包重建编译器、汇编器、链接器和 SDK 命令。下方固定的公开候选默认使用已验证的四个原生二进制包。旧项目的寄存器标量表达式生产器只支持 Go 语法子集，其测试记录属于旧实现。
 
 `wrgo --print-target` 列出配置。默认启用 Core 3.0、WasmMTE 和 EH，使用 wasm32 线性内存并关闭 Wasm 线程。Go 1.24.2 的 wasm 后端使用 64 位 Go int、指针和 uintptr，指令寻址宽度为 32 位。ROS 导入单独按 VM 注册的 i32、i64 签名传参。`--go-word-bits 64` 可检查 Go 数据模型。`--memory64` 和 `--no-memory64` 选择 VM 的特性开关，生成的线性内存仍为 wasm32。标准 Go 的 32 位字长、wasm64 ABI、Wasm 线程和 MVP 仍需后端移植。
 

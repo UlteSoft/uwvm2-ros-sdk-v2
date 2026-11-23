@@ -15,7 +15,7 @@ export UWVM_ROS_SDK_ROOT="$(python3 -c 'import json; print(json.load(open("selec
 "$UWVM_ROS_SDK_ROOT/bin/wrrs" --target wasm64 --memory64 main.rs -o guest64.wasm
 ```
 
-要从源码构建编译器，在安装命令上加 `--mode source --jobs 8`。这会获取可编辑的编译器、LLVM 源码，以及官方 Rust 1.97.1 的三个 x86-64 Linux stage0 归档。安装器校验 Git/LFS 输入，重建程序再依据 Rust 的 `src/stage0` 锁文件逐一校验归档，将引导工具链安装到工作目录。Cargo 使用随库依赖离线构建。宿主需准备 Python 3.12+、原生 C/C++ 编译器和系统开发头文件、CMake、Ninja、Git 及 GNU binutils。如显式指定 `--rust-bin /path/to/1.97.1/bin`，安装器使用该目录中的匹配工具链，并跳过三个归档的下载。
+使用当前 SDK 从源码构建时，指定独立命令 `rebuild`、选定的平台和语言，以及 `--jobs 8`。这会获取可编辑的编译器、LLVM 源码，以及官方 Rust 1.97.1 的三个 x86-64 Linux stage0 归档。安装器校验 Git/LFS 输入，重建程序再依据 Rust 的 `src/stage0` 锁文件逐一校验归档，将引导工具链安装到工作目录。Cargo 使用随库依赖离线构建。宿主需准备 Python 3.12+、原生 C/C++ 编译器和系统开发头文件、CMake、Ninja、Git 及 GNU binutils。如显式指定 `--rust-bin /path/to/1.97.1/bin`，安装器使用该目录中的匹配工具链，并跳过三个归档的下载。
 
 来宾须提供 `#[panic_handler]` 并导出 `_start`。默认使用 Rust 2021。通用 crate 可用 `uwrosv2` 或 `u2rosv2` 引用。ABB 安装中的 `abb` 和 `wros_observation` 指向同一 crate，其中 `ros1` 模块提供 RAPID 消息和服务类型。可将 `examples/abb/rust/ros1` 整目录复制到 SDK 外并用 Xmake 构建。[Xmake 指南](../install-xmake.md)
 

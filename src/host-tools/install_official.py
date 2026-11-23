@@ -1,4 +1,4 @@
-"""Install Xmake and build the native VM from their pinned official GitHub projects."""
+"""Rebuild native Xmake and uwvm2-ros from their pinned official GitHub projects."""
 import argparse
 import fcntl
 import hashlib
@@ -24,10 +24,7 @@ def command(argv, cwd, env):
     subprocess.run(argv, cwd=cwd, env=env, check=True, stdout=sys.stderr)
 
 
-def native_xmake(origin, host, work, downloads, env, jobs):
-    if host == "linux-x86_64":
-        release = origin["linux_x86_64"]
-        return fetch_archive(release["url"], release["sha256"], downloads)
+def native_xmake(origin, work, downloads, env, jobs):
     release = origin["source"]
     archive = fetch_archive(release["url"], release["sha256"], downloads)
     with tarfile.open(archive, "r:gz") as tar:
@@ -104,7 +101,7 @@ def install(host, cache, work, jobs):
         receipt = bucket / "receipt.json"
         with (bucket / "build.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            spec = {"repository": origin["repository"], "commit": origin["commit"], "host": host}
+            spec = {"provider": "source", "repository": origin["repository"], "commit": origin["commit"], "host": host}
             if tool == "uwvm2-ros":
                 spec["tree"] = origin["tree"]
             if receipt.exists():
@@ -115,7 +112,7 @@ def install(host, cache, work, jobs):
                 with tempfile.TemporaryDirectory(dir=work, prefix=tool + "-") as tmp:
                     stage = Path(tmp)
                     if tool == "xmake":
-                        built = native_xmake(origin, host, stage, downloads, env, jobs)
+                        built = native_xmake(origin, stage, downloads, env, jobs)
                     else:
                         built = native_vm(origin, host, stage, bindir / "xmake", env, jobs)
                     installer["require_host"](built, host)
@@ -136,6 +133,7 @@ def install(host, cache, work, jobs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("source",), required=True)
     parser.add_argument("--host", required=True)
     parser.add_argument("--cache", required=True, type=Path)
     parser.add_argument("--work", required=True, type=Path)

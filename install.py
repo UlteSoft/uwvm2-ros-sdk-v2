@@ -198,25 +198,33 @@ def fetch_entry(directory, revision, env):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", nargs="?", choices=("install", "plan", "list"), default="install")
+    parser.add_argument("action", nargs="?", choices=("install", "plan", "list", "rebuild"), default="install",
+                        help="install prebuilt packages (default), plan a selection, list it, or rebuild from source")
     parser.add_argument("--commit", help="pin a full Git commit (default: resolve main once)")
     parser.add_argument("--language", help="language ID from the selected revision (see list), for example c, cpp, rust, go, tinygo, py (python) or wat")
     parser.add_argument("--platform", default="generic", help="platform ID from the selected revision (see list)")
-    parser.add_argument("--mode", choices=("binary", "source", "bindings"))
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--mode", choices=("binary", "source", "bindings"),
+                       help="install defaults to binary; plan --mode source previews a rebuild")
+    modes.add_argument("--source", dest="mode", action="store_const", const="source", help="alias for --mode source")
     parser.add_argument("--no-mte", action="store_true", help="select compatibility bindings built by an external Rust compiler")
     parser.add_argument("--prefix", type=Path, default=Path.home() / ".local/share/wros-sdk")
     parser.add_argument("--bootstrap", type=Path, help="host LLVM installation for a C/C++ or TinyGo source build")
     parser.add_argument("--rust-bin", type=Path, help="use installed official Rust host tools for a Rust compiler build (1.97.1) or wrwat build (1.98.0)")
-    parser.add_argument("--jobs", type=int, metavar="N", help="parallel jobs for building native host tools (including the VM) and language components")
+    parser.add_argument("--jobs", type=int, metavar="N", help="parallel jobs for source rebuilds")
     args = parser.parse_args()
+    if args.action == "install" and args.mode == "source":
+        parser.error("install only installs prebuilt inputs; use the rebuild action for a source build")
+    if args.action == "rebuild" and args.mode not in (None, "source"):
+        parser.error("rebuild requires source mode")
     if args.action != "list" and not args.language:
-        parser.error("--language is required for install and plan")
+        parser.error("--language is required for install, plan and rebuild")
     if args.commit is not None and not COMMIT.fullmatch(args.commit):
         parser.error("--commit requires a complete lowercase 40-character commit ID")
     if args.jobs is not None and args.jobs < 1:
         parser.error("--jobs must be positive")
     if args.jobs is not None and args.action == "list":
-        parser.error("--jobs applies to install and plan")
+        parser.error("--jobs applies to rebuild or a selection")
 
     prefix = args.prefix.expanduser().resolve()
     scratch = prefix / ".work"
@@ -231,6 +239,10 @@ def main():
         bootstrap.write_bytes(entry)
         command = [sys.executable, "-I", "-B", str(bootstrap), str(repository), commit, str(prefix),
                    args.action, "--platform", args.platform]
+        # Older second stages accepted --mode binary and still compiled host tools.
+        # A stage that predates this protocol must reject the request before installation.
+        if args.action in ("install", "plan") and args.mode != "source":
+            command.append("--prebuilt-only")
         for key in ("language", "mode", "bootstrap", "rust_bin", "jobs"):
             value = getattr(args, key)
             if value is not None:
