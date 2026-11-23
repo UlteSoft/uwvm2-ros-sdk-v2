@@ -2,12 +2,18 @@
   "schema": 2,
   "language": "C/C++",
   "status": "requalification-in-progress",
+  "sdk_repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git",
+  "sdk_commit": "1a88ebbf29a0dedba6385a6079e92b0aaf860070",
+  "sdk_tree": "1dfc5c6146857fc7458a30924b6905be81477516",
+  "vm_repository": "https://github.com/UlteSoft/uwvm2-ros.git",
   "vm_commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
   "vm_tree": "5b21dae0134c9a69a0c50780c7f398a099040711",
+  "vm_release_tag": "wros-vm-6de97ade53a7",
   "acceptance_rule": "Credit requires a fresh run on the recorded VM tree and host executable, matched by guest and memory-owner SHA-256.",
   "previous_runtime_results": "withdrawn",
-  "github_install_acceptance": "pending",
+  "github_install_acceptance": "partial",
   "case_manifest": "src/qualification/cfamily/external-libraries.json",
+  "case_manifest_sha256": "a9a689324f9a462a6d91941d43832604bcca6fa14ae17ce3bb8184f6a79f8ad7",
   "profiles": {
     "abi": [
       "wasm32",
@@ -26,19 +32,209 @@
       true
     ]
   },
-  "scope": "Six pinned upstream libraries, 14 C/C++ programs, 16 guest profiles on each host. Native compile and link precede interpreter and AOT execution.",
+  "scope": "The x86_64 and i686 hosts each compiled and linked 14 C/C++ programs from six pinned upstream libraries across 16 profiles (224 guests per host). The internal sysroot corpus in src/qualification/cfamily/cases.json has separate qualification.",
   "isolation": {
     "parent_memory_max": 68719476736,
     "project_scratch": true,
     "swap_max": 0,
-    "test_memory_max": 68719476736
+    "test_memory_max": 68719476736,
+    "offline_guest_execution": true
+  },
+  "cold_install": {
+    "source": "Both hosts fetched the public SDK installer from raw.githubusercontent.com at the recorded SDK commit and began with an empty installation prefix. The receipts identify the SDK and VM main commits and trees observed at the time. The installation execve traces recorded only Python and Git processes.",
+    "platform": "generic",
+    "mode": "binary",
+    "selections": [
+      "c",
+      "cpp",
+      "wat"
+    ],
+    "install_inputs_sha256": "3bfcfaf6257aaf7de7bc021e43b83f47723267e565bb69b80f72aa8b77981cf1",
+    "root_installer_sha256": "06db1abb2ee52af3b826947a9ec6331a75c66065ac2fb9cd6c7bbcf67fec7c30",
+    "stage_installer_sha256": "b8f28fb84d9a7c94ef360cb3a4d4da9206584ea8d90b46e66936c3bae91cf54f"
+  },
+  "runtime": {
+    "int": "--runtime-int",
+    "aot": "--runtime-aot with the LLVM JIT, fast-compile policy and JIT cache disabled",
+    "thread_stack": {
+      "baseline_manifest_sha256": "6721a36774149d04b28a81fbb49553afbe145a40f5340e27b5ab6601df55148d",
+      "baseline_native_stack_mib": 1,
+      "replay_overrides_mib": {
+        "clients/pugixml.cpp": 2,
+        "upstream/fast_float/tests/example_comma_test.cpp": 2,
+        "upstream/fast_float/tests/example_test.cpp": 2,
+        "upstream/fast_float/tests/json_fmt.cpp": 2,
+        "upstream/fast_float/tests/wide_char_test.cpp": 2
+      },
+      "replay": "Both engines reran all 224 rows on each host. The replay checked each guest, build receipt and threaded memory owner by SHA-256. Only the WASI Threads native-stack-bytes argument changed in the eight threaded profiles of the five listed programs.",
+      "matrix_runner_sha256": "ff6212556da6cd158e5d435ab32d4886377b4a570d69fc313aee78a348296fac",
+      "replay_runner_sha256": "49032b3c6f78a20cf35e02b82cf5da93f783bc06ca7b76fe850d6c7fed65fb94"
+    }
+  },
+  "guest_instruction_inspection": {
+    "decoder_host": "native Linux x86_64",
+    "decoder_sha256": "228ef6ff8fad3fdcc898989593ebfcd99fd1acda42cb2217df4dd5a4eeec173d",
+    "counts_per_qualified_host": {
+      "decoded_guests": 224,
+      "mte_on_rows_with_memtag_instructions": 112,
+      "mte_off_rows_with_memtag_instructions": 0,
+      "threads_on_rows_with_atomics_and_one_shared_memory": 112,
+      "threads_off_rows_with_atomics_or_shared_memory": 0,
+      "rows_importing_thread_spawn": 0,
+      "eh_on_cpp_rows_with_eh_instructions_and_tags": 48,
+      "eh_on_c_rows_with_eh_instructions_or_tags": 0,
+      "eh_off_rows_with_eh_instructions_or_tags": 0
+    },
+    "coverage": "Each switch was enabled for 112 rows and disabled for 112. The EH-enabled group comprised 48 C++ rows and 64 C rows."
+  },
+  "wasmtime_reference": {
+    "execution_host": "native Linux x86_64",
+    "scope": "Each qualified host supplied its linked guests for all 112 non-MTE rows and its shared-memory owners for the 56 threaded rows. Both reference runs verified the guest and owner SHA-256 values.",
+    "version": "42.0.1",
+    "release_commit": "6844a83b530f86ad13a65175282fe2dbcd33cad1",
+    "stock_cli_sha256": "21f8e8f994a96d2267afe4a4c06a6302e78aca20e9438afbf01dd443fe32108b",
+    "stock_wasm32": "Exit status and stdout matched both VM engines on all 56 rows from each qualified host.",
+    "stock_wasm64": "The stock CLI rejected unknown wasi_snapshot_preview1 imports with the _wasm64 suffix before guest execution.",
+    "c_api_adapter_sha256": "fdccd44cb44ec2e5d8f7f98b7f4c43ac69901f0a1b40b9a9c391b9c74294f010",
+    "c_api_adapter_source_sha256": "aefc31ac1d6e053f3bde11db031f3cedee9ec1a7d330e956e98be004b025acf6",
+    "c_api_comparison": "The adapter supplied the imported interfaces and compared guest exit status, stdout and stderr to each recorded VM engine."
   },
   "hosts": {
     "x86_64": {
-      "status": "pending"
+      "status": "pass",
+      "execution": "native Linux x86_64",
+      "toolchain_and_vm_elf": "ELF64 EM_X86_64",
+      "cold_install": {
+        "status": "pass",
+        "empty_cache_receipt_sha256": "ec94477493f847c9afca4b85bee7d99181de2cf463bf92705091e0ded566ee1f",
+        "vm_release_asset": "https://github.com/UlteSoft/uwvm2-ros/releases/download/wros-vm-6de97ade53a7/uwvm2-ros-linux-x86_64.tar.xz",
+        "vm_archive_sha256": "0097440870d1b1e1b98f66688a64804216bb590b9e72ea1ca5c7f500889cd61e",
+        "vm_elf_sha256": "64c6e62cc1d8d6d447fe58b563384594c5da33159d6f5cdce3822a239b8a40e8",
+        "host_tools_origins_sha256": "c6e8d39b348c1418af081bf3f360761c49526ba1e650f74f5d5451d27e8f6dc9",
+        "xmake": {
+          "provider": "github-release",
+          "url": "https://github.com/xmake-io/xmake/releases/download/v3.0.5/xmake-bundle-v3.0.5.linux.x86_64",
+          "elf_sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+        },
+        "wrc_and_wrcc_sha256": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04",
+        "wasm_ld_sha256": "3c65e1fbb9d285ec198287f47d9d5a68b23d1ca053bb95c861b2422a06c04124",
+        "wrwat_sha256": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+        "selection_sha256": {
+          "c": "9292b3e85e7b01054bec29d27a6c02d76d09e6560c4e0fa9eda97d737e1a7c3f",
+          "cpp": "09ec2514a4df79940e4dacf7b6c95d2876562c567122ec09ecc55d2ee2dbc692",
+          "wat": "eec87c290a433c1ce255b4ddbcdd578d0375f7b73e5d0d5c3208e1b4a84ac14d"
+        },
+        "external_projects": "The installed Xmake built and tested the external scene-abi C, C++ and WAT projects.",
+        "external_projects_receipt_sha256": "599562990bef87b201bea021d1100e660ea191292386a772887daf5a35a39603"
+      },
+      "baseline_1_mib": {
+        "linked": 224,
+        "int_pass": 224,
+        "aot_pass": 211,
+        "aot_native_stack_rejections": 13,
+        "results_sha256": "b527455beeb59b4364f1a3cbff4f92f5ded18aa7e0ca032d1cf8247123ee7123",
+        "summary_sha256": "07ca6574bc0c8b6ceadc10f62934c1520b728818c15624d810d111ad56d86a8c"
+      },
+      "manifest_replay": {
+        "reused_linked_guests": 224,
+        "reused_threaded_memory_owners": 112,
+        "changed_stack_arguments": {
+          "aot": 40,
+          "int": 40
+        },
+        "int_pass": 224,
+        "aot_pass": 224,
+        "int_aot_equal_outputs": {
+          "stderr": 224,
+          "stdout": 224
+        },
+        "results_sha256": "f7745824d8f70eec079eb35806a1f31f75108152d1f5714866effee33fea4e28",
+        "summary_sha256": "16a6589f35625877fe3c0e1ddc791033deb98e37be1ba56d150e4257e7f6fd62"
+      },
+      "reference": {
+        "execution_host": "native Linux x86_64",
+        "decoded_results_sha256": "02a1d58e306425d99fe5087e087cd0293cea22bdc6d446efe792f5ea9efda721",
+        "stock_wasm32_pass": 56,
+        "stock_wasm64_import_rejections_before_execution": 56,
+        "stock_results_sha256": "ac9182050e86591d4259ba3103185540aa56a531696b6c26d5bdf63c1c3aac17",
+        "c_api_returned": 112,
+        "c_api_matches": {
+          "int": 112,
+          "aot": 112
+        },
+        "c_api_results_sha256": "fb534887d9020b917bbe9c799e7611952320e015a7eb7709cded79fd8afd7efa",
+        "summary_sha256": "54f18713711b2904ac392eaf4fe999fe6b2f92888e4c9cd2fd0c105c9f24093f"
+      },
+      "collected_summary_sha256": "f73723aefb53e646f860a0e1299808998de356a802d5e20709bac0b4f2b4fc23"
     },
     "i686": {
-      "status": "pending"
+      "status": "pass",
+      "execution": "native 32-bit Linux userspace under setarch i686",
+      "toolchain_and_vm_elf": "ELF32 EM_386",
+      "cold_install": {
+        "status": "pass",
+        "empty_prefix_receipt_sha256": "2456b68ab302214195e93370fbafbb276cec996f973823a28530473b392d9b77",
+        "vm_release_asset": "https://github.com/UlteSoft/uwvm2-ros/releases/download/wros-vm-6de97ade53a7/uwvm2-ros-linux-i686.tar.xz",
+        "vm_archive_sha256": "55bc12fdb182cc85a9344ec4d6c8c4087c6354c9f021203c8064c83de033b0e6",
+        "vm_elf_sha256": "1310b66db36d944396b582d96d0bfdcee1b94f0bc51fd03182f5aaa96e394993",
+        "host_tools_origins_sha256": "a81d57208b8c6dd6072974c9497dd04a2c7fc948d1bedb607e78889dbb33f18b",
+        "xmake": {
+          "provider": "debian",
+          "snapshot": "https://snapshot.debian.org/archive/debian/20260112T000000Z/",
+          "version": "3.0.5+ds-1~bpo13+1",
+          "package_sha256": "15775aae8b80ae3cd4a901b6c6de68b8505aeb908e629bec55258e6702238af3",
+          "elf_sha256": "312865667ebd05584da4aeb70d74cef5db18e2cf6160791063a433bc8736e6f5",
+          "launcher_sha256": "08f895e83a167d1a8ed17cf7328c2f65ba873d079a9451a92dc3988e33b1fb6d"
+        },
+        "wrc_and_wrcc_sha256": "04b542acfeb643def8707891ffdb3e863fe4f5c356828f7d7f68f19268fbaca1",
+        "wasm_ld_sha256": "5808a7a3dc9c046c136568873ed29f037f753c870dffe54812d8e5faf9a365ff",
+        "wrwat_sha256": "dd3cc5ed99e0d00fd47da337b9d6a1f5ec00e6ea5c673946fd43692930d40a98",
+        "selection_sha256": {
+          "c": "d663cf194c58e1ddf367401b79fa32a9d5a040669bafb4c0b77f18b8c82bb12a",
+          "cpp": "d4c2d4042eaca3219944f93d535c18943ea8250af3ce1efa762ac22e92a7f2ef",
+          "wat": "77138e03c5c3f4b03cfb99d3d1984bb6dff92f21d76289033b22f9eee3778f0a"
+        },
+        "external_projects": "The installed Xmake reported its version, built and tested the external zlib C and angles C++ projects.",
+        "external_projects_receipt_sha256": "f89791d862879cbfd4a7ea1dd1016640481689a84c35cefb8f930eaf887a3228"
+      },
+      "baseline_1_mib": {
+        "linked": 224,
+        "int_pass": 224,
+        "aot_pass": 220,
+        "aot_native_stack_rejections": 4,
+        "results_sha256": "19619b663bde2271cece5d7635fd867552f24b2d131386794a0ffd9cc5fb409a",
+        "summary_sha256": "af17f62459f286c0a72be6750b5c804faec7599ef1621049137fe06662176898"
+      },
+      "manifest_replay": {
+        "reused_linked_guests": 224,
+        "reused_threaded_memory_owners": 112,
+        "changed_stack_arguments": {
+          "aot": 40,
+          "int": 40
+        },
+        "int_pass": 224,
+        "aot_pass": 224,
+        "int_aot_equal_outputs": {
+          "stderr": 224,
+          "stdout": 224
+        },
+        "results_sha256": "d62bd9b501d4fd1dfab0c66e9a6e6127ae63b41ed5750ba47072f07a6b675182",
+        "summary_sha256": "f6b7bcb3b6bfe65fd63ef7f95e3f745576de6f4b4d7cdbd094bfdc8fd8c4dfa8"
+      },
+      "reference": {
+        "execution_host": "native Linux x86_64",
+        "decoded_results_sha256": "b3349a988b7e42ca155427d93c3fa029301ca697967144713dcc482461f6091b",
+        "stock_wasm32_pass": 56,
+        "stock_wasm64_import_rejections_before_execution": 56,
+        "stock_results_sha256": "d555537abd3e8a8cffb6349108423b268298c2392b59b8dda70a69476f9c7b89",
+        "c_api_returned": 112,
+        "c_api_matches": {
+          "int": 112,
+          "aot": 112
+        },
+        "c_api_results_sha256": "d0668d745b1681557d132edaffcc7aeb5f2e467c61df90a4fc4f9563c1fec4f8",
+        "summary_sha256": "0516f88ef90e15c58acd63e5767f43a32f256d289aaaf6909b1d3b77fc85ef18"
+      }
     },
     "aarch64": {
       "status": "pending"
