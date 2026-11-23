@@ -1,0 +1,44 @@
+{
+  "id": "agibot",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "aimdk_msgs/JointState",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_position",
+        "field": "position",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_velocity",
+        "field": "velocity",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_effort",
+        "field": "effort",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_error_code",
+        "field": "error_code",
+        "type": "u16",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://x2-aimdk.agibot.com/downloads/aimdk-sdk-v1_0_0-aimdk-aarch64-a424add7-artifacts.zip",
+        "revision": "5bbcf724d54fb28f153db0d272f9acb7906bb1d2cac7dd7ccdc699a5c7eeab35",
+        "path": "src/aimdk_msgs/interface/robot/hal/msg/JointState.msg",
+        "sha256": "bdc131e7aa452b5ccc22e5f22cd5d28dcee5929c7794ff2fed0625ae910c9e72"
+      }
+    ]
+  }
+}

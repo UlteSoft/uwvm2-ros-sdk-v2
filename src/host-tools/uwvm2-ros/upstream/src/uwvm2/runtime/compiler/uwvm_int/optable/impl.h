@@ -1,0 +1,58 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-04-05
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+# include "define.h"
+# include "storage.h"
+# include "call.h"
+# include "exception.h"
+# include "exception_throw.h"
+# include "exception_metadata.h"
+# include "compare.h"
+# include "constop.h"
+# include "control.h"
+# include "convert.h"
+# include "memory.h"
+# include "memory64.h"
+# include "memtag.h"
+# include "memtag_bulk.h"
+# include "memory64_simd.h"
+# include "memtag_simd.h"
+# include "memory64_bulk.h"
+# include "register_ring.h"
+# include "numeric.h"
+# include "stack.h"
+# include "wasm1p1.h"
+# include "gc.h"
+# include "table64.h"
+# include "threads.h"
+# include "memtag_threads.h"
+# include "memory64_atomic.h"
+# include "variable.h"
+# include "conbine.h"
+# include "delay_local.h"
+# include "instruction_reorder.h"
+# include "conbine_heavy.h"
+# include "combine_extra_heavy.h"
+#endif

@@ -1,0 +1,41 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2026-06-14
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+module;
+
+export module uwvm2.runtime.llvm_jit_cache;
+// Re-exporting partitions keeps callers on one stable module name while implementation details stay split by concern.
+export import :format;
+export import :self_executable;
+export import :compress;
+export import :environment;
+export import :store;
+export import :llvm_object_cache;
+
+#ifndef UWVM_MODULE
+# define UWVM_MODULE
+#endif
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT export
+#endif
+
+#include "impl.h"

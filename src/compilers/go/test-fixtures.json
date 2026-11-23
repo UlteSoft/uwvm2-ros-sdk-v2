@@ -1,0 +1,126 @@
+{
+  "src/crypto/internal/fips140test/cast_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "7f6709d3a4f7e0945fd84bd3edd5a659b8087a23be3cea6097e94aa4584d527a"
+    ],
+    "upstream_sha256": "894db4b0ccadd41b198962533330f9b3a6275b799030f1de99a5e60ca99b6aeb"
+  },
+  "src/crypto/rsa/example_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "7f6709d3a4f7e0945fd84bd3edd5a659b8087a23be3cea6097e94aa4584d527a"
+    ],
+    "upstream_sha256": "679240725b6ffbf72bf337b829fc49ebe49f3089517f63ee317171f2dc1a706d"
+  },
+  "src/crypto/rsa/rsa_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "604dd963de030ae60473d70b7646243a942c6381fff8213f46ce90258e33d6a6",
+      "35c6a1548fdcb16398b5a65c793b0ac17f365e9f7fe407a98ad7fa6ac107d0eb",
+      "68a45d6e13976f3d8d2b6b26133ef0277ea7cc96291acc62433db7dbffffdc40",
+      "09c38edb1f948537b0ebb792dadd7d3af2b8ec75a3fe9c5f697d334ba2c5b9cd",
+      "58a224a91ccd5d1ebe661f1bc370c6dc1f730c61dff6325f3c72be6e89e282f1",
+      "1cd785107047f88d72ec0fb345f7aeb7d9f331f8cc3e9fa0ee2b6a2d646be19b"
+    ],
+    "upstream_sha256": "2f18e0bdd8e03acfcc2dd2dcfae5439ebd4134305692cfac2f090693ea2e40ca"
+  },
+  "src/crypto/tls/example_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "fc44fb15e87a51076330af4063daa120f53691a939099f9b3ebe96b0c89a4793",
+      "fc44fb15e87a51076330af4063daa120f53691a939099f9b3ebe96b0c89a4793"
+    ],
+    "upstream_sha256": "0c1c065aea98125a16fe59fe30df13e57400179fa5b3c2503fb3b98dcc99457d"
+  },
+  "src/crypto/tls/handshake_server_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "cd758aea474a1839b79b6a2eea6f461a4db598c20046670df83c3c3c9672c529"
+    ],
+    "upstream_sha256": "d3c776a4f99d6dbcac94c1ef96dbe9be79db3dc7560371f69a94173068ee4ada"
+  },
+  "src/crypto/tls/handshake_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "86ed7c502933af015558a81888c08197043a23f3453604f7a3c14f6ed8e90d56",
+      "abd7611e0313c6f45d89de4e416c2f847b653f54ddd1db6079ea7929a96bb35c",
+      "87a58ff4b458504b486df29923a5db350999a1075e56c4131f2bd34bf794644e"
+    ],
+    "upstream_sha256": "70fcd4635c800de01cb4dd1671fd9c0bbe2b976381b34b0f98ebe7978b450acf"
+  },
+  "src/crypto/tls/testdata/example-key.pem": {
+    "action": "omit",
+    "pem_sha256": [
+      "fc44fb15e87a51076330af4063daa120f53691a939099f9b3ebe96b0c89a4793"
+    ],
+    "upstream_sha256": "4280dcaf02ddf203cc1e3179b872f2e2f130662437b2f525bb24dfab4e7fade3"
+  },
+  "src/crypto/tls/tls_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "ee08fdca08f7749b803cb73f1b593e278146454ba3c007a1b48eea6fb46126b5",
+      "cf2f92763c38348b0d7ec7fb230412b97142dadca155abcc8dbb0ce372c1e352",
+      "851aa242f373d9273199806afe570debdae0e5edfbfdc672d3ca9691ff849587"
+    ],
+    "upstream_sha256": "993ffaa28c7ff1b8ecfe4ea16a41967190b90a87eac602ee7e8f158b6bfd1fb5"
+  },
+  "src/crypto/x509/pem_decrypt_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "056be8f7f9d5cfcc002ec449272054a5f6ac1ccc7b8a3e0e57172441cf8f79c9",
+      "fc771edb579601a51d5f4755afdef27c4be4925880fa800e495560e6f86f8cc9",
+      "4eba7467c2055461aa4d5d5bc80ad6b552ab34b1dc9970fbd1b5b8bd04c0e7bc",
+      "4f1df9572694ae8378244227bb2cf752555bc1a171450a77787bd1a96aa1304b",
+      "81fea6d237840e791d5cbcea508b9b01f88861cede5937ecdb9376bdb847bdd3",
+      "73d19cd33d1bd1390c1fac4cfa3b98c09a93786cb47d96b0f6e12f73783dff07",
+      "873ec7dc496341cea0353418d8650f70b60e2898f9d868a9b31aa84313f0d0e5"
+    ],
+    "upstream_sha256": "f72e5f3577873fb6d8e68d5cbe42782043c3ccec040c9a78fdf898e132fec5cc"
+  },
+  "src/crypto/x509/platform_root_key.pem": {
+    "action": "omit",
+    "pem_sha256": [
+      "a3f46e15e8220fc2910e4d486ed8e5d84f394af4c985bb8bae90a255d64538a8"
+    ],
+    "upstream_sha256": "2fea2ebe77388df61566fcd43eb0070dbff2842c8786a0e7906a13e5f10c3e65"
+  },
+  "src/crypto/x509/x509_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "6cc0943827c6c33b7d3ad8425f4519017105141119060a9d868f3aac0e6452b0",
+      "7f6709d3a4f7e0945fd84bd3edd5a659b8087a23be3cea6097e94aa4584d527a",
+      "896464d860f012aae4a0cee6251beb0e726951f30ba3f8e8206451d5e5c98ce6"
+    ],
+    "upstream_sha256": "0e9922fa015d87dd8b8942dda573b41fa488d4e75aa6b00583f3146be5908260"
+  },
+  "src/crypto/x509/x509_test_import.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "4129fc24e0a0d44c5d764d494c46ba578bc9e112e1ee33c694f7d3b5590b05f1"
+    ],
+    "upstream_sha256": "0bb61653dc5686d9dd497c65958f51aaa54c78c82ebdfc5a0fa000ccf82bbaa4"
+  },
+  "src/encoding/pem/pem_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "df124ee39fa034d1b9209b354357d83c4c2179908b12bdfd248d2231e985b4a6",
+      "a3a0d2abecd8e359b66445e26ae4fc23fca270dfc7f08f05b10c0fed936c124a"
+    ],
+    "upstream_sha256": "f4636ac836aa28f0299fb26f729c0f5091cfcc817565ca5bb7f5cf0973a3d051"
+  },
+  "src/net/http/internal/testcert/testcert.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "8cee609888800efd19ea312ebfca9b66575f1d95c2cc88846c018efbfe671501"
+    ],
+    "upstream_sha256": "812c69f79fc71384de1d93fb1058ab20e5b58ab2860dea72167681048d14a12e"
+  },
+  "src/net/smtp/smtp_test.go": {
+    "action": "redact-pem-blocks",
+    "pem_sha256": [
+      "07fb7afa2508092d57dd41be6ea4b98946d49b4e1573de144ffceae8cda9d3c7"
+    ],
+    "upstream_sha256": "2f95d4d2bffa7ee1acc169f7c240c2f2b47fe1903f3dfbb48a6059010ec0bef9"
+  }
+}

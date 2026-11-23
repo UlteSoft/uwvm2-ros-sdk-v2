@@ -1,0 +1,467 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+# include <cstdint>
+# include <limits>
+# include <memory>
+# include <utility>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/parser/wasm/concepts/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/type/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/const_expr/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/opcode/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/features/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1p1/type/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm3/type/impl.h>
+# include <uwvm2/parser/wasm/binfmt/binfmt_ver1/impl.h>
+# include <uwvm2/validation/impl.h>
+# include <uwvm2/extension/memtag/usage.h>
+# include <uwvm2/extension/memtag/globals.h>
+# include <uwvm2/validation/standard/wasm1/impl.h>
+# include <uwvm2/validation/standard/wasm1p1/impl.h>
+# include <uwvm2/validation/standard/wasm3/impl.h>
+# include <uwvm2/object/impl.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# include <uwvm2/uwvm/utils/memory/impl.h>
+# include <uwvm2/uwvm/wasm/impl.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::runtime::validator
+{
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr bool validate_all_wasm_code_for_module(
+        ::uwvm2::parser::wasm::binfmt::ver1::wasm_binfmt_ver1_module_extensible_storage_t<Fs...> const& module_storage,
+        ::uwvm2::parser::wasm::concepts::feature_parameter_t<Fs...> const& fs_para,
+        [[maybe_unused]] ::uwvm2::utils::container::u8cstring_view file_name,
+        [[maybe_unused]] ::uwvm2::utils::container::u8string_view module_name,
+        ::uwvm2::extension::memtag::usage_sink* memtag_usage = nullptr) noexcept
+    {
+        auto const& importsec{::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<
+            ::uwvm2::parser::wasm::standard::wasm1::features::import_section_storage_t<Fs...>>(module_storage.sections)};
+        auto const import_func_count{importsec.importdesc.index_unchecked(0u).size()};
+
+        auto const& codesec{::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<
+            ::uwvm2::parser::wasm::standard::wasm1::features::code_section_storage_t<Fs...>>(module_storage.sections)};
+
+        ::uwvm2::validation::error::code_validation_error_impl v_err{};
+#ifdef UWVM_CPP_EXCEPTIONS
+        try
+#endif
+        {
+            // Real module declarations must be admitted even when codesec is empty.
+            // This metadata-only gate does not decode or validate any body twice.
+            ::uwvm2::validation::standard::wasm3::validate_module_declarations_with_runtime_policy(module_storage, v_err, fs_para);
+            for(::std::size_t local_idx{}; local_idx < codesec.codes.size(); ++local_idx)
+            {
+                // [codesec.codes.begin ... local_idx < size ... end]
+                // [safe                                      ] immutable parser-owned descriptor borrow.
+                auto const& code{codesec.codes.index_unchecked(local_idx)};
+                // [actual expression begin ... code_end] | one-past
+                // [safe: parser-proven complete body   ] | never read at end
+                // ^^ begin/end: copied only after the actual descriptor's index bound.
+                auto const code_begin_ptr{reinterpret_cast<::std::byte const*>(code.body.expr_begin)};
+                auto const code_end_ptr{reinterpret_cast<::std::byte const*>(code.body.code_end)};
+                v_err = {};
+                if(memtag_usage != nullptr)
+                {
+                    auto const bytes{::std::span<::std::byte const>{code_begin_ptr,code_end_ptr}};
+                    if(!::uwvm2::extension::memtag::may_contain_memtag(bytes)) { continue; }
+                    auto const& policy{::uwvm2::parser::wasm::standard::wasm1p1::features::get_wasm1p1_parameter(fs_para)};
+                    if(!::uwvm2::validation::standard::wasm3::uses_core3_validation_policy(policy))
+                    {
+                        // Preserve the selected legacy binary grammar before
+                        // using the Core 3 typed sink solely for metadata.
+                        ::uwvm2::validation::standard::wasm3::validate_code_with_runtime_policy(
+                            module_storage,import_func_count+local_idx,code_begin_ptr,code_end_ptr,v_err,fs_para);
+                    }
+                    ::uwvm2::validation::standard::wasm3::validate_code_to_sink(
+                        ::uwvm2::validation::standard::wasm3::wasm3_code_version{},module_storage,
+                        import_func_count+local_idx,code_begin_ptr,code_end_ptr,v_err,fs_para,*memtag_usage);
+                }
+                else
+                {
+                ::uwvm2::validation::standard::wasm3::validate_code_with_runtime_policy(module_storage,
+                                                                                        import_func_count + local_idx,
+                                                                                        code_begin_ptr,
+                                                                                        code_end_ptr,
+                                                                                        v_err,
+                                                                                        fs_para);
+                }
+            }
+        }
+#ifdef UWVM_CPP_EXCEPTIONS
+        catch(::fast_io::error)
+            {
+                auto const module_begin{module_storage.module_span.module_begin};
+                auto const module_end{module_storage.module_span.module_end};
+                if(module_begin == nullptr || module_end == nullptr) [[unlikely]] { ::fast_io::fast_terminate(); }
+                auto const begin_address{reinterpret_cast<::std::uintptr_t>(module_begin)};
+                auto const end_address{reinterpret_cast<::std::uintptr_t>(module_end)};
+                if(end_address < begin_address || end_address - begin_address >
+                   static_cast<::std::uintptr_t>((::std::numeric_limits<::std::ptrdiff_t>::max)())) [[unlikely]]
+                { ::fast_io::fast_terminate(); }
+                auto const diagnostic_address{v_err.err_curr == nullptr ? begin_address : reinterpret_cast<::std::uintptr_t>(v_err.err_curr)};
+                if(diagnostic_address < begin_address || diagnostic_address > end_address) [[unlikely]] { ::fast_io::fast_terminate(); }
+                auto const diagnostic_offset{static_cast<::std::size_t>(diagnostic_address - begin_address)};
+                auto bounded_error{v_err};
+                // [actual parser module_begin ... checked offset ... module_end]
+                // [safe                                                       ] offset <= span <= PTRDIFF_MAX.
+                // ^^ err_curr: reconstruct from the real owner only after the integer bounds; no null subtraction.
+                bounded_error.err_curr = module_begin + diagnostic_offset;
+                ::uwvm2::uwvm::utils::memory::print_memory const memory_printer{module_begin, bounded_error.err_curr, module_end};
+
+                ::uwvm2::validation::error::error_output_t errout{};
+                errout.module_begin = module_storage.module_span.module_begin;
+                // Error text and memory indication consume the same bounded real-module position.
+                errout.err = bounded_error;
+                errout.flag.enable_ansi = static_cast<::std::uint_least8_t>(::uwvm2::uwvm::utils::ansies::put_color);
+# if defined(_WIN32) && (_WIN32_WINNT < 0x0A00 || defined(_WIN32_WINDOWS))
+                errout.flag.win32_use_text_attr = static_cast<::std::uint_least8_t>(!::uwvm2::uwvm::utils::ansies::log_win32_use_ansi_b);
+# endif
+
+#if defined(UWVM2_USE_HUGE_FAST_IO_CPO_OUTPUT)
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    // 1
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Validation error in WebAssembly Code (module=\"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                    module_name,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\", file=\"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                    file_name,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\").\n",
+                                    // 2
+                                    errout,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\n"
+                                    // 3
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Validator Memory Indication: ",
+                                    memory_printer,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                    u8"\n\n");
+#else
+                {
+                    // Bound each CPO argument pack while holding one lock for the complete diagnostic.
+                    // The opt-in branch above retains the original single-call output verbatim.
+                    auto output_ref{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+                    ::fast_io::operations::decay::stream_ref_decay_lock_guard output_lock{
+                        ::fast_io::operations::decay::output_stream_mutex_ref_decay(output_ref)};
+                    auto output_unlocked{::fast_io::operations::decay::output_stream_unlocked_ref_decay(output_ref)};
+                    ::fast_io::io::perr(output_unlocked,
+                                        // 1
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                        u8"[error] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"Validation error in WebAssembly Code (module=\"");
+                    ::fast_io::io::perr(output_unlocked,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                        module_name,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"\", file=\"",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                        file_name);
+                    ::fast_io::io::perr(output_unlocked,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"\").\n",
+                                        // 2
+                                        errout,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"\n"
+                                        // 3
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN));
+                    ::fast_io::io::perr(output_unlocked,
+                                        u8"[info]  ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"Validator Memory Indication: ",
+                                        memory_printer,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                        u8"\n\n");
+                }
+#endif
+
+                return false;
+            }
+#endif
+
+        return true;
+    }
+
+    /// A flat shadow preserves allocation tags but cannot reconstruct managed
+    /// allocation extents, reservations or immutable static ownership. Check
+    /// each verified module (including importers) before accepting this format.
+    template<typename File>
+    [[nodiscard]] inline bool admits_tag_only_checkpoint(File const& file) noexcept
+    {
+        namespace mt = ::uwvm2::extension::memtag;
+        if(file.binfmt_ver != 1u || !file.has_owned_source_image()) { return false; }
+        auto const& module{file.wasm_module_storage.wasm_binfmt_ver1_storage};
+        mt::usage_sink usage{.classify_only=true};
+        if(!validate_all_wasm_code_for_module(module, file.wasm_parameter.binfmt1_para,
+                file.file_name, file.module_name, &usage) || !usage.valid || usage.uses_allocation_directory)
+        { return false; }
+
+        using custom_type = ::uwvm2::parser::wasm::standard::wasm1::features::custom_section_storage_t;
+        auto const& custom{::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<custom_type>(module.sections)};
+        bool seen{};
+        for(auto const& section : custom.customs)
+        {
+            if(section.custom_name == mt::obsolete_globals_section_name) { return false; }
+            if(section.custom_name != mt::linear_globals_section_name) { continue; }
+            if(seen) { return false; }
+            seen=true;
+            auto const begin{reinterpret_cast<::std::uintptr_t>(section.custom_begin)};
+            auto const end{reinterpret_cast<::std::uintptr_t>(section.sec_span.sec_end)};
+            if(begin < reinterpret_cast<::std::uintptr_t>(module.module_span.module_begin) || end < begin ||
+               end > reinterpret_cast<::std::uintptr_t>(module.module_span.module_end)) { return false; }
+            ::std::span<::std::byte const> payload{reinterpret_cast<::std::byte const*>(begin), end-begin};
+            bool needs_directory{};
+            // An independent pass binds memory indices and bounds to actual
+            // owners at admission. Here only the existence of a nonempty
+            // descriptor matters. No record can grant access or restore state.
+            auto result{mt::visit_linear_globals(payload, [](::std::uint32_t, ::std::uint64_t& extent) noexcept
+                { extent=UINT64_MAX; return true; }, [&](mt::linear_global_descriptor item) noexcept
+                { needs_directory |= item.byte_length != 0u; })};
+            if(!result || needs_directory) { return false; }
+        }
+        return true;
+    }
+
+    inline constexpr bool validate_all_wasm_code() noexcept
+    {
+        ::fast_io::unix_timestamp start_time{};
+        if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+        {
+#if defined(UWVM2_USE_HUGE_FAST_IO_CPO_OUTPUT)
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Start validating all wasm code. ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                u8"[",
+                                ::uwvm2::uwvm::io::get_local_realtime(),
+                                u8"] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8"(verbose)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+#else
+            {
+                // Keep one diagnostic lock, but bound each CPO's argument pack in the default build.
+                auto output_ref{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+                ::fast_io::operations::decay::stream_ref_decay_lock_guard output_lock{
+                    ::fast_io::operations::decay::output_stream_mutex_ref_decay(output_ref)};
+                auto output_unlocked{::fast_io::operations::decay::output_stream_unlocked_ref_decay(output_ref)};
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Start validating all wasm code. ");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                    u8"[",
+                                    ::uwvm2::uwvm::io::get_local_realtime(),
+                                    u8"] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                    u8"(verbose)\n");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }
+#endif
+
+#ifdef UWVM_CPP_EXCEPTIONS
+            try
+#endif
+            {
+                start_time = ::fast_io::posix_clock_gettime(::fast_io::posix_clock_id::monotonic_raw);
+            }
+#ifdef UWVM_CPP_EXCEPTIONS
+            catch(::fast_io::error)
+            {
+                // do nothing
+            }
+#endif
+        }
+
+        // validate all wasm code (full verification before execution)
+        for(auto const& [module_name, mod]: ::uwvm2::uwvm::wasm::storage::all_module)
+        {
+            switch(mod.type)
+            {
+                case ::uwvm2::uwvm::wasm::type::module_type_t::exec_wasm: [[fallthrough]];
+                case ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_wasm:
+                {
+                    auto const wf{mod.module_storage_ptr.wf};
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                    if(wf == nullptr) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+#endif
+
+                    switch(wf->binfmt_ver)
+                    {
+                        case 1u:
+                        {
+                            if(!validate_all_wasm_code_for_module(wf->wasm_module_storage.wasm_binfmt_ver1_storage,
+                                                                  wf->wasm_parameter.binfmt1_para,
+                                                                  wf->file_name,
+                                                                  module_name))
+                            {
+                                return false;
+                            }
+                            break;
+                        }
+                        [[unlikely]] default:
+                        {
+                            static_assert(::uwvm2::uwvm::wasm::feature::max_binfmt_version == 1u, "missing implementation of other binfmt version");
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case ::uwvm2::uwvm::wasm::type::module_type_t::local_import:
+                {
+                    // local imported modules are implemented by concepts; no wasm bytecode to validate.
+                    break;
+                }
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+                case ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_dl:
+                {
+                    break;
+                }
+#endif
+                [[unlikely]] default:
+                {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                    ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                    ::std::unreachable();
+                }
+            }
+        }
+
+        if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+        {
+            ::fast_io::unix_timestamp end_time{};
+
+#ifdef UWVM_CPP_EXCEPTIONS
+            try
+#endif
+            {
+                end_time = ::fast_io::posix_clock_gettime(::fast_io::posix_clock_id::monotonic_raw);
+            }
+#ifdef UWVM_CPP_EXCEPTIONS
+            catch(::fast_io::error)
+            {
+                // do nothing
+            }
+#endif
+
+            // verbose
+#if defined(UWVM2_USE_HUGE_FAST_IO_CPO_OUTPUT)
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Validate all wasm code done. (time=",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                end_time - start_time,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"s). ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                u8"[",
+                                ::uwvm2::uwvm::io::get_local_realtime(),
+                                u8"] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8"(verbose)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+#else
+            {
+                // Keep one diagnostic lock, but bound each CPO's argument pack in the default build.
+                auto output_ref{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+                ::fast_io::operations::decay::stream_ref_decay_lock_guard output_lock{
+                    ::fast_io::operations::decay::output_stream_mutex_ref_decay(output_ref)};
+                auto output_unlocked{::fast_io::operations::decay::output_stream_unlocked_ref_decay(output_ref)};
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Validate all wasm code done. (time=");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                    end_time - start_time,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"s). ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                    u8"[");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::io::get_local_realtime(),
+                                    u8"] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                    u8"(verbose)\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }
+#endif
+        }
+
+        return true;
+    }
+}
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

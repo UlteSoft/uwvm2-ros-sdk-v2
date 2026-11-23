@@ -1,0 +1,44 @@
+{
+  "id": "fanuc",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "fanuc_msgs/ForceSensor",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_force_x",
+        "field": "force_x",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_force_z",
+        "field": "force_z",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_moment_z",
+        "field": "moment_z",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_fs_type",
+        "field": "fs_type",
+        "type": "u32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/FANUC-CORPORATION/fanuc_driver/blob/da5db3f611cdc9dffe687e056c4e79bea584bf5c/fanuc_msgs/msg/ForceSensor.msg",
+        "revision": "da5db3f611cdc9dffe687e056c4e79bea584bf5c",
+        "path": "fanuc_msgs/msg/ForceSensor.msg",
+        "sha256": "9c1fbfff859e53e1d9e12c8ec7dc6fad4644897dcbecbdd9b880a6a95d880bb3"
+      }
+    ]
+  }
+}

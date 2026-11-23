@@ -1,0 +1,114 @@
+{
+  "project": "Odin",
+  "url": "https://github.com/odin-lang/Odin",
+  "tag": "dev-2026-11a",
+  "commit": "9a6991685ddf663956d9836602eb421e141fc443",
+  "license": "zlib",
+  "license_path": "upstream/LICENSE",
+  "included_paths": [
+    "src",
+    "base",
+    "core",
+    "shared",
+    "LICENSE",
+    "Makefile",
+    "build_odin.sh"
+  ],
+  "git_files": 1898,
+  "upstream_changed": {
+    "base/runtime/core.odin": {
+      "upstream_git_blob": "cd717dd2047f836649029dc5ecf93f382f431bce",
+      "upstream_sha256": "65ffa5990f7954d5f46e014347c98dab1c68c7729b67180d508b3a977e951f59",
+      "ported_sha256": "4599451da61b6796fdd59528d98dc2fd06817b3fcf818d206a5d7ed2c1eab925"
+    },
+    "base/runtime/default_allocators_general.odin": {
+      "upstream_git_blob": "64af6c904554584379c937cd9021557b922532db",
+      "upstream_sha256": "ed176545ae48a3aa12e4c8a8a3b51c883d53cfcbc1b0532c2511b9a540e09e9d",
+      "ported_sha256": "dd1b7c5d97bf8deea1c1b4cd72bf5924bc6bf3766042053b0c807c110d7ab4c5"
+    },
+    "base/runtime/entry_wasm.odin": {
+      "upstream_git_blob": "52bb0e07219f741212f2cc7a65875b009ea2272e",
+      "upstream_sha256": "7896f378a90df8d033db58ea67b3ed286db9ad68e828defa8da50a000ad20235",
+      "ported_sha256": "9fe2eb338c6af197978b50ea5e106cd3615989ce98d4a75dd85330e79c79781d"
+    },
+    "base/runtime/internal.odin": {
+      "upstream_git_blob": "e43a53b9e486594257066674d732a858d7c92cb7",
+      "upstream_sha256": "8d9b6781105c4ec1f9383a07b1b0ca2286159d82491d4e082b5fd741221cb50d",
+      "ported_sha256": "64d44cf763dead5d62956f3f15f4f02c46e094766208822c1a7c0d4912687d48"
+    },
+    "base/runtime/internal_i128.odin": {
+      "upstream_git_blob": "8c70002c96d5e778eab947fb8806a44812ac56bb",
+      "upstream_sha256": "8ed78df8b6d58a265497bfe53b75a4ec37fce9f3c84c4a98783c845b58c4dd27",
+      "ported_sha256": "8d5e9c896ae17a9c92d029a7b945b14d6c12f3f8887a9bbadc1d96c2e14693c3"
+    },
+    "base/runtime/procs.odin": {
+      "upstream_git_blob": "002a6501f597d5ee4f89a0c453d9064ba5332447",
+      "upstream_sha256": "bd959ad6c6f401e9ccd1101fbb12baaa4059a0ebeca244316c7ab55cb4861b65",
+      "ported_sha256": "d0ae1907c4774edf03796ef4b4a5ca335ef3b3f9318e0b467a2af9315bca1e12"
+    },
+    "base/runtime/procs_wasm.odin": {
+      "upstream_git_blob": "7e03656caa94e40c300ff28700585068fd879954",
+      "upstream_sha256": "5522b94d3b3f13cc64877c8e8e47186164dd0721ea2289239beaeac83e2994e8",
+      "ported_sha256": "b9efce9a6133ebf68e2ad79665c01e5782665981003e694942a1c2af9cfffca0"
+    },
+    "base/runtime/wasm_allocator.odin": {
+      "upstream_git_blob": "d5fd71ba60cc38ab40306a6175e54115004b4151",
+      "upstream_sha256": "f3aead5f795ec661f50df8e9f84dae572fce091a2bca051ba89a51bc8448cc02",
+      "ported_sha256": "51bd630d298b31a1fb6dbac42fdabde8149f282ce2aaf05e99af274c7727a2d3"
+    },
+    "src/build_settings.cpp": {
+      "upstream_git_blob": "30c86bc36629123dc3691e916ae9d3502588be01",
+      "upstream_sha256": "ee36c1a73c7313ce4859e078f42b1979a4f227e8867c7b07571e9925b54104f2",
+      "ported_sha256": "8bba4214e11139de58819fd34ec6026fa3a006875db245f45b50f78a6f02f8a2"
+    },
+    "src/checker.cpp": {
+      "upstream_git_blob": "8e2f7f80059a31b65752f4cfeb7211fef0d71a0c",
+      "upstream_sha256": "2beaa3cff7e34f07983350c8a951aa4d0c075cf87d832c99136ae1de1fec49fa",
+      "ported_sha256": "3d64929da3522801d13757ae15c6378817c7ab069a3dbf669b84c23ee473c2e6"
+    },
+    "src/llvm_abi.cpp": {
+      "upstream_git_blob": "66fa66d444adec6ab4fd02caccb4aa3cd555e58d",
+      "upstream_sha256": "84abb353dba80a6034b8618b2c5aa3bf98a50c6c0953cae8ce05a57d81b60104",
+      "ported_sha256": "d362fff5417b9cdd4d8a0aa9c53bbff2452f12e2fd3b08d21e02845a859d595f"
+    },
+    "src/llvm_backend.cpp": {
+      "upstream_git_blob": "9cfe1f48dd49718f261725fe3370b659dc6b7916",
+      "upstream_sha256": "295b46a6057e539c3bf156fcf3d4b3e533ecdbcd6c1b1ea645a178cd406ad4e8",
+      "ported_sha256": "7fed083e6a6cbd35c6dc16cdaf1d523a4cf9f647697155442b849e1cd33b318c"
+    },
+    "src/llvm_backend_expr.cpp": {
+      "upstream_git_blob": "a653338be755efe89a9cf003ff2f83df2d0081fe",
+      "upstream_sha256": "43b1b97808c86ff06bacf2a550491f0c05bb36f9029edcff0277a27d757d187b",
+      "ported_sha256": "df3d58c6a355cdc7fe4823c050a9f84c9974576f27978ea95d8fb72fd9099ec4"
+    },
+    "src/llvm_backend_proc.cpp": {
+      "upstream_git_blob": "e422820213374c9850f6ab064f86e1905e1338f6",
+      "upstream_sha256": "825ce731c5f777760fad7849d50cfb07b9f7f5235243d71acde851afdee2a47b",
+      "ported_sha256": "d44c9b2b90ecf5fe3827bab2d12112b4c6e7dbe34c9804125bc5265900a0d0f0"
+    },
+    "src/llvm_backend_utility.cpp": {
+      "upstream_git_blob": "dbdd84e7921c40b5bea95d7e4d3c79c042a1b251",
+      "upstream_sha256": "3f275fa1fcb055fd82e23ea7275916a43e6fd04ad6bb5f97b23b1ff32c221e41",
+      "ported_sha256": "730e4163f5637f8a5a0a269839418fbe4dfd9ab66ec4b6955753cf56f184aa40"
+    },
+    "src/main.cpp": {
+      "upstream_git_blob": "14fde3ced7e748d7832f438babfadbc5ba0dba0f",
+      "upstream_sha256": "fc3c5313fbaf5d8224debfaf4a57781ac8e417c9bc063a8d9487cfa2d0aff543",
+      "ported_sha256": "1812bbc94cab193497327b431a9e0df2e42c816cdb72cdc1e8ac032f327202a9"
+    },
+    "src/types.cpp": {
+      "upstream_git_blob": "4e5499f492034639dc8e5e720c549da2516e1df9",
+      "upstream_sha256": "8d1ba37006ed9260cb78f6823f0a6c0ceb0aa8cdef69268b599aa5003c984f67",
+      "ported_sha256": "2fb0c29de6455f0b4ceb85f06fef6a64f3d2a6e5cab5db8e5bc7c8685cb62ab3"
+    }
+  },
+  "legacy_port": {
+    "repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2",
+    "checkout": "d78b272693e1dba582c9e4320e9e4f3c392c6c7c",
+    "wasm64_patch_sha256": "de89e87d87456a3e5ae4fc0b08b55fe5ac723028f3638556aa56d4679597c6d4",
+    "marker_path": "language/odin/mark_mte.cpp",
+    "marker_sha256": "b64b5b36d1f673c2f9a7a5af6fa7e50a6df464bb1e003e9258dfc3674e4cadd9"
+  },
+  "host_llvm": "20.1.8",
+  "marker_llvm": "23.1.5"
+}

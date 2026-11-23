@@ -1,0 +1,37 @@
+{
+  "contract": "src/abi/contract.json",
+  "module": "uwvm_ros_v2",
+  "registered_operations": 163,
+  "source_inputs": 28,
+  "current_workspace_matches_contract": true,
+  "matching_vm_source_commit": "576aa42918eaa3baca12ca030e3c55482cb524ca",
+  "corresponding_runtime_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+  "previous_vendor_test_vm": "2221a8c57e00de1c7f537603c86187bec3ba84a5",
+  "unchanged_registered_signatures": 163,
+  "changed_evidence_inputs": [
+    "src/uwvm2/imported/ros/scene/communication_contract.h",
+    "src/uwvm2/imported/ros/scene/permission_report.h",
+    "src/uwvm2/uwvm/imported/scene/host.h",
+    "tools/ros_scene/interface-catalogue.json"
+  ],
+  "changed_operations": {
+    "service.available": {
+      "old_request": [
+        {
+          "name": "client",
+          "type": "u64"
+        }
+      ],
+      "current_request": [
+        {
+          "name": "client",
+          "type": "u64"
+        },
+        {
+          "name": "source_capability",
+          "type": "u64"
+        }
+      ]
+    }
+  }
+}

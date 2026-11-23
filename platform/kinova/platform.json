@@ -1,0 +1,50 @@
+{
+  "id": "kinova",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "kortex_driver/ActuatorCyclic_Feedback",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_feedback_id_identifier",
+        "field": "feedback_id_identifier",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_jitter_comm",
+        "field": "jitter_comm",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_voltage",
+        "field": "voltage",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_temperature_motor",
+        "field": "temperature_motor",
+        "type": "f32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/Kinovarobotics/ros_kortex/blob/c3280d8a6a6b5d96590d51538e3f265710a6c77d/kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_Feedback.msg",
+        "revision": "c3280d8a6a6b5d96590d51538e3f265710a6c77d",
+        "path": "kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_Feedback.msg",
+        "sha256": "9cc841526e40b8bc2f8e66177a90baf52838a835b770ddcba392e4b204a4a371"
+      },
+      {
+        "url": "https://github.com/Kinovarobotics/ros_kortex/blob/c3280d8a6a6b5d96590d51538e3f265710a6c77d/kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_MessageId.msg",
+        "revision": "c3280d8a6a6b5d96590d51538e3f265710a6c77d",
+        "path": "kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_MessageId.msg",
+        "sha256": "d4189f71113bf8c3574df21fa1120a7d0740a3527ce017114004ac6913dd949d"
+      }
+    ]
+  }
+}

@@ -1,0 +1,2319 @@
+{
+  "commit": "663aab60ba1acacac54d1a8c18ea8140bf84f2b4",
+  "scope": "Frozen local Git object fixture; shipped guest examples using offline observations",
+  "environment": "Offline nested 64 GiB memory / zero swap cgroups and clean namespaces",
+  "matrix": {
+    "platforms": 37,
+    "languages": 4,
+    "passed": 148,
+    "failed": 0,
+    "missing_dependencies": 0,
+    "int_passed": 148,
+    "aot_passed": 148
+  },
+  "cpp": {
+    "standards": [
+      "c++98",
+      "c++03",
+      "c++11",
+      "c++14",
+      "c++17",
+      "c++20",
+      "c++23",
+      "c++26"
+    ],
+    "common_header_checks_passed": 344,
+    "c_raw_nounwind_declarations": {
+      "c++98": 163,
+      "c++03": 163
+    },
+    "noexcept_checks_per_modern_standard": {
+      "c": 166,
+      "cpp": 168
+    },
+    "shipped_raii_builds_passed": 8,
+    "shipped_raii_vm_runs_passed": 16,
+    "owner_vm_runs_passed": 48,
+    "owner_native_mock_runs_passed": 8,
+    "unitree_direct_compilers_passed_without_extra_include_dirs": [
+      "wrc",
+      "wrcc"
+    ],
+    "unitree_direct_vm_runs_passed": 4
+  },
+  "strict_cpp_platform": {
+    "passed_headers": 218,
+    "failed_headers": 70,
+    "passed_examples": 226,
+    "failed_examples": 70,
+    "standards": [
+      "c++98",
+      "c++03"
+    ],
+    "affected_platforms": [
+      "abb",
+      "agibot",
+      "agilex",
+      "booster",
+      "boston_dynamics",
+      "clearpath",
+      "deep_robotics",
+      "dobot",
+      "doosan",
+      "elephant",
+      "fanuc",
+      "flexiv",
+      "fourier",
+      "franka",
+      "hello_robot",
+      "kinova",
+      "kuka",
+      "leju",
+      "limx",
+      "nvidia",
+      "nvidia-groot",
+      "nvidia-isaac-ros",
+      "nvidia-isaac-sim",
+      "pal",
+      "realman",
+      "robotis",
+      "ros",
+      "ros1",
+      "ros2",
+      "trossen",
+      "ubtech",
+      "ufactory",
+      "universal_robots",
+      "wasi",
+      "yaskawa"
+    ],
+    "shared_diagnostic": "include/platform/shared/reader.h:79 expands UINT64_C to ULL",
+    "extra_example_diagnostics": [
+      "fourier",
+      "nvidia",
+      "wasi"
+    ]
+  },
+  "cases": [
+    {
+      "platform": "generic",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "7ab80c0c4331c9170625cc1bb6132836cfeb10495da9ba8a5cfff38dd5646e5d",
+          "bytes": 19115
+        }
+      ]
+    },
+    {
+      "platform": "generic",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "89e060a519d525d6257396b0a0b3fdbb01604e68c5bd47066703cee1e656293e",
+          "bytes": 19176
+        }
+      ]
+    },
+    {
+      "platform": "generic",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "41aa5da95138d570e4fc780bec1678e2694ede4f3ce3b699ed53d0647ee57017",
+          "bytes": 617266
+        }
+      ]
+    },
+    {
+      "platform": "generic",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "42de4b9c090e56868333f5b26aa71e86694bae50ab4f9c40079c93821dcad0e8",
+          "bytes": 138
+        }
+      ]
+    },
+    {
+      "platform": "unitree",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "bc594a2d8470e97166bf838ac8499c9914d4ce575ff373f42b4415da22bd7445",
+          "bytes": 22036
+        }
+      ]
+    },
+    {
+      "platform": "unitree",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "3f4d04decdc34e7b6a08d6d0a871092a2c752aa36aae2b60f0e0cfdd4a3a1bde",
+          "bytes": 30123
+        }
+      ]
+    },
+    {
+      "platform": "unitree",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "d8818ddbb0375aea057690d6931d6bd8652a58c8fce4f23519352b45a08b1b10",
+          "bytes": 922
+        }
+      ]
+    },
+    {
+      "platform": "unitree",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "c501b71139bee82fbbc410f7a072c6609db813df4c6978794ed153b6872e9068",
+          "bytes": 225
+        }
+      ]
+    },
+    {
+      "platform": "abb",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "11a8a9c3a61b20f75a8f8f6a15540bf416f42a06b876ede394f8076a7905cbb2",
+          "bytes": 20682
+        }
+      ]
+    },
+    {
+      "platform": "abb",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "e734975aab2305fcd3a39cd166120bc36ff7a0581e559120584f5007e4d8ece9",
+          "bytes": 20818
+        }
+      ]
+    },
+    {
+      "platform": "abb",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "a9ffab16c4d67d2a438be326ff4d74356284ae07fc2049702468d65caf935b7c",
+          "bytes": 622829
+        }
+      ]
+    },
+    {
+      "platform": "abb",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "e7a4d530d1cf9e2f3c7ceafea36d71008a4b7b54da87c1310cd645cecca4a709",
+          "bytes": 1640
+        }
+      ]
+    },
+    {
+      "platform": "agibot",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "56450e5b937157670802e99ad913f90575c3b099b7f3f45af21170de6dcdc480",
+          "bytes": 28256
+        }
+      ]
+    },
+    {
+      "platform": "agibot",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "84613ce1c551c09691bcbd5ccf578daa13d1651bb03a539579df8ada6ff63d18",
+          "bytes": 28978
+        }
+      ]
+    },
+    {
+      "platform": "agibot",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "0595de37a1165b9c79360259d24484413abcb95bda133612eb5100ebde5d433c",
+          "bytes": 623433
+        }
+      ]
+    },
+    {
+      "platform": "agibot",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "0e3122239b263683dec682c3bbf4b8c6fe3420b2bd9187b0b4e99c47009779bb",
+          "bytes": 2349
+        }
+      ]
+    },
+    {
+      "platform": "agilex",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "46470473dbd63f7f209baa6863708a43e88b2b5abb7bd416ee6f6a7a171b7853",
+          "bytes": 23342
+        }
+      ]
+    },
+    {
+      "platform": "agilex",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "2028b1a37addb17f63d6c5e59a337775157db9f2cf9c8785d3aab425816ca984",
+          "bytes": 23481
+        }
+      ]
+    },
+    {
+      "platform": "agilex",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "5a74d9e8f75ed1beca00c382de0a89f88783015b6e7bf7d3a0149f3e68a45b61",
+          "bytes": 623128
+        }
+      ]
+    },
+    {
+      "platform": "agilex",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "de9f00a042f0f3208ed379f58808e44974c5b18e1087b698415b52d8a3677aa1",
+          "bytes": 2236
+        }
+      ]
+    },
+    {
+      "platform": "booster",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "2365939b2fa55ad117886a320f98dcf6e523e4218e5734a05d5e490d20c58b20",
+          "bytes": 26861
+        }
+      ]
+    },
+    {
+      "platform": "booster",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "b552d95418d91b3bb8df862e8b82757161201a836d19ceea64ef9c41f431ca76",
+          "bytes": 27243
+        }
+      ]
+    },
+    {
+      "platform": "booster",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "edf0a34f64937fcb73ccf68c9cef35533897bfffe45c2b51df21471087ef8ced",
+          "bytes": 623368
+        }
+      ]
+    },
+    {
+      "platform": "booster",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ae6e0a1509b2ca54dcea9ac8dc1e63a9ef4d717519f2b5d10d14297a6934ef18",
+          "bytes": 2039
+        }
+      ]
+    },
+    {
+      "platform": "boston_dynamics",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "6e79262b4e88b6f59d0b08707ddb5b7917ad8f9349beb7ace0fc8b399325603e",
+          "bytes": 22205
+        }
+      ]
+    },
+    {
+      "platform": "boston_dynamics",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "c40160aa6868b46dc1e4a998069a53e1dcec32e4e2edc9aaec08668870650b68",
+          "bytes": 22354
+        }
+      ]
+    },
+    {
+      "platform": "boston_dynamics",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "6874e76860561521db78ff013ef86786172b948ca1e6d9157c273458de17c667",
+          "bytes": 621739
+        }
+      ]
+    },
+    {
+      "platform": "boston_dynamics",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "48693f99237976cc697393dd80de298e8a9ca77e96019c9c0a45a03e405d4b66",
+          "bytes": 1664
+        }
+      ]
+    },
+    {
+      "platform": "clearpath",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "b48df16e0e164cadaafa3608939f44364a97ea1a5a85c679a9fbf6f2a5b373ed",
+          "bytes": 20111
+        }
+      ]
+    },
+    {
+      "platform": "clearpath",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "68fdf33edc5c9dd9a60f8724d2965fc23cd185fd078218e7f9930a6d58633a7a",
+          "bytes": 20253
+        }
+      ]
+    },
+    {
+      "platform": "clearpath",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "04e87967353fa0d6f9d7598a710e52535f4d0e4ac20bd7a9bef2f26651fd5e98",
+          "bytes": 620780
+        }
+      ]
+    },
+    {
+      "platform": "clearpath",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "35324b60aaef599ba4acd0c87e8ce17513942ac159ba3ef71e3912539e40dcbb",
+          "bytes": 1257
+        }
+      ]
+    },
+    {
+      "platform": "deep_robotics",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "73d4d6b4406bb54b6799a880f13fd98fe2699d3f707fdb8a30f3996c51d20695",
+          "bytes": 27459
+        }
+      ]
+    },
+    {
+      "platform": "deep_robotics",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "3badd1dc8b088cb01364f1949311bee27b93ec532aea3817c9a372013582ca28",
+          "bytes": 27882
+        }
+      ]
+    },
+    {
+      "platform": "deep_robotics",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "7ca5ecc009ae3c95917dc5f866af5cb02ac2919a22a833c3ed542389d3a9632a",
+          "bytes": 623487
+        }
+      ]
+    },
+    {
+      "platform": "deep_robotics",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "8e981dcf8f74f7832e5db99c091c4b49d60107f853091a2689b5c46fa1a3c685",
+          "bytes": 2439
+        }
+      ]
+    },
+    {
+      "platform": "dobot",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "f3b072a594412575d189ed1d186ab42a5d15ca50a3185dae70e07671b5c3c169",
+          "bytes": 22929
+        }
+      ]
+    },
+    {
+      "platform": "dobot",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "941464dca02606144b6e4e816928b86390b9d00319fd87f42c3443eee7841fd8",
+          "bytes": 23229
+        }
+      ]
+    },
+    {
+      "platform": "dobot",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "26595ca568ea50904f640537605a519b93487ed6ed99d7dcdf689db5b98ebbbb",
+          "bytes": 621843
+        }
+      ]
+    },
+    {
+      "platform": "dobot",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "21bc8a4d17dfc892bf2ad2f0db1614519d22c259a0c4b7049825ff48f8bc0dba",
+          "bytes": 1686
+        }
+      ]
+    },
+    {
+      "platform": "doosan",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "c347c52d72065e2dcb11eb2e46ed636b2243bb8caa450f82fe80c78e8c064be3",
+          "bytes": 24578
+        }
+      ]
+    },
+    {
+      "platform": "doosan",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "82512a3304654fd3512964d4dd5fa47432ff134f80ed643a0be0989ddc3199c1",
+          "bytes": 25064
+        }
+      ]
+    },
+    {
+      "platform": "doosan",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "5d34b2de5ba35805a1c7a725afe8596416c33abb58a27f09543e10d0d2e02bac",
+          "bytes": 622873
+        }
+      ]
+    },
+    {
+      "platform": "doosan",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "4fedae4453d548e2d5f3e8368c951f1f3a24eb07e5c1a51a71202f366f76f3b6",
+          "bytes": 1753
+        }
+      ]
+    },
+    {
+      "platform": "elephant",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "596d44cd054fa8a66ce271a0e825f6fc70f82572dedf60d6413c2c6eac19201f",
+          "bytes": 21302
+        }
+      ]
+    },
+    {
+      "platform": "elephant",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "b28b858ecc90acd232fe72d336803d063d3a93cfd795343c199d8c0c5f39259d",
+          "bytes": 21552
+        }
+      ]
+    },
+    {
+      "platform": "elephant",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "dfa225f06c474fa5ed0eb9a7850477ddaa2d7acd931b1019cb789cad6ccb085e",
+          "bytes": 621837
+        }
+      ]
+    },
+    {
+      "platform": "elephant",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "784019c205c0134e8ae28a70b8774aa838bdba0ca154c0a271f2268dfb109811",
+          "bytes": 1630
+        }
+      ]
+    },
+    {
+      "platform": "fanuc",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "87a5b6c6a2bf292774f2a9743ae62439f998ce90c38a73228c81f26af3cbabf0",
+          "bytes": 26130
+        }
+      ]
+    },
+    {
+      "platform": "fanuc",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ca946ab8752136e027b38906d4f561a08de8900a8cd9b0342fa04b7fcb5fffa7",
+          "bytes": 26550
+        }
+      ]
+    },
+    {
+      "platform": "fanuc",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "a5c36b23a92234bba51ff0324cd5d583f38c0f015004a05d4e8043e900fed5d2",
+          "bytes": 623446
+        }
+      ]
+    },
+    {
+      "platform": "fanuc",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "60e44eae362b927d83bf2c2918475a2ae632b248b000ebfcc553650dbc413345",
+          "bytes": 2316
+        }
+      ]
+    },
+    {
+      "platform": "flexiv",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "83eb097536c55f636808a64c8d829b1c4357e54dd82b297289f5c7d5777a1304",
+          "bytes": 22742
+        }
+      ]
+    },
+    {
+      "platform": "flexiv",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "f30ad67e08bfbed92e5f7a05cc3455212613d41646d96f735d51db00184d4691",
+          "bytes": 23028
+        }
+      ]
+    },
+    {
+      "platform": "flexiv",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "96a5ca410fc559446a69778ca45129b8dfec18cf221ab14945f6ad632eaf9569",
+          "bytes": 621893
+        }
+      ]
+    },
+    {
+      "platform": "flexiv",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "b17a0db6f6ebd0b4e7a3f056efdf481419fc30cfc80f5f9d444167e6c3132c20",
+          "bytes": 1660
+        }
+      ]
+    },
+    {
+      "platform": "fourier",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "0fc04faf53a1fa849c32ccd961a516e12ae1bdc31bfa9e08cff6b7b83e5f7725",
+          "bytes": 37919
+        }
+      ]
+    },
+    {
+      "platform": "fourier",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "845a828393244cf3f4a0b3d174b8cfa348343929335b83ded5d460bb9902759d",
+          "bytes": 38639
+        }
+      ]
+    },
+    {
+      "platform": "fourier",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "6acf98108fb7ebfc92a4d865d472144850906d2219346fcbb508d17f33c74531",
+          "bytes": 623598
+        }
+      ]
+    },
+    {
+      "platform": "fourier",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "15d738f5d8eab3bdcbab3704f1de6592281093efed5a9918c48f954953dc3a20",
+          "bytes": 2719
+        }
+      ]
+    },
+    {
+      "platform": "franka",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "bed8d988e1cd638f87215d161244356dbdcee5f26092321e22193bcaba8f86bc",
+          "bytes": 24335
+        }
+      ]
+    },
+    {
+      "platform": "franka",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "c17b685cb4db775ae8adf864d017ab9057f5321be6d99112d9c256a32edd5421",
+          "bytes": 24762
+        }
+      ]
+    },
+    {
+      "platform": "franka",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "5bcc2bda73edc211ad1890c6046893b02f6c043473721f02ed4b4bbc5254fe1a",
+          "bytes": 623211
+        }
+      ]
+    },
+    {
+      "platform": "franka",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "58a2556359f606c34b764fb3f71df4e22bb47a237d87777fba941276ef471ee0",
+          "bytes": 2126
+        }
+      ]
+    },
+    {
+      "platform": "hello_robot",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "71de15938e1ad216d88e558b741056e4a5ac7900ca295de28aac83937fc92648",
+          "bytes": 24498
+        }
+      ]
+    },
+    {
+      "platform": "hello_robot",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "6489d0878b922036d36c886d4f61de91136d6655ba3bf91794d0c5d493c33cdb",
+          "bytes": 24775
+        }
+      ]
+    },
+    {
+      "platform": "hello_robot",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "eecae17e92b7bd4d3fe46d66b704e0178c6a2b074dc6e184de3fccd66a262a63",
+          "bytes": 623353
+        }
+      ]
+    },
+    {
+      "platform": "hello_robot",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "09c32a5eca3986f57114c20ba707bf957bfe597b3337ff32ffd3ab3de9e34f46",
+          "bytes": 2442
+        }
+      ]
+    },
+    {
+      "platform": "kinova",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ca8b7367ec068e502d896299d326b51779d167ff38900c32a3fd9eac8c63226f",
+          "bytes": 28319
+        }
+      ]
+    },
+    {
+      "platform": "kinova",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "df89a5b57d1e5a1bee5b779caabc5e8244df0eae46aec85a708a89712e4921be",
+          "bytes": 28458
+        }
+      ]
+    },
+    {
+      "platform": "kinova",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "f73509869e7155f4053c90808e7766d825e4c754c34a6955ff6cdb1bd86e7b15",
+          "bytes": 623181
+        }
+      ]
+    },
+    {
+      "platform": "kinova",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "bb7874d29031f05522a40be4b791ae081a6eb9309e367e94562a117d836518f0",
+          "bytes": 2490
+        }
+      ]
+    },
+    {
+      "platform": "kuka",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "6efcc839c7b512b259db9f4e31454b1a828c82f2c83e9048381b64e779d3b0ac",
+          "bytes": 23022
+        }
+      ]
+    },
+    {
+      "platform": "kuka",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "7c311865468b661f8a56c2832b9aefbc96ac4f70f6bbf24159b35b11ab2da0b5",
+          "bytes": 23508
+        }
+      ]
+    },
+    {
+      "platform": "kuka",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "3d489bdf021f5cd89d6671aca04d6d08e4097cf2b66bfdfc5c8e0c18065ce117",
+          "bytes": 622330
+        }
+      ]
+    },
+    {
+      "platform": "kuka",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "6df7b3ee7323b69f542ae24ce1be9768cd24b5c0accd5612387be73a14d2f556",
+          "bytes": 2441
+        }
+      ]
+    },
+    {
+      "platform": "leju",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "4d842facdca81c32d5130fda9a63e443fcfae104c497012ad9ac21b5ed32e7f6",
+          "bytes": 27365
+        }
+      ]
+    },
+    {
+      "platform": "leju",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "2ed28f24d6e6ed066030d3b3a9e74ae8cd7a78dba8babea0aa1d0b9f86d40044",
+          "bytes": 27643
+        }
+      ]
+    },
+    {
+      "platform": "leju",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "511d76f22ae12694247fa4e95650a3a1ae770ab14d0817c438e509c86c72045a",
+          "bytes": 623207
+        }
+      ]
+    },
+    {
+      "platform": "leju",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "741e818f79e562d6996c3534f94e1219a53d7f6af71a4896f01cf9141c041841",
+          "bytes": 2326
+        }
+      ]
+    },
+    {
+      "platform": "limx",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "98198089b6d93dd64370c48ff0e0d7e486ffd9df3f1509220f81584cb97b0789",
+          "bytes": 23744
+        }
+      ]
+    },
+    {
+      "platform": "limx",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "15e37163de5bae398ba097fa196c0d59dc3850f2dd140044e1bb5f8ae743f5b5",
+          "bytes": 24211
+        }
+      ]
+    },
+    {
+      "platform": "limx",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "9ba2a41816d5c420f6cb2fbdd8ed3cf9e4c3472b868ab091907a34ccf7386132",
+          "bytes": 622684
+        }
+      ]
+    },
+    {
+      "platform": "limx",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "1bf4bd61f7f5beefbea9142068e2c521de0513f3e70d6be98b4b4c128c6e73d3",
+          "bytes": 1783
+        }
+      ]
+    },
+    {
+      "platform": "nvidia",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "8a03bf4bf5553281bfb192ae032edcba9248d8177303d88b3c9c3bab7ed5ae72",
+          "bytes": 27598
+        }
+      ]
+    },
+    {
+      "platform": "nvidia",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "d1878a68bfb65239e78d35c5c862f938bc9e207d61241fb0f85d0e3f332e0662",
+          "bytes": 28308
+        }
+      ]
+    },
+    {
+      "platform": "nvidia",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "fe7ce7ca665230aedd1cbf5c5a7960d93a2ebdec5834b5aac3863bc979eb945b",
+          "bytes": 623265
+        }
+      ]
+    },
+    {
+      "platform": "nvidia",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "3cbc3c7c3893f477bc75582787394e5aac822a9c10b574964a5c8b87234286e7",
+          "bytes": 2210
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-groot",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "94ff74f9be1188b33c6480c3106fd50a19afae66fe4889c5c523b236f8df1375",
+          "bytes": 22505
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-groot",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "2a1b374b1931c92afe39416d9aab8e766b7d832ecd33435819b6001760019f0d",
+          "bytes": 22868
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-groot",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "fb8c9a4919acf16caabcfda0e705b88191015d4f370ca15a7884d3e5222888d9",
+          "bytes": 623059
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-groot",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "d0cc4a04184d3623673dbdb389831ffc0d2408e23307dbaf2d243fb10441f7d6",
+          "bytes": 1841
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-ros",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ea7d31662ba6f6ac6ac691ffd2a94fefc5adcd2aaddf7aa550c4a4c632321e8b",
+          "bytes": 24192
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-ros",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "3968ae11700f800cf82c6426ca15941cb1a11ee5d61b655fd3c2e8a42e71d628",
+          "bytes": 24661
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-ros",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "60e7019d387505004b845a7ec1ad8e6346be426c943d58dfc481b5d9ec0a90b4",
+          "bytes": 623069
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-ros",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "0f65a92eccfbc0a3f73ad623c451d9f1618f5afa4aa41c3a824d67ecde096615",
+          "bytes": 1726
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-sim",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "dc88e1a63cf5c60860edccc7dd30cd7d0b7840a37cb3b0b3c309a8e73decfbe4",
+          "bytes": 23883
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-sim",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "2c7ef592e1a4f4c1cdb2c3e721d44cd278610aab3db056b73778b905fed6a26a",
+          "bytes": 24217
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-sim",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "55a96aa63d48a6ec91cec25e0727a51aa29959679fd731e4c1d563ff4bb4c8f3",
+          "bytes": 622997
+        }
+      ]
+    },
+    {
+      "platform": "nvidia-isaac-sim",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "14708cb180feef70e8a243483e76078e4ab80fcdf874a628e27c95c109039875",
+          "bytes": 1699
+        }
+      ]
+    },
+    {
+      "platform": "pal",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "29fbd8ea769a2f28f9a3e3abcc2aef084ed5679d0a5c50f854124a962ca83b5e",
+          "bytes": 20467
+        }
+      ]
+    },
+    {
+      "platform": "pal",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "4ffe2fed98fa73aa67fcc70a9bbefd7a5a9476a35f2ecef3510e874bcf041727",
+          "bytes": 20603
+        }
+      ]
+    },
+    {
+      "platform": "pal",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "a8158adca6db77a5d13e21a2cc162b08eb7f1f4359570b48bd91fe954243ea20",
+          "bytes": 622639
+        }
+      ]
+    },
+    {
+      "platform": "pal",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "aa98d8630fa255ba5069e636fe2b1a548e519380a3dbb8c635a454618551ca3f",
+          "bytes": 1511
+        }
+      ]
+    },
+    {
+      "platform": "realman",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ab5794af9575a866af8840c735f9a5d09e9d85f0399e9ed8ed72cea31d168b78",
+          "bytes": 25397
+        }
+      ]
+    },
+    {
+      "platform": "realman",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ca0d5f1917335d8d7c0c461bb7b896e4523e0c187e0d18d6f91d16978346fd4a",
+          "bytes": 25863
+        }
+      ]
+    },
+    {
+      "platform": "realman",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "6b5d40a006d2b32e4fbd8b8520ffbdb3bff5e1f4de9ef6c1c5a23ed13be2c366",
+          "bytes": 623046
+        }
+      ]
+    },
+    {
+      "platform": "realman",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "550f27cd4dbd343d63248315d0f7e267a7e71b316ad11722032d24aed9bfe766",
+          "bytes": 1737
+        }
+      ]
+    },
+    {
+      "platform": "robotis",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "4d213fb0fcb4d679474a19702e409a5f95c36850352c407795bea03278e501f3",
+          "bytes": 30042
+        }
+      ]
+    },
+    {
+      "platform": "robotis",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "5ab6a0fd36bb73486cf016fc033c25e40d6f8710245c8743ee68d02793f349a0",
+          "bytes": 30571
+        }
+      ]
+    },
+    {
+      "platform": "robotis",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "4dd74588d9f561e24b6a913ec286d7796da2d2a5e9032921380ca1f1a270122b",
+          "bytes": 623157
+        }
+      ]
+    },
+    {
+      "platform": "robotis",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "f8e679f34cfacece616f81e022b4cfa7c8abbc3048258ac8c5b73fc0bcf6a184",
+          "bytes": 2462
+        }
+      ]
+    },
+    {
+      "platform": "ros",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "e3d67a15e52b89554dd632fe6d7bd1698ecc5d1746f0c30c31fee84f6b8979a7",
+          "bytes": 30871
+        }
+      ]
+    },
+    {
+      "platform": "ros",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "dd531e7b39472ce62ae83e8fa1fd7b229cce56613bf751b3d2a0cc4a8d848743",
+          "bytes": 31376
+        }
+      ]
+    },
+    {
+      "platform": "ros",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "12beddd9ce2de7586471c34bffd5162634eb2f6e4f4383e7be6edcd5422b3ab2",
+          "bytes": 623464
+        }
+      ]
+    },
+    {
+      "platform": "ros",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ffc83bc6f5a6fa5dcfeffe765f446ce2e362fd053cee92134835ee9abbb80a23",
+          "bytes": 2443
+        }
+      ]
+    },
+    {
+      "platform": "ros1",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "b54d251ef4043d12a7e192718df4a78843fce5784a25c58212710ac559786698",
+          "bytes": 20499
+        }
+      ]
+    },
+    {
+      "platform": "ros1",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "739f4109dc7cfb380d3a2080f2ceb645cc79caa49ba577614f2bdafb374bd866",
+          "bytes": 20636
+        }
+      ]
+    },
+    {
+      "platform": "ros1",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "2342d0802bf8f5fbce0ea3ba93fca3fc7d990ba1d399658afff1492da63fd6e7",
+          "bytes": 622630
+        }
+      ]
+    },
+    {
+      "platform": "ros1",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "14f61cf3999b138a386a4703a9deb33df538d83f9810eb685283a62cc769f5a6",
+          "bytes": 1464
+        }
+      ]
+    },
+    {
+      "platform": "ros2",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "a7b73b0ed0a257d477b77364c57385b37a18cb802ecf3fb8e88086f9c82e8f3a",
+          "bytes": 23729
+        }
+      ]
+    },
+    {
+      "platform": "ros2",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "8acb7777885cb144894d9a1ce218754a40fd2e0b027d9a531dd45d77f8e1e87f",
+          "bytes": 24035
+        }
+      ]
+    },
+    {
+      "platform": "ros2",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "a76d54575a016ef0edcca58418f5a653138df0128e42e5992064a4cd9fa5c8f7",
+          "bytes": 622949
+        }
+      ]
+    },
+    {
+      "platform": "ros2",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "4a714d6df15b7188cf231a195120e7dc1bf435e6a62f528ccedc1afd12e0fdcb",
+          "bytes": 1682
+        }
+      ]
+    },
+    {
+      "platform": "trossen",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "69adae6bb50272335bf12623c74b8d1693d38ebc2c6f5e2c7ea1c39c5d1eaf30",
+          "bytes": 28268
+        }
+      ]
+    },
+    {
+      "platform": "trossen",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "128778eb2116ecb640c6e269175698559a7a01bbd3ed89f71a4fc0a7523fa299",
+          "bytes": 28698
+        }
+      ]
+    },
+    {
+      "platform": "trossen",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "9066b69281a2f863d1bc29f94d378803c442d191fb358168448760010ffc4dc6",
+          "bytes": 622349
+        }
+      ]
+    },
+    {
+      "platform": "trossen",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "85a02abc7ab3fc4e9aad8f9a32a2b0e0328078c80dfd0f5f019e6f6d4263fa2b",
+          "bytes": 1410
+        }
+      ]
+    },
+    {
+      "platform": "ubtech",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "94a936101119ce19cf460ae61fb6fe334fb44d83d76f6a4a360c2c35aa0f9b31",
+          "bytes": 26253
+        }
+      ]
+    },
+    {
+      "platform": "ubtech",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "4d15a245543cf5fd5d9227aa06795ba8fa9a7e4d828afdd34cac0d406e432c43",
+          "bytes": 26927
+        }
+      ]
+    },
+    {
+      "platform": "ubtech",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "e91a0e332bf98ad43fe16d124044693c5ca116e99f99d7ab572f4e4c55bd5eb2",
+          "bytes": 623265
+        }
+      ]
+    },
+    {
+      "platform": "ubtech",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "06bbd63809fc4cac055d685f2497e3f0af1b56fb1c28ecadf63e03c5b6cebff0",
+          "bytes": 2819
+        }
+      ]
+    },
+    {
+      "platform": "ufactory",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "f75d353153198b04336486757956c54df71b72a3265e59a26635b64939c87b48",
+          "bytes": 20841
+        }
+      ]
+    },
+    {
+      "platform": "ufactory",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "7cfeb9bf0328267d234ff3a2bec6797cf9074f78a8d7f0d8ccde8af9bce23075",
+          "bytes": 20982
+        }
+      ]
+    },
+    {
+      "platform": "ufactory",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "ef3106fd459a793f4213c2c51ec5687507a4db3c53191f0d82061c59c198b4b1",
+          "bytes": 623081
+        }
+      ]
+    },
+    {
+      "platform": "ufactory",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "f350e3a55c383aaec46750dbab18a7153560f085e543153ae79c7f7173866bce",
+          "bytes": 1847
+        }
+      ]
+    },
+    {
+      "platform": "universal_robots",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "3b4ce8c67a1db43d4b58988ee2e324f88ca5f6fe6d9164c52764d487705fee3c",
+          "bytes": 22199
+        }
+      ]
+    },
+    {
+      "platform": "universal_robots",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "49dc55fcb63a1a388bd98c9f94c9660c4a52ad72f7e032b77b699ab7c9735973",
+          "bytes": 22468
+        }
+      ]
+    },
+    {
+      "platform": "universal_robots",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "fbf1b127f3f919fde7d07948c01cddcbe1014c890edc1eaac9ef38c8225f0cea",
+          "bytes": 621039
+        }
+      ]
+    },
+    {
+      "platform": "universal_robots",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "85388c3943c5ee27a321bcf6ce103aac2fa090f9dc5c9fd21bcb956b405e37ef",
+          "bytes": 1436
+        }
+      ]
+    },
+    {
+      "platform": "wasi",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "0c17b28ee5dc4936fea79152838724add94b53cc71e4f4d6206b14e022753e77",
+          "bytes": 22681
+        }
+      ]
+    },
+    {
+      "platform": "wasi",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "de8a2221ea33a667f4b96eb81af3fa98f1a3c76ecf98bd6bc26cb738f2bf5ca8",
+          "bytes": 22956
+        }
+      ]
+    },
+    {
+      "platform": "wasi",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "e301cd93551ffc4fe341e4d2fbffa97c72bf6838c372ded6d4196eb183af8daf",
+          "bytes": 623098
+        }
+      ]
+    },
+    {
+      "platform": "wasi",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "562338800ca51503ebd9b6d6e8a2b1a68dbfae58d293bfaa30685014aeb17178",
+          "bytes": 1997
+        }
+      ]
+    },
+    {
+      "platform": "yaskawa",
+      "language": "c",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "a8a449d0216d875002b47da7f62a52de6a46822387cce413728166a544f97716",
+          "bytes": 27671
+        }
+      ]
+    },
+    {
+      "platform": "yaskawa",
+      "language": "cpp",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "550da17b1820a1395ecf1a3117179f3e28a6a20559fc445c7cde28e89675e0c9",
+          "bytes": 28402
+        }
+      ]
+    },
+    {
+      "platform": "yaskawa",
+      "language": "rust",
+      "mode": "bindings",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "348993bc5865d0771a752770d85026a7853e23fd5412e3329fed51ae71bdd49a",
+          "bytes": 623442
+        }
+      ]
+    },
+    {
+      "platform": "yaskawa",
+      "language": "wat",
+      "mode": "binary",
+      "build": 0,
+      "test": 0,
+      "int": "passed",
+      "aot": "passed",
+      "modules": [
+        {
+          "sha256": "a8b167999969f158c03ace29d3e41911af010efd0a4f9dcacedc3ed4d524537d",
+          "bytes": 2245
+        }
+      ]
+    }
+  ]
+}

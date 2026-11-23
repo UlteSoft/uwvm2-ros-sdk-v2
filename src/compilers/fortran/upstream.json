@@ -1,0 +1,111 @@
+{
+  "upstream": "https://github.com/llvm/llvm-project.git",
+  "tag": "llvmorg-23.1.5",
+  "commit": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "components": {
+    "flang": {
+      "repository_tree": "6ec1c490a8c96ef9c2d903fb240df4cf9eb71076",
+      "directory": "llvm-project/flang",
+      "license": "llvm-project/flang/LICENSE.TXT"
+    },
+    "flang-rt": {
+      "repository_tree": "f3002638626e0b4ca7f1c13204e1cef6f0713723",
+      "directory": "llvm-project/flang-rt",
+      "license": "llvm-project/flang-rt/LICENSE.TXT"
+    },
+    "mlir": {
+      "repository_tree": "331a9b7beeec94841edbc421df70609c07f8fd0f",
+      "directory": "llvm-project/mlir",
+      "license": "llvm-project/mlir/LICENSE.TXT"
+    }
+  },
+  "shared_llvm": "src/compilers/cc/llvm-project",
+  "old_sdk_base": "ee5d05aadb79f9fdcc9dd7c015cc1eafcce73179",
+  "merged_patches": {
+    "llvm23-wasm-abi.patch": {
+      "sha256": "72f1bccd7366c2f624473f5418113e5275a4fa3762e08a013e1e98be1d144ff8",
+      "applied_to": [
+        "flang/lib/Optimizer/CodeGen/Target.cpp",
+        "flang/lib/Frontend/CompilerInvocation.cpp",
+        "flang-rt/lib/runtime/__fortran_builtins.f90",
+        "flang-rt/lib/runtime/iso_c_binding.f90"
+      ]
+    },
+    "llvm23-flang-assumed-size-index.patch": {
+      "sha256": "2f6cbd70a3ec9d742b9827d36133f1681f566378140afaa846022ef3921cf472",
+      "applied_to": [
+        "flang/lib/Optimizer/CodeGen/CodeGen.cpp"
+      ]
+    },
+    "llvm23-flang-wasm32-address-kind.patch": {
+      "sha256": "f1245bb1f3ebac4dcc00ef7c2e9fb4826001fdc83625f6c94a29bd8ca286d1f1",
+      "applied_to": [
+        "flang/lib/Frontend/CompilerInvocation.cpp"
+      ]
+    },
+    "llvm23-flang-target-cfi-layout.patch": {
+      "sha256": "8b82a92db84ee9ca3333df2b033975e9abcc73b81f8d398c64e80b35fe66e5d8",
+      "applied_to": [
+        "flang/include/flang/Optimizer/CodeGen/DescriptorModel.h",
+        "flang/lib/Optimizer/CodeGen/TypeConverter.cpp",
+        "flang/lib/Optimizer/Transforms/DebugTypeGenerator.cpp"
+      ]
+    },
+    "llvm23-globals-intrinsic-header.patch": {
+      "sha256": "31a4c2be6a0e8dfa14eb48777d9678ccb55bdbad6312826f9c2e0b91d0c9be63",
+      "applied_to": [
+        "llvm/lib/Target/WebAssembly/WebAssemblyGlobalsTagging.cpp"
+      ]
+    }
+  },
+  "edited_guest_runtime_files": {
+    "flang/include/flang/Runtime/allocatable.h": {
+      "patched_sha256": "3c7c7ebe4cab76fc23f1b6f7f6a838af4c38e00eac7821f86801235255c022b8",
+      "working_tree_sha256": "4e4df11c5438513a3c455e66f5cfb69269f547134888d71be4acce0ddd00f935"
+    },
+    "flang/include/flang/Runtime/pointer.h": {
+      "patched_sha256": "1cf92f84ee92c739b58dfbd827d9b29b891939fe7e19d95a9ee57a98a447b478",
+      "working_tree_sha256": "e561f13c618ac414362805b8d20635efd769ce282891e9205041bc71ddc46d8d"
+    },
+    "flang-rt/lib/runtime/ISO_Fortran_binding.cpp": {
+      "patched_sha256": "790c4ba87ae4f8a3c1ecba0fd8e3462960f1591e571545e667a5dbba624d9fe7",
+      "working_tree_sha256": "1749306bac506d596e3c807c39e63858d0f5f013807dc33746a732ffb0021221"
+    },
+    "flang-rt/lib/runtime/ISO_Fortran_util.h": {
+      "patched_sha256": "85c619e79305db20654783ce79f46607464579d7f77e69989d05c0f29a218e63",
+      "working_tree_sha256": "620a560520e614080b97aefeeda4271803fb10a3f5069e3484a799926973e2c4"
+    },
+    "flang-rt/lib/runtime/allocatable.cpp": {
+      "patched_sha256": "69079c0c8ad9bc4f546c336a1e6279b1522eca4f448c05b5f2c5f5f0acee6069",
+      "working_tree_sha256": "9d64238e989cc39fa298d248585bde507ac19f0db948be5d8fb310573622b37a"
+    },
+    "flang-rt/lib/runtime/pointer.cpp": {
+      "patched_sha256": "fab1417cb12d40c4e2ab2d38adf20a6cf36145492d21fbd7684de446ce072517",
+      "working_tree_sha256": "d0dde6e530f288985d673e6e8a34dfc74f44416e80284dc6f35266c82092fbad"
+    },
+    "flang-rt/lib/runtime/descriptor.cpp": {
+      "patched_sha256": "6cbb6ca07a4690e733bd91c9bfc3702bf73177a6f48dd36225aee65ed627c6d1",
+      "working_tree_sha256": "a561fcab8b4ee756b5c25ddc46aa31aab401ec888d3c567eb2fb71e9c32e0654"
+    },
+    "flang-rt/lib/runtime/type-info.cpp": {
+      "patched_sha256": "b5e63d3086a60abb7b6f341a9306705044c5bdfbb9227fdb78ed7e720159f38e",
+      "working_tree_sha256": "ce2c780ec71ca3f009168da4d300c42acba2dc41cb26e619d2fb048bad763068"
+    },
+    "flang-rt/lib/runtime/iso_c_binding.f90": {
+      "patched_sha256": "6dc49b967993c7ee105f5f1d979dabcf7781017052d65b66da37b13f2af33268",
+      "working_tree_sha256": "980031291f3caa21bbf2d7e5e15da6bff6cf1d9202c9cc3b28cd39b5d3665127"
+    },
+    "flang-rt/include/flang-rt/runtime/terminator.h": {
+      "patched_sha256": "825f69b3e54b4a51c43f1921e4cd7c551910df61306d1c27c7f8c41fcbf57e19",
+      "working_tree_sha256": "1c532f8137d09d4f16f98f4ca01ef856ddc718edda9396f3cb2bd5ce9924d09c"
+    }
+  },
+  "legacy_adapter_sha256": {
+    "mark_mte.cpp": "887bba79f88d06913d1ad8257944711753602fed66f89bd1a319cbc15baf11b3",
+    "runtime/clock.c": "fc53849f78bdf73b2eb7bf1964c67f33a5719ca950be2d2c2055c6a7a613fbfd",
+    "runtime/compute_platform.cpp": "b571de485d5964ee2cc8ad161d880a47feb2032b68d141e1e01cea98d131577c",
+    "runtime/entry.c": "3a156713b61fcd2bb98851842d2497c4aa93111f6f11b1706e811eb5916ef372"
+  },
+  "qualification": "pending"
+}

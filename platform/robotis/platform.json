@@ -1,0 +1,50 @@
+{
+  "id": "robotis",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "turtlebot3_msgs/SensorState",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_bumper",
+        "field": "bumper",
+        "type": "u8",
+        "indexed": false
+      },
+      {
+        "name": "read_left_encoder",
+        "field": "left_encoder",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_right_encoder",
+        "field": "right_encoder",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_battery",
+        "field": "battery",
+        "type": "f32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/ROBOTIS-GIT/turtlebot3_msgs/blob/76e78b0a34e07cf1dd16dafdc54c44f35c5b83eb/msg/SensorState.msg",
+        "revision": "76e78b0a34e07cf1dd16dafdc54c44f35c5b83eb",
+        "path": "msg/SensorState.msg",
+        "sha256": "1a9e0c633878fbe28695f1a5490a5655acbfaf871df3d58d197b7f2d51ded8c1"
+      },
+      {
+        "url": "https://github.com/ros/std_msgs/blob/34198520757d1aab358118a0ef294fe2609fde33/msg/Header.msg",
+        "revision": "34198520757d1aab358118a0ef294fe2609fde33",
+        "path": "msg/Header.msg",
+        "sha256": "5e64e71bb8d9d47019367f6a621934aab7e6ffedc6cfdcc912486aa5576ed693"
+      }
+    ]
+  }
+}

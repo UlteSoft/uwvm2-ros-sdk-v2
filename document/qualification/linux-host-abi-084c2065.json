@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "operation": "GitHub root install.py list",
+  "public_revision": "084c206553f46cbe1f421e9c2f9ef5855f128c08",
+  "local_revision": "6a3a1eb8d2b170f6be1cebf5d89a81be5a82e4c1",
+  "independent_receipt_sha256": "196413d5eb1f6e24792eb57b2ff7df02ea298bb4bdbc5560d7e596c1764584f5",
+  "isolation": {
+    "parent_memory_max_bytes": 68719476736,
+    "leaf_memory_max_bytes": 68719476736,
+    "parent_swap_max_bytes": 0,
+    "leaf_swap_max_bytes": 0,
+    "parent_oom_group": 0,
+    "leaf_oom_group": 1
+  },
+  "hosts": {
+    "x86_64": {
+      "execution": "native x86_64 Linux",
+      "started_utc": "2026-11-23T04:55:36Z",
+      "exit": 0,
+      "elf": {
+        "machine": "x86_64",
+        "elf_class": 64,
+        "elf_machine": 62,
+        "elf_flags": "0x00000000"
+      },
+      "observed": {
+        "abi": "linux-x86_64"
+      },
+      "selections_at_revision": [
+        "as",
+        "c",
+        "cpp",
+        "go",
+        "js",
+        "py",
+        "rust",
+        "tinygo",
+        "typescript",
+        "wat"
+      ],
+      "stdout_sha256": "986e12e179601f136e66d060be2f9deecce05f8c5810e5c94803f20ea0a1f4e6",
+      "status_sha256": "92668283b797d30209997b149f68c909263768eba479fbf918ddea3795bf2bd8"
+    },
+    "i686": {
+      "execution": "native GNU i386 Linux userspace on x86_64 kernel",
+      "started_utc": "2026-11-23T04:59:02Z",
+      "exit": 0,
+      "elf": {
+        "machine": "x86_64",
+        "elf_class": 32,
+        "elf_machine": 3,
+        "elf_flags": "0x00000000"
+      },
+      "observed": {
+        "abi": "linux-i686"
+      },
+      "selections_at_revision": [],
+      "stdout_sha256": "951f4526236f10527bdf8bde15782cbf8f866994de85ce46f563d948d586afa9",
+      "status_sha256": "bb8ad49224d28a7a7605a62fc3c4f593e0d0eca9ba0ea19b814ba8a15dbded7b",
+      "loader": "PT_INTERP relocated in test copies of Debian binaries"
+    },
+    "aarch64": {
+      "execution": "QEMU 10.2.1 system virt, max, Debian GNU aarch64 Linux",
+      "started_utc": "2026-11-23T04:57:29Z",
+      "exit": 0,
+      "elf": {
+        "machine": "aarch64",
+        "elf_class": 64,
+        "elf_machine": 183,
+        "elf_flags": "0x00000000"
+      },
+      "observed": {
+        "abi": "linux-aarch64"
+      },
+      "selections_at_revision": [],
+      "stdout_sha256": "d2f42d9f5cff8be228d6d83506b9565c240d6cde824cbf21677d3f6f4edddaf5",
+      "status_sha256": "f6ec12f9adb4de5cf2d1da01f0bc4ec353a175e8ff6cebb5115538a099183a85"
+    },
+    "arm": {
+      "execution": "QEMU 10.2.1 system virt, cortex-a15, Debian GNU arm Linux",
+      "started_utc": "2026-11-23T04:57:29Z",
+      "exit": 0,
+      "elf": {
+        "machine": "armv7l",
+        "elf_class": 32,
+        "elf_machine": 40,
+        "elf_flags": "0x05000200"
+      },
+      "observed": {
+        "abi": "linux-arm",
+        "at_hwcap": 4176086,
+        "features": [
+          "vfp",
+          "neon",
+          "vfpv3",
+          "vfpv4",
+          "vfpd32"
+        ]
+      },
+      "selections_at_revision": [],
+      "stdout_sha256": "970644cea51e3b2113a081dc9e6c9c7fb5382863268c1d5e9e55a96b1d1d92bc",
+      "status_sha256": "f6ec12f9adb4de5cf2d1da01f0bc4ec353a175e8ff6cebb5115538a099183a85",
+      "independently_read_at_hwcap": 4176086,
+      "arm926_no_vfp": {
+        "mode": "local frozen installer, QEMU user",
+        "exit": 0,
+        "stdout_sha256": "a819c0e9532f06129c04f869b59ea52e14b26ebe6576e699260c4341c97040d1",
+        "host_cpu": {
+          "abi": "linux-arm",
+          "at_hwcap": 151,
+          "features": []
+        }
+      }
+    },
+    "armhf": {
+      "execution": "QEMU 10.2.1 system virt, cortex-a15, Debian GNU armhf Linux",
+      "started_utc": "2026-11-23T04:57:29Z",
+      "exit": 0,
+      "elf": {
+        "machine": "armv7l",
+        "elf_class": 32,
+        "elf_machine": 40,
+        "elf_flags": "0x05000400"
+      },
+      "observed": {
+        "abi": "linux-armhf",
+        "at_hwcap": 4176086,
+        "features": [
+          "vfp",
+          "neon",
+          "vfpv3",
+          "vfpv4",
+          "vfpd32"
+        ]
+      },
+      "selections_at_revision": [],
+      "stdout_sha256": "5988fe3c9265ef85eee29530280c11816c66839adca8278c9409bc45eeb651d3",
+      "status_sha256": "389e3aba92d04dd9d78502f86a690f88659b277368cb612dd7b6c6ef20f49e95",
+      "independently_read_at_hwcap": 4176086,
+      "arm926_no_vfp": {
+        "mode": "local frozen installer, QEMU user",
+        "exit": 132,
+        "stdout_sha256": "d1ea6dc7366d51438894358e106aa11e2d70e5095243dbcd7ee37c6da8358720",
+        "outcome": "GNU armhf Python startup SIGILL before installer code"
+      }
+    }
+  }
+}

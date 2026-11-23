@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/madler/zlib",
+  "tag": "v1.3.2",
+  "commit": "da607da739fa6047df13e66a2af6b8bec7c2a498",
+  "component": "Adler-32",
+  "license_file": "upstream/LICENSE",
+  "modifications": []
+}

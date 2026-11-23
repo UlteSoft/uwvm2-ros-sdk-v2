@@ -1,0 +1,53 @@
+{
+  "url": "https://github.com/llvm/llvm-project",
+  "tag": "llvmorg-23.1.5",
+  "commit": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "license_path": "../cc/llvm-project/LICENSE.TXT",
+  "shared_source": "../cc/llvm-project",
+  "changes": [
+    {
+      "path": "clang/lib/Driver/ToolChains/Clang.cpp",
+      "upstream_git_blob": "db7893c547ee7e639b66433cd1ebf9885aecc070",
+      "upstream_sha256": "46f95d77d79decd5aeb6c0de0f4f0df6818a82acb48cb499d77b403777b9c890",
+      "integrated_sha256": "de191abe632483efa0854af7bab5fd2bb4511bb15094f67c388b468f8624d2b7"
+    },
+    {
+      "path": "clang/lib/CodeGen/CGObjCGNU.cpp",
+      "upstream_git_blob": "9742b496cbf5a286b55a870f5e6a1a5b1305b968",
+      "upstream_sha256": "2740d64092eca5923461e899474388ec033beb2c5620c23fcb919f0d1dc0797b",
+      "integrated_sha256": "d325e1e9de4cfaca40eb973ad735a16339938e20d2eabbfffdc7575bf852a816"
+    },
+    {
+      "path": "clang/lib/CodeGen/CGException.cpp",
+      "upstream_git_blob": "99dfaa80be4290d6528bc81eb3b696069da09efd",
+      "upstream_sha256": "a3d89011c69b366e5391ec9fdef7037a9086a567ab6a137152eabd2b8091bb91",
+      "integrated_sha256": "4316950ac7b11b0c8ad5a9971f76295547252d5503c797f5b7679bbf71ab7d0b"
+    },
+    {
+      "path": "clang/lib/CodeGen/CGObjCRuntime.cpp",
+      "upstream_git_blob": "2b8bd170b719787f5f8b2a8863585a872de95c8b",
+      "upstream_sha256": "946961265c092faabaa5f58444638f4fbac8a947527ab285ed54fa0fc04cf2d5",
+      "integrated_sha256": "7b128d39facf85871e1592f28a01f48f0beea721bb0c75eec8833798f5740d80"
+    },
+    {
+      "path": "llvm/lib/Transforms/InstCombine/InstCombineAndOrXor.cpp",
+      "upstream_git_blob": "e6388dcb33d3d961f1eedd70c13ca99c0e1c8e46",
+      "upstream_sha256": "f90640827b281e8f2b34e44d0a472f25a923240363f020cdfea5536a3488247a",
+      "integrated_sha256": "bf6b3fbf7682e754b36a455589f939c0a5bd63063a0a01b84b3eb0a64b1962f6"
+    },
+    {
+      "path": "llvm/lib/CodeGen/WinEHPrepare.cpp",
+      "upstream_git_blob": "40cb11cbeb0de43a4c80c287715cc2c72896afd6",
+      "upstream_sha256": "02e190fbd439af6b42b25b1d1ab1660364609a48a2804e465afce1ddeebd3905",
+      "integrated_sha256": "89fecfad3c23caf2ba88917ad474bc402e17f5391846fe2c6f4f6d50b5b47fbe"
+    }
+  ],
+  "sdk_overlays": [
+    {
+      "path": "wros/clang_driver.cpp",
+      "integrated_sha256": "da8e72e604d9b72a3d3d0001f41b4dc72b6f1289b0df3d90c43fe9e5dbbf6747"
+    }
+  ],
+  "source_root": "../cc/llvm-project"
+}

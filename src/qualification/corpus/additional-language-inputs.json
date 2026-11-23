@@ -1,0 +1,46 @@
+[
+  {
+    "language": "Common Lisp",
+    "package": "cl_transforms_stamped",
+    "scope": "ROS message conversion methods in a library.",
+    "url": "https://github.com/ros/roslisp_common/blob/94c5a2aca4cd5dbee2ca7b23dc56c82b91121bef/cl_transforms_stamped/src/ros-messages.lisp",
+    "commit": "94c5a2aca4cd5dbee2ca7b23dc56c82b91121bef",
+    "path": "cl_transforms_stamped/src/ros-messages.lisp",
+    "source_sha256": "d78d87f0c6a9d03460835ab7848706923a181468bbdf3d482acfcdcf03c04b8e",
+    "archive_sha256": "10e84d16a7ad0dee681cd356ce84379900e36000a75a70c599325a7258457f77",
+    "guest_qualification": "pending"
+  },
+  {
+    "language": "Ada",
+    "package": "rosidl_generator_ada",
+    "scope": "A generated Ada binding to a ROS time record, with explicit host integer types to review for the guest ABI.",
+    "url": "https://github.com/ada-ros/rosidl_generator_ada/blob/c46905ff3c809bb3f796c5fd04dd627ab74d5ad5/gpr_c_typesupport/gen/builtin_interfaces_msg_detail_time_ustruct_h.ads",
+    "commit": "c46905ff3c809bb3f796c5fd04dd627ab74d5ad5",
+    "path": "gpr_c_typesupport/gen/builtin_interfaces_msg_detail_time_ustruct_h.ads",
+    "source_sha256": "af73b0c21928f80cc85ed34048e25a73732572c34bf605759abfd25a4133f061",
+    "archive_sha256": "723bf04365f81ac62c6c91715497a0130b2066817aaaf6482e6c804c6c70a056",
+    "guest_qualification": "pending"
+  },
+  {
+    "language": "Tcl",
+    "package": "vrpn",
+    "scope": "A Tcl application script that depends on commands provided by its host.",
+    "url": "https://github.com/ros-drivers-gbp/vrpn-release/blob/a6df63e823d3ad22c9594592163214438228f6b9/demos/afm-plus-lammps/falcon.tcl",
+    "commit": "a6df63e823d3ad22c9594592163214438228f6b9",
+    "path": "demos/afm-plus-lammps/falcon.tcl",
+    "source_sha256": "89d26eab4d6a18ec8f1e4fb75f52c5b89384e68983dabfad802375ca6ae15a8a",
+    "archive_sha256": "fa68234771769e482ea8a87fc969aada0be033527a4c1334ea11db2fa83827a3",
+    "guest_qualification": "pending"
+  },
+  {
+    "language": "Perl",
+    "package": "vrpn",
+    "scope": "A host-side RPC source generator. Guest execution needs its own use case and test.",
+    "url": "https://github.com/ros-drivers-gbp/vrpn-release/blob/a6df63e823d3ad22c9594592163214438228f6b9/util/gen_rpc/gen_vrpn_rpc.pl",
+    "commit": "a6df63e823d3ad22c9594592163214438228f6b9",
+    "path": "util/gen_rpc/gen_vrpn_rpc.pl",
+    "source_sha256": "ee6793433c9deb6aaeccaa055fa217e66817606a88a6947c22bae9bea65fd5cb",
+    "archive_sha256": "fa68234771769e482ea8a87fc969aada0be033527a4c1334ea11db2fa83827a3",
+    "guest_qualification": "pending"
+  }
+]

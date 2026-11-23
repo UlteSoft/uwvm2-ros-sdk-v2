@@ -1,0 +1,7 @@
+[package]
+name = "decode-memtag"
+version = "0.1.0"
+edition = "2024"
+publish = false
+[dependencies]
+wasmparser = { path = "../../../compilers/wrwat/vendor/wasmparser-memtag", default-features = false, features = ["std", "features", "simd"] }

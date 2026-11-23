@@ -1,0 +1,394 @@
+{
+  "result": "runtime-qualified-with-delivery-limits",
+  "sources": {
+    "code_commit": "e9ce427de3bda374304b0bf5dfc90ced43bee861",
+    "doc_commit": "b4e77b6dcc697c8bc011d195576373a2681d0f59",
+    "contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+    "native_sdk_commit": "663aab60ba1acacac54d1a8c18ea8140bf84f2b4"
+  },
+  "toolchain": {
+    "quickjs": "2026-06-04",
+    "typescript": "5.9.3",
+    "node": "22.22.3",
+    "wabt": "1.0.36",
+    "xmake": "3.0.5+20251230",
+    "vm_sha256": "a3d05e71b254c2e0fc1739fb5e59f0264f8fd08c7c70179b7eefae3a6cc9aa6c",
+    "node_sha256": "e6ec2c188d83d813f81f2de8aea084d74dce603ac1abedd0a30ad941b10087b2",
+    "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+    "native_backend_mode": "instrumented",
+    "native_backend_compiler_sha256": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+    "native_backend_sysroot_sha256": "5f4559fb68f8fc4421cfe095f073df695eb8cad718dd754f2e5441b506272d90",
+    "native_backend_vm_qualified": false
+  },
+  "isolation": {
+    "network": "offline",
+    "home_and_cache_empty_at_start": true,
+    "memory_max_bytes": 68719476736,
+    "swap_max_bytes": 0,
+    "tested_cgroups": "parent and nested test subgroup",
+    "checkout_hidden": true
+  },
+  "import_tables": {
+    "js": {
+      "sha256": "d2fca6d3933f3c08da5ab9234c888c9e18c7f06c0b5aa73c886499291a0529bf",
+      "ros_imports": 163,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "typescript": {
+      "sha256": "54a3c78fd7d617213bbb10e957a4ed3085d78db056329c0b345a00fe69b2d48d",
+      "ros_imports": 163,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    }
+  },
+  "standalone_driver_guests": {
+    "js-shipped": {
+      "sha256": "03d7ea7b94aa0e5a717c214dd4d0b8e18baacf9c0ee1a62d6f294c2edd388abd",
+      "ros_imports": 1,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "js-guard": {
+      "sha256": "26e9318a8543cbf7d1e917e78eb3bbbaaee4d7a8715e55fa0b3d295dc0e2a52a",
+      "ros_imports": 7,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "js-all-deny": {
+      "sha256": "c5e90700384be6b253993665b11cb0fadcae0516661e7c264a50c8f19edf1d02",
+      "ros_imports": 163,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "typescript-shipped": {
+      "sha256": "9cc093e5459e416e747102597b5ac1a8d706489a0f229e77bb299169d569ace9",
+      "ros_imports": 1,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "typescript-guard": {
+      "sha256": "830a54d68dcaa0a913e81ee025d4fc966ad302d384fed54658db2e62fc57f926",
+      "ros_imports": 7,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "typescript-all-deny": {
+      "sha256": "34ae08ec13819f0e54a21dfaf1747a67301f91374b59c82874c2d42c35f5f9d2",
+      "ros_imports": 163,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "js-clock-only": {
+      "sha256": "02ff2df3870fa5f16a837d3aef5284de5f8cfaa47eaae4a3f52236970a1099c3",
+      "ros_imports": 0,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    },
+    "js-shipped-guard": {
+      "sha256": "f34fdcbecd7fbf2e7a02a2d9ab7562d7c23a97556b2fbf21fb7e8467248466f6",
+      "ros_imports": 3,
+      "wasi_imports": [
+        "clock_time_get"
+      ],
+      "wabt_match": true
+    }
+  },
+  "standard_wabt_validator": {
+    "js": {
+      "exit": 1,
+      "diagnostic": [
+        "000212b: error: unexpected opcode: 0xff"
+      ]
+    },
+    "typescript": {
+      "exit": 1,
+      "diagnostic": [
+        "000212c: error: unexpected opcode: 0xff"
+      ]
+    }
+  },
+  "runtime_passed": 24,
+  "runtime_cases": 24,
+  "runtime": {
+    "js/full-abi-allow": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "js/aggregate-full-deny": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "js/shipped-abi-allow": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "js/shipped-abi-hidden": {
+      "INT": {
+        "exit": 127,
+        "passed": true,
+        "diagnostic": "scene interface is hidden"
+      },
+      "AOT": {
+        "exit": 127,
+        "passed": true,
+        "diagnostic": "scene interface is hidden"
+      }
+    },
+    "js/grant-buffer-bigint": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "typescript/full-abi-allow": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "typescript/aggregate-full-deny": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "typescript/shipped-abi-allow": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "typescript/shipped-abi-hidden": {
+      "INT": {
+        "exit": 127,
+        "passed": true,
+        "diagnostic": "scene interface is hidden"
+      },
+      "AOT": {
+        "exit": 127,
+        "passed": true,
+        "diagnostic": "scene interface is hidden"
+      }
+    },
+    "typescript/grant-buffer-bigint": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "js/clock-only": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    },
+    "js/shipped-guard": {
+      "INT": {
+        "exit": 0,
+        "passed": true
+      },
+      "AOT": {
+        "exit": 0,
+        "passed": true
+      }
+    }
+  },
+  "guard_checks": [
+    "valid backing ArrayBuffer address as bigint and typed-array byte offset",
+    "detached buffers and typed-array arguments rejected",
+    "unsigned i32 upper boundary and rejected noninteger, negative, out-of-range and non-number values",
+    "number i64 rejected and larger or negative bigint wraps modulo 2^64",
+    "capability grant, narrowed grant denial and absent alias denial",
+    "separate little-endian length slot, short reply returns 90 and records 8",
+    "length slot overlap rejected with 22",
+    "in-place request and reply succeeds",
+    "guard trigger/take count retained through refused delivery and resource close"
+  ],
+  "documentation": {
+    "binding_files": 82,
+    "binding_only_reordering": [],
+    "verified_relevant_docs": [
+      "documentation-commit/include/js/uwrosv2/guard.mjs",
+      "documentation-commit/include/typescript/uwrosv2/guard.d.ts"
+    ]
+  },
+  "clock_permission_arguments": [
+    "--wasip1-single-create",
+    "main",
+    "--wasip1-single-enable",
+    "main",
+    "--wasip1-single-interface",
+    "main",
+    "clock_time_get",
+    "allow",
+    "--wasip1-single-grant",
+    "main",
+    "realtime-clock"
+  ],
+  "clock_visibility_negative": [
+    {
+      "name": "vm-js-clock-only-int",
+      "exit": 127
+    },
+    {
+      "name": "vm-js-clock-only-aot",
+      "exit": 127
+    }
+  ],
+  "driver_rejections": {
+    "compile-typescript-wrong-i64": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "not assignable to parameter of type 'bigint'"
+    },
+    "compile-typescript-unselected": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "has no exported member 'wr_guard_create'"
+    },
+    "compile-js-unknown-operation": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "unknown ROSv2 operation"
+    },
+    "profile-js-no-mte": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "sysroot"
+    },
+    "profile-js-require-qualified": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "strict"
+    },
+    "profile-typescript-no-mte": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "sysroot"
+    },
+    "profile-typescript-require-qualified": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "strict"
+    }
+  },
+  "installer_rejection": {
+    "js": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "unknown language or platform"
+    },
+    "typescript": {
+      "exit": 1,
+      "passed": true,
+      "diagnostic": "unknown language or platform"
+    }
+  },
+  "stock_xmake_rejection": {
+    "js": {
+      "exit": 255,
+      "passed": true,
+      "diagnostic": "requested language differs from the installed selection"
+    },
+    "typescript": {
+      "exit": 255,
+      "passed": true,
+      "diagnostic": "requested language differs from the installed selection"
+    }
+  },
+  "standalone_xmake": {
+    "build": {
+      "exit": 0,
+      "passed": true
+    },
+    "test": {
+      "exit": 0,
+      "passed": true
+    },
+    "four_tests_passed": true,
+    "test_without_clock": {
+      "exit": 255,
+      "passed": false
+    },
+    "guests": {
+      "js": {
+        "sha256": "6df0f8eb9d428a77d1d09d77d0737e2185214770f4b2b61437205659e0834ffb",
+        "ros_imports": 1,
+        "wasi_imports": [
+          "clock_time_get"
+        ],
+        "wabt_match": true
+      },
+      "typescript": {
+        "sha256": "bfe58ef4cd255c01a72d98b367bea7ca10809b0248cfa66b4a8bd5a98a3963ac",
+        "ros_imports": 1,
+        "wasi_imports": [
+          "clock_time_get"
+        ],
+        "wabt_match": true
+      }
+    }
+  },
+  "source_report_sha256": "67b319e420edd274e5da846544079bb78f84f5e22f4f5eb5f2c1e8a971eb8723"
+}

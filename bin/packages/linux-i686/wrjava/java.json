@@ -1,0 +1,14 @@
+{
+  "schema": 2,
+  "host": "linux-i686",
+  "launcher": {
+    "format": "tar.xz",
+    "member": "wrjava",
+    "compressed_bytes": 11828,
+    "compressed_sha256": "67d632a0e9ab05ad710176c9eee0a1717a18c793bcbc3f92b7df581dcae34ff6",
+    "bytes": 20132,
+    "sha256": "7795db5f7a4dcbf5556aa7a50f47ba9bfab3e60a02aa602f0c0c18e90a6f06ef",
+    "path": "bin/packages/linux-i686/wrjava/java/wrjava-7795db5f7a4dcbf5556a.tar.xz"
+  },
+  "jdk_lock": "src/compilers/jvm/openjdk/debian/upstream.json"
+}

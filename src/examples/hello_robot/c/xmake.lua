@@ -1,0 +1,10 @@
+set_project("hello_robot-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("hello_robot-observation")
+    set_kind("binary")
+    set_language("c")
+    set_ros_platform("hello_robot")
+    add_files("main.c")
+    add_wros_tests("int", "aot")
+target_end()

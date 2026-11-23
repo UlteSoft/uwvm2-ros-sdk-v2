@@ -1,0 +1,11 @@
+set_project("franka-state")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("franka-state")
+    set_kind("binary")
+    set_language("go")
+    set_ros_platform("franka")
+    add_files("go.mod")
+    set_wros_test_queries("abi", "go-runtime")
+    add_wros_tests("int", "aot")
+target_end()

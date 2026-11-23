@@ -1,0 +1,286 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+# ifndef UWVM
+#  define UWVM
+# endif
+// std
+# include <cstddef>
+# include <cstdint>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/ansies/impl.h>
+# include <uwvm2/utils/cmdline/handle.h>
+# include <uwvm2/parser/wasm/concepts/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1p1/features/impl.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# include <uwvm2/uwvm/cmdline/params/wasm_feature.h>
+# include <uwvm2/uwvm/wasm/storage/mode.h>
+# include <uwvm2/uwvm/wasm/feature/impl.h>
+# include <uwvm2/uwvm/runtime/runtime_mode/impl.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::cmdline::params::details
+{
+    namespace wasm_feature_details
+    {
+        using parameter_return_type = ::uwvm2::utils::cmdline::parameter_return_type;
+        using cli_mode = ::uwvm2::parser::wasm::standard::wasm1p1::features::wasm_feature_cli_mode;
+
+        /// @brief Access the global wasm1.1 parser feature parameter used by CLI callbacks.
+        inline constexpr auto& wasm1p1_parameter() noexcept
+        {
+            return ::uwvm2::uwvm::wasm::feature::wasm_binfmt_ver1_wasm1p1_parameter(
+                ::uwvm2::uwvm::wasm::storage::wasm_parameter.binfmt1_para);
+        }
+
+        /// @brief Print a deterministic conflict diagnostic for wasm feature parameters.
+        inline constexpr parameter_return_type print_conflict(::uwvm2::utils::container::u8string_view curr,
+                                                              ::uwvm2::utils::container::u8string_view conflict) noexcept
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                u8"[error] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Conflicting Wasm feature parameters: \"",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                curr,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"\" conflicts with \"",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                conflict,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"\".\n\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            return parameter_return_type::return_m1_imme;
+        }
+
+        /// @brief Diagnose the one explicitly selected baseline, independently of overrides.
+        inline constexpr ::uwvm2::utils::container::u8string_view selected_feature_name(auto const& para) noexcept
+        {
+            if(para.explicit_feature_mvp) { return u8"--wasm-feature-wasmmvp"; }
+            if(para.explicit_feature_wasm1p1) { return u8"--wasm-feature-wasm1p1"; }
+            if(para.explicit_feature_wasm2) { return u8"--wasm-feature-wasm2"; }
+            return u8"--wasm-feature-wasm3";
+        }
+
+        inline constexpr parameter_return_type begin_direct_feature(::uwvm2::utils::cmdline::parameter_parsing_results* para_curr,
+                                                                    cli_mode requested,
+                                                                    bool& explicit_flag) noexcept
+        {
+            auto& para{wasm1p1_parameter()};
+            if(para.explicit_feature_mvp || para.explicit_feature_wasm1p1 ||
+               para.explicit_feature_wasm2 || para.explicit_feature_wasm3) [[unlikely]]
+            { return print_conflict(para_curr->str, selected_feature_name(para)); }
+            para.cli_mode = requested;
+            explicit_flag = true;
+            return parameter_return_type::def;
+        }
+
+        inline constexpr void apply_feature_baseline(auto& para, cli_mode baseline) noexcept
+        { ::uwvm2::parser::wasm::standard::wasm1p1::features::apply_feature_baseline(para, baseline); }
+
+        inline constexpr void apply_mvp_feature_set(auto& para) noexcept { apply_feature_baseline(para, cli_mode::direct_mvp); }
+        inline constexpr void apply_wasm1p1_feature_set(auto& para) noexcept { apply_feature_baseline(para, cli_mode::direct_wasm1p1); }
+        inline constexpr void apply_wasm2_feature_set(auto& para) noexcept { apply_feature_baseline(para, cli_mode::direct_wasm2); }
+        inline constexpr void apply_wasm3_feature_set(auto& para) noexcept { apply_feature_baseline(para, cli_mode::direct_wasm3); }
+
+        /// @brief Override one independent feature without changing the selected baseline.
+        inline constexpr parameter_return_type configure_single_feature(::uwvm2::utils::cmdline::parameter_parsing_results* para_curr,
+                                                                        ::uwvm2::utils::container::u8string_view same_name,
+                                                                        ::uwvm2::utils::container::u8string_view opposite_name,
+                                                                        bool& explicit_flag,
+                                                                        bool& opposite_explicit_flag,
+                                                                        bool& disable_flag,
+                                                                        bool disable,
+                                                                        bool controls_multi_result,
+                                                                        bool controls_multiple_tables) noexcept
+        {
+            if(explicit_flag) [[unlikely]] { return print_conflict(para_curr->str, same_name); }
+            if(opposite_explicit_flag) [[unlikely]] { return print_conflict(para_curr->str, opposite_name); }
+
+            auto& para{wasm1p1_parameter()};
+            explicit_flag = true;
+            disable_flag = disable;
+            if(controls_multi_result) { para.controllable_allow_multi_result_vector = disable; }
+            if(controls_multiple_tables) { para.controllable_allow_multi_table = disable; }
+            return parameter_return_type::def;
+        }
+    }  // namespace wasm_feature_details
+
+#if defined(UWVM_MODULE)
+    extern "C++" UWVM_GNU_COLD
+#else
+    UWVM_GNU_COLD inline constexpr
+#endif
+        /// @brief Handle --wasm-feature-mvp.
+        ::uwvm2::utils::cmdline::parameter_return_type wasm_feature_mvp_callback(
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results * para_begin,
+            ::uwvm2::utils::cmdline::parameter_parsing_results * para_curr,
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results * para_end) noexcept
+    {
+        auto& para{wasm_feature_details::wasm1p1_parameter()};
+        if(auto const ret{wasm_feature_details::begin_direct_feature(
+               para_curr, wasm_feature_details::cli_mode::direct_mvp, para.explicit_feature_mvp)};
+           ret != wasm_feature_details::parameter_return_type::def) [[unlikely]]
+        {
+            return ret;
+        }
+        wasm_feature_details::apply_mvp_feature_set(para);
+        return wasm_feature_details::parameter_return_type::def;
+    }
+
+#if defined(UWVM_MODULE)
+    extern "C++" UWVM_GNU_COLD
+#else
+    UWVM_GNU_COLD inline constexpr
+#endif
+        /// @brief Handle --wasm-feature-wasm1.1.
+        ::uwvm2::utils::cmdline::parameter_return_type wasm_feature_wasm1p1_callback(
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results * para_begin,
+            ::uwvm2::utils::cmdline::parameter_parsing_results * para_curr,
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results * para_end) noexcept
+    {
+        auto& para{wasm_feature_details::wasm1p1_parameter()};
+        if(auto const ret{wasm_feature_details::begin_direct_feature(
+               para_curr, wasm_feature_details::cli_mode::direct_wasm1p1, para.explicit_feature_wasm1p1)};
+           ret != wasm_feature_details::parameter_return_type::def) [[unlikely]]
+        {
+            return ret;
+        }
+        wasm_feature_details::apply_wasm1p1_feature_set(para);
+        return wasm_feature_details::parameter_return_type::def;
+    }
+
+#if defined(UWVM_MODULE)
+    extern "C++" UWVM_GNU_COLD
+#else
+    UWVM_GNU_COLD inline constexpr
+#endif
+        /// @brief Handle --wasm-feature-wasm2.
+        ::uwvm2::utils::cmdline::parameter_return_type wasm_feature_wasm2_callback(
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_begin,
+            ::uwvm2::utils::cmdline::parameter_parsing_results* para_curr,
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_end) noexcept
+    {
+        auto& para{wasm_feature_details::wasm1p1_parameter()};
+        if(auto const ret{wasm_feature_details::begin_direct_feature(
+               para_curr, wasm_feature_details::cli_mode::direct_wasm2, para.explicit_feature_wasm2)};
+           ret != wasm_feature_details::parameter_return_type::def) [[unlikely]]
+        {
+            return ret;
+        }
+        wasm_feature_details::apply_wasm2_feature_set(para);
+        return wasm_feature_details::parameter_return_type::def;
+    }
+
+#if defined(UWVM_MODULE)
+    extern "C++" UWVM_GNU_COLD
+#else
+    UWVM_GNU_COLD inline constexpr
+#endif
+        /// @brief Handle --wasm-feature-wasm3.
+        ::uwvm2::utils::cmdline::parameter_return_type wasm_feature_wasm3_callback(
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_begin,
+            ::uwvm2::utils::cmdline::parameter_parsing_results* para_curr,
+            [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_end) noexcept
+    {
+        auto& para{wasm_feature_details::wasm1p1_parameter()};
+        if(auto const ret{wasm_feature_details::begin_direct_feature(
+               para_curr, wasm_feature_details::cli_mode::direct_wasm3, para.explicit_feature_wasm3)};
+           ret != wasm_feature_details::parameter_return_type::def) [[unlikely]]
+        {
+            return ret;
+        }
+        wasm_feature_details::apply_wasm3_feature_set(para);
+        return wasm_feature_details::parameter_return_type::def;
+    }
+
+#if defined(UWVM_MODULE)
+# define UWVM_WASM_FEATURE_CALLBACK_LINKAGE extern "C++" UWVM_GNU_COLD
+#else
+# define UWVM_WASM_FEATURE_CALLBACK_LINKAGE UWVM_GNU_COLD inline constexpr
+#endif
+
+    UWVM_WASM_FEATURE_CALLBACK_LINKAGE ::uwvm2::utils::cmdline::parameter_return_type wasm_feature_disable_memtag_extension_callback(
+        [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_begin,
+        [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_curr,
+        [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_end) noexcept
+    {
+        // Extension acceptance is independent of the selected official Core
+        // version. Neither a later preset nor a guest can turn it back on.
+        wasm_feature_details::wasm1p1_parameter().disable_memtag_extension = true;
+        ::uwvm2::uwvm::runtime::runtime_mode::runtime_disable_memtag = true;
+        return wasm_feature_details::parameter_return_type::def;
+    }
+
+#define UWVM_DEFINE_WASM_FEATURE_PAIR(member_name, cli_suffix, controls_multi_result, controls_multiple_tables)                                       \
+    UWVM_WASM_FEATURE_CALLBACK_LINKAGE ::uwvm2::utils::cmdline::parameter_return_type wasm_feature_enable_##member_name##_callback(                   \
+        [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_begin,                                                              \
+        ::uwvm2::utils::cmdline::parameter_parsing_results* para_curr,                                                                                \
+        [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_end) noexcept                                                       \
+    {                                                                                                                                                  \
+        auto& para{wasm_feature_details::wasm1p1_parameter()};                                                                                         \
+        return wasm_feature_details::configure_single_feature(                                                                                        \
+            para_curr, u8"--wasm-feature-enable-" cli_suffix, u8"--wasm-feature-disable-" cli_suffix,                                                \
+            para.explicit_enable_##member_name, para.explicit_disable_##member_name, para.disable_##member_name,                                     \
+            false, controls_multi_result, controls_multiple_tables);                                                                                   \
+    }                                                                                                                                                  \
+    UWVM_WASM_FEATURE_CALLBACK_LINKAGE ::uwvm2::utils::cmdline::parameter_return_type wasm_feature_disable_##member_name##_callback(                  \
+        [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_begin,                                                              \
+        ::uwvm2::utils::cmdline::parameter_parsing_results* para_curr,                                                                                \
+        [[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results* para_end) noexcept                                                       \
+    {                                                                                                                                                  \
+        auto& para{wasm_feature_details::wasm1p1_parameter()};                                                                                         \
+        return wasm_feature_details::configure_single_feature(                                                                                        \
+            para_curr, u8"--wasm-feature-disable-" cli_suffix, u8"--wasm-feature-enable-" cli_suffix,                                                \
+            para.explicit_disable_##member_name, para.explicit_enable_##member_name, para.disable_##member_name,                                     \
+            true, controls_multi_result, controls_multiple_tables);                                                                                    \
+    }
+
+    UWVM_DEFINE_WASM_FEATURE_PAIR(multi_value, "multi-value", true, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(reference_types, "reference-types", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(table_instructions, "table-instructions", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(multiple_tables, "multiple-tables", false, true)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(bulk_memory, "bulk-memory", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(sign_extension, "sign-extension", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(nontrapping_float_to_int, "nontrapping-float-to-int", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(simd, "simd", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(extended_const, "extended-const", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(table_initializer, "table-initializer", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(relaxed_simd, "relaxed-simd", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(multi_memory, "multi-memory", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(threads, "threads", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(tail_call, "tail-call", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(memory64, "memory64", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(table64, "table64", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(function_references, "function-references", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(gc, "gc", false, false)
+    UWVM_DEFINE_WASM_FEATURE_PAIR(exceptions, "exceptions", false, false)
+
+#undef UWVM_DEFINE_WASM_FEATURE_PAIR
+#undef UWVM_WASM_FEATURE_CALLBACK_LINKAGE
+}
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

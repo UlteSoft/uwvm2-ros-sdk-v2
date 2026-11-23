@@ -1,0 +1,44 @@
+{
+  "le": {
+    "size": 84,
+    "sha256": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22",
+    "hex": "00010000000000000000f23f000000000000f0bf000000000000e8bf000000000000f03f000000000000d03f000000000000f0bf000000000000a03f000000000000b0bf000000000000c03f000000000000d0bf",
+    "values": [
+      1.125,
+      -1.0,
+      -0.75,
+      1.0,
+      0.25,
+      -1.0,
+      0.03125,
+      -0.0625,
+      0.125,
+      -0.25
+    ]
+  },
+  "be": {
+    "size": 84,
+    "sha256": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+    "hex": "000000003ff2000000000000bff0000000000000bfe80000000000003ff00000000000003fd0000000000000bff00000000000003fa0000000000000bfb00000000000003fc0000000000000bfd0000000000000",
+    "values": [
+      1.125,
+      -1.0,
+      -0.75,
+      1.0,
+      0.25,
+      -1.0,
+      0.03125,
+      -0.0625,
+      0.125,
+      -0.25
+    ]
+  },
+  "provenance": {
+    "type": "franka_msgs/msg/Elbow",
+    "declaration": "https://github.com/frankarobotics/franka_ros2/blob/4acc05c01ebfcdf916ee6b3df966df0ad7b2f9ec/franka_msgs/msg/Elbow.msg",
+    "generator": "eProsima Fast-CDR v2.2.5, XCDRv1 PLAIN_CDR, five std::array<double,2> values serialized in declaration order",
+    "revision": "9f4e60f7ac958e0fbbfe949102de3929cbbc226f",
+    "reference": "https://github.com/eProsima/Fast-CDR/tree/9f4e60f7ac958e0fbbfe949102de3929cbbc226f",
+    "sample": "Independent offline binary-layout vectors. Both derivative second components have diagnostic values to distinguish every array slot."
+  }
+}

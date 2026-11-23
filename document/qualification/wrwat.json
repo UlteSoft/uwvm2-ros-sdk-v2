@@ -1,0 +1,46 @@
+{
+  "github_commit": "d8e730f70ef12a31eb007ff8165073d95bf7bf36",
+  "compiler": "wrwat",
+  "host": "linux-x86_64",
+  "memory_max": 68719476736,
+  "memory_swap_max": 0,
+  "archive_sha256": "1cb9692aaf96f7c0fd6ff99f1b2b8b372e52b5d2e199c7d5127978191d7ba35d",
+  "binary_sha256": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+  "platforms": [
+    "generic",
+    "unitree"
+  ],
+  "modes": [
+    "binary",
+    "source"
+  ],
+  "offline_source_binary_comparisons": 2,
+  "hosted_guest_xmake_int_aot": {
+    "passed": 24,
+    "total": 24
+  },
+  "wasi_thread_spawn_cross_thread_memtag": {
+    "passed": 8,
+    "total": 8
+  },
+  "expected_rejections": {
+    "passed": 60,
+    "total": 60
+  },
+  "shipped_xmake": {
+    "passed": 0,
+    "total": 4,
+    "failure": "assert unavailable in project-scope Lua on Xmake 3.0.5"
+  },
+  "evidence_sha256": {
+    "binary/online.log": "49b78819fb80ff9c71820ef157106bdd8969e16b53a0e791a448c3dd0e8b7ba1",
+    "binary/offline-matrix.log": "366a7a3e7d05299aaed8257e2a5c6d04833df78a47444c696f69556a8b0b565a",
+    "binary/gates-offline.log": "fac9dc42631b9db198725c34aba2984e20ad07d5b33b3b6ea35c1200d77cc399",
+    "binary/shipped-and-gates-offline.log": "a79afaa2bfe84763b8326d3c19a367bce4ca031a0e9dc8c33aaa97fc39efe98c",
+    "source/online.log": "bcfcf47e47d3f7c6bd1e26c24835fbbc0519cb3d8120699c10b83e46b1de553f",
+    "source/offline-matrix.log": "969f396795f45098d9228d0358f4d64fda156cce50e53d7bf698df755e53cce7",
+    "source/gates-offline.log": "f283b2f69d9ee3e0f5ebc58d41a2e47aef07dcbacf9a5668396d5e039a448cfc",
+    "source/shipped-and-gates-offline.log": "d25958d1f90603e898fdfa6e9da9ccd723801747677fc342e3243d4bee7a17e2",
+    "source/rebuild-offline.log": "5e1ec221f767d4311608dc4f7dac41fb9a0e2944d2168b4f3da4280c6f80f3f7"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "go-asm": {
+    "bytes": 6288457,
+    "compressed_bytes": 3047420,
+    "compressed_sha256": "893de23e8a6e28072a0c985120296b0cd80e35432ce9ee75b3999e2e42e910b3",
+    "format": "tar.xz",
+    "member": "asm",
+    "path": "bin/packages/linux-x86_64/wrgo/go/asm-893de23e8a6e28072a0c.tar.xz",
+    "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936"
+  },
+  "go-compile": {
+    "bytes": 28139575,
+    "compressed_bytes": 12833368,
+    "compressed_sha256": "c2176c3d5512b7e60a6d96f35770cb7ceb619b3e69370df5e72ab7ee872d38ef",
+    "format": "tar.xz",
+    "member": "compile",
+    "path": "bin/packages/linux-x86_64/wrgo/go/compile-c2176c3d5512b7e60a6d.tar.xz",
+    "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416"
+  },
+  "go-link": {
+    "bytes": 8660113,
+    "compressed_bytes": 4438772,
+    "compressed_sha256": "61ceebb5e13d4851b043ec779be48b7273783f5b9f360776127ea66489901091",
+    "format": "tar.xz",
+    "member": "link",
+    "path": "bin/packages/linux-x86_64/wrgo/go/link-61ceebb5e13d4851b043.tar.xz",
+    "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc"
+  },
+  "go-wrgo": {
+    "bytes": 3344749,
+    "compressed_bytes": 1798956,
+    "compressed_sha256": "390ca7a3cebbf2345183a2d810b29dcdfed064abcb0c81bb94a542c081a6be04",
+    "format": "tar.xz",
+    "member": "wrgo",
+    "path": "bin/packages/linux-x86_64/wrgo/go/wrgo-390ca7a3cebbf2345183.tar.xz",
+    "sha256": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0"
+  }
+}

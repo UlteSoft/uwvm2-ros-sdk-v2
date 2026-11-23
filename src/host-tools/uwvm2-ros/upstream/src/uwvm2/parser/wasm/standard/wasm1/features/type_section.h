@@ -1,0 +1,1118 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @brief       WebAssembly Release 1.0 (2019-07-20)
+ * @details     antecedent dependency: null
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-04-09
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+# include <cstdint>
+# include <cstring>
+# include <climits>
+# include <concepts>
+# include <type_traits>
+# include <utility>
+# include <memory>
+# include <limits>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/parser/wasm/base/impl.h>
+# include <uwvm2/parser/wasm/utils/impl.h>
+# include <uwvm2/parser/wasm/concepts/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/type/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/section/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/opcode/impl.h>
+# include <uwvm2/parser/wasm/binfmt/binfmt_ver1/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm3/type/function_signature.h>
+# include <uwvm2/parser/wasm/standard/wasm3/type/recursive_type.h>
+# include <uwvm2/parser/wasm/standard/wasm3/type/section_details.h>
+# include <uwvm2/validation/standard/wasm3/recursive_type_validation.h>
+# include "def.h"
+# include "feature_def.h"
+# include "parser_limit.h"
+# include "types.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::parser::wasm::standard::wasm1::features
+{
+    namespace details
+    {
+        // Core 3 metadata needs the full printable declarations. The legacy
+        // context printer below only knows erased function ABI carriers; retain
+        // it for feature packs without Core 3 and use fast_io print_define for
+        // richer packs. This affects diagnostic output, never execution paths.
+        template<typename Feature>
+        inline constexpr bool core3_type_details_feature = requires(typename Feature::parameter const& parameter)
+        { parameter.disable_gc; parameter.disable_function_references; };
+    }
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    struct type_section_storage_t
+    {
+        inline static constexpr ::uwvm2::utils::container::u8string_view section_name{u8"Type"};
+        inline static constexpr ::uwvm2::parser::wasm::standard::wasm1::type::wasm_byte section_id{
+            static_cast<::uwvm2::parser::wasm::standard::wasm1::type::wasm_byte>(::uwvm2::parser::wasm::standard::wasm1::section::section_id::type_sec)};
+
+        ::uwvm2::parser::wasm::standard::wasm1::section::section_span_view sec_span{};
+
+        ::uwvm2::utils::container::vector<::uwvm2::parser::wasm::standard::wasm1::features::final_type_type_t<Fs...>> types{};
+        ::uwvm2::utils::container::vector<::uwvm2::parser::wasm::standard::wasm3::type::owned_function_signature<final_value_type_t<Fs...>>> owned_signatures{};
+        // Exact Core 3 definitions are retained separately from the executable ABI projection.
+        // Flat kind indices match `types` and `owned_signatures`, including aggregate slots.
+        ::uwvm2::parser::wasm::standard::wasm3::type::recursive_type_section core3_recursive_types{};
+        ::uwvm2::utils::container::vector<::uwvm2::parser::wasm::standard::wasm3::type::composite_kind> core3_type_kinds{};
+        ::uwvm2::validation::standard::wasm3::recursive_type_context core3_context{};
+
+        // Aggregate the encoding requirement once, avoiding a complete type scan per validated function.
+        bool requires_function_references{};
+        bool requires_gc{};
+        bool requires_exceptions{};
+        bool requires_simd{}, requires_reference_types{}, requires_multi_value{};
+        // Parser-only visibility for forward function references inside the current rec group.
+        // Zero outside a group; never used by execution or copied into the runtime module.
+        ::std::size_t active_recursive_group_visible_types{};
+
+        inline constexpr type_section_storage_t() noexcept = default;
+        inline constexpr type_section_storage_t(type_section_storage_t&&) noexcept = default;
+        inline constexpr type_section_storage_t& operator=(type_section_storage_t&&) noexcept = default;
+        inline constexpr type_section_storage_t(type_section_storage_t const& other)
+            : sec_span{other.sec_span}, types{other.types}, owned_signatures{other.owned_signatures},
+              core3_recursive_types{other.core3_recursive_types}, core3_type_kinds{other.core3_type_kinds},
+              core3_context{other.core3_context},
+              requires_function_references{other.requires_function_references}, requires_gc{other.requires_gc},
+              requires_exceptions{other.requires_exceptions},
+              requires_simd{other.requires_simd}, requires_reference_types{other.requires_reference_types},
+              requires_multi_value{other.requires_multi_value},
+              active_recursive_group_visible_types{other.active_recursive_group_visible_types}
+        {
+            // Borrowed legacy signatures still point into the caller-owned module image. Owned Core 3 views must
+            // instead refer to this copy's carrier allocations; no pointers into the source copy may survive.
+            // Custom feature packs may replace the function record entirely. Only the existing function
+            // representation uses this owned-signature adapter; other type-section records retain their copy semantics.
+            if constexpr(::std::same_as<final_type_type_t<Fs...>, final_function_type<Fs...>>)
+            {
+                for(auto const& signature : owned_signatures)
+                {
+                    // Parser-published type_index < types.size(); the corresponding type vector was copied above.
+                    ::uwvm2::parser::wasm::standard::wasm3::type::bind_owned_function_signature(
+                        signature, types.index_unchecked(signature.type_index));
+                }
+            }
+        }
+        inline constexpr type_section_storage_t& operator=(type_section_storage_t const& other)
+        {
+            if(this != ::std::addressof(other))
+            {
+                type_section_storage_t temporary{other};
+                *this = ::std::move(temporary);
+            }
+            return *this;
+        }
+
+    };
+
+    /// @brief Define functions for value_type against wasm1 for checking value_type
+    /// @note  ADL for distribution to the correct handler function
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr bool define_check_typesec_value_type(
+        [[maybe_unused]] ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<type_section_storage_t<Fs...>> sec_adl,
+        ::uwvm2::parser::wasm::standard::wasm1::type::value_type value_type  // [adl] can be replaced
+        ) noexcept
+    { return ::uwvm2::parser::wasm::standard::wasm1::features::is_valid_value_type(value_type); }
+
+    /// @brief Detect a feature-aware type-section value-type checker.
+    /// @details Extension features use this differently named hook so the MVP two-argument ADL hook remains unambiguous.
+    template <typename... Fs>
+    concept has_check_typesec_value_type_with_feature_parameter =
+        requires(::uwvm2::parser::wasm::concepts::feature_reserve_type_t<type_section_storage_t<Fs...>> sec_adl,
+                 ::uwvm2::parser::wasm::standard::wasm1::features::final_value_type_t<Fs...> value_type,
+                 ::uwvm2::parser::wasm::concepts::feature_parameter_t<Fs...> const& fs_para) {
+            { define_check_typesec_value_type_with_feature_parameter(sec_adl, value_type, fs_para) } -> ::std::same_as<bool>;
+        };
+
+    /// @brief Check whether a type-section value type is enabled for the current feature parameter set.
+    /// @details Prefer the extension-aware hook when present; otherwise fall back to the original wasm1 two-argument hook.
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr bool check_typesec_value_type(::uwvm2::parser::wasm::concepts::feature_reserve_type_t<type_section_storage_t<Fs...>> sec_adl,
+                                                   ::uwvm2::parser::wasm::standard::wasm1::features::final_value_type_t<Fs...> value_type,
+                                                   ::uwvm2::parser::wasm::concepts::feature_parameter_t<Fs...> const& fs_para) noexcept
+    {
+        if constexpr(has_check_typesec_value_type_with_feature_parameter<Fs...>)
+        {
+            return define_check_typesec_value_type_with_feature_parameter(sec_adl, value_type, fs_para);
+        }
+        else
+        {
+            static_assert(::uwvm2::parser::wasm::standard::wasm1::features::has_check_typesec_value_type<Fs...>,
+                          "define_check_typesec_value_type(...) not found");
+            return define_check_typesec_value_type(sec_adl, value_type);
+        }
+    }
+
+    /// @brief      handle type_prefix: "functype"
+    /// @details    Separate processing to facilitate reuse in subsequent expansion
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr ::std::byte const* handle_type_prefix_functype(
+        ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<type_section_storage_t<Fs...>> sec_adl,
+        ::uwvm2::parser::wasm::binfmt::ver1::wasm_binfmt_ver1_module_extensible_storage_t<Fs...> & module_storage,
+        ::std::byte const* section_curr,
+        ::std::byte const* const section_end,
+        ::uwvm2::parser::wasm::base::error_impl& err,
+        [[maybe_unused]] ::uwvm2::parser::wasm::concepts::feature_parameter_t<Fs...> const& fs_para) UWVM_THROWS
+    {
+        // [... prefix] para_len ... para_begin ... res_len (para_end) ... res_begin ... prefix (res_end) ...
+        // [   safe   ] unsafe (could be the section_end)
+        //              ^^ section_curr
+        //
+        // parse_by_scan below bounds-checks the parameter vector length against section_end.
+
+        auto& typesec{::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<type_section_storage_t<Fs...>>(module_storage.sections)};
+        // The outer binary count counts rec groups, but an inner member contributes one flat
+        // type. It cannot prove capacity for a subsequent bare 0x60, so both the owned and
+        // borrowed unchecked insertion paths require an explicit slot here.
+        if constexpr((::std::same_as<wasm1, Fs> || ...))
+        {
+            auto const& limit{::uwvm2::parser::wasm::concepts::get_curr_feature_parameter<wasm1>(fs_para).parser_limit};
+            if(typesec.types.size() >= limit.max_type_sec_types) [[unlikely]]
+            {
+                err.err_curr = section_curr; // Borrowed section cursor; may be section_end, never dereferenced here.
+                err.err_selectable.exceed_the_max_parser_limit.name = u8"typesec_types";
+                err.err_selectable.exceed_the_max_parser_limit.value = typesec.types.size() + 1uz;
+                err.err_selectable.exceed_the_max_parser_limit.maxval = limit.max_type_sec_types;
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::exceed_the_max_parser_limit;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+        }
+        typesec.types.reserve(typesec.types.size() + 1uz);
+
+        // A feature may replace the byte-borrowing function-signature decoder with an owned representation.
+        // [0x60] vectors ... section_end
+        // [safe] unsafe (could be section_end)
+        //        ^^ section_curr: the extension commits this cursor only after a complete bounded decode.
+        if constexpr(requires { define_parse_owned_function_signature(sec_adl, module_storage, section_curr, section_end, err, fs_para); })
+        {
+            if(define_parse_owned_function_signature(sec_adl, module_storage, section_curr, section_end, err, fs_para))
+            { return section_curr; }
+        }
+
+        using char8_t_const_may_alias_ptr UWVM_GNU_MAY_ALIAS = char8_t const*;
+        using value_type_const_may_alias_ptr UWVM_GNU_MAY_ALIAS = ::uwvm2::parser::wasm::standard::wasm1::features::final_value_type_t<Fs...> const*;
+
+        static_assert(sizeof(::uwvm2::parser::wasm::standard::wasm1::features::final_value_type_t<Fs...>) == 1uz);
+
+        ::uwvm2::parser::wasm::standard::wasm1::features::final_function_type<Fs...> ft{};
+
+        // Add scope space to prevent subsequent access to variables that should not be accessed
+
+        // parameter
+        {
+            ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32 para_len;  // No initialization necessary
+            auto const [next_para_len, err_para_len]{::fast_io::parse_by_scan(reinterpret_cast<char8_t_const_may_alias_ptr>(section_curr),
+                                                                              reinterpret_cast<char8_t_const_may_alias_ptr>(section_end),
+                                                                              ::fast_io::mnp::leb128_get(para_len))};
+            if(err_para_len != ::fast_io::parse_code::ok) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::invalid_parameter_length;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(err_para_len);
+            }
+
+            // [... prefix para_len ...] para_begin ... res_len (para_end) ... res_begin ... prefix (res_end) ...
+            // [           safe        ] unsafe (could be the section_end)
+            //             ^^ section_curr
+
+            // The size_t of some platforms is smaller than u32, in these platforms you need to do a size check before conversion
+            constexpr auto size_t_max{::std::numeric_limits<::std::size_t>::max()};
+            constexpr auto wasm_u32_max{::std::numeric_limits<::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32>::max()};
+            if constexpr(size_t_max < wasm_u32_max)
+            {
+                // The size_t of current platforms is smaller than u32, in these platforms you need to do a size check before conversion
+                if(para_len > size_t_max) [[unlikely]]
+                {
+                    err.err_curr = section_curr;
+                    err.err_selectable.u64 = static_cast<::std::uint_least64_t>(para_len);
+                    err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::size_exceeds_the_maximum_value_of_size_t;
+                    ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+                }
+            }
+
+            // parse_by_scan succeeded, so [section_curr, next_para_len) is now proven safe and next_para_len is inside [section_curr, section_end].
+            // Proof view before moving section_curr: section_curr still points at the parameter length, and next_para_len marks the parameter payload.
+            // Pointer move: advance section_curr to the first parameter byte, or to result length when the parameter vector is empty.
+            section_curr = reinterpret_cast<::std::byte const*>(next_para_len);
+
+            // [... prefix para_len ...] para_begin ... res_len (para_end) ... res_begin ... prefix (res_end) ...
+            // [           safe        ] unsafe (could be the section_end)
+            //                           ^^ section_curr
+
+            // section_curr was produced by parse_by_scan inside [section_begin, section_end], so this subtraction is in range.
+            if(static_cast<::std::size_t>(section_end - section_curr) < static_cast<::std::size_t>(para_len)) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_selectable.u32 = para_len;
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::illegal_parameter_length;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+
+            // [... prefix para_len ... para_begin ...] res_len (para_end) ... res_begin ... prefix (res_end) ...
+            // [                 safe                 ] unsafe (could be the section_end)
+            //                          ^^ section_curr
+
+            // The length check above proves [section_curr, section_curr + para_len) is safe inside the current section.
+
+            // set parameters
+            // Pointer storage: ft.parameter.begin records the beginning of the checked parameter payload.
+            ft.parameter.begin = reinterpret_cast<value_type_const_may_alias_ptr>(section_curr);
+            // Pointer move: advance by para_len bytes, which were proven safe by the length check above.
+            section_curr += para_len;
+
+            // [... prefix para_len ... para_begin ...] res_len (para_end) ... res_begin ... prefix (res_end) ...
+            // [                 safe                 ] unsafe (could be the section_end)
+            //                                          ^^ section_curr
+            //                          ^^ ft.parameter.begin
+            //                                          ^^ ft.parameter.end
+
+            // Storing Temporary Variables into Modules
+            // Pointer storage: ft.parameter.end records the one-past-end pointer of the checked parameter payload.
+            ft.parameter.end = reinterpret_cast<value_type_const_may_alias_ptr>(section_curr);
+
+            // check handler
+            // check parameters
+            // The range [ft.parameter.begin, ft.parameter.end) is inside the already length-checked parameter payload above,
+            // so dereferencing parameter_curr only reads bytes proven to belong to the current section.
+            // [parameter values ... current ... end): != end proves each current type is live.
+            // [safe                              ] ++current advances by one only after visiting a live value,
+            //                                      remaining in this allocation or reaching its checked endpoint.
+            for(auto parameter_curr{ft.parameter.begin}; parameter_curr != ft.parameter.end; ++parameter_curr)
+            {
+                if(!check_typesec_value_type(sec_adl, *parameter_curr, fs_para)) [[unlikely]]
+                {
+                    err.err_curr = reinterpret_cast<::std::byte const*>(parameter_curr);
+                    err.err_selectable.u8 = static_cast<::std::uint_least8_t>(
+                        static_cast<::std::underlying_type_t<::uwvm2::parser::wasm::standard::wasm1::features::final_value_type_t<Fs...>>>(*parameter_curr));
+                    err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::illegal_value_type;
+                    ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+                }
+                // The enclosing length check and current != end prove this actual declaration read.
+                // Optional feature ADL records exact requirements in this same existing traversal.
+                if constexpr(requires { define_record_typesec_value_requirements(sec_adl, typesec, *parameter_curr); })
+                { define_record_typesec_value_requirements(sec_adl, typesec, *parameter_curr); }
+            }
+        }
+
+        // result
+        {
+            // [... prefix para_len ... para_begin ...] res_len (para_end) ... res_begin ... prefix (res_end) ...
+            // [                 safe                 ] unsafe (could be the section_end)
+            //                                          ^^ section_curr
+
+            ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32 result_len;  // No initialization necessary
+            auto const [next_result_len, err_result_len]{::fast_io::parse_by_scan(reinterpret_cast<char8_t_const_may_alias_ptr>(section_curr),
+                                                                                  reinterpret_cast<char8_t_const_may_alias_ptr>(section_end),
+                                                                                  ::fast_io::mnp::leb128_get(result_len))};
+            if(err_result_len != ::fast_io::parse_code::ok) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::invalid_result_length;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(err_result_len);
+            }
+
+            // [... prefix para_len ... para_begin ... res_len (para_end) ...] res_begin ... prefix (res_end) ...
+            // [                           safe                              ] unsafe (could be the section_end)
+            //                                         ^^ section_curr
+
+            // The size_t of some platforms is smaller than u32, in these platforms you need to do a size check before conversion
+            constexpr auto size_t_max{::std::numeric_limits<::std::size_t>::max()};
+            constexpr auto wasm_u32_max{::std::numeric_limits<::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32>::max()};
+            if constexpr(size_t_max < wasm_u32_max)
+            {
+                // The size_t of current platforms is smaller than u32, in these platforms you need to do a size check before conversion
+                if(result_len > size_t_max) [[unlikely]]
+                {
+                    err.err_curr = section_curr;
+                    err.err_selectable.u64 = static_cast<::std::uint_least64_t>(result_len);
+                    err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::size_exceeds_the_maximum_value_of_size_t;
+                    ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+                }
+            }
+
+            // parse_by_scan succeeded, so [section_curr, next_result_len) is now proven safe and next_result_len is inside [section_curr, section_end].
+            // Proof view before moving section_curr: section_curr still points at the result length, and next_result_len marks the result payload.
+            // Pointer move: advance section_curr to the first result byte, or to the next function type prefix when the result vector is empty.
+            section_curr = reinterpret_cast<::std::byte const*>(next_result_len);
+
+            // [... prefix para_len ... para_begin ... res_len (para_end) ...] res_begin ... prefix (res_end) ...
+            // [                           safe                              ] unsafe (could be the section_end)
+            //                                                                 ^^ section_curr
+
+            /// @details    In the current version of WebAssembly, the length of the result type vector of a valid function type may be
+            ///             at most 1. This restriction may be removed in future versions.
+            /// @see        WebAssembly Release 1.0 (2019-07-20) § 2.3.3
+            constexpr bool allow_multi_value{::uwvm2::parser::wasm::standard::wasm1::features::allow_multi_result_vector<Fs...>()};
+            if constexpr(allow_multi_value)
+            {
+                // Keep wasm1 function-type validation strict until a runtime extension flag enables multi-value.
+                // When compile-time allows multi results, the runtime parameter can re-enable the single-result check
+                constexpr bool has_controllable_allow_multi_value{
+                    ::uwvm2::parser::wasm::standard::wasm1::features::has_feature_parameter_controllable_allow_multi_result_vector_from_paras_c<Fs...>};
+                if constexpr(has_controllable_allow_multi_value)
+                {
+                    if(get_feature_parameter_controllable_allow_multi_result_vector_from_paras(fs_para))
+                    {
+                        if(result_len > static_cast<::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32>(1u)) [[unlikely]]
+                        {
+                            err.err_curr = section_curr;
+                            err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::wasm1_not_allow_multi_value;
+                            ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // WebAssembly 1.0: result vector length must be at most 1
+                if(result_len > static_cast<::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32>(1u)) [[unlikely]]
+                {
+                    err.err_curr = section_curr;
+                    err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::wasm1_not_allow_multi_value;
+                    ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+                }
+            }
+
+            // section_curr was produced by parse_by_scan inside [section_begin, section_end], so this subtraction is in range.
+            if(static_cast<::std::size_t>(section_end - section_curr) < static_cast<::std::size_t>(result_len)) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_selectable.u32 = result_len;
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::illegal_result_length;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+
+            // [... prefix para_len ... para_begin ... res_len (para_end) ... res_begin ...] prefix (res_end) ...
+            // [                           safe                                            ] unsafe (could be the section_end)
+            //                                                                ^^ section_curr
+
+            // The length check above proves [section_curr, section_curr + result_len) is safe inside the current section.
+
+            // set parameters
+            // Pointer storage: ft.result.begin records the beginning of the checked result payload.
+            ft.result.begin = reinterpret_cast<value_type_const_may_alias_ptr>(section_curr);
+            // Pointer move: advance by result_len bytes, which were proven safe by the length check above.
+            section_curr += result_len;
+
+            // [... prefix para_len ... para_begin ... res_len (para_end) ... res_begin ...] prefix (res_end) ...
+            // [                           safe                                            ] unsafe (could be the section_end)
+            //                                                                               ^^ section_curr
+            //                                                                ^^ ft.result.begin
+            //                                                                               ^^ ft.result.end
+
+            // Storing Temporary Variables into Modules
+            // Pointer storage: ft.result.end records the one-past-end pointer of the checked result payload.
+            ft.result.end = reinterpret_cast<value_type_const_may_alias_ptr>(section_curr);
+
+            // check results
+            // The range [ft.result.begin, ft.result.end) is inside the already length-checked result payload above,
+            // so dereferencing result_curr only reads bytes proven to belong to the current section.
+            // [result values ... current ... end): != end proves each current type is live.
+            // [safe                              ] ++current advances by one only after visiting a live value,
+            //                                      remaining in this allocation or reaching its checked endpoint.
+            for(auto result_curr{ft.result.begin}; result_curr != ft.result.end; ++result_curr)
+            {
+                if(!check_typesec_value_type(sec_adl, *result_curr, fs_para)) [[unlikely]]
+                {
+                    err.err_curr = reinterpret_cast<::std::byte const*>(result_curr);
+                    err.err_selectable.u8 = static_cast<::std::uint_least8_t>(
+                        static_cast<::std::underlying_type_t<::uwvm2::parser::wasm::standard::wasm1::features::final_value_type_t<Fs...>>>(*result_curr));
+                    err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::illegal_value_type;
+                    ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+                }
+                // The enclosing length check and current != end prove this actual declaration read.
+                // Optional feature ADL records exact requirements in this same existing traversal.
+                if constexpr(requires { define_record_typesec_value_requirements(sec_adl, typesec, *result_curr); })
+                { define_record_typesec_value_requirements(sec_adl, typesec, *result_curr); }
+            }
+            // All result values/counts are admitted before this scalar metadata is published.
+            typesec.requires_multi_value |= result_len > 1u;
+        }
+
+        // push back
+        typesec.types.push_back_unchecked(::std::move(ft));
+
+        return section_curr;
+    }
+
+    /// @brief Define type_prefix for wasm1 Functions for checking type_prefix
+    /// @note  ADL for distribution to the correct handler function
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr ::std::byte const* define_type_prefix_handler(
+        ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<type_section_storage_t<Fs...>> sec_adl,
+        [[maybe_unused]] ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<::uwvm2::parser::wasm::standard::wasm1::features::final_function_type<Fs...>>
+            type_adl,                                                               // [adl]
+        ::uwvm2::parser::wasm::standard::wasm1::type::function_type_prefix prefix,  // [adl] can be replaced
+        ::uwvm2::parser::wasm::binfmt::ver1::wasm_binfmt_ver1_module_extensible_storage_t<Fs...> & module_storage,
+        ::std::byte const* section_curr,
+        ::std::byte const* const section_end,
+        ::uwvm2::parser::wasm::base::error_impl& err,
+        ::uwvm2::parser::wasm::concepts::feature_parameter_t<Fs...> const& fs_para,
+        ::std::byte const* const prefix_module_ptr) UWVM_THROWS
+    {
+        // Note that section_curr may be equal to section_end, which needs to be checked
+
+        // [... prefix] ...
+        // [   safe   ] unsafe (could be the section_end)
+        //              ^^ section_curr
+
+        // Core 3 rec groups are a feature-aware parser extension. The wrapper itself must be
+        // decoded before an inner 0x60 function can reuse the existing bounded signature decoder.
+        if(static_cast<::std::uint_least8_t>(prefix) == 0x4eu)
+        {
+            if constexpr(requires { define_parse_core3_recursive_function_group(
+                sec_adl, module_storage, section_curr, section_end, err, fs_para, prefix_module_ptr); })
+            {
+                // [0x4e] group length and members ... section_end
+                // [safe ] unsafe (possibly section_end)
+                //        ^^ section_curr: the extension validates each move before returning its final cursor.
+                return define_parse_core3_recursive_function_group(
+                    sec_adl, module_storage, section_curr, section_end, err, fs_para, prefix_module_ptr);
+            }
+        }
+
+        switch(prefix)
+        {
+            case ::uwvm2::parser::wasm::standard::wasm1::type::function_type_prefix::functype:
+            {
+                // Note that section_curr may be equal to section_end, which needs to be checked
+                return handle_type_prefix_functype(sec_adl, module_storage, section_curr, section_end, err, fs_para);
+            }
+            [[unlikely]] default:
+            {
+                err.err_curr = prefix_module_ptr;
+                err.err_selectable.u8 = static_cast<::std::uint_least8_t>(
+                    static_cast<::std::underlying_type_t<::uwvm2::parser::wasm::standard::wasm1::features::final_value_type_t<Fs...>>>(prefix));
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::illegal_type_prefix;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+        }
+    }
+
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr void define_check_duplicate_types(
+        [[maybe_unused]] ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<type_section_storage_t<Fs...>> sec_adl,
+        [[maybe_unused]] ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<::uwvm2::parser::wasm::standard::wasm1::features::final_function_type<Fs...>>
+            type_adl,  // [adl]
+        ::uwvm2::parser::wasm::binfmt::ver1::wasm_binfmt_ver1_module_extensible_storage_t<Fs...> & module_storage,
+        ::std::byte const* section_curr,
+        [[maybe_unused]] ::std::byte const* const section_end,
+        ::uwvm2::parser::wasm::base::error_impl& err,
+        [[maybe_unused]] ::uwvm2::parser::wasm::concepts::feature_parameter_t<Fs...> const& fs_para) UWVM_THROWS
+    {
+        auto& typesec{::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<type_section_storage_t<Fs...>>(module_storage.sections)};
+
+        ::uwvm2::utils::container::unordered_flat_map<::uwvm2::parser::wasm::standard::wasm1::features::type_function_checker,
+                                                      ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32>
+            duplicate_type_function_checker{};
+
+        duplicate_type_function_checker.reserve(typesec.types.size());
+
+        ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32 type_counter{};
+        for(auto& type: typesec.types)
+        {
+
+            ::uwvm2::parser::wasm::standard::wasm1::features::type_function_checker tmp{};
+            tmp.parameter.begin = reinterpret_cast<::std::byte const*>(type.parameter.begin);
+            tmp.parameter.end = reinterpret_cast<::std::byte const*>(type.parameter.end);
+            tmp.result.begin = reinterpret_cast<::std::byte const*>(type.result.begin);
+            tmp.result.end = reinterpret_cast<::std::byte const*>(type.result.end);
+
+            auto const [it, is_inserted]{duplicate_type_function_checker.try_emplace(tmp, type_counter)};
+            if(!is_inserted) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_selectable.u32arr[0] = type_counter;  // Current repetition
+                err.err_selectable.u32arr[1] = it->second;    // Previously existing
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::duplicate_type_function;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+
+            ++type_counter;
+        }
+    }
+
+    /// @brief Define the handler function for type_section
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr void handle_binfmt_ver1_extensible_section_define(
+        ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<type_section_storage_t<Fs...>> sec_adl,
+        ::uwvm2::parser::wasm::binfmt::ver1::wasm_binfmt_ver1_module_extensible_storage_t<Fs...> & module_storage,
+        ::std::byte const* const section_begin,
+        ::std::byte const* const section_end,
+        ::uwvm2::parser::wasm::base::error_impl& err,
+        ::uwvm2::parser::wasm::concepts::feature_parameter_t<Fs...> const& fs_para,
+        [[maybe_unused]] ::uwvm2::parser::wasm::binfmt::ver1::max_section_id_map_sec_id_t& wasm_order,
+        ::std::byte const* const sec_id_module_ptr) UWVM_THROWS
+    {
+#ifdef UWVM_TIMER
+        ::uwvm2::utils::debug::timer parsing_timer{u8"parse type section (id: 1)"};
+#endif
+        // section_begin may equal section_end; parse_by_scan below bounds-checks the type count against section_end.
+
+        // get type_section_storage_t from storages
+        auto& typesec{::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<type_section_storage_t<Fs...>>(module_storage.sections)};
+
+        // check duplicate
+        if(typesec.sec_span.sec_begin) [[unlikely]]
+        {
+            err.err_curr = sec_id_module_ptr;
+            err.err_selectable.u8 = typesec.section_id;
+            err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::duplicate_section;
+            ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+        }
+
+        using wasm_byte_const_may_alias_ptr UWVM_GNU_MAY_ALIAS = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_byte const*;
+
+        typesec.sec_span.sec_begin = reinterpret_cast<wasm_byte_const_may_alias_ptr>(section_begin);
+        typesec.sec_span.sec_end = reinterpret_cast<wasm_byte_const_may_alias_ptr>(section_end);
+
+        // The GC-enabled decoder retains composite kinds, field layouts, and recursive groups.
+        // It consumes the same caller-proven [section_begin, section_end) byte range transactionally.
+        if constexpr(requires { define_parse_core3_complete_type_section(
+            sec_adl, module_storage, section_begin, section_end, err, fs_para); })
+        {
+            if(define_parse_core3_complete_type_section(
+                sec_adl, module_storage, section_begin, section_end, err, fs_para)) { return; }
+        }
+
+        auto section_curr{section_begin};
+
+        // [before_section ... ] | type_count ... prefix ...
+        // [        safe       ] | unsafe (could be the section_end)
+        //                         ^^ section_curr
+
+        ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32 type_count;  // No initialization necessary
+
+        using char8_t_const_may_alias_ptr UWVM_GNU_MAY_ALIAS = char8_t const*;
+
+        auto const [type_count_next, type_count_err]{::fast_io::parse_by_scan(reinterpret_cast<char8_t_const_may_alias_ptr>(section_curr),
+                                                                              reinterpret_cast<char8_t_const_may_alias_ptr>(section_end),
+                                                                              ::fast_io::mnp::leb128_get(type_count))};
+
+        if(type_count_err != ::fast_io::parse_code::ok) [[unlikely]]
+        {
+            err.err_curr = section_curr;
+            err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::invalid_type_count;
+            ::uwvm2::parser::wasm::base::throw_wasm_parse_code(type_count_err);
+        }
+
+        // [before_section ... | type_count ...] prefix ...
+        // [             safe                  ] unsafe (could be the section_end)
+        //                       ^^ section_curr
+
+        // The size_t of some platforms is smaller than u32, in these platforms you need to do a size check before conversion
+        constexpr auto size_t_max{::std::numeric_limits<::std::size_t>::max()};
+        constexpr auto wasm_u32_max{::std::numeric_limits<::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32>::max()};
+        if constexpr(size_t_max < wasm_u32_max)
+        {
+            // The size_t of current platforms is smaller than u32, in these platforms you need to do a size check before conversion
+            if(type_count > size_t_max) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_selectable.u64 = static_cast<::std::uint_least64_t>(type_count);
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::size_exceeds_the_maximum_value_of_size_t;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+        }
+
+        if constexpr((::std::same_as<wasm1, Fs> || ...))
+        {
+            auto const& wasm1_feapara_r{::uwvm2::parser::wasm::concepts::get_curr_feature_parameter<wasm1>(fs_para)};
+            auto const& parser_limit{wasm1_feapara_r.parser_limit};
+            if(static_cast<::std::size_t>(type_count) > parser_limit.max_type_sec_types) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_selectable.exceed_the_max_parser_limit.name = u8"typesec_types";
+                err.err_selectable.exceed_the_max_parser_limit.value = static_cast<::std::size_t>(type_count);
+                err.err_selectable.exceed_the_max_parser_limit.maxval = parser_limit.max_type_sec_types;
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::exceed_the_max_parser_limit;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+        }
+
+        typesec.types.reserve(static_cast<::std::size_t>(type_count));
+
+        ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32 type_counter{};  // use for check
+
+        // parse_by_scan succeeded, so [section_curr, type_count_next) is now proven safe and type_count_next is inside [section_curr, section_end].
+        // Proof view before moving section_curr: section_curr still points at the type count, and type_count_next marks the first type prefix.
+        // Pointer move: advance section_curr to the first type prefix, or to section_end when the type vector is empty.
+        section_curr = reinterpret_cast<::std::byte const*>(type_count_next);
+
+        // [before_section ... | type_count ...] prefix ...
+        // [              safe                 ] unsafe (could be the section_end)
+        //                                       ^^ section_curr
+
+        while(section_curr != section_end) [[likely]]
+        {
+            // Ensuring the existence of valid information
+
+            // [... prefix] ...
+            // [   safe   ] unsafe (could be the section_end)
+            //      ^^ section_curr
+
+            // check type counter
+            // Ensure content is available before counting (section_curr != section_end)
+            if(::uwvm2::parser::wasm::utils::counter_selfinc_throw_when_overflow(type_counter, section_curr, err) > type_count) [[unlikely]]
+            {
+                err.err_curr = section_curr;
+                err.err_selectable.u32 = type_count;
+                err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::type_section_resolved_exceeded_the_actual_number;
+                ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+            }
+
+            auto const prefix_module_ptr{section_curr};
+            // [... prefix] ...
+            // [   safe   ] unsafe (could be the section_end)
+            //      ^^ prefix_module_ptr
+
+            ::uwvm2::parser::wasm::standard::wasm1::features::final_type_prefix_t<Fs...> prefix;
+
+            // section_curr != section_end from the loop condition proves the one-byte type prefix read is in bounds.
+            ::std::memcpy(::std::addressof(prefix), section_curr, sizeof(prefix));
+
+            static_assert(sizeof(prefix) == 1uz);
+            // Size equal to one does not need to do little-endian conversion
+
+            // Avoid high invalid byte problem for platforms with CHAR_BIT greater than 8
+#if CHAR_BIT > 8
+            prefix = static_cast<decltype(prefix)>(static_cast<::std::uint_least8_t>(prefix) & 0xFFu);
+#endif
+
+            // Pointer move: advance to the first byte after the checked type prefix.
+            ++section_curr;
+            // [... prefix] ...
+            // [   safe   ] unsafe (could be the section_end)
+            //              ^^ section_curr
+
+            // Note that maybe (section_curr == section_end) now, follow-up needs to be checked (in define_type_prefix_handler)
+
+            // check has func
+            static_assert(::uwvm2::parser::wasm::standard::wasm1::features::has_type_prefix_handler<Fs...>, "define_type_prefix_handler(...) not found");
+
+            // handle it
+            ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<::uwvm2::parser::wasm::standard::wasm1::features::final_type_type_t<Fs...>> type_adl{};
+            // [checked outer prefix][checked member/group payload] ... section_end
+            // [safe                                                   ] unsafe (possibly section_end)
+            //                                                         ^^ section_curr: handler commits only bounded moves.
+            section_curr = define_type_prefix_handler(sec_adl, type_adl, prefix, module_storage, section_curr, section_end, err, fs_para, prefix_module_ptr);
+            // The outer count measures rec groups, not flat member type indices. Enforce the
+            // flat limit after every entry as well, including a bare 0x60 after a large group.
+            if constexpr((::std::same_as<wasm1, Fs> || ...))
+            {
+                auto const& limit{::uwvm2::parser::wasm::concepts::get_curr_feature_parameter<wasm1>(fs_para).parser_limit};
+                if(typesec.types.size() > limit.max_type_sec_types) [[unlikely]]
+                {
+                    err.err_curr = section_curr; // Bounded handler result; diagnostic may equal section_end.
+                    err.err_selectable.exceed_the_max_parser_limit.name = u8"typesec_types";
+                    err.err_selectable.exceed_the_max_parser_limit.value = typesec.types.size();
+                    err.err_selectable.exceed_the_max_parser_limit.maxval = limit.max_type_sec_types;
+                    err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::exceed_the_max_parser_limit;
+                    ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+                }
+            }
+        }
+
+        // [... ] (section_end)
+        // [safe] unsafe (could be the section_end)
+        //        ^^ section_curr
+
+        // check type counter match
+        if(type_counter != type_count) [[unlikely]]
+        {
+            err.err_curr = section_curr;
+            err.err_selectable.u32arr[0] = type_counter;
+            err.err_selectable.u32arr[1] = type_count;
+            err.err_code = ::uwvm2::parser::wasm::base::wasm_parse_error_code::type_section_resolved_not_match_the_actual_number;
+            ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+        }
+
+        // A conceptual interface is reserved here for checks that may be added later.
+        constexpr bool prohibit_duplicate_types{::uwvm2::parser::wasm::standard::wasm1::features::prohibit_duplicate_types<Fs...>()};
+        if constexpr(prohibit_duplicate_types)
+        {
+            static_assert(::uwvm2::parser::wasm::standard::wasm1::features::has_check_duplicate_types_handler<Fs...>);
+            ::uwvm2::parser::wasm::concepts::feature_reserve_type_t<::uwvm2::parser::wasm::standard::wasm1::features::final_type_type_t<Fs...>> type_adl{};
+            define_check_duplicate_types(sec_adl, type_adl, module_storage, section_curr, section_end, err, fs_para);
+        }
+    }
+
+    /// @brief Wrapper for the section storage structure
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    struct type_section_storage_section_details_wrapper_t
+    {
+        type_section_storage_t<Fs...> const* type_section_storage_ptr{};
+        ::uwvm2::parser::wasm::binfmt::ver1::splice_section_storage_structure_t<Fs...> const* all_sections_ptr{};
+    };
+
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr type_section_storage_section_details_wrapper_t<Fs...> section_details(
+        type_section_storage_t<Fs...> const& type_section_storage,
+        ::uwvm2::parser::wasm::binfmt::ver1::splice_section_storage_structure_t<Fs...> const& all_sections) noexcept
+    { return {::std::addressof(type_section_storage), ::std::addressof(all_sections)}; }
+
+#ifndef UWVM_MODULE
+    // This optional context-print fast path depends on non-exported fast_io protocol internals.
+    namespace details::type_section_print
+    {
+        template <::std::integral char_type, ::std::size_t n>
+        inline constexpr bool emit_literal(char_type*& curr, char_type* end, char_type const (&literal)[n], ::std::size_t& offset) noexcept
+        {
+            constexpr ::std::size_t literal_size{n - 1uz};
+            auto const remain{literal_size - offset};
+            auto const space{static_cast<::std::size_t>(end - curr)};
+            auto const count{remain < space ? remain : space};
+
+            curr = ::fast_io::freestanding::my_copy_n(literal + offset, count, curr);
+            offset += count;
+
+            if(offset == literal_size)
+            {
+                offset = 0uz;
+                return true;
+            }
+
+            return false;
+        }
+
+        template <::std::integral char_type, typename T>
+        inline constexpr bool emit_reserve(char_type*& curr, char_type* end, T value, ::std::size_t& offset) noexcept
+        {
+            using value_type = ::std::remove_cvref_t<T>;
+            constexpr ::std::size_t reserve_size{print_reserve_size(::fast_io::io_reserve_type<char_type, value_type>)};
+
+            if(offset == 0uz && static_cast<::std::size_t>(end - curr) >= reserve_size)
+            {
+                curr = print_reserve_define(::fast_io::io_reserve_type<char_type, value_type>, curr, value);
+                return true;
+            }
+
+            char_type buffer[reserve_size];
+            auto const buffer_end{print_reserve_define(::fast_io::io_reserve_type<char_type, value_type>, buffer, value)};
+            auto const literal_size{static_cast<::std::size_t>(buffer_end - buffer)};
+            auto const remain{literal_size - offset};
+            auto const space{static_cast<::std::size_t>(end - curr)};
+            auto const count{remain < space ? remain : space};
+
+            curr = ::fast_io::freestanding::my_copy_n(buffer + offset, count, curr);
+            offset += count;
+
+            if(offset == literal_size)
+            {
+                offset = 0uz;
+                return true;
+            }
+
+            return false;
+        }
+
+        UWVM_WASM_UTILS_DEFINE_CONTEXT_LITERAL(header_prefix, "\nType[");
+        UWVM_WASM_UTILS_DEFINE_CONTEXT_LITERAL(header_suffix, "]:\n");
+        UWVM_WASM_UTILS_DEFINE_CONTEXT_LITERAL(row_prefix, " - type[");
+        UWVM_WASM_UTILS_DEFINE_CONTEXT_LITERAL(row_body_prefix, "]: {");
+        UWVM_WASM_UTILS_DEFINE_CONTEXT_LITERAL(row_suffix, "}\n");
+
+        enum class stage : unsigned char
+        {
+            header_prefix,
+            header_count,
+            header_suffix,
+            row_prefix,
+            row_index,
+            row_body_prefix,
+            row_body,
+            row_suffix,
+            done
+        };
+
+        struct context
+        {
+            stage curr_stage{};
+            ::std::size_t offset{};
+            ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32 type_counter{};
+            ::uwvm2::parser::wasm::standard::wasm1::features::details::function_type_print::context body_context{};
+
+            template <::std::integral char_type, ::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+            inline constexpr ::fast_io::context_print_result<char_type*> print_context_define(
+                type_section_storage_section_details_wrapper_t<Fs...> const type_section_details_wrapper,
+                char_type* curr,
+                char_type* end) noexcept
+            {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                if(type_section_details_wrapper.type_section_storage_ptr == nullptr || type_section_details_wrapper.all_sections_ptr == nullptr) [[unlikely]]
+                {
+                    ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+                }
+#endif
+
+                if(curr == end) [[unlikely]] { return {curr, false}; }
+
+                auto const type_section_span{type_section_details_wrapper.type_section_storage_ptr->sec_span};
+                auto const type_section_size{static_cast<::std::size_t>(type_section_span.sec_end - type_section_span.sec_begin)};
+
+                if(type_section_size == 0uz || this->curr_stage == stage::done) { return {curr, true}; }
+
+                auto const& types{type_section_details_wrapper.type_section_storage_ptr->types};
+                auto const type_size{types.size()};
+
+                for(;;)
+                {
+                    switch(this->curr_stage)
+                    {
+                        case stage::header_prefix:
+                        {
+                            if(!emit_literal(curr, end, header_prefix<char_type>(), this->offset)) { return {curr, false}; }
+                            this->curr_stage = stage::header_count;
+                            break;
+                        }
+                        case stage::header_count:
+                        {
+                            if(!emit_reserve(curr, end, type_size, this->offset)) { return {curr, false}; }
+                            this->curr_stage = stage::header_suffix;
+                            break;
+                        }
+                        case stage::header_suffix:
+                        {
+                            if(!emit_literal(curr, end, header_suffix<char_type>(), this->offset)) { return {curr, false}; }
+                            this->curr_stage = type_size == 0uz ? stage::done : stage::row_prefix;
+                            break;
+                        }
+                        case stage::row_prefix:
+                        {
+                            if(this->type_counter == type_size)
+                            {
+                                this->curr_stage = stage::done;
+                                break;
+                            }
+
+                            if(!emit_literal(curr, end, row_prefix<char_type>(), this->offset)) { return {curr, false}; }
+                            this->curr_stage = stage::row_index;
+                            break;
+                        }
+                        case stage::row_index:
+                        {
+                            if(!emit_reserve(curr, end, this->type_counter, this->offset)) { return {curr, false}; }
+                            this->curr_stage = stage::row_body_prefix;
+                            break;
+                        }
+                        case stage::row_body_prefix:
+                        {
+                            if(!emit_literal(curr, end, row_body_prefix<char_type>(), this->offset)) { return {curr, false}; }
+                            this->curr_stage = stage::row_body;
+                            break;
+                        }
+                        case stage::row_body:
+                        {
+                            auto const& curr_type{types.index_unchecked(this->type_counter)};
+                            auto const body_result{this->body_context.print_context_define(section_details(curr_type), curr, end)};
+                            curr = body_result.iter;
+                            if(!body_result.done) { return {curr, false}; }
+                            this->body_context = {};
+                            this->curr_stage = stage::row_suffix;
+                            break;
+                        }
+                        case stage::row_suffix:
+                        {
+                            if(!emit_literal(curr, end, row_suffix<char_type>(), this->offset)) { return {curr, false}; }
+                            ++this->type_counter;
+                            this->curr_stage = stage::row_prefix;
+                            break;
+                        }
+                        case stage::done: return {curr, true};
+                    }
+
+                    if(curr == end) { return {curr, false}; }
+                }
+            }
+        };
+    }  // namespace details::type_section_print
+#endif
+
+    /// @brief Print the type section details
+    /// @throws maybe throw fast_io::error, see the implementation of the stream
+    template <::std::integral char_type, typename Stm, ::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    inline constexpr void print_define(::fast_io::io_reserve_type_t<char_type, type_section_storage_section_details_wrapper_t<Fs...>>,
+                                       Stm && stream,
+                                       type_section_storage_section_details_wrapper_t<Fs...> const type_section_details_wrapper)
+    {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+        if(type_section_details_wrapper.type_section_storage_ptr == nullptr || type_section_details_wrapper.all_sections_ptr == nullptr) [[unlikely]]
+        {
+            ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+        }
+#endif
+
+        auto const type_section_span{type_section_details_wrapper.type_section_storage_ptr->sec_span};
+        auto const type_section_size{static_cast<::std::size_t>(type_section_span.sec_end - type_section_span.sec_begin)};
+
+        if(type_section_size)
+        {
+            auto const& storage{*type_section_details_wrapper.type_section_storage_ptr};
+            if(!storage.core3_recursive_types.groups.empty())
+            {
+                ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream),
+                    ::uwvm2::parser::wasm::standard::wasm3::type::section_details(storage.core3_recursive_types));
+                return;
+            }
+            if(!storage.owned_signatures.empty())
+            {
+                namespace core3 = ::uwvm2::parser::wasm::standard::wasm3::type;
+                ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream), ::fast_io::mnp::code_cvt(u8"\nType["),
+                    ::fast_io::mnp::dec(storage.types.size()), ::fast_io::mnp::code_cvt(u8"]:\n"));
+                for(auto const& signature : storage.owned_signatures)
+                {
+                    ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream), ::fast_io::mnp::code_cvt(u8" - type["),
+                        ::fast_io::mnp::dec(signature.type_index), ::fast_io::mnp::code_cvt(u8"]: "),
+                        core3::function_type_details_t{::std::addressof(signature.parameters), ::std::addressof(signature.results)},
+                        ::fast_io::mnp::code_cvt(::uwvm2::utils::container::u8string_view{u8"\n"}));
+                }
+                return;
+            }
+            auto const type_size{type_section_details_wrapper.type_section_storage_ptr->types.size()};
+
+            if constexpr(::std::same_as<char_type, char>)
+            {
+                ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream), "\nType[", type_size, "]:\n");
+            }
+            else if constexpr(::std::same_as<char_type, wchar_t>)
+            {
+                ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream), L"\nType[", type_size, L"]:\n");
+            }
+            else if constexpr(::std::same_as<char_type, char8_t>)
+            {
+                ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream), u8"\nType[", type_size, u8"]:\n");
+            }
+            else if constexpr(::std::same_as<char_type, char16_t>)
+            {
+                ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream), u"\nType[", type_size, u"]:\n");
+            }
+            else if constexpr(::std::same_as<char_type, char32_t>)
+            {
+                ::fast_io::operations::print_freestanding<false>(::std::forward<Stm>(stream), U"\nType[", type_size, U"]:\n");
+            }
+
+            ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32 type_counter{};
+            for(auto const& curr_type: type_section_details_wrapper.type_section_storage_ptr->types)
+            {
+                if constexpr(::std::same_as<char_type, char>)
+                {
+                    ::fast_io::operations::print_freestanding<true>(::std::forward<Stm>(stream),
+                                                                    " - type[",
+                                                                    type_counter,
+                                                                    "]: {",
+                                                                    section_details(curr_type),
+                                                                    "}");
+                }
+                else if constexpr(::std::same_as<char_type, wchar_t>)
+                {
+                    ::fast_io::operations::print_freestanding<true>(::std::forward<Stm>(stream),
+                                                                    L" - type[",
+                                                                    type_counter,
+                                                                    L"]: {",
+                                                                    section_details(curr_type),
+                                                                    L"}");
+                }
+                else if constexpr(::std::same_as<char_type, char8_t>)
+                {
+                    ::fast_io::operations::print_freestanding<true>(::std::forward<Stm>(stream),
+                                                                    u8" - type[",
+                                                                    type_counter,
+                                                                    u8"]: {",
+                                                                    section_details(curr_type),
+                                                                    u8"}");
+                }
+                else if constexpr(::std::same_as<char_type, char16_t>)
+                {
+                    ::fast_io::operations::print_freestanding<true>(::std::forward<Stm>(stream),
+                                                                    u" - type[",
+                                                                    type_counter,
+                                                                    u"]: {",
+                                                                    section_details(curr_type),
+                                                                    u"}");
+                }
+                else if constexpr(::std::same_as<char_type, char32_t>)
+                {
+                    ::fast_io::operations::print_freestanding<true>(::std::forward<Stm>(stream),
+                                                                    U" - type[",
+                                                                    type_counter,
+                                                                    U"]: {",
+                                                                    section_details(curr_type),
+                                                                    U"}");
+                }
+
+                ++type_counter;
+            }
+        }
+    }
+
+#ifndef UWVM_MODULE
+    template <::std::integral char_type, ::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+        requires(!(details::core3_type_details_feature<Fs> || ...))
+    inline constexpr auto print_context_type(::fast_io::io_reserve_type_t<char_type, type_section_storage_section_details_wrapper_t<Fs...>>) noexcept
+    { return ::fast_io::io_type_t<::uwvm2::parser::wasm::standard::wasm1::features::details::type_section_print::context>{}; }
+
+    template <::std::integral char_type, ::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+        requires(!(details::core3_type_details_feature<Fs> || ...))
+    inline constexpr ::std::size_t print_context_static_buffer_size(
+        ::fast_io::io_reserve_type_t<char_type, type_section_storage_section_details_wrapper_t<Fs...>>) noexcept
+    {
+        constexpr auto buffer_size{::fast_io::details::dynamic_reserve_default_static_stack_size<char_type>()};
+        return buffer_size;
+    }
+#endif
+}
+
+/// @brief Define container optimization operations for use with fast_io
+UWVM_MODULE_EXPORT namespace fast_io::freestanding
+{
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    struct is_trivially_copyable_or_relocatable<::uwvm2::parser::wasm::standard::wasm1::features::type_section_storage_t<Fs...>>
+    {
+        inline static constexpr bool value = true;
+    };
+
+    template <::uwvm2::parser::wasm::concepts::wasm_feature... Fs>
+    struct is_zero_default_constructible<::uwvm2::parser::wasm::standard::wasm1::features::type_section_storage_t<Fs...>>
+    {
+        inline static constexpr bool value = true;
+    };
+}
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

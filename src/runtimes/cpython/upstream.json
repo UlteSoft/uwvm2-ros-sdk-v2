@@ -1,0 +1,26 @@
+{
+  "repository": "https://github.com/python/cpython",
+  "tag": "v3.14.8",
+  "commit": "8e6e75d9102e39bed2a2b279203a396741180f12",
+  "archive_url": "https://www.python.org/ftp/python/3.14.8/Python-3.14.8.tar.xz",
+  "archive_sha256": "c2215904f02b175596dc49351585104f4bc20341e1c47378b26a2c274360ce73",
+  "license": "PSF License Version 2 and incorporated licenses",
+  "license_file": "upstream/LICENSE",
+  "upstream_directory": "upstream",
+  "local_source_modifications": [
+    {
+      "path": "Include/internal/pycore_freelist.h",
+      "upstream_sha256": "00d8aef601de80cf1abb7a455dddc114b2d945c470102974de48ce1a84893810",
+      "change": "Disable object freelist retention in tagged Wasm builds so every release reaches the tagged allocator."
+    },
+    {
+      "path": "Modules/timemodule.c",
+      "upstream_sha256": "52506a84546eaada5bab24d22233834e3db9fc69e4aeff9233ab21ea4d3ad9f8",
+      "change": "Convert WASI opaque pointer-width clock IDs through intptr_t, including memory64 compilation."
+    }
+  ],
+  "selected_files": 2010,
+  "file_hash_format": "SHA-256 of the checked-in file bytes relative to upstream/",
+  "source_index": "upstream.sha256",
+  "sdk_guest_qualification": "pending"
+}

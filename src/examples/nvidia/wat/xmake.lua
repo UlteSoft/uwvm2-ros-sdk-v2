@@ -1,0 +1,10 @@
+set_project("nvidia-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("nvidia-observation")
+    set_kind("binary")
+    set_language("wat")
+    set_ros_platform("nvidia")
+    add_files("main.wat")
+    add_wros_tests("int", "aot")
+target_end()

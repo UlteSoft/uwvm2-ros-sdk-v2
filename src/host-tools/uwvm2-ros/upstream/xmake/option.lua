@@ -1,0 +1,769 @@
+-- Run policy in a full option sandbox before option-derived dependencies.
+-- Each expensive ensure() entry independently repeats the same admission.
+option("ros-product-policy", function()
+    set_default(true)
+    set_showmenu(false)
+    -- These options have no dependency-producing hooks. Resolve their values
+    -- before sysroot/rtlib/unwindlib callbacks can request a provider. Do not
+    -- depend back on those callbacks: that would create an admission cycle.
+    add_deps("target", "llvm-target", "execution-int", "execution-jit", "use-llvm-compiler",
+        "llvm-runtimes-provider", "stdlib", "llvm-build-jobs", "llvm-build-targets", "llvm-cmake-toolchain",
+        "use-thread-local", "fno-exceptions", "enable-wsea", "linux-native-debug", "detailed-debug-check",
+        "disable-local-imported-wasip1", "enable-local-imported-wasip1-wasm64", "enable-local-imported-wasip1-socket", "import-u2rosv1-ros1", "import-u2rosv1-ros2", "import-u2rosv2", "enable-preload-dl",
+        "wasm-memory-model", "use-cxx-module", "enable-lto", "numeric-exception-fused", "gc-jit-access-profile",
+        "gc-allocation-profile", "mingw-min", "apple-platform", "macos-x64-native-step", "macos-4gib-test",
+        "enable-uwvm-int-combine-ops", "enable-uwvm-int-delay-local", "enable-uwvm-int-instruction-reorder",
+        "enable-uwvm-int-loop-unwind", "host-mte")
+    after_check(function()
+        local product = import("utility.ros_product", {anonymous = true})
+        product.uwvm_ros_product_check_current()
+    end)
+end)
+
+option("march", function()
+    set_description
+    (
+        [[Set the "-march" option for gcc and clang.]],
+        "The option is automatically added if using our toolchain option.",
+        [[    none: Don't set the "-march" option; this is the toolchain-baseline default.]],
+        [[    native: Set "-march=native" explicitly for developer-local builds.]],
+        [[    default: Legacy explicit alias for "native".]],
+        [[    arch: Set the "-march" option as "-march=arch". Note that "arch" is any value other than "no", "none", and "default".]]
+    )
+    set_default("none")
+    add_deps("ros-product-policy")
+    after_check(function(option)
+        local product = import("utility.ros_product", {anonymous = true})
+        product.uwvm_ros_product_check_current()
+        import("utility.utility")
+        option:add("cxflags", utility.get_march_option())
+    end)
+end)
+
+option("sysroot", function()
+    set_description
+    (
+        "Set the `--sysroot` option for gcc and clang.",
+        "The option is automatically added if using our toolchain option.",
+        [[    none: Don't set the "--sysroot" option, use the default sysroot of the toolchain.]],
+        [[    detect: Detect and set the sysroot for clang, use the default sysroot for gcc.]],
+        [[    path: Set the "--sysroot" option as "--sysroot=path". Note that "path" is an absolute path or a relative path other than "no" and "detect".]]
+    )
+    set_default("detect")
+    add_deps("ros-product-policy")
+    after_check(function(option)
+        local product = import("utility.ros_product", {anonymous = true})
+        product.uwvm_ros_product_check_current()
+        import("utility.utility")
+        local sysroot_option = utility.get_sysroot_option()
+        for flag, opt in pairs(sysroot_option) do
+            option:add(flag, opt)
+        end
+    end)
+end)
+
+option("llvm-target", function()
+    set_description
+    (
+        "Set the `--llvm-target` option for clang.",
+        "The option is automatically added if using our toolchain option.",
+        [[    none: Don't set the "--llvm-target" option, use the default target of the toolchain.]],
+        [[    detect: Detect and set the target for clang.]],
+        [[    triplet: Set the "--llvm-target" option as "--llvm-target=triplet".]]
+    )
+    set_default("detect")
+end)
+
+option("target", function()
+    set_description
+    (
+        "Set the compiler target triple.",
+        "The option is automatically added by platform rules that support cross-compilation.",
+        [[    detect: Use the toolchain/platform default target.]],
+        [[    triplet: Set the compiler target as "--target=triplet".]]
+    )
+    set_default("detect")
+end)
+
+option("rtlib", function()
+    set_description
+    (
+        [[Set the "-rtlib" option for clang.]],
+        "The option is automatically added if using our toolchain option.",
+        [[    default: Don't set the "rtlib" option, use the default rtlib of clang.]],
+        [[    libgcc/compiler-rt/platform: Set the "rtlib" option.]]
+    )
+    set_default("default")
+    set_values("default", "libgcc", "compiler-rt", "platform")
+    add_deps("ros-product-policy")
+    after_check(function(option)
+        local product = import("utility.ros_product", {anonymous = true})
+        product.uwvm_ros_product_check_current()
+        import("utility.utility")
+        local rtlib_option = utility.get_rtlib_option()
+        for _, flag in ipairs({ "ldflags", "shflags" }) do
+            option:add(flag, rtlib_option)
+        end
+    end)
+end)
+
+option("unwindlib", function()
+    set_description
+    (
+        [[Set the "-unwindlib" option for clang."]],
+        "The option is automatically added if using our toolchain option.",
+        [[    default: Don't set the "unwindlib" option, use the default unwindlib of clang.]],
+        [[    libgcc/libunwind/platform: Set the option "unwindlib" if rtlib is "compiler-rt".]],
+        [[    force-libgcc/force-libunwind/force-platform: Always set the "unwindlib" option.]]
+    )
+    set_default("default")
+    set_values("default", "libgcc", "libunwind", "platform", "force-libgcc", "force-libunwind", "force-platform")
+    add_deps("ros-product-policy", "rtlib")
+    after_check(function(option)
+        local product = import("utility.ros_product", {anonymous = true})
+        product.uwvm_ros_product_check_current()
+        import("utility.utility")
+        local unwind_option = utility.get_unwindlib_option()
+        for _, flag in ipairs({ "ldflags", "shflags" }) do
+            option:add(flag, unwind_option)
+        end
+    end)
+end)
+
+option("stdlib", function()
+    set_description
+    (
+        "Select the C++ standard library implementation.",
+        "The option is automatically added if using our toolchain option.",
+        [[    default: Use the toolchain's default C++ standard library.]],
+        [[    libstdc++: Prefer GNU libstdc++.]],
+        [[    libc++: Prefer LLVM libc++.]]
+    )
+    set_default("default")
+    set_values("default", "libstdc++", "libc++")
+end)
+
+option("strip", function()
+    set_description
+    (
+        "Strip level.",
+        [[    default: Use per-mode defaults.]],
+        [[             debug/release/releasedbg: none]],
+        [[             minsizerel: ident]],
+        [[    none: Don't strip symbols.]],
+        [[    symbol: Strip symbols.]],
+        [[    ident: Strip symbols + strip ident strings (e.g. -fno-ident).]]
+    )
+    set_default("default")
+    set_values("default", "none", "symbol", "ident")
+end)
+
+option("enable-lto", function()
+    set_description
+    (
+        "Whether to enable LTO while building in release/minsizerel/releasedbg mode.",
+        "LTO is disabled in the current ROS qualification profile. When using different compiler and linker, " ..
+        "for example, compiling with clang while linking with bfd, LTO should be disabled.",
+        [[Errors may be reported as "file not recognized: file format not recognized".]]
+    )
+    set_default(false)
+end)
+
+option("linux-native-debug", function()
+    set_description("Enable Wasm-only Linux native debugging with a qualified LLVM native-owner-table-v2 SDK; the target signal ABI and JIT loader must be supported.")
+    set_default(true)
+end)
+
+option("linux-x64-native-debug", function()
+    set_description("Enable Wasm-only Linux x86-64 native debugging with a qualified LLVM native-owner-table-v2 SDK; unavailable ownership never falls back to VM text.")
+    set_default(false)
+end)
+
+option("macos-x64-native-step", function()
+    set_description("Enable the opt-in macOS x86-64 protected Mach machine-step backend; actual native SDK/runtime qualification is still required.")
+    set_default(false)
+end)
+
+option("macos-4gib-test", function()
+    set_description("Build macOS ARM64 release semantics with O0 and no LTO for a 4 GiB product qualification run; default release stays O3.")
+    set_default(false)
+end)
+
+option("static", function()
+    set_description
+    (
+        "Select the static linking policy.",
+        [[    none: Use dynamic/default linking for libraries that have a dynamic default.]],
+        [[    non-system: Statically link non-system/non-platform libraries by explicit archive selection; keep platform/system libraries under the platform default.]],
+        [[    compiler: Use the compiler/toolchain global static strategy, including -static where supported.]]
+    )
+    set_default("none")
+    set_values("none", "non-system", "compiler")
+    add_deps("ros-product-policy")
+    after_check(function()
+        local product = import("utility.ros_product", {anonymous = true})
+        product.uwvm_ros_product_check_current()
+        local static_mode = get_config("static")
+        if static_mode ~= "none" and static_mode ~= "non-system" and static_mode ~= "compiler" then
+            raise([[Invalid --static value "%s"; expected one of: none, non-system, compiler.]], tostring(static_mode))
+        end
+    end)
+end)
+
+option("use-llvm-compiler", function()
+    set_description
+    (
+        "Use the LLVM/Clang compiler toolchain (Clang-CL on Windows, clang on other platforms).",
+        "This only switches the compiler toolchain and does not enable the LLVM AOT backend by itself.",
+        "default = true"
+    )
+    set_default(true)
+end)
+
+option("use-cxx-module", function()
+    set_description
+    (
+        "C++ module builds have not yet been adapted for uwvm2-ros and are rejected.",
+        "Must remain disabled; use --use-cxx-module=n.",
+        "default = false"
+    )
+    set_default(false)
+end)
+
+option("build-source-id", function()
+    set_description
+    (
+        "Declare the verified identity of a source archive for persistent LLVM native-object caching.",
+        "Use sha256:<64 lowercase hexadecimal digits> from a normalized complete-source manifest.",
+        "Leave as none for Git builds or when source provenance cannot be verified.",
+        "default = none"
+    )
+    set_default("none")
+end)
+
+option("numeric-exception-fused", function()
+    set_description("Use fused catch and direct tuple publication in the admitted numeric exception island (Linux x86-64 LLVM JIT).")
+    set_default(false)
+end)
+
+option("gc-jit-access-profile", function()
+    set_description("Select GC JIT access lowering: default, typed-array-load, typed-array-access, typed-array-access-inline or typed-array-access-private (experimental Linux x86-64 LLVM JIT; checked fallback for debug/checkpoint).")
+    set_default("default")
+    set_values("default", "typed-array-load", "typed-array-access", "typed-array-access-inline", "typed-array-access-private")
+end)
+
+option("gc-allocation-profile", function()
+    set_description("Select GC allocation policy: default or general-slab (Linux x86-64 LLVM JIT, packed arrays and serialized publication).")
+    set_default("default")
+    set_values("default", "general-slab")
+end)
+
+option("use-thread-local", function()
+    set_description
+    (
+        "Required modern ROS per-thread state. false is a legacy Uwvm2 configuration and is rejected.",
+        "default = true"
+    )
+    set_default(true)
+end)
+
+option("execution-int", function()
+    set_description
+    (
+        "select execution int backend",
+        [[    none: disable execution int backend.]],
+        [[    uwvm-int: use uwvm execution int backend.]]
+    )
+    set_default("none")
+    set_values("none", "uwvm-int")
+end)
+
+option("execution-jit", function()
+    set_description
+    (
+        "select the full-module LLVM AOT backend (legacy option name)",
+        [[    none: disable the LLVM AOT backend.]],
+        [[    llvm: use the LLVM AOT backend.]]
+    )
+    set_default("llvm")
+    set_values("none", "llvm")
+end)
+
+-- This is a fail-closed prerequisite request, not a flags-only sanitizer mode.
+option("host-mte", function()
+    set_default("off")
+    set_values("off", "required")
+    set_description(
+        "Native VM host MTE prerequisite policy, separate from guest WasmMTE.",
+        "off: preserve the ordinary host build (default).",
+        "required: require qualified AArch64 Linux stack, heap, globals, loader and thread providers.",
+        "No complete host provider is qualified yet; required currently fails before dependency acquisition.",
+        "See documents/toolchain/native-host-mte.md; compiler flags alone do not satisfy this requirement.")
+end)
+
+option("llvm-runtimes-provider", function()
+    set_default("auto")
+    set_values("auto", "bundled", "platform")
+    set_description("Source-owned paired libc++/libc++abi/libunwind: auto and bundled build the pinned sources. platform is retained for diagnostics but rejected by uwvm2-ros.")
+end)
+
+option("llvm-build-jobs", function()
+    set_default("inherit")
+    set_description("Bundled LLVM/libc++/libunwind jobs: inherit uses xmake -j/--jobs (standalone config uses 1); a positive integer overrides it. LLVM link jobs stay at one. This is not a memory limit.")
+end)
+
+option("llvm-build-targets", function()
+    set_default("Native")
+    set_description("Bundled LLVM code-generation backends: Native, all, or a semicolon-separated LLVM target list.")
+end)
+
+option("llvm-cmake-toolchain", function()
+    set_default("none")
+    set_description("CMake toolchain for bundled LLVM; must match ROS target/ABI and explicitly set LLVM_HOST_TRIPLE.")
+end)
+
+option("llvm-jit-env", function()
+    set_default(true)
+    set_showmenu(false)
+    add_deps("ros-product-policy", "execution-jit", "llvm-runtimes-provider", "llvm-build-jobs", "llvm-build-targets", "llvm-cmake-toolchain",
+        "use-llvm-compiler", "stdlib", "rtlib", "unwindlib", "sysroot", "target", "llvm-target")
+    after_check(function(option)
+        local product = import("utility.ros_product", {anonymous = true})
+        product.uwvm_ros_product_check_current()
+        import("utility.utility")
+        local llvm_jit_options = utility.get_llvm_jit_options()
+        if llvm_jit_options.includedirs then
+            option:add("sysincludedirs", llvm_jit_options.includedirs)
+        end
+        for _, field in ipairs({
+            "sysincludedirs",
+            "defines",
+            "linkdirs",
+            "links",
+            "syslinks",
+            "frameworkdirs",
+            "frameworks",
+            "cxxflags",
+            "ldflags",
+            "shflags"
+        }) do
+            local values = llvm_jit_options[field]
+            if values then
+                for _, value in ipairs(values) do
+                    if field == "ldflags" or field == "shflags" then
+                        option:add(field, value, { force = true })
+                    else
+                        option:add(field, value)
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+option("enable-wsea", function()
+    set_default(true)
+    set_showmenu(true)
+    set_description("Build the opt-in --secure per-module offline verifier (OpenSSL 3, supported POSIX hosts). Disabling this makes --secure module fail closed.")
+end)
+
+option("openssl-provider", function()
+    set_default("bundled")
+    set_values("bundled", "package")
+    set_showmenu(true)
+    set_description("OpenSSL dependency provider: complete pinned bundled 3.5.9 source (default), or explicit xmake package >=3.0. openssl-root overrides this option.")
+end)
+
+option("openssl-root", function()
+    set_default("default")
+    set_showmenu(true)
+    set_description(
+        "Use an explicit prebuilt OpenSSL >=3 root, overriding bundled/package selection.",
+        [[    default: use openssl-provider (bundled by default).]],
+        [[    path: use target headers from path/include and libraries from path or path/lib. Cross builds require target libraries.]]
+    )
+end)
+
+option("openssl-provider-receipt", function()
+    set_default("none")
+    set_showmenu(true)
+    set_description("Pinned target SDK/runtime JSON receipt; its SHA256 and runtime hashes participate in bundled OpenSSL reuse identity.")
+end)
+
+option("openssl-build-jobs", function()
+    set_default("1")
+    set_showmenu(true)
+    set_description("Maximum parallel make jobs for the bundled OpenSSL dependency (default 1).")
+end)
+
+option("openssl-configure-target", function()
+    set_default("auto")
+    set_showmenu(true)
+    set_description("OpenSSL Configure target (auto maps platform/arch; target compiler ELF/ABI is independently verified).")
+end)
+
+option("openssl-cflags", function()
+    set_default("")
+    set_showmenu(true)
+    set_description("Extra target C/ABI flags for bundled OpenSSL; native and cross outputs remain isolated.")
+end)
+
+option("openssl-ldflags", function()
+    set_default("")
+    set_showmenu(true)
+    set_description("Extra target linker flags for bundled OpenSSL; never adds host OpenSSL search paths.")
+end)
+
+option("openssl-float-abi", function()
+    set_default("auto")
+    set_values("auto", "soft", "hard")
+    set_showmenu(true)
+    set_description("ARM bundled OpenSSL PCS: auto expects arm=soft, armhf/armeb=hard; override explicitly for a distinct ARM BE soft profile.")
+end)
+
+option("openssl-no-asm", function()
+    set_default(false)
+    set_showmenu(true)
+    set_description("Explicit portable no-asm OpenSSL build, intended for target bring-up/debugging; cryptographic algorithms remain enabled.")
+end)
+
+option("enable-uwvm-int-combine-ops", function()
+    set_description
+    (
+        "Enable combined opcodes for uwvm-int.",
+        [[    none: disable all combine ops.]],
+        [[    soft: enable only soft/light combine ops (default).]],
+        [[    heavy: enable soft + heavy combine ops (explicit performance profile).]],
+        [[    extra: enable soft + heavy + extra-heavy combine ops (ultra-specific mega fusions).]]
+    )
+    set_default("soft")
+    set_values("none", "soft", "heavy", "extra")
+end)
+
+option("enable-uwvm-int-delay-local", function()
+    set_description
+    (
+        "Enable delay-local variantization for uwvm-int.",
+        [[    none: disable delay-local fusions.]],
+        [[    soft: enable minimal delay-local fusions.]],
+        [[    heavy: enable soft + extended delay-local fusions (default).]]
+    )
+    set_default("heavy")
+    set_values("none", "soft", "heavy")
+end)
+
+option("enable-uwvm-int-instruction-reorder", function()
+    set_description
+    (
+        "Compile in experimental register-ring-aware instruction rescheduling for uwvm-int.",
+        "default = false",
+        "    false: compile out instruction-reschedule code.",
+        "    true: make instruction-reschedule code available; runtime still defaults to off."
+    )
+    set_default(false)
+end)
+
+option("enable-uwvm-int-loop-unwind", function()
+    set_description
+    (
+        "Enable loop-unwind translation for uwvm-int.",
+        "default = true",
+        "    false: compile out loop-unwind code to reduce tiny-environment code size.",
+        "    true: enable loop-unwind translation, still controllable at runtime."
+    )
+    set_default(true)
+end)
+
+option("detailed-debug-check", function()
+    set_description
+    (
+        "Initiates a more detailed debug checking mode in debug mode",
+        "default = true"
+    )
+    set_default(true)
+end)
+
+-- WINDOWS
+
+option("mingw-min", function()
+    set_description
+    (
+        "Minimum (x86_64, i686, aarch64, arm) windows system required. Minimum value for _WIN32_WINNT, _WIN32_WINDOWS and WINVER.",
+        [[    default: Use the default compiler macro definition. In general, MinGW is 0x0A00, MSVC is not defined.]],
+        [[    WS25: Windows Server 2025, -D_WIN32_WINNT=0x0A00]],
+        [[    WIN11: Windows 11, -D_WIN32_WINNT=0x0A00]],
+        [[    WS22: Windows Server 2022, -D_WIN32_WINNT=0x0A00]],    
+        [[    WS19: Windows Server 2019, -D_WIN32_WINNT=0x0A00]],    
+        [[    WS16: Windows Server 2016, -D_WIN32_WINNT=0x0A00]],    
+        [[    WIN10: Windows 10, -D_WIN32_WINNT=0x0A00]],
+        [[    WS12R2: Windows Server 2012 R2, -D_WIN32_WINNT=0x0603]],    
+        [[    WINBLUE: Windows 8.1, -D_WIN32_WINNT=0x0603]],
+        [[    WS12: Windows Server 2012, -D_WIN32_WINNT=0x0602]],    
+        [[    WIN8: Windows 8, -D_WIN32_WINNT=0x0602]],
+        [[    WS08R2: Windows Server 2008 R2, -D_WIN32_WINNT=0x0601]],
+        [[    WIN7: Windows 7, -D_WIN32_WINNT=0x0601]],
+        [[    WS08: Windows Server 2008, -D_WIN32_WINNT=0x0600]],
+        [[    VISTA: Windows Vista, -D_WIN32_WINNT=0x0600]],
+        [[    WS03: Windows Server 2003, -D_WIN32_WINNT=0x0502]],
+        [[    WINXP64: Windows XP 64bit, -D_WIN32_WINNT=0x0502]],
+        [[    WINXP: Windows XP, -D_WIN32_WINNT=0x0501]],
+        [[    WS2K: Windows Server 2000, -D_WIN32_WINNT=0x0500]],
+        [[    WIN2K: Windows 2000, -D_WIN32_WINNT=0x0500]],
+        [[    WINME: Windows ME, -D_WIN32_WINDOWS=0x0490]],
+        [[    WIN98: Windows 98, -D_WIN32_WINDOWS=0x0410]],
+        [[    WIN95: Windows 95, -D_WIN32_WINDOWS=0x0400]],
+        [[    NT400: Windows NT 4.0, -D_WIN32_WINNT=0x0400]],
+        [[    NT351: Windows NT 3.51, -D_WIN32_WINNT=0x0351]],
+        [[    NT350: Windows NT 3.5, -D_WIN32_WINNT=0x0350]],
+        [[    NT310: Windows NT 3.1, -D_WIN32_WINNT=0x0310]],
+        [[Errors may be reported as "version not recognized: Windows Version not recognized".]]
+    )
+    set_default("default")
+    set_values
+    (
+        "default",
+        "WS25", 
+        "WIN11", 
+        "WS22", 
+        "WS19", 
+        "WS16", 
+        "WIN10",
+        "WS12R2", 
+        "WINBLUE",
+        "WS12",
+        "WIN8", 
+        "WS08R2", 
+        "WIN7",         
+        "WS08", 
+        "VISTA", 
+        "WS03", 
+        "WINXP64",
+        "WINXP", 
+        "WS2K",
+        "WIN2K",
+        "WINME", 
+        "WIN98", 
+        "WIN95", 
+        "NT400",
+        "NT351",
+        "NT350",
+        "NT310"
+    )
+end)
+
+-- APPLE PLATFORM
+
+option("apple-platform", function()
+    set_description
+    (
+        "Apple platform target and minimum version. Sets -mtargetos and -m*-version-min options.",
+        [[    default:]],
+        [[        Use the default compiler behavior.]],
+        [[]],
+        [[    macOS versions:]],
+        [[        MACOS_SEQUOIA: macOS 15.0 Sequoia]],
+        [[        MACOS_SONOMA: macOS 14.0 Sonoma]],
+        [[        MACOS_VENTURA: macOS 13.0 Ventura]],
+        [[        MACOS_MONTEREY: macOS 12.0 Monterey]],
+        [[        MACOS_BIG_SUR: macOS 11.0 Big Sur]],
+        [[        MACOS_CATALINA: macOS 10.15 Catalina]],
+        [[        MACOS_MOJAVE: macOS 10.14 Mojave]],
+        [[        MACOS_HIGH_SIERRA: macOS 10.13 High Sierra]],
+        [[        MACOS_SIERRA: macOS 10.12 Sierra]],
+        [[        MACOS_EL_CAPITAN: macOS 10.11 El Capitan]],
+        [[        MACOS_YOSEMITE: macOS 10.10 Yosemite]],
+        [[]],
+        [[    iOS versions:]],
+        [[        IOS_18: iOS 18.0]],
+        [[        IOS_17: iOS 17.0]],
+        [[        IOS_16: iOS 16.0]],
+        [[        IOS_15: iOS 15.0]],
+        [[        IOS_14: iOS 14.0]],
+        [[        IOS_13: iOS 13.0]],
+        [[        IOS_12: iOS 12.0]],
+        [[        IOS_11: iOS 11.0]],
+        [[]],
+        [[    tvOS versions:]],
+        [[        TVOS_18: tvOS 18.0]],
+        [[        TVOS_17: tvOS 17.0]],
+        [[        TVOS_16: tvOS 16.0]],
+        [[        TVOS_15: tvOS 15.0]],
+        [[        TVOS_14: tvOS 14.0]],
+        [[        TVOS_13: tvOS 13.0]],
+        [[]],
+        [[    watchOS versions:]],
+        [[        WATCHOS_11: watchOS 11.0]],
+        [[        WATCHOS_10: watchOS 10.0]],
+        [[        WATCHOS_9: watchOS 9.0]],
+        [[        WATCHOS_8: watchOS 8.0]],
+        [[        WATCHOS_7: watchOS 7.0]],
+        [[]],
+        [[    visionOS versions:]],
+        [[        VISIONOS_2: visionOS 2.0]],
+        [[        VISIONOS_1: visionOS 1.0]],
+        [[]],
+        [[    Custom format:]],
+        [[        "platform:version" (e.g., "macos:10.15", "ios:13.0")]]
+    )
+    set_default("default")
+    set_values
+    (
+        "default",
+        -- macOS
+        "MACOS_SEQUOIA", "MACOS_SONOMA", "MACOS_VENTURA", "MACOS_MONTEREY", 
+        "MACOS_BIG_SUR", "MACOS_CATALINA", "MACOS_MOJAVE", "MACOS_HIGH_SIERRA",
+        "MACOS_SIERRA", "MACOS_EL_CAPITAN", "MACOS_YOSEMITE",
+        -- iOS
+        "IOS_18", "IOS_17", "IOS_16", "IOS_15", "IOS_14", "IOS_13", "IOS_12", "IOS_11",
+        -- tvOS
+        "TVOS_18", "TVOS_17", "TVOS_16", "TVOS_15", "TVOS_14", "TVOS_13",
+        -- watchOS
+        "WATCHOS_11", "WATCHOS_10", "WATCHOS_9", "WATCHOS_8", "WATCHOS_7",
+        -- visionOS
+        "VISIONOS_2", "VISIONOS_1"
+    )
+end)
+
+-- uwvm test option
+
+option("test-libfuzzer", function()
+    set_description
+    (
+        "Test libfuzzer with fuzzing mode. (Currently only supports the LLVM environment.)",
+        "default = false",
+        [[    true: Test libfuzzer with fuzzing mode.]],
+        [[    false: Don't test libfuzzer with fuzzing mode.]]
+    )
+    set_default(false)
+end)
+
+option("enable-test-uwvm-int", function()
+    set_description
+    (
+        "Register slow `test/0013.uwvm_int/**` targets for strict uwvm-int validation/coverage workflows.",
+        "default = false",
+        [[    true: register 0013.uwvm_int test targets.]],
+        [[    false: skip registering 0013.uwvm_int test targets.]]
+    )
+    set_default(false)
+end)
+
+option("enable-test-llvm-jit", function()
+    set_description
+    (
+        "Register slow LLVM AOT validation/coverage targets.",
+        "default = false",
+        [[    true: register the historical 0014.llvm_jit targets and 0013 strict LLVM-AOT mirror targets.]],
+        [[    false: skip registering slow LLVM AOT validation/coverage targets.]]
+    )
+    set_default(false)
+end)
+
+option("enable-test-backend-fuzzer", function()
+    set_description
+    (
+        "Register the shell-driven 0015 backend differential fuzzer target.",
+        "default = false",
+        [[    true: register test/0015.backend_fuzzer backend fuzzer target.]],
+        [[    false: skip registering the backend fuzzer target.]]
+    )
+    set_default(false)
+end)
+
+-- uwvm Debug Option
+
+option("debug-timer", function()
+    set_description
+    (
+        "Add timer functionality to each module.",
+        "default = false"
+    )
+    set_default(false)
+end)
+
+-- uwvm special build options
+
+option("fno-exceptions", function()
+    set_description
+    (
+        "The uwvm's wasi relies on the cpp exception. Turn off the cpp exception with this parameter so that it can be used in an environment where exceptions are forbidden. " ..
+        "(This option causes the program to crash if some system calls fail, and it will be removed after herbception (P0709) enters the ios c++ standard)",
+        "default = false"
+    )
+    set_default(false)
+end)
+
+option("wasm-memory-model", function()
+    set_description
+    (
+        "Select the WebAssembly linear memory backend.",
+        "default: keep the platform default selection.",
+        "mmap: force the mmap/VirtualAlloc backend and fail when unavailable.",
+        "multi-thread-alloc: force the multithread allocator backend and fail when unavailable.",
+        "single-thread-alloc: force the single-thread allocator backend.",
+        "default = default"
+    )
+    set_default("default")
+    set_values("default", "mmap", "multi-thread-alloc", "single-thread-alloc")
+end)
+
+option("disable-local-imported-wasip1", function()
+    set_description
+    (
+        "Required false in uwvm2-ros: every WASI Preview 1 interface is compiled; true is rejected.",
+        "default = false"
+    )
+    set_default(false)
+end)
+
+option("enable-local-imported-wasip1-wasm64", function()
+    set_description
+    (
+        "Required true in uwvm2-ros: compile WASI for both memory32 and memory64.",
+        "default = true"
+    )
+    set_default(true)
+end)
+
+option("enable-local-imported-wasip1-socket", function()
+    set_description("The SDK requires none. Guest ROS communication uses the scene imports.")
+    set_default("none")
+    set_values("none")
+end)
+
+-- ROS SDKs are linked only into independent gateway executables.
+option("import-u2rosv1-ros1", function()
+    set_default(false)
+    set_showmenu(true)
+    set_description("Opt in to deprecated u2rosv1 imports for ros1; default false. Compilation grants no runtime authority.")
+end)
+option("import-u2rosv1-ros2", function()
+    set_default(false)
+    set_showmenu(true)
+    set_description("Opt in to deprecated u2rosv1 imports for ros2; default false. Independent of u2rosv2.")
+end)
+option("import-u2rosv2", function()
+    set_default(true)
+    set_showmenu(true)
+    set_description("Required true: compile u2rosv2 robot-scene imports independently of deprecated u2rosv1; runtime grants default to none.")
+end)
+option("enable-preload-dl", function()
+    set_default(false)
+    set_showmenu(true)
+    set_description("Opt in to unsafe in-process native library preloading; default false. Cannot be used in a u2rosv2 deployment.")
+end)
+option("ros-custom-registry-header", function()
+    set_default("none")
+    set_showmenu(true)
+    set_description("Reviewed generated fixed-topic descriptor header; grants no ROS authority.")
+end)
+
+option("ros-original-control-manifest-header", function()
+    set_default("none")
+    set_showmenu(true)
+    set_description("Reviewed original ROS2 control schema alongside vendor catalogs; requires explicit ROS2 imports and grants no rights.")
+end)
+
+-- All vendor and platform switches default OFF. The matching selected schema
+-- is applied coherently to every CLI/Runtime target by def_build().
+includes("ros_vendors.lua")

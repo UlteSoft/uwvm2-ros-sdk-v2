@@ -1,0 +1,39 @@
+{
+  "repository": "https://svn.r-project.org/R/tags/R-4-5-1",
+  "git_mirror": "https://github.com/wch/r-source",
+  "tag": "R-4-5-1",
+  "commit": "1d95a4c60b0be6766490b1a621610b98a4bf5765",
+  "archive_url": "https://cran.r-project.org/src/base/R-4/R-4.5.1.tar.xz",
+  "archive_sha256": "3c29f587f438588160cc8a82a2b3fcc0abff392f731d930b4eaa7f85fa022a32",
+  "license": "GPL-2 or GPL-3 and incorporated licenses",
+  "license_files": [
+    "upstream/COPYING",
+    "upstream/share/licenses/AGPL-3",
+    "upstream/share/licenses/license.db",
+    "upstream/share/licenses/LGPL-3",
+    "upstream/share/licenses/LGPL-2",
+    "upstream/share/licenses/BSD_2_clause",
+    "upstream/share/licenses/Artistic-2.0",
+    "upstream/share/licenses/LGPL-2.1",
+    "upstream/share/licenses/BSD_3_clause",
+    "upstream/share/licenses/GPL-2",
+    "upstream/share/licenses/MIT",
+    "upstream/share/licenses/GPL-3",
+    "upstream/doc/COPYRIGHTS"
+  ],
+  "selected_files": 1292,
+  "local_source_modifications": {
+    "configure": {
+      "upstream_sha256": "9459fb87fcb812f9379c6db9083444bb9ddf5dd5f2d74528eb292c0fb614086d",
+      "modified_sha256": "fbbc7b4ee6a9897103440f482b034bafc42a56f72934e956e0cbf3265144463d"
+    },
+    "src/include/Rmath.h0.in": {
+      "upstream_sha256": "40732d9fcc2e069b9824eb0a66a8fb8f02f25cd14c7308930345a43baccbf5ed",
+      "modified_sha256": "1a1c2e8ec89d4c3219932a11ce338b8232b63a01f9b4c339d9a141a140e10e94"
+    }
+  },
+  "legacy_source_commit": "466ec1647ae8577bc2c16bd4f8df8162636817f4",
+  "installed_guest_qualification": "pending",
+  "release_archive_svn_revision": 88306,
+  "tag_svn_revision": 88307
+}

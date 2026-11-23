@@ -1,0 +1,5 @@
+[source.crates-io]
+replace-with = "pinned-sources"
+
+[source.pinned-sources]
+directory = "registry"

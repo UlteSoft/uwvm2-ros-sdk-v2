@@ -1,0 +1,704 @@
+#pragma once
+#include <uwvm2/utils/allocator/fast_io_strict/object.h>
+#include <uwvm2/utils/container/unique.h>
+#include <uwvm2/utils/container/standard.h>
+#ifndef UWVM_MODULE
+#include <uwvm2/runtime/diagnostic/crash_policy.h>
+#include "program.h"
+#include <uwvm2/runtime/compiler/shared/gc_aggregate.h>
+#include <array>
+#include <atomic>
+#include <new>
+#include <utility>
+#include <cmath>
+#include <uwvm2/runtime/compiler/shared/strict_float.h>
+#include <uwvm2/runtime/lib/uwvm_runtime_wasm_fp_environment.h>
+#include <uwvm2/runtime/wasm_threads/wait.h>
+#include <uwvm2/object/memory/linear/threaded_grow_types.h>
+#include <uwvm2/runtime/memtag/hardware_thread.h>
+#include <uwvm2/runtime/memtag/bridge.h>
+#include <uwvm2/runtime/memtag/wait.h>
+
+#endif
+#if defined(__linux__) && defined(UWVM_UTILS_HAS_FAST_IO_NATIVE_THREAD) && defined(UWVM_CPP_EXCEPTIONS)
+namespace uwvm2::runtime::compiler::uwvm_int::threaded
+{
+    namespace threads = ::uwvm2::runtime::wasm_threads;
+    class engine;
+    struct compile_result { execution_result outcome{}; ::uwvm2::utils::container::std_unique_ptr<engine> code{}; };
+    class engine final
+    {
+        using memory_type = ::uwvm2::object::memory::linear::native_memory_t;
+        using global_type = ::uwvm2::object::global::wasm_global_storage_t;
+        struct target { ::std::size_t module{}, function{}; bool host{}; signature const* type{}; };
+        struct bound_memory {memory_type* memory{};::std::size_t maximum{};};
+        struct bound_module
+        {
+            module_program program{};
+            ::uwvm2::utils::container::std_vector<bound_memory> memories{};
+            ::uwvm2::utils::container::std_vector<target> targets{};
+            ::uwvm2::utils::container::std_vector<global_type*> globals{};
+            ::uwvm2::utils::container::std_vector<storage::local_defined_tag_storage_t const*> tags{};
+        };
+        struct activation
+        {
+            ::std::size_t module{}, function{}, pc{}, locals{}, base{}, previous_values{}, controls{}; bool cross_module{};
+        };
+        struct control
+        {
+            ::std::size_t base{}, start{}, end{}, parameters{}, results{};
+            bool loop{};
+            instruction const* handlers{};
+        };
+        struct exception_record { storage::local_defined_tag_storage_t const* tag{}; ::std::size_t offset{},count{},module{}; bool escaped{}; storage::gc_reference reference{}; };
+        child_world::owner world_;
+        decltype(::std::declval<child_world const&>().validated_code()) validated_code_;
+        limits limits_;
+        bool const execute_memtag_{true};
+        bool has_tag_storage_{};
+        ::uwvm2::utils::container::std_unique_ptr<threads::code_debug_image> debug_;
+        ::uwvm2::utils::container::std_vector<bound_module> modules_{};
+        // These fixed-size arrays are allocated before a native child is minted.
+        // Guest recursion consumes explicit slots, not recursive C++ frames.
+        ::uwvm2::utils::container::std_vector<stack_value> values_{};
+        ::uwvm2::utils::container::std_vector<storage::gc_object_value> gc_scratch_{};
+        ::uwvm2::utils::container::std_vector<activation> calls_{};
+        ::uwvm2::utils::container::std_vector<control> controls_{};
+        ::uwvm2::utils::container::std_vector<::std::byte> host_parameters_{},host_results_{};
+        ::uwvm2::utils::container::std_vector<exception_record> exceptions_{};
+        ::uwvm2::utils::container::std_vector<stack_value> exception_values_{};
+        ::std::size_t exception_top_{},exception_value_top_{};
+        ::std::size_t value_top_{}, call_top_{}, control_top_{};
+        ::std::atomic_flag entered_{};
+        execution_result result_{};
+        ::uwvm2::object::memory::linear::threaded_grow_result last_grow_{};
+        // Only the real Group native scheduler may enter this engine. Serial
+        // initializer -> command/start is allowed; concurrent/reentrant entry is
+        // not. Clear every activation-owned byte, never the retained World.
+        void clear_activation() noexcept
+        {
+            ::std::fill(values_.begin(),values_.end(),0u);
+            ::std::fill(calls_.begin(),calls_.end(),activation{});
+            ::std::fill(controls_.begin(),controls_.end(),control{});
+            ::std::fill(host_parameters_.begin(),host_parameters_.end(),::std::byte{});
+            ::std::fill(host_results_.begin(),host_results_.end(),::std::byte{});
+            ::std::fill(exceptions_.begin(),exceptions_.end(),exception_record{});
+            ::std::fill(exception_values_.begin(),exception_values_.end(),0u);
+            value_top_=call_top_=control_top_=exception_top_=exception_value_top_=0;
+        }
+        struct entry_scope final
+        {
+            engine& actual;
+            ~entry_scope() noexcept { actual.clear_activation();actual.entered_.clear(::std::memory_order_release); }
+        };
+        explicit engine(child_world::owner world, limits budget,bool execute_memtag):world_{::std::move(world)},limits_{budget},execute_memtag_{execute_memtag} {}
+
+        [[nodiscard]] signature const* function_type(::std::size_t m, ::std::size_t f) const noexcept
+        {
+            auto const* module{world_->module(m)};if(!module) { return nullptr; }
+            auto const n{module->imported_function_vec_storage.size()};
+            if(f<n)
+            {
+                auto const* p{module->imported_function_vec_storage.index_unchecked(f).import_type_ptr};
+                return p ? p->imports.storage.function : nullptr;
+            }
+            f-=n;return f<module->local_defined_function_vec_storage.size() ?
+                module->local_defined_function_vec_storage.index_unchecked(f).function_type_ptr : nullptr;
+        }
+        template<typename T,typename Vector>
+        [[nodiscard]] static bool member_index(Vector const& vector, T const* pointer, ::std::size_t& index) noexcept
+        {
+            auto const n{vector.size()};if(!pointer || !n) { return false; }
+            auto const begin{reinterpret_cast<::std::uintptr_t>(vector.data())};
+            auto const address{reinterpret_cast<::std::uintptr_t>(pointer)};
+            if(address<begin || n>SIZE_MAX/sizeof(T)) { return false; }
+            auto const offset{address-begin};
+            if(offset>=n*sizeof(T) || offset%sizeof(T)) { return false; }
+            index=offset/sizeof(T);return true;
+        }
+        [[nodiscard]] bool defined_target(storage::local_defined_function_storage_t const* pointer, target& out) const noexcept
+        {
+            for(::std::size_t m{};m<modules_.size();++m)
+            {
+                auto const* module{world_->module(m)};::std::size_t f{};
+                if(member_index(module->local_defined_function_vec_storage,pointer,f))
+                { out={m,module->imported_function_vec_storage.size()+f,false,pointer->function_type_ptr};return true; }
+            }
+            return false; // In particular, never execute a parent guest pointer.
+        }
+        [[nodiscard]] static ::std::size_t type_index(storage::wasm_module_storage_t const& module,signature const* type) noexcept
+        {
+            auto const begin=reinterpret_cast<::std::uintptr_t>(module.type_section_storage.type_section_begin);
+            auto const address=reinterpret_cast<::std::uintptr_t>(type);
+            if(!begin||!type||address<begin||(address-begin)%sizeof(signature))return SIZE_MAX;
+            auto const index=(address-begin)/sizeof(signature);
+            return index<module.type_section_storage.type_section_count?index:SIZE_MAX;
+        }
+        [[nodiscard]] bool type_matches(::std::size_t expected_module,signature const* expected,target const& actual) const noexcept
+        {
+            auto const* e=world_->module(expected_module);auto const* a=world_->module(actual.module);
+            if(!e||!a)return false;
+            auto const ei=type_index(*e,expected),ai=type_index(*a,actual.type);
+            if(ei>UINT32_MAX||ai>UINT32_MAX)return false;
+            // Heap identity and declared function subtyping matter even when
+            // the flattened ABI happens to be equal. Never compare just the
+            // reference carrier bytes or module-local type indices.
+            return storage::gc_object_store::canonical_function_type_matches(
+                a->gc_store.get(),static_cast<::std::uint32_t>(ai),e->gc_store.get(),static_cast<::std::uint32_t>(ei));
+        }
+        [[nodiscard]] bool reference_target(storage::gc_reference const& reference,target& out) const noexcept
+        {
+            using kind=::uwvm2::object::global::wasm_ref_kind;
+            if(reference.kind==kind::wasm_func_defined)
+                return defined_target(static_cast<storage::local_defined_function_storage_t const*>(reference.storage.ptr),out);
+            if(reference.kind!=kind::wasm_func_imported)return false;
+            for(::std::size_t m{};m<modules_.size();++m)
+            {
+                ::std::size_t f{};
+                if(member_index(world_->module(m)->imported_function_vec_storage,
+                    static_cast<storage::imported_function_storage_t const*>(reference.storage.ptr),f))return resolve_target(m,f,out);
+            }
+            return false;
+        }
+        [[nodiscard]] bool resolve_target(::std::size_t m, ::std::size_t f, target& out) const noexcept
+        {
+            auto const* module{world_->module(m)};auto const count{module->imported_function_vec_storage.size()};
+            auto const* type{function_type(m,f)};if(!detail::executable_signature(type)) { return false; }
+            if(f>=count) { out={m,f,false,type};return true; }
+            auto const* record{::std::addressof(module->imported_function_vec_storage.index_unchecked(f))};
+            // Every followed record must be an exact element of this child's
+            // retained registry. A guessed pointer is not an import identity.
+            for(::std::size_t steps{};steps<=limits_.functions;++steps)
+            {
+                bool owned{};
+                for(::std::size_t owner{};owner<modules_.size();++owner)
+                { ::std::size_t unused{};if(member_index(world_->module(owner)->imported_function_vec_storage,record,unused)) { owned=true;break; } }
+                if(!owned) { return false; }
+                using kind=storage::imported_function_link_kind;
+                if(record->link_kind==kind::imported) { record=record->target.imported_ptr;continue; }
+                if(record->link_kind==kind::defined)
+                { return defined_target(record->target.defined_ptr,out) && type_matches(m,type,out); }
+                if(record->link_kind==kind::local_imported)
+                { out={m,f,true,type};return record->target.local_imported.module_ptr!=nullptr; }
+                return false; // DL/weak/unknown host cancellation is not admitted.
+            }
+            return false;
+        }
+        [[nodiscard]] static bool memory64(memory_type const& memory) noexcept
+        { return memory.status==decltype(memory.status)::wasm64; }
+        [[nodiscard]] static ::std::uint64_t memory_address(memory_type const& memory,::std::uint64_t bits) noexcept
+        { return memory64(memory)?bits:static_cast<::std::uint32_t>(bits); }
+        template<typename Function>
+        static auto memory_geometry(memory_type const& memory,Function&& function) noexcept
+        {
+            if(memory64(memory))return threads::is_shared(memory)?function.template operator()<::std::uint64_t,true>():
+                function.template operator()<::std::uint64_t,false>();
+            return threads::is_shared(memory)?function.template operator()<::std::uint32_t,true>():
+                function.template operator()<::std::uint32_t,false>();
+        }
+
+        [[nodiscard]] static global_type* resolve_global(storage::wasm_module_storage_t const& module, ::std::size_t index) noexcept
+        {
+            auto const count{module.imported_global_vec_storage.size()};
+            if(index>=count)
+            {
+                index-=count;if(index>=module.local_defined_global_vec_storage.size()) { return nullptr; }
+                return const_cast<global_type*>(::std::addressof(module.local_defined_global_vec_storage.index_unchecked(index).global));
+            }
+            auto const* record{::std::addressof(module.imported_global_vec_storage.index_unchecked(index))};
+            for(::std::size_t i{};i!=4096uz && record;++i)
+            {
+                using kind=storage::imported_global_storage_t::imported_global_link_kind;
+                if(record->link_kind==kind::imported) { record=record->target.imported_ptr;continue; }
+                if(record->link_kind==kind::defined && record->target.defined_ptr) { return ::std::addressof(record->target.defined_ptr->global); }
+                return nullptr;
+            }
+            return nullptr;
+        }
+        [[nodiscard]] bool fail(status code) noexcept { result_.code=code;return false; }
+        [[nodiscard]] bool push(stack_value value) noexcept
+        { if(value_top_==values_.size()) { return fail(status::resource_limit); } values_[value_top_++]=value;return true; }
+        [[nodiscard]] bool pop(stack_value& out) noexcept
+        {
+            if(!call_top_ || value_top_<=calls_[call_top_-1uz].base) { return fail(status::invariant_failure); }
+            out=values_[--value_top_];return true;
+        }
+        [[nodiscard]] bool pop(::std::uint64_t& out) noexcept
+        { stack_value value{};if(!pop(value)) { return false; }out=value.low;return true; }
+        [[nodiscard]] bool compact(::std::size_t base, ::std::size_t count) noexcept
+        {
+            if(count>value_top_ || base>value_top_-count || count>values_.size()-base) { return fail(status::invariant_failure); }
+            ::std::memmove(values_.data()+base,values_.data()+value_top_-count,count*sizeof(stack_value));
+            value_top_=base+count;return true;
+        }
+        [[nodiscard]] bool enter(target const& target) noexcept
+        {
+            if(target.host || target.module>=modules_.size() || call_top_==calls_.size()) { return fail(status::resource_limit); }
+            auto const* module{world_->module(target.module)};
+            auto const local{target.function-module->imported_function_vec_storage.size()};
+            if(local>=modules_[target.module].program.functions.size()) { return fail(status::invariant_failure); }
+            auto const& f{modules_[target.module].program.functions[local]};
+            auto const arguments{static_cast<::std::size_t>(f.type->parameter.end-f.type->parameter.begin)};
+            if(arguments>value_top_ || f.locals<arguments || f.locals>values_.size()-(value_top_-arguments) || control_top_==controls_.size())
+            { return fail(status::resource_limit); }
+            auto const mark{value_top_-arguments};
+            auto const controls{control_top_};
+            auto const crossing=call_top_!=0u && (calls_[call_top_-1u].cross_module || calls_[call_top_-1u].module!=target.module);
+            calls_[call_top_++]={target.module,target.function,0,mark,mark+f.locals,mark,controls,crossing};
+            ::std::fill(values_.begin()+value_top_,values_.begin()+mark+f.locals,0u);value_top_=mark+f.locals;
+            controls_[control_top_++]={value_top_,0,f.instructions.size()-1uz,0,
+                static_cast<::std::size_t>(f.type->result.end-f.type->result.begin),false};
+            return true;
+        }
+        [[nodiscard]] bool tail_enter(threads::ThreadedGroup::ChildLease& lease, target const& target) noexcept
+        {
+            if(!call_top_ || !target.type) { return fail(status::invariant_failure); }
+            auto const frame{calls_[call_top_-1uz]};
+            auto const* caller_type{function_type(frame.module,frame.function)};
+            auto const results{static_cast<::std::size_t>(target.type->result.end-target.type->result.begin)};
+            if(!caller_type || results!=static_cast<::std::size_t>(caller_type->result.end-caller_type->result.begin) ||
+               !::std::equal(target.type->result.begin,target.type->result.end,caller_type->result.begin))
+            { return fail(status::trap_signature); }
+            if(target.host)
+            {
+                // Import authority belongs to the actual Wasm caller even when
+                // it tail-calls. A host failure has no guest EH delivery path.
+                return host_call(lease,target) && leave();
+            }
+            auto const arguments{static_cast<::std::size_t>(target.type->parameter.end-target.type->parameter.begin)};
+            if(value_top_<frame.base || arguments>value_top_-frame.base)
+            { return fail(status::invariant_failure); }
+            // Replace the activation rather than adding a call. This retires
+            // the tail caller's lexical catch scopes and reuses its value and
+            // control storage, so arbitrarily deep tail recursion is bounded.
+            if(!compact(frame.previous_values,arguments)) { return false; }
+            control_top_=frame.controls;--call_top_;
+            if(!enter(target)) { return false; }
+            // A cross-module tail hop must not erase the provenance that the
+            // import dispatcher uses to reject authority laundering.
+            calls_[call_top_-1uz].cross_module |= frame.cross_module || frame.module!=target.module;
+            return true;
+        }
+        [[nodiscard]] bool leave() noexcept
+        {
+            auto const frame{calls_[call_top_-1uz]};auto const* t{function_type(frame.module,frame.function)};
+            if(!compact(frame.previous_values,static_cast<::std::size_t>(t->result.end-t->result.begin))) { return false; }
+            control_top_=frame.controls;--call_top_;return true;
+        }
+        [[nodiscard]] bool branch(::std::size_t depth) noexcept
+        {
+            auto& frame{calls_[call_top_-1uz]};
+            if(depth>=control_top_-frame.controls) { return fail(status::invariant_failure); }
+            auto const index{control_top_-1uz-depth};auto const label{controls_[index]};
+            if(!compact(label.base,label.loop?label.parameters:label.results)) { return false; }
+            if(index==frame.controls) { return leave(); }
+            if(label.loop) { control_top_=index+1uz;frame.pc=label.start; }
+            else { control_top_=index;frame.pc=label.end+1uz; }
+            return true;
+        }
+        [[nodiscard]] bool host_call(threads::ThreadedGroup::ChildLease& lease, target const& target) noexcept
+        {
+            auto const* t{target.type};auto const params{static_cast<::std::size_t>(t->parameter.end-t->parameter.begin)};
+            auto const results{static_cast<::std::size_t>(t->result.end-t->result.begin)};
+            if(params>value_top_-calls_[call_top_-1uz].base || results>values_.size()-(value_top_-params)) { return fail(status::invariant_failure); }
+            auto const base{value_top_-params};::std::size_t in{},out{};
+            for(::std::size_t i{};i<params;++i)
+            {
+                auto const bytes{detail::abi_bytes(t->parameter.begin[i])};
+                if(bytes>host_parameters_.size()-in) { return fail(status::resource_limit); }
+                ::std::memcpy(host_parameters_.data()+in,::std::addressof(values_[base+i]),bytes);in+=bytes;
+            }
+            for(auto i{t->result.begin};i!=t->result.end;++i) { out+=detail::abi_bytes(*i); }
+            if(out>host_results_.size()) { return fail(status::resource_limit); }
+            ::std::fill(host_results_.begin(),host_results_.begin()+out,::std::byte{});
+            auto const& caller{calls_[call_top_-1uz]};
+            ::uwvm2::runtime::lib::details::scoped_llvm_wasm_host_fp_environment_restore host_fp{true};
+            if(!host_fp.ready()) { return fail(status::host_failure); }
+            auto const result{threads::dispatch_import(lease,*world_,caller.module,caller.function,target.function,
+                {host_results_.data(),out},{host_parameters_.data(),in},caller.cross_module||caller.module!=target.module,target.module)};
+            if(result==threads::host_dispatch_status::group_stopped) { return fail(status::cancelled); }
+            if(result!=threads::host_dispatch_status::returned) { return fail(status::host_denied); }
+            if(lease.cancellation().stop_requested()) { return fail(status::cancelled); }
+            value_top_=base;out=0;
+            for(::std::size_t i{};i<results;++i)
+            {
+                auto const bytes{detail::abi_bytes(t->result.begin[i])};stack_value value{};
+                ::std::memcpy(::std::addressof(value),host_results_.data()+out,bytes);out+=bytes;
+                if(!push(value)) { return false; }
+            }
+            return true;
+        }
+        [[nodiscard]] bool access_failure(::uwvm2::extension::memtag::access_result const& proof,::std::uint64_t pointer) noexcept
+        {
+            using e=::uwvm2::extension::memtag::access_error;
+            if(proof.error==e::tag_mismatch)
+            {
+                result_.memtag_pointer=pointer;result_.memtag_granule=proof.mismatch_granule;
+                result_.memtag_pointer_tag=proof.pointer_tag;result_.memtag_allocation_tag=proof.allocation_tag;
+                return fail(status::trap_memtag);
+            }
+            return fail(proof.error==e::out_of_bounds?status::trap_memory:status::invariant_failure);
+        }
+        template<typename Function>
+        [[nodiscard]] bool memory_span(memory_type& memory,::std::uint64_t pointer,::std::uint64_t offset,
+                                       ::std::size_t bytes,Function&& function) noexcept
+        {
+            // The snapshot and tag proof cover the complete range before callback
+            // entry. Do not trap or retain a native pointer inside the callback.
+            if(has_tag_storage_ && memory.memtag_shadow.enabled())
+            {
+                auto const proof=memory_geometry(memory,[&]<typename Address,bool Shared>() noexcept
+                {return ::uwvm2::runtime::memtag::with_guest_access<Address,Shared>(
+                    memory,static_cast<Address>(pointer),offset,bytes,::std::forward<Function>(function));});
+                return proof || access_failure(proof,pointer);
+            }
+            ::std::size_t length{};
+            auto const address{memory_address(memory,pointer)};
+            if(offset>UINT64_MAX-address) { return fail(status::trap_memory); }
+            auto const okay{threads::details::access(memory,address+offset,bytes,length,[&](::std::byte* data) noexcept
+            { function(::std::span<::std::byte>{data,bytes}); })};
+            return okay || fail(status::trap_memory);
+        }
+        [[nodiscard]] bool memtag_operation(instruction const& ins) noexcept;
+        template<::std::size_t Bytes>
+        [[nodiscard]] bool access(memory_type& memory, ::std::uint64_t address, ::std::uint64_t offset, bool write, ::std::uint64_t& value) noexcept
+        {
+            bool const ok{memory_span(memory,address,offset,Bytes,[&](::std::span<::std::byte> data) noexcept
+            {
+                // Guest raw storage uses the same compiler-atomic may_alias
+                // convention as shared/wasm_threads.h, never atomic_ref over a
+                // fabricated C++ object. Plain Wasm accesses may tear bytewise;
+                // the native profile still needs mixed-width race qualification.
+                auto* pointer{data.data()};
+                using byte_type=typename ::uwvm2::runtime::compiler::shared::wasm_threads::atomic_access_traits<1>::type;
+                for(::std::size_t i{};i!=Bytes;++i)
+                {
+                    auto* byte{reinterpret_cast<byte_type*>(pointer+i)};
+                    if(write) { __atomic_store_n(byte,static_cast<byte_type>(value>>(i*8u)),__ATOMIC_RELAXED); }
+                    else { value|=static_cast<::std::uint64_t>(__atomic_load_n(byte,__ATOMIC_RELAXED))<<(i*8u); }
+                }
+            })};
+            return ok;
+        }
+        [[nodiscard]] bool memory_access(instruction const& ins, memory_type& memory) noexcept
+        {
+            auto const op{ins.opcode};bool const store{op>=0x36u};::std::uint64_t value{},address{};
+            if(store && !pop(value)) { return false; } if(!pop(address)) { return false; }
+            auto const offset{ins.immediate};
+            unsigned width{(op==0x28u||op==0x2au||op==0x36u||op==0x38u||op==0x34u||op==0x35u||op==0x3eu)?4u:
+                (op==0x29u||op==0x2bu||op==0x37u||op==0x39u)?8u:(op==0x2cu||op==0x2du||op==0x30u||op==0x31u||op==0x3au||op==0x3cu)?1u:2u};
+            bool ok{};switch(width) { case 1:ok=access<1>(memory,memory_address(memory,address),offset,store,value);break;case 2:ok=access<2>(memory,memory_address(memory,address),offset,store,value);break;
+                case 4:ok=access<4>(memory,memory_address(memory,address),offset,store,value);break;default:ok=access<8>(memory,memory_address(memory,address),offset,store,value); }
+            if(!ok||store) { return ok; }
+            bool const sign{op==0x2cu||op==0x2eu||op==0x30u||op==0x32u||op==0x34u};
+            if(sign && width<8u && (value&(::std::uint64_t{1}<<(width*8u-1u)))) { value|=(~::std::uint64_t{})<<(width*8u); }
+            if(op==0x28u||(op>=0x2cu&&op<=0x2fu)) { value=static_cast<::std::uint32_t>(value); }
+            return push(value);
+        }
+        template<::std::size_t Bytes>
+        [[nodiscard]] bool atomic_access(memory_type& memory, unsigned operation, ::std::uint64_t address, ::std::uint64_t offset,
+                                         ::std::uint64_t& value, ::std::uint64_t expected) noexcept
+        {
+            if((static_cast<::std::uint64_t>(address)+offset)&(Bytes-1uz)) { return fail(status::trap_unaligned); }
+            namespace atomic=::uwvm2::runtime::compiler::shared::wasm_threads;
+            bool const ok{memory_span(memory,address,offset,Bytes,[&](::std::span<::std::byte> data) noexcept
+            {
+                auto* p{data.data()};using op=atomic::atomic_rmw_operation;
+                switch(operation)
+                {
+                    case 0:value=atomic::atomic_load_le<Bytes>(p);break;
+                    case 1:atomic::atomic_store_le<Bytes>(p,value);break;
+                    case 2:value=atomic::atomic_rmw_le<op::add,Bytes>(p,value);break;
+                    case 3:value=atomic::atomic_rmw_le<op::sub,Bytes>(p,value);break;
+                    case 4:value=atomic::atomic_rmw_le<op::and_,Bytes>(p,value);break;
+                    case 5:value=atomic::atomic_rmw_le<op::or_,Bytes>(p,value);break;
+                    case 6:value=atomic::atomic_rmw_le<op::xor_,Bytes>(p,value);break;
+                    case 7:value=atomic::atomic_rmw_le<op::exchange,Bytes>(p,value);break;
+                    case 8:value=atomic::atomic_rmw_le<op::compare_exchange,Bytes>(p,value,expected);break;
+                }
+            })};
+            return ok;
+        }
+        [[nodiscard]] bool atomic(instruction const& ins, memory_type& memory) noexcept
+        {
+#ifdef UWVM_CPP_EXCEPTIONS
+            try
+            {
+#endif
+            auto const sub{ins.opcode-0x100u};if(sub==3u) { ::std::atomic_thread_fence(::std::memory_order_seq_cst);return true; }
+            ::std::uint64_t address{},value{},expected{},timeout{};
+            if(sub<=2u)
+            {
+                if(sub && !pop(timeout)) { return false; }if(!pop(expected)||!pop(address)) { return false; }
+                auto const offset{ins.immediate};
+                threads::wait_result result{};
+                if(has_tag_storage_ && memory.memtag_shadow.enabled())
+                {
+                    ::uwvm2::runtime::memtag::wait_execution_result checked{};
+                    auto const pointer=memory_address(memory,address);
+                    checked=memory_geometry(memory,[&]<typename Address,bool Shared>() noexcept
+                    {
+                        auto const p=static_cast<Address>(pointer);
+                        if(sub==0u)return ::uwvm2::runtime::memtag::wait_notify<0u,Address,Shared>(memory,p,offset,expected,0);
+                        if(sub==1u)return ::uwvm2::runtime::memtag::wait_notify<1u,Address,Shared>(memory,p,offset,expected,::std::bit_cast<::std::int64_t>(timeout));
+                        return ::uwvm2::runtime::memtag::wait_notify<2u,Address,Shared>(memory,p,offset,expected,::std::bit_cast<::std::int64_t>(timeout));
+                    });
+                    if(!checked.access) { return access_failure(checked.access,pointer); }
+                    result=checked.wait;
+                }
+                else
+                {
+                    auto const pointer=memory_address(memory,address);
+                    if(offset>UINT64_MAX-pointer)return fail(status::trap_memory);
+                    auto const effective=pointer+offset;
+                    if(sub==0u) { result=threads::memory_notify(memory,effective,static_cast<::std::uint32_t>(expected)); }
+                    else if(sub==1u) { result=threads::memory_wait<4>(memory,threads::is_shared(memory),effective,expected,::std::bit_cast<::std::int64_t>(timeout)); }
+                    else { result=threads::memory_wait<8>(memory,threads::is_shared(memory),effective,expected,::std::bit_cast<::std::int64_t>(timeout)); }
+                }
+                if(result.status==threads::wait_status::cancelled) { return fail(status::cancelled); }
+                if(result.status==threads::wait_status::unaligned) { return fail(status::trap_unaligned); }
+                if(result.status==threads::wait_status::out_of_bounds) { return fail(status::trap_memory); }
+                if(result.status>threads::wait_status::timed_out) { return fail(status::host_failure); }
+                return push(sub?static_cast<unsigned>(result.status):result.notified);
+            }
+            unsigned const slot{(sub-0x10u)%7u};unsigned const operation{(sub-0x10u)/7u};
+            if(operation && !pop(value)) { return false; }
+            if(operation==8u && !pop(expected)) { return false; }
+            if(!pop(address)) { return false; }
+            auto const offset{ins.immediate};
+            unsigned const widths[7]{4,8,1,2,1,2,4};bool ok{};
+            switch(widths[slot])
+            { case 1:ok=atomic_access<1>(memory,operation,memory_address(memory,address),offset,value,expected);break;
+              case 2:ok=atomic_access<2>(memory,operation,memory_address(memory,address),offset,value,expected);break;
+              case 4:ok=atomic_access<4>(memory,operation,memory_address(memory,address),offset,value,expected);break;
+              default:ok=atomic_access<8>(memory,operation,memory_address(memory,address),offset,value,expected); }
+            if(!ok||operation==1u) { return ok; }
+            return push(slot==0u||slot==2u||slot==3u?static_cast<::std::uint32_t>(value):value);
+#ifdef UWVM_CPP_EXCEPTIONS
+            }
+            catch(::std::bad_alloc const&) { return fail(status::resource_limit); }
+            catch(...) { return fail(status::host_failure); }
+#endif
+        }
+        [[nodiscard]] ::std::uint64_t exception_token(storage::gc_reference const& ref) const noexcept
+        {
+            if(ref.kind!=::uwvm2::object::global::wasm_ref_kind::wasm_exn||!ref.storage.ptr)return 0u;
+            for(::std::size_t i{};i<exception_top_;++i)
+                if(exceptions_[i].escaped&&exceptions_[i].reference.storage.ptr==ref.storage.ptr)return i+1u;
+            return 0u;
+        }
+        [[nodiscard]] bool bulk_memory(threads::ThreadedGroup::ChildLease& lease,instruction const& ins) noexcept;
+        template<typename Memory>
+        [[nodiscard]] bool grow_memory(threads::ThreadedGroup::ChildLease& lease,Memory& memory,::std::size_t maximum) noexcept;
+        template<::uwvm2::runtime::compiler::shared::simd_code Op,
+            ::uwvm2::runtime::compiler::shared::wasm1p1_simd_instruction_kind Kind,
+            ::uwvm2::runtime::compiler::shared::wasm1p1_simd_scalar_kind Scalar,
+            ::std::size_t Lanes,unsigned Align>
+        [[nodiscard]] static bool simd_execute(engine&,instruction const&) noexcept;
+        [[nodiscard]] bool arithmetic(unsigned op) noexcept;
+        [[nodiscard]] bool gc_operation(instruction const&) noexcept;
+        [[nodiscard]] bool floating(unsigned op) noexcept;
+        [[nodiscard]] bool raise(threads::ThreadedGroup::ChildLease&,::std::uint64_t) noexcept;
+        [[nodiscard]] bool throw_tag(threads::ThreadedGroup::ChildLease&,::std::size_t) noexcept;
+        [[nodiscard]] bool step(threads::ThreadedGroup::ChildLease&, instruction const&) noexcept;
+        [[nodiscard]] status prepare(::uwvm2::validation::error::code_validation_error_impl&);
+    public:
+        engine(engine const&)=delete;engine& operator=(engine const&)=delete;
+        [[nodiscard]] static compile_result compile(child_world::owner world, limits budget,
+            ::uwvm2::validation::error::code_validation_error_impl& error,bool execute_memtag=true) noexcept
+        {
+            compile_result result{};
+#ifdef UWVM_CPP_EXCEPTIONS
+            try
+            {
+#if defined(__FAST_MATH__)
+                result.outcome.code=status::unsupported_profile;return result;
+#endif
+                if constexpr(::std::endian::native!=::std::endian::little || sizeof(float)!=4 || sizeof(double)!=8 ||
+                    !::std::numeric_limits<float>::is_iec559 || !::std::numeric_limits<double>::is_iec559)
+                { result.outcome.code=status::unsupported_profile;return result; }
+                if(!world || !budget.values || !budget.controls || !budget.calls || !budget.functions || !budget.host_bytes ||
+                    !budget.storage_bytes || !budget.source_bytes || !budget.instruction_bytes || !budget.exception_objects || !budget.exception_values) { result.outcome.code=status::invalid_world;return result; }
+                auto owned{::uwvm2::utils::container::std_unique_ptr<engine>{::uwvm2::utils::allocator::fast_io_strict::object<engine>([&](engine* uwvm_allocated) { return ::new(static_cast<void*>(uwvm_allocated)) engine{::std::move(world),budget,execute_memtag}; })}};
+                result.outcome.code=owned->prepare(error);
+                if(result.outcome.normal()) { result.code=::std::move(owned); }
+            }
+            catch(::std::bad_alloc const&) { result.outcome.code=status::resource_limit; }
+            catch(...) { result.outcome.code=status::validation_failed; }
+#else
+            // No unavailable exception/unwind build can publish this profile.
+            static_cast<void>(world);static_cast<void>(budget);static_cast<void>(error);
+            result.outcome.code=status::unsupported_profile;
+#endif
+            return result;
+        }
+        [[nodiscard]] threads::code_debug_image const* debug_image() const noexcept{return debug_.get();}
+        [[nodiscard]] child_world const& world() const noexcept { return *world_; }
+        [[nodiscard]] child_world::owner retained_world() const noexcept { return world_; }
+        // Capacities, not merely live element counts, are charged. These are
+        // backend-owned allocations only; the Root adapter must also charge the
+        // actual World and native stack against its genuine reservation.
+        [[nodiscard]] ::std::size_t owned_storage_bytes() const noexcept
+        {
+            ::std::size_t total{sizeof(engine)};
+            auto add{[&](::std::size_t n,::std::size_t width) noexcept
+            { if(n>(SIZE_MAX-total)/width) { total=SIZE_MAX; } else { total+=n*width; } }};
+            if(debug_){add(sizeof(threads::code_debug_image),1u);add(debug_->allocated_bytes(),1u);}
+            add(gc_scratch_.capacity(),sizeof(storage::gc_object_value));
+            add(values_.capacity(),sizeof(stack_value));add(calls_.capacity(),sizeof(activation));add(controls_.capacity(),sizeof(control));
+            add(host_parameters_.capacity(),1);add(host_results_.capacity(),1);add(modules_.capacity(),sizeof(bound_module));
+            add(exceptions_.capacity(),sizeof(exception_record));add(exception_values_.capacity(),sizeof(stack_value));
+            for(auto const& m:modules_) { add(m.memories.capacity(),sizeof(bound_memory));add(m.globals.capacity(),sizeof(global_type*));add(m.tags.capacity(),sizeof(storage::local_defined_tag_storage_t*)); }
+            return total;
+        }
+        [[nodiscard]] ::std::size_t owned_code_bytes() const noexcept
+        {
+            ::std::size_t total{};auto add{[&](::std::size_t n,::std::size_t width) noexcept
+            { if(n>(SIZE_MAX-total)/width) { total=SIZE_MAX; } else { total+=n*width; } }};
+            for(auto const& m:modules_)
+            {
+                add(m.targets.capacity(),sizeof(target));add(m.program.functions.capacity(),sizeof(function_program));
+                for(auto const& f:m.program.functions)
+                { add(f.instructions.capacity(),sizeof(instruction));for(auto const& i:f.instructions) { add(i.labels.capacity(),sizeof(::std::uint32_t));add(i.catches.capacity(),sizeof(catch_clause)); } }
+            }
+            return total;
+        }
+        [[nodiscard]] auto const& last_memory_grow() const noexcept { return last_grow_; }
+        [[nodiscard]] execution_result run_entry(threads::ThreadedGroup::ChildLease& lease,
+            ::std::size_t function, ::std::span<::std::byte> results, ::std::span<::std::byte const> params,
+            ::std::size_t selected_module=SIZE_MAX) noexcept
+        {
+            if(execute_memtag_ && !::uwvm2::runtime::memtag::prepare_hardware_thread()) { return {status::invalid_world}; }
+            auto const module{selected_module==SIZE_MAX?world_->entry_module_index():selected_module};
+            if(::std::addressof(lease.world())!=world_.get() || !lease.owns_current_native_thread() ||
+                ::std::addressof(lease.admission())!=::std::addressof(world_->admission()) ||
+                module>=modules_.size() || function>=modules_[module].targets.size() || modules_[module].targets[function].host)
+            { return {status::invalid_world}; }
+            if(!validated_code_ || !validated_code_->covers(*world_)) { return {status::invalid_world}; }
+            // The actual owner, not a module-local declaration, selects checks
+            // for every scalar/SIMD/atomic/bulk access, including tag-zero callers.
+            for(auto const& bound:modules_)
+            {
+                for(auto const& owned:bound.memories)
+                    if(has_tag_storage_ && owned.memory->memtag_shadow.enabled()&&!memory_geometry(*owned.memory,[&]<typename Address,bool Shared>() noexcept
+                        {return ::uwvm2::runtime::memtag::details::configured<Address,Shared>(*owned.memory);}))
+                        return {status::invalid_world};
+            }
+            auto const* type{function_type(module,function)};::std::size_t input_bytes{},output_bytes{};
+            for(auto i{type->parameter.begin};i!=type->parameter.end;++i) { if(!detail::numeric_type(*i)) { return {status::trap_signature}; } input_bytes+=detail::abi_bytes(*i); }
+            for(auto i{type->result.begin};i!=type->result.end;++i) { if(!detail::numeric_type(*i)) { return {status::trap_signature}; } output_bytes+=detail::abi_bytes(*i); }
+            if(params.size()!=input_bytes || results.size()!=output_bytes) { return {status::trap_signature}; }
+            if(entered_.test_and_set(::std::memory_order_acq_rel)) { return {status::already_entered}; }
+            entry_scope retire{*this};
+            ::uwvm2::runtime::memtag::deferred::entry_scope memtag_delivery{};
+            if(execute_memtag_ && !memtag_delivery.enter()) { return {status::resource_limit}; }
+            clear_activation();result_={};last_grow_={};
+            if(lease.cancellation().stop_requested()) { result_.code=status::cancelled;return result_; }
+            ::std::size_t offset{};
+            for(auto i{type->parameter.begin};i!=type->parameter.end;++i)
+            {
+                auto const bytes{detail::abi_bytes(*i)};stack_value value{};
+                ::std::memcpy(::std::addressof(value),params.data()+offset,bytes);offset+=bytes;values_[value_top_++]=value;
+            }
+            bool fp_active{};
+            ::uwvm2::runtime::lib::details::scoped_llvm_wasm_fp_environment fp_scope{fp_active};
+            if(!fp_scope.ready())
+            { result_.code=status::host_failure;lease.request_trap(static_cast<::std::uint32_t>(result_.code),module,function,0);return result_; }
+            threads::execution_scope wait_scope{lease.waits(),lease.cancellation(),lease.debug_wait_attachment()};
+            if(enter(modules_[module].targets[function]))
+            {
+                while(call_top_ && result_.normal())
+                {
+                    auto& frame{calls_[call_top_-1uz]};auto const* instance{world_->module(frame.module)};
+                    auto const& source_function{modules_[frame.module].program.functions[frame.function-instance->imported_function_vec_storage.size()]};
+                    auto const& code{source_function.instructions};
+                    result_.module=frame.module;result_.function=frame.function;
+                    if(frame.pc>=code.size()) { static_cast<void>(fail(status::invariant_failure));break; }
+                    auto const& ins{code[frame.pc++]};result_.wasm_offset=ins.offset;
+                    if(execute_memtag_ && (::uwvm2::extension::memtag::asynchronous_requested() || ::uwvm2::extension::memtag::logging_requested()))
+                    { ::uwvm2::runtime::memtag::deferred::boundary(frame.module,frame.function,source_function.expression_offset(ins.offset),
+                        ::uwvm2::runtime::memtag::deferred::draining_opcode(ins.primary_opcode())?1u:0u); }
+                    if(lease.cancellation().stop_requested()) { static_cast<void>(fail(status::cancelled));break; }
+                    if(!lease.debug_safepoint(threads::debug_stop_site::before_instruction,
+                        frame.module,frame.function,ins.offset,frame.pc-1u))
+                    {static_cast<void>(fail(lease.cancellation().stop_requested()?status::cancelled:status::invariant_failure));break;}
+                    if(!step(lease,ins)) { break; }
+                }
+            }
+            memtag_delivery.finish();
+            if(result_.code!=status::ok && result_.code!=status::cancelled)
+            {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                namespace crash=::uwvm2::runtime::diagnostic::crash;
+                auto category=crash::category::execution;
+                char const* reason="threaded interpreter trap";
+                switch(result_.code){
+                case status::trap_unreachable:category=crash::category::unreachable;reason="unreachable";break;
+                case status::trap_allocation:category=crash::category::memtag;reason="managed memory allocation rejected";break;
+                case status::trap_memtag:category=crash::category::memtag;reason="memory tag mismatch";break;
+                case status::trap_memory:reason="memory access out of bounds";break;
+                case status::trap_divide_by_zero:reason="integer divide by zero";break;
+                case status::trap_integer_overflow:reason="integer overflow";break;
+                case status::trap_invalid_conversion:reason="invalid conversion to integer";break;
+                case status::trap_uncaught_exception:reason="uncaught Wasm exception";break;
+                case status::trap_cast:reason="reference cast failed";break;
+                case status::resource_limit:reason="threaded execution storage capacity exhausted";break;
+                case status::invariant_failure:case status::host_failure:category=crash::category::internal;reason="threaded runtime failure";break;
+                default:break;
+                }
+                crash::memory_detail const memory{0u,result_.memtag_pointer,result_.memtag_granule,
+                    result_.memtag_pointer_tag,result_.memtag_allocation_tag};
+                ::std::uint64_t expression_offset{UINT64_MAX};
+                if(result_.module<modules_.size())
+                {
+                    auto const& source_module{modules_[result_.module].program};
+                    auto const imported{source_module.instance->imported_function_vec_storage.size()};
+                    if(result_.function>=imported && result_.function-imported<source_module.functions.size())
+                    { expression_offset=source_module.functions[result_.function-imported].expression_offset(result_.wasm_offset); }
+                }
+                crash::report(category,reason,1u,result_.module,result_.function,expression_offset,
+                    result_.code==status::trap_memtag?&memory:nullptr);
+                crash::pause_process();
+                if(category==crash::category::internal) { ::fast_io::fast_terminate(); }
+#endif
+                auto const journal_category=result_.code==status::trap_unreachable?threads::journal_fault::unreachable:
+                    (result_.code==status::trap_memtag || result_.code==status::trap_allocation)?threads::journal_fault::memtag:threads::journal_fault::execution;
+                lease.request_trap(static_cast<::std::uint32_t>(result_.code),result_.module,result_.function,result_.wasm_offset,journal_category);
+            }
+            auto const outcome{lease.read_outcome()};
+            if(outcome.kind==threads::termination_kind::proc_exit) { result_.code=status::proc_exit;result_.exit_code=outcome.code; }
+            else if(outcome.kind!=threads::termination_kind::running && result_.normal()) { result_.code=status::cancelled; }
+            if(result_.normal())
+            {
+                offset=0;::std::size_t index{};
+                for(auto i{type->result.begin};i!=type->result.end;++i,++index)
+                {
+                    auto const bytes{detail::abi_bytes(*i)};
+                    ::std::memcpy(results.data()+offset,::std::addressof(values_[index]),bytes);offset+=bytes;
+                }
+            }
+            // Both the actual parent entry and child start retire the SAME safe
+            // iterative path; no ordinary parent opfunc is a fallback.
+            return result_; // retire clears all per-entry arenas before busy=false.
+        }
+        [[nodiscard]] execution_result run_thread_start(threads::ThreadedGroup::ChildLease& lease,
+            ::std::uint32_t tid, ::std::uint32_t argument) noexcept
+        {
+            if(tid==0u || tid>=(1u<<29u)) { return {status::invalid_world}; }
+            ::std::uint32_t const values[2]{tid,argument};
+            return run_entry(lease,world_->thread_start_function_index(),{},
+                {reinterpret_cast<::std::byte const*>(values),sizeof(values)});
+        }
+    };
+}
+
+#include "prepare.h"
+#include "execute.h"
+#include "floating.h"
+#include "exception.h"
+#include "gc.h"
+#include "bulk_memory.h"
+#include "simd.h"
+#include "memtag.h"
+
+#endif // Linux native-thread, C++ exceptions, non-module threaded source profile

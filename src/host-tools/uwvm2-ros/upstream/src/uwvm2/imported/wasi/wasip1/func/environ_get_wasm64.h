@@ -1,0 +1,180 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+# include <uwvm2/runtime/checkpoint/host_memory_phase.h>
+// std
+# include <cstddef>
+# include <cstdint>
+# include <climits>
+# include <cstring>
+# include <limits>
+# include <concepts>
+# include <bit>
+# include <memory>
+// macro
+# include <uwvm2/uwvm_predefine/utils/ansies/uwvm_color_push_macro.h>
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/imported/wasi/wasip1/feature/feature_push_macro.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/uwvm_predefine/utils/ansies/impl.h>
+# include <uwvm2/uwvm_predefine/io/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/object/memory/linear/impl.h>
+# include <uwvm2/imported/wasi/wasip1/abi/impl.h>
+# include <uwvm2/imported/wasi/wasip1/fd_manager/impl.h>
+# include <uwvm2/imported/wasi/wasip1/memory/impl.h>
+# include <uwvm2/imported/wasi/wasip1/environment/impl.h>
+# include "base.h"
+#endif
+
+#ifndef UWVM_CPP_EXCEPTIONS
+# if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wcpp"
+# elif defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wcpp"
+# endif
+# warning "Without enabling C++ exceptions, using this WASI function may cause termination."
+# if defined(__clang__)
+#  pragma clang diagnostic pop
+# elif defined(__GNUC__)
+#  pragma GCC diagnostic pop
+# endif
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+#if defined(UWVM_IMPORT_WASI_WASIP1) && defined(UWVM_IMPORT_WASI_WASIP1_WASM64)
+
+UWVM_MODULE_EXPORT namespace uwvm2::imported::wasi::wasip1::func
+{
+    /// @brief     WasiPreview1.environ_get_wasm64
+    /// @details   __wasi_errno_t environ_get(char **environ, char *environ_buf);
+    /// @note      The WASI specification does not require implementation-side isolation of environ/environ_buf memory order; the caller must ensure they do
+    ///            not overlap. Memory write visibility is guaranteed by function call synchronization boundaries.
+
+    inline constexpr ::uwvm2::imported::wasi::wasip1::abi::errno_wasm64_t environ_get_wasm64(
+        ::uwvm2::imported::wasi::wasip1::environment::wasip1_environment<::uwvm2::object::memory::linear::native_memory_t> & env,
+        ::uwvm2::imported::wasi::wasip1::abi::wasi_void_ptr_wasm64_t environ_ptrsz,
+        ::uwvm2::imported::wasi::wasip1::abi::wasi_void_ptr_wasm64_t environ_buf_ptrsz) noexcept
+    {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        if(!env.allows_interface(u8"environ_get_wasm64")) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable; }
+        if(!env.permits(::uwvm2::imported::wasi::wasip1::environment::permission_t::environ)) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable; }
+#endif
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        ::std::uint64_t data_bytes{};
+        for(auto const text : env.envs)
+        {
+            if(text.size() >= env.limits.max_args_env_bytes || data_bytes > env.limits.max_args_env_bytes - text.size() - 1u)
+            { ::uwvm2::utils::control::host_diagnostics::limited("args-env-bytes",false); return ::uwvm2::imported::wasi::wasip1::abi::errno_t::e2big; }
+            data_bytes += text.size() + 1u;
+        }
+#endif
+        auto const memory_pointer{env.get_memory()};
+        if(memory_pointer == nullptr) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::efault; }
+        auto& memory{*memory_pointer};
+
+        if(!check_wasip1_guest_pointer_alignment<8uz>(environ_ptrsz, u8"environ_get_wasm64.environ (Pointer<Pointer<u8>>)"))
+        { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval; }
+
+        auto const trace_wasip1_call{env.trace_wasip1_call};
+
+        if(trace_wasip1_call) [[unlikely]]
+        {
+            ::uwvm2::imported::wasi::wasip1::func::print_wasip1_trace_message(env,
+                                                                              u8"environ_get_wasm64(",
+                                                                              ::fast_io::mnp::addrvw(environ_ptrsz),
+                                                                              u8", ",
+                                                                              ::fast_io::mnp::addrvw(environ_buf_ptrsz),
+                                                                              u8")");
+        }
+
+        auto const environ_vec_size{env.envs.size()};
+        if(environ_vec_size > ::std::numeric_limits<::std::size_t>::max() / sizeof(::uwvm2::imported::wasi::wasip1::abi::wasi_void_ptr_wasm64_t))
+            [[unlikely]]
+        {
+            // This is an error specific to env itself, which triggers a direct trap.
+            ::fast_io::fast_terminate();
+        }
+
+        // WASI authorizes exactly the count reported by the matching sizes_get call.
+        auto const environ_vec_size_bytes{environ_vec_size * sizeof(::uwvm2::imported::wasi::wasip1::abi::wasi_void_ptr_wasm64_t)};
+        if(!::uwvm2::imported::wasi::wasip1::func::check_wasip1_memory_bounds_wasm64(memory, environ_ptrsz, environ_vec_size_bytes))
+            { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::efault; }
+
+        // Check only once to avoid excessive locking overhead.
+        ::std::size_t curr_environ_size_bytes{};
+        for(auto const curr_environ: env.envs)
+        {
+            auto const curr_environ_size{curr_environ.size()};
+            if(::std::numeric_limits<::std::size_t>::max() - 1uz - curr_environ_size_bytes < curr_environ_size) [[unlikely]]
+            {
+                // This is an error specific to env itself, which triggers a direct trap.
+                ::fast_io::fast_terminate();
+            }
+            // never overflow
+            curr_environ_size_bytes += curr_environ_size + 1uz;  // end zero-byte
+        }
+        if(!::uwvm2::imported::wasi::wasip1::func::check_wasip1_memory_bounds_wasm64(memory, environ_buf_ptrsz, curr_environ_size_bytes))
+            { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::efault; }
+
+        ::uwvm2::runtime::checkpoint::host_memory_phase::scope replay_output_phase{true};
+        auto environ_curr_size{environ_ptrsz};
+        auto environ_buff_curr_size{environ_buf_ptrsz};
+        for(auto const curr_environ: env.envs)
+        {
+            ::uwvm2::imported::wasi::wasip1::memory::store_basic_wasm_type_to_memory_wasm64_unchecked<
+                ::uwvm2::imported::wasi::wasip1::abi::wasi_void_ptr_wasm64_t>(memory, environ_curr_size, environ_buff_curr_size);
+            environ_curr_size += sizeof(::uwvm2::imported::wasi::wasip1::abi::wasi_void_ptr_wasm64_t);
+
+            ::uwvm2::imported::wasi::wasip1::memory::write_all_to_memory_wasm64_unchecked(memory,
+                                                                                          environ_buff_curr_size,
+                                                                                          reinterpret_cast<::std::byte const*>(curr_environ.cbegin()),
+                                                                                          reinterpret_cast<::std::byte const*>(curr_environ.cend()));
+            environ_buff_curr_size += curr_environ.size();
+
+            ::uwvm2::imported::wasi::wasip1::memory::store_basic_wasm_type_to_memory_wasm64_unchecked<char8_t>(memory, environ_buff_curr_size, u8'\0');
+            environ_buff_curr_size += sizeof(char8_t);
+            static_assert(sizeof(char8_t) == 1uz);
+        }
+
+        return ::uwvm2::imported::wasi::wasip1::abi::errno_wasm64_t::esuccess;
+    }
+}  // namespace uwvm2::imported::wasi::wasip1::func
+
+#endif
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/imported/wasi/wasip1/feature/feature_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+# include <uwvm2/uwvm_predefine/utils/ansies/uwvm_color_pop_macro.h>
+#endif
+

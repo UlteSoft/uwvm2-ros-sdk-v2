@@ -1,0 +1,11 @@
+set_project("abb-ros1-guest")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("abb-ros1-guest")
+    set_kind("binary")
+    set_language("go")
+    set_ros_platform("abb")
+    add_files("go.mod")
+    set_wros_test_queries("abi", "go-runtime")
+    add_wros_tests("int", "aot")
+target_end()

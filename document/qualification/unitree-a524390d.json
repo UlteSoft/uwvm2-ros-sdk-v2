@@ -1,0 +1,231 @@
+{
+  "public_commit": "a524390de584d690d773ab0fe09142f0bcb4d4fd",
+  "git_tree": "a7ef6297d35a3ae1a9fcf72d141534aff7b27d4e",
+  "bootstrap_sha256": "e5d0e51c2f0e747413f66ec2c38afeeb1837725ec035d8b8972a19d9792b6628",
+  "host": "linux-x86_64",
+  "platform": "unitree",
+  "language": "py",
+  "python": "3.14.8",
+  "binary_installs": {
+    "py-default": {
+      "language": "py",
+      "mode": "binary",
+      "installer_sha256": "e5d0e51c2f0e747413f66ec2c38afeeb1837725ec035d8b8972a19d9792b6628"
+    },
+    "python-explicit": {
+      "language": "py",
+      "mode": "binary",
+      "installer_sha256": "e5d0e51c2f0e747413f66ec2c38afeeb1837725ec035d8b8972a19d9792b6628"
+    }
+  },
+  "external_script": {
+    "py-default": {
+      "script_sha256": "d978e8aa62f833dcdad939d751c5f9b58c2955dbf177174dfd80c746051ecd31",
+      "shared_guest_sha256": "8c134e24989760ea008a5ce0b9e8acfb976b68c0272eaac53d8f08bc35087540",
+      "linked_library_sha256": "89cf990d56d71b714217c6d3386262be966bbcd3ca1b804e9fae6c04311000e3",
+      "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+      "runs": {
+        "int": {
+          "exit": 0,
+          "stdout_version": "3.14.8",
+          "platform": "wasi",
+          "diagnostic_fd_tell_denied": true,
+          "output_sha256": "8f6a700ca0200ba7c9fef0d8981f9d83440fdfe91eed8ea6aeb9d344cbf9e816"
+        },
+        "aot": {
+          "exit": 0,
+          "stdout_version": "3.14.8",
+          "platform": "wasi",
+          "diagnostic_fd_tell_denied": true,
+          "output_sha256": "8f6a700ca0200ba7c9fef0d8981f9d83440fdfe91eed8ea6aeb9d344cbf9e816"
+        }
+      }
+    },
+    "python-explicit": {
+      "script_sha256": "d978e8aa62f833dcdad939d751c5f9b58c2955dbf177174dfd80c746051ecd31",
+      "shared_guest_sha256": "8c134e24989760ea008a5ce0b9e8acfb976b68c0272eaac53d8f08bc35087540",
+      "linked_library_sha256": "89cf990d56d71b714217c6d3386262be966bbcd3ca1b804e9fae6c04311000e3",
+      "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+      "runs": {
+        "int": {
+          "exit": 0,
+          "stdout_version": "3.14.8",
+          "platform": "wasi",
+          "diagnostic_fd_tell_denied": true,
+          "output_sha256": "8f6a700ca0200ba7c9fef0d8981f9d83440fdfe91eed8ea6aeb9d344cbf9e816"
+        },
+        "aot": {
+          "exit": 0,
+          "stdout_version": "3.14.8",
+          "platform": "wasi",
+          "diagnostic_fd_tell_denied": true,
+          "output_sha256": "8f6a700ca0200ba7c9fef0d8981f9d83440fdfe91eed8ea6aeb9d344cbf9e816"
+        }
+      }
+    }
+  },
+  "source_install": {
+    "exit": 0,
+    "network_during_compilation": "offline",
+    "jobs": 2,
+    "git_paths": 28930,
+    "unique_git_blobs": 26300,
+    "lfs_objects": 9,
+    "verified_installer_sha256": "ac80696844fcb9211a5c810eca026063e0e5f97b2ba4844a915f4eb393e6da90",
+    "shared_guest_sha256": "47db71e8841b5102ac9fd85e5f8fe72a51bf816065b908052c802acba304cf00",
+    "linked_library_sha256": "dfb29cc3f08e3edddf70e09f83b071b50e97f07413631e239424ef855c2995cc"
+  },
+  "installed_binary_and_source_archive_match": false,
+  "installed_binary_and_source_runtime_match": false,
+  "independent_review": {
+    "isolation": {
+      "scope_parent": "wrosvendor.slice",
+      "parent_and_leaf_max_bytes": 68719476736,
+      "swap_max_bytes": 0,
+      "parent_oom_group": 0,
+      "leaf_oom_group": 1,
+      "offline_build_and_run": true
+    },
+    "external_python": {
+      "wrpy_direct_int": true,
+      "wrpy_direct_aot_authorized": true,
+      "xmake_int_aot": true,
+      "source_direct": {
+        "int": "passed",
+        "aot": "pending"
+      },
+      "message_types": {
+        "unitree_api": 8,
+        "unitree_go": 24,
+        "unitree_hg": 11
+      },
+      "field_count": 257,
+      "message_round_trips": 172,
+      "malformed_rejected": true,
+      "authorized_handle_written": {
+        "int": true,
+        "aot": true
+      },
+      "denied_code": 13,
+      "unselected_operation_lookup_error": true,
+      "fastcdr_2_2_5_sha": "9f4e60f7ac958e0fbbfe949102de3929cbbc226f",
+      "fastcdr_frames": {
+        "go2-be.cdr": {
+          "bytes": 1180,
+          "sha256": "7adcbe17c7183e5d1199a3c5730cf8dfca12d222274992c36e43fb6e6311c73c"
+        },
+        "go2-le.cdr": {
+          "bytes": 1180,
+          "sha256": "16c465859160dc4fdb9beb137f50a2c2a0ef142c7662c9a4b595768cf228eb52"
+        },
+        "hg-be.cdr": {
+          "bytes": 2092,
+          "sha256": "78aab33ca5a5c62ee44ff33e275da878a352c21f3e57e6d26c01ad40fda9b4ce"
+        },
+        "hg-le.cdr": {
+          "bytes": 2092,
+          "sha256": "44bbebad350337b99b81f6559661af1e16b1675bcbf63362c46051509cc1413b"
+        }
+      }
+    },
+    "feature_proof": {
+      "mte_required": true,
+      "mte_active_and_disabled_tagged_buffers": [
+        128,
+        0
+      ],
+      "native_wasm_eh_observed": false,
+      "python_raise_catch_observed": true,
+      "exact_preview1_count": {
+        "public-shared": 16,
+        "rebuilt-shared": 16,
+        "direct": 12,
+        "abi-only": 12
+      },
+      "actual_ros_imports": {
+        "public-shared": [],
+        "rebuilt-shared": [],
+        "direct": [
+          "abi",
+          "capability.open"
+        ],
+        "abi-only": [
+          "abi"
+        ]
+      }
+    },
+    "shared_script_path": {
+      "no-mount": 1,
+      "default-dir-rights": 120,
+      "read-only": 120,
+      "read-only-no-runtime-tags": 0,
+      "int-file-tags-off": 0,
+      "int-sibling-tags-off": 1
+    },
+    "ros1_pytemplate_0_1_1": {
+      "archive_sha256": "e3becf582061a20b52f6ddf5e47f27e08132d05f4d0c9bf018bb4f4127f5e691",
+      "module_sha256": "6b62836d8c04279115b57744c1628f4a0501846770c64e6e3ab13f7df3af1777",
+      "upstream_host_tests_passed": 3,
+      "scope": "Answer and Fibonacci computation components",
+      "native_python_c_wasm_int_aot_outputs_equal": true,
+      "output_sha256": "891baa6a0a9efff6fd4553d467c1caa8451d5409efbc634427fc4140f320d94a"
+    },
+    "receipt_sha256": "e39f6936b3ac733d09f3dff3c249312a61475e80f40feb2736191259df60c10f",
+    "source_and_binary_compiler_receipts": {
+      "binary_legacy": {
+        "archive_sha256": "89cf990d56d71b714217c6d3386262be966bbcd3ca1b804e9fae6c04311000e3",
+        "compiler_sha256": "4ed6cce04d570222f4bb574e2c965c721fdbef89fecc27de126045328ac727a1",
+        "closure_sha256": "61b9f1ad956598643e8751af44f125dcbf39225eae7f643357461fc61391446e"
+      },
+      "binary_link": {
+        "sha256": "8c134e24989760ea008a5ce0b9e8acfb976b68c0272eaac53d8f08bc35087540",
+        "link_compiler_sha256": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+        "link_closure_sha256": "5f4559fb68f8fc4421cfe095f073df695eb8cad718dd754f2e5441b506272d90"
+      },
+      "source_lib": {
+        "source_index_sha256": "ffddd71f999a28a27fda873c384e512c829d27dc07aa47fd98b4573b8e10e85b",
+        "compiler_sha256": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+        "closure_sha256": "5f4559fb68f8fc4421cfe095f073df695eb8cad718dd754f2e5441b506272d90",
+        "profile": {
+          "address_bits": 32,
+          "wasm_version": "3.0",
+          "threads": false,
+          "mte": true,
+          "exceptions": "eh",
+          "triple": "wasm32-wasip1",
+          "abi": "wasi_snapshot_preview1",
+          "memtag_wire": "packed-v1",
+          "extensions": [
+            "wasmmte"
+          ]
+        },
+        "extracted": {
+          "libpython3.14.a": "dfb29cc3f08e3edddf70e09f83b071b50e97f07413631e239424ef855c2995cc",
+          "pyconfig.h": "efca43d69f47e8b0627d8c69ce93040df61303a644117dfc3405c5675c2f6eac",
+          "frozen.h": "c97e194e8e1478ee2960b18b5a765850a98ed3ae4c4f353e9b329a92ac87ea18"
+        }
+      },
+      "source_link": {
+        "sha256": "47db71e8841b5102ac9fd85e5f8fe72a51bf816065b908052c802acba304cf00",
+        "link_compiler_sha256": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+        "link_closure_sha256": "5f4559fb68f8fc4421cfe095f073df695eb8cad718dd754f2e5441b506272d90"
+      }
+    },
+    "tinygo": {
+      "historical_stderr_errno_probe_passed": {
+        "int": true,
+        "aot": true
+      },
+      "debug_cli_exit_codes": {
+        "example-debug": 1,
+        "neither-debug": 0,
+        "default-debug": 1,
+        "no-mte-debug": 1,
+        "no-eh-debug": 0,
+        "standard": 0
+      },
+      "first_failure": "Clang integrated assembler on runtime/panic.S",
+      "new_native_frontend_llvm_build": false
+    }
+  }
+}

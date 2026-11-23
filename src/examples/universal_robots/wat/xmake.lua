@@ -1,0 +1,10 @@
+set_project("universal_robots-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("universal_robots-observation")
+    set_kind("binary")
+    set_language("wat")
+    set_ros_platform("universal_robots")
+    add_files("main.wat")
+    add_wros_tests("int", "aot")
+target_end()

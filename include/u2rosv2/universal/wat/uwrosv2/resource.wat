@@ -1,0 +1,39 @@
+;; Generated from src/abi/contract.json. Copy the required imports into the calling
+;; guest and declare each one with wrwat --ros-operation. Guest addresses refer to
+;; the immediate caller's linear memory.
+(module
+
+  ;; resource.close. Close an owned local scheduling, lifecycle, sealed-buffer, model or transform
+  ;; resource according to its cleanup contract. Retained borrows or cleanup debt retain their
+  ;; capacity until actual retirement; closure does not grant another purpose. Sensor/proposal and
+  ;; recording/replay handles route to their owning dispatchers; retained borrows/pins still prevent
+  ;; premature retirement.
+  ;;
+  ;; The caller must belong to the capability's environment. The deployment must expose
+  ;; resource.close and the grant must authorize resource.close. The resource registry checks the
+  ;; originating grant and provider binding.
+  ;;
+  ;; Encode and decode scalar words as little-endian u64. Signed values use their two's-complement
+  ;; bit pattern.
+  ;;
+  ;; Keep the request readable, the full reply capacity writable and the eight-byte length slot
+  ;; writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may overlap
+  ;; because the VM copies the request before delivery. The length slot must be disjoint from both
+  ;; ranges after address normalization. An overlap with the slot returns INVALID (22).
+  ;;
+  ;; @param $cap - (i64) Capability handle for the resource.close action in the caller's environment.
+  ;; @param $memory - (i32) Index of the caller's linear memory containing all three spans.
+  ;; @param $request - (i64) Guest address of the encoded request. Wire order is `resource` (`u64`).
+  ;; @param $size - (i64) Exact request length, 8 bytes.
+  ;; @param $output - (i64) Guest address of the checked reply range. This operation has an empty
+  ;;   reply body.
+  ;; @param $capacity - (i64) Byte capacity of the full writable reply range, at most 4194304. The
+  ;;   fixed result occupies 0 bytes.
+  ;; @param $length_output - (i64) Guest address of the writable little-endian u64 byte count. On
+  ;;   delivery it records the number of bytes written to the reply.
+  ;; @returns Zero on success, otherwise a scene status. The VM writes a zero length before the
+  ;;   mutation. A later refusal can therefore also leave zero in the slot.
+  (import "uwvm_ros_v2" "resource.close" (func $wr_resource_close (param $cap i64) (param $memory i32) (param $request i64) (param $size i64) (param $output i64) (param $capacity i64) (param $length_output i64) (result i32)))
+
+  (export "resource.close" (func $wr_resource_close))
+)

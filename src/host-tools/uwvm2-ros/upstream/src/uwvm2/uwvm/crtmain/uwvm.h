@@ -1,0 +1,248 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @file        uwvm.cppm
+ * @brief       uwvm cpp main function
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-03-20
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// std
+# include <cstdint>
+# include <cstddef>
+# include <limits>
+# include <utility>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/runtime/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/ansies/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# if defined(UWVM_MACOS_4GIB_TEST)
+#  include "low_memory_entry.h"
+#  include <uwvm2/uwvm/run/retval.h>
+# else
+#  include <uwvm2/uwvm/cmdline/impl.h>
+#  include <uwvm2/uwvm/run/impl.h>
+# endif
+# include <uwvm2/uwvm/crtmain/global/impl.h>
+// callback
+# if !defined(UWVM_MACOS_4GIB_TEST)
+#  include <uwvm2/uwvm/cmdline/callback/impl.h>
+# endif
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+#include "cache_seal_process.h"
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm
+{
+    /// @brief      uwvm c++ uz u8 main function
+    /// @param      argc Argument Count
+    /// @param      argv Argument Vector
+    /// @return     exit value
+    inline constexpr int uwvm_uz_u8main(::std::size_t argc, char8_t const* const* argv) noexcept
+    {
+#if defined(UWVM_RUNTIME_LLVM_JIT)
+        // Only callbacks from this parse may request a policy change. Help and
+        // failed parses return below without ever entering the cold helper.
+        ::uwvm2::uwvm::runtime::runtime_mode::global_runtime_llvm_jit_cache_seal_process_requested = false;
+#endif
+#if defined(UWVM_MACOS_4GIB_TEST)
+        using parsing_return_val = ::uwvm2::uwvm::crtmain::low_memory::parse_status;
+        auto const parsing_result{::uwvm2::uwvm::crtmain::low_memory::parse(argc, argv)};
+#else
+        using parsing_return_val = ::uwvm2::uwvm::cmdline::parsing_return_val;
+        auto const parsing_result{::uwvm2::uwvm::cmdline::parsing(argc, argv)};
+#endif
+        switch(parsing_result)
+        {
+            case parsing_return_val::def:
+            {
+                break;
+            }
+            case parsing_return_val::return0:
+            {
+                return static_cast<int>(::uwvm2::uwvm::run::retval::ok);
+            }
+            case parsing_return_val::returnm1:
+            {
+                return static_cast<int>(::uwvm2::uwvm::run::retval::parameter_error);
+            }
+            [[unlikely]] default:
+            {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                ::std::unreachable();
+            }
+        }
+
+#if defined(UWVM_RUNTIME_LLVM_JIT)
+        if(!::uwvm2::uwvm::crtmain::apply_explicit_llvm_cache_process_seal())
+        { return static_cast<int>(::uwvm2::uwvm::run::retval::parameter_error); }
+#endif
+
+#if defined(UWVM_MACOS_4GIB_TEST)
+        return ::uwvm2::uwvm::crtmain::low_memory::run();
+#else
+        return ::uwvm2::uwvm::run::run();
+#endif
+    }
+
+    /// @brief    whole process time
+    /// @details  The destructor for this global variable is called during `atexit`, and the initializer is called during `.init_array`
+    ///           there are no other global dependencies.
+    inline ::uwvm2::uwvm::global::process_time whole_process_time{};  // [global]
+
+#if !((defined(_WIN32) && !defined(__CYGWIN__)) && !defined(_WIN32_WINDOWS))  // NOT WINNT
+
+    /// @brief      uwvm c++ main function (nont winnt)
+    /// @details    Handles initialization of all global variables. Only non-raii global variables, or constexpr raii global variables, are allowed, rtti global
+    ///             variables and constinit raii global variables are forbidden.
+    /// @param      argc Argument Count
+    /// @param      argv Argument Vector
+    /// @return     exit value
+    /// @see        main()
+    inline constexpr int uwvm_main_non_winnt(int argc, char** argv) noexcept
+    {
+        // Automatically get the correct timezone data
+        ::uwvm2::uwvm::global::tz_set_s tz_set_ele{};
+
+        // The size_t of some platforms is smaller than int, in these platforms you need to do a size check before conversion
+        constexpr auto size_t_max{::std::numeric_limits<::std::size_t>::max()};
+        constexpr auto int_max{::std::numeric_limits<int>::max()};
+        if constexpr(size_t_max < int_max)
+        {
+            // The size_t of current platforms is smaller than int, in these platforms you need to do a size check before conversion
+            if(argc > size_t_max) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"argc \"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    argc,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\" exceeds the maximum value of size_t :\"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    size_t_max,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\".",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                    u8"\n\n");
+                return static_cast<int>(::uwvm2::uwvm::run::retval::parameter_error);
+            }
+        }
+
+        // Just in case argc is less than 0.
+        if(argc < 0) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                u8"[error] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"argc \"",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                argc,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"\" is less than zero.",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                u8"\n\n");
+            return static_cast<int>(::uwvm2::uwvm::run::retval::parameter_error);
+        }
+
+        // cast
+        auto const argc_uz{static_cast<::std::size_t>(argc)};
+        using char8_t_const_ptr_const_may_alias_ptr UWVM_GNU_MAY_ALIAS = char8_t const* const*;
+        auto const argv_u8{reinterpret_cast<char8_t_const_ptr_const_may_alias_ptr>(argv)};
+
+# if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__WINE__)
+        // Native Windows needs WSAStartup/WSACleanup for the entire run (also
+        // on Win9x). Use the concrete RAII type exported by fast_io's module:
+        // its net_service alias is header-only. POSIX/Cygwin/Wine select an
+        // empty dummy service, so there is no initialization to omit there.
+        ::fast_io::win32_wsa_service service{};
+# endif
+
+        // u8main
+        return uwvm_uz_u8main(argc_uz, argv_u8);
+    }
+
+#else
+
+    /// @brief      uwvm c++ main function (Windows NT)
+    /// @details    Handles initialization of all global variables. Only non-raii global variables, or constexpr raii global variables, are allowed, rtti global
+    ///             variables and constinit raii global variables are forbidden.
+    /// @param      argc Argument Count
+    /// @param      argv Argument Vector
+    /// @return     exit value
+    /// @see        main()
+    inline constexpr int uwvm_main_winnt() noexcept
+    {
+        // program manipulation
+        // Generate guard to protect global pod pointer
+
+        // set win32-winnt console output and windows cp to utf8
+        ::uwvm2::uwvm::global::set_win32_console_io_cp_to_utf8 set_native_console_io_cp_to_utf8_ele{};
+        // set win32-winnt console ansi escape
+        ::uwvm2::uwvm::global::enable_win32_ansi enable_native_ansi_ele{};
+
+        // Automatically get the correct timezone data
+        ::uwvm2::uwvm::global::tz_set_s tz_set_ele{};
+
+        // codecvt parameters on winnt
+        ::uwvm2::uwvm::cmdline::nt_code_cvt_argv_storage const u8_cmdline{::uwvm2::uwvm::cmdline::nt_code_cvt_argv()};
+        auto const argc_uz{u8_cmdline.argc};
+        auto const argv_u8{u8_cmdline.argv.data()};
+
+# if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__WINE__)
+        // Keep the same native-Windows WSA lifetime as the non-NT entry above;
+        // the exported concrete type works in both header and module builds.
+        ::fast_io::win32_wsa_service service{};
+# endif
+
+        // u8main
+        return uwvm_uz_u8main(argc_uz, argv_u8);
+    }
+
+#endif
+
+}  // namespace uwvm2::uwvm
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/uwvm/runtime/macro/pop_macros.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

@@ -1,0 +1,288 @@
+{
+  "binding_commit": "b9fee6fe06f4876a0ca4bb473a966fe770559158",
+  "contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+  "node_sha256": "e6ec2c188d83d813f81f2de8aea084d74dce603ac1abedd0a30ad941b10087b2",
+  "source": {
+    "parameters": 1125,
+    "returns": 163,
+    "capability_operations": 152,
+    "retained_protocols": 6,
+    "viewer_operations": 8,
+    "domains": 38,
+    "statuses": 12
+  },
+  "proof": {
+    "sha256": "779ad2f506823542678d1ed6933c69e23b0c9275862289998f837df8b30a06ee",
+    "imports": 163
+  },
+  "asc_builds": {
+    "capability_abi_allow": {
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a",
+      "imports": 1
+    },
+    "capability_abi_deny": {
+      "sha256": "31975a0d4b9e92101660875e2098b8db6d1eb5d059204e9ba8ae9cec7afe3600",
+      "imports": 1
+    },
+    "domain_action": {
+      "sha256": "dfab727dd9aa85958d9f48135ceb9199588454391f2a62ef69b0a86d7912f61d",
+      "imports": 7
+    },
+    "domain_artifact": {
+      "sha256": "a4c5406ae6c76e9e0d5400862b76f604548d63bdd40f170a6cb3ee75ab62df3f",
+      "imports": 11
+    },
+    "domain_bridge": {
+      "sha256": "3916994e133df69494d4cbb1f46bc050a9e12e08bcfc3fc8e02978963898d9f0",
+      "imports": 4
+    },
+    "domain_buffer": {
+      "sha256": "db971f12317091f3a66cc043a9e8438d90ad56f4f3ba177fd0250471a0890d34",
+      "imports": 5
+    },
+    "domain_capability": {
+      "sha256": "b26624afc0c8d2582da1c600c997559cc56a14a272b6732c75b3eb007832c05e",
+      "imports": 4
+    },
+    "domain_clock": {
+      "sha256": "42ee7419b85de81c0a634f22c5620943cd274d7a139bb34d0d83dfe90923d658",
+      "imports": 3
+    },
+    "domain_communication": {
+      "sha256": "c6930a8a81b936267400810b1a1ca21aef93d4ab5e9ee7b145746f5be5847e4f",
+      "imports": 2
+    },
+    "domain_context": {
+      "sha256": "517bcc9e29425f515996b1a2d57c64df2d7c86c4fee83f22ab0381a20b620788",
+      "imports": 3
+    },
+    "domain_control": {
+      "sha256": "014d4b5a223b10dad957d1871d1cecab21ff9c6df67eaec3d9d2517f919555a3",
+      "imports": 5
+    },
+    "domain_device": {
+      "sha256": "c2cf3ff67e56e513c9ec2991d8ba4858f3c14d06c919c7e0c592c317a8aa698c",
+      "imports": 5
+    },
+    "domain_diagnostic": {
+      "sha256": "01c5a8b719131f41c62dce5059f6296f4f607b84d46e0f8beecdb1d003e9388c",
+      "imports": 1
+    },
+    "domain_driver": {
+      "sha256": "dd540b4a55d20d83e0989047a97a4f5d21d4db7c321f11a6a9106cc6f94d8f74",
+      "imports": 5
+    },
+    "domain_event": {
+      "sha256": "3c08fb178f86b1eeffca14df0a65e894ab29236523396c739625ea03a644e87e",
+      "imports": 3
+    },
+    "domain_graph": {
+      "sha256": "ddf31da74e48f6e920f0269d691906040b53c5114c718e3249309d92ecd644d5",
+      "imports": 2
+    },
+    "domain_guard": {
+      "sha256": "ac0952f7dbb071bb378e4c7eeee520456b7d12ff2f93ddec1a979b3b9ef88960",
+      "imports": 3
+    },
+    "domain_lifecycle": {
+      "sha256": "1b482c0acf97a033997b7789403a31716ba0d4441a4bf30f931772ae24e1ab45",
+      "imports": 6
+    },
+    "domain_log": {
+      "sha256": "be5ad5f566efc0cb4bf19689a3d8a7c31d2d9133192404bdf1bb9af51ba4bc90",
+      "imports": 1
+    },
+    "domain_media": {
+      "sha256": "a3f6eb3c329110bd18d3e6fd8dcffebf1a06f3dca316456d8a491919594b13b6",
+      "imports": 4
+    },
+    "domain_model": {
+      "sha256": "73eb6d3a258ffceb390056b5122efd674377b8b65414eff869d9afec9b1b8291",
+      "imports": 5
+    },
+    "domain_module_call": {
+      "sha256": "7fdd780580e68e2d7ec8740c678084b044cd12d71a4cb4983a9bce6034c5223c",
+      "imports": 6
+    },
+    "domain_modules": {
+      "sha256": "562b873c964d3e3ed9b7f52872125e3a505f577ba48e56de6f650daf1dffc420",
+      "imports": 6
+    },
+    "domain_node": {
+      "sha256": "4d5318514c34b51cef333f64158cd36be78105a8d21471046f545058275e10e2",
+      "imports": 2
+    },
+    "domain_parameter": {
+      "sha256": "a5244c6f4007ea60bb3e3cff4e1af22cb0d9a16b045da0360d7d9dc6e6048641",
+      "imports": 12
+    },
+    "domain_permission": {
+      "sha256": "41640afd5562b038df5f7852c35c1793c506a62f2a6872bdd7a461d3e8433971",
+      "imports": 1
+    },
+    "domain_proposal": {
+      "sha256": "fc072f8753150f694956ba2837203fe4b51f9b13254380ad8bc7ce8c34ccebc2",
+      "imports": 4
+    },
+    "domain_qos": {
+      "sha256": "db59db0ea05d4eefd09a6c46bc81e96f8c62dbf171635fb92087d2fb5b11bf7e",
+      "imports": 3
+    },
+    "domain_recording": {
+      "sha256": "be86c28dbec158f588bcdd2596194d7396aa3284c965e64232bee992e9434a20",
+      "imports": 4
+    },
+    "domain_replay": {
+      "sha256": "851547a8b416ada6c81d7e819c02a419caac339368fcf0d82c4e6592bdc2c894",
+      "imports": 3
+    },
+    "domain_request": {
+      "sha256": "fce5c6ce306a913795de18b24785aa847545844d67716cae4ecbd77ad95f75f5",
+      "imports": 2
+    },
+    "domain_resource": {
+      "sha256": "64424892deaa957aed01648d5129fd04e957cf9eb5977308c9dcb7624080aeb2",
+      "imports": 1
+    },
+    "domain_sensor": {
+      "sha256": "fb147b19c6fe1ae10c4957e4e56d80a6bb64c2fbde304e98ed94d50b8bfd080c",
+      "imports": 3
+    },
+    "domain_service": {
+      "sha256": "e3a8a7c2ef1b87fb42f0769dd0d6ee460837cd9dcd17013e3ad5f7a9a50d264a",
+      "imports": 10
+    },
+    "domain_timer": {
+      "sha256": "f7f691ff2f1f9c21e7e412c89b461a8878cf4f4bf844a3debe7a779e285cabb1",
+      "imports": 4
+    },
+    "domain_topic": {
+      "sha256": "c32e5e8c84ce43458ff1581b68c54df3d737c5e545c9cc2a282aaeb38a1b2b05",
+      "imports": 7
+    },
+    "domain_transform": {
+      "sha256": "d400cae09ddefe829febbbe5e1b0fb6a83083a828460615d611d92efe30bf687",
+      "imports": 9
+    },
+    "domain_types": {
+      "sha256": "89143c42f71bdb48c630c1d87ba534f48b42ce8c9e1e6116d31b78b33e9bf521",
+      "imports": 1
+    },
+    "domain_vm": {
+      "sha256": "bcad64f1874a2626d33ddf96a43e1b5bced9f71aeb7850fa580a70261e8812e2",
+      "imports": 1
+    },
+    "domain_wait": {
+      "sha256": "5ca68fd30e71012ce69d05266797517d23ad695041a27311cd5a4ba1a8791103",
+      "imports": 5
+    },
+    "frozen_scalar_example": {
+      "sha256": "f06495841bd962631c644261f9842209cc90c8b85df3a98a251833a79970d3dd",
+      "imports": 1
+    },
+    "scene_abi_allow": {
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a",
+      "imports": 1
+    },
+    "scene_abi_deny": {
+      "sha256": "31975a0d4b9e92101660875e2098b8db6d1eb5d059204e9ba8ae9cec7afe3600",
+      "imports": 1
+    },
+    "scene_all": {
+      "sha256": "fc2a2aebcc7edddb86f400edc26b7cefb36c19d3417d4b7df09bd990cd3971d7",
+      "imports": 163
+    },
+    "scene_one_non_abi": {
+      "sha256": "b5c8c6f97f037c82462ec1f349de92b62a85266bf25b3e1abf0646dd89deefd8",
+      "imports": 1
+    }
+  },
+  "vm_sha256": "a3d05e71b254c2e0fc1739fb5e59f0264f8fd08c7c70179b7eefae3a6cc9aa6c",
+  "cases": [
+    {
+      "case": "domain-allow",
+      "engine": "int",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a"
+    },
+    {
+      "case": "scene-allow",
+      "engine": "int",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a"
+    },
+    {
+      "case": "scene-deny",
+      "engine": "int",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "31975a0d4b9e92101660875e2098b8db6d1eb5d059204e9ba8ae9cec7afe3600"
+    },
+    {
+      "case": "scene-hidden",
+      "engine": "int",
+      "exit": 127,
+      "expected": "hidden link error",
+      "passed": true,
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a"
+    },
+    {
+      "case": "frozen-example",
+      "engine": "int",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "f06495841bd962631c644261f9842209cc90c8b85df3a98a251833a79970d3dd"
+    },
+    {
+      "case": "domain-allow",
+      "engine": "aot",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a"
+    },
+    {
+      "case": "scene-allow",
+      "engine": "aot",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a"
+    },
+    {
+      "case": "scene-deny",
+      "engine": "aot",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "31975a0d4b9e92101660875e2098b8db6d1eb5d059204e9ba8ae9cec7afe3600"
+    },
+    {
+      "case": "scene-hidden",
+      "engine": "aot",
+      "exit": 127,
+      "expected": "hidden link error",
+      "passed": true,
+      "sha256": "9aba6ff3e38f5b250b7c89fac50d9a61d0788830aef78b888f233647692a731a"
+    },
+    {
+      "case": "frozen-example",
+      "engine": "aot",
+      "exit": 0,
+      "expected": "success",
+      "passed": true,
+      "sha256": "f06495841bd962631c644261f9842209cc90c8b85df3a98a251833a79970d3dd"
+    }
+  ],
+  "compiler": "AssemblyScript 0.28.20",
+  "host_runtime": "Node.js 22.22.3",
+  "memory_max": 68719476736,
+  "memory_swap_max": 0,
+  "network": "offline"
+}

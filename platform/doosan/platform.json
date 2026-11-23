@@ -1,0 +1,38 @@
+{
+  "id": "doosan",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "dsr_msgs/LogAlarm",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_level",
+        "field": "level",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_group",
+        "field": "group",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_index",
+        "field": "index",
+        "type": "i32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/DoosanRobotics/doosan-robot/blob/19d520d7df599dc9751f3e8a41337c399c418a47/robot_ws/src/dsr_msgs/msg/LogAlarm.msg",
+        "revision": "19d520d7df599dc9751f3e8a41337c399c418a47",
+        "path": "robot_ws/src/dsr_msgs/msg/LogAlarm.msg",
+        "sha256": "e9d3a01151050c3f917427398a025fc73b1f74b0363b2af6624a57c92093b11f"
+      }
+    ]
+  }
+}

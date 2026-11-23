@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "host": "linux-x86_64",
+  "packages": {
+    "wrzig": {
+      "format": "tar.xz",
+      "member": "wrzig",
+      "compressed_bytes": 1518380,
+      "compressed_sha256": "23b945188ea68ec58acc2a2031f60bb131f1b3f4750a9c6ac33212836d9786a3",
+      "bytes": 4763672,
+      "sha256": "45153e3883a267ab48e1b44b1f31a10ec309cec4b9a5a5d1f4906a4b195fa06f",
+      "path": "bin/packages/linux-x86_64/wrzig/wrzig-45153e3883a267ab48e1.tar.xz",
+      "host": "linux-x86_64"
+    },
+    "wros-zig-mte": {
+      "format": "tar.xz",
+      "member": "wros-zig-mte",
+      "compressed_bytes": 4232640,
+      "compressed_sha256": "0bf1da5e079b084cdefcdd04e0165f95e7d243d75d72de129ef510cb7819f50a",
+      "bytes": 15861640,
+      "sha256": "7bf353e96609ae4df23e00e88c0b928abd3821ace0b8c83e3c15c9ae4314bf48",
+      "path": "bin/packages/linux-x86_64/wrzig/wros-zig-mte-7bf353e96609ae4df23e.tar.xz",
+      "host": "linux-x86_64"
+    }
+  }
+}

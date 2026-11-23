@@ -1,0 +1,6 @@
+{
+  "artifacts": {},
+  "support_roots": ["src/compilers/cc/policy"],
+  "support_map": {"src/compilers/cc/policy": "install"},
+  "source_roots": ["src/compilers/cc", "src/compilers/objc", "src/runtimes/objc"]
+}

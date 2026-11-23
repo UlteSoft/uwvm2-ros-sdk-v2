@@ -1,0 +1,31 @@
+{
+  "sources": [
+    {
+      "name": "typescript",
+      "url": "https://github.com/microsoft/TypeScript.git",
+      "tag": "v5.9.3",
+      "commit": "c63de15a992d37f0d6cec03ac7631872838602cb",
+      "license": "LICENSE.txt",
+      "directory": "src/compilers/typescript/upstream/typescript",
+      "source_files": 787,
+      "included_paths": [
+        "src",
+        "scripts",
+        "bin",
+        "Herebyfile.mjs",
+        "LICENSE.txt",
+        "ThirdPartyNoticeText.txt",
+        "README.md",
+        "package-lock.json",
+        "package.json"
+      ],
+      "omitted_paths": [],
+      "local_changes": []
+    }
+  ],
+  "verification": "Selected Git blobs are byte-identical to the listed revisions. The current driver uses the release distribution. An offline bootstrap rebuild of the host compiler is pending.",
+  "sdk_integration": [
+    "driver.py",
+    "compile.cjs"
+  ]
+}

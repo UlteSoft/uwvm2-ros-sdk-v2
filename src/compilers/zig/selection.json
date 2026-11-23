@@ -1,0 +1,40 @@
+{
+  "artifacts": {
+    "wrzig": [
+      "bin/wrzig"
+    ],
+    "wros-zig-mte": [
+      "share/toolchains/zig/bin/wros-zig-mte"
+    ]
+  },
+  "host_tools": {
+    "clang": [
+      "share/toolchains/portable/bin/clang"
+    ],
+    "wasm-ld": [
+      "share/toolchains/portable/bin/wasm-ld"
+    ]
+  },
+  "support_roots": [
+    "bin/packages/linux-x86_64/wrzig/release.json",
+    "src/compilers/zig/upstream.json",
+    "src/compilers/zig/upstream/LICENSE",
+    "src/compilers/zig/prepare.py",
+    "src/compilers/zig/rebuild.py",
+    "src/compilers/zig/driver.py",
+    "src/compilers/zig/memory.c",
+    "src/compilers/cc/distribution/licenses",
+    "src/compilers/cc/policy/guest_profile.py",
+    "src/compilers/cc/policy/imports.py",
+    "src/compilers/official_dist.py"
+  ],
+  "source_roots": [
+    "src/compilers/zig",
+    "src/abi",
+    "src/platform/universal_robots",
+    "src/compilers/package_native.py",
+    "src/compilers/cc/llvm-project/llvm",
+    "src/compilers/cc/llvm-project/cmake",
+    "src/compilers/cc/llvm-project/third-party"
+  ]
+}

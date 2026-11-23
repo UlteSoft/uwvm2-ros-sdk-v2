@@ -1,0 +1,26 @@
+{
+  "id": "trossen",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "interbotix_xs_msgs/JointTemps",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_temps",
+        "field": "temps",
+        "type": "i32",
+        "indexed": true
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/Interbotix/interbotix_ros_core/blob/172841ffa93f7556fff9c7455ad0e77688fa156e/interbotix_ros_xseries/interbotix_xs_msgs/msg/JointTemps.msg",
+        "revision": "172841ffa93f7556fff9c7455ad0e77688fa156e",
+        "path": "interbotix_ros_xseries/interbotix_xs_msgs/msg/JointTemps.msg",
+        "sha256": "e0798d4b96836b4836a540161fefb8071998ef948e5fb09b5e29a8bb3d9a4622"
+      }
+    ]
+  }
+}

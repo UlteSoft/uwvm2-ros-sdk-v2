@@ -1,0 +1,9 @@
+[package]
+name = "uwrosv2"
+version = "0.1.0"
+edition = "2021"
+description = "Allocation-free Wasm guest bindings for the uwvm_ros_v2 scene ABI"
+license = "MIT"
+
+[lib]
+path = "src/lib.rs"

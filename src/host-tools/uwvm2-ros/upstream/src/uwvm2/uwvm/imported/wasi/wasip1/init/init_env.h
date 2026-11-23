@@ -1,0 +1,1318 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-03-27
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+# if defined(__linux__)
+#  include <sys/stat.h>
+#  include <sys/sysmacros.h>
+# endif
+// std
+# include <cstddef>
+# include <cstdint>
+# include <uwvm2/uwvm/debugger/console_stdio.h>
+# if defined(UWVM_ROS_ZERO_HOST_DEFAULTS) && defined(__linux__)
+#  include <sys/vfs.h>
+# endif
+# include <uwvm2/uwvm/debugger/wasip1_calls.h>
+# include <cstring>
+# include <cerrno>
+# include <limits>
+# include <type_traits>
+# include <utility>
+# include <memory>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+# ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+#  include <uwvm2/imported/wasi/wasip1/feature/feature_push_macro.h>  // wasip1
+# endif
+// system
+# if defined(UWVM_SUPPORT_UNIX_PATH_SOCKET)
+#  if __has_include(<sys/un.h>)
+#   include <sys/un.h>
+#  endif
+#  if __has_include(<sys/socket.h>)
+#   include <sys/socket.h>
+#  endif
+#  if __has_include(<unistd.h>)
+#   include <unistd.h>
+#  endif
+# endif
+// import
+# include <fast_io.h>
+# include <uwvm2/uwvm_predefine/utils/ansies/impl.h>
+# include <uwvm2/uwvm_predefine/io/impl.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/control/impl.h>
+# include <uwvm2/utils/ansies/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/type/impl.h>
+# include <uwvm2/imported/wasi/wasip1/impl.h>
+# include <uwvm2/uwvm/cmdline/parser_state.h>
+# include <uwvm2/uwvm/wasm/storage/impl.h>
+# include <uwvm2/uwvm/imported/wasi/wasip1/storage/impl.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::runtime::lib { extern "C++" void runtime_stop_before_proc_exit_host_api() noexcept; }
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::imported::wasi::wasip1::storage
+{
+#ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+# if defined(UWVM_IMPORT_WASI_WASIP1)
+
+#  if defined(UWVM_SUPPORT_UNIX_PATH_SOCKET) && __has_include(<sys/un.h>) && defined(AF_LOCAL) && __has_include(<unistd.h>)
+    namespace posix
+    {
+        extern int unlink(char const* path) noexcept
+#   if !(defined(__MSDOS__) || defined(__DJGPP__)) && !(defined(__APPLE__) || defined(__DARWIN_C_LEVEL))
+            __asm__("unlink")
+#   else
+            __asm__("_unlink")
+#   endif
+                ;
+    }  // namespace posix
+#  endif
+
+    inline constexpr void uwvm_wasip1_proc_exit_func_ptr_overload(::uwvm2::parser::wasm::standard::wasm1::type::wasm_i32 code) noexcept
+    {
+        using wasm_u32 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32;
+        constexpr wasm_u32 wasi_proc_exit_code_upper_bound{126u};
+        auto const raw_code{static_cast<wasm_u32>(code)};
+
+        if(::uwvm2::uwvm::io::show_wasip1_warning && raw_code >= wasi_proc_exit_code_upper_bound) [[unlikely]]
+        {
+            // Output the main information and memory indication
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                // 1
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                u8"[warn]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"WASI Preview 1 proc_exit exit code out of range [0, 126): ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                raw_code,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8".",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8" (wasip1)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+
+            if(::uwvm2::uwvm::io::wasip1_warning_fatal) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_RED),
+                                    u8"[fatal] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Convert warnings to fatal errors. ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                    u8"(wasip1)\n\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                ::uwvm2::uwvm::io::fast_exit(::uwvm2::uwvm::io::diagnostic_exit_status::invalid_option);
+            }
+        }
+
+        // The default WASI environment calls this function pointer directly, bypassing host_api.default.cpp wrappers.
+        ::uwvm2::runtime::lib::runtime_stop_before_proc_exit_host_api();
+
+#  if defined(__linux__)
+        ::fast_io::fast_exit(static_cast<int>(code));
+#  elif defined(_WIN32)
+        // It is not recommended to implement NT, as it requires simultaneously closing DLLs and other components.
+        ::fast_io::win32::ExitProcess(static_cast<::std::uint_least32_t>(raw_code));
+#  else
+        ::uwvm2::imported::wasi::wasip1::func::posix::exit(static_cast<int>(code));
+#  endif
+    }
+
+    /// @note This can only be used when initialization occurs before WASM execution, so no locks are added here.
+    /// @note Socket descriptors are currently not auto-discovered or preconfigured here. In particular, this
+    ///       function does not modify the host's SIGPIPE handling or per-socket flags (such as SO_NOSIGPIPE).
+    ///       Instead, individual WASI socket operations (for example, sock_send via MSG_NOSIGNAL where supported)
+    ///       are responsible for preventing SIGPIPE from being delivered to the host process.
+    /// @note This function initializes one concrete WASI environment from the current global command-line
+    ///       accumulators. Target-specific initialization below temporarily swaps those accumulators to a merged
+    ///       global+target view, calls this function, then restores the original global state.
+    template <::uwvm2::imported::wasi::wasip1::environment::wasip1_memory memory_type>
+    inline constexpr bool init_wasip1_environment(::uwvm2::imported::wasi::wasip1::environment::wasip1_environment<memory_type> & env) noexcept
+    {
+        env.wasip1_proc_exit_func_ptr = ::uwvm2::uwvm::imported::wasi::wasip1::storage::uwvm_wasip1_proc_exit_func_ptr_overload;
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        ::uwvm2::utils::thread::process_exit::register_finalizer(
+            ::uwvm2::runtime::lib::runtime_stop_before_proc_exit_host_api);
+#endif
+
+        [[maybe_unused]] auto const print_init_error{
+            [](::uwvm2::utils::container::u8string_view msg) constexpr noexcept
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Initialization error in the wasip1 environment: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                    msg,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                    u8"\n\n");
+            }};
+
+        [[maybe_unused]] auto const print_init_error_with_fast_io_error{
+            [](::uwvm2::utils::container::u8string_view msg, ::fast_io::error e) constexpr noexcept
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Initialization error in the wasip1 environment: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                    msg,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8" (",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                    e,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8")\n\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }};
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        if(env.trace_wasip1_call) { print_init_error(u8"Legacy WASI tracing is unsupported; use runtime diagnostics"); return false; }
+#endif
+        // ====== Arguments ======
+        {
+            using u8string = ::uwvm2::utils::container::u8string;
+            using u8string_view = ::uwvm2::utils::container::u8string_view;
+
+            wasip1_argument_storage.clear();
+            env.argv.clear();
+
+            if(wasip1_force_args_is_set)
+            {
+                // `force-args` is a complete argv replacement for the current
+                // WASI target. It intentionally ignores the `--run` argv tail
+                // and cannot be combined with `set-argv0` for the same target.
+                wasip1_argument_storage.reserve(wasip1_force_argument_storage.size());
+                env.argv.reserve(wasip1_force_argument_storage.size());
+                for(auto const& arg: wasip1_force_argument_storage) { wasip1_argument_storage.emplace_back(arg); }
+            }
+            else
+            {
+                auto const wasm_file_ppos{::uwvm2::uwvm::cmdline::wasm_file_ppos};
+                auto const use_custom_argv0{wasip1_argv0_is_set};
+
+                if(wasm_file_ppos != nullptr || use_custom_argv0)
+                {
+                    // Default argv comes from the parsed `--run <wasm> ...`
+                    // tail. If set-argv0 is present, skip the wasm filename and
+                    // write the custom argv[0] first; the remaining run-tail
+                    // arguments keep their original order.
+                    auto const& pr{::uwvm2::uwvm::cmdline::parsing_result};
+                    auto const parsed_wasi_argv_size{wasm_file_ppos == nullptr ? 0uz : static_cast<::std::size_t>(pr.end() - wasm_file_ppos)};
+                    auto const wasi_argv_size{parsed_wasi_argv_size + static_cast<::std::size_t>(wasm_file_ppos == nullptr && use_custom_argv0)};
+
+                    wasip1_argument_storage.reserve(wasi_argv_size);
+                    env.argv.reserve(wasi_argv_size);
+
+                    if(use_custom_argv0) { wasip1_argument_storage.emplace_back(wasip1_argv0_storage); }
+
+                    if(wasm_file_ppos != nullptr)
+                    {
+                        auto curr{wasm_file_ppos + static_cast<::std::ptrdiff_t>(use_custom_argv0)};
+                        for(; curr != pr.end(); ++curr) { wasip1_argument_storage.emplace_back(u8string{curr->str}); }
+                    }
+                }
+            }
+
+            for(auto const& arg: wasip1_argument_storage) { env.argv.emplace_back_unchecked(u8string_view{arg.data(), arg.size()}); }
+        }
+
+        // ====== Environment variables ======
+        {
+            using u8string = ::uwvm2::utils::container::u8string;
+            using u8string_view = ::uwvm2::utils::container::u8string_view;
+
+            if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Begin initializing the wasip1 environment variables. ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                    u8"[",
+                                    ::uwvm2::uwvm::io::get_local_realtime(),
+                                    u8"] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                    u8"(verbose)\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }
+
+            // Build the materialized WASI environment in the same order as the
+            // command-line model:
+            //
+            // 1. Optionally import the process environment.
+            // 2. Drop malformed host entries whose key is empty.
+            // 3. Remove inherited keys listed in the delete set.
+            // 4. Apply explicit add-or-replace entries.
+            //
+            // Add-or-replace deliberately runs after deletion. This keeps the
+            // operation useful for "delete inherited value, then provide a
+            // deterministic guest value" and matches the target-override merge
+            // logic below.
+            auto const get_env_key{[](u8string_view env_str) constexpr noexcept -> u8string_view
+                                   {
+                                       auto const eq_pos{env_str.find_character(u8'=')};
+                                       if(eq_pos == ::fast_io::containers::npos) { return env_str; }
+                                       return env_str.subview(0uz, eq_pos);
+                                   }};
+
+            ::uwvm2::utils::container::vector<u8string> env_vec{};
+
+            if(!wasip1_noinherit_system_environment)
+            {
+                env_vec = ::uwvm2::imported::wasi::wasip1::platform::get_process_env();
+
+                // Filter invalid host env entries (e.g. "=C:=..."), keep only non-empty keys.
+                {
+                    ::uwvm2::utils::container::vector<u8string> filtered{};
+                    filtered.reserve(env_vec.size());
+                    for(auto& e: env_vec)
+                    {
+                        u8string_view const ev{e.data(), e.size()};
+                        if(get_env_key(ev).empty()) { continue; }
+                        filtered.emplace_back_unchecked(::std::move(e));
+                    }
+                    env_vec = ::std::move(filtered);
+                }
+
+                // Delete inherited host environment variables. The command-line
+                // callback already rejects duplicate delete names, so the set
+                // lookup here is a pure membership test with no ordering
+                // semantics.
+                if(!wasip1_delete_system_environment.empty())
+                {
+                    ::uwvm2::utils::container::vector<u8string> kept{};
+                    kept.reserve(env_vec.size());
+                    for(auto& e: env_vec)
+                    {
+                        u8string_view const ev{e.data(), e.size()};
+                        u8string_view const key{get_env_key(ev)};
+
+                        if(wasip1_delete_system_environment.find(key) == wasip1_delete_system_environment.cend())
+                        {
+                            kept.emplace_back_unchecked(::std::move(e));
+                        }
+                    }
+                    env_vec = ::std::move(kept);
+                }
+            }
+
+            // Apply explicit variables after deletion. Existing host entries are
+            // replaced in place to preserve the host environment's relative
+            // order where possible; new entries are appended after the inherited
+            // block. The map has already collapsed duplicate command-line names
+            // to the last value.
+            if(!wasip1_add_or_replace_environment.empty())
+            {
+                for(auto const& kv: wasip1_add_or_replace_environment)
+                {
+                    auto new_entry{::uwvm2::utils::container::u8concat_uwvm(kv.first, u8"=", kv.second)};
+
+                    bool replaced{};
+                    for(auto& e: env_vec)
+                    {
+                        u8string_view const ev{e.data(), e.size()};
+                        if(get_env_key(ev) == kv.first)
+                        {
+                            e = ::std::move(new_entry);
+                            replaced = true;
+                            break;
+                        }
+                    }
+
+                    if(!replaced) { env_vec.emplace_back(::std::move(new_entry)); }
+                }
+            }
+
+            // Own strings in global storage and bind string_views into env.envs.
+            wasip1_environment_storage = ::std::move(env_vec);
+            env.envs.clear();
+            env.envs.reserve(wasip1_environment_storage.size());
+            for(auto const& e: wasip1_environment_storage) { env.envs.emplace_back_unchecked(u8string_view{e.data(), e.size()}); }
+        }
+
+        // ====== File descriptor table ======
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        if(!env.permits(::uwvm2::imported::wasi::wasip1::environment::permission_t::args))
+        { env.argv.clear(); wasip1_argument_storage.clear(); }
+        if(!env.permits(::uwvm2::imported::wasi::wasip1::environment::permission_t::environ))
+        { env.envs.clear(); wasip1_environment_storage.clear(); }
+#endif
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        env.policy_resources.clear();
+        env.wasix_socket_abi=::uwvm2::uwvm::imported::wasi::wasip1::storage::wasip1_wasix_socket_abi;
+        ::std::uint64_t approved_string_bytes{};
+        auto text_fits{[&env, &approved_string_bytes](auto const& strings) constexpr noexcept
+        {
+            auto& bytes{approved_string_bytes};
+            for(auto const text : strings)
+            {
+                if(text.size() >= env.limits.max_args_env_bytes || bytes > env.limits.max_args_env_bytes - text.size() - 1u) { return false; }
+                bytes += text.size() + 1u;
+            }
+            return true;
+        }};
+        if(!text_fits(env.argv) || !text_fits(env.envs)) { print_init_error(u8"WASI args/environment exceed approved byte limit"); return false; }
+#endif
+        // Build a temporary fd map first and commit it only after all stdio,
+        // socket, directory, duplicate-fd, and limit checks succeed. This keeps
+        // a failed target environment initialization from partially overwriting
+        // a previous environment's descriptor table.
+        //
+        // Note: `--wasip1-set-fd-limit 0` is translated to `fd_t::max()` by the
+        // cmdline callback; here a literal zero means "the environment has no
+        // explicit limit yet, use the built-in default".
+        auto const fd_limit_before{env.fd_storage.fd_limit};
+        ::std::size_t fd_limit{fd_limit_before};
+        if(fd_limit == 0uz) [[unlikely]]
+        {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            fd_limit = static_cast<::std::size_t>(::std::numeric_limits<::uwvm2::imported::wasi::wasip1::abi::wasi_posix_fd_t>::max());
+#else
+            fd_limit = 1024uz;
+#endif
+        }
+
+        using fd_t = ::uwvm2::imported::wasi::wasip1::abi::wasi_posix_fd_t;
+        using fd_map_t = ::uwvm2::utils::container::map<fd_t, ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t>;
+        fd_map_t fd_map{};
+
+        // env.fd_storage.opens always contains at least stdio (fd0..fd2).
+        if(fd_limit < 3uz) [[unlikely]]
+        {
+            print_init_error(u8"fd_limit too small (need >= 3 for stdio)");
+            return false;
+        }
+
+        if constexpr(::std::numeric_limits<::std::size_t>::max() > static_cast<::std::size_t>(::std::numeric_limits<fd_t>::max()))
+        {
+            if(fd_limit > static_cast<::std::size_t>(::std::numeric_limits<fd_t>::max())) [[unlikely]]
+            {
+                print_init_error(u8"fd_limit exceeds fd_t maximum");
+                return false;
+            }
+        }
+
+        auto const try_emplace_fd{
+            [&fd_map, &print_init_error](fd_t fd, ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t&& p) constexpr noexcept -> bool
+            {
+                [[maybe_unused]] auto [it, inserted]{fd_map.emplace(fd, ::std::move(p))};
+                if(!inserted) [[unlikely]]
+                {
+                    print_init_error(u8"duplicate preopened fd");
+                    return false;
+                }
+                return true;
+            }};
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS) && defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+        for(::std::size_t i{};i<env.preopen_sockets.size();++i)
+        {
+            auto const& socket=env.preopen_sockets[i];
+            if(socket.fd<3) { print_init_error(u8"Socket preopen fd must be >= 3; stdio uses separate inherited socket rights"); return false; }
+            for(::std::size_t j{};j<i;++j) if(env.preopen_sockets[j].fd==socket.fd)
+            { print_init_error(u8"Duplicate preopened socket fd"); return false; }
+        }
+        for(auto const& grant:env.socket_rights)
+        {
+            bool found=grant.fd>=0&&grant.fd<3;
+            for(auto const& socket:env.preopen_sockets) if(socket.fd==grant.fd) found=true;
+            if(!found) { print_init_error(u8"Socket rights refer to an undeclared preopen; configure --wasip1-single-socket-tcp-connect/listen or udp-connect/bind first"); return false; }
+            if((grant.base & ~::uwvm2::imported::wasi::wasip1::environment::socket_all_rights)!=decltype(grant.base){} ||
+               (grant.inheriting & ~::uwvm2::imported::wasi::wasip1::environment::socket_data_rights)!=decltype(grant.inheriting){})
+            { print_init_error(u8"Invalid socket rights mask"); return false; }
+        }
+#endif
+        auto const init_stdio{[&env
+#  if defined(UWVM_CPP_EXCEPTIONS) &&                                                                                                                          \
+      (!defined(__AVR__) && !((defined(_WIN32) && !defined(__WINE__)) && defined(_WIN32_WINDOWS)) && !(defined(__MSDOS__) || defined(__DJGPP__)) &&            \
+       !(defined(__NEWLIB__) && !defined(__CYGWIN__)) && !defined(_PICOLIBC__) && !defined(__wasm__))
+                                  , &print_init_error_with_fast_io_error
+#  endif
+        ](::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_t& new_fd_fd, ::fast_io::native_io_observer obs, bool input) constexpr noexcept -> bool
+                              {
+                                  // Basic standard streams grant their direction,
+                                  // metadata and readiness only. No path, socket
+                                  // derivation, mutation or inheriting rights are
+                                  // implicit. Trusted CLI configuration may opt
+                                  // into the former full masks explicitly.
+                                  new_fd_fd.rights_base = env.stdio_base_rights(input);
+                                  new_fd_fd.rights_inherit = env.stdio_inheriting_rights();
+
+#  if !defined(__AVR__) && !((defined(_WIN32) && !defined(__WINE__)) && defined(_WIN32_WINDOWS)) && !(defined(__MSDOS__) || defined(__DJGPP__)) &&             \
+      !(defined(__NEWLIB__) && !defined(__CYGWIN__)) && !defined(_PICOLIBC__) && !defined(__wasm__)
+                                  // can dup
+                                  new_fd_fd.wasi_fd.ptr->wasi_fd_storage.reset_type(::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_type_e::file);
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                  try
+#   endif
+                                  {
+#   if defined(_WIN32) && !defined(__CYGWIN__)
+                                      new_fd_fd.wasi_fd.ptr->wasi_fd_storage.storage.file_fd.file = ::fast_io::native_file{::fast_io::io_dup, obs};
+#   else
+                                      new_fd_fd.wasi_fd.ptr->wasi_fd_storage.storage.file_fd = ::fast_io::native_file{::fast_io::io_dup, obs};
+#   endif
+                                  }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                  catch(::fast_io::error e)
+                                  {
+                                      print_init_error_with_fast_io_error(u8"dup stdio failed", e);
+                                      return false;
+                                  }
+#   endif
+#  else
+                                  // cannot dup, use observer
+                                  new_fd_fd.wasi_fd.ptr->wasi_fd_storage.reset_type(::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_type_e::file_observer);
+                                  new_fd_fd.wasi_fd.ptr->wasi_fd_storage.storage.file_observer = obs;
+#  endif
+
+                                  return true;
+                              }};
+
+        if(::uwvm2::uwvm::wasm::storage::execute_wasm_mode == ::uwvm2::uwvm::wasm::base::mode::debug_jit ||
+           ::uwvm2::uwvm::wasm::storage::debug_control_requested)
+        {
+            env.debug_trace_identity=::uwvm2::uwvm::debugger::wasip1_calls::new_environment();
+            env.debug_fd_created=::uwvm2::uwvm::debugger::wasip1_calls::created_descriptor;
+            env.debug_io_observed=::uwvm2::uwvm::debugger::wasip1_calls::observe_io;
+        }
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        // Preserve the logical numbers forever, without opening a host object
+        // for an ungranted stream. DEV and RELEASE use this identical policy.
+        for(unsigned index{}; index != 3u; ++index)
+        {
+            ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t stream{};
+            if(env.grants_stdio(index))
+            {
+                auto const native{index == 0u ? ::fast_io::in() : index == 1u ? ::fast_io::out() : ::fast_io::err()};
+                if(!init_stdio(*stream.fd_p, native, index == 0u)) { return false; }
+#if defined(__linux__)
+                int socket_type{};::socklen_t type_size{sizeof(socket_type)};
+                int const descriptor=stream.fd_p->wasi_fd.ptr->wasi_fd_storage.storage.file_fd.native_handle();
+                if(::getsockopt(descriptor,SOL_SOCKET,SO_TYPE,&socket_type,&type_size)==0)
+                {
+                    using socket_kind=::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_rc_t::socket_type;
+                    if(type_size!=sizeof(socket_type) || (socket_type!=SOCK_STREAM&&socket_type!=SOCK_DGRAM))
+                    { print_init_error(u8"Unsupported inherited socket type"); return false; }
+                    auto& resource=*stream.fd_p->wasi_fd.ptr;
+                    resource.socket_kind=socket_type==SOCK_STREAM?socket_kind::stream:socket_kind::datagram;
+                    resource.socket_initial_fd=static_cast<int>(index);
+                    auto flags=::fcntl(descriptor,F_GETFL);
+                    if(flags<0) { print_init_error(u8"Cannot inspect inherited socket flags"); return false; }
+                    resource.socket_nonblock=(flags&O_NONBLOCK)!=0;
+                    auto const rights=env.socket_rights_for(static_cast<int>(index));
+                    stream.fd_p->rights_base=stream.fd_p->rights_base & rights.base;
+                    stream.fd_p->rights_inherit={};
+                }
+                else if(errno!=ENOTSOCK) { print_init_error(u8"Cannot classify inherited stdio resource"); return false; }
+                else
+                {
+                    struct stat native_status{};
+                    if(::fstat(descriptor,&native_status)<0) { print_init_error(u8"Cannot inspect inherited stdio resource"); return false; }
+                    stream.fd_p->wasi_fd.ptr->stdio_direct_io_safe=S_ISREG(native_status.st_mode)||
+                        (S_ISCHR(native_status.st_mode)&&major(native_status.st_rdev)==1u&&
+                         (minor(native_status.st_rdev)==3u||minor(native_status.st_rdev)==5u));
+                }
+#endif
+                stream.fd_p->wasi_fd.ptr->checkpoint_stdio_index = static_cast<int>(index);
+                env.policy_resources.emplace_back(::uwvm2::imported::wasi::wasip1::environment::policy_resource_binding{
+                    index, index, static_cast<::std::uint64_t>(reinterpret_cast<::std::uintptr_t>(stream.fd_p->wasi_fd.ptr)), {},
+                    static_cast<::std::uint64_t>(stream.fd_p->rights_base),static_cast<::std::uint64_t>(stream.fd_p->rights_inherit)});
+            }
+            else
+            {
+                stream.fd_p->close_pos = SIZE_MAX - 1u;
+                stream.fd_p->rights_base = {};
+                stream.fd_p->rights_inherit = {};
+            }
+            if(!try_emplace_fd(static_cast<fd_t>(index), ::std::move(stream))) { return false; }
+        }
+#else
+        if(::uwvm2::uwvm::wasm::storage::execute_wasm_mode == ::uwvm2::uwvm::wasm::base::mode::debug_jit)
+        { env.debug_console_write=::uwvm2::uwvm::debugger::console_stdio::write;
+          env.debug_console_read=::uwvm2::uwvm::debugger::console_stdio::read;
+        }
+        // Native stdin/stdout/stderr are always installed first as fds 0, 1, 2.
+        // WASI Preview 1 assumes these descriptors exist; therefore fd_limit
+        // smaller than 3 is rejected before this point.
+        if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Begin initializing the wasip1 standard I/O (in, out, err). ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                u8"[",
+                                ::uwvm2::uwvm::io::get_local_realtime(),
+                                u8"] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8"(verbose)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+        }
+
+        {
+            ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t fd0{};
+            if(::uwvm2::uwvm::wasm::storage::execute_wasm_mode != ::uwvm2::uwvm::wasm::base::mode::debug_jit)
+            { if(!init_stdio(*fd0.fd_p, ::fast_io::in(), true)) [[unlikely]] { return false; } }
+            else
+            {
+                // A separate EOF device backs the capability. Only the bounded
+                // host callback supplies guest data; command input stays sealed.
+#if defined(_WIN32) && !defined(__CYGWIN__)
+                ::fast_io::native_file input{u8"NUL",::fast_io::open_mode::in};
+#else
+                ::fast_io::native_file input{u8"/dev/null",::fast_io::open_mode::in};
+#endif
+                if(!init_stdio(*fd0.fd_p,input, true)) { return false; }
+                using rights=::uwvm2::imported::wasi::wasip1::abi::rights_t;
+                fd0.fd_p->rights_base=rights::right_fd_read | rights::right_fd_filestat_get | rights::right_poll_fd_readwrite;
+                fd0.fd_p->rights_inherit={};
+            }
+            fd0.fd_p->wasi_fd.ptr->checkpoint_stdio_index=0;
+            if(!try_emplace_fd(static_cast<fd_t>(0), ::std::move(fd0))) [[unlikely]] { return false; }
+        }
+        {
+            ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t fd1{};
+#  if defined(__linux__) || (defined(__APPLE__) && defined(__MACH__)) || (defined(_WIN32) && !defined(__CYGWIN__))
+            if(::uwvm2::uwvm::wasm::storage::execute_wasm_mode == ::uwvm2::uwvm::wasm::base::mode::debug_jit &&
+               ::uwvm2::utils::control::inspect_guest_output_host_api(
+#   if defined(_WIN32) && !defined(__CYGWIN__)
+                   1
+#   else
+                   ::fast_io::out().native_handle()
+#   endif
+               ) !=
+                   ::uwvm2::utils::control::sealed_input_decision::allow)
+            {
+                // A FIFO/regular-file output alias could inject command bytes;
+                // only same-slave-terminal output is a separate safe direction.
+                print_init_error(u8"guest standard output aliases protected debugger input");
+                return false;
+            }
+#  endif
+            if(!init_stdio(*fd1.fd_p, ::fast_io::out(), false)) [[unlikely]] { return false; }
+            if(::uwvm2::uwvm::wasm::storage::execute_wasm_mode == ::uwvm2::uwvm::wasm::base::mode::debug_jit)
+            {
+                // Native terminal output handles can be O_RDWR. Restrict guest
+                // rights at initialization so they cannot consume debug commands
+                // or change shared open-file flags on the host console.
+                using rights = ::uwvm2::imported::wasi::wasip1::abi::rights_t;
+                fd1.fd_p->rights_base = rights::right_fd_write | rights::right_fd_filestat_get | rights::right_poll_fd_readwrite;
+                fd1.fd_p->rights_inherit = {};
+            }
+            fd1.fd_p->wasi_fd.ptr->checkpoint_stdio_index=1;
+            if(!try_emplace_fd(static_cast<fd_t>(1), ::std::move(fd1))) [[unlikely]] { return false; }
+        }
+        {
+            ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t fd2{};
+#  if defined(__linux__) || (defined(__APPLE__) && defined(__MACH__)) || (defined(_WIN32) && !defined(__CYGWIN__))
+            if(::uwvm2::uwvm::wasm::storage::execute_wasm_mode == ::uwvm2::uwvm::wasm::base::mode::debug_jit &&
+               ::uwvm2::utils::control::inspect_guest_output_host_api(
+#   if defined(_WIN32) && !defined(__CYGWIN__)
+                   2
+#   else
+                   ::fast_io::err().native_handle()
+#   endif
+               ) !=
+                   ::uwvm2::utils::control::sealed_input_decision::allow)
+            {
+                // A FIFO/regular-file output alias could inject command bytes;
+                // only same-slave-terminal output is a separate safe direction.
+                print_init_error(u8"guest standard output aliases protected debugger input");
+                return false;
+            }
+#  endif
+            if(!init_stdio(*fd2.fd_p, ::fast_io::err(), false)) [[unlikely]] { return false; }
+            if(::uwvm2::uwvm::wasm::storage::execute_wasm_mode == ::uwvm2::uwvm::wasm::base::mode::debug_jit)
+            {
+                // Native terminal output handles can be O_RDWR. Restrict guest
+                // rights at initialization so they cannot consume debug commands
+                // or change shared open-file flags on the host console.
+                using rights = ::uwvm2::imported::wasi::wasip1::abi::rights_t;
+                fd2.fd_p->rights_base = rights::right_fd_write | rights::right_fd_filestat_get | rights::right_poll_fd_readwrite;
+                fd2.fd_p->rights_inherit = {};
+            }
+            fd2.fd_p->wasi_fd.ptr->checkpoint_stdio_index=2;
+            if(!try_emplace_fd(static_cast<fd_t>(2), ::std::move(fd2))) [[unlikely]] { return false; }
+        }
+
+#endif
+
+#  if defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS) && !defined(__linux__)
+        if(!env.preopen_sockets.empty()) { print_init_error(u8"This platform has no cancellable ROS socket provider"); return false; }
+#endif
+        // Preopened sockets use explicit fds supplied by command-line options.
+        // They are inserted before directory preopens so the directory allocator
+        // can skip occupied fd numbers and still expose directories as a compact
+        // scan starting at fd 3 where possible. See the function-level @note for
+        // SIGPIPE policy.
+        if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Begin initializing the wasip1 preopened sockets. ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                u8"[",
+                                ::uwvm2::uwvm::io::get_local_realtime(),
+                                u8"] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8"(verbose)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+        }
+
+        for(auto const& ps: env.preopen_sockets)
+        {
+            if(ps.fd < static_cast<fd_t>(0)) [[unlikely]]
+            {
+                print_init_error(u8"preopened socket fd is negative");
+                return false;
+            }
+
+            ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t new_sock_fd{};
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            auto const rights=env.socket_rights_for(ps.fd);
+            if(ps.handle_type!=::uwvm2::imported::wasi::wasip1::environment::handle_type_e::listen && rights.inheriting!=decltype(rights.inheriting){})
+            { print_init_error(u8"Only a listening socket can grant accepted-child rights"); return false; }
+            new_sock_fd.fd_p->rights_base=rights.base;
+            new_sock_fd.fd_p->rights_inherit=rights.inheriting;
+            using socket_kind=::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_rc_t::socket_type;
+            auto& resource=*new_sock_fd.fd_p->wasi_fd.ptr;
+            resource.socket_kind=ps.handle_type==::uwvm2::imported::wasi::wasip1::environment::handle_type_e::listen?socket_kind::listener:
+                ps.sock_type==::uwvm2::imported::wasi::wasip1::environment::sock_type_t::dgram?socket_kind::datagram:socket_kind::stream;
+            resource.socket_initial_fd=ps.fd;
+#else
+            new_sock_fd.fd_p->rights_base = static_cast<::uwvm2::imported::wasi::wasip1::abi::rights_t>(-1);
+            new_sock_fd.fd_p->rights_inherit = static_cast<::uwvm2::imported::wasi::wasip1::abi::rights_t>(-1);
+#endif
+
+#   ifdef UWVM_CPP_EXCEPTIONS
+            try
+#   endif
+            {
+                ::fast_io::native_socket_file sock{ps.sock_family, ps.sock_type, ::fast_io::open_mode{}, ps.sock_protocol};
+
+                if(ps.sock_family == ::uwvm2::imported::wasi::wasip1::environment::sock_family_t::local)
+                {
+#   if defined(UWVM_SUPPORT_UNIX_PATH_SOCKET) && __has_include(<sys/un.h>) && defined(AF_LOCAL)
+                    auto const& local_path_u8{ps.local_unix_path};
+                    if(local_path_u8.empty()) [[unlikely]]
+                    {
+                        print_init_error(u8"unix socket path is empty");
+                        return false;
+                    }
+
+                    struct ::sockaddr_un un{};
+                    un.sun_family = static_cast<decltype(un.sun_family)>(AF_LOCAL);
+
+                    bool abstract_namespace{};
+                    ::std::size_t copy_len{local_path_u8.size()};
+
+#    if defined(__linux__)
+                    if(local_path_u8.front() == u8'@') [[unlikely]]
+                    {
+                        abstract_namespace = true;
+                        copy_len = local_path_u8.size() - 1uz;
+                    }
+#    endif
+
+                    if(abstract_namespace)
+                    {
+                        if(copy_len >= sizeof(un.sun_path)) [[unlikely]]
+                        {
+                            print_init_error(u8"unix socket path too long");
+                            return false;
+                        }
+
+                        un.sun_path[0u] = '\0';
+                        if(copy_len != 0uz) { ::std::memcpy(un.sun_path + 1, reinterpret_cast<char const*>(local_path_u8.data() + 1u), copy_len); }
+                    }
+                    else
+                    {
+                        if(copy_len >= sizeof(un.sun_path)) [[unlikely]]
+                        {
+                            print_init_error(u8"unix socket path too long");
+                            return false;
+                        }
+
+                        // `unlink()` below treats `un.sun_path` as a C-string; reject embedded NULs to avoid truncation surprises.
+                        if(::std::memchr(local_path_u8.data(), 0, local_path_u8.size()) != nullptr) [[unlikely]]
+                        {
+                            print_init_error(u8"unix socket path contains NUL");
+                            return false;
+                        }
+
+                        ::std::memcpy(un.sun_path, reinterpret_cast<char const*>(local_path_u8.data()), copy_len);
+                        un.sun_path[copy_len] = '\0';
+                    }
+
+                    auto const base_len{static_cast<::fast_io::posix_socklen_t>(__builtin_offsetof(::sockaddr_un, sun_path))};
+                    // For filesystem namespace: include trailing NUL (we set `un.sun_path[copy_len] = '\0'`).
+                    // For abstract namespace: `copy_len` excludes the leading '@', and the "+1" accounts for the leading NUL at `un.sun_path[0]`.
+                    auto const addr_len{static_cast<::fast_io::posix_socklen_t>(base_len + copy_len + 1u)};
+
+                    auto set_un_len{[addr_len, &print_init_error]<typename T>(T& un) constexpr noexcept -> bool
+                                    {
+                                        if constexpr(requires(T&& un_tmp) { un_tmp.sun_len; })
+                                        {
+                                            using sun_len_t = decltype(un.sun_len);
+                                            if(addr_len > ::std::numeric_limits<sun_len_t>::max()) [[unlikely]]
+                                            {
+                                                print_init_error(u8"unix socket sockaddr too large");
+                                                return false;
+                                            }
+                                            un.sun_len = static_cast<sun_len_t>(addr_len);
+                                        }
+
+                                        return true;
+                                    }};
+
+                    if(!set_un_len(un)) [[unlikely]] { return false; }
+
+                    if(ps.handle_type != ::uwvm2::imported::wasi::wasip1::environment::handle_type_e::connect && !abstract_namespace)
+                    {
+#    if __has_include(<unistd.h>) && !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                        errno = 0;
+                        auto const unlink_ret{posix::unlink(un.sun_path)};
+                        if(unlink_ret == -1 && errno != ENOENT) [[unlikely]]
+                        {
+                            print_init_error(u8"unlink existing unix socket file failed");
+                            return false;
+                        }
+#    endif
+                    }
+
+                    if(ps.handle_type == ::uwvm2::imported::wasi::wasip1::environment::handle_type_e::connect)
+                    {
+                        // Connected sockets perform the host connect during
+                        // initialization; bind/listen sockets publish a server
+                        // endpoint that is already usable when wasm starts.
+                        ::fast_io::posix_connect(sock, ::std::addressof(un), addr_len);
+                    }
+                    else
+                    {
+                        ::fast_io::posix_bind(sock, ::std::addressof(un), addr_len);
+                        if(ps.handle_type == ::uwvm2::imported::wasi::wasip1::environment::handle_type_e::listen) { ::fast_io::posix_listen(sock, 128); }
+                    }
+#   else
+                    print_init_error(u8"local(unix) socket preopen unsupported on this platform");
+                    return false;
+#   endif
+                }
+                else
+                {
+                    if(ps.sock_family == ::uwvm2::imported::wasi::wasip1::environment::sock_family_t::inet && !ps.ip.address.isv4) [[unlikely]]
+                    {
+                        print_init_error(u8"socket family mismatch (inet but not ipv4)");
+                        return false;
+                    }
+                    if(ps.sock_family == ::uwvm2::imported::wasi::wasip1::environment::sock_family_t::inet6 && ps.ip.address.isv4) [[unlikely]]
+                    {
+                        print_init_error(u8"socket family mismatch (inet6 but ipv4)");
+                        return false;
+                    }
+
+                    if(ps.ip.address.isv4)
+                    {
+                        ::fast_io::posix_sockaddr_in in{.sin_family =
+#   if defined(_WIN32)
+                                                            2 /*AF_INET*/
+#   else
+                                                            AF_INET
+#   endif
+                                                        ,
+                                                        .sin_port = ::fast_io::big_endian(ps.ip.port),
+                                                        .sin_addr = ps.ip.address.address.v4};
+
+                        if(ps.handle_type == ::uwvm2::imported::wasi::wasip1::environment::handle_type_e::connect)
+                        {
+                            ::fast_io::posix_connect(sock, ::std::addressof(in), sizeof(in));
+                        }
+                        else
+                        {
+                            ::fast_io::posix_bind(sock, ::std::addressof(in), sizeof(in));
+                            if(ps.handle_type == ::uwvm2::imported::wasi::wasip1::environment::handle_type_e::listen) { ::fast_io::posix_listen(sock, 128); }
+                        }
+                    }
+                    else
+                    {
+                        ::fast_io::posix_sockaddr_in6 in6{.sin6_family =
+#   if defined(_WIN32)
+                                                              23 /*AF_INET6*/
+#   else
+                                                              AF_INET6
+#   endif
+                                                          ,
+                                                          .sin6_port = ::fast_io::big_endian(ps.ip.port),
+                                                          .sin6_flowinfo = 0,
+                                                          .sin6_addr = ps.ip.address.address.v6,
+                                                          .sin6_scoped_id = 0};
+
+                        if(ps.handle_type == ::uwvm2::imported::wasi::wasip1::environment::handle_type_e::connect)
+                        {
+                            ::fast_io::posix_connect(sock, ::std::addressof(in6), sizeof(in6));
+                        }
+                        else
+                        {
+                            ::fast_io::posix_bind(sock, ::std::addressof(in6), sizeof(in6));
+                            if(ps.handle_type == ::uwvm2::imported::wasi::wasip1::environment::handle_type_e::listen) { ::fast_io::posix_listen(sock, 128); }
+                        }
+                    }
+                }
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS) && defined(__linux__)
+                // Only native-owned listener OFDs are forced nonblocking. Guest
+                // blocking mode is independent and implemented by readiness wait.
+                if(resource.socket_kind==socket_kind::listener)
+                {
+                    auto const flags=::fcntl(sock.native_handle(),F_GETFL);
+                    if(flags<0 || ::fcntl(sock.native_handle(),F_SETFL,flags|O_NONBLOCK)<0)
+                    { print_init_error(u8"Cannot prepare cancellable socket listener"); return false; }
+                }
+#endif
+#   if defined(_WIN32) && !defined(__CYGWIN__)
+                new_sock_fd.fd_p->wasi_fd.ptr->wasi_fd_storage.reset_type(::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_type_e::socket);
+                new_sock_fd.fd_p->wasi_fd.ptr->wasi_fd_storage.storage.socket_fd = ::std::move(sock);
+#   else
+                new_sock_fd.fd_p->wasi_fd.ptr->wasi_fd_storage.reset_type(::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_type_e::file);
+                new_sock_fd.fd_p->wasi_fd.ptr->wasi_fd_storage.storage.file_fd = ::std::move(sock);
+#   endif
+            }
+#   ifdef UWVM_CPP_EXCEPTIONS
+            catch(::fast_io::error e)
+            {
+                print_init_error_with_fast_io_error(u8"preopen socket init failed", e);
+                return false;
+            }
+#   endif
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            auto label=ps.sock_family==::uwvm2::imported::wasi::wasip1::environment::sock_family_t::local ?
+                ::uwvm2::utils::container::u8concat(u8"unix:",ps.local_unix_path) : ::uwvm2::utils::container::u8concat(ps.ip);
+            label=::uwvm2::utils::container::u8concat(static_cast<unsigned>(ps.sock_family),u8":",static_cast<unsigned>(ps.sock_type),u8":",
+                static_cast<unsigned>(ps.handle_type),u8":",label);
+            env.policy_resources.emplace_back(::uwvm2::imported::wasi::wasip1::environment::policy_resource_binding{
+                5u,static_cast<::std::uint64_t>(ps.fd),static_cast<::std::uint64_t>(reinterpret_cast<::std::uintptr_t>(new_sock_fd.fd_p->wasi_fd.ptr)),
+                ::uwvm2::utils::container::u8string{::uwvm2::utils::container::u8string_view{label.data(),label.size()}},static_cast<::std::uint64_t>(new_sock_fd.fd_p->rights_base),static_cast<::std::uint64_t>(new_sock_fd.fd_p->rights_inherit)});
+#endif
+            if(!try_emplace_fd(ps.fd, ::std::move(new_sock_fd))) [[unlikely]] { return false; }
+        }
+#  endif
+
+        // Preopened directories are assigned automatically from fd3 upward,
+        // skipping any explicit socket fds already present. The final WASI fd
+        // table may still contain holes due to socket fd choices; those holes
+        // are represented by renumber_map after materialization below.
+
+        if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Begin initializing the wasip1 preopened directories. ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                u8"[",
+                                ::uwvm2::uwvm::io::get_local_realtime(),
+                                u8"] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8"(verbose)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+        }
+
+        ::std::size_t next_dir_fd_u{3uz};
+        constexpr ::std::size_t fd_t_max_u{static_cast<::std::size_t>(::std::numeric_limits<fd_t>::max())};
+        for(auto const& mr: env.mount_dir_roots)
+        {
+            fd_t next_dir_fd{};
+            for(;;)
+            {
+                if(next_dir_fd_u > fd_t_max_u) [[unlikely]]
+                {
+                    print_init_error(u8"fd exhausted");
+                    return false;
+                }
+
+                next_dir_fd = static_cast<fd_t>(next_dir_fd_u);
+                if(fd_map.find(next_dir_fd) == fd_map.end()) { break; }
+                ++next_dir_fd_u;
+            }
+
+            ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t new_dir_fd{};
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            struct statfs filesystem{};
+            if(::fstatfs(mr.entry.native_handle(), &filesystem) != 0 || filesystem.f_type == 0x9fa0 || filesystem.f_type == 0x62656572)
+            { print_init_error(u8"WASI cannot preopen procfs/sysfs or an unverifiable filesystem"); return false; }
+            new_dir_fd.fd_p->rights_base = static_cast<::uwvm2::imported::wasi::wasip1::abi::rights_t>(mr.rights_configured ? mr.rights_base : env.limits.filesystem_base_rights);
+            new_dir_fd.fd_p->rights_inherit = static_cast<::uwvm2::imported::wasi::wasip1::abi::rights_t>(mr.rights_configured ? mr.rights_inheriting : env.limits.filesystem_inheriting_rights);
+#else
+            new_dir_fd.fd_p->rights_base = static_cast<::uwvm2::imported::wasi::wasip1::abi::rights_t>(-1);
+            new_dir_fd.fd_p->rights_inherit = static_cast<::uwvm2::imported::wasi::wasip1::abi::rights_t>(-1);
+#endif
+
+            new_dir_fd.fd_p->wasi_fd.ptr->wasi_fd_storage.reset_type(::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_type_e::dir);
+
+            // A preopen directory is represented as a one-entry directory stack.
+            // WASI path traversal may push more stack entries at runtime, but
+            // command-line mounts always start with exactly the host directory
+            // opened by the mount-dir callback.
+            auto& dir_stack_vec{new_dir_fd.fd_p->wasi_fd.ptr->wasi_fd_storage.storage.dir_stack.dir_stack};
+            auto& new_entry_ref{dir_stack_vec.emplace_back()};
+            auto& new_entry{new_entry_ref.ptr->dir_stack};
+
+#  if !defined(__AVR__) && !((defined(_WIN32) && !defined(__WINE__)) && defined(_WIN32_WINDOWS)) && !(defined(__MSDOS__) || defined(__DJGPP__)) &&             \
+      !(defined(__NEWLIB__) && !defined(__CYGWIN__)) && !defined(_PICOLIBC__) && !defined(__wasm__)
+            // can dup
+
+            // default: new_entry.is_observer = false;
+            new_entry.name = mr.preload_dir;
+
+#   ifdef UWVM_CPP_EXCEPTIONS
+            try
+#   endif
+            {
+                ::fast_io::native_file tmp{::fast_io::io_dup, mr.entry};
+                new_entry.storage.file = ::fast_io::dir_file{tmp.release()};
+            }
+#   ifdef UWVM_CPP_EXCEPTIONS
+            catch(::fast_io::error e)
+            {
+                print_init_error_with_fast_io_error(u8"dup preopen dir failed", e);
+                return false;
+            }
+#   endif
+#  else
+            // cannot dup, use observer
+            // dir_stack_entry_t default-constructs the `file` union member; switch to observer safely.
+            new_entry = ::uwvm2::imported::wasi::wasip1::fd_manager::dir_stack_entry_t{true};
+            new_entry.name = mr.preload_dir;
+            new_entry.storage.observer = ::fast_io::dir_io_observer{mr.entry};
+#  endif
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            env.policy_resources.emplace_back(::uwvm2::imported::wasi::wasip1::environment::policy_resource_binding{
+                3u, static_cast<::std::uint64_t>(next_dir_fd), static_cast<::std::uint64_t>(reinterpret_cast<::std::uintptr_t>(new_dir_fd.fd_p->wasi_fd.ptr)), mr.preload_dir,
+                static_cast<::std::uint64_t>(new_dir_fd.fd_p->rights_base), static_cast<::std::uint64_t>(new_dir_fd.fd_p->rights_inherit)});
+#endif
+            if(!try_emplace_fd(next_dir_fd, ::std::move(new_dir_fd))) [[unlikely]] { return false; }
+            ++next_dir_fd_u;
+
+            if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Initialization wasip1 preopened directory successful: fd = ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    next_dir_fd,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8", wasi dir path = \"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    new_entry.name,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\". ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                    u8"[",
+                                    ::uwvm2::uwvm::io::get_local_realtime(),
+                                    u8"] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                    u8"(verbose)\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }
+        }
+
+        // Enforce the configured fd limit after all automatic and explicit
+        // preopens have been staged. This catches combined failures such as
+        // stdio + sockets + mounts exceeding a small target fd limit.
+        if(fd_map.size() > fd_limit) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                u8"[error] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Initialization error in the wasip1 environment: fd limit exceeded (",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                fd_limit,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8")\n\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            return false;
+        }
+
+        // Materialize the temporary map into the fd manager representation.
+        // Contiguous fds starting at zero are moved into `opens`; remaining
+        // sparse descriptors are kept in `renumber_map` so lookup by original
+        // WASI fd still works without padding `opens` with empty entries.
+        ::uwvm2::utils::container::vector<::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t> opens_new{};
+        ::uwvm2::utils::container::map<fd_t, ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_unique_ptr_t> renumber_map_new{};
+
+        fd_t fd_cursor{};
+        for(;;)
+        {
+            auto it{fd_map.find(fd_cursor)};
+            if(it == fd_map.end()) { break; }
+            opens_new.emplace_back(::std::move(it->second));
+            fd_map.erase(it);
+
+            // Avoid signed overflow on fd_t (wasi_posix_fd_t is wasm_i32).
+            if(fd_cursor == ::std::numeric_limits<fd_t>::max()) { break; }
+            ++fd_cursor;
+        }
+
+        for(auto& [fd, uni]: fd_map) { renumber_map_new.emplace(fd, ::std::move(uni)); }
+
+        // Commit. Swapping destroys the old descriptor state only after every
+        // previous step has succeeded.
+        env.fd_storage.opens.swap(opens_new);
+        env.fd_storage.renumber_map.swap(renumber_map_new);
+        env.fd_storage.closes.clear();
+        if(fd_limit_before == 0uz) [[unlikely]] { env.fd_storage.fd_limit = fd_limit; }
+
+        return true;
+    }
+
+    inline constexpr bool init_wasip1_environment(::uwvm2::uwvm::imported::wasi::wasip1::storage::wasip1_module_override_t & state) noexcept
+    {
+        using mount_dir_root_t = ::uwvm2::imported::wasi::wasip1::environment::mount_dir_root_t;
+        using u8string = ::uwvm2::utils::container::u8string;
+
+        // Copy scalar and trace defaults into the target environment first.
+        // Fields with an explicit target value override the global default;
+        // unset fields inherit the already-initialized global environment.
+        state.env.wasip1_memory = nullptr;
+        if(state.trace_wasip1_call_is_set)
+        {
+            state.env.trace_wasip1_call = state.trace_wasip1_call;
+            state.env.trace_wasip1_output_target = state.trace_wasip1_output_target;
+            state.env.trace_wasip1_output_file_path_storage = state.trace_wasip1_output_file_path_storage;
+        }
+        else
+        {
+            state.env.trace_wasip1_call = default_wasip1_env.trace_wasip1_call;
+            state.env.trace_wasip1_output_target = default_wasip1_env.trace_wasip1_output_target;
+            state.env.trace_wasip1_output_file_path_storage = default_wasip1_env.trace_wasip1_output_file_path_storage;
+        }
+        state.env.trace_wasip1_group_kind = state.trace_wasip1_group_kind;
+        state.env.trace_wasip1_group_name_storage = state.trace_wasip1_group_name_storage;
+        state.env.disable_utf8_check = state.disable_utf8_check_is_set ? state.disable_utf8_check : default_wasip1_env.disable_utf8_check;
+        // Target presence replaces only explicitly configured bits. In
+        // particular, a target deny can remove an explicit global grant while
+        // unrelated global permissions continue to follow the existing model.
+        state.env.interface_enabled = state.enabled_is_set && state.enabled;
+        state.env.interfaces = state.interfaces;
+        state.env.non_fd_permissions = effective_wasip1_permissions(
+            default_wasip1_env.non_fd_permissions, state.non_fd_permissions, state.permission_presence);
+        state.env.wasip1_proc_exit_func_ptr = default_wasip1_env.wasip1_proc_exit_func_ptr;
+        state.env.wasip1_proc_raise_func_ptr = default_wasip1_env.wasip1_proc_raise_func_ptr;
+        state.env.wasip1_sched_yield_func_ptr = default_wasip1_env.wasip1_sched_yield_func_ptr;
+        state.env.fd_storage.fd_limit = state.fd_limit_is_set ? state.fd_limit : default_wasip1_env.fd_storage.fd_limit;
+
+        if(state.env.trace_wasip1_call &&
+           state.env.trace_wasip1_output_target == ::uwvm2::imported::wasi::wasip1::environment::trace_wasip1_output_target_t::file &&
+           !::uwvm2::uwvm::imported::wasi::wasip1::storage::reopen_wasip1_trace_output_file(
+               state.env.trace_wasip1_output_file,
+               ::uwvm2::utils::container::u8string_view{state.env.trace_wasip1_output_file_path_storage.data(),
+                                                        state.env.trace_wasip1_output_file_path_storage.size()},
+               false)) [[unlikely]]
+        {
+            return false;
+        }
+
+#  if defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+        // Runtime socket preopens are global sockets followed by target-local
+        // sockets. Callback-time validation already rejects duplicate fds inside
+        // one target, and the concrete initializer will reject any remaining
+        // duplicate after the full effective list is visible.
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        // Target presence replaces one fd's rights, including an explicit none.
+        for(auto const& grant:default_wasip1_env.socket_rights)
+        {
+            bool present{};for(auto const& local:state.env.socket_rights) if(local.fd==grant.fd) present=true;
+            if(!present)state.env.socket_rights.push_back(grant);
+        }
+#endif
+        state.env.preopen_sockets = default_wasip1_env.preopen_sockets;
+        state.env.preopen_sockets.reserve(state.env.preopen_sockets.size() + state.preopen_sockets.size());
+        for(auto const& preopen_socket: state.preopen_sockets) { state.env.preopen_sockets.emplace_back(preopen_socket); }
+#  endif
+
+        // Target initialization reuses the global initializer to avoid a second,
+        // subtly different environment-construction path. The global command-line
+        // accumulators are moved aside, replaced by a merged global+target view,
+        // then restored immediately after initialization. The final strings are
+        // moved into the target state so all string_views in state.env.envs point
+        // at target-owned storage.
+        auto const saved_noinherit_system_environment{wasip1_noinherit_system_environment};
+        auto saved_delete_system_environment{::std::move(wasip1_delete_system_environment)};
+        auto saved_add_or_replace_environment{::std::move(wasip1_add_or_replace_environment)};
+        auto const saved_argv0_is_set{wasip1_argv0_is_set};
+        auto saved_argv0_storage{::std::move(wasip1_argv0_storage)};
+        auto const saved_force_args_is_set{wasip1_force_args_is_set};
+        auto saved_force_argument_storage{::std::move(wasip1_force_argument_storage)};
+        auto saved_environment_storage{::std::move(wasip1_environment_storage)};
+        auto saved_argument_storage{::std::move(wasip1_argument_storage)};
+
+        auto saved_default_mount_dir_roots{::std::move(default_wasip1_env.mount_dir_roots)};
+        auto saved_module_mount_dir_roots{::std::move(state.mount_dir_roots)};
+        auto saved_env_mount_dir_roots{::std::move(state.env.mount_dir_roots)};
+
+        auto const global_mount_dir_count{saved_default_mount_dir_roots.size()};
+        auto const module_mount_dir_count{saved_module_mount_dir_roots.size()};
+
+        // Delete names are a set: global and target delete commands combine by
+        // union. Repeated target deletes were rejected during command parsing,
+        // and overlap with global deletes has the same final effect.
+        wasip1_environment_name_set_t combined_delete_system_environment{saved_delete_system_environment};
+        combined_delete_system_environment.reserve(saved_delete_system_environment.size() + state.delete_system_environment.size());
+        for(auto const env_name: state.delete_system_environment) { combined_delete_system_environment.emplace(env_name); }
+
+        // Add-or-replace entries are a map: target values override global values
+        // for matching keys before materialization. This is equivalent to
+        // applying global add-or-replace first and target add-or-replace second,
+        // while avoiding duplicate-key vectors and linear replacement scans.
+        wasip1_environment_map_t combined_add_or_replace_environment{saved_add_or_replace_environment};
+        combined_add_or_replace_environment.reserve(saved_add_or_replace_environment.size() + state.add_or_replace_environment.size());
+        for(auto const& env_pair: state.add_or_replace_environment)
+        {
+            if(auto env_iter{combined_add_or_replace_environment.find(env_pair.first)}; env_iter != combined_add_or_replace_environment.end())
+            {
+                env_iter->second = env_pair.second;
+            }
+            else
+            {
+                combined_add_or_replace_environment.emplace(env_pair.first, env_pair.second);
+            }
+        }
+
+        wasip1_noinherit_system_environment =
+            state.noinherit_system_environment_is_set ? state.noinherit_system_environment : saved_noinherit_system_environment;
+        wasip1_delete_system_environment = ::std::move(combined_delete_system_environment);
+        wasip1_add_or_replace_environment = ::std::move(combined_add_or_replace_environment);
+        // Target argv policy deliberately does not inherit global force-args or
+        // global set-argv0. If the target did not set either option, it uses the
+        // default `--run` argv tail exactly like a fresh global environment; if
+        // it did, the target policy applies only to that target.
+        wasip1_argv0_is_set = state.argv0_is_set;
+        wasip1_argv0_storage = state.argv0_is_set ? u8string{state.argv0_storage} : u8string{};
+        wasip1_force_args_is_set = state.force_args_is_set;
+        wasip1_force_argument_storage = state.force_args_is_set ? state.force_argument_storage : ::uwvm2::utils::container::vector<u8string>{};
+
+        // Mounts are global mounts followed by target mounts. Their validation
+        // already used the same effective ordering, so fd assignment and
+        // preopen-name reporting here match command-line diagnostics.
+        state.env.mount_dir_roots = ::std::move(saved_default_mount_dir_roots);
+        state.env.mount_dir_roots.reserve(global_mount_dir_count + module_mount_dir_count);
+        for(auto& mount_root: saved_module_mount_dir_roots) { state.env.mount_dir_roots.emplace_back(::std::move(mount_root)); }
+
+        auto const init_ok{init_wasip1_environment(state.env)};
+
+        state.argument_storage = ::std::move(wasip1_argument_storage);
+        state.environment_storage = ::std::move(wasip1_environment_storage);
+
+        // Restore global command-line accumulators immediately after the target
+        // environment is materialized. state.argument_storage and
+        // state.environment_storage now own the strings referenced by state.env.
+        wasip1_noinherit_system_environment = saved_noinherit_system_environment;
+        wasip1_delete_system_environment = ::std::move(saved_delete_system_environment);
+        wasip1_add_or_replace_environment = ::std::move(saved_add_or_replace_environment);
+        wasip1_argv0_is_set = saved_argv0_is_set;
+        wasip1_argv0_storage = ::std::move(saved_argv0_storage);
+        wasip1_force_args_is_set = saved_force_args_is_set;
+        wasip1_force_argument_storage = ::std::move(saved_force_argument_storage);
+        wasip1_argument_storage = ::std::move(saved_argument_storage);
+        wasip1_environment_storage = ::std::move(saved_environment_storage);
+
+        ::uwvm2::utils::container::vector<mount_dir_root_t> restored_default_mount_dir_roots{};
+        restored_default_mount_dir_roots.reserve(global_mount_dir_count);
+
+        ::uwvm2::utils::container::vector<mount_dir_root_t> restored_module_mount_dir_roots{};
+        restored_module_mount_dir_roots.reserve(module_mount_dir_count);
+
+        ::std::size_t mount_index{};
+        for(auto& mount_root: state.env.mount_dir_roots)
+        {
+            if(mount_index < global_mount_dir_count) { restored_default_mount_dir_roots.emplace_back(::std::move(mount_root)); }
+            else
+            {
+                restored_module_mount_dir_roots.emplace_back(::std::move(mount_root));
+            }
+            ++mount_index;
+        }
+
+        default_wasip1_env.mount_dir_roots = ::std::move(restored_default_mount_dir_roots);
+        state.mount_dir_roots = ::std::move(restored_module_mount_dir_roots);
+        state.env.mount_dir_roots = ::std::move(saved_env_mount_dir_roots);
+
+        return init_ok;
+    }
+
+# endif
+#endif
+}  // namespace uwvm2::uwvm::imported::wasi::wasip1::storage
+
+#ifndef UWVM_MODULE
+// macro
+# ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+#  include <uwvm2/imported/wasi/wasip1/feature/feature_pop_macro.h>  // wasip1
+# endif
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

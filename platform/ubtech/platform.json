@@ -1,0 +1,68 @@
+{
+  "id": "ubtech",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "grab_demo_msgs/GraspCandidate",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_confidence",
+        "field": "confidence",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_pose_pose_position_z",
+        "field": "pose_pose_position_z",
+        "type": "f64",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/UBTECH-Robot/tk_sdk_demo/blob/3df9f9dc7689203fb673a21d8205bb597ed4fafe/src/grab_demo_msgs/msg/GraspCandidate.msg",
+        "revision": "3df9f9dc7689203fb673a21d8205bb597ed4fafe",
+        "path": "src/grab_demo_msgs/msg/GraspCandidate.msg",
+        "sha256": "c6acb64fe6ff41c571c80f2f269834e5d041027d16c937d5086f9b1bc992cf4c"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/std_msgs/msg/Header.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "std_msgs/msg/Header.msg",
+        "sha256": "d2cea14630e39ed0fa5b432ba9160a7c38855b9427d3344f99e83e83facb53c2"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/PoseStamped.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/PoseStamped.msg",
+        "sha256": "31898ab0eb64a6c44c27ab4959819a32ec3bc3ee847c8fe1b01c897d48e311e5"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Pose.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Pose.msg",
+        "sha256": "3eceb77c63ebbb544c11d7f991e475e9819e0cf534deb1a879392c1b3dc997de"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Point.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Point.msg",
+        "sha256": "eb4c07e591cf0269ccb17245dcd4f998162feb09cc8add85fa082c8a30bfc91d"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Quaternion.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Quaternion.msg",
+        "sha256": "298495eb67a139642ffd37cc9029eae085e6c39a8789828b7517868a487939ed"
+      }
+    ]
+  }
+}

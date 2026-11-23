@@ -1,0 +1,157 @@
+{
+  "platform": "abb",
+  "language": "go",
+  "host": "linux-x86_64",
+  "public_commit": "a5863c63842081570e8541fc037b43fcc52506fd",
+  "git_tree": "ed308365a1c307c197d9f03479509672771e5f77",
+  "binary_install_exit": 0,
+  "source_install_exit": 0,
+  "bootstrap_sha256": "e5d0e51c2f0e747413f66ec2c38afeeb1837725ec035d8b8972a19d9792b6628",
+  "comparison_receipt_sha256": "b8834d06b261f1e73b47a14cc835fbe2f6b20eb25ea24cc9284265800d57e4d2",
+  "manifest_git_blob": "ac4b1c8759e953e43b040bcb9d047d0cd61b00bd",
+  "packer_git_blob": "239545a8f22e5c404de9885943a703ebac256f6a",
+  "isolation": {
+    "network": "offline",
+    "leaf": {
+      "memory.max": 68719476736,
+      "memory.swap.max": 0,
+      "memory.oom.group": 1
+    },
+    "parent": {
+      "memory.max": 68719476736,
+      "memory.swap.max": 0,
+      "memory.oom.group": 0
+    }
+  },
+  "products": {
+    "wrgo": {
+      "elf_sha256": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0",
+      "elf_bytes": 3344749,
+      "elf_byte_equal": true,
+      "tar_xz_sha256": "390ca7a3cebbf2345183a2d810b29dcdfed064abcb0c81bb94a542c081a6be04",
+      "tar_xz_bytes": 1798956,
+      "tar_xz_byte_equal": true,
+      "source_installed_mode": "0o775",
+      "binary_installed_mode": "0o755"
+    },
+    "asm": {
+      "elf_sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936",
+      "elf_bytes": 6288457,
+      "elf_byte_equal": true,
+      "tar_xz_sha256": "893de23e8a6e28072a0c985120296b0cd80e35432ce9ee75b3999e2e42e910b3",
+      "tar_xz_bytes": 3047420,
+      "tar_xz_byte_equal": true,
+      "source_installed_mode": "0o775",
+      "binary_installed_mode": "0o755"
+    },
+    "compile": {
+      "elf_sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416",
+      "elf_bytes": 28139575,
+      "elf_byte_equal": true,
+      "tar_xz_sha256": "c2176c3d5512b7e60a6d96f35770cb7ceb619b3e69370df5e72ab7ee872d38ef",
+      "tar_xz_bytes": 12833368,
+      "tar_xz_byte_equal": true,
+      "source_installed_mode": "0o775",
+      "binary_installed_mode": "0o755"
+    },
+    "link": {
+      "elf_sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc",
+      "elf_bytes": 8660113,
+      "elf_byte_equal": true,
+      "tar_xz_sha256": "61ceebb5e13d4851b043ec779be48b7273783f5b9f360776127ea66489901091",
+      "tar_xz_bytes": 4438772,
+      "tar_xz_byte_equal": true,
+      "source_installed_mode": "0o775",
+      "binary_installed_mode": "0o755"
+    }
+  },
+  "ordinary_applications": {
+    "summary_sha256": "3e5912d0a6392ad59d2be4d5194da93a2b8eca94618fe974ca059a8c27312059",
+    "matching_wasm": {
+      "sample": {
+        "same_project_inputs": true,
+        "byte_equal_wasm": true,
+        "wasm_sha256": "c04cf135b929c4ae1ea5d7b2f51950da674a02d86479fc7e7c9e90b7d0b8bca8"
+      },
+      "wire": {
+        "same_project_inputs": true,
+        "byte_equal_wasm": true,
+        "wasm_sha256": "83bb52444a74fa6166778b716a55819203ca3cb2415d67c7bb5241fe0db7b8d0"
+      }
+    },
+    "unmodified_shipped_example_wasm": "c82490b94acd84a94a8448daf8faa18ccb6463b67e279c7f48c143cb5c3e4d45",
+    "positive_vector_count": 140,
+    "selections": {
+      "binary": {
+        "receipt_sha256": "4b791b78df2aba70ea761d1318055e946c1be504afef11bc1e0123e9f841398d",
+        "sample": {
+          "steps_exit": {
+            "version": 0,
+            "direct-build": 0,
+            "xmake-build": 0,
+            "direct-int": 0,
+            "direct-aot": 0,
+            "xmake-test": 0
+          },
+          "xmake_passed": [
+            "abb-ros1-guest/int",
+            "abb-ros1-guest/aot"
+          ]
+        },
+        "wire": {
+          "steps_exit": {
+            "version": 0,
+            "direct-build": 0,
+            "xmake-build": 0,
+            "direct-int": 0,
+            "direct-aot": 0,
+            "xmake-test": 0
+          },
+          "xmake_passed": [
+            "abb-wire-verification/int",
+            "abb-wire-verification/aot"
+          ]
+        }
+      },
+      "source": {
+        "receipt_sha256": "bd37fb1a64aa966f43dc3bddbc435b61e1572ec22c3c7ab76ea00562d3c308e0",
+        "sample": {
+          "steps_exit": {
+            "version": 0,
+            "direct-build": 0,
+            "xmake-build": 0,
+            "direct-int": 0,
+            "direct-aot": 0,
+            "xmake-test": 0
+          },
+          "xmake_passed": [
+            "abb-ros1-guest/int",
+            "abb-ros1-guest/aot"
+          ]
+        },
+        "wire": {
+          "steps_exit": {
+            "version": 0,
+            "direct-build": 0,
+            "xmake-build": 0,
+            "direct-int": 0,
+            "direct-aot": 0,
+            "xmake-test": 0
+          },
+          "xmake_passed": [
+            "abb-wire-verification/int",
+            "abb-wire-verification/aot"
+          ]
+        }
+      }
+    },
+    "sample_scope": "The independent sample exercises the valid RAPID and EGM cases. Both inclusions of the full distributed example compiled to the same separately recorded Wasm."
+  },
+  "tinygo_shipped_example": {
+    "wasm_sha256": "49a019ffdc128e96244b342f1aa4f30e66d3a42da99f93c70a4ec24f5015d7d8",
+    "xmake_passed": [
+      "abb-ros1-guest/int",
+      "abb-ros1-guest/aot"
+    ]
+  }
+}

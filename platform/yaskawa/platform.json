@@ -1,0 +1,50 @@
+{
+  "id": "yaskawa",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "motoros2_interfaces/ErrorInfo",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_number",
+        "field": "number",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_sub_code",
+        "field": "sub_code",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_datetime_sec",
+        "field": "datetime_sec",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_datetime_nanosec",
+        "field": "datetime_nanosec",
+        "type": "u32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/Yaskawa-Global/motoros2_interfaces/blob/24a63cf8a7a582c9fa6744507d605415462c9c17/msg/ErrorInfo.msg",
+        "revision": "24a63cf8a7a582c9fa6744507d605415462c9c17",
+        "path": "msg/ErrorInfo.msg",
+        "sha256": "71046bedd075abe0de6e66da031ece5dce96ccf888a4c87406b991ca7c7ce326"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "wasi",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "__wasi_fdstat_t",
+    "format": "packed",
+    "fields": [
+      {
+        "name": "read_fs_filetype",
+        "field": "fs_filetype",
+        "type": "u8",
+        "indexed": false
+      },
+      {
+        "name": "read_fs_flags",
+        "field": "fs_flags",
+        "type": "u16",
+        "indexed": false
+      },
+      {
+        "name": "read_fs_rights_base",
+        "field": "fs_rights_base",
+        "type": "u64",
+        "indexed": false
+      },
+      {
+        "name": "read_fs_rights_inheriting",
+        "field": "fs_rights_inheriting",
+        "type": "u64",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/WebAssembly/wasi-libc/blob/2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13/libc-bottom-half/headers/public/wasi/wasip1.h",
+        "revision": "2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13",
+        "path": "libc-bottom-half/headers/public/wasi/wasip1.h",
+        "sha256": "db122dfbbd0a51c28c888aabc7163814e9b400689d4c76727b54e404e0e754b6"
+      }
+    ]
+  }
+}

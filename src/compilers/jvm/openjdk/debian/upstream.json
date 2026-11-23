@@ -1,0 +1,116 @@
+{
+  "snapshot": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/dists/trixie-security/",
+  "inrelease_sha256": "996f54def734574b35ab6e0b040c0f96f424f1858bdb9a49fd57a6725cda19b5",
+  "arches": {
+    "i386": {
+      "packages": {
+        "openjdk-21-jdk-headless": {
+          "name": "openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_i386.deb",
+          "size": 85446896,
+          "sha256": "9d35852c34919ab631dd9aed80dfb8eeddb4e3c1eaeba28be6f9579e3c26fbcc",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_i386.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_i386.deb"
+        },
+        "openjdk-21-jre-headless": {
+          "name": "openjdk-21-jre-headless_21.0.10+7-1~deb13u1_i386.deb",
+          "size": 43281864,
+          "sha256": "d97e3db3122c7185e9f0016fee40359da6afaef200c36dcb0ed1a724b4fd60ec",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_i386.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_i386.deb"
+        }
+      },
+      "index_sha256": "3f80d07ed818270e591ab69f4b3916ee6f60ede7bdde36b024af4640e6232368",
+      "index_path": "main/binary-i386/Packages.xz"
+    },
+    "arm64": {
+      "packages": {
+        "openjdk-21-jdk-headless": {
+          "name": "openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_arm64.deb",
+          "size": 81993600,
+          "sha256": "261f073d6d396f0f2ec76304782664f12a245097f55056c0beb9dd4829e78cf1",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_arm64.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_arm64.deb"
+        },
+        "openjdk-21-jre-headless": {
+          "name": "openjdk-21-jre-headless_21.0.10+7-1~deb13u1_arm64.deb",
+          "size": 40691292,
+          "sha256": "d53d315345f4527bd28fb3203e0cdba23b7693f26084cb637e03a9d7f99b1b45",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_arm64.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_arm64.deb"
+        }
+      },
+      "index_sha256": "511cb3d15fa0b9831f54326a4b0a134fc72d168ed158fa0ce72707f4ec91f0b8",
+      "index_path": "main/binary-arm64/Packages.xz"
+    },
+    "armel": {
+      "packages": {
+        "openjdk-21-jdk-headless": {
+          "name": "openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_armel.deb",
+          "size": 74397004,
+          "sha256": "33e027731375f56fcdffb17e0b54d93c9b33443d1231909e098706006abc32cd",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_armel.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_armel.deb"
+        },
+        "openjdk-21-jre-headless": {
+          "name": "openjdk-21-jre-headless_21.0.10+7-1~deb13u1_armel.deb",
+          "size": 32932512,
+          "sha256": "953496d0886cee7047456d7a1b897c3888899b501407fa89f6a1dbda1e29a9e6",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_armel.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_armel.deb"
+        }
+      },
+      "index_sha256": "d25900f40f3bef91c695eab6d5669b910e00888b7e1cb3a4ee7fab3f12060acc",
+      "index_path": "main/binary-armel/Packages.xz"
+    },
+    "armhf": {
+      "packages": {
+        "openjdk-21-jdk-headless": {
+          "name": "openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_armhf.deb",
+          "size": 78447552,
+          "sha256": "cb422bd1da4c5558ff15f523025e6e303f2e6daa9a6c16be82ee34a8385261cc",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_armhf.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.10+7-1~deb13u1_armhf.deb"
+        },
+        "openjdk-21-jre-headless": {
+          "name": "openjdk-21-jre-headless_21.0.10+7-1~deb13u1_armhf.deb",
+          "size": 35668012,
+          "sha256": "47f3cf27e6e40e603667451ea6a94dad3ba6fa75d95fc12df627669a099b1c9f",
+          "pool_path": "pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_armhf.deb",
+          "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21-jre-headless_21.0.10+7-1~deb13u1_armhf.deb"
+        }
+      },
+      "index_sha256": "6dd5017dce23eab55ee5391e8eb8597888422949a306b7ab6463abe869c55107",
+      "index_path": "main/binary-armhf/Packages.xz"
+    }
+  },
+  "inrelease_signing_subkeys": [
+    "B0CAB9266E8C3929798B3EEEBDE6D2B9216EC7A8",
+    "89C87ACEA5DD6B8E6A7068808E9F831205B4BA95"
+  ],
+  "source": [
+    {
+      "name": "openjdk-21_21.0.10+7-1~deb13u1.dsc",
+      "size": 5085,
+      "sha256": "f1432e21c328051eaa85e7d3497fdef2b406ab19f7c0ba002a6078486a848f7e",
+      "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21_21.0.10+7-1~deb13u1.dsc"
+    },
+    {
+      "name": "openjdk-21_21.0.10+7.orig-googletest.tar.xz",
+      "size": 613408,
+      "sha256": "6e6699c442cd6bc008140d159b43a7a39bb811d1ecd380cf3b707cc535e04393",
+      "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21_21.0.10+7.orig-googletest.tar.xz"
+    },
+    {
+      "name": "openjdk-21_21.0.10+7.orig.tar.xz",
+      "size": 67584308,
+      "sha256": "cd66eb8091406d663f040fe476ea9b077e7c77b6b6742d8ae338dcbb6d01a0d8",
+      "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21_21.0.10+7.orig.tar.xz"
+    },
+    {
+      "name": "openjdk-21_21.0.10+7-1~deb13u1.debian.tar.xz",
+      "size": 216804,
+      "sha256": "15f65f39a08ed6d949265d26be0b212e37cc110bea790b139a518a1dbc13577a",
+      "url": "https://snapshot.debian.org/archive/debian-security/20260128T000000Z/pool/updates/main/o/openjdk-21/openjdk-21_21.0.10+7-1~deb13u1.debian.tar.xz"
+    }
+  ]
+}

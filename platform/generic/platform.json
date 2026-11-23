@@ -1,0 +1,6 @@
+{
+  "id": "generic",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": []
+}

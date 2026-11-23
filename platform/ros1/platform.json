@@ -1,0 +1,32 @@
+{
+  "id": "ros1",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "std_msgs/Time",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_data_sec",
+        "field": "data_sec",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_data_nsec",
+        "field": "data_nsec",
+        "type": "u32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/ros/std_msgs/blob/34198520757d1aab358118a0ef294fe2609fde33/msg/Time.msg",
+        "revision": "34198520757d1aab358118a0ef294fe2609fde33",
+        "path": "msg/Time.msg",
+        "sha256": "98fb80122583159aab57692b30d22bd5aed45b1bb31192d24bbe492b426b080d"
+      }
+    ]
+  }
+}

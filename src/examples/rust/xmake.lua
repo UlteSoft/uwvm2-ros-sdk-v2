@@ -1,0 +1,10 @@
+set_project("scene-abi")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("scene-abi")
+    set_kind("binary")
+    set_language("rust")
+    add_files("main.rs")
+    set_wros_test_queries("abi")
+    add_wros_tests("int", "aot")
+target_end()

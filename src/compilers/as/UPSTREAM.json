@@ -1,0 +1,106 @@
+{
+  "sources": [
+    {
+      "name": "assemblyscript",
+      "url": "https://github.com/AssemblyScript/assemblyscript.git",
+      "tag": "v0.28.20",
+      "commit": "b6bda05c29c9eb7d07d7f6cb2703508483b30493",
+      "license": "LICENSE",
+      "directory": "src/compilers/as/upstream/assemblyscript",
+      "source_files": 205,
+      "included_paths": [
+        "LICENSE",
+        "NOTICE",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "tsconfig-base.json",
+        "bin",
+        "cli",
+        "dist",
+        "lib",
+        "scripts",
+        "src",
+        "std",
+        "util"
+      ],
+      "omitted_paths": [],
+      "local_changes": []
+    },
+    {
+      "name": "binaryen-js",
+      "url": "https://github.com/AssemblyScript/binaryen.js.git",
+      "tag": "v131.0.0",
+      "commit": "e8a4d654d31e869236e81bebc9355697c3af0610",
+      "license": "LICENSE",
+      "directory": "src/compilers/as/upstream/binaryen-js",
+      "source_files": 8,
+      "included_paths": [
+        "LICENSE",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "index.d.ts",
+        "scripts",
+        "src"
+      ],
+      "omitted_paths": [],
+      "local_changes": []
+    },
+    {
+      "name": "binaryen",
+      "url": "https://github.com/WebAssembly/binaryen.git",
+      "tag": "version_131",
+      "commit": "1f903c14babf829745b421b92ff0f286e93e4209",
+      "license": "LICENSE",
+      "directory": "src/compilers/as/upstream/binaryen-js/binaryen",
+      "source_files": 806,
+      "included_paths": [
+        "LICENSE",
+        "README.md",
+        "CMakeLists.txt",
+        "config.h.in",
+        "ubsan.blacklist",
+        "scripts",
+        "src",
+        "third_party"
+      ],
+      "omitted_paths": [
+        "third_party/fuzztest",
+        "third_party/googletest",
+        "third_party/mimalloc"
+      ],
+      "local_changes": []
+    },
+    {
+      "name": "long",
+      "url": "https://github.com/dcodeIO/long.js.git",
+      "tag": "v5.3.2",
+      "commit": "e1bcb4f65096465b69f0fd67e68fc2a79a67ade9",
+      "license": "LICENSE",
+      "directory": "src/compilers/as/upstream/long",
+      "source_files": 9,
+      "included_paths": [
+        "LICENSE",
+        "README.md",
+        "index.js",
+        "index.d.ts",
+        "types.d.ts",
+        "package-lock.json",
+        "package.json",
+        "scripts",
+        "wasm.wat"
+      ],
+      "omitted_paths": [],
+      "local_changes": []
+    }
+  ],
+  "verification": "Selected Git blobs are byte-identical to the listed revisions. The current driver uses the release distribution. An offline bootstrap rebuild of the host compiler is pending.",
+  "sdk_integration": [
+    "driver.py",
+    "compile.mjs",
+    "driver_lowering.mjs",
+    "prove_imports.py",
+    "staging.ts"
+  ]
+}

@@ -1,0 +1,729 @@
+{
+  "sdk_commit": "28466433fedaccd87bc83efa5a530729ec9b3418",
+  "tree": "ee5a4e52382b021eea5f4e860a8ee026bde97c8b",
+  "host": "linux-x86_64",
+  "platform": "abb",
+  "bootstrap_sha256": "65c44bf8ce4979f9dfab181f6aa1913f2540500b85d8786e9ea327658760db0e",
+  "isolation": {
+    "parent_and_leaf_memory_max": 68719476736,
+    "parent_and_leaf_swap_max": 0,
+    "project_network": "offline",
+    "home_and_cache": "empty",
+    "vm_and_xmake_from_sdk": true,
+    "developer_tree_hidden": true,
+    "system_tmp_and_shm": "read-only and empty",
+    "systemd_scope_oom_policy": "kill"
+  },
+  "reference": {
+    "bodies": 70,
+    "vectors": 140,
+    "metadata": 48,
+    "definitions": 48,
+    "truncated_prefixes": 5113,
+    "invalid_bool_or_count": 268,
+    "empty_bodies": 8,
+    "json_sha256": "67b96f9b8ed5f0d149b1d7da16972ddda8777a71830e6540822b1b0ee57a6a4c",
+    "field_type_and_tag_checks": 182,
+    "trailing_byte_cases": 140,
+    "upstream_archives": {
+      "abb": "0f55b2747d1a6be4583a5cfa00617807312b2cb77c317893ae9a3ba8588ae9e2",
+      "std": "9b1bc908da87d52dab15ae70b52616057c9c1b66afaf52bf97899210ff6f8e4e",
+      "genmsg": "49e70f2ad240bb232f9d98e192981c80f34c8dcabf9ae0cd3bd447d8b7ab9a57",
+      "genpy": "9dc05e00aa3f0aee9a90ba36ded8474021f27952a051f8a9deee0dac480c6203"
+    }
+  },
+  "binary_installations": {
+    "go-default": {
+      "exit": 0,
+      "mode": "binary"
+    },
+    "go-explicit": {
+      "exit": 0,
+      "mode": "binary"
+    },
+    "tinygo-default": {
+      "exit": 0,
+      "mode": "binary"
+    },
+    "tinygo-explicit": {
+      "exit": 0,
+      "mode": "binary"
+    }
+  },
+  "default_projects": {
+    "go": {
+      "exit_codes": {
+        "target": 0,
+        "direct-build": 0,
+        "xmake-test": 0,
+        "session": 0,
+        "xmake-build": 0,
+        "direct-int": 0,
+        "compiler-version": 0,
+        "direct-aot": 0
+      },
+      "target": {
+        "core": "3.0",
+        "eh": true,
+        "go_pointer_bits": 64,
+        "go_word_bits": 64,
+        "language": "go",
+        "memory64_feature": true,
+        "mte": true,
+        "threads": false,
+        "wasm_index_bits": 32
+      },
+      "binaries": {
+        "wrgo": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "c82490b94acd84a94a8448daf8faa18ccb6463b67e279c7f48c143cb5c3e4d45",
+      "xmake_wasm_sha256": {
+        "wasm-wasip1/wasm32/release/abb-ros1-guest.wasm": "c82490b94acd84a94a8448daf8faa18ccb6463b67e279c7f48c143cb5c3e4d45"
+      }
+    },
+    "tinygo": {
+      "exit_codes": {
+        "target": 0,
+        "direct-build": 0,
+        "xmake-test": 0,
+        "session": 0,
+        "xmake-build": 0,
+        "direct-int": 0,
+        "compiler-version": 0,
+        "direct-aot": 0
+      },
+      "target": {
+        "core": "3.0",
+        "eh": true,
+        "go_pointer_bits": 32,
+        "go_word_bits": 32,
+        "language": "tinygo",
+        "memory64_feature": true,
+        "mte": true,
+        "threads": false,
+        "wasm_index_bits": 32
+      },
+      "binaries": {
+        "wrtg": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "49a019ffdc128e96244b342f1aa4f30e66d3a42da99f93c70a4ec24f5015d7d8",
+      "xmake_wasm_sha256": {
+        "wasm-wasip1/wasm32/release/abb-ros1-guest.wasm": "49a019ffdc128e96244b342f1aa4f30e66d3a42da99f93c70a4ec24f5015d7d8"
+      }
+    }
+  },
+  "wire_projects": {
+    "go": {
+      "exit_codes": {
+        "target": 0,
+        "direct-build": 0,
+        "xmake-test": 0,
+        "session": 0,
+        "xmake-build": 0,
+        "direct-int": 0,
+        "compiler-version": 0,
+        "direct-aot": 0
+      },
+      "target": {
+        "core": "3.0",
+        "eh": true,
+        "go_pointer_bits": 64,
+        "go_word_bits": 64,
+        "language": "go",
+        "memory64_feature": true,
+        "mte": true,
+        "threads": false,
+        "wasm_index_bits": 32
+      },
+      "binaries": {
+        "wrgo": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "0081e7fa442bd7dab89fc4de4ff37e681e6fb69579691fa7463d4331df539c74",
+      "xmake_wasm_sha256": {
+        "wasm-wasip1/wasm32/release/abb-wire-verification.wasm": "0081e7fa442bd7dab89fc4de4ff37e681e6fb69579691fa7463d4331df539c74"
+      },
+      "vm_signature_matches": 163,
+      "explicit_denials_per_engine": 163,
+      "wasm_profile_details": {
+        "default": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 30,
+              "max": 4096
+            }
+          ],
+          "eh_tags": 1,
+          "mte_claimz_encoded_patterns": 1,
+          "mte_release_encoded_patterns": 1
+        },
+        "minimal": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 30,
+              "max": null
+            }
+          ],
+          "eh_tags": 0,
+          "mte_claimz_encoded_patterns": 0,
+          "mte_release_encoded_patterns": 0
+        },
+        "mte-noeh": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 30,
+              "max": 4096
+            }
+          ],
+          "eh_tags": 0,
+          "mte_claimz_encoded_patterns": 1,
+          "mte_release_encoded_patterns": 1
+        },
+        "eh-nomte": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 30,
+              "max": null
+            }
+          ],
+          "eh_tags": 1,
+          "mte_claimz_encoded_patterns": 0,
+          "mte_release_encoded_patterns": 0
+        }
+      }
+    },
+    "tinygo": {
+      "exit_codes": {
+        "target": 0,
+        "direct-build": 0,
+        "xmake-test": 0,
+        "session": 0,
+        "xmake-build": 0,
+        "direct-int": 0,
+        "compiler-version": 0,
+        "direct-aot": 0
+      },
+      "target": {
+        "core": "3.0",
+        "eh": true,
+        "go_pointer_bits": 32,
+        "go_word_bits": 32,
+        "language": "tinygo",
+        "memory64_feature": true,
+        "mte": true,
+        "threads": false,
+        "wasm_index_bits": 32
+      },
+      "binaries": {
+        "wrtg": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "155bc2156e73fc837bae74c742de15eb42b97a4cce0a1d14cde929acfc468610",
+      "xmake_wasm_sha256": {
+        "wasm-wasip1/wasm32/release/abb-wire-verification.wasm": "155bc2156e73fc837bae74c742de15eb42b97a4cce0a1d14cde929acfc468610"
+      },
+      "vm_signature_matches": 163,
+      "explicit_denials_per_engine": 163,
+      "wasm_profile_details": {
+        "default": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 2,
+              "max": 4096
+            }
+          ],
+          "eh_tags": 1,
+          "mte_claimz_encoded_patterns": 1,
+          "mte_release_encoded_patterns": 15
+        },
+        "minimal": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 2,
+              "max": null
+            }
+          ],
+          "eh_tags": 0,
+          "mte_claimz_encoded_patterns": 0,
+          "mte_release_encoded_patterns": 0
+        },
+        "mte-noeh": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 2,
+              "max": 4096
+            }
+          ],
+          "eh_tags": 0,
+          "mte_claimz_encoded_patterns": 1,
+          "mte_release_encoded_patterns": 9
+        },
+        "eh-nomte": {
+          "wasm_memories": [
+            {
+              "index_bits": 32,
+              "shared": false,
+              "min": 2,
+              "max": null
+            }
+          ],
+          "eh_tags": 1,
+          "mte_claimz_encoded_patterns": 0,
+          "mte_release_encoded_patterns": 0
+        }
+      }
+    }
+  },
+  "observed_git_recovery": {
+    "language": "tinygo",
+    "selection": "default",
+    "repository_path": "install/install.py",
+    "git_blob_oid": "57a069972d432e19ae1aa57c4216ef223bf06939",
+    "installer_exit": 0
+  },
+  "without_bootstrap": {
+    "wat_source": "source compilation failed; the installed system rustc selected /usr/lib/rust-1.93/bin without cargo, while wrwat requires Rust 1.98.0"
+  },
+  "independent_receipt_sha256": "a8a0a2fdc371b61c432927b41de5b033c6b401ef030366971f080676a49c3aa0",
+  "legacy_selectors": {
+    "c": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "cpp": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "rust": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "go": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "tinygo": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "as": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "js": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "typescript": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "wat": {
+      "install_exit": 0,
+      "xmake_test_exit": 0,
+      "xmake_engines": [
+        "int",
+        "aot"
+      ]
+    },
+    "c_ffi_bridge": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "csharp": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "d": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "fortran": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "fsharp": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "haskell": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "java": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "kotlin": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "lua": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "moonbit": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "nim": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "objectc": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "odin": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "php": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "py": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "r": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "ruby": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "swift": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "vbnet": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "zig": {
+      "install_exit": 1,
+      "reason": "Installation failed: unknown language or platform; use 'list' for available selections"
+    }
+  },
+  "quickjs_ffi_build": {
+    "program_from_installed_prefix": "libexec/quickjs-c/bin/wrc",
+    "executable_trace_sha256": "1eade66eeb29b414e6dd158e6977936853d339130a6e2b7eb22bd1722bd6aa60",
+    "xmake_exit": 0
+  },
+  "source_projects": {
+    "go": {
+      "install_exit": 0,
+      "source_paths": 40987,
+      "lfs_objects": 3,
+      "stock": {
+        "wasm_sha256": "c82490b94acd84a94a8448daf8faa18ccb6463b67e279c7f48c143cb5c3e4d45",
+        "xmake_engines": [
+          "int",
+          "aot"
+        ],
+        "steps": {
+          "direct-build": 0,
+          "direct-int": 0,
+          "direct-aot": 0,
+          "xmake-build": 0,
+          "xmake-test": 0
+        }
+      },
+      "wire": {
+        "wasm_sha256": "0081e7fa442bd7dab89fc4de4ff37e681e6fb69579691fa7463d4331df539c74",
+        "xmake_engines": [
+          "int",
+          "aot"
+        ],
+        "steps": {
+          "direct-build": 0,
+          "direct-int": 0,
+          "direct-aot": 0,
+          "xmake-build": 0,
+          "xmake-test": 0
+        }
+      }
+    },
+    "tinygo": {
+      "install_exit": 0,
+      "source_paths": 55961,
+      "lfs_objects": 6,
+      "stock": {
+        "wasm_sha256": "49a019ffdc128e96244b342f1aa4f30e66d3a42da99f93c70a4ec24f5015d7d8",
+        "xmake_engines": [
+          "int",
+          "aot"
+        ],
+        "steps": {
+          "direct-build": 0,
+          "direct-int": 0,
+          "direct-aot": 0,
+          "xmake-build": 0,
+          "xmake-test": 0
+        }
+      },
+      "wire": {
+        "wasm_sha256": "155bc2156e73fc837bae74c742de15eb42b97a4cce0a1d14cde929acfc468610",
+        "xmake_engines": [
+          "int",
+          "aot"
+        ],
+        "steps": {
+          "direct-build": 0,
+          "direct-int": 0,
+          "direct-aot": 0,
+          "xmake-build": 0,
+          "xmake-test": 0
+        }
+      }
+    }
+  },
+  "source_native_rebuild": {
+    "go": {
+      "asm": {
+        "elf_and_archive_match": {
+          "elf": true,
+          "archive": true
+        },
+        "public": {
+          "elf": {
+            "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936",
+            "bytes": 6288457,
+            "mode": "0o755"
+          },
+          "archive": {
+            "sha256": "893de23e8a6e28072a0c985120296b0cd80e35432ce9ee75b3999e2e42e910b3",
+            "bytes": 3047420,
+            "mode": "0o600"
+          }
+        },
+        "source": {
+          "elf": {
+            "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936",
+            "bytes": 6288457,
+            "mode": "0o775"
+          },
+          "archive": {
+            "sha256": "893de23e8a6e28072a0c985120296b0cd80e35432ce9ee75b3999e2e42e910b3",
+            "bytes": 3047420,
+            "mode": "0o664"
+          }
+        }
+      },
+      "compile": {
+        "elf_and_archive_match": {
+          "elf": true,
+          "archive": true
+        },
+        "public": {
+          "elf": {
+            "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416",
+            "bytes": 28139575,
+            "mode": "0o755"
+          },
+          "archive": {
+            "sha256": "c2176c3d5512b7e60a6d96f35770cb7ceb619b3e69370df5e72ab7ee872d38ef",
+            "bytes": 12833368,
+            "mode": "0o600"
+          }
+        },
+        "source": {
+          "elf": {
+            "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416",
+            "bytes": 28139575,
+            "mode": "0o775"
+          },
+          "archive": {
+            "sha256": "c2176c3d5512b7e60a6d96f35770cb7ceb619b3e69370df5e72ab7ee872d38ef",
+            "bytes": 12833368,
+            "mode": "0o664"
+          }
+        }
+      },
+      "link": {
+        "elf_and_archive_match": {
+          "elf": true,
+          "archive": true
+        },
+        "public": {
+          "elf": {
+            "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc",
+            "bytes": 8660113,
+            "mode": "0o755"
+          },
+          "archive": {
+            "sha256": "61ceebb5e13d4851b043ec779be48b7273783f5b9f360776127ea66489901091",
+            "bytes": 4438772,
+            "mode": "0o600"
+          }
+        },
+        "source": {
+          "elf": {
+            "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc",
+            "bytes": 8660113,
+            "mode": "0o775"
+          },
+          "archive": {
+            "sha256": "61ceebb5e13d4851b043ec779be48b7273783f5b9f360776127ea66489901091",
+            "bytes": 4438772,
+            "mode": "0o664"
+          }
+        }
+      },
+      "wrgo": {
+        "elf_and_archive_match": {
+          "elf": false,
+          "archive": false
+        },
+        "public": {
+          "elf": {
+            "sha256": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0",
+            "bytes": 3344749,
+            "mode": "0o755"
+          },
+          "archive": {
+            "sha256": "390ca7a3cebbf2345183a2d810b29dcdfed064abcb0c81bb94a542c081a6be04",
+            "bytes": 1798956,
+            "mode": "0o600"
+          }
+        },
+        "source": {
+          "elf": {
+            "sha256": "f9a02aaf00d385ca5e2fcb7ea2e25e26cf255d439146f52f578842e5bdeef755",
+            "bytes": 3344933,
+            "mode": "0o775"
+          },
+          "archive": {
+            "sha256": "3343914b11aaf55cd61e841a00c5a214ac315467bf7824562820bfe3157114bb",
+            "bytes": 1798940,
+            "mode": "0o664"
+          }
+        }
+      }
+    },
+    "wrgo_diagnosis": "The official Go 1.24.2 host reproduces the published launcher before the SDK guest runtime overlay. Applying only that overlay reproduces the source installer launcher difference, even with the stock compiler tools.",
+    "tinygo": {
+      "language": "tinygo",
+      "products": {
+        "prepare-ir": {
+          "ELF_cmp": true,
+          "tar_xz_cmp": true,
+          "installed_modes": [
+            "0o775",
+            "0o755",
+            "0o755"
+          ],
+          "bytes": 14479616,
+          "compressed_bytes": 4286400,
+          "compressed_sha256": "1341995f412d326e13e05a45ac82d763d77e368c74c412b43905d6a5ad5d435f",
+          "format": "tar.xz",
+          "member": "prepare-ir",
+          "path": "bin/packages/linux-x86_64/tinygo/prepare-ir-1341995f412d326e13e0.tar.xz",
+          "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+        },
+        "wrtg": {
+          "ELF_cmp": true,
+          "tar_xz_cmp": true,
+          "installed_modes": [
+            "0o775",
+            "0o755",
+            "0o755"
+          ],
+          "bytes": 3344749,
+          "compressed_bytes": 1798908,
+          "compressed_sha256": "a76d6e9b893eadc8b8243355690b2e76c0bb0eaccbf7cd213f8be4c434cf64b0",
+          "format": "tar.xz",
+          "member": "wrtg",
+          "path": "bin/packages/linux-x86_64/tinygo/wrtg-a76d6e9b893eadc8b824.tar.xz",
+          "sha256": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66"
+        }
+      },
+      "separate_frontend": {
+        "source_sha256": "35bf65db562f35ef4a8a7b489aa8e477ba59cbee787d051023ee0d6a6b597474",
+        "preceding_independent_source_sha256": "528baf13d4e5dfc3a5205cc99a92b882ef6f569dc1e8cbe128edc4ec92bdd37e",
+        "published_host_bootstrap_sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2",
+        "source_matches_preceding_independent": false,
+        "source_matches_published_host_bootstrap": false
+      }
+    },
+    "tinygo_bootstrap": "The offline rebuild reused LLVM 23 and 45 LLVM 19 build products independently built from matching source. The install rebuilt the Go/cgo frontend, prepare-ir and wrtg."
+  },
+  "wat_with_external_official_rust": {
+    "rust": "1.98.0",
+    "install_exit": 0,
+    "elf_sha256": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+    "archive_sha256": "1cb9692aaf96f7c0fd6ff99f1b2b8b372e52b5d2e199c7d5127978191d7ba35d",
+    "project": {
+      "wasm_sha256": "e7a4d530d1cf9e2f3c7ceafea36d71008a4b7b54da87c1310cd645cecca4a709",
+      "xmake_engines": [
+        "int",
+        "aot"
+      ],
+      "steps": {
+        "xmake-build": 0,
+        "xmake-test": 0
+      }
+    }
+  },
+  "untested": [
+    "native live ABB controller, RWS, EGM and ROS transport",
+    "live authorized service.available success",
+    "TinyGo source install building LLVM19 and LLVM23 from scratch on this ABB run",
+    "Xmake replay of every non-default feature combination",
+    "statistical performance benchmark"
+  ]
+}

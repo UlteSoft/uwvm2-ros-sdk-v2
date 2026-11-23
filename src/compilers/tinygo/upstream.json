@@ -1,0 +1,46 @@
+{
+  "bootstrap": "https://github.com/tinygo-org/tinygo/releases/download/v0.38.0/tinygo0.38.0.linux-amd64.tar.gz",
+  "commit": "733a17d470870afc9c821524ce291ec5062d682b",
+  "frontend_llvm": {
+    "branch": "xtensa_release_19.1.2",
+    "commit": "510a078c1ad4aee4460818bcb38ff0ba3fbf6a83",
+    "origin": "https://github.com/espressif/llvm-project",
+    "tree": "66f80f04a78c41c1c4f4081511e9d3c3ceccd6b8"
+  },
+  "license": "upstream/LICENSE",
+  "local_changes": "Wasm conservative GC tag and lifetime management, Preview1 runtime IO/clocks, and terminal panic dispatch. prepare_ir.cpp attaches target policy before LLVM object generation. Binary mode uses the pinned TinyGo release. Source mode builds the frontend with the upstream GNUmakefile, the vendored Espressif LLVM sources and the Go dependencies listed in frontend/sources.json.",
+  "local_files": {
+    "src/runtime/arch_tinygowasm.go": "818ce316afec2567cd264e41d1d90e42dfa6e54eeb2ac9a010392499704334d9",
+    "src/runtime/gc_blocks.go": "04faec361d4fe967674cdda863ae67b661605f9bb70c7ce950b0a22cc860cb8e",
+    "src/runtime/gc_blocks_wros.go": "9ab109f353f15d151989e27428830fc7a931e6a4801f07dc01a0dc4595190bf4",
+    "src/runtime/gc_wros.go": "7db0e74c1bf39a49a8ae5c0f76db95f375df4df3107e8f6851eda956247cf8fa",
+    "src/runtime/gc_wros_default.go": "5a59d513c80aa355b2ad9abbfb7d1a16135b592c413824ef7b7ea2c3fe06f7c9",
+    "src/runtime/panic.go": "4018d59fe05e256fb76665b3c13dd944370cf99c6b29578edf150aac6b82d425",
+    "src/runtime/panic_unwind.go": "2053681cdf0ede6d324df16e3eb8ebb9fcf5b581c7484c439d5976493c6f65aa",
+    "src/runtime/panic_wros.go": "4d10f46cc0cb0b0f6d860bb61b4ade9e9da04febf37874e62cf3baf64bbb3f13",
+    "src/runtime/panic_wros_default.go": "dc8a4dd6551951bb100d6fb9973930fc52e8919d1375069371750960fb14412e",
+    "src/runtime/runtime_tinygowasm.go": "4acf6c1c22c14d039ed627657890314cd22ce978894e81532ddfe4bbdd7b4030",
+    "src/runtime/runtime_wasip1.go": "9d00df5d62ea5b6726603e91308fa3e342bc8f7cc2e883a1b84d7d09b57c89a9",
+    "src/runtime/runtime_wros_io.go": "1a84fc39359e9bfbbcb22ad966d4fd64c1caa349e84f5f660a47288c86b2016a",
+    "src/runtime/runtime_wros_wasip1.go": "a79fcea1a0f3b727651a2d9fc9a5aacd660af352c778eb9d7dd89c600b2a9eb6"
+  },
+  "origin": "https://github.com/tinygo-org/tinygo",
+  "submodules": {
+    "lib/CMSIS": "9fe411cef1cef5de58e5957b89760759de44e393",
+    "lib/avr": "6624554c02b237b23dc17d53e992bf54033fc228",
+    "lib/bdwgc": "1166f11f7dee08d7ad369296b24cf8c9582f8789",
+    "lib/binaryen": "11dba9b1c2ad988500b329727f39f4d8786918c5",
+    "lib/cmsis-svd": "05a9562ec59b87945a8d7177a4b08b7aa2f2fd58",
+    "lib/macos-minimal-sdk": "e7c72156eac3ebf29c34cc2faa71efcb1296663f",
+    "lib/mingw-w64": "8526cb618269440a94810b94b77f8bd48c5c3396",
+    "lib/musl": "7a43f6fea9081bdd53d8a11cef9e9fab0348c53d",
+    "lib/nrfx": "d779b49fc59c7a165e7da1d7cd7d57b28a059f16",
+    "lib/picolibc": "b92edfda8ac6853772d87cadaeeeaa21b78609b6",
+    "lib/stm32-svd": "e6db8e32d5d42293a528434ec12e7f88479a8649",
+    "lib/wasi-cli": "6ae82617096e83e6606047736e84ac397b788631",
+    "lib/wasi-libc": "1dfe5c302d1c5ab621f7abf04620fae92700fd22",
+    "src/net": "77be3968d158db1669bc0b40518f4a16aa7413d7"
+  },
+  "upstream_tree": "31a2b2c683d8f1089f3d65b26c77222213ad8925",
+  "version": "v0.38.0"
+}

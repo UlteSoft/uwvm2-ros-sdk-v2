@@ -1,0 +1,44 @@
+{
+  "id": "boston_dynamics",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "bosdyn.api.PointCloud.data",
+    "format": "packed",
+    "fields": [
+      {
+        "name": "read_x",
+        "field": "xyz",
+        "type": "f32",
+        "indexed": true,
+        "element_stride": 3,
+        "component": 0
+      },
+      {
+        "name": "read_y",
+        "field": "xyz",
+        "type": "f32",
+        "indexed": true,
+        "element_stride": 3,
+        "component": 1
+      },
+      {
+        "name": "read_z",
+        "field": "xyz",
+        "type": "f32",
+        "indexed": true,
+        "element_stride": 3,
+        "component": 2
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/boston-dynamics/spot-sdk/blob/16a98aae3b818082288504c6e53b59a67666aaeb/protos/bosdyn/api/point_cloud.proto",
+        "revision": "16a98aae3b818082288504c6e53b59a67666aaeb",
+        "path": "protos/bosdyn/api/point_cloud.proto",
+        "sha256": "5b6fa58ee76d528d19de90f6f63545a71ac7ecf108e9644c640248d89ff9fcb6"
+      }
+    ]
+  }
+}

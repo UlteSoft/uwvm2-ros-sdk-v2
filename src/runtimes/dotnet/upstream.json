@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/dotnet/runtime",
+  "tag": "v10.0.15",
+  "commit": "a3788b71495457354b64ca8040b6ded5ff6ca4f9",
+  "license": "MIT and third-party notices",
+  "license_files": {
+    "LICENSE.TXT": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+    "THIRD-PARTY-NOTICES.TXT": "66f1d4e44973185519bb4aa8a9718eb22fc7af2cc532e3ae9cfc4c127ee7fc54"
+  },
+  "archive_sha256": "df3899ce646abce8486600eb7fc91dc6076d663e0f126c3dd35c7d3af939c06d",
+  "upstream_blob_index": "upstream.git-blobs",
+  "selected_text_files": 1196,
+  "local_source_modifications": [
+    {
+      "path": "src/mono/mono/sgen/sgen-qsort.c",
+      "upstream_blob": "dfcc9371d02271f69b82f5aa8567b7d98540b9a1",
+      "modified_sha256": "646f0eb65c04f3f97a4c07855a3ae775fdee27e921f7dae313fca649ed97ff68",
+      "description": "Use wasi-libc qsort for bounded SGen scratch storage on wasm32 WASI."
+    }
+  ],
+  "qualification": "pending"
+}

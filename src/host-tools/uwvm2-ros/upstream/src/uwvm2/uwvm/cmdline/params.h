@@ -1,0 +1,480 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-03-27
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+# include <memory>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/imported/wasi/feature/feature_push_macro.h>  // wasi
+# ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+#  include <uwvm2/imported/wasi/wasip1/feature/feature_push_macro.h>  // wasip1
+# endif
+# include <uwvm2/uwvm/runtime/macro/push_macros.h>
+// import
+# include <uwvm2/utils/cmdline/impl.h>
+# include <uwvm2/uwvm/cmdline/params/impl.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::cmdline
+{
+    namespace details
+    {
+        inline constexpr ::uwvm2::utils::cmdline::parameter const* parameter_unsort[]{
+            // global
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::diagnostic_control_fd),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::update_control_fd),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::update_public_key),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::update_contract),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::update_scope),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::update_call_export),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::version),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::run),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::help),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::mode),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_permissions),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_dump_max),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_dump_force),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_crash),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_debug_jit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_jit_control_fd),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_jit_control_handle),
+
+        // debug
+#ifdef _DEBUG
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_test),
+#endif
+
+            // Independent I1T authority uses the existing command registry.
+# include "params/wasithread_registry.inc"
+
+            // ROS parameters use the existing hash-table registration.
+# include "params/ros1_registry.inc"
+# include "params/ros2_registry.inc"
+#if defined(UWVM_IMPORT_ROSV2)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_create),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_bind),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_interface),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_grant),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_input_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_input),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_output_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_lifecycle),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_output),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_publication_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_publication),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_buffer_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_buffer),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_model_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_model),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_model_capacity),
+#if defined(UWVM_ROS_TEST_KERNEL_ATTACHMENT)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_model_kernel_channel),
+#endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_model_channel),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_transform_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_transform_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_transform_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_transform_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_transform_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_device_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_device_endpoints),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_device_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_device_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_device_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_device_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_control_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_control_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_control_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_control_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_bridge_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_bridge_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_bridge_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_bridge_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_bridge_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_media_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_media_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_media_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_media_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_media_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_sensor_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_sensor_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_sensor_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_sensor_descriptor),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_sensor_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_sensor_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_proposal_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_proposal_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_proposal_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_proposal_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_proposal_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_proposal_arbiter),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_recording_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_recording_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_recording_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_recording_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_recording_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_replay),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_log_diagnostic_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_log_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_log_logger),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_log_loss),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_diagnostic_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_diagnostic_source),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_child),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_call_audit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_driver_schema),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_driver_budget),
+#if defined(UWVM_ROS_TEST_KERNEL_ATTACHMENT)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_driver_kernel_channel),
+#endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_driver_channel),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_call_buffer_journal),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_call_buffer_capture),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_call_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_call),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_call_clear_input),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_check),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_dump_effective_policy),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_communication_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_parameter_budget),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_parameter_profile),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_parameter_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_parameter_definition),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_parameter_definition_hex),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_communication_worker),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_communication_binding),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_event_stream),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_communication_pair),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_communication_worker_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_communication_channel),
+#endif
+
+            // wasm
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_memtag_extension),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::secure),
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::driver_verify),
+#endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_set_main_module_name),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_set_start_func),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_preload_library),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_depend_recursion_limit),
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_register_dl),
+#endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_reset_import),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_set_preload_module_attribute),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_set_memory_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_set_parser_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_set_initializer_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_set_resource_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_mvp),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_wasm1p1),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_wasm2),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_wasm3),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_multi_value),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_multi_value),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_reference_types),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_reference_types),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_table_instructions),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_table_instructions),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_multiple_tables),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_multiple_tables),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_bulk_memory),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_bulk_memory),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_sign_extension),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_sign_extension),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_nontrapping_float_to_int),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_nontrapping_float_to_int),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_simd),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_simd),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_extended_const),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_table_initializer),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_relaxed_simd),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_multi_memory),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_threads),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_extended_const),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_table_initializer),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_relaxed_simd),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_multi_memory),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_threads),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_tail_call),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_tail_call),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_memory64),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_table64),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_memory64),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_table64),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_function_references),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_gc),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_enable_exceptions),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_function_references),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_gc),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_feature_disable_exceptions),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_memory_grow_strict),
+
+        // runtime
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_disable_memtag),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_memtag_backend),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_memtag_mode),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_memtag_action),
+#if defined(UWVM_RUNTIME_HAS_BACKEND)
+# if defined(UWVM_RUNTIME_UWVM_INTERPRETER)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_int),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_uwvm_int_disable_loop_unwind),
+#  if defined(UWVM_ENABLE_UWVM_INT_COMBINE_OPS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_uwvm_int_set_opcode_conbination_level),
+#  endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_uwvm_int_disable_delay_local),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_uwvm_int_enable_instruction_reorder),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_uwvm_int_loop_unwind_max_size),
+# endif
+# if defined(UWVM_RUNTIME_LLVM_JIT)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_aot),
+# endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_compiler_log),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_compile_threads),
+# if defined(UWVM2_HAS_THREADED_PROFILE_HOST_API) && UWVM2_HAS_THREADED_PROFILE_HOST_API
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasi_threads),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::debug_thread_history),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasi_thread_signals),
+# endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_scheduling_policy),
+# if defined(UWVM_RUNTIME_LLVM_JIT)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_policy),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_full_policy),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_exception_dispatch),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_cache_path),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_cache_seal_process),
+# endif
+#endif
+
+        // wasi
+#if defined(UWVM_IMPORT_WASI)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasi_disable_utf8_check),
+#endif
+        // wasip1
+#ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+# if defined(UWVM_IMPORT_WASI_WASIP1)
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_expose_host_api),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_disable),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_set_fd_limit),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_mount_dir),
+#  endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_disable_mount_path_normalization),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_allow_overlapping_mount_paths),
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_set_argv0),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_force_args),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_noinherit_system_environment),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_inherit_system_environment),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_grant),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_deny),
+#  endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_interface),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_interface),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_grant),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_socket_abi),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_socket_rights),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_socket_rights),
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_socket_rights),
+#  endif
+#  if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_add_module),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_enable),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_disable),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_interface),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_noinherit_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_inherit_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_disable_utf8_check),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_enable_utf8_check),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_set_argv0),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_force_args),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_set_fd_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_add_or_replace_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_delete_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_mount_dir),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_mount_dir_rights),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_socket_rights),
+#   if defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_socket_tcp_listen),
+#   endif
+#   if defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_socket_tcp_connect),
+#   endif
+#   if defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_socket_udp_bind),
+#   endif
+#   if defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_socket_udp_connect),
+#   endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_grant),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_deny),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_limit_action),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_ros_global_limit_exit_action),
+#  endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_mount_dir_rights),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_mount_dir_rights),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_limit),
+        ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_limit_action),
+        ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_limit_action),
+        ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_limit_exit_action),
+        ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_limit_exit_action),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_deny),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_grant),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_deny),
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_delete_system_environment),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_add_or_replace_environment),
+#  endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_create),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_enable),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_disable),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_expose_host_api),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_hide_host_api),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_noinherit_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_inherit_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_disable_utf8_check),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_enable_utf8_check),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_set_argv0),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_force_args),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_set_fd_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_add_or_replace_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_delete_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_mount_dir),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_create),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_add_module),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_enable),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_disable),
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_expose_host_api),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_hide_host_api),
+#  endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_noinherit_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_inherit_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_disable_utf8_check),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_enable_utf8_check),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_set_argv0),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_force_args),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_set_fd_limit),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_add_or_replace_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_delete_system_environment),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_mount_dir),
+#  if defined(UWVM_IMPORT_WASI_WASIP1_SUPPORT_SOCKET)
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_socket_tcp_listen),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_socket_tcp_connect),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_socket_udp_bind),
+#  endif
+#  if !defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_global_socket_udp_connect),
+#  endif
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_socket_tcp_listen),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_socket_tcp_connect),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_socket_udp_bind),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_single_socket_udp_connect),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_socket_tcp_listen),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_socket_tcp_connect),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_socket_udp_bind),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::wasip1_group_socket_udp_connect),
+#  endif
+
+# endif
+#endif
+
+            // log
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::log_output),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::log_color),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::log_enable_warning),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::log_disable_warning),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::log_convert_warn_to_fatal),
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::log_verbose),
+#if defined(_WIN32) && (_WIN32_WINNT < 0x0A00 || defined(_WIN32_WINDOWS))
+            ::std::addressof(::uwvm2::uwvm::cmdline::params::log_win32_use_ansi),
+#endif
+        };
+    }  // namespace details
+
+    inline constexpr auto parameters{::uwvm2::utils::cmdline::parameter_sort(details::parameter_unsort)};
+
+    inline constexpr ::std::size_t parameter_lookup_table_size{::uwvm2::utils::cmdline::calculate_alias_parameters_size(parameters)};
+    inline constexpr auto parameter_lookup_table{::uwvm2::utils::cmdline::expand_alias_parameters_and_check<parameter_lookup_table_size>(parameters)};
+
+    inline constexpr ::std::size_t parameter_max_principal_name_size{::uwvm2::utils::cmdline::calculate_max_principal_name_size(parameters)};
+    inline constexpr ::std::size_t parameter_max_name_size{::uwvm2::utils::cmdline::calculate_max_para_size(parameter_lookup_table)};
+
+    inline constexpr auto hash_table_size{::uwvm2::utils::cmdline::calculate_hash_table_size(parameter_lookup_table)};
+    inline constexpr auto hash_table{
+        ::uwvm2::utils::cmdline::generate_hash_table<hash_table_size.hash_table_size, hash_table_size.extra_size, hash_table_size.real_max_conflict_size>(
+            parameter_lookup_table)};
+
+    inline constexpr ::std::size_t hash_table_byte_sz{sizeof(hash_table)};
+    // inline constexpr auto sizeof_hash_table{sizeof(hash_table)};
+}
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/runtime/macro/pop_macros.h>
+# ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+#  include <uwvm2/imported/wasi/wasip1/feature/feature_pop_macro.h>  // wasip1
+# endif
+# include <uwvm2/imported/wasi/feature/feature_pop_macro.h>  // wasi
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

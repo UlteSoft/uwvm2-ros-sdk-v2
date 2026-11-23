@@ -1,0 +1,10 @@
+set_project("ros2-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("ros2-observation")
+    set_kind("binary")
+    set_language("wat")
+    set_ros_platform("ros2")
+    add_files("main.wat")
+    add_wros_tests("int", "aot")
+target_end()

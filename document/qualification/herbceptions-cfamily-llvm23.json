@@ -1,0 +1,130 @@
+{
+  "scope": "local-frozen-producer",
+  "host": "linux-x86_64",
+  "frontend": "wrcc",
+  "cxx_standard": "c++20",
+  "input": "src/examples/cpp/herbceptions/typed-error.cpp",
+  "input_sha256": "142d4290f0e4df0feba72e83e5ff2a179c531253f038b22634df534e73abc2f8",
+  "producer": {
+    "source_id": "6cab9df1c25ee57cb68239e2eb8cbda0e90693b057dddde9c72d0a77ef6a3079",
+    "tools": {
+      "clang": "ed0d7927d7582aa0113f655af671f3015f59d797c967c85f195ce1ddae7b74c9",
+      "clang++": "ed0d7927d7582aa0113f655af671f3015f59d797c967c85f195ce1ddae7b74c9",
+      "llvm-ar": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
+      "llvm-ranlib": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
+      "llvm-nm": "2cda42e5ea480601d60944c18ec0175e48b43a72ff8a35c6e77f0a11ae7c0115",
+      "llvm-config": "45f80e0dbd4c858b49585caae9c546f1e1447cc1231946459761bfc0c2022223",
+      "wasm-ld": "019bffcd36f2af3ebeeb29e7e634909252e601d912a4024170b59578e1a57b58"
+    }
+  },
+  "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+  "isolated": {
+    "cgroup_memory_bytes": 68719476736,
+    "cgroup_swap_bytes": 0,
+    "namespace": [
+      "pid",
+      "net",
+      "ipc",
+      "uts",
+      "mnt"
+    ]
+  },
+  "results": [
+    {
+      "profile": {
+        "address_bits": 32,
+        "wasm_version": "3.0",
+        "threads": false,
+        "mte": true,
+        "exceptions": "eh",
+        "triple": "wasm32-wasip1",
+        "abi": "wasi_snapshot_preview1",
+        "memtag_wire": "packed-v1",
+        "extensions": [
+          "wasmmte"
+        ]
+      },
+      "wasm_sha256": "9bac0700aac1eea2bc0a19a2d9b502ec09d1c2cb1fcd80f64705858ce2c99c05",
+      "mte_instructions": 40,
+      "eh_instructions": 0,
+      "exception_tags": 0,
+      "run": {
+        "int": 42,
+        "aot": 42
+      },
+      "disabled_compilation_exit": 1
+    },
+    {
+      "profile": {
+        "address_bits": 32,
+        "wasm_version": "3.0",
+        "threads": false,
+        "mte": true,
+        "exceptions": "noeh",
+        "triple": "wasm32-wasip1",
+        "abi": "wasi_snapshot_preview1",
+        "memtag_wire": "packed-v1",
+        "extensions": [
+          "wasmmte"
+        ]
+      },
+      "wasm_sha256": "68cde6f97414db81cf85de4df78b4196a0bde6d79eb31461544c49920edbe998",
+      "mte_instructions": 40,
+      "eh_instructions": 0,
+      "exception_tags": 0,
+      "run": {
+        "int": 42,
+        "aot": 42
+      },
+      "disabled_compilation_exit": 1
+    },
+    {
+      "profile": {
+        "address_bits": 64,
+        "wasm_version": "3.0",
+        "threads": false,
+        "mte": true,
+        "exceptions": "eh",
+        "triple": "wasm64-wasip1",
+        "abi": "uwvm-preview1-memory64-extension",
+        "memtag_wire": "packed-v1",
+        "extensions": [
+          "wasmmte"
+        ]
+      },
+      "wasm_sha256": "954c85dd78ccf6de38f50d012b280b6bd1c5a49fafe25956178168d5eb06382e",
+      "mte_instructions": 40,
+      "eh_instructions": 0,
+      "exception_tags": 0,
+      "run": {
+        "int": 42,
+        "aot": 42
+      },
+      "disabled_compilation_exit": 1
+    },
+    {
+      "profile": {
+        "address_bits": 64,
+        "wasm_version": "3.0",
+        "threads": false,
+        "mte": true,
+        "exceptions": "noeh",
+        "triple": "wasm64-wasip1",
+        "abi": "uwvm-preview1-memory64-extension",
+        "memtag_wire": "packed-v1",
+        "extensions": [
+          "wasmmte"
+        ]
+      },
+      "wasm_sha256": "492c625c82f4a1328d56c3c6feeb911f877daf16460a741a3e5ca6994690e86d",
+      "mte_instructions": 40,
+      "eh_instructions": 0,
+      "exception_tags": 0,
+      "run": {
+        "int": 42,
+        "aot": 42
+      },
+      "disabled_compilation_exit": 1
+    }
+  ]
+}

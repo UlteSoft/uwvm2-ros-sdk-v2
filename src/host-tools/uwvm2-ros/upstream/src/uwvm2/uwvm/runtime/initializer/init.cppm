@@ -1,0 +1,102 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+module;
+#include <uwvm2/utils/container/shared.h>
+#include <uwvm2/utils/control/wasithread.h>
+#include <uwvm2/utils/allocator/resource_limit.h>
+
+// std
+#include <concepts>
+#include <atomic>
+#include <array>
+#include <span>
+#include <vector>
+#include <cstddef>
+#include <cstdlib>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <memory>
+#include <utility>
+// macro
+#include <uwvm2/utils/macro/push_macros.h>
+#include <uwvm2/uwvm/runtime/macro/push_macros.h>
+#include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+#include <uwvm2/runtime/lib/uwvm_runtime_generated_wasm_bridge.h>
+#ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+# include <uwvm2/imported/wasi/wasip1/feature/feature_push_macro.h>  // wasip1
+#endif
+
+export module uwvm2.uwvm.runtime.initializer:init;
+
+import fast_io;
+import uwvm2.runtime.gc.entry_admission;
+import uwvm2.runtime.gc.instance_phase;
+import uwvm2.utils.container;
+import uwvm2.utils.debug;
+import uwvm2.parser.wasm.base;
+import uwvm2.parser.wasm.concepts;
+import uwvm2.parser.wasm.standard.wasm1.type;
+import uwvm2.parser.wasm.standard.wasm1.const_expr;
+import uwvm2.parser.wasm.standard.wasm1.opcode;
+import uwvm2.parser.wasm.standard.wasm1.features;
+import uwvm2.parser.wasm.standard.wasm1p1.type;
+import uwvm2.parser.wasm.standard.wasm1p1.features;
+import uwvm2.parser.wasm.standard.wasm2.features;
+import uwvm2.parser.wasm.standard.wasm3.type;
+import uwvm2.validation.standard.wasm3.constant_expression;
+import uwvm2.validation.standard.wasm3.reference_policy;
+import uwvm2.validation.standard.wasm3.value_immediate;
+import uwvm2.validation.standard.wasm3.declaration_policy;
+import uwvm2.parser.wasm.binfmt.binfmt_ver1;
+import uwvm2.object;
+import uwvm2.uwvm.io;
+import uwvm2.uwvm.utils.ansies;
+import uwvm2.uwvm.imported.wasi.wasip1.storage;
+import uwvm2.uwvm.wasm;
+import uwvm2.uwvm.runtime.storage;
+import uwvm2.uwvm.runtime.runtime_mode;
+import uwvm2.uwvm.runtime.validator;
+import uwvm2.extension.memtag.globals;
+import uwvm2.extension.memtag.checkpoint;
+import uwvm2.extension.memtag.debug_view;
+import uwvm2.extension.memtag.hardware_mte;
+import uwvm2.runtime.memtag.native_pointer;
+import uwvm2.extension.memtag.tag_image;
+import uwvm2.extension.memtag.usage;
+import uwvm2.extension.memtag.shadow;
+import uwvm2.extension.memtag.storage;
+import uwvm2.runtime.memtag.bridge;
+import uwvm2.runtime.diagnostic.crash_policy;
+import uwvm2.runtime.memtag.random;
+import uwvm2.runtime.memtag.static_allocation;
+import :init_limit;
+import :threaded_registry_view;
+
+#ifndef UWVM_MODULE
+# define UWVM_MODULE
+#endif
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT export
+#endif
+
+#include "init.h"

@@ -1,0 +1,11 @@
+{
+  "status": "requalification-in-progress",
+  "vm_repository": "https://github.com/UlteSoft/uwvm2-ros",
+  "vm_commit": "cdabcbf23df3391d6778176385a7bcdaa506b749",
+  "vm_tree": "29a3049f074a079531ab776fa3bebb3b8c43af6a",
+  "current_runtime_records": [
+    "cfamily-open-library-matrix.json",
+    "objc-library-matrix.json"
+  ],
+  "policy": "All earlier VM interpreter and AOT runs, including the engine runs in pinned historical language and platform reports, are withdrawn from current runtime qualification. Installation, compilation, and instruction inspection can be checked separately."
+}

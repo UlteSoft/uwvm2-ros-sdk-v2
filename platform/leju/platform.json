@@ -1,0 +1,44 @@
+{
+  "id": "leju",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "kuavo_msgs/BatteryInfo",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_voltage",
+        "field": "voltage",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_current",
+        "field": "current",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_percentage",
+        "field": "percentage",
+        "type": "u8",
+        "indexed": false
+      },
+      {
+        "name": "read_temperatures",
+        "field": "temperatures",
+        "type": "i16",
+        "indexed": true
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/LejuRobotics/kuavo-ros-opensource/blob/2634d9fa891bb9b4987cddc7977599922342a316/src/kuavo_msgs/msg/BatteryInfo.msg",
+        "revision": "2634d9fa891bb9b4987cddc7977599922342a316",
+        "path": "src/kuavo_msgs/msg/BatteryInfo.msg",
+        "sha256": "6241779961ded20266ddc135090967a783991845762add12440fe6b4bd2dfe69"
+      }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "id": "nvidia-isaac-ros",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "isaac_ros_tensor_list_interfaces/TensorShape",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_rank",
+        "field": "rank",
+        "type": "u8",
+        "indexed": false
+      },
+      {
+        "name": "read_dims",
+        "field": "dims",
+        "type": "u32",
+        "indexed": true
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/blob/7bec6ae5dbb2faa11617f40226e8932a4a94e6e4/isaac_ros_tensor_list_interfaces/msg/TensorShape.msg",
+        "revision": "7bec6ae5dbb2faa11617f40226e8932a4a94e6e4",
+        "path": "isaac_ros_tensor_list_interfaces/msg/TensorShape.msg",
+        "sha256": "1f99decc52025409c6cb8c9f9f2b6003569cb9d1466cd0a6adac64924aed7f66"
+      }
+    ]
+  }
+}

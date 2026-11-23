@@ -1,0 +1,122 @@
+{
+  "project": "TeaVM",
+  "url": "https://github.com/konsoletyper/teavm",
+  "tag": "0.13.1",
+  "commit": "b3a245b7d9034ff35cdfab2def057a3d4f256efb",
+  "license": "Apache-2.0",
+  "license_path": "upstream/LICENSE",
+  "notice_path": "upstream/NOTICE",
+  "archive_url": "https://codeload.github.com/konsoletyper/teavm/tar.gz/refs/tags/0.13.1",
+  "archive_sha256": "8bac715943d1b5b4d416e971eaf42afee80c71eb6009d34f49162b3b2d30df5c",
+  "official_git_blobs_verified": 3881,
+  "retained_files": 3860,
+  "omitted_paths": [
+    ".idea/codeStyleSettings.xml",
+    ".idea/codeStyles/Project.xml",
+    ".idea/codeStyles/codeStyleConfig.xml",
+    ".idea/copyright/Apache_2_0.xml",
+    ".idea/copyright/profiles_settings.xml",
+    ".idea/inspectionProfiles/Project_Default.xml",
+    ".idea/runConfigurations/IDEA_JPS_Debug.xml",
+    ".idea/runConfigurations/build.xml",
+    ".idea/runConfigurations/build_and_run_tests.xml",
+    ".idea/runConfigurations/build_samples.xml",
+    ".idea/runConfigurations/publish_locally.xml",
+    ".idea/runConfigurations/tests.xml",
+    ".idea/runConfigurations/tests__c_.xml",
+    ".idea/runConfigurations/tests__wasi_.xml",
+    ".idea/runConfigurations/tests__wasm__.xml",
+    ".idea/scopes/classlib.xml",
+    ".idea/scopes/classlib_emu.xml",
+    ".idea/scopes/jso_apis.xml",
+    ".run/Run IDEA plugin.run.xml",
+    "gradle/wrapper/gradle-wrapper.jar",
+    "samples/gradle/wrapper/gradle-wrapper.jar"
+  ],
+  "local_changes": [
+    {
+      "path": "core/src/main/java/org/teavm/backend/c/CTarget.java",
+      "upstream_git_blob": "a331279efe54e0652faf0f0386ccb6ca0dd98115",
+      "upstream_sha256": "75341ce9756cc1df3880e41b6543b0000c06110b3ff32a45c4d284297079f002",
+      "sdk_sha256": "10d7d37bb0405fbd4be4067b250af28ffe259205af5fc8b5a97cace1e0a4f485"
+    },
+    {
+      "path": "core/src/main/java/org/teavm/backend/c/generate/ClassGenerator.java",
+      "upstream_git_blob": "bea1380811a46605af8bcd956628f5b17fa8daa4",
+      "upstream_sha256": "f10870cc1c1b95e080381b8929fcc627c55407bc47a514e4c28cc522bb2b4b24",
+      "sdk_sha256": "4ea82fcf80a7b014b65d653b71d7a9b7cc100b975e1177db8c3f843bca905ace"
+    },
+    {
+      "path": "core/src/main/java/org/teavm/runtime/Allocator.java",
+      "upstream_git_blob": "a61c42f42a9971f4b4e18da3d571dfcf8aec61cc",
+      "upstream_sha256": "eb31fbbd80f7043be277c12806abdc8381d511b9a97c92e8e1828a08ff561211",
+      "sdk_sha256": "6525f6056992545bbcc3c608aaf53da6cb454d339046dc2f62a6eabdd52400fd"
+    },
+    {
+      "path": "core/src/main/java/org/teavm/runtime/GC.java",
+      "upstream_git_blob": "5c08f005c41ff52398002cb07595de71d363478d",
+      "upstream_sha256": "3c2e4ec760f015ad165fa6a9d6eaebf228b297ecc1080edc596689a1e68bc9e4",
+      "sdk_sha256": "6502c27d146cf2dd727e806c9c1831e4fab3cbd204f52747ce16ba83fcee47c8"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/core.c",
+      "upstream_git_blob": "9daf4794161376a8df718429c71e3c87fe08fd91",
+      "upstream_sha256": "78980bbe7863cffcb6b5cdbc8b39354620ee2eb9bfa7d16b0728398383a200d0",
+      "sdk_sha256": "b0cd4ec65f2a7ae320dd56b5b60b4240206bc65a90b297ad70f26349b49f06f9"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/core.h",
+      "upstream_git_blob": "ee629c129aa0885e9a44246155d1ead52a1a8da3",
+      "upstream_sha256": "55a7ad99dab270c484c0896de93e76ac90331495c1d470fc46a12da1c4fd72a0",
+      "sdk_sha256": "f8e61991af82561a59c2a3bff9e8773606186a1f8bd8df1f38a67273bb60e81f"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/date.c",
+      "upstream_git_blob": "801d92ed6554acb363969323465bdb851c491393",
+      "upstream_sha256": "0211a1cf726df605af4096db42a07d3c160d2377d3bb6717ec5b77a1610ccccd",
+      "sdk_sha256": "a2733a44b0ac449b89aab1ac6033ccac9bd4b6213110a13f7c19449689cbf7a4"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/definitions.h",
+      "upstream_git_blob": "50546b5c3075e6b9543cc5c349d3884378d32947",
+      "upstream_sha256": "b4b4ad1dbf9b6a69d05f78e3a935501e5881e78e81756f5c27eacbdd0d69e36b",
+      "sdk_sha256": "0f8f4570a4c6fe2663e6487d310f9bc95180f8904adc87c3eceb0114021bcb5b"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/exceptions.h",
+      "upstream_git_blob": "cd309f0b262fd5d4d71fb4d07ac7004a7b6bae84",
+      "upstream_sha256": "616815d6de27553b95972cd9ebb02260e97a56314a9ad2d33d0b87e3530dff4c",
+      "sdk_sha256": "e4c41686d1196802fd2fcc6bea299e9cf6584d2c9b121ca7b14600bfcbc9f808"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/fiber.c",
+      "upstream_git_blob": "e4a4fd68a40b9a061d0e6dbae3fe7667430404f0",
+      "upstream_sha256": "22ee89513ccd5d850c3cb2fbb37f877d23cb7393801ee4694ce24c257ede3399",
+      "sdk_sha256": "2aa98339295d7a5e6cfef793004b1ebe779c71eacb66813e5ba373997a67d4b3"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/file.c",
+      "upstream_git_blob": "e4c50a8eb4b560ad086040f914ea47020fd0faee",
+      "upstream_sha256": "49c8a5f152eefffbe2832b607fcd40b225936fc593d1a0d53fb81ed700a30538",
+      "sdk_sha256": "a2733a44b0ac449b89aab1ac6033ccac9bd4b6213110a13f7c19449689cbf7a4"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/log.c",
+      "upstream_git_blob": "ff5e227a89fc8b88614f7592e32d2a67af7670a8",
+      "upstream_sha256": "6cf0956f04a28c190393f7b1137a14602174deaaf086acc6a3dca30b2e0ee884",
+      "sdk_sha256": "514cf4005650916492b7fb8cc6e975d527b1d366c706b3dbd2ff59ee72daa690"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/memory.c",
+      "upstream_git_blob": "a8caa55931e785f7f5b4d620258d1b3cb1a8ca1b",
+      "upstream_sha256": "09051ac8ef766497e7d611923f9576dd2e9661d21e314e2849fae0de634a1709",
+      "sdk_sha256": "f6fa2db9ac5818c7311bd8f74724cf3b04b2c1960e2825bc977e79e5a6a02add"
+    },
+    {
+      "path": "core/src/main/resources/org/teavm/backend/c/time.c",
+      "upstream_git_blob": "26808f4d1c64be1eedbfdf286efb6c2af307d046",
+      "upstream_sha256": "5446322d20daaae74b47face0c81dd08ffd334d1fcde263d89fb49cc154c3f87",
+      "sdk_sha256": "acabef1d6822a740f86c41508e5f8ffaa9b5b1d133408ac62bdf0f3994413650"
+    }
+  ]
+}

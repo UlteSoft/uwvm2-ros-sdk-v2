@@ -1,0 +1,30 @@
+{
+  "id": "universal_robots",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "ur_dashboard_msgs/SafetyStatus",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_status",
+        "field": "status",
+        "type": "i8",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/262330ed9b5467a17c8ceae09567991e22d13944/ur_dashboard_msgs/msg/SafetyStatus.msg",
+        "revision": "262330ed9b5467a17c8ceae09567991e22d13944",
+        "path": "ur_dashboard_msgs/msg/SafetyStatus.msg",
+        "sha256": "0ca8884a85b851d24091fb3f4100237f98a5977981cee919c75e4b6d1b98d9ef"
+      }
+    ]
+  },
+  "guides": [
+    "cdr.md",
+    "cdr.zh.md"
+  ]
+}

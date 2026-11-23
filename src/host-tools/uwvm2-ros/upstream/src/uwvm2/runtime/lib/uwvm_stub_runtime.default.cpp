@@ -1,0 +1,106 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+#ifndef UWVM_MODULE
+// import
+# include <fast_io.h>
+# include <uwvm2/runtime/lib/uwvm_runtime.h>
+#endif
+
+namespace uwvm2::runtime::lib
+{
+    extern "C++" bool full_compile_prepare_host_api() noexcept { return false; }
+
+    extern "C++" void full_compile_and_run_main_module(::uwvm2::utils::container::u8string_view main_module_name, full_compile_run_config cfg) noexcept
+    {
+        static_cast<void>(main_module_name);
+        static_cast<void>(cfg);
+        ::fast_io::fast_terminate();
+    }
+
+    extern "C++" void runtime_stop_before_proc_exit_host_api() noexcept {}
+
+    extern "C++" llvm_jit_full_source_publication_view llvm_jit_full_source_publication_host_api(
+        ::std::size_t module_id) noexcept
+    { (void)module_id; return {}; }
+
+    extern "C++" void reset_runtime_state_host_api() noexcept {}
+
+#if defined(UWVM_UTILS_HAS_FAST_IO_NATIVE_THREAD)
+    extern "C++" ::uwvm2::runtime::diagnostic::wasm_coredump::result runtime_dump_stopped_guest_host_api(
+        ::uwvm2::utils::thread::cooperative_pause_domain::pause_ticket const&,
+        ::std::uint64_t, ::std::string_view, ::std::string_view, void*,
+        ::uwvm2::runtime::diagnostic::wasm_coredump::write_function, unsigned, ::std::uint64_t, unsigned,
+        ::std::span<llvm_jit_checkpoint_thread_capture_owner const>) noexcept
+    { return {.status=::uwvm2::runtime::diagnostic::wasm_coredump::error::unsupported_snapshot}; }
+    extern "C++" bool replace_full_source_after_drain_host_api(
+        bool (*initialize_source)(void*) noexcept, void* context) noexcept
+    { (void)initialize_source; (void)context; return false; }
+#endif
+
+#if defined(UWVM_RUNTIME_LLVM_JIT)
+    extern "C++" void llvm_jit_reset_runtime_state_host_api() noexcept { reset_runtime_state_host_api(); }
+#endif
+
+    extern "C++" bool builtin_observed_caller_identity_host_api(host_observer_caller_identity& out) noexcept { out = {}; return false; }
+
+    extern "C++" bool ros_execution_backend_supported_host_api() noexcept { return false; }
+    extern "C++" bool ros_caller_identity_host_api(ros_caller_identity& out, bool) noexcept { out = {}; return false; }
+    extern "C++" bool ros_observed_caller_identity_host_api(ros_caller_identity& out) noexcept { out = {}; return false; }
+
+    // A frontend-only build has no authenticated execution or exchange owner.
+    // It must never invoke even a trusted carrier callback in this profile.
+    extern "C++" ::std::uint32_t with_ros_exchange_memory_host_api(ros_exchange_memory_callback,void*) noexcept { return 13; }
+    bool ros_exchange_memory_access::capture(::std::size_t,::std::uint64_t,::std::size_t,::std::uint64_t& normalized) noexcept
+    { normalized=0; return false; }
+    bool ros_exchange_memory_access::copy(::std::size_t,::std::uint64_t,void*,::std::size_t,bool) noexcept
+    { (void)memory_owner_; (void)memory_index_; return false; }
+    bool ros_exchange_memory_access::erase(::std::uint64_t,::std::uint64_t) noexcept { return false; }
+    extern "C++" bool ros_exchange_memory_erase_host_api(void const*,::std::uint64_t,::std::uint64_t,::std::uint64_t,::std::uint64_t,::std::uint64_t) noexcept { return false; }
+
+    extern "C++" ::std::size_t preload_memory_descriptor_count_host_api() noexcept { return 0uz; }
+
+    extern "C++" bool preload_memory_descriptor_at_host_api(::std::size_t descriptor_index,
+                                                            ::uwvm2::uwvm::wasm::type::uwvm_preload_memory_descriptor_t* out) noexcept
+    {
+        static_cast<void>(descriptor_index);
+        static_cast<void>(out);
+        return false;
+    }
+
+    extern "C++" bool preload_memory_normalize_range_host_api(::std::size_t, ::std::uint_least64_t, ::std::size_t, ::std::uint64_t& out) noexcept { out=0u; return false; }
+    extern "C++" bool preload_memory_range_host_api(::std::size_t, ::std::uint_least64_t, ::std::size_t) noexcept { return false; }
+
+    extern "C++" bool preload_memory_read_host_api(::std::size_t memory_index,
+                                                   ::std::uint_least64_t offset,
+                                                   void* destination,
+                                                   ::std::size_t size) noexcept
+    {
+        static_cast<void>(memory_index);
+        static_cast<void>(offset);
+        static_cast<void>(destination);
+        static_cast<void>(size);
+        return false;
+    }
+
+    extern "C++" bool preload_memory_write_host_api(::std::size_t memory_index,
+                                                    ::std::uint_least64_t offset,
+                                                    void const* source,
+                                                    ::std::size_t size) noexcept
+    {
+        static_cast<void>(memory_index);
+        static_cast<void>(offset);
+        static_cast<void>(source);
+        static_cast<void>(size);
+        return false;
+    }
+}  // namespace uwvm2::runtime::lib

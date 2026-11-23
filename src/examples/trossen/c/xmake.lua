@@ -1,0 +1,10 @@
+set_project("trossen-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("trossen-observation")
+    set_kind("binary")
+    set_language("c")
+    set_ros_platform("trossen")
+    add_files("main.c")
+    add_wros_tests("int", "aot")
+target_end()

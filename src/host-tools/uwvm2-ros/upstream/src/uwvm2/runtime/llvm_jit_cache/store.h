@@ -1,0 +1,1457 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2026-06-14
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+#include <uwvm2/utils/container/standard.h>
+#include <uwvm2/runtime/lib/uwvm_runtime_posix_abi.h>
+
+#ifndef UWVM_MODULE
+// std
+# include <algorithm>
+# include <atomic>
+# include <cerrno>
+# include <chrono>
+# include <condition_variable>
+# include <cstddef>
+# include <cstdint>
+# include <cstring>
+# include <deque>
+# include <limits>
+# include <memory>
+# include <mutex>
+# include <thread>
+# include <string_view>
+# include <utility>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/runtime/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+# if defined(__unix__) || defined(__APPLE__) || defined(__linux__) || defined(__linux)
+#  include <unistd.h>
+# endif
+// import
+# include <fast_io.h>
+# include <fast_io_device.h>
+# include <fast_io_crypto.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/thread/native_thread_join.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# include "format.h"
+# include "self_executable.h"
+# include "secure_file.h"
+# include "origin_auth.h"
+# include "compress.h"
+# if !defined(UWVM_RUNTIME_LLVM_JIT_CACHE_USE_OPENSSL_ED25519)
+#  error "LLVM JIT cache Ed25519 signatures require OpenSSL."
+# endif
+# include <openssl/evp.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+#if defined(__linux__) && (defined(__GNUC__) || defined(__clang__))
+# pragma GCC visibility push(hidden)
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::runtime::llvm_jit_cache
+{
+    namespace details
+    {
+        // Preserve the reason for refusing identity before any cache filesystem I/O.
+        // Diagnostic statuses never substitute for the existing digest comparison.
+        [[nodiscard]] inline cache_status self_executable_status(cache_context const& ctx) noexcept
+        {
+            if(!ctx.has_self_executable_sha256) { return cache_status::executable_identity_unavailable; }
+            self_executable::digest_type digest{};
+            if(!self_executable::current_digest(digest)) { return cache_status::executable_identity_unavailable; }
+            for(::std::size_t i{}; i != digest.size(); ++i)
+            {
+                if(digest[i] != ctx.self_executable_sha256.index_unchecked(i)) { return cache_status::executable_identity_mismatch; }
+            }
+            return cache_status::ok;
+        }
+
+        [[nodiscard]] inline bool origin_matches(cache_context const& ctx, runtime_origin::use const& actual) noexcept
+        {
+            auto named{ctx.origin.lock()};
+            return named && actual && named.get() == actual.get() && !named.owner_before(actual) && !actual.owner_before(named) &&
+                   runtime_origin::authorized(actual);
+        }
+
+        [[nodiscard]] inline cache_status current_origin_status(cache_context const& ctx, runtime_origin::use const& actual) noexcept
+        {
+            auto const identity{self_executable_status(ctx)};
+            if(identity != cache_status::ok) { return identity; }
+            if(!origin_matches(ctx, actual)) { return cache_status::origin_admission_unavailable; }
+            if(!kernel_origin::check_binding(actual))
+            {
+                // A concurrent real runtime stop can revoke admission during
+                // the kernel check. Preserve that cause instead of attributing
+                // the resulting refusal to the kernel's keyring policy.
+                return origin_matches(ctx, actual) ? cache_status::kernel_origin_unavailable : cache_status::origin_admission_unavailable;
+            }
+            return origin_matches(ctx, actual) ? cache_status::ok : cache_status::origin_admission_unavailable;
+        }
+
+        struct authenticated_context
+        {
+            cache_context value;
+            bool ready{};
+
+            authenticated_context(cache_context const& original, runtime_origin::use const& actual) noexcept : value{original}
+            {
+                if(!original.has_signature_seed || !original.has_self_executable_sha256 || !origin_matches(original, actual)) { return; }
+                origin_auth::signing_seed private_seed{};
+                if(!private_seed.derive(actual, original.signature_seed)) { return; }
+                ::std::memcpy(value.signature_seed.data(), private_seed.data(), cache_ed25519_seed_size);
+                ready = origin_matches(original, actual);
+            }
+
+            authenticated_context(authenticated_context const&) = delete;
+            authenticated_context& operator= (authenticated_context const&) = delete;
+
+            ~authenticated_context() { kernel_origin::erase(value.signature_seed.data(), value.signature_seed.size()); }
+        };
+
+        using sha256_digest = ::uwvm2::utils::container::array<::std::byte, ::uwvm2::runtime::llvm_jit_cache::cache_sha256_digest_size>;
+
+        inline constexpr void append_hex_byte(::uwvm2::utils::container::u8string& out, ::std::byte b) noexcept
+        {
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(out)};
+            ::fast_io::io::print(ref, ::fast_io::mnp::hex<false, true>(::std::to_integer<::std::uint_least8_t>(b)));
+        }
+
+        inline constexpr void sha256_update(::fast_io::sha256_context& sha, ::std::byte const* first, ::std::byte const* last) noexcept
+        {
+            if(first != last) { sha.update(first, last); }
+        }
+
+        inline constexpr void sha256_update(::fast_io::sha256_context& sha, ::uwvm2::utils::container::u8string_view v) noexcept
+        { sha256_update(sha, reinterpret_cast<::std::byte const*>(v.cbegin()), reinterpret_cast<::std::byte const*>(v.cend())); }
+
+        [[nodiscard]] inline constexpr sha256_digest sha256_bytes(::std::byte const* first, ::std::byte const* last) noexcept
+        {
+            ::fast_io::sha256_context sha{};
+            sha256_update(sha, first, last);
+            sha.do_final();
+            sha256_digest out{};
+            sha.digest_to_byte_ptr(out.data());
+            return out;
+        }
+
+        // Borrow an already-owned byte range for this synchronous digest. No
+        // pointer escapes and no identity input is omitted or normalized.
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string
+            sha256_hex_for_path(::std::byte const* first, ::std::byte const* last) noexcept
+        {
+            auto const digest{sha256_bytes(first, last)};
+            ::uwvm2::utils::container::u8string out{};
+            out.reserve(::uwvm2::runtime::llvm_jit_cache::cache_sha256_digest_size * 2uz);
+            // Hex keeps cache file names portable across filesystems and shell tools.
+            for(auto b: digest) { append_hex_byte(out, b); }
+            return out;
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string
+            sha256_hex_for_path(::uwvm2::utils::container::vector<::std::byte> const& bytes) noexcept
+        { return sha256_hex_for_path(bytes.cbegin(), bytes.cend()); }
+
+        inline constexpr void append_bytes_n(::uwvm2::utils::container::vector<::std::byte>& out, ::std::byte const* first, ::std::size_t size) noexcept
+        {
+            if(size != 0uz) { append_bytes(out, first, first + size); }
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::vector<::std::byte>
+            ed25519_signature_message_parts(::uwvm2::utils::container::vector<::std::byte> const& header,
+                                            ::std::byte const* isa_metadata,
+                                            ::std::size_t isa_metadata_size,
+                                            ::std::byte const* context_metadata,
+                                            ::std::size_t context_metadata_size,
+                                            ::std::byte const* payload,
+                                            ::std::size_t payload_size) noexcept
+        {
+            ::uwvm2::utils::container::vector<::std::byte> message{};
+            message.reserve(header.size() + isa_metadata_size + context_metadata_size + payload_size);
+            // The signature covers header, metadata, and payload, but not the signature field itself to avoid self-reference.
+            append_bytes_n(message, header.cbegin(), header.size());
+            append_bytes_n(message, isa_metadata, isa_metadata_size);
+            append_bytes_n(message, context_metadata, context_metadata_size);
+            append_bytes_n(message, payload, payload_size);
+            return message;
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::vector<::std::byte>
+            ed25519_signature_message(::uwvm2::utils::container::vector<::std::byte> const& header,
+                                      ::uwvm2::utils::container::vector<::std::byte> const& isa_metadata,
+                                      ::uwvm2::utils::container::vector<::std::byte> const& context_metadata,
+                                      ::uwvm2::utils::container::vector<::std::byte> const& payload) noexcept
+        {
+            return ed25519_signature_message_parts(header,
+                                                   isa_metadata.cbegin(),
+                                                   isa_metadata.size(),
+                                                   context_metadata.cbegin(),
+                                                   context_metadata.size(),
+                                                   payload.cbegin(),
+                                                   payload.size());
+        }
+
+        [[nodiscard]] inline constexpr bool ed25519_identity_sign(cache_context const& ctx,
+                                                                  ::uwvm2::utils::container::vector<::std::byte> const& header,
+                                                                  ::uwvm2::utils::container::vector<::std::byte> const& isa_metadata,
+                                                                  ::uwvm2::utils::container::vector<::std::byte> const& context_metadata,
+                                                                  ::uwvm2::utils::container::vector<::std::byte> const& payload,
+                                                                  ::uwvm2::utils::container::vector<::std::byte>& signature) noexcept
+        {
+#if defined(UWVM_RUNTIME_LLVM_JIT_CACHE_USE_OPENSSL_ED25519)
+            if(!ctx.has_signature_seed) { return false; }
+            auto const message{ed25519_signature_message(header, isa_metadata, context_metadata, payload)};
+            // Persistent callers supply a short-lived kernel-origin HMAC seed; raw codec fixtures alone grant no disk authority.
+            auto const seed{reinterpret_cast<unsigned char const*>(ctx.signature_seed.data())};
+            auto private_key{::EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, nullptr, seed, cache_ed25519_seed_size)};
+            if(private_key == nullptr) { return false; }
+
+            auto md_ctx{::EVP_MD_CTX_new()};
+            if(md_ctx == nullptr)
+            {
+                ::EVP_PKEY_free(private_key);
+                return false;
+            }
+
+            ::std::size_t signature_size{cache_ed25519_signature_size};
+            signature.resize(signature_size);
+            auto const ok{::EVP_DigestSignInit(md_ctx, nullptr, nullptr, nullptr, private_key) == 1 &&
+                          ::EVP_DigestSign(md_ctx,
+                                           reinterpret_cast<unsigned char*>(signature.data()),
+                                           ::std::addressof(signature_size),
+                                           reinterpret_cast<unsigned char const*>(message.data()),
+                                           message.size()) == 1};
+            ::EVP_MD_CTX_free(md_ctx);
+            ::EVP_PKEY_free(private_key);
+            if(!ok) { return false; }
+            signature.resize(signature_size);
+            return signature_size == cache_ed25519_signature_size;
+#else
+# error "LLVM JIT cache Ed25519 signatures require OpenSSL."
+#endif
+        }
+
+        [[nodiscard]] inline constexpr bool ed25519_identity_verify(cache_context const& ctx,
+                                                                    ::uwvm2::utils::container::vector<::std::byte> const& header,
+                                                                    ::std::byte const* isa_metadata,
+                                                                    ::std::size_t isa_metadata_size,
+                                                                    ::std::byte const* context_metadata,
+                                                                    ::std::size_t context_metadata_size,
+                                                                    ::std::byte const* signature,
+                                                                    ::std::byte const* payload,
+                                                                    ::std::size_t payload_size) noexcept
+        {
+#if defined(UWVM_RUNTIME_LLVM_JIT_CACHE_USE_OPENSSL_ED25519)
+            if(!ctx.has_signature_seed || signature == nullptr) { return false; }
+            auto const message{
+                ed25519_signature_message_parts(header, isa_metadata, isa_metadata_size, context_metadata, context_metadata_size, payload, payload_size)};
+            // Persistent callers reconstruct from the actual keyring-origin seed, never from public metadata alone.
+            auto const seed{reinterpret_cast<unsigned char const*>(ctx.signature_seed.data())};
+            auto private_key{::EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, nullptr, seed, cache_ed25519_seed_size)};
+            if(private_key == nullptr) { return false; }
+
+            ::uwvm2::utils::container::array<::std::byte, 32uz> public_key{};
+            ::std::size_t public_key_size{public_key.size()};
+            auto const public_key_ok{
+                ::EVP_PKEY_get_raw_public_key(private_key, reinterpret_cast<unsigned char*>(public_key.data()), ::std::addressof(public_key_size)) == 1 &&
+                public_key_size == public_key.size()};
+            ::EVP_PKEY_free(private_key);
+            if(!public_key_ok) { return false; }
+
+            auto verify_key{
+                ::EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, nullptr, reinterpret_cast<unsigned char const*>(public_key.data()), public_key.size())};
+            if(verify_key == nullptr) { return false; }
+
+            auto md_ctx{::EVP_MD_CTX_new()};
+            if(md_ctx == nullptr)
+            {
+                ::EVP_PKEY_free(verify_key);
+                return false;
+            }
+
+            auto const ok{::EVP_DigestVerifyInit(md_ctx, nullptr, nullptr, nullptr, verify_key) == 1 &&
+                          ::EVP_DigestVerify(md_ctx,
+                                             reinterpret_cast<unsigned char const*>(signature),
+                                             cache_ed25519_signature_size,
+                                             reinterpret_cast<unsigned char const*>(message.data()),
+                                             message.size()) == 1};
+            ::EVP_MD_CTX_free(md_ctx);
+            ::EVP_PKEY_free(verify_key);
+            return ok;
+#else
+# error "LLVM JIT cache Ed25519 signatures require OpenSSL."
+#endif
+        }
+
+        [[nodiscard]] inline constexpr bool ed25519_identity_verify(cache_context const& ctx,
+                                                                    ::uwvm2::utils::container::vector<::std::byte> const& header,
+                                                                    ::uwvm2::utils::container::vector<::std::byte> const& isa_metadata,
+                                                                    ::uwvm2::utils::container::vector<::std::byte> const& context_metadata,
+                                                                    ::std::byte const* signature,
+                                                                    ::uwvm2::utils::container::vector<::std::byte> const& payload) noexcept
+        {
+            return ed25519_identity_verify(ctx,
+                                           header,
+                                           isa_metadata.cbegin(),
+                                           isa_metadata.size(),
+                                           context_metadata.cbegin(),
+                                           context_metadata.size(),
+                                           signature,
+                                           payload.cbegin(),
+                                           payload.size());
+        }
+
+        [[nodiscard]] inline constexpr bool cache_path_separator(char8_t ch) noexcept
+        {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+            return ch == u8'/' || ch == u8'\\';
+#else
+            return ch == u8'/';
+#endif
+        }
+
+        inline constexpr void append_path_separator_if_needed(::uwvm2::utils::container::u8string& path) noexcept
+        {
+            if(path.empty()) { return; }
+            auto const last{path.back_unchecked()};
+            if(!cache_path_separator(last))
+            {
+                // Forward slash is accepted by both POSIX and Win32 path APIs, so one separator keeps generated paths stable.
+                ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(path)};
+                ::fast_io::io::print(ref, u8"/");
+            }
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string
+            cache_path_piece(::uwvm2::utils::container::u8string_view path, ::std::size_t first, ::std::size_t last) noexcept
+        {
+            ::uwvm2::utils::container::u8string out{};
+            out.reserve(last - first);
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(out)};
+            ::fast_io::io::print(ref, path.subview_unchecked(first, last - first));
+            return out;
+        }
+
+        inline constexpr void append_cache_path_component(::uwvm2::utils::container::u8string& path,
+                                                          ::uwvm2::utils::container::u8string const& component) noexcept
+        {
+            append_path_separator_if_needed(path);
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(path)};
+            ::fast_io::io::print(ref, component);
+        }
+
+        struct cache_dir_cursor
+        {
+            ::fast_io::dir_file dir{};
+            ::std::size_t next{};
+            ::uwvm2::utils::container::u8string display_path{};
+
+            inline constexpr cache_dir_cursor() noexcept = default;
+            cache_dir_cursor(cache_dir_cursor const&) = delete;
+            cache_dir_cursor& operator= (cache_dir_cursor const&) = delete;
+            inline cache_dir_cursor(cache_dir_cursor&&) noexcept = default;
+            inline cache_dir_cursor& operator= (cache_dir_cursor&&) noexcept = default;
+
+            inline cache_dir_cursor(::fast_io::dir_file&& directory, ::std::size_t next_pos, ::uwvm2::utils::container::u8string&& display) noexcept :
+                dir{::std::move(directory)}, next{next_pos}, display_path{::std::move(display)}
+            {
+            }
+        };
+
+        [[nodiscard]] inline constexpr cache_dir_cursor open_cache_dir_root(::uwvm2::utils::container::u8string_view path) UWVM_THROWS
+        {
+            if(path.empty())
+            {
+                // Empty cache roots intentionally mean the current working directory for embedding/test scenarios.
+                return {
+                    ::fast_io::dir_file{u8".", ::fast_io::open_mode::follow},
+                    0uz,
+                    {}
+                };
+            }
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+            if(path.size() >= 2uz && cache_path_separator(path.index_unchecked(0uz)) && cache_path_separator(path.index_unchecked(1uz)))
+            {
+                // UNC paths must open the server/share root atomically before walking the remaining components.
+                ::std::size_t pos{2uz};
+                while(pos != path.size() && cache_path_separator(path.index_unchecked(pos))) { ++pos; }
+                while(pos != path.size() && !cache_path_separator(path.index_unchecked(pos))) { ++pos; }
+                while(pos != path.size() && cache_path_separator(path.index_unchecked(pos))) { ++pos; }
+                while(pos != path.size() && !cache_path_separator(path.index_unchecked(pos))) { ++pos; }
+                auto root{cache_path_piece(path, 0uz, pos)};
+                while(pos != path.size() && cache_path_separator(path.index_unchecked(pos))) { ++pos; }
+                return {
+                    ::fast_io::dir_file{root, ::fast_io::open_mode::follow},
+                    pos,
+                    ::std::move(root)
+                };
+            }
+
+            if(path.size() >= 3uz && path.index_unchecked(1uz) == u8':' && cache_path_separator(path.index_unchecked(2uz)))
+            {
+                // Drive-root paths such as C:/ need a distinct root handle before mkdirat-style traversal.
+                auto root{cache_path_piece(path, 0uz, 3uz)};
+                ::std::size_t pos{3uz};
+                while(pos != path.size() && cache_path_separator(path.index_unchecked(pos))) { ++pos; }
+                return {
+                    ::fast_io::dir_file{root, ::fast_io::open_mode::follow},
+                    pos,
+                    ::std::move(root)
+                };
+            }
+
+            if(path.size() >= 2uz && path.index_unchecked(1uz) == u8':')
+            {
+                // Drive-relative paths are preserved because Windows distinguishes C:foo from C:/foo.
+                auto root{cache_path_piece(path, 0uz, 2uz)};
+                return {
+                    ::fast_io::dir_file{root, ::fast_io::open_mode::follow},
+                    2uz,
+                    ::std::move(root)
+                };
+            }
+#endif
+
+            if(cache_path_separator(path.index_unchecked(0uz)))
+            {
+                // Absolute POSIX-style paths start traversal from the filesystem root.
+                auto root{cache_path_piece(path, 0uz, 1uz)};
+                ::std::size_t pos{1uz};
+                while(pos != path.size() && cache_path_separator(path.index_unchecked(pos))) { ++pos; }
+                return {
+                    ::fast_io::dir_file{root, ::fast_io::open_mode::follow},
+                    pos,
+                    ::std::move(root)
+                };
+            }
+
+            return {
+                // Relative paths are resolved from the process working directory for predictable local caches.
+                ::fast_io::dir_file{u8".", ::fast_io::open_mode::follow},
+                0uz,
+                {}
+            };
+        }
+
+        [[nodiscard]] inline constexpr bool mkdir_error_is_file_exists(::fast_io::error e) noexcept
+        {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+            // Different fast_io backends report "already exists" through different OS error domains.
+            // windows
+            switch(e.domain)
+            {
+                // win32
+                case ::fast_io::win32_domain_value:
+                {
+                    return e.code == 183uz /*ERROR_ALREADY_EXISTS*/ || e.code == 80uz /*ERROR_FILE_EXISTS*/;
+                }
+# if !defined(_WIN32_WINDOWS)
+                // winnt
+                case ::fast_io::nt_domain_value:
+                {
+                    static_assert(sizeof(::fast_io::error::value_type) >= sizeof(::std::uint_least32_t));
+                    return e.code == 0xC0000035uz /*STATUS_OBJECT_NAME_COLLISION*/;
+                }
+# endif
+# if defined(EEXIST)
+                // posix
+                [[unlikely]] case ::fast_io::posix_domain_value:
+                {
+                    return e.code == static_cast<::fast_io::error::value_type>(static_cast<unsigned>(EEXIST));
+                }
+# endif
+                [[unlikely]] default:
+                {
+                    return false;
+                }
+            }
+#else
+            // POSIX
+# if defined(EEXIST)
+            return e.domain == ::fast_io::posix_domain_value && e.code == static_cast<::fast_io::error::value_type>(static_cast<unsigned>(EEXIST));
+# else
+            (void)e;
+            return false;
+# endif
+#endif
+        }
+
+        inline constexpr void warn_make_directory_failed([[maybe_unused]] ::uwvm2::utils::container::u8string const& path,
+                                                         [[maybe_unused]] ::fast_io::error e) noexcept
+        {
+#if defined(UWVM)
+            // Cache directory creation is a performance feature; warn instead of aborting unless warnings are fatal.
+            if(!::uwvm2::uwvm::io::show_runtime_warning) { return; }
+
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_YELLOW),
+                                u8"[warn]  ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                u8"Failed to create LLVM JIT cache directory \"",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_YELLOW),
+                                path,
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                u8"\". error: ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_CYAN),
+                                e,
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_ORANGE),
+                                u8" (runtime)\n",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL));
+
+            if(::uwvm2::uwvm::io::runtime_warning_fatal) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_LT_RED),
+                                    u8"[fatal] ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                    u8"Convert warnings to fatal errors. ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_ORANGE),
+                                    u8"(runtime)\n\n",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL));
+                ::uwvm2::uwvm::io::fast_exit(::uwvm2::uwvm::io::diagnostic_exit_status::invalid_option);
+            }
+#endif
+        }
+
+        inline constexpr void warn_cache_write_failed([[maybe_unused]] ::uwvm2::utils::container::u8string const& cache_dir,
+                                                      [[maybe_unused]] ::fast_io::error e) noexcept
+        {
+#if defined(UWVM)
+            // A failed cache write must not fail compilation, but it should be visible during runtime diagnostics.
+            if(!::uwvm2::uwvm::io::show_runtime_warning) { return; }
+
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_YELLOW),
+                                u8"[warn]  ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                u8"Failed to write LLVM JIT cache object \"",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_YELLOW),
+                                cache_dir,
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                u8"\". error: ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_CYAN),
+                                e,
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_ORANGE),
+                                u8" (runtime)\n",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL));
+
+            if(::uwvm2::uwvm::io::runtime_warning_fatal) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_LT_RED),
+                                    u8"[fatal] ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                    u8"Convert warnings to fatal errors. ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_ORANGE),
+                                    u8"(runtime)\n\n",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL));
+                ::uwvm2::uwvm::io::fast_exit(::uwvm2::uwvm::io::diagnostic_exit_status::invalid_option);
+            }
+#endif
+        }
+
+        inline constexpr void try_make_directory_at(::fast_io::dir_file& parent,
+                                                    ::uwvm2::utils::container::u8string const& component,
+                                                    ::uwvm2::utils::container::u8string const& display_path) noexcept
+        {
+            if(component.empty()) { return; }
+
+#ifdef UWVM_CPP_EXCEPTIONS
+            try
+#endif
+            {
+                // Creating components relative to an open directory avoids rebuilding and reparsing the whole path.
+                ::fast_io::native_mkdirat(::fast_io::at(parent), component);
+            }
+#ifdef UWVM_CPP_EXCEPTIONS
+            catch(::fast_io::error e)
+            {
+                // Concurrent compilers may create the same shard directory; that race is benign.
+                if(mkdir_error_is_file_exists(e)) [[likely]] { return; }
+                warn_make_directory_failed(display_path, e);
+            }
+#endif
+        }
+
+        [[nodiscard]] inline constexpr ::fast_io::dir_file open_cache_dir(::uwvm2::utils::container::u8string_view dir, bool create) UWVM_THROWS
+        {
+            auto cursor{open_cache_dir_root(dir)};
+            ::uwvm2::utils::container::u8string component{};
+            component.reserve(dir.size());
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(component)};
+
+            // Walk one path component at a time so directory creation works for absolute, UNC, and relative roots alike.
+            for(::std::size_t i{cursor.next}; i != dir.size();)
+            {
+                while(i != dir.size() && cache_path_separator(dir.index_unchecked(i))) { ++i; }
+                if(i == dir.size()) { break; }
+
+                auto const first{i};
+                while(i != dir.size() && !cache_path_separator(dir.index_unchecked(i))) { ++i; }
+
+                component.clear();
+                ::fast_io::io::print(ref, dir.subview_unchecked(first, i - first));
+                append_cache_path_component(cursor.display_path, component);
+                if(create) { try_make_directory_at(cursor.dir, component, cursor.display_path); }
+                cursor.dir = ::fast_io::dir_file{::fast_io::at(cursor.dir), component, ::fast_io::open_mode::follow};
+            }
+
+            return ::std::move(cursor.dir);
+        }
+
+        [[nodiscard]] inline constexpr ::fast_io::dir_file make_directories_for_cache_dir(::uwvm2::utils::container::u8string_view dir) UWVM_THROWS
+        { return open_cache_dir(dir, true); }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::vector<::std::byte> cache_path_key_bytes(cache_context const& ctx) noexcept
+        {
+            auto isa{make_isa_metadata(ctx)};
+            auto context{make_context_metadata(ctx)};
+            ::uwvm2::utils::container::vector<::std::byte> bytes{};
+            bytes.reserve(ctx.cache_key.size() + isa.size() + context.size() + 48uz);
+            // The path key includes metadata as well as the logical key to avoid opening obviously incompatible blobs.
+            append_key_value(bytes, u8"format", u8"uwvm-ljc-path-key-v2");
+            append_key_value(bytes, u8"cache-key", ctx.cache_key);
+            append_key_value(bytes, u8"isa", isa);
+            append_key_value(bytes, u8"context", context);
+            return bytes;
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string cache_key_hash(cache_context const& ctx) noexcept
+        {
+            auto const key_bytes{cache_path_key_bytes(ctx)};
+            return sha256_hex_for_path(key_bytes);
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string
+            cache_file_name_from_hash(::uwvm2::utils::container::u8string const& key_hash) noexcept
+        {
+            ::uwvm2::utils::container::u8string name{};
+            name.reserve(cache_product_name.size() + 1uz + key_hash.size() + 9uz);
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(name)};
+            ::fast_io::io::print(ref, cache_product_name, u8"-", key_hash, u8".uwvm-ljc");
+            return name;
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string cache_key_shard(::uwvm2::utils::container::u8string const& key_hash) noexcept
+        {
+            ::uwvm2::utils::container::u8string out{};
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(out)};
+            // Two hex digits create 256 shards, enough to keep large cache directories from becoming linear scans.
+            ::fast_io::io::print(ref, key_hash.subview_unchecked(0uz, 2uz));
+            return out;
+        }
+
+        [[nodiscard]] inline constexpr ::fast_io::dir_file
+            open_cache_object_dir(cache_context const& ctx, ::uwvm2::utils::container::u8string const& key_hash, bool create) UWVM_THROWS
+        {
+            auto root{open_cache_dir(::uwvm2::utils::container::u8string_view{ctx.cache_dir.cbegin(), ctx.cache_dir.size()}, create)};
+
+            // Namespace even explicit embedder contexts, not only CLI defaults.
+            // Old layouts are neither probed nor migrated: executable cache
+            // compatibility cannot be inferred from a matching user path.
+            ::uwvm2::utils::container::u8string product_component{};
+            ::uwvm2::utils::container::u8string_ref_uwvm product_ref{::std::addressof(product_component)};
+            ::fast_io::io::print(product_ref, cache_product_name);
+            ::uwvm2::utils::container::u8string display_path{ctx.cache_dir};
+            append_cache_path_component(display_path, product_component);
+            if(create) { try_make_directory_at(root, product_component, display_path); }
+            auto product_dir{
+                ::fast_io::dir_file{::fast_io::at(root), product_component, ::fast_io::open_mode::follow}
+            };
+
+            ::uwvm2::utils::container::u8string objects_component{u8"objects"};
+            append_cache_path_component(display_path, objects_component);
+            if(create) { try_make_directory_at(product_dir, objects_component, display_path); }
+            auto objects_dir{
+                ::fast_io::dir_file{::fast_io::at(product_dir), objects_component, ::fast_io::open_mode::follow}
+            };
+
+            auto shard_component{cache_key_shard(key_hash)};
+            append_cache_path_component(display_path, shard_component);
+            if(create) { try_make_directory_at(objects_dir, shard_component, display_path); }
+            return ::fast_io::dir_file{::fast_io::at(objects_dir), shard_component, ::fast_io::open_mode::follow};
+        }
+
+        [[nodiscard]] inline constexpr ::std::uint_least64_t cache_process_id() noexcept
+        {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+            return static_cast<::std::uint_least64_t>(::fast_io::win32::GetCurrentProcessId());
+#elif defined(__unix__) || defined(__APPLE__) || defined(__linux__) || defined(__linux)
+            return static_cast<::std::uint_least64_t>(::uwvm2::runtime::lib::posix_abi::getpid_noexcept());
+#else
+            return 0u;
+#endif
+        }
+
+        inline ::std::atomic_uint_least64_t cache_atomic_write_counter{};  // [global]
+
+        [[nodiscard]] inline constexpr ::std::uint_least64_t cache_atomic_write_nonce() noexcept
+        {
+            auto const ticks{static_cast<::std::uint_least64_t>(::std::chrono::steady_clock::now().time_since_epoch().count())};
+            auto const address{static_cast<::std::uint_least64_t>(reinterpret_cast<::std::uintptr_t>(::std::addressof(cache_atomic_write_counter)))};
+            auto const pid{cache_process_id()};
+            // Mixing time, process, and address space data makes temporary names unique across parallel compiler processes.
+            return ticks ^ (address << 1u) ^ (pid << 32u) ^ pid;
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string
+            cache_atomic_temp_file_name(::uwvm2::utils::container::u8string const& file_name) noexcept
+        {
+            static auto const nonce{cache_atomic_write_nonce()};  // [global]
+            auto const counter{cache_atomic_write_counter.fetch_add(1u, ::std::memory_order_relaxed)};
+            auto temp_name{file_name};
+            temp_name.reserve(temp_name.size() + 64uz);
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(temp_name)};
+            // A per-process counter prevents collisions between multiple asynchronous writes of the same cache object.
+            ::fast_io::io::print(ref, u8".wip-atomic-write-", ::fast_io::mnp::hex<false, true>(nonce), u8"-", counter);
+            return temp_name;
+        }
+
+        inline cache_status write_cache_blob_atomic(cache_context const& ctx,
+                                                    ::uwvm2::utils::container::vector<::std::byte> const& blob,
+                                                    runtime_origin::use const& actual) noexcept
+        {
+            if(auto status{current_origin_status(ctx, actual)}; status != cache_status::ok) { return status; }
+            cache_blob_view encoded{};
+            if(parse_cache_blob(blob.data(), blob.data() + blob.size(), encoded) != cache_status::ok ||
+               encoded.header.signature_size != cache_ed25519_signature_size ||
+               encoded.header.signature != static_cast<::std::uint_least32_t>(signature_kind::ed25519_identity))
+            {
+                return cache_status::malformed;
+            }
+#if defined(__linux__)
+            auto const key_hash{cache_key_hash(ctx)};
+            auto const shard{cache_key_shard(key_hash)};
+            auto const name{cache_file_name_from_hash(key_hash)};
+            auto const temporary{cache_atomic_temp_file_name(name)};
+            auto as_view = [](auto const& text) noexcept { return ::std::string_view{reinterpret_cast<char const*>(text.data()), text.size()}; };
+            auto dir{secure_file::object_directory(as_view(ctx.cache_dir), as_view(cache_product_name), as_view(shard), true)};
+            if(!dir) { return cache_status::io_error; }
+            auto status{current_origin_status(ctx, actual)};
+            if(status != cache_status::ok) { return status; }
+            auto const written{secure_file::write_atomic(dir.value,
+                                                         as_view(name),
+                                                         as_view(temporary),
+                                                         blob.data(),
+                                                         blob.size(),
+                                                         [&]() noexcept
+                                                         {
+                                                             status = current_origin_status(ctx, actual);
+                                                             return status == cache_status::ok;
+                                                         })};
+            return written ? cache_status::ok : (status == cache_status::ok ? cache_status::io_error : status);
+#else
+            (void)blob;
+            return cache_status::kernel_origin_unavailable;
+#endif
+        }
+
+        inline constexpr cache_status build_cache_blob(cache_context const& ctx,
+                                                       ::std::byte const* object,
+                                                       ::std::size_t size,
+                                                       cache_policy const& policy,
+                                                       ::uwvm2::utils::container::vector<::std::byte>& blob) noexcept
+        {
+            // A non-null object pointer is required only when there are bytes to read.
+            if(object == nullptr && size != 0uz) [[unlikely]] { return cache_status::malformed; }
+            if(size > policy.max_object_bytes) [[unlikely]] { return cache_status::size_limit_exceeded; }
+
+#ifdef UWVM_CPP_EXCEPTIONS
+            try
+#endif
+            {
+                ::uwvm2::utils::container::vector<::std::byte> payload{};
+                auto compression{policy.compression};
+                switch(policy.compression)
+                {
+                    // The uncompressed path is preserved for small or already-compressed object files.
+                    case compression_kind::none:
+                        payload.reserve(size);
+                        if(size != 0uz) { append_bytes(payload, object, object + size); }
+                        break;
+                    case compression_kind::uwvm_lzss: payload = compress_lzss(object, size); break;
+                    case compression_kind::uwvm_native_lz: payload = compress_native_lz(object, size); break;
+                    default: return cache_status::unsupported_compression;
+                }
+
+                if(compression != compression_kind::none && payload.size() >= size)
+                {
+                    // Storing larger compressed output only slows loads, so fall back to raw bytes when compression loses.
+                    compression = compression_kind::none;
+                    payload = {};
+                    payload.reserve(size);
+                    if(size != 0uz) { append_bytes(payload, object, object + size); }
+                }
+
+                auto isa_metadata{make_isa_metadata(ctx)};
+                auto context_metadata{make_context_metadata(ctx)};
+
+                cache_fixed_header header{};
+                // Header sizes are filled after compression and metadata construction so they match the final byte layout exactly.
+                ::std::copy(cache_magic, cache_magic + 8uz, header.magic);
+                header.version = cache_format_version;
+                header.fixed_header_size = static_cast<::std::uint_least32_t>(cache_fixed_header_size);
+                header.compression = static_cast<::std::uint_least32_t>(compression);
+                header.signature = policy.generate_signature ? static_cast<::std::uint_least32_t>(signature_kind::ed25519_identity)
+                                                             : static_cast<::std::uint_least32_t>(signature_kind::none);
+                header.uncompressed_size = static_cast<::std::uint_least64_t>(size);
+                header.payload_size = static_cast<::std::uint_least64_t>(payload.size());
+                header.isa_metadata_size = static_cast<::std::uint_least64_t>(isa_metadata.size());
+                header.context_metadata_size = static_cast<::std::uint_least64_t>(context_metadata.size());
+                header.signature_size = policy.generate_signature ? cache_ed25519_signature_size : 0uz;
+
+                auto header_bytes{serialize_fixed_header(header)};
+                ::uwvm2::utils::container::vector<::std::byte> signature{};
+                if(policy.generate_signature)
+                {
+                    // Signing happens after the header is serialized because all size and codec fields must be authenticated.
+                    if(!cache_ed25519_identity_signature_available) { return cache_status::unsupported_signature; }
+                    signature.reserve(cache_ed25519_signature_size);
+                    if(!ed25519_identity_sign(ctx, header_bytes, isa_metadata, context_metadata, payload, signature))
+                    {
+                        return cache_status::unsupported_signature;
+                    }
+                    if(signature.size() != cache_ed25519_signature_size) [[unlikely]] { return cache_status::unsupported_signature; }
+                }
+
+                blob = {};
+                blob.reserve(header_bytes.size() + isa_metadata.size() + context_metadata.size() + signature.size() + payload.size());
+                // The physical order matches parse_cache_blob, which allows zero-copy views into loaded files.
+                append_bytes(blob, header_bytes.cbegin(), header_bytes.cend());
+                append_bytes(blob, isa_metadata.cbegin(), isa_metadata.cend());
+                append_bytes(blob, context_metadata.cbegin(), context_metadata.cend());
+                append_bytes(blob, signature.cbegin(), signature.cend());
+                append_bytes(blob, payload.cbegin(), payload.cend());
+                return cache_status::ok;
+            }
+#ifdef UWVM_CPP_EXCEPTIONS
+            catch(::fast_io::error e)
+            {
+                static_cast<void>(e);
+                return cache_status::io_error;
+            }
+#endif
+        }
+
+        [[nodiscard]] inline constexpr bool valid_signature_shape(cache_blob_view const& view) noexcept
+        {
+            // Shape validation separates malformed files from policy decisions like "verification required".
+            if(view.header.signature == static_cast<::std::uint_least32_t>(signature_kind::none)) { return view.header.signature_size == 0u; }
+            if(view.header.signature == static_cast<::std::uint_least32_t>(signature_kind::ed25519_identity))
+            {
+                return view.header.signature_size == cache_ed25519_signature_size;
+            }
+            return true;
+        }
+    }  // namespace details
+
+    [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string cache_file_name(cache_context const& ctx) noexcept
+    { return details::cache_file_name_from_hash(details::cache_key_hash(ctx)); }
+
+    [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string cache_file_path(cache_context const& ctx) noexcept
+    {
+        auto path{ctx.cache_dir};
+        details::append_path_separator_if_needed(path);
+        ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(path)};
+        auto const key_hash{details::cache_key_hash(ctx)};
+        auto const shard{details::cache_key_shard(key_hash)};
+        // Public path construction mirrors the storage layout for diagnostics and tests.
+        ::fast_io::io::print(ref, cache_product_name);
+        details::append_path_separator_if_needed(path);
+        ::fast_io::io::print(ref, u8"objects");
+        details::append_path_separator_if_needed(path);
+        ::fast_io::io::print(ref, shard);
+        details::append_path_separator_if_needed(path);
+        auto const name{details::cache_file_name_from_hash(key_hash)};
+        ::fast_io::io::print(ref, name);
+        return path;
+    }
+
+    [[nodiscard]] inline cache_status store_object(cache_context const& ctx, ::std::byte const* object, ::std::size_t size, cache_policy const& policy) noexcept
+    {
+        if(!policy.enable) { return cache_disabled_status(policy); }
+        if(!policy.generate_signature || !policy.verify_signature) { return cache_status::origin_authentication_required; }
+        if(!kernel_origin::dumping_disabled()) { return cache_status::process_not_sealed; }
+        if(auto status{details::self_executable_status(ctx)}; status != cache_status::ok) { return status; }
+
+        auto actual{runtime_origin::acquire(ctx.origin)};
+        if(!actual) { return cache_status::origin_admission_unavailable; }
+        details::authenticated_context authenticated{ctx, actual};
+        if(!authenticated.ready) { return cache_status::kernel_origin_unavailable; }
+        ::uwvm2::utils::container::vector<::std::byte> blob{};
+        // Blob construction is separated from file publication so write failures cannot leave half-valid cache state.
+        if(auto const status{details::build_cache_blob(authenticated.value, object, size, policy, blob)}; status != cache_status::ok) [[unlikely]]
+        {
+            return status;
+        }
+
+        return details::write_cache_blob_atomic(ctx, blob, actual);
+    }
+
+    namespace details
+    {
+        struct cache_store_request
+        {
+            runtime_origin::use origin{};  // Real per-request Source/generation use; released LAST.
+            cache_context ctx{};
+            ::uwvm2::utils::container::vector<::std::byte> blob{};
+            ::uwvm2::utils::container::u8string log_module{};
+            ::std::size_t object_bytes{};
+            ::std::size_t object_index{};
+            ::std::size_t object_count{};
+            bool log_completion{};
+            bool log_parallel_object{};
+        };
+
+        template <typename... Args>
+        inline constexpr void runtime_cache_log_line(Args&&... args) noexcept
+        {
+#if defined(UWVM)
+            // A verbose cache diagnosis must not require a separate compiler
+            // logging flag or write to an unopened runtime-log stream.
+            if(::uwvm2::uwvm::io::enable_runtime_log)
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8runtime_log_output, u8"[llvm-jit-cache] ", ::std::forward<Args>(args)...);
+            }
+            else if(::uwvm2::uwvm::io::show_verbose)
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output, u8"[llvm-jit-cache] ", ::std::forward<Args>(args)...);
+            }
+#else
+            ((void)args, ...);
+#endif
+        }
+
+        /// @brief Report the check that refused native cache I/O, never secret bytes.
+        inline void log_cache_refusal(cache_status status) noexcept
+        {
+#if defined(__linux__)
+            if(status == cache_status::io_error || status == cache_status::not_found)
+            {
+                runtime_cache_log_line(u8"refusal-detail operation=", secure_file::last_failure.operation,
+                                       u8" errno=", secure_file::last_failure.system_error);
+            }
+            else if(status == cache_status::kernel_origin_unavailable)
+            {
+                runtime_cache_log_line(u8"refusal-detail operation=", kernel_origin::last_failure.operation,
+                                       u8" errno=", kernel_origin::last_failure.system_error);
+            }
+#else
+            (void)status;
+#endif
+        }
+
+        inline constexpr void log_cache_store_completion(cache_store_request const& request, cache_status status) noexcept
+        {
+            if(!request.log_completion) { return; }
+            log_cache_refusal(status);
+            if(request.log_parallel_object)
+            {
+                runtime_cache_log_line(u8"object-cache-store-complete module=\"",
+                                       request.log_module,
+                                       u8"\" status=",
+                                       cache_status_name(status),
+                                       u8" bytes=",
+                                       request.object_bytes,
+                                       u8" object_index=",
+                                       request.object_index,
+                                       u8" object_count=",
+                                       request.object_count);
+                return;
+            }
+
+            runtime_cache_log_line(u8"object-cache-store-complete module=\"",
+                                   request.log_module,
+                                   u8"\" status=",
+                                   cache_status_name(status),
+                                   u8" bytes=",
+                                   request.object_bytes);
+        }
+
+        struct async_cache_store_worker
+        {
+            ::std::mutex mutex{};
+            ::std::mutex lifecycle{};  // cold real native-owner join serialization
+            ::std::condition_variable condition{};
+#if defined(UWVM_UTILS_HAS_FAST_IO_NATIVE_THREAD)
+            using native_worker = ::fast_io::native_thread;
+#else
+            struct native_worker
+            {
+                [[nodiscard]] constexpr bool joinable() const noexcept { return false; }
+                constexpr void join() const noexcept {}
+            };
+#endif
+            native_worker worker{};
+            ::uwvm2::utils::container::std_deque<cache_store_request> requests{};
+            ::std::size_t active_requests{};
+            bool stop_requested{};
+            bool worker_started{};
+
+            async_cache_store_worker() noexcept = default;
+            async_cache_store_worker(async_cache_store_worker const&) = delete;
+            async_cache_store_worker& operator= (async_cache_store_worker const&) = delete;
+
+            ~async_cache_store_worker() noexcept { this->stop_and_join(); }
+
+            inline constexpr void run() noexcept
+            {
+                // A single background writer keeps JIT threads from blocking on disk while preserving simple ordering.
+                for(;;)
+                {
+                    cache_store_request request{};
+
+                    {
+                        ::std::unique_lock lock{this->mutex};
+                        this->condition.wait(lock, [this]() noexcept { return this->stop_requested || !this->requests.empty(); });
+                        if(this->requests.empty())
+                        {
+                            // Stop is honored only after queued requests are drained so accepted writes are not lost.
+                            if(this->stop_requested) { break; }
+                            continue;
+                        }
+
+                        request = ::std::move(this->requests.front());
+                        this->requests.pop_front();
+                        ++this->active_requests;
+                    }
+
+                    auto const status{write_cache_blob_atomic(request.ctx, request.blob, request.origin)};
+                    log_cache_store_completion(request, status);
+                    // A flush must also retire the actual Runtime generation
+                    // lease. Publishing work==0 before this release races a
+                    // cold threaded transition even after every byte is written.
+                    request.origin.reset();
+
+                    {
+                        // active_requests covers writes AND their origin leases.
+                        ::std::lock_guard lock{this->mutex};
+                        --this->active_requests;
+                    }
+                    this->condition.notify_all();
+                }
+            }
+
+            [[nodiscard]] inline constexpr bool start_locked() noexcept
+            {
+                if(this->worker_started) { return true; }
+
+#ifdef UWVM_CPP_EXCEPTIONS
+                try
+#endif
+                {
+                    // The worker is lazy so programs that never store an object do not pay for a thread.
+#if defined(UWVM_UTILS_HAS_FAST_IO_NATIVE_THREAD)
+                    this->worker = native_worker{[this]() noexcept { this->run(); }};
+#else
+                    return false;
+#endif
+                    this->worker_started = true;
+                    return true;
+                }
+#ifdef UWVM_CPP_EXCEPTIONS
+                catch(...)
+                {
+                    return false;
+                }
+#endif
+            }
+
+            [[nodiscard]] inline constexpr cache_status enqueue(cache_store_request&& request) noexcept
+            {
+                bool run_synchronously{};
+
+#ifdef UWVM_CPP_EXCEPTIONS
+                try
+#endif
+                {
+                    ::std::lock_guard lock{this->mutex};
+                    if(this->stop_requested) { run_synchronously = true; }
+                    else if(!this->start_locked()) { run_synchronously = true; }
+                    else
+                    {
+                        // Ownership of the complete blob moves to the queue so the caller can return immediately.
+                        this->requests.push_back(::std::move(request));
+                        this->condition.notify_one();
+                        return cache_status::ok;
+                    }
+                }
+#ifdef UWVM_CPP_EXCEPTIONS
+                catch(...)
+                {
+                    run_synchronously = true;
+                }
+#endif
+
+                if(run_synchronously)
+                {
+                    // Synchronous fallback preserves cache correctness when the worker cannot be started or is shutting down.
+                    auto const status{write_cache_blob_atomic(request.ctx, request.blob, request.origin)};
+                    log_cache_store_completion(request, status);
+                    return status;
+                }
+
+                return cache_status::io_error;
+            }
+
+            // Cold bounded DATA/work quiescence. The process-owned idle worker
+            // remains retained; this is NOT OS-thread termination or finalizers.
+            [[nodiscard]] inline bool flush_until(::std::chrono::steady_clock::time_point deadline) noexcept
+            {
+                ::std::unique_lock lock{this->mutex};
+                return this->condition.wait_until(lock, deadline, [this]() noexcept { return this->requests.empty() && this->active_requests == 0uz; });
+            }
+
+            inline constexpr void flush() noexcept
+            {
+                ::std::unique_lock lock{this->mutex};
+                // Tests and shutdown paths need a deterministic point where all accepted writes are durable or failed.
+                this->condition.wait(lock, [this]() noexcept { return this->requests.empty() && this->active_requests == 0uz; });
+            }
+
+            // Terminal cold owner phase AFTER real runtime execution/producer
+            // admission drained. Stop acceptance and wake this ACTUAL store
+            // worker, but keep its complete native owner/queue alive on timeout.
+            // A WORK0 condition or early loop/TLS flag is never physical ACK.
+            [[nodiscard]] inline bool stop_and_join_until(::std::chrono::steady_clock::time_point deadline) noexcept
+            {
+                ::std::unique_lock owned{this->lifecycle, ::std::try_to_lock};
+                if(!owned.owns_lock()) { return false; }  // pending, not a second OS join
+                {
+                    ::std::lock_guard lock{this->mutex};
+                    this->stop_requested = true;
+                    if(!this->worker_started) { return true; }  // actually never started/already joined
+                }
+                this->condition.notify_all();
+#if defined(UWVM_UTILS_HAS_FAST_IO_NATIVE_THREAD)
+                auto const joined{::uwvm2::utils::thread::join_native_thread_until(this->worker, deadline)};
+                if(joined.actual.status != ::fast_io::thread_join_status::joined) { return false; }
+                {
+                    // Only successful ACTUAL provider join cleared native owner
+                    // fields. The queue is no longer observed by any worker;
+                    // destructor/normal exit will not invoke an unbounded join.
+                    ::std::lock_guard lock{this->mutex};
+                    this->worker_started = false;
+                    return this->requests.empty() && this->active_requests == 0uz;
+                }
+#else
+                static_cast<void>(deadline);
+                return false;  // retain unqualified real std owner
+#endif
+            }
+
+            inline constexpr void stop_and_join() noexcept
+            {
+                ::std::unique_lock owned{this->lifecycle};
+                {
+                    ::std::lock_guard lock{this->mutex};
+                    this->stop_requested = true;
+                }
+                this->condition.notify_all();
+
+                if(this->worker.joinable()) { this->worker.join(); }
+                // Real synchronous join succeeded (or owner never started).
+                // Preserve that fact for a later qualified terminal query.
+                ::std::lock_guard lock{this->mutex};
+                this->worker_started = false;
+            }
+        };
+
+        [[nodiscard]] inline constexpr async_cache_store_worker& async_cache_store_worker_instance() noexcept
+        {
+            static async_cache_store_worker worker{};  // [global]
+            return worker;
+        }
+    }  // namespace details
+
+    [[nodiscard]] inline cache_status store_object_async(cache_context const& ctx,
+                                                         ::std::byte const* object,
+                                                         ::std::size_t size,
+                                                         cache_policy const& policy,
+                                                         ::uwvm2::utils::container::u8string_view log_module = {},
+                                                         bool log_completion = false,
+                                                         ::std::size_t object_index = 0uz,
+                                                         ::std::size_t object_count = 0uz) noexcept
+    {
+        if(!policy.enable) { return cache_disabled_status(policy); }
+        if(!policy.generate_signature || !policy.verify_signature) { return cache_status::origin_authentication_required; }
+        if(!kernel_origin::dumping_disabled()) { return cache_status::process_not_sealed; }
+        if(auto status{details::self_executable_status(ctx)}; status != cache_status::ok) { return status; }
+
+        auto actual{runtime_origin::acquire(ctx.origin)};
+        if(!actual) { return cache_status::origin_admission_unavailable; }
+        details::authenticated_context authenticated{ctx, actual};
+        if(!authenticated.ready) { return cache_status::kernel_origin_unavailable; }
+        details::cache_store_request request{};
+        request.origin = actual;
+        request.ctx = ctx;
+        request.object_bytes = size;
+        request.object_index = object_index;
+        request.object_count = object_count;
+        request.log_completion = log_completion;
+        request.log_parallel_object = object_count != 0uz;
+        if(log_completion)
+        {
+            request.log_module.reserve(log_module.size());
+            // The module name must be copied because the async request can outlive LLVM's callback frame.
+            ::uwvm2::utils::container::u8string_ref_uwvm ref{::std::addressof(request.log_module)};
+            ::fast_io::io::print(ref, log_module);
+        }
+        if(auto const status{details::build_cache_blob(authenticated.value, object, size, policy, request.blob)}; status != cache_status::ok) [[unlikely]]
+        {
+            return status;
+        }
+
+        if(auto status{details::current_origin_status(ctx, actual)}; status != cache_status::ok) { return status; }
+        return details::async_cache_store_worker_instance().enqueue(::std::move(request));
+    }
+
+    [[nodiscard]] inline bool flush_async_store_objects_until(::std::chrono::steady_clock::time_point deadline) noexcept
+    { return details::async_cache_store_worker_instance().flush_until(deadline); }
+    inline constexpr void flush_async_store_objects() noexcept { details::async_cache_store_worker_instance().flush(); }
+
+    // Terminal managed CLI shutdown only. Once called, accepted writes drain
+    // and future external stores use the existing synchronous fallback. The
+    // caller serializes all runtime/external store producers; ordinary reusable
+    // reset/flush retains its prior behavior and does not call this method.
+    [[nodiscard]] inline bool shutdown_async_store_objects_until(::std::chrono::steady_clock::time_point deadline) noexcept
+    { return details::async_cache_store_worker_instance().stop_and_join_until(deadline); }
+
+    inline constexpr void shutdown_async_store_objects() noexcept
+    {
+        // fast_exit terminates only the calling thread on Linux. Stop and join the writer explicitly before a WASI proc_exit so a
+        // sleeping cache thread cannot keep the process alive after the main thread has already exited.
+        details::async_cache_store_worker_instance().stop_and_join();
+    }
+
+    [[nodiscard]] inline cache_load_result load_object(cache_context const& ctx, cache_policy const& policy) noexcept
+    {
+        cache_load_result result{};
+
+        if(!policy.enable)
+        {
+            result.status = cache_disabled_status(policy);
+            return result;
+        }
+        result.status = details::self_executable_status(ctx);
+        if(result.status != cache_status::ok) { return result; }
+
+        if(!policy.generate_signature || !policy.verify_signature)
+        {
+            result.status = cache_status::origin_authentication_required;
+            return result;
+        }
+        if(!kernel_origin::dumping_disabled())
+        {
+            result.status = cache_status::process_not_sealed;
+            return result;
+        }
+        auto actual{runtime_origin::acquire(ctx.origin)};
+        if(!actual)
+        {
+            result.status = cache_status::origin_admission_unavailable;
+            return result;
+        }
+        details::authenticated_context authenticated{ctx, actual};
+        if(!authenticated.ready)
+        {
+            result.status = cache_status::kernel_origin_unavailable;
+            return result;
+        }
+
+#ifdef UWVM_CPP_EXCEPTIONS
+        try
+#endif
+        {
+            auto const key_hash{details::cache_key_hash(ctx)};
+            auto expected_isa{make_isa_metadata(ctx)};
+            auto expected_context{make_context_metadata(ctx)};
+            ::std::size_t maximum{cache_fixed_header_size};
+            if(!details::checked_add(maximum, cache_ed25519_signature_size) || !details::checked_add(maximum, expected_isa.size()) ||
+               !details::checked_add(maximum, expected_context.size()) || !details::checked_add(maximum, policy.max_object_bytes))
+            {
+                result.status = cache_status::size_limit_exceeded;
+                return result;
+            }
+#if defined(__linux__)
+            auto as_view = [](auto const& text) noexcept { return ::std::string_view{reinterpret_cast<char const*>(text.data()), text.size()}; };
+            auto const shard{details::cache_key_shard(key_hash)};
+            auto cache_dir{secure_file::object_directory(as_view(ctx.cache_dir), as_view(cache_product_name), as_view(shard), false)};
+            if(!cache_dir)
+            {
+                result.status = secure_file::last_failure.system_error == ENOENT ? cache_status::not_found : cache_status::io_error;
+                return result;
+            }
+            auto const file_name{details::cache_file_name_from_hash(key_hash)};
+            auto file{secure_file::read_snapshot(cache_dir.value, as_view(file_name), maximum)};
+            if(!file.ok)
+            {
+                result.status = secure_file::last_failure.system_error == ENOENT ? cache_status::not_found : cache_status::io_error;
+                return result;
+            }
+            auto const first{file.bytes.get()};
+            auto const last{first + file.size};
+#else
+            result.status = cache_status::kernel_origin_unavailable;
+            return result;
+            ::std::byte const* first{};
+            ::std::byte const* last{};
+#endif
+
+            cache_blob_view view{};
+            if(auto const status{parse_cache_blob(first, last, view)}; status != cache_status::ok)
+            {
+                result.status = status;
+                return result;
+            }
+
+            if(!details::valid_signature_shape(view))
+            {
+                result.status = cache_status::malformed;
+                return result;
+            }
+
+            if(view.header.uncompressed_size > static_cast<::std::uint_least64_t>(policy.max_object_bytes))
+            {
+                // The size limit is enforced before decompression to bound memory use for untrusted cache files.
+                result.status = cache_status::size_limit_exceeded;
+                return result;
+            }
+
+            if(!metadata_equal(view.isa_metadata, view.header.isa_metadata_size, expected_isa))
+            {
+                // ISA mismatch is a normal cache miss: object code is not portable across target/CPU differences.
+                result.status = cache_status::isa_mismatch;
+                return result;
+            }
+            result.isa_matched = true;
+
+            if(!metadata_equal(view.context_metadata, view.header.context_metadata_size, expected_context))
+            {
+                // Context mismatch rejects objects built with a different LLVM, ABI, policy, or logical cache key.
+                result.status = cache_status::context_mismatch;
+                return result;
+            }
+
+            auto const compression{static_cast<compression_kind>(view.header.compression)};
+            if(compression != compression_kind::none && compression != compression_kind::uwvm_lzss && compression != compression_kind::uwvm_native_lz)
+            {
+                result.status = cache_status::unsupported_compression;
+                return result;
+            }
+
+            if(policy.verify_signature)
+            {
+                if(view.header.signature == static_cast<::std::uint_least32_t>(signature_kind::none))
+                {
+                    // Unsigned native code is rejected by default because the cache directory is outside the compiler binary.
+                    result.status = cache_status::signature_missing;
+                    return result;
+                }
+                if(view.header.signature != static_cast<::std::uint_least32_t>(signature_kind::ed25519_identity))
+                {
+                    result.status = cache_status::unsupported_signature;
+                    return result;
+                }
+                if(!cache_ed25519_identity_signature_available)
+                {
+                    result.status = cache_status::unsupported_signature;
+                    return result;
+                }
+
+                auto header_bytes{serialize_fixed_header(view.header)};
+                auto const isa_size{static_cast<::std::size_t>(view.header.isa_metadata_size)};
+                auto const context_size{static_cast<::std::size_t>(view.header.context_metadata_size)};
+                auto const payload_size{static_cast<::std::size_t>(view.header.payload_size)};
+
+                // Verify before decompression so malformed compressed data is not processed unless it is signed for this context.
+                if(!details::ed25519_identity_verify(authenticated.value,
+                                                     header_bytes,
+                                                     view.isa_metadata,
+                                                     isa_size,
+                                                     view.context_metadata,
+                                                     context_size,
+                                                     view.signature,
+                                                     view.payload,
+                                                     payload_size))
+                {
+                    result.status = cache_status::signature_mismatch;
+                    return result;
+                }
+                result.signature_verified = true;
+            }
+
+            auto const uncompressed_size{static_cast<::std::size_t>(view.header.uncompressed_size)};
+            auto const payload_size{static_cast<::std::size_t>(view.header.payload_size)};
+            if(!decompress_payload(compression, view.payload, payload_size, uncompressed_size, result.object))
+            {
+                // The object buffer is cleared on decode failure so callers cannot accidentally consume partial output.
+                result.status = cache_status::decompression_failed;
+                result.object = {};
+                return result;
+            }
+
+            result.status = details::current_origin_status(ctx, actual);
+            if(result.status != cache_status::ok)
+            {
+                result.object = {};
+                return result;
+            }
+            result.status = cache_status::ok;
+            return result;
+        }
+#ifdef UWVM_CPP_EXCEPTIONS
+        catch(::fast_io::error)
+        {
+            result.status = cache_status::io_error;
+            return result;
+        }
+#endif
+    }
+}  // namespace uwvm2::runtime::llvm_jit_cache
+
+#if defined(__linux__) && (defined(__GNUC__) || defined(__clang__))
+# pragma GCC visibility pop
+#endif
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/uwvm/runtime/macro/pop_macros.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

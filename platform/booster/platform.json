@@ -1,0 +1,38 @@
+{
+  "id": "booster",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "booster_interface/ImuState",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_rpy",
+        "field": "rpy",
+        "type": "f32",
+        "indexed": true
+      },
+      {
+        "name": "read_gyro",
+        "field": "gyro",
+        "type": "f32",
+        "indexed": true
+      },
+      {
+        "name": "read_acc",
+        "field": "acc",
+        "type": "f32",
+        "indexed": true
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/BoosterRobotics/robocup_demo/blob/fa4f31ccb4428a9e60e90b4f54eb80499caeb0ca/src/interface/booster_ros2_interface/msg/ImuState.msg",
+        "revision": "fa4f31ccb4428a9e60e90b4f54eb80499caeb0ca",
+        "path": "src/interface/booster_ros2_interface/msg/ImuState.msg",
+        "sha256": "aab374da59a0ad77db57eb3d55bed5a5ba2080a100a592e88dcf2d9866dfa00a"
+      }
+    ]
+  }
+}

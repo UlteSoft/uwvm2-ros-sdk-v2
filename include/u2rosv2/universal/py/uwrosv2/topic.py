@@ -1,0 +1,291 @@
+"""Raw topic imports from uwvm_ros_v2."""
+from _uwros_runtime import raw
+
+
+def wr_topic_acknowledge(cap, memory, request, size, output, capacity, length_output):
+    """Consume exactly the previously reserved record after guest processing. Exact replay is
+    idempotent; stale generation, wrong consumer, altered nonce or expired reservation is
+    refused. Lost native ACK is outcome_unknown and never triggers blind re-consumption. Bounded
+    receipt survives failed guest delivery.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    topic.acknowledge and the grant must authorize topic.acknowledge. Applicable grant purposes
+    include topic.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may
+    overlap because the VM copies the request before delivery. The length slot must be disjoint
+    from both ranges after address normalization. An overlap with the slot returns INVALID (22).
+
+    cap (i64, unsigned bit pattern). Capability handle for the topic.acknowledge action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's linear memory containing all three
+    spans.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `key` (`request_key`), `reservation` (`reservation_ref`).
+
+    size (i64, unsigned bit pattern). Byte length of the complete encoded request. The carrier
+    accepts at most 4194304 bytes.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `receipt` (`receipt`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194304.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply.
+
+    Returns an i32 as a Python int. Zero on success, otherwise a scene status. A short reply
+    returns TOO_LARGE (90) with the required capacity or minimum in the length slot. Other
+    limits may return 90 before a useful size is available. Inspect the delivered receipt for
+    the operation's outcome."""
+    return raw('topic.acknowledge', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_topic_describe(cap, memory, request, size, output, capacity, length_output):
+    """Owned node, resolved endpoint/type/direction and profile, with optional cached actual
+    provider incarnation and native identity. Metadata is copied from the same retained
+    endpoint; no middleware call or discovery occurs during description. Unknown provider
+    generation and GID remain absent. This grants no publication or subscription authority.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    topic.describe and the grant must authorize topic.describe. Applicable grant purposes
+    include topic.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may
+    overlap because the VM copies the request before delivery. The length slot must be disjoint
+    from both ranges after address normalization. An overlap with the slot returns INVALID (22).
+
+    cap (i64, unsigned bit pattern). Capability handle for the topic.describe action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's linear memory containing all three
+    spans.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `endpoint` (`u64`).
+
+    size (i64, unsigned bit pattern). Exact request length, 8 bytes.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `endpoint` (`endpoint_info`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194304.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply.
+
+    Returns an i32 as a Python int. Zero on success, otherwise a scene status. A short reply
+    returns TOO_LARGE (90) with the required capacity or minimum in the length slot. Other
+    limits may return 90 before a useful size is available."""
+    return raw('topic.describe', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_topic_open(cap, memory, request, size, output, capacity, length_output):
+    """Create exactly one publisher or subscription role. Creation is asynchronous: explicit
+    monotonically increasing key and finite absolute steady deadline; response is a request
+    receipt, not an endpoint. communication.open.take retrieves a separately published typed
+    handle.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    topic.open and the grant must authorize topic.open. Applicable grant purposes include topic.
+    Depending on the selected inputs and plan, the VM also checks node.open, type.describe.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may
+    overlap because the VM copies the request before delivery. The length slot must be disjoint
+    from both ranges after address normalization. An overlap with the slot returns INVALID (22).
+
+    cap (i64, unsigned bit pattern). Capability handle for the topic.open action in the caller's
+    environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's linear memory containing all three
+    spans.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `endpoint` (`endpoint_request`), `creation_key` (`u64`), `deadline` (`u64`).
+
+    size (i64, unsigned bit pattern). Byte length of the complete encoded request. The carrier
+    accepts at most 4194304 bytes.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `creation` (`communication_creation_receipt`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194304. The fixed result occupies 48 bytes.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply.
+
+    Returns an i32 as a Python int. Zero on success, otherwise a scene status. A short reply
+    returns TOO_LARGE (90) with the required capacity or minimum in the length slot. Other
+    limits may return 90 before a useful size is available. Inspect the delivered receipt for
+    the operation's outcome."""
+    return raw('topic.open', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_topic_publish(cap, memory, request, size, output, capacity, length_output):
+    """Reserve and validate complete message before acceptance; acceptance is not remote delivery.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    topic.publish and the grant must authorize topic.publish. Applicable grant purposes include
+    topic.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may
+    overlap because the VM copies the request before delivery. The length slot must be disjoint
+    from both ranges after address normalization. An overlap with the slot returns INVALID (22).
+
+    cap (i64, unsigned bit pattern). Capability handle for the topic.publish action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's linear memory containing all three
+    spans.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `key` (`request_key`), `endpoint` (`u64`), `body` (`message`), `deadline` (`u64`).
+
+    size (i64, unsigned bit pattern). Byte length of the complete encoded request. The carrier
+    accepts at most 4194304 bytes.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `receipt` (`receipt`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194304.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply.
+
+    Returns an i32 as a Python int. Zero on success, otherwise a scene status. A short reply
+    returns TOO_LARGE (90) with the required capacity or minimum in the length slot. Other
+    limits may return 90 before a useful size is available. Inspect the delivered receipt for
+    the operation's outcome."""
+    return raw('topic.publish', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_topic_release(cap, memory, request, size, output, capacity, length_output):
+    """Cancel exactly the owned borrow while retaining the original record. This is not
+    service-request cancellation or endpoint close. Cleanup uses pre-reserved capacity and is
+    not throttled by creation/traffic quotas; uncertain native cancellation retains debt until
+    trusted reconciliation.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    topic.release and the grant must authorize topic.release. Applicable grant purposes include
+    topic.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may
+    overlap because the VM copies the request before delivery. The length slot must be disjoint
+    from both ranges after address normalization. An overlap with the slot returns INVALID (22).
+
+    cap (i64, unsigned bit pattern). Capability handle for the topic.release action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's linear memory containing all three
+    spans.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `key` (`request_key`), `reservation` (`reservation_ref`).
+
+    size (i64, unsigned bit pattern). Byte length of the complete encoded request. The carrier
+    accepts at most 4194304 bytes.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `receipt` (`receipt`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194304.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply.
+
+    Returns an i32 as a Python int. Zero on success, otherwise a scene status. A short reply
+    returns TOO_LARGE (90) with the required capacity or minimum in the length slot. Other
+    limits may return 90 before a useful size is available. Inspect the delivered receipt for
+    the operation's outcome."""
+    return raw('topic.release', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_topic_reserve(cap, memory, request, size, output, capacity, length_output):
+    """Explicit two-phase receive: independently authorize the exact consumer endpoint, retain the
+    original native record and deliver a bounded detached copy without acknowledgement.
+    Same-consumer retry returns the retained record/nonce; concurrent consumers cannot steal it.
+    Both node/context/schema origins and native metadata remain attached.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    topic.reserve and the grant must authorize topic.reserve. Applicable grant purposes include
+    topic.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may
+    overlap because the VM copies the request before delivery. The length slot must be disjoint
+    from both ranges after address normalization. An overlap with the slot returns INVALID (22).
+
+    cap (i64, unsigned bit pattern). Capability handle for the topic.reserve action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's linear memory containing all three
+    spans.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `endpoint` (`u64`), `deadline` (`u64`).
+
+    size (i64, unsigned bit pattern). Exact request length, 16 bytes.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `reservation` (`delivery_reservation`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194304.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply.
+
+    Returns an i32 as a Python int. Zero on success, otherwise a scene status. A short reply
+    returns TOO_LARGE (90) with the required capacity or minimum in the length slot. Other
+    limits may return 90 before a useful size is available. The reservation remains owned until
+    acknowledgement or release."""
+    return raw('topic.reserve', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_topic_take(cap, memory, request, size, output, capacity, length_output):
+    """Receive one source record without consuming on invalid/short output.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    topic.take and the grant must authorize topic.take. Applicable grant purposes include topic.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. Request and reply may
+    overlap because the VM copies the request before delivery. The length slot must be disjoint
+    from both ranges after address normalization. An overlap with the slot returns INVALID (22).
+
+    cap (i64, unsigned bit pattern). Capability handle for the topic.take action in the caller's
+    environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's linear memory containing all three
+    spans.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `endpoint` (`u64`).
+
+    size (i64, unsigned bit pattern). Exact request length, 8 bytes.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `record` (`delivery`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194304.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply.
+
+    Returns an i32 as a Python int. Zero on success, otherwise a scene status. A short reply
+    returns TOO_LARGE (90) with the required capacity or minimum in the length slot. Other
+    limits may return 90 before a useful size is available."""
+    return raw('topic.take', cap, memory, request, size, output, capacity, length_output)

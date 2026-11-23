@@ -1,0 +1,277 @@
+diff --git a/vendor/wasm-encoder-0.263.0/src/core/instructions.rs b/vendor/wasm-encoder-0.263.0/src/core/instructions.rs
+index d81d49cfd72fae81ced132356c565c3def31143b..ebf09cedd9c6b35c5b9764a7bd7f9cf10be2a8e1 100644
+--- a/vendor/wasm-encoder-0.263.0/src/core/instructions.rs
++++ b/vendor/wasm-encoder-0.263.0/src/core/instructions.rs
+@@ -20,6 +20,13 @@ impl<'a> InstructionSink<'a> {
+ 
+     // Control instructions.
+ 
++    /// Encode a reviewed linear WasmMTE instruction and its memory index.
++    pub fn wros_memtag(&mut self, operation: u16, memory: u32) {
++        self.sink.push(0xff);
++        (0x0101_0000_u32 | u32::from(operation)).encode(self.sink);
++        memory.encode(self.sink);
++    }
++
+     /// Encode [`Instruction::Unreachable`].
+     pub fn unreachable(&mut self) -> &mut Self {
+         self.sink.push(0x00);
+diff --git a/vendor/wasmparser-memtag/src/binary_reader.rs b/vendor/wasmparser-memtag/src/binary_reader.rs
+index be913a212b3d6024ad80e92c9fd00dbfbc145e4c..a8ad8567828ee2f07c881189a2d62515b5a41f5c 100644
+--- a/vendor/wasmparser-memtag/src/binary_reader.rs
++++ b/vendor/wasmparser-memtag/src/binary_reader.rs
+@@ -1478,6 +1478,11 @@ impl<'a> BinaryReader<'a> {
+             0x0101_0036 => memory_instruction!(visit_memtag_hint),
+             0x0101_0037 => memory_instruction!(visit_memtag_hintstore),
+             0x0101_0038 => memory_instruction!(visit_memtag_hintstorez),
++            0x0101_0040 => memory_instruction!(visit_memtag_claim),
++            0x0101_0041 => memory_instruction!(visit_memtag_claimz),
++            0x0101_0042 => memory_instruction!(visit_memtag_reserve),
++            0x0101_0043 => memory_instruction!(visit_memtag_activate),
++            0x0101_0044 => memory_instruction!(visit_memtag_release),
+             _ => bail!(
+                 pos,
+                 "unknown uwvm2-ros VM instruction extension opcode: 0x{opcode:x}"
+diff --git a/vendor/wasmparser-memtag/src/lib.rs b/vendor/wasmparser-memtag/src/lib.rs
+index 6db8ae2885e303ee8e4c65566587e013f2547420..15fa679d49bd680df28bf6bbe6214ad2a68dbe60 100644
+--- a/vendor/wasmparser-memtag/src/lib.rs
++++ b/vendor/wasmparser-memtag/src/lib.rs
+@@ -396,6 +396,11 @@ macro_rules! _for_each_operator_group {
+                 MemtagHint { mem: u32 } => visit_memtag_hint (arity 3 -> 1)
+                 MemtagHintstore { mem: u32 } => visit_memtag_hintstore (arity 4 -> 1)
+                 MemtagHintstorez { mem: u32 } => visit_memtag_hintstorez (arity 4 -> 1)
++                MemtagClaim { mem: u32 } => visit_memtag_claim (arity 2 -> 1)
++                MemtagClaimz { mem: u32 } => visit_memtag_claimz (arity 2 -> 1)
++                MemtagReserve { mem: u32 } => visit_memtag_reserve (arity 2 -> 1)
++                MemtagActivate { mem: u32 } => visit_memtag_activate (arity 2 -> 1)
++                MemtagRelease { mem: u32 } => visit_memtag_release (arity 2 -> 1)
+             }
+ 
+             // 0xFE prefixed operators
+diff --git a/vendor/wasmparser-memtag/src/validator/operators.rs b/vendor/wasmparser-memtag/src/validator/operators.rs
+index 58d23a2555c16983d702f071c0d5fcd15b3aea0b..192bab68d00f71fb710af510029c7d1bdf40f79b 100644
+--- a/vendor/wasmparser-memtag/src/validator/operators.rs
++++ b/vendor/wasmparser-memtag/src/validator/operators.rs
+@@ -3503,6 +3503,21 @@ where
+         self.push_operand(ty)?;
+         Ok(())
+     }
++    fn visit_memtag_claim(&mut self, mem: u32) -> Self::Output {
++        self.visit_memtag_untagstore(mem)
++    }
++    fn visit_memtag_claimz(&mut self, mem: u32) -> Self::Output {
++        self.visit_memtag_untagstore(mem)
++    }
++    fn visit_memtag_reserve(&mut self, mem: u32) -> Self::Output {
++        self.visit_memtag_untagstore(mem)
++    }
++    fn visit_memtag_activate(&mut self, mem: u32) -> Self::Output {
++        self.visit_memtag_untagstore(mem)
++    }
++    fn visit_memtag_release(&mut self, mem: u32) -> Self::Output {
++        self.visit_memtag_untagstore(mem)
++    }
+     fn visit_memtag_extract(&mut self, mem: u32) -> Self::Output {
+         let ty = self.check_memory_index(mem)?;
+         self.pop_operand(Some(ty))?;
+diff --git a/vendor/wast-263.0.0/src/core/binary.rs b/vendor/wast-263.0.0/src/core/binary.rs
+index abff4b45f7ce95d6aa1d5aeacd55b44a59f032e2..5fa4e9d7745561336a6451bf8870824bbed904da 100644
+--- a/vendor/wast-263.0.0/src/core/binary.rs
++++ b/vendor/wast-263.0.0/src/core/binary.rs
+@@ -839,6 +839,102 @@ impl Expression<'_> {
+ pub(crate) mod custom_encoders {
+     use super::*;
+ 
++    pub(crate) fn memtag_status(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x20, memory.into());
++    }
++
++    pub(crate) fn memtag_extract(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x21, memory.into());
++    }
++
++    pub(crate) fn memtag_insert(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x22, memory.into());
++    }
++
++    pub(crate) fn memtag_tagbits(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x23, memory.into());
++    }
++
++    pub(crate) fn memtag_startbit(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x24, memory.into());
++    }
++
++    pub(crate) fn memtag_copy(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x25, memory.into());
++    }
++
++    pub(crate) fn memtag_sub(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x26, memory.into());
++    }
++
++    pub(crate) fn memtag_load(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x27, memory.into());
++    }
++
++    pub(crate) fn memtag_untag(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x28, memory.into());
++    }
++
++    pub(crate) fn memtag_untagstore(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x29, memory.into());
++    }
++
++    pub(crate) fn memtag_untagstorez(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x2a, memory.into());
++    }
++
++    pub(crate) fn memtag_store(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x2b, memory.into());
++    }
++
++    pub(crate) fn memtag_storez(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x2c, memory.into());
++    }
++
++    pub(crate) fn memtag_random(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x2d, memory.into());
++    }
++
++    pub(crate) fn memtag_randomstore(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x2e, memory.into());
++    }
++
++    pub(crate) fn memtag_randomstorez(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x2f, memory.into());
++    }
++
++    pub(crate) fn memtag_hint(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x36, memory.into());
++    }
++
++    pub(crate) fn memtag_hintstore(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x37, memory.into());
++    }
++
++    pub(crate) fn memtag_hintstorez(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x38, memory.into());
++    }
++
++    pub(crate) fn memtag_claim(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x40, memory.into());
++    }
++
++    pub(crate) fn memtag_claimz(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x41, memory.into());
++    }
++
++    pub(crate) fn memtag_reserve(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x42, memory.into());
++    }
++
++    pub(crate) fn memtag_activate(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x43, memory.into());
++    }
++
++    pub(crate) fn memtag_release(sink: &mut InstructionSink<'_>, memory: &MemoryArg<'_>) {
++        sink.wros_memtag(0x44, memory.into());
++    }
++
+     // Labels on `else` and `end` aren't encoded.
+     pub(crate) fn else_(sink: &mut InstructionSink<'_>, _label: &Option<Id<'_>>) {
+         sink.else_();
+diff --git a/vendor/wast-263.0.0/src/core/expr.rs b/vendor/wast-263.0.0/src/core/expr.rs
+index 20b80a238e3dd2570a8925184cc13ee1252ea1a8..2bd18696257eec7ed5539614fa46a8c4fc9acd71 100644
+--- a/vendor/wast-263.0.0/src/core/expr.rs
++++ b/vendor/wast-263.0.0/src/core/expr.rs
+@@ -661,6 +661,54 @@ instructions! {
+         #[custom_encode]
+         memory_copy(MemoryCopy<'a>) : "memory.copy",
+         memory_fill(MemoryArg<'a>) : "memory.fill",
++        #[custom_encode]
++        memtag_status(MemoryArg<'a>) : "memtag.status",
++        #[custom_encode]
++        memtag_extract(MemoryArg<'a>) : "memtag.extract",
++        #[custom_encode]
++        memtag_insert(MemoryArg<'a>) : "memtag.insert",
++        #[custom_encode]
++        memtag_tagbits(MemoryArg<'a>) : "memtag.tagbits",
++        #[custom_encode]
++        memtag_startbit(MemoryArg<'a>) : "memtag.startbit",
++        #[custom_encode]
++        memtag_copy(MemoryArg<'a>) : "memtag.copy",
++        #[custom_encode]
++        memtag_sub(MemoryArg<'a>) : "memtag.sub",
++        #[custom_encode]
++        memtag_load(MemoryArg<'a>) : "memtag.load",
++        #[custom_encode]
++        memtag_untag(MemoryArg<'a>) : "memtag.untag",
++        #[custom_encode]
++        memtag_untagstore(MemoryArg<'a>) : "memtag.untagstore",
++        #[custom_encode]
++        memtag_untagstorez(MemoryArg<'a>) : "memtag.untagstorez",
++        #[custom_encode]
++        memtag_store(MemoryArg<'a>) : "memtag.store",
++        #[custom_encode]
++        memtag_storez(MemoryArg<'a>) : "memtag.storez",
++        #[custom_encode]
++        memtag_random(MemoryArg<'a>) : "memtag.random",
++        #[custom_encode]
++        memtag_randomstore(MemoryArg<'a>) : "memtag.randomstore",
++        #[custom_encode]
++        memtag_randomstorez(MemoryArg<'a>) : "memtag.randomstorez",
++        #[custom_encode]
++        memtag_hint(MemoryArg<'a>) : "memtag.hint",
++        #[custom_encode]
++        memtag_hintstore(MemoryArg<'a>) : "memtag.hintstore",
++        #[custom_encode]
++        memtag_hintstorez(MemoryArg<'a>) : "memtag.hintstorez",
++        #[custom_encode]
++        memtag_claim(MemoryArg<'a>) : "memtag.claim",
++        #[custom_encode]
++        memtag_claimz(MemoryArg<'a>) : "memtag.claimz",
++        #[custom_encode]
++        memtag_reserve(MemoryArg<'a>) : "memtag.reserve",
++        #[custom_encode]
++        memtag_activate(MemoryArg<'a>) : "memtag.activate",
++        #[custom_encode]
++        memtag_release(MemoryArg<'a>) : "memtag.release",
+         memory_discard(MemoryArg<'a>) : "memory.discard",
+         data_drop(Index<'a>) : "data.drop",
+         elem_drop(Index<'a>) : "elem.drop",
+diff --git a/vendor/wast-263.0.0/src/core/resolve/names.rs b/vendor/wast-263.0.0/src/core/resolve/names.rs
+index be3a488f682c4afd508e9057b051c8af39281142..dfeb07f361bcb81f9a9531df65e65aa8ba563610 100644
+--- a/vendor/wast-263.0.0/src/core/resolve/names.rs
++++ b/vendor/wast-263.0.0/src/core/resolve/names.rs
+@@ -409,6 +409,30 @@ impl<'a, 'b> ExprResolver<'a, 'b> {
+         }
+ 
+         match instr {
++            I::memtag_status(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_extract(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_insert(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_tagbits(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_startbit(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_copy(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_sub(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_load(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_untag(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_untagstore(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_untagstorez(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_store(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_storez(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_random(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_randomstore(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_randomstorez(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_hint(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_hintstore(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_hintstorez(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_claim(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_claimz(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_reserve(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_activate(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
++            I::memtag_release(i) => { self.resolver.resolve(&mut i.mem, Ns::Memory)?; }
+             I::memory_size(i) | I::memory_grow(i) | I::memory_fill(i) | I::memory_discard(i) => {
+                 self.resolver.resolve(&mut i.mem, Ns::Memory)?;
+             }

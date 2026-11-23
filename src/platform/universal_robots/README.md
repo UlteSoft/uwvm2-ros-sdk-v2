@@ -1,0 +1,12 @@
+# Universal Robots interface sources
+
+[中文](README.zh.md)
+
+The ROS 2 Driver 7.3.0 Jazzy dependency list selects the ROS-Industrial humble-devel interface package. The SDK pins its 2.7.0 release. The complete declarations registered by both upstream CMake files are present. The manifests record the official URL, tag, full commit, license, Git blob and SHA-256 of each file. [Driver dependencies](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/9efe5e9ec2ce2f7a01e80c315dfcf10ab933e7a8/Universal_Robots_ROS2_Driver.jazzy.repos) · [Sources and hashes](upstream.json)
+
+- `ur_dashboard_msgs` defines 8 messages, 25 services and one action. The dashboard ROS node uses the robot-mode and program-state queries. [Declared interfaces](upstream/ur_dashboard_msgs/CMakeLists.txt) · [Driver call sites](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/9efe5e9ec2ce2f7a01e80c315dfcf10ab933e7a8/ur_robot_driver/src/dashboard_client_ros.cpp)
+- `ur_msgs` defines 10 messages, 8 services and 3 actions. The GPIO controller publishes IOStates and ToolDataMsg. [Declared interfaces](upstream/ur_msgs/CMakeLists.txt) · [Controller publishers](https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/9efe5e9ec2ce2f7a01e80c315dfcf10ab933e7a8/ur_controllers/src/gpio_controller.cpp#L279)
+
+The C, C++ and Rust dashboard APIs provide eight typed messages, 16 fields and 57 named constants with encapsulated big- and little-endian XCDRv1 codecs. The four other observation bindings expose the existing SafetyStatus field. The other 47 upstream interfaces comprise ten messages, 33 services and four actions. Independent installation, interoperability and execution qualification is pending. [Public dashboard API](../../../platform/universal_robots/cdr.md) · [Observation API](../../../platform/universal_robots/README.md)
+
+From the SDK repository root, run `python3 -B src/platform/universal_robots/generate_cdr.py` to regenerate the dashboard records, scalar codecs, notices, example bytes and observation registration for this platform. The generator reads the registered dashboard message paths and verifies their SHA-256 values against the frozen manifest. It uses the existing parameterized native XCDRv1 wire and C framing templates at generation time. Each installed language carries its own codec. [Generator](generate_cdr.py) · [Hand-authored ProgramInformation sample](program_information_frames.json)

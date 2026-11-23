@@ -1,0 +1,467 @@
+// Private cold adapter. Included INSIDE the actual runtime namespace AFTER
+// Wasip1 resolution, publication and private checkpoint admission definitions.
+// Only the coherent manager can invoke it, inside its ONE actual proof scope.
+#pragma once
+#include <uwvm2/utils/container/standard.h>
+#if defined(UWVM_RUNTIME_LLVM_JIT) && defined(UWVM_UTILS_HAS_FAST_IO_NATIVE_THREAD) && defined(UWVM_CPP_EXCEPTIONS)
+extern "C++"
+{
+    class runtime_wasip1_debug_environment final
+    {
+        friend class runtime_checkpoint_coherent_manager;
+        friend class llvm_jit_wasip1_environment_capsule;
+        friend class runtime_checkpoint_world_transaction;
+        runtime_wasip1_debug_environment() = delete;
+        using request = ::uwvm2::uwvm::debugger::wasip1_state::request;
+        using view = ::uwvm2::uwvm::debugger::wasip1_state::view;
+        using status = ::uwvm2::uwvm::debugger::wasip1_state::status;
+        using action = ::uwvm2::uwvm::debugger::wasip1_state::action;
+#if !defined(UWVM_DISABLE_LOCAL_IMPORTED_WASIP1) && defined(UWVM_IMPORT_WASI_WASIP1)
+        using fd = ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_t;
+        using fd_type = ::uwvm2::imported::wasi::wasip1::fd_manager::wasi_fd_type_e;
+        using strings = ::uwvm2::utils::container::vector<::uwvm2::utils::container::u8string>;
+        using string_views = ::uwvm2::utils::container::vector<::uwvm2::utils::container::u8string_view>;
+        // Cold management lookup: only actual selected-world storage may own
+        // argument/environment views. No guest or file pointer is accepted.
+        [[nodiscard]] static bool resolve_text_owners(::std::size_t, wasip1_env_type&,
+            strings*&, strings*&) noexcept;
+        [[nodiscard]] static bool bound_text(strings const& backing, string_views const& views) noexcept
+        {
+            namespace ws = ::uwvm2::uwvm::debugger::wasip1_state;
+            if(backing.size() != views.size() || views.size() > ws::maximum_entries) { return false; }
+            ::std::size_t bytes{};
+            for(::std::size_t i{}; i != views.size(); ++i)
+            {
+                // [actual owned vectors with equal counts ... i<N] end
+                // [safe] compare view addresses and extents BEFORE borrowing its
+                // bytes. No arbitrary caller view is dereferenced as ownership.
+                auto const& owner{backing.index_unchecked(i)}; auto const& borrowed{views.index_unchecked(i)};
+                if(owner.data() != borrowed.data() || owner.size() != borrowed.size() ||
+                   owner.size() > ws::maximum_text_bytes || owner.size() + 1u > ws::maximum_environment_bytes - bytes)
+                { return false; }
+                bytes += owner.size() + 1u; // Checked bounded accumulation BEFORE addition.
+                for(char8_t c : owner) { if(c == u8'\0') { return false; } }
+            }
+            return true;
+        }
+        [[nodiscard]] static view text_operation(request const& selected,
+            strings& backing, string_views& live) noexcept
+        {
+            namespace ws = ::uwvm2::uwvm::debugger::wasip1_state;
+            view out{}; out.module = selected.module; out.operation = selected.operation;
+            if(!bound_text(backing, live)) { out.result = status::unavailable_owned_text; return out; }
+            out.total_entries = backing.size();
+            bool const environment{selected.operation == action::environment || selected.operation == action::set_environment ||
+                selected.operation == action::remove_environment};
+            if(!ws::is_mutation(selected.operation))
+            {
+                auto const first{selected.first < backing.size() ? static_cast<::std::size_t>(selected.first) : backing.size()};
+                auto const count{(::std::min)(static_cast<::std::size_t>(selected.count), backing.size() - first)};
+                out.strings.reserve(count);
+                ::std::size_t page_bytes{};
+                out.next = first;
+                for(::std::size_t i{}; i != count; ++i)
+                {
+                    // [checked page first..first+count<=N] end
+                    // [safe] first+i<N; original storage, never request pointers.
+                    auto const& entry{backing.index_unchecked(first + i)};
+                    if(entry.size() > ws::maximum_page_text_bytes - page_bytes) { break; }
+                    out.strings.push_back({first + i, ws::text{ws::text_view{entry.data(), entry.size()}}});
+                    page_bytes += entry.size(); // Checked byte budget BEFORE addition.
+                    out.next = first + i + 1u; // first+i<N proves this <=N.
+                }
+                out.more = out.next < backing.size(); out.result = status::ok; return out;
+            }
+            strings candidate{};
+            bool const insert{selected.operation == action::insert_argument};
+            bool const remove{selected.operation == action::remove_argument};
+            if(insert && backing.size() == ws::maximum_entries) { out.result = status::resource_limit; return out; }
+            if(insert && selected.index > backing.size()) { out.result = status::entry_not_found; return out; }
+            candidate.reserve(backing.size() + static_cast<::std::size_t>(selected.operation == action::set_environment || insert));
+            bool found{};
+            if((selected.operation == action::replace_argument || remove) && selected.index >= backing.size())
+            { out.result = status::entry_not_found; return out; }
+            for(::std::size_t i{}; i != backing.size(); ++i)
+            {
+                auto const& entry{backing.index_unchecked(i)};
+                if(insert && selected.index == i) { candidate.emplace_back(ws::text_view{selected.value.data(), selected.value.size()}); }
+                if(remove && selected.index == i) { found = true; continue; }
+                bool const matched{environment && ws::environment_key_matches(ws::text_view{entry.data(), entry.size()}, ws::text_view{selected.name.data(), selected.name.size()})};
+                if(matched)
+                {
+                    if(found) { out.result = status::unavailable_owned_text; return out; } // Ambiguous duplicate key, leave every vector unchanged.
+                    found = true;
+                    if(selected.operation == action::remove_environment) { continue; }
+                    ::uwvm2::utils::container::u8string replacement{};
+                    ::fast_io::io::print(::uwvm2::utils::container::u8string_ref_uwvm{::std::addressof(replacement)},
+                        ::fast_io::u8string_view{selected.name.data(), selected.name.size()}, ::fast_io::mnp::chvw(u8'='),
+                        ::fast_io::u8string_view{selected.value.data(), selected.value.size()});
+                    candidate.push_back(::std::move(replacement));
+                }
+                else if(!environment && !insert && selected.index == i)
+                { candidate.emplace_back(ws::text_view{selected.value.data(), selected.value.size()}); found = true; }
+                else { candidate.push_back(entry); }
+            }
+            if(insert && selected.index == backing.size())
+            { candidate.emplace_back(ws::text_view{selected.value.data(), selected.value.size()}); }
+            if(environment && !found)
+            {
+                if(selected.operation == action::remove_environment) { out.result = status::entry_not_found; return out; }
+                if(candidate.size() == ws::maximum_entries) { out.result = status::resource_limit; return out; }
+                ::uwvm2::utils::container::u8string replacement{};
+                ::fast_io::io::print(::uwvm2::utils::container::u8string_ref_uwvm{::std::addressof(replacement)},
+                    ::fast_io::u8string_view{selected.name.data(), selected.name.size()}, ::fast_io::mnp::chvw(u8'='),
+                    ::fast_io::u8string_view{selected.value.data(), selected.value.size()});
+                candidate.push_back(::std::move(replacement));
+            }
+            string_views candidate_views{}; candidate_views.reserve(candidate.size());
+            ::std::size_t bytes{};
+            for(auto const& entry : candidate)
+            {
+                if(entry.size() + 1u > ws::maximum_environment_bytes - bytes)
+                { out.result = status::resource_limit; return out; }
+                bytes += entry.size() + 1u;
+                candidate_views.emplace_back(entry.data(), entry.size());
+            }
+            out.total_entries = candidate.size();
+            // No allocate/throw/provider/guest callback after commit begins.
+            // All real guest actors are parked and host admission is closed.
+            // Candidate_views points into candidate's individually owned strings;
+            // vector swap transfers buffers without relocating string objects.
+            // First publish the new views, then their owning buffer. The retired
+            // views/backing die only after BOTH swaps complete in this proof scope.
+            live.swap(candidate_views); backing.swap(candidate);
+            out.mutation_applied = true; out.result = status::ok; return out;
+        }
+        [[nodiscard]] static fd* find_descriptor(::uwvm2::imported::wasi::wasip1::fd_manager::wasm_fd_storage_t& storage,
+            ::std::uint64_t number) noexcept
+        {
+            if(number > static_cast<::std::uint64_t>((::std::numeric_limits<::std::int32_t>::max)())) { return nullptr; }
+            if(number < storage.opens.size())
+            {
+                // [actual manager opens vector ... number<size] end
+                // [safe] bounded unsigned integer is checked BEFORE narrowing.
+                return storage.opens.index_unchecked(static_cast<::std::size_t>(number)).fd_p;
+            }
+            auto const found{storage.renumber_map.find(static_cast<::std::int32_t>(number))};
+            return found == storage.renumber_map.end() ? nullptr : found->second.fd_p;
+        }
+        [[nodiscard]] static bool descriptor_row(fd const& actual, ::std::uint64_t number,
+            ::uwvm2::uwvm::debugger::wasip1_state::descriptor_entry& row) noexcept
+        {
+            namespace ws = ::uwvm2::uwvm::debugger::wasip1_state;
+            if(actual.close_pos != SIZE_MAX || actual.wasi_fd.ptr == nullptr) { return false; }
+            auto const& storage{actual.wasi_fd.ptr->wasi_fd_storage};
+            row.managed_resource = actual.wasi_fd.ptr->checkpoint_managed_identity;
+            row.descriptor = number; row.base_rights = static_cast<::std::uint64_t>(actual.rights_base);
+            row.inheriting_rights = static_cast<::std::uint64_t>(actual.rights_inherit);
+            switch(storage.type)
+            {
+                case fd_type::null: return false;
+                case fd_type::file: row.kind = ws::descriptor_kind::native_file; break;
+                case fd_type::file_observer: row.kind = ws::descriptor_kind::native_file_observer; break;
+                case fd_type::dir:
+                {
+                    row.kind = ws::descriptor_kind::directory;
+                    auto const& chain{storage.storage.dir_stack};
+                    row.preopened = chain.is_preload_dir();
+                    if(row.preopened)
+                    {
+                        // [actual nonempty one-element directory chain] end
+                        // [safe] is_preload_dir proved size==1 before front().
+                        auto const entry{chain.dir_stack.front_unchecked().ptr};
+                        if(entry == nullptr) { return false; }
+                        row.guest_preopen_name.assign(ws::text_view{entry->dir_stack.name.data(), entry->dir_stack.name.size()});
+                    }
+                    break;
+                }
+#if defined(_WIN32) && !defined(__CYGWIN__)
+                case fd_type::socket: row.kind = ws::descriptor_kind::socket; break;
+                case fd_type::socket_observer: row.kind = ws::descriptor_kind::socket_observer; break;
+#endif
+                default: return false;
+            }
+            return true;
+        }
+        // Never use path_open's creation name: a retained descriptor survives
+        // renames, unlink, fd_renumber and duplication. Query its live OS owner.
+        static void descriptor_current_path(fd const& actual, ::uwvm2::uwvm::debugger::wasip1_state::descriptor_entry& row) noexcept
+        {
+            namespace ws=::uwvm2::uwvm::debugger::wasip1_state;
+            auto const& storage{actual.wasi_fd.ptr->wasi_fd_storage};
+            auto sample{[&](auto handle)
+            {
+                auto first{ws::current_descriptor_path(handle)};
+                auto second{ws::current_descriptor_path(handle)};
+                if(!first.empty() && first==second) { row.current_path=::std::move(second); row.current_path_available=true; }
+            }};
+            switch(storage.type)
+            {
+                case fd_type::file:
+#if defined(_WIN32) && !defined(__CYGWIN__)
+                    sample(storage.storage.file_fd.file.native_handle());
+#else
+                    sample(storage.storage.file_fd.native_handle());
+#endif
+                    break;
+                case fd_type::file_observer: sample(storage.storage.file_observer.native_handle()); break;
+                case fd_type::dir:
+                {
+                    auto const& stack{storage.storage.dir_stack.dir_stack};
+                    if(stack.empty() || stack.back_unchecked().ptr==nullptr) { break; }
+                    auto const& entry{stack.back_unchecked().ptr->dir_stack};
+                    if(entry.is_observer) { sample(entry.storage.observer.native_handle()); }
+                    else { sample(entry.storage.file.native_handle()); }
+                    break;
+                }
+                default: break;
+            }
+        }
+#include "uwvm_runtime_wasip1_managed_files.h"
+        // Detached debugger policy data. The caller owns the complete current
+        // cohort; neither host handles nor resource incarnation pointers escape.
+        [[nodiscard]] static view policy_operation(request const& selected, wasip1_env_type& environment)
+        {
+            namespace ws=::uwvm2::uwvm::debugger::wasip1_state;
+            view out{};out.module=selected.module;out.operation=selected.operation;
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            namespace ep=::uwvm2::imported::wasi::wasip1::environment;
+            namespace hi=::uwvm2::utils::control::host_interfaces;
+            ::std::size_t copied_bytes{};bool page_full{};
+            auto entry=[&](::uwvm2::utils::container::std_string const& key,::uwvm2::utils::container::std_string const& value)
+            {
+                auto index{out.total_entries++};
+                if(index<selected.first || page_full) { return; }
+                auto bytes{key+"="+value};
+                if(out.strings.size()>=selected.count || bytes.size()>ws::maximum_page_text_bytes-copied_bytes)
+                { page_full=true;out.more=true;return; }
+                ws::text_entry entry{};entry.index=index;
+                for(unsigned char c:bytes) { entry.bytes.push_back(static_cast<char8_t>(c)); }
+                copied_bytes+=bytes.size();out.strings.push_back(::std::move(entry));out.next=index+1u;
+            };
+            // The page byte budget is a transport boundary, not a limit on
+            // configured group identities. Long values remain reachable as
+            // explicit byte fragments instead of a zero-progress "more" page.
+            auto row=[&](::uwvm2::utils::container::std_string const& key,::uwvm2::utils::container::std_string const& value)
+            {
+                if(key.size()+1u+value.size()<=ws::maximum_page_text_bytes) { entry(key,value);return; }
+                entry(key+".bytes-total",::uwvm2::utils::container::to_string(value.size()));
+                for(::std::size_t offset{};offset<value.size();)
+                {
+                    auto const count{(::std::min)(::std::size_t{2048u},value.size()-offset)};
+                    entry(key+".fragment."+::uwvm2::utils::container::to_string(offset),value.substr(offset,count));offset+=count;
+                }
+            };
+            out.next=selected.first;
+            auto number=[&](::uwvm2::utils::container::std_string const& key,::std::uint64_t value) { row(key,::uwvm2::utils::container::to_string(value)); };
+            auto limit=[&](::uwvm2::utils::container::std_string const& key,::std::uint64_t value) { row(key,value==ep::unlimited?"unlimited" : ::uwvm2::utils::container::to_string(value)); };
+            number("environment.identity",environment.debug_trace_identity);
+            row("group.kind",environment.trace_wasip1_group_kind==ep::trace_wasip1_group_kind_t::global?"global":
+                environment.trace_wasip1_group_kind==ep::trace_wasip1_group_kind_t::single?"single":"group");
+            row("group.name",{reinterpret_cast<char const*>(environment.trace_wasip1_group_name_storage.data()),environment.trace_wasip1_group_name_storage.size()});
+            for(::std::size_t i{};i<g_runtime.modules.size();++i)
+            { if(is_wasip1_import_visible_for_runtime_module_id_slow(i) &&
+                 ::std::addressof(resolve_wasip1_env_for_runtime_module_id(i))==::std::addressof(environment))
+                { number("group.member."+::uwvm2::utils::container::to_string(i),i); } }
+            row("interface.enabled",environment.interface_enabled?"true":"false");
+            row("socket.abi",environment.wasix_socket_abi?"wasix":"wasip1");
+            row("utf8.validation",environment.disable_utf8_check?"disabled":"enabled");
+            for(::std::size_t i{};i<hi::catalogue.size();++i)
+            { if(hi::catalogue[i].group==hi::family::wasip1)
+                { row("interface."+::uwvm2::utils::container::std_string(hi::catalogue[i].function),::uwvm2::utils::container::std_string(hi::name(environment.interfaces.entries[i]))); } }
+            constexpr char const* grants[]{"clock-realtime","clock-monotonic","clock-process","clock-thread","random","proc-raise","sched-yield","stdio-full-rights","stdin-read","stdout-write","stderr-write","stdio-metadata","stdio-readiness","args","environ","proc-exit",nullptr,"realtime-resolution","monotonic-resolution","process-resolution","thread-resolution","realtime-timer","monotonic-timer","process-timer","thread-timer"};
+            for(unsigned i{};i<::std::size(grants);++i)
+            { if(grants[i]==nullptr)continue; // Unassigned permission bit; never an interface or grant
+              row("grant."+::uwvm2::utils::container::std_string(grants[i]),environment.permits(static_cast<ep::permission_t>(::std::uint32_t{1u}<<i))?"allow":"deny"); }
+            limit("fd.limit",environment.fd_storage.fd_limit);
+            limit("poll.max-subscriptions",environment.limits.max_poll_subscriptions);
+            limit("poll.max-wait-ns",environment.limits.max_poll_wait_ns);
+            limit("args-env.max-bytes",environment.limits.max_args_env_bytes);
+            number("filesystem.base-rights",environment.limits.filesystem_base_rights);
+            number("filesystem.inheriting-rights",environment.limits.filesystem_inheriting_rights);
+            constexpr char const* clocks[]{"realtime","monotonic","process","thread"};
+            for(unsigned i{};i<4u;++i) { number("clock."+::uwvm2::utils::container::std_string(clocks[i])+".granularity-ns",environment.limits.clock_granularity_ns[i]); }
+            auto const& ledger{environment.limits.accounting};
+            if(!ledger) { out={};out.module=selected.module;out.operation=selected.operation;out.result=status::unavailable_environment;return out; }
+            ::std::unique_lock accounting_lock{ledger->mutex,::std::try_to_lock};
+            if(!accounting_lock.owns_lock()) { out={};out.module=selected.module;out.operation=selected.operation;out.result=status::unavailable_foreign_host_state;return out; }
+            constexpr char const* budgets[]{"random","stdin","stdout","stderr","realtime","monotonic","process","thread","poll","signal","yield","filesystem","socket-read","socket-write","socket-accept","socket-shutdown"};
+            constexpr char const* fields[]{"request-bytes","window-bytes","window-calls","total-bytes","total-calls","concurrent"};
+            for(unsigned i{};i<::std::size(budgets);++i)
+            {
+                auto const prefix{"quota."+::uwvm2::utils::container::std_string(budgets[i])+"."};auto const& policy{environment.limits.operations[i]};
+                ::std::uint64_t const values[]{policy.request_bytes,policy.window_bytes,policy.window_calls,policy.total_bytes,policy.total_calls,policy.concurrent};
+                for(unsigned j{};j<6u;++j)
+                {
+                    auto const key{prefix+fields[j]};limit(key,values[j]);
+                    row(key+".on-limit",policy.actions[j]==ep::limit_action::wait?"wait":"reject");
+                    row(key+".on-exit",policy.exit_actions[j]==ep::exit_wait_action::wait?"wait":"cancel");
+                }
+                row(prefix+"native-wait.on-exit",policy.native_wait_exit_action==ep::exit_wait_action::wait?"wait":"cancel");
+                auto const& counter{ledger->counters[i]};
+                number(prefix+"used.window-bytes",counter.window_bytes);number(prefix+"used.window-calls",counter.window_calls);
+                number(prefix+"used.total-bytes",counter.total_bytes);number(prefix+"used.total-calls",counter.total_calls);number(prefix+"used.active",counter.active);
+            }
+            // Live FD rights and paths are separately paged by fds/preopens;
+            // this list describes the immutable approved socket capabilities.
+            for(auto const& socket:environment.socket_rights)
+            {
+                auto const prefix{"socket."+::uwvm2::utils::container::to_string(socket.fd)+"."};
+                number(prefix+"base-rights",static_cast<::std::uint64_t>(socket.base));
+                number(prefix+"inheriting-rights",static_cast<::std::uint64_t>(socket.inheriting));
+            }
+            out.result=status::ok;return out;
+#else
+            out.result=status::not_selected;return out;
+#endif
+        }
+        [[nodiscard]] static view descriptor_operation(request const& selected, wasip1_env_type& environment) noexcept
+        {
+            namespace ws = ::uwvm2::uwvm::debugger::wasip1_state;
+            view out{}; out.module = selected.module; out.operation = selected.operation;
+            out.environment_identity=environment.debug_trace_identity;
+            auto& storage{environment.fd_storage};
+            // Cold management only: the actual gate/cohort proof surrounds this
+            // ordinary FD storage -> per-FD lock order. No guest hot path changes.
+            ::uwvm2::utils::mutex::rw_fair_shared_guard_t table_guard{storage.fds_rwlock};
+            if(selected.operation == action::reduce_rights)
+            {
+                auto const actual{find_descriptor(storage, selected.descriptor)};
+                if(actual == nullptr) { out.result = status::bad_descriptor; return out; }
+                ::uwvm2::utils::mutex::mutex_guard_t descriptor_guard{actual->fd_mutex};
+                if(actual->close_pos != SIZE_MAX || actual->wasi_fd.ptr == nullptr ||
+                    actual->wasi_fd.ptr->wasi_fd_storage.type == fd_type::null)
+                { out.result = status::bad_descriptor; return out; }
+                auto const base{static_cast<::std::uint64_t>(actual->rights_base)}, inheriting{static_cast<::std::uint64_t>(actual->rights_inherit)};
+                if(base != selected.expected_base || inheriting != selected.expected_inheriting)
+                { out.result = status::changed_descriptor; return out; }
+                if(!ws::rights_subset(selected.new_base, selected.new_inheriting, base, inheriting))
+                { out.result = status::capability_increase; return out; }
+                // Both subsets were checked BEFORE either scalar is changed.
+                // No handle injection, dup/open/close/renumber or OS operation.
+                actual->rights_base = static_cast<decltype(actual->rights_base)>(selected.new_base);
+                actual->rights_inherit = static_cast<decltype(actual->rights_inherit)>(selected.new_inheriting);
+                out.mutation_applied = true; out.result = status::ok; return out;
+            }
+            if(storage.opens.size() > ws::maximum_fd_scan || storage.renumber_map.size() > ws::maximum_fd_scan - storage.opens.size())
+            { out.result = status::resource_limit; return out; }
+            // renumber_map is not assumed ordered. Collect bounded actual guest
+            // identifiers, sort BEFORE pagination and reject duplicates/inconsistent
+            // vector/map membership; numeric next can never skip a lower FD.
+            ::uwvm2::utils::container::vector<::std::uint64_t> numbers{};
+            numbers.reserve(storage.opens.size() + storage.renumber_map.size());
+            for(::std::size_t i{}; i != storage.opens.size(); ++i) { numbers.push_back(i); }
+            for(auto const& [number, item] : storage.renumber_map)
+            {
+                (void)item;
+                if(number < 0 || static_cast<::std::uint64_t>(number) < storage.opens.size())
+                { out.result = status::unavailable_environment; return out; }
+                numbers.push_back(static_cast<::std::uint64_t>(number));
+            }
+            if(numbers.size() > 1u)
+            {
+                // [actual owned guest ID buffer ... bounded <=65536 cells] end
+                // [safe] nonempty container iterators bound all sorting accesses.
+                ::std::sort(numbers.begin(), numbers.end());
+            }
+            for(::std::size_t i{1u}; i < numbers.size(); ++i)
+            {
+                // [sorted bounded IDs ... i-1,i<N] end
+                // [safe] i>=1 and i<N BEFORE both reads.
+                if(numbers.index_unchecked(i - 1u) == numbers.index_unchecked(i))
+                { out.result = status::unavailable_environment; return out; }
+            }
+            out.descriptors.reserve(static_cast<::std::size_t>(selected.count));
+            out.next = selected.first;
+            ::std::size_t page_bytes{}; bool page_closed{};
+            auto const copy_row{[&](fd* actual, ::std::uint64_t number) noexcept
+            {
+                if(actual == nullptr) { return; }
+                ::uwvm2::utils::mutex::mutex_guard_t descriptor_guard{actual->fd_mutex};
+                ws::descriptor_entry row{};
+                if(!descriptor_row(*actual, number, row) || (selected.operation == action::preopens && !row.preopened)) { return; }
+                ++out.total_entries; // Entire scan <=65536, no overflow.
+                if(number < selected.first) { return; }
+                descriptor_current_path(*actual,row);
+                if(page_closed || out.descriptors.size() == selected.count || row.guest_preopen_name.size()+row.current_path.size() > ws::maximum_page_text_bytes - page_bytes)
+                { page_closed = true; out.more = true; return; }
+                out.next = number + 1u; // number<=INT32_MAX, checked BEFORE next advance.
+                page_bytes += row.guest_preopen_name.size()+row.current_path.size(); // Checked BEFORE addition.
+                out.descriptors.push_back(::std::move(row));
+            }};
+            for(auto const number : numbers) { copy_row(find_descriptor(storage, number), number); }
+            out.result = status::ok; return out;
+        }
+#endif
+        [[nodiscard]] static view apply_current(request const& selected) noexcept
+        {
+            namespace ws = ::uwvm2::uwvm::debugger::wasip1_state;
+            view out{}; out.module = selected.module; out.operation = selected.operation;
+            if(!ws::valid(selected)) { out.result = status::invalid_request; return out; }
+#if !defined(UWVM_DISABLE_LOCAL_IMPORTED_WASIP1) && defined(UWVM_IMPORT_WASI_WASIP1)
+            namespace storage = ::uwvm2::uwvm::imported::wasi::wasip1::storage;
+            if(selected.module >= g_runtime.modules.size() || g_runtime.modules.size() > ws::maximum_entries ||
+               !is_wasip1_import_visible_for_runtime_module_id_slow(static_cast<::std::size_t>(selected.module)))
+            { out.result = status::unavailable_environment; return out; }
+            auto const id{static_cast<::std::size_t>(selected.module)};
+            // [actual runtime module vector ... selected.module<size] end
+            // [safe] actual generation lease+publication and canonical full engine.
+            auto const& record{g_runtime.modules.index_unchecked(id)};
+            auto const publication{record.llvm_jit_full_publication.get()};
+            if(record.runtime_module == nullptr || !record.llvm_jit_ready || publication == nullptr || !publication->engine ||
+               !publication->context || publication->plan || publication->debug_source_runtime_epoch != current_runtime_generation())
+            { out.result = status::unavailable_environment; return out; }
+            // An unused native provider can retain stable host API tables;
+            // an empty counted gate/current exposure=false cannot revoke them.
+            // This cold current source census is required BEFORE env/FD/text
+            // reads or mutation, in addition to genuine outer ALL/host/N/pub.
+            if(!::uwvm2::uwvm::runtime::full::full_source_instance::has_canonical_owner(publication->source))
+            { out.result=status::unavailable_foreign_host_state;return out; }
+            // Pure live inspection accepts the exact finalized builtin WASI/ROS
+            // census under the outer closed-host/ALL-stop/publication proof.
+            // Native plugins still fail that census. State changes retain the
+            // stricter WASI-only adapter contract; this grants no restore right.
+            bool const qualified{ws::is_mutation(selected.operation) ?
+                publication->source->actual_no_unadapted_native_memory_provider(id,current_runtime_generation(),record.runtime_module) :
+                publication->source->actual_debug_memory_provider_census(id,current_runtime_generation(),record.runtime_module)};
+            if(!qualified) { out.result=status::unavailable_foreign_host_state;return out; }
+            auto& environment{resolve_wasip1_env_for_runtime_module_id(id)};
+            strings* arguments{}; strings* variables{};
+            if(!resolve_text_owners(id,environment,arguments,variables))
+            { out.result = status::unavailable_owned_text; return out; }
+            ::std::size_t aliases{};
+            for(::std::size_t i{}; i != g_runtime.modules.size(); ++i)
+            {
+                if(is_wasip1_import_visible_for_runtime_module_id_slow(i) &&
+                   ::std::addressof(resolve_wasip1_env_for_runtime_module_id(i)) == ::std::addressof(environment)) { ++aliases; }
+            }
+            switch(selected.operation)
+            {
+                case action::policy: out=policy_operation(selected,environment);break;
+                case action::arguments: case action::replace_argument: case action::insert_argument: case action::remove_argument:
+                    out = text_operation(selected, *arguments, environment.argv); break;
+                case action::environment: case action::set_environment: case action::remove_environment:
+                    out = text_operation(selected, *variables, environment.envs); break;
+                case action::descriptor_detail: case action::trace_enable: case action::trace_disable: case action::trace_clear: case action::trace_read:
+                    out.result = status::invalid_request; return out; // trace DATA bypasses no environment admission
+                case action::portable_export: case action::portable_import:
+                case action::portable_export_group: case action::portable_import_group:
+                case action::checkpoint_save: case action::checkpoint_restore: case action::checkpoint_drop:
+                    out.result = status::invalid_request; return out; // Native capsule API, never a DATA-only request.
+                case action::create_file: case action::duplicate_descriptor: case action::close_descriptor:
+                    if constexpr(::uwvm2::runtime::lib::wasip1_native_file::supported)
+                    { out = manage_descriptor(selected, environment); break; }
+                    else { out.result = status::unavailable_resource_rollback; return out; }
+                case action::descriptors: case action::preopens: case action::reduce_rights:
+                    out = descriptor_operation(selected, environment); break;
+            }
+            out.environment_identity=environment.debug_trace_identity;
+            out.shared_environment = aliases > 1u; out.observed_runtime_epoch = current_runtime_generation();
+            return out;
+#else
+            out.result = status::unavailable_environment; return out;
+#endif
+        }
+    };
+}
+#endif

@@ -1,0 +1,111 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-03-27
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+module;
+#include <uwvm2/utils/container/unique.h>
+#include <uwvm2/utils/container/standard.h>
+#include <uwvm2/utils/container/shared.h>
+// std
+#include <uwvm2/runtime/lib/uwvm_runtime_update.h>
+#include <atomic>
+#include <bit>
+#include <array>
+#include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include <uwvm2/runtime/lib/uwvm_runtime_posix_abi.h>
+#if defined(__unix__) || defined(__APPLE__)
+# include <unistd.h>
+#endif
+#if defined(__linux__)
+# include <sys/socket.h>
+# include <sys/syscall.h>
+#endif
+#include <limits>
+#include <uwvm2/runtime/lib/uwvm_runtime_guest_exit.h>
+#include <memory>
+#include <span>
+#include <type_traits>
+#include <utility>
+#include <vector>
+#if defined(_WIN32) && !defined(__CYGWIN__)
+// These Win32 API declarations are needed directly by run.h; importing the
+// fast_io module alone does not make its global-fragment declarations visible.
+# include <fast_io_device.h>
+#endif
+// macro
+#include <uwvm2/utils/macro/push_macros.h>
+#include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+#include <uwvm2/uwvm/runtime/macro/push_macros.h>
+#if defined(UWVM_UTILS_HAS_FAST_IO_NATIVE_THREAD)
+# include <thread>
+#endif
+#include <uwvm2/runtime/lib/uwvm_runtime_threaded_profile_feature.h>
+export module uwvm2.uwvm.run:run;
+
+import :threaded_signal_cli;
+import uwvm2.runtime.diagnostic.crash_file;
+#if defined(UWVM_IMPORT_ROS1) || defined(UWVM_IMPORT_ROS2)
+import uwvm2.uwvm.imported.ros;
+#endif
+import fast_io;
+import uwvm2.runtime.gc.entry_admission;
+import uwvm2.utils.container;
+import uwvm2.utils.ansies;
+import uwvm2.utils.debug;
+import uwvm2.utils.thread;
+import uwvm2.parser.wasm.base;
+import uwvm2.parser.wasm.concepts;
+import uwvm2.parser.wasm.standard;
+import uwvm2.parser.wasm.binfmt.base;
+// Import the API and its configuration types just as the runtime implementation
+// does. A textual header in the global fragment cannot see module-owned
+// u8string_view; adding textual container headers there would mix type ownership.
+import uwvm2.runtime;
+#if UWVM2_HAS_THREADED_PROFILE_HOST_API
+import uwvm2.runtime.wasm_threads;
+#endif
+import uwvm2.uwvm.io;
+import uwvm2.uwvm.utils.ansies;
+import uwvm2.uwvm.utils.memory;
+import uwvm2.uwvm.cmdline;
+import uwvm2.uwvm.cmdline.params;
+import uwvm2.uwvm.wasm;
+import uwvm2.uwvm.runtime;
+import uwvm2.utils.control;
+import uwvm2.uwvm.debugger;
+import :retval;
+import :loader;
+import :owned_source;
+
+#ifndef UWVM_MODULE
+# define UWVM_MODULE
+#endif
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT export
+#endif
+
+#include "update_cli.h"
+#include "run.h"

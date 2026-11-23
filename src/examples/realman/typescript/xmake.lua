@@ -1,0 +1,11 @@
+set_project("realman-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("realman-observation")
+    set_kind("binary")
+    set_language("typescript")
+    set_ros_platform("realman")
+    set_wros_test_queries("realtime-clock")
+    add_files("main.ts")
+    add_wros_tests("int", "aot")
+target_end()

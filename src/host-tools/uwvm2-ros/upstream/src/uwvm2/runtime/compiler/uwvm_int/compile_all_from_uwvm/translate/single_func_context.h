@@ -1,0 +1,1000 @@
+// Validate and emit each instruction in one traversal of the function body.
+// The compiler owns its runtime metadata and emission state; Core 3 type and
+// feature rules use the same helpers as validation/standard/wasm3.
+
+using wasm_u32 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_u32;
+using wasm_i32 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_i32;
+using wasm_i64 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_i64;
+using wasm_f32 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_f32;
+using wasm_f64 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_f64;
+using wasm_byte = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_byte;
+using wasm_value_type = ::uwvm2::uwvm::runtime::storage::wasm_binfmt1_final_value_type_t;
+using code_validation_error_code = ::uwvm2::validation::error::code_validation_error_code;
+using parser_feature_parameter_t = ::uwvm2::uwvm::wasm::feature::wasm_binfmt_ver1_feature_parameter_storage_t;
+using wasm_v128_t = ::uwvm2::parser::wasm::standard::wasm1p1::type::wasm_v128;
+using wasm_funcref_t = ::uwvm2::object::global::wasm_funcref_t;
+using wasm_externref_t = ::uwvm2::object::global::wasm_externref_t;
+
+parser_feature_parameter_t const default_wasm_feature_parameter{};
+auto const& effective_wasm_feature_parameter{wasm_feature_parameter == nullptr ? default_wasm_feature_parameter : *wasm_feature_parameter};
+[[maybe_unused]] auto const& wasm1p1_para{::uwvm2::parser::wasm::standard::wasm1p1::features::get_wasm1p1_parameter(effective_wasm_feature_parameter)};
+
+// no necessary to set err to default
+
+enum class block_type : unsigned
+{
+    function,
+    block,
+    loop,
+    if_,
+    else_
+};
+
+struct block_result_type
+{
+    wasm_value_type const* begin{};
+    wasm_value_type const* end{};
+};
+
+struct block_signature_t
+{
+    block_result_type start{};
+    block_result_type result{};
+    ::std::size_t signature_type_index{SIZE_MAX};
+    ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type singleton_result_core_type{};
+    bool has_singleton_result_core_type{};
+};
+
+struct operand_stack_storage_t
+{
+    wasm_value_type type{};
+    bool is_unknown{};
+    bool is_reference_bottom{};
+    // Compile-time only: exact ref.func/ref.null heap type. SIZE_MAX is an erased funcref.
+    ::std::size_t exact_function_type_index{SIZE_MAX};
+    ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type core_type{};
+    bool has_core_type{};
+};
+
+struct block_t
+{
+    block_result_type label{};
+    block_result_type start{};
+    block_result_type result{};
+    ::std::size_t signature_type_index{SIZE_MAX};
+    ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type singleton_result_core_type{};
+    bool has_singleton_result_core_type{};
+    ::std::size_t operand_stack_base{};
+    block_type type{};
+    bool polymorphic_base{};
+    ::std::size_t local_init_checkpoint{};
+    ::uwvm2::runtime::compiler::shared::wasm_exception_control::handlers exception_handlers{};
+    bool then_polymorphic_end{};  // only meaningful for if/else frames
+    bool codegen_entry_reachable{true};
+    // Ordinary incoming edges exist even when the interpreter has no register
+    // cache. Do not infer execution reachability from optional cache snapshots.
+    bool codegen_has_end_edge{};
+    // Index of a cold exception target; no runtime work or allocation for functions without EH.
+    ::std::size_t exception_target_index{SIZE_MAX};
+
+    // Stack-top cache snapshot at "end label" entry (used when fallthrough is unreachable at `end`,
+    // but the construct is reachable via an earlier branch to its end label).
+    // Only meaningful when scalar stack-top caching is enabled.
+    bool stacktop_has_end_state{};
+    ::uwvm2::runtime::compiler::uwvm_int::optable::uwvm_interpreter_stacktop_currpos_t stacktop_currpos_at_end{};
+    ::std::size_t stacktop_memory_count_at_end{};
+    ::std::size_t stacktop_cache_count_at_end{};
+    ::std::size_t stacktop_cache_i32_count_at_end{};
+    ::std::size_t stacktop_cache_i64_count_at_end{};
+    ::std::size_t stacktop_cache_f32_count_at_end{};
+    ::std::size_t stacktop_cache_f64_count_at_end{};
+    // Codegen type stack snapshot at end label entry.
+    // Needed to restore type information when a polymorphic fallthrough reaches `end` and becomes reachable again.
+    ::uwvm2::utils::container::validation_vector<operand_stack_storage_t> codegen_operand_stack_at_end{};
+
+    // Stack-top cache snapshot at `if` or `loop` entry. The numeric loop fields also describe
+    // exception re-entry into its already emitted header; no loop type-vector copy is needed.
+    ::uwvm2::runtime::compiler::uwvm_int::optable::uwvm_interpreter_stacktop_currpos_t stacktop_currpos_at_else_entry{};
+    ::std::size_t stacktop_memory_count_at_else_entry{};
+    ::std::size_t stacktop_cache_count_at_else_entry{};
+    ::std::size_t stacktop_cache_i32_count_at_else_entry{};
+    ::std::size_t stacktop_cache_i64_count_at_else_entry{};
+    ::std::size_t stacktop_cache_f32_count_at_else_entry{};
+    ::std::size_t stacktop_cache_f64_count_at_else_entry{};
+    ::uwvm2::utils::container::validation_vector<operand_stack_storage_t> codegen_operand_stack_at_else_entry{};
+
+    // Stack-top cache snapshot at then-path end (used when else-path is unreachable but then-path reaches `end`).
+    // Only meaningful for `if-else` frames when scalar stack-top caching is enabled.
+    bool stacktop_has_then_end_state{};
+    ::uwvm2::runtime::compiler::uwvm_int::optable::uwvm_interpreter_stacktop_currpos_t stacktop_currpos_at_then_end{};
+    ::std::size_t stacktop_memory_count_at_then_end{};
+    ::std::size_t stacktop_cache_count_at_then_end{};
+    ::std::size_t stacktop_cache_i32_count_at_then_end{};
+    ::std::size_t stacktop_cache_i64_count_at_then_end{};
+    ::std::size_t stacktop_cache_f32_count_at_then_end{};
+    ::std::size_t stacktop_cache_f64_count_at_then_end{};
+    ::uwvm2::utils::container::validation_vector<operand_stack_storage_t> codegen_operand_stack_at_then_end{};
+
+    // Translation labels:
+    // - For `block`/`if`/`else`/`function`: `end_label_id` is the branch target.
+    // - For `loop`: `start_label_id` is the branch target, `end_label_id` is the fallthrough target.
+    ::std::size_t start_label_id{SIZE_MAX};
+    ::std::size_t end_label_id{SIZE_MAX};
+    ::std::size_t else_label_id{SIZE_MAX};  // only meaningful for if/else frames
+
+    // Wasm bytecode pointer at the loop start label (first opcode inside the loop body). Used by extra-heavy loop fusion.
+    ::std::byte const* wasm_code_curr_at_start_label{};
+};
+
+auto const import_func_count{curr_module.imported_function_vec_storage.size()};
+auto const local_func_count{curr_module.local_defined_function_vec_storage.size()};
+
+auto const imported_global_count{static_cast<wasm_u32>(curr_module.imported_global_vec_storage.size())};
+auto const local_global_count{static_cast<wasm_u32>(curr_module.local_defined_global_vec_storage.size())};
+auto const all_global_count{static_cast<wasm_u32>(imported_global_count + local_global_count)};
+
+auto const imported_table_count{static_cast<wasm_u32>(curr_module.imported_table_vec_storage.size())};
+auto const local_table_count{static_cast<wasm_u32>(curr_module.local_defined_table_vec_storage.size())};
+auto const all_table_count{static_cast<wasm_u32>(imported_table_count + local_table_count)};
+
+auto const imported_memory_count{static_cast<wasm_u32>(curr_module.imported_memory_vec_storage.size())};
+auto const local_memory_count{static_cast<wasm_u32>(curr_module.local_defined_memory_vec_storage.size())};
+auto const all_memory_count{static_cast<wasm_u32>(imported_memory_count + local_memory_count)};
+
+// Reuse translation temporaries across functions to avoid repeated heap allocations.
+using curr_block_type = block_t;
+::uwvm2::utils::container::validation_vector<curr_block_type> control_flow_stack{};
+
+using curr_operand_stack_value_type = wasm_value_type;
+using curr_operand_stack_type = ::uwvm2::utils::container::validation_vector<operand_stack_storage_t>;
+curr_operand_stack_type operand_stack{};
+// A Core 3 null exn reference can be recognized without creating a borrowed exception
+// carrier. It is admitted only immediately before throw_ref, so no branch, local, or
+// call can observe a value that has not been materialized in the operand frame.
+bool static_null_exception_pending{};
+// Codegen operand stack (type-only): tracks the operand-stack types for the **emitted bytecode**.
+// This is required for stack-top caching spill/fill typing because conbine may validate ahead of codegen.
+curr_operand_stack_type codegen_operand_stack{};
+
+::uwvm2::utils::container::vector<::std::size_t> local_offsets{};
+::uwvm2::utils::container::vector<curr_operand_stack_value_type> local_types{};
+
+// Reuse label/thunk fixup temporaries across functions to avoid repeated heap allocations.
+using bytecode_vec_t = ::uwvm2::runtime::compiler::uwvm_int::optable::interpreter_bytecode_vector;
+
+using rel_offset_t = ::std::make_unsigned_t<::std::ptrdiff_t>;
+static_assert(sizeof(rel_offset_t) == sizeof(::std::byte const*));
+static_assert(::std::is_trivially_copyable_v<rel_offset_t>);
+
+struct label_info_t
+{
+    ::std::size_t offset{SIZE_MAX};
+    bool in_thunk{};
+    // Compiler-only link to a live control frame; never serialized or executed.
+    ::std::size_t end_frame_index{SIZE_MAX};
+};
+
+struct ptr_fixup_t
+{
+    ::std::size_t site{};      // byte index within the owning buffer
+    ::std::size_t label_id{};  // index into labels
+    bool in_thunk{};           // false: site in `bytecode`, true: site in `thunks`
+};
+
+::uwvm2::utils::container::vector<label_info_t> labels{};
+::uwvm2::utils::container::vector<ptr_fixup_t> ptr_fixups{};
+bytecode_vec_t thunks{};
+labels.reserve(64uz);
+ptr_fixups.reserve(256uz);
+thunks.reserve(256uz);
+
+#if defined(UWVM_COMPILE_SINGLE_LOCAL_FUNCTION)
+auto const local_function_idx{compile_local_function_idx};
+#else
+for(::std::size_t local_function_idx{}; local_function_idx < local_func_count; ++local_function_idx)
+#endif
+{
+    ::std::size_t const function_index{import_func_count + local_function_idx};
+
+    auto const& curr_local_func{curr_module.local_defined_function_vec_storage.index_unchecked(local_function_idx)};
+    auto const& curr_func_type{*curr_local_func.function_type_ptr};
+    auto const& curr_code{*curr_local_func.wasm_code_ptr};
+
+    auto const code_begin{reinterpret_cast<::std::byte const*>(curr_code.body.expr_begin)};
+    auto const code_end{reinterpret_cast<::std::byte const*>(curr_code.body.code_end)};
+
+    // check
+    if(function_index < import_func_count) [[unlikely]]
+    {
+        // [function body bytes, possibly empty] | code_end
+        // [readable only if nonempty           ] | one-past is not dereferenced
+        // ^^ code_begin -> err.err_curr: diagnostic copy; begin may equal end.
+        err.err_curr = code_begin;
+        err.err_selectable.not_local_function.function_index = function_index;
+        err.err_code = code_validation_error_code::not_local_function;
+        ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+    }
+
+    auto const local_func_idx{function_index - import_func_count};
+    if(local_func_idx >= local_func_count) [[unlikely]]
+    {
+        // [function body bytes, possibly empty] | code_end
+        // [readable only if nonempty           ] | one-past is not dereferenced
+        // ^^ code_begin -> err.err_curr: diagnostic copy; begin may equal end.
+        err.err_curr = code_begin;
+        err.err_selectable.invalid_function_index.function_index = function_index;
+        err.err_selectable.invalid_function_index.all_function_size = import_func_count + local_func_count;
+        err.err_code = code_validation_error_code::invalid_function_index;
+        ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+    }
+
+    auto const func_parameter_begin{curr_func_type.parameter.begin};
+    auto const func_parameter_end{curr_func_type.parameter.end};
+    auto const func_parameter_count_uz{static_cast<::std::size_t>(func_parameter_end - func_parameter_begin)};
+    auto const func_parameter_count_u32{static_cast<wasm_u32>(func_parameter_count_uz)};
+
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+    if(func_parameter_count_u32 != func_parameter_count_uz) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+#endif
+
+    // Built only for array.new_elem/array.init_elem and reused by this function.
+    // The shared GC validator reads the same exact segment types in every backend.
+    bool gc_element_types_ready{};
+    ::uwvm2::utils::container::vector<::uwvm2::parser::wasm::standard::wasm3::type::core_value_type> gc_element_types{};
+    auto const& curr_code_locals{curr_code.locals};
+    ::uwvm2::validation::standard::wasm3::require_gc_recursive_type_policy(
+        !wasm1p1_para.disable_gc, curr_module.type_section_storage.requires_gc, code_begin, err);
+    auto const* declaration_context{wasm1p1_para.disable_gc ?
+        runtime_declaration_type_context(curr_module) : nullptr};
+    ::uwvm2::validation::standard::wasm3::require_function_declaration_policy(curr_func_type, curr_code_locals,
+        curr_module.type_section_storage.requires_function_references, wasm1p1_para, code_begin, err,
+        curr_module.table_declarations_require_function_references, curr_module.global_declarations_require_function_references,
+        curr_module.element_declarations_require_function_references, curr_module.tag_section_present || !curr_module.imported_tag_vec_storage.empty(),
+        declaration_context, curr_module.type_section_storage.type_section_count,
+        curr_module.table_declarations_require_gc, curr_module.global_declarations_require_gc, curr_module.element_declarations_require_gc,
+        runtime_exception_declaration_requirements(curr_module),
+        {.simd = curr_module.type_section_storage.requires_simd,
+         .reference_types = curr_module.type_section_storage.requires_reference_types,
+         .multi_value = curr_module.type_section_storage.requires_multi_value},
+        runtime_storage_declaration_requirements(curr_module), runtime_address_declaration_requirements(curr_module),
+        runtime_constant_declaration_requirements(curr_module));
+
+    if constexpr(FusedI32Sink::receives_fused_i32_operations)
+    { fused_i32_transaction.begin(curr_module, options.curr_wasm_id, local_function_idx); }
+
+    // all local count = parameter + local defined local count
+    wasm_u32 all_local_count{func_parameter_count_u32};
+    for(auto const& local_part: curr_code_locals)
+    {
+        // all_local_count never overflow and never exceed the max of u32 (validated by parser limits)
+        all_local_count += local_part.count;
+    }
+
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+    if constexpr(::std::numeric_limits<wasm_u32>::max() > ::std::numeric_limits<::std::size_t>::max())
+    {
+        if(all_local_count > ::std::numeric_limits<::std::size_t>::max()) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+    }
+#endif
+
+    // Reset per-function translation temporaries.
+    control_flow_stack.clear();
+    operand_stack.clear();
+    codegen_operand_stack.clear();
+    bool is_polymorphic{};
+    // Validation resets bottom typing at a nested end even if no execution edge reaches it.
+    // Keep actual fallthrough reachability separate when selecting register-cache merge states.
+    bool codegen_reachable{true};
+
+    ::uwvm2::runtime::compiler::uwvm_int::optable::local_func_storage_t local_func_symbol{};
+
+    // Translation uses internal temporary local slots to preserve branch arguments across stack-unwind branches
+    // (e.g., `br`/`br_if`/`br_table` when `target_base + arity` is not equal to current stack size).
+    auto max_internal_temp_local_count{static_cast<::std::size_t>(curr_func_type.result.end - curr_func_type.result.begin)};
+    auto const type_section_begin_for_temp{curr_module.type_section_storage.type_section_begin};
+    auto const type_section_end_for_temp{curr_module.type_section_storage.type_section_end};
+    if(type_section_begin_for_temp != nullptr && type_section_end_for_temp != nullptr)
+    {
+        // type section: [initialized type records ...] | type_section_end_for_temp
+        //               [safe while cursor != end     ] | one-past is not dereferenced
+        // ^^ type_curr walks the module's borrowed begin/end type-record span; both ends are nonnull here.
+        for(auto type_curr{type_section_begin_for_temp}; type_curr != type_section_end_for_temp; ++type_curr)
+        {
+            auto const param_count{static_cast<::std::size_t>(type_curr->parameter.end - type_curr->parameter.begin)};
+            auto const result_count{static_cast<::std::size_t>(type_curr->result.end - type_curr->result.begin)};
+            if(param_count > max_internal_temp_local_count) { max_internal_temp_local_count = param_count; }
+            if(result_count > max_internal_temp_local_count) { max_internal_temp_local_count = result_count; }
+        }
+    }
+    if(max_internal_temp_local_count == 0uz) { max_internal_temp_local_count = 1uz; }
+    if(max_internal_temp_local_count > static_cast<::std::size_t>(::std::numeric_limits<wasm_u32>::max()) ||
+       static_cast<::std::size_t>(all_local_count) >
+           static_cast<::std::size_t>(::std::numeric_limits<wasm_u32>::max()) - max_internal_temp_local_count) [[unlikely]]
+    {
+        ::fast_io::fast_terminate();
+    }
+    wasm_u32 const internal_temp_local_count{static_cast<wasm_u32>(max_internal_temp_local_count)};
+    wasm_u32 all_local_count_with_internal{all_local_count + internal_temp_local_count};
+    local_func_symbol.local_count = static_cast<::std::size_t>(all_local_count_with_internal);
+
+    using local_offset_t = ::std::size_t;
+    constexpr local_offset_t local_slot_size{sizeof(wasm_v128_t)};
+    static_assert(local_slot_size != 0uz);
+    constexpr local_offset_t internal_temp_local_size{sizeof(wasm_v128_t)};
+    static_assert(local_slot_size == internal_temp_local_size);
+
+    // Operand stack is byte-packed in byref mode: i32/f32 are 4 bytes, i64/f64 are 8 bytes.
+    // We track the exact max byte usage during validation so the runtime can allocate precisely.
+    /// @warning Extension point: new runtime value types need a byte size here plus stack-top cache and local frame layout support.
+    auto const operand_stack_valtype_size{[&](wasm_value_type t) constexpr noexcept -> ::std::size_t
+                                          {
+                                              if(static_cast<unsigned>(t) == 0x69u)
+                                              {
+                                                  // Core 3 exnref retains its 16-byte VM token even though the
+                                                  // shared wasm1p1 enum has no named exnref enumerator.
+                                                  return sizeof(wasm_externref_t);
+                                              }
+                                              switch(t)
+                                              {
+                                                  case wasm_value_type::i32:
+                                                  {
+                                                      return 4uz;
+                                                  }
+                                                  case wasm_value_type::i64:
+                                                  {
+                                                      return 8uz;
+                                                  }
+                                                  case wasm_value_type::f32:
+                                                  {
+                                                      return 4uz;
+                                                  }
+                                                  case wasm_value_type::f64:
+                                                  {
+                                                      return 8uz;
+                                                  }
+                                                  case wasm_value_type::v128:
+                                                  {
+                                                      return sizeof(wasm_v128_t);
+                                                  }
+                                                  case wasm_value_type::funcref:
+                                                  {
+                                                      return sizeof(wasm_funcref_t);
+                                                  }
+                                                  case wasm_value_type::externref:
+                                                  {
+                                                      return sizeof(wasm_externref_t);
+                                                  }
+                                                  [[unlikely]] default:
+                                                  {
+                                                      return 0uz;
+                                                  }
+                                              }
+                                          }};
+
+    // Current operand stack size in bytes (byte-packed: i32/f32=4, i64/f64=8).
+    // Maintained incrementally to avoid O(n^2) rescans during compilation.
+    ::std::size_t operand_stack_bytes{};
+
+    // Runtime operand stack maximum (for allocation sizing).
+    // Track on-demand (push/restore) instead of per-op to reduce translator overhead.
+    ::std::size_t runtime_operand_stack_max{};
+    ::std::size_t runtime_operand_stack_byte_max{};
+
+    auto const operand_stack_push{[&](curr_operand_stack_value_type vt) constexpr UWVM_THROWS
+                                  {
+                                      // Hot path: avoid the checked `push_back()` in fast_io::vector.
+                                      if(operand_stack.size() == operand_stack.capacity())
+                                      {
+                                          operand_stack.reserve(operand_stack.capacity() ? operand_stack.capacity() * 2uz : 64uz);
+                                      }
+                                      operand_stack.push_back_unchecked({vt});
+                                      auto const add{operand_stack_valtype_size(vt)};
+                                      if(add == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+                                      if(add > (::std::numeric_limits<::std::size_t>::max() - operand_stack_bytes)) [[unlikely]]
+                                      {
+                                          ::fast_io::fast_terminate();
+                                      }
+                                      operand_stack_bytes += add;
+
+                                      if(!is_polymorphic) [[likely]]
+                                      {
+                                          auto const sz{operand_stack.size()};
+                                          if(sz > runtime_operand_stack_max) { runtime_operand_stack_max = sz; }
+                                          if(operand_stack_bytes > runtime_operand_stack_byte_max) { runtime_operand_stack_byte_max = operand_stack_bytes; }
+                                      }
+                                  }};
+
+    auto const operand_stack_pop_unchecked{[&]() constexpr noexcept
+                                           {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                                               if(!is_polymorphic && operand_stack.empty()) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+#endif
+                                               // Polymorphic stacks model unreachable code, so virtual pops may exceed the
+                                               // currently materialized operand depth.
+                                               if(operand_stack.empty()) { return; }
+                                               auto const vt{operand_stack.back_unchecked().type};
+                                               operand_stack.pop_back_unchecked();
+                                               auto const sub{operand_stack_valtype_size(vt)};
+                                               if(sub == 0uz || sub > operand_stack_bytes) [[unlikely]] { ::fast_io::fast_terminate(); }
+                                               operand_stack_bytes -= sub;
+                                           }};
+
+    auto const operand_stack_pop_n{[&](::std::size_t n) constexpr noexcept
+                                   {
+                                       // Unreachable instructions may consume missing (bottom) operands, but
+                                       // must never consume concrete values owned by an enclosing frame.
+                                       auto const base{control_flow_stack.empty() ? 0uz : control_flow_stack.back_unchecked().operand_stack_base};
+                                       while(n-- != 0uz && operand_stack.size() > base) { operand_stack_pop_unchecked(); }
+                                   }};
+
+    auto const operand_stack_truncate_to{[&](::std::size_t new_size) constexpr noexcept
+                                         {
+                                             while(operand_stack.size() > new_size) { operand_stack_pop_unchecked(); }
+                                         }};
+
+    struct concrete_operand_t
+    {
+        bool from_stack{};
+        curr_operand_stack_value_type type{};
+        bool is_unknown{};
+        bool is_reference_bottom{};
+        ::std::size_t exact_function_type_index{SIZE_MAX};
+        ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type core_type{};
+        bool has_core_type{};
+    };
+
+    auto const curr_frame_operand_stack_base{[&]() constexpr noexcept -> ::std::size_t
+                                             {
+                                                 if(control_flow_stack.empty()) { return 0uz; }
+                                                 return control_flow_stack.back_unchecked().operand_stack_base;
+                                             }};
+
+    auto const concrete_operand_count{[&]() constexpr noexcept -> ::std::size_t
+                                      {
+                                          auto const base{curr_frame_operand_stack_base()};
+                                          auto const stack_size{operand_stack.size()};
+                                          return stack_size >= base ? (stack_size - base) : 0uz;
+                                      }};
+
+    auto const report_operand_stack_underflow{
+        [&](::std::byte const* op_begin, ::uwvm2::utils::container::u8string_view op_name, ::std::size_t required_count) constexpr UWVM_THROWS
+        {
+            // [caller-saved opcode/prefix] immediate bytes ... | code_end
+            // [dispatch-proven byte, where present       ] | one-past is not dereferenced
+            // ^^ op_begin -> err.err_curr: copy only; caller owns the opcode-span proof.
+            err.err_curr = op_begin;
+            err.err_selectable.operand_stack_underflow.op_code_name = op_name;
+            err.err_selectable.operand_stack_underflow.stack_size_actual = concrete_operand_count();
+            err.err_selectable.operand_stack_underflow.stack_size_required = required_count;
+            err.err_code = code_validation_error_code::operand_stack_underflow;
+            ::uwvm2::parser::wasm::base::throw_wasm_parse_code(::fast_io::parse_code::invalid);
+        }};
+
+    auto const try_pop_concrete_operand{[&]() constexpr noexcept -> concrete_operand_t
+                                        {
+                                            if(concrete_operand_count() == 0uz) { return {}; }
+                                            auto const operand{operand_stack.back_unchecked()};
+                                            operand_stack_pop_unchecked();
+                                            return {.from_stack = true, .type = operand.type, .is_unknown = operand.is_unknown,
+                                                    .is_reference_bottom = operand.is_reference_bottom,
+                                                    .exact_function_type_index = operand.exact_function_type_index,
+                                                    .core_type = operand.core_type, .has_core_type = operand.has_core_type};
+                                        }};
+
+    auto const try_peek_concrete_operand{[&]() constexpr noexcept -> concrete_operand_t
+                                         {
+                                             if(concrete_operand_count() == 0uz) { return {}; }
+                                             auto const operand{operand_stack.back_unchecked()};
+                                             return {.from_stack = true, .type = operand.type, .is_unknown = operand.is_unknown,
+                                                     .is_reference_bottom = operand.is_reference_bottom,
+                                                     .exact_function_type_index = operand.exact_function_type_index,
+                                                     .core_type = operand.core_type, .has_core_type = operand.has_core_type};
+                                         }};
+
+    [[maybe_unused]] auto const pop_available_concrete_operands{[&](::std::size_t count) constexpr noexcept
+                                                                {
+                                                                    while(count-- != 0uz && concrete_operand_count() != 0uz) { operand_stack_pop_unchecked(); }
+                                                                }};
+
+    auto const operand_type_matches{[](concrete_operand_t operand, curr_operand_stack_value_type expected_type) constexpr noexcept
+                                    { return !operand.from_stack || ::uwvm2::validation::standard::wasm3::reference_carrier_matches(operand, expected_type); }};
+
+    auto const stack_entry_type_matches{[](operand_stack_storage_t operand, curr_operand_stack_value_type expected_type) constexpr noexcept
+                                        { return ::uwvm2::validation::standard::wasm3::reference_carrier_matches(operand, expected_type); }};
+
+    [[maybe_unused]] auto const push_unknown_operand{[&]() constexpr UWVM_THROWS
+                                                     {
+                                                         // Unknown stack values only model polymorphic validation. Give them a
+                                                         // concrete storage type so byte-size accounting remains well-defined.
+                                                         operand_stack_push(curr_operand_stack_value_type::i32);
+                                                         operand_stack.back_unchecked().is_unknown = true;
+                                                     }};
+
+    auto const sync_type_stacks_from_codegen_snapshot{[&](curr_operand_stack_type const& snapshot, bool snapshot_reachable) constexpr UWVM_THROWS
+                                                      {
+                                                          // All four callers already reconstructed the specification stack:
+                                                          // else truncates to the frame prefix and pushes declared parameters;
+                                                          // end truncates to that prefix and pushes declared results. A codegen
+                                                          // snapshot records physical carriers, not authoritative Core 3 heaps.
+                                                          // Never replace those validated prefix/tuple metadata with a snapshot.
+                                                          // A nested end resets validation bottom even when no execution edge
+                                                          // reaches it. Such a declared tuple need not exist in the physical
+                                                          // snapshot. Only the caller's actual incoming-edge witness permits
+                                                          // a layout assertion; it never authorizes semantic type replacement.
+                                                          if(snapshot_reachable)
+                                                          {
+                                                              if(snapshot.size() != operand_stack.size()) [[unlikely]]
+                                                              { ::fast_io::fast_terminate(); }
+                                                              for(::std::size_t i{}; i != snapshot.size(); ++i)
+                                                              {
+                                                                  // [semantic.begin, semantic.end) / [physical.begin, physical.end)
+                                                                  // [safe                                                     ] i is below both equal sizes.
+                                                                  //         ^^ index_unchecked(i) borrows existing entries; no cursor advances.
+                                                                  auto const& semantic{operand_stack.index_unchecked(i)};
+                                                                  auto const& physical{snapshot.index_unchecked(i)};
+                                                                  // Polymorphic/reference bottom uses placeholder storage. Its carrier
+                                                                  // is not a type proof, so only concrete entries must agree exactly.
+                                                                  if(!semantic.is_unknown && !semantic.is_reference_bottom &&
+                                                                     !physical.is_unknown && !physical.is_reference_bottom &&
+                                                                     semantic.type != physical.type) [[unlikely]]
+                                                                  { ::fast_io::fast_terminate(); }
+                                                              }
+                                                          }
+                                                          codegen_operand_stack = snapshot;
+                                                          operand_stack_bytes = 0uz;
+                                                          for(auto const& v: operand_stack)
+                                                          {
+                                                              auto const add{operand_stack_valtype_size(v.type)};
+                                                              if(add == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+                                                              if(add > (::std::numeric_limits<::std::size_t>::max() - operand_stack_bytes)) [[unlikely]]
+                                                              {
+                                                                  ::fast_io::fast_terminate();
+                                                              }
+                                                              operand_stack_bytes += add;
+                                                          }
+
+                                                          if(!is_polymorphic) [[likely]]
+                                                          {
+                                                              auto const sz{operand_stack.size()};
+                                                              if(sz > runtime_operand_stack_max) { runtime_operand_stack_max = sz; }
+                                                              if(operand_stack_bytes > runtime_operand_stack_byte_max)
+                                                              {
+                                                                  runtime_operand_stack_byte_max = operand_stack_bytes;
+                                                              }
+                                                          }
+                                                      }};
+
+    // Local storage is byte-packed too (same scalar sizes). We emit local offsets as immediates, so runtime only
+    // needs the total local byte size to allocate and zero-initialize.
+    local_offsets.clear();
+    local_types.clear();
+    auto const local_offsets_need{static_cast<::std::size_t>(all_local_count_with_internal)};
+    if(local_offsets.capacity() < local_offsets_need) { local_offsets.reserve(local_offsets_need); }
+    // local_types stores only Wasm-visible locals (no internal temp local).
+    auto const local_types_need{static_cast<::std::size_t>(all_local_count)};
+    if(local_types.capacity() < local_types_need) { local_types.reserve(local_types_need); }
+
+    auto const local_bytes_add{[&](local_offset_t& acc, local_offset_t add) constexpr noexcept
+                               {
+                                   if(add > (::std::numeric_limits<local_offset_t>::max() - acc)) [[unlikely]]
+                                   {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                                       ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                                       ::fast_io::fast_terminate();
+                                   }
+                                   acc += add;
+                               }};
+
+    local_offset_t local_bytes{};
+    for(wasm_u32 i{}; i != func_parameter_count_u32; ++i)
+    {
+        // Safe: reserved `all_local_count_with_internal` above.
+        local_offsets.push_back_unchecked(local_bytes);
+        // Safe: reserved `all_local_count` above.
+        local_types.push_back_unchecked(func_parameter_begin[i]);
+        local_bytes_add(local_bytes, static_cast<local_offset_t>(operand_stack_valtype_size(local_types.back_unchecked())));
+    }
+    for(auto const& local_part: curr_code_locals)
+    {
+        for(wasm_u32 j{}; j != local_part.count; ++j)
+        {
+            // Safe: reserved `all_local_count_with_internal` above.
+            local_offsets.push_back_unchecked(local_bytes);
+            // Safe: reserved `all_local_count` above.
+            local_types.push_back_unchecked(local_part.type);
+            local_bytes_add(local_bytes, static_cast<local_offset_t>(operand_stack_valtype_size(local_types.back_unchecked())));
+        }
+    }
+
+    if(local_offsets.size() != static_cast<::std::size_t>(all_local_count)) [[unlikely]]
+    {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+        ::fast_io::fast_terminate();
+    }
+    if(local_types.size() != static_cast<::std::size_t>(all_local_count)) [[unlikely]]
+    {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+        ::fast_io::fast_terminate();
+    }
+
+    // Internal temp locals come last and each slot is wide enough for any wasm1p1 value.
+    ::uwvm2::utils::container::vector<local_offset_t> internal_temp_local_offsets{};
+    internal_temp_local_offsets.reserve(static_cast<::std::size_t>(internal_temp_local_count));
+    for(wasm_u32 i{}; i != internal_temp_local_count; ++i)
+    {
+        // Safe: reserved `all_local_count_with_internal` above.
+        local_offsets.push_back_unchecked(local_bytes);
+        internal_temp_local_offsets.push_back_unchecked(local_bytes);
+        local_bytes_add(local_bytes, internal_temp_local_size);
+    }
+
+    local_func_symbol.local_bytes_max = local_bytes;
+
+    // Local index -> byte offset from `local_base` (type...[2u]).
+    auto const local_offset_from_index{[&](wasm_u32 local_index) constexpr noexcept -> local_offset_t
+                                       {
+                                           auto const idx{static_cast<::std::size_t>(local_index)};
+                                           if(idx >= local_offsets.size()) [[unlikely]]
+                                           {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                                               ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                                               ::fast_io::fast_terminate();
+                                           }
+                                           return local_offsets.index_unchecked(idx);
+                                       }};
+
+    [[maybe_unused]] auto const local_type_from_index{[&](wasm_u32 local_index) constexpr noexcept -> curr_operand_stack_value_type
+                                                      {
+                                                          auto const idx{static_cast<::std::size_t>(local_index)};
+                                                          if(idx >= local_types.size()) [[unlikely]]
+                                                          {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                                                              ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                                                              ::fast_io::fast_terminate();
+                                                          }
+
+                                                          return local_types.index_unchecked(idx);
+                                                      }};
+
+    auto const rich_owned_begin{curr_module.type_section_storage.owned_signature_begin};
+    auto const rich_owned_end{curr_module.type_section_storage.owned_signature_end};
+    auto const runtime_type_count{get_runtime_type_section_count(curr_module)};
+    // Both pointers are bound by the initializer from one retained vector or both are null.
+    // [rich_owned_begin, rich_owned_end) is subtracted only when both endpoints exist.
+    // [safe                            ] exact count must match the projected carrier table.
+    auto const rich_owned_available{rich_owned_begin != nullptr && rich_owned_end != nullptr &&
+        static_cast<::std::size_t>(rich_owned_end - rich_owned_begin) == runtime_type_count};
+    // The parser's validated subtype forest remains live while this module is compiled.
+    // Defined aggregate heaps must use canonical subtyping, never dummy ABI signatures.
+    auto const runtime_core3_value_type_matches{[&](auto actual, auto expected, auto const& signatures) constexpr noexcept
+    {
+        // The runtime module pins the parser table during fused translation;
+        // this nullable borrow selects the SAME abstract/defined rules as pure/LLVM.
+        auto const context{curr_module.type_section_storage.core3_context_ptr};
+        return ::uwvm2::validation::standard::wasm3::core3_value_type_matches_with_context(
+            actual, expected, signatures, context);
+    }};
+    auto const rich_type_index_from_pointer{[&](auto const* declaration) noexcept -> ::std::size_t
+    {
+        if(!rich_owned_available) { return runtime_type_count; }
+        auto const types_begin{curr_module.type_section_storage.type_section_begin};
+        for(::std::size_t i{}; i != runtime_type_count; ++i)
+        {
+            // [types_begin, types_begin + runtime_type_count) is one retained allocation.
+            // [safe                                     ] i < runtime_type_count proves the read.
+            //         ^^ types_begin[i] borrows a signature; no pointer advances.
+            if(::std::addressof(types_begin[i]) == declaration) { return i; }
+        }
+        return runtime_type_count;
+    }};
+    ::std::size_t curr_owned_type_index{runtime_type_count};
+    if(rich_owned_available)
+    {
+        curr_owned_type_index = rich_type_index_from_pointer(curr_local_func.function_type_ptr);
+        if(curr_owned_type_index == runtime_type_count) [[unlikely]] { ::fast_io::fast_terminate(); }
+    }
+    struct block_core_type_t
+    {
+        ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type type{};
+        bool has_type{};
+    };
+    auto const block_core_type_at{[&](block_result_type types, ::std::size_t signature_type_index,
+                                      bool result, bool has_singleton_result_core_type,
+                                      ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type singleton_result_core_type,
+                                      ::std::size_t index) noexcept -> block_core_type_t
+    {
+        auto const count{types.begin == types.end ? 0uz : static_cast<::std::size_t>(types.end - types.begin)};
+        if(index >= count) { ::fast_io::fast_terminate(); }
+        if(rich_owned_available && signature_type_index < runtime_type_count)
+        {
+            // [rich_owned_begin, rich_owned_end) is the initializer-retained type table.
+            // [safe                            ] index < count == tuple.size() below.
+            //         ^^ signature_type_index < runtime_type_count proves the signature read.
+            auto const& signature{rich_owned_begin[signature_type_index]};
+            auto const& tuple{result ? signature.results : signature.parameters};
+            if(tuple.size() != count) { ::fast_io::fast_terminate(); }
+            return {tuple.index_unchecked(index), true};
+        }
+        if(result && has_singleton_result_core_type && count == 1uz)
+        { return {singleton_result_core_type, true}; }
+        return {};
+    }};
+    auto const block_value_matches{[&](operand_stack_storage_t actual, block_result_type types,
+                                       ::std::size_t signature_type_index, bool result,
+                                       bool has_singleton_result_core_type,
+                                       ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type singleton_result_core_type,
+                                       ::std::size_t index) noexcept
+    {
+        auto const expected{block_core_type_at(types, signature_type_index, result,
+            has_singleton_result_core_type, singleton_result_core_type, index)};
+        if(expected.has_type && !actual.is_unknown)
+        {
+            return runtime_core3_value_type_matches(
+                ::uwvm2::validation::standard::wasm3::core3_operand_effective_type(actual), expected.type,
+                ::uwvm2::validation::standard::wasm3::core3_signature_view<
+                    ::uwvm2::uwvm::runtime::storage::wasm_binfmt1_owned_signature_t>{rich_owned_begin,
+                        rich_owned_available ? runtime_type_count : 0uz});
+        }
+        // [types.begin, types.end) is the retained carrier tuple.
+        // [safe                 ] block_core_type_at proved index < count.
+        //         ^^ begin[index] reads one carrier; no cursor moves.
+        return stack_entry_type_matches(actual, types.begin[index]);
+    }};
+    auto const block_push_types{[&](block_result_type types, ::std::size_t signature_type_index,
+                                    bool result, bool has_singleton_result_core_type,
+                                    ::uwvm2::parser::wasm::standard::wasm3::type::core_value_type singleton_result_core_type) UWVM_THROWS
+    {
+        auto const count{types.begin == types.end ? 0uz : static_cast<::std::size_t>(types.end - types.begin)};
+        for(::std::size_t index{}; index != count; ++index)
+        {
+            auto const rich{block_core_type_at(types, signature_type_index, result,
+                has_singleton_result_core_type, singleton_result_core_type, index)};
+            // [types.begin, types.end) is the parser-retained flat signature.
+            // [safe                 ] index < count proves begin[index] readable.
+            //         ^^ begin[index] is borrowed; only an integer loop index changes.
+            operand_stack_push(types.begin[index]);
+            if(rich.has_type)
+            {
+                auto& top{operand_stack.back_unchecked()};
+                top.core_type = rich.type;
+                top.has_core_type = true;
+            }
+        }
+    }};
+    auto const local_core_type_from_index{[&](wasm_u32 index) noexcept
+    {
+        if(index < func_parameter_count_u32)
+        {
+            return rich_owned_available ? rich_owned_begin[curr_owned_type_index].parameters.index_unchecked(index) :
+                ::uwvm2::validation::standard::wasm3::core3_legacy_carrier_type(func_parameter_begin[index]);
+        }
+        auto remaining{index - func_parameter_count_u32};
+        for(auto const& run: curr_code_locals)
+        {
+            if(remaining < run.count)
+            { return run.has_core_type ? run.core_type :
+                ::uwvm2::validation::standard::wasm3::core3_legacy_carrier_type(run.type); }
+            remaining -= run.count;
+        }
+        // Every caller has already checked index < all_local_count.
+        ::fast_io::fast_terminate();
+    }};
+    ::uwvm2::validation::standard::wasm3::core3_local_initialization initialized_locals{};
+    auto const local_initially_initialized{[&](wasm_u32 index) noexcept
+    { return index < func_parameter_count_u32 ||
+        ::uwvm2::validation::standard::wasm3::core3_value_is_defaultable(local_core_type_from_index(index)); }};
+
+    // Internal temp local is the first slot after all Wasm-visible locals.
+    local_offset_t const internal_temp_local_off{internal_temp_local_offsets.index_unchecked(0uz)};
+    [[maybe_unused]] local_offset_t const internal_temp_local_bytes{
+        static_cast<local_offset_t>(static_cast<::std::size_t>(internal_temp_local_count) * static_cast<::std::size_t>(internal_temp_local_size))};
+    // Parameters occupy the prefix of the locals buffer and are populated by memcpy at runtime.
+    // Non-parameter locals must be zero-initialized by the Wasm spec, but we can skip zeroing trailing locals
+    // that are never read (no `local.get`).
+    local_offset_t const param_bytes_off{local_offset_from_index(func_parameter_count_u32)};
+    local_offset_t local_bytes_zeroinit_end{param_bytes_off};
+
+    static_assert(::std::is_trivially_copyable_v<::std::byte>);
+
+    // ============================
+    // Stack-top cache configuration
+    // ============================
+
+    constexpr bool stacktop_i32_enabled{CompileOption.i32_stack_top_begin_pos != CompileOption.i32_stack_top_end_pos};
+    constexpr bool stacktop_i64_enabled{CompileOption.i64_stack_top_begin_pos != CompileOption.i64_stack_top_end_pos};
+    constexpr bool stacktop_f32_enabled{CompileOption.f32_stack_top_begin_pos != CompileOption.f32_stack_top_end_pos};
+    constexpr bool stacktop_f64_enabled{CompileOption.f64_stack_top_begin_pos != CompileOption.f64_stack_top_end_pos};
+    constexpr bool stacktop_v128_enabled{CompileOption.v128_stack_top_begin_pos != CompileOption.v128_stack_top_end_pos};
+
+    constexpr bool stacktop_enabled{stacktop_i32_enabled || stacktop_i64_enabled || stacktop_f32_enabled || stacktop_f64_enabled || stacktop_v128_enabled};
+
+    // Wasm1 operand stack is mixed-typed. If stack-top caching is enabled here, we require full scalar coverage
+    // (i32/i64/f32/f64) so the compiler-side stack-top model remains valid for arbitrary type mixes.
+    if constexpr(stacktop_enabled)
+    {
+        static_assert(CompileOption.is_tail_call, "stack-top caching requires tail-call (non-byref) interpreter mode");
+
+        static_assert(stacktop_i32_enabled && stacktop_i64_enabled && stacktop_f32_enabled && stacktop_f64_enabled,
+                      "Wasm1 stack-top caching requires i32/i64/f32/f64 ranges enabled together.");
+
+        static_assert(CompileOption.i32_stack_top_begin_pos >= 3uz && CompileOption.i32_stack_top_end_pos > CompileOption.i32_stack_top_begin_pos);
+        static_assert(CompileOption.i64_stack_top_begin_pos >= 3uz && CompileOption.i64_stack_top_end_pos > CompileOption.i64_stack_top_begin_pos);
+        static_assert(CompileOption.f32_stack_top_begin_pos >= 3uz && CompileOption.f32_stack_top_end_pos > CompileOption.f32_stack_top_begin_pos);
+        static_assert(CompileOption.f64_stack_top_begin_pos >= 3uz && CompileOption.f64_stack_top_end_pos > CompileOption.f64_stack_top_begin_pos);
+
+        // Note:
+        // Smaller rings (e.g. 1 or 2 slots) are allowed. When an opcode needs more operands than the ring can hold,
+        // the opfunc falls back to reading the remaining operands from the operand stack memory (stack pointer),
+        // keeping as many values in registers as possible.
+
+        // Overlaps must be *fully merged* (same begin/end). Partial overlaps are invalid for the optable layouts.
+        constexpr auto overlap{[](::std::size_t a_begin, ::std::size_t a_end, ::std::size_t b_begin, ::std::size_t b_end) consteval noexcept
+                               { return a_begin < b_end && b_begin < a_end; }};
+        constexpr auto equal{[](::std::size_t a_begin, ::std::size_t a_end, ::std::size_t b_begin, ::std::size_t b_end) consteval noexcept
+                             { return a_begin == b_begin && a_end == b_end; }};
+
+        constexpr bool i32_i64_overlap{overlap(CompileOption.i32_stack_top_begin_pos,
+                                               CompileOption.i32_stack_top_end_pos,
+                                               CompileOption.i64_stack_top_begin_pos,
+                                               CompileOption.i64_stack_top_end_pos)};
+        constexpr bool i32_f32_overlap{overlap(CompileOption.i32_stack_top_begin_pos,
+                                               CompileOption.i32_stack_top_end_pos,
+                                               CompileOption.f32_stack_top_begin_pos,
+                                               CompileOption.f32_stack_top_end_pos)};
+        constexpr bool i32_f64_overlap{overlap(CompileOption.i32_stack_top_begin_pos,
+                                               CompileOption.i32_stack_top_end_pos,
+                                               CompileOption.f64_stack_top_begin_pos,
+                                               CompileOption.f64_stack_top_end_pos)};
+        constexpr bool i64_f32_overlap{overlap(CompileOption.i64_stack_top_begin_pos,
+                                               CompileOption.i64_stack_top_end_pos,
+                                               CompileOption.f32_stack_top_begin_pos,
+                                               CompileOption.f32_stack_top_end_pos)};
+        constexpr bool i64_f64_overlap{overlap(CompileOption.i64_stack_top_begin_pos,
+                                               CompileOption.i64_stack_top_end_pos,
+                                               CompileOption.f64_stack_top_begin_pos,
+                                               CompileOption.f64_stack_top_end_pos)};
+        constexpr bool f32_f64_overlap{overlap(CompileOption.f32_stack_top_begin_pos,
+                                               CompileOption.f32_stack_top_end_pos,
+                                               CompileOption.f64_stack_top_begin_pos,
+                                               CompileOption.f64_stack_top_end_pos)};
+
+        static_assert(!i32_i64_overlap || equal(CompileOption.i32_stack_top_begin_pos,
+                                                CompileOption.i32_stack_top_end_pos,
+                                                CompileOption.i64_stack_top_begin_pos,
+                                                CompileOption.i64_stack_top_end_pos),
+                      "i32/i64 stack-top ranges must be disjoint or fully merged.");
+        static_assert(!i32_f32_overlap || equal(CompileOption.i32_stack_top_begin_pos,
+                                                CompileOption.i32_stack_top_end_pos,
+                                                CompileOption.f32_stack_top_begin_pos,
+                                                CompileOption.f32_stack_top_end_pos),
+                      "i32/f32 stack-top ranges must be disjoint or fully merged.");
+        static_assert(!i32_f64_overlap || equal(CompileOption.i32_stack_top_begin_pos,
+                                                CompileOption.i32_stack_top_end_pos,
+                                                CompileOption.f64_stack_top_begin_pos,
+                                                CompileOption.f64_stack_top_end_pos),
+                      "i32/f64 stack-top ranges must be disjoint or fully merged.");
+        static_assert(!i64_f32_overlap || equal(CompileOption.i64_stack_top_begin_pos,
+                                                CompileOption.i64_stack_top_end_pos,
+                                                CompileOption.f32_stack_top_begin_pos,
+                                                CompileOption.f32_stack_top_end_pos),
+                      "i64/f32 stack-top ranges must be disjoint or fully merged.");
+        static_assert(!i64_f64_overlap || equal(CompileOption.i64_stack_top_begin_pos,
+                                                CompileOption.i64_stack_top_end_pos,
+                                                CompileOption.f64_stack_top_begin_pos,
+                                                CompileOption.f64_stack_top_end_pos),
+                      "i64/f64 stack-top ranges must be disjoint or fully merged.");
+        static_assert(!f32_f64_overlap || equal(CompileOption.f32_stack_top_begin_pos,
+                                                CompileOption.f32_stack_top_end_pos,
+                                                CompileOption.f64_stack_top_begin_pos,
+                                                CompileOption.f64_stack_top_end_pos),
+                      "f32/f64 stack-top ranges must be disjoint or fully merged.");
+
+        // v128 is used as a vector register-class carrier. If enabled, it must coincide with an f32/f64 merged range.
+        if constexpr(stacktop_v128_enabled)
+        {
+            static_assert(CompileOption.v128_stack_top_begin_pos >= 3uz && CompileOption.v128_stack_top_end_pos > CompileOption.v128_stack_top_begin_pos);
+
+            constexpr bool f32_v128_overlap{overlap(CompileOption.f32_stack_top_begin_pos,
+                                                    CompileOption.f32_stack_top_end_pos,
+                                                    CompileOption.v128_stack_top_begin_pos,
+                                                    CompileOption.v128_stack_top_end_pos)};
+            constexpr bool f64_v128_overlap{overlap(CompileOption.f64_stack_top_begin_pos,
+                                                    CompileOption.f64_stack_top_end_pos,
+                                                    CompileOption.v128_stack_top_begin_pos,
+                                                    CompileOption.v128_stack_top_end_pos)};
+            static_assert(f32_v128_overlap && f64_v128_overlap, "v128 range must overlap f32/f64 ranges.");
+            static_assert(equal(CompileOption.v128_stack_top_begin_pos,
+                                CompileOption.v128_stack_top_end_pos,
+                                CompileOption.f32_stack_top_begin_pos,
+                                CompileOption.f32_stack_top_end_pos) &&
+                              equal(CompileOption.v128_stack_top_begin_pos,
+                                    CompileOption.v128_stack_top_end_pos,
+                                    CompileOption.f64_stack_top_begin_pos,
+                                    CompileOption.f64_stack_top_end_pos),
+                          "v128 range must fully coincide with an f32/f64 merged range (same begin/end).");
+
+            static_assert(!overlap(CompileOption.v128_stack_top_begin_pos,
+                                   CompileOption.v128_stack_top_end_pos,
+                                   CompileOption.i32_stack_top_begin_pos,
+                                   CompileOption.i32_stack_top_end_pos) &&
+                              !overlap(CompileOption.v128_stack_top_begin_pos,
+                                       CompileOption.v128_stack_top_end_pos,
+                                       CompileOption.i64_stack_top_begin_pos,
+                                       CompileOption.i64_stack_top_end_pos),
+                          "v128 range must not overlap i32/i64 ranges.");
+        }
+
+        static_assert(details::interpreter_tuple_has_no_holes<CompileOption>(),
+                      "stack-top ranges must cover all opfunc argument slots >= 3 (no holes), or shrink the ranges.");
+    }
+
+    // Translate: opfunc signature tuple (ip, operand_stack_top_ptr, local_base_ptr, [stack-top cache...]).
+    // Call bridges take slot 1 by value and return its updated pointer; ordinary call opfuncs must store that return in slot 1.
+    // Slot types are derived from `CompileOption` to drive ABI packing (GPR vs FP/SIMD regs) correctly.
+    static constexpr ::std::size_t interpreter_tuple_size{details::interpreter_tuple_size<CompileOption>()};
+    using interpreter_tuple_t = decltype(details::make_interpreter_tuple<CompileOption>(::std::make_index_sequence<interpreter_tuple_size>{}));
+    static constexpr interpreter_tuple_t interpreter_tuple{};
+
+    // Translate: stack-top currpos.
+    ::uwvm2::runtime::compiler::uwvm_int::optable::uwvm_interpreter_stacktop_currpos_t curr_stacktop{
+        .i32_stack_top_curr_pos = stacktop_i32_enabled ? CompileOption.i32_stack_top_begin_pos : SIZE_MAX,
+        .i64_stack_top_curr_pos = stacktop_i64_enabled ? CompileOption.i64_stack_top_begin_pos : SIZE_MAX,
+        .f32_stack_top_curr_pos = stacktop_f32_enabled ? CompileOption.f32_stack_top_begin_pos : SIZE_MAX,
+        .f64_stack_top_curr_pos = stacktop_f64_enabled ? CompileOption.f64_stack_top_begin_pos : SIZE_MAX,
+        .v128_stack_top_curr_pos = stacktop_v128_enabled ? CompileOption.v128_stack_top_begin_pos : SIZE_MAX,
+    };
+
+    // Stack-top cache runtime state (compiler-side model).
+    // - `memory_count`: number of stack values materialized in operand stack memory.
+    // - `cache_count`:  number of stack values resident in stack-top cache (top segment).
+    ::std::size_t stacktop_memory_count{};
+    ::std::size_t stacktop_cache_count{};
+    ::std::size_t stacktop_cache_i32_count{};
+    ::std::size_t stacktop_cache_i64_count{};
+    ::std::size_t stacktop_cache_f32_count{};
+    ::std::size_t stacktop_cache_f64_count{};
+
+    // Experimental: strict control-flow entry (call-like).
+    // Goal: ensure re-entry points (block/loop end, loop start, else entry) see an empty stack-top cache and
+    // all values materialized in operand-stack memory, to avoid expensive state-merge/repair across edges.
+    // NOTE: Keeping stack-top cache across control-flow re-entry is critical for tight loops.
+    // The strict mode forces call-like barriers (flush-to-memory + reset currpos) at loop/block/else entries,
+    // which can introduce large per-iteration overhead when branches are hot.
+    constexpr bool strict_cf_entry_like_call{false};
+
+    // Experimental: register-only control-flow canonicalization.
+    // Goal: keep operand values resident in the stack-top cache across loop re-entry, while still making the
+    // label entry currpos deterministic (range-begin) so back-edges can jump directly without spilling/filling.
+    constexpr bool stacktop_regtransform_cf_entry{true};
+
+    // Current stack-top transform opfunc supports at most:
+    // - one fully-merged integer ring (i32/i64), and
+    // - one fully-merged fp/simd ring (f32/f64/v128).
+    constexpr bool stacktop_regtransform_supported{
+        // i32/i64 must be same-range if both enabled
+        (!(stacktop_i32_enabled && stacktop_i64_enabled) || (CompileOption.i32_stack_top_begin_pos == CompileOption.i64_stack_top_begin_pos &&
+                                                             CompileOption.i32_stack_top_end_pos == CompileOption.i64_stack_top_end_pos)) &&
+        // f32/f64 must be same-range if both enabled
+        (!(stacktop_f32_enabled && stacktop_f64_enabled) || (CompileOption.f32_stack_top_begin_pos == CompileOption.f64_stack_top_begin_pos &&
+                                                             CompileOption.f32_stack_top_end_pos == CompileOption.f64_stack_top_end_pos)) &&
+        // v128 must coincide with the active f32/f64 merged range
+        (!stacktop_v128_enabled || ((stacktop_f32_enabled && CompileOption.v128_stack_top_begin_pos == CompileOption.f32_stack_top_begin_pos &&
+                                     CompileOption.v128_stack_top_end_pos == CompileOption.f32_stack_top_end_pos) ||
+                                    (stacktop_f64_enabled && CompileOption.v128_stack_top_begin_pos == CompileOption.f64_stack_top_begin_pos &&
+                                     CompileOption.v128_stack_top_end_pos == CompileOption.f64_stack_top_end_pos)))};
+
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+    // Tracking for `stacktop_assert_invariants()` diagnostics.
+    ::uwvm2::runtime::compiler::uwvm_int::optable::wasm1_code stacktop_dbg_last_op{::uwvm2::runtime::compiler::uwvm_int::optable::wasm1_code::unreachable};
+    ::std::size_t stacktop_dbg_last_ip{};
+#endif
+
+    // Bytecode emitter (writes into local_func_symbol.op.operands).
+    bytecode_vec_t& bytecode{local_func_symbol.op.operands};

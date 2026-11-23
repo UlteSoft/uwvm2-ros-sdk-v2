@@ -1,0 +1,44 @@
+{
+  "id": "nvidia-groot",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "DROID observation.state",
+    "format": "packed",
+    "fields": [
+      {
+        "name": "read_eef_9d",
+        "field": "eef_9d",
+        "type": "f32",
+        "indexed": true
+      },
+      {
+        "name": "read_gripper_position",
+        "field": "gripper_position",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_joint_position",
+        "field": "joint_position",
+        "type": "f32",
+        "indexed": true
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/NVIDIA/Isaac-GR00T/blob/dac54b313160c201c450f97df0fd74ebd379c892/demo_data/droid_sample/meta/modality.json",
+        "revision": "dac54b313160c201c450f97df0fd74ebd379c892",
+        "path": "demo_data/droid_sample/meta/modality.json",
+        "sha256": "9ccdf1c25a2422b62dfd23abc511010809d3d72595580914507c9013a9736861"
+      },
+      {
+        "url": "https://github.com/NVIDIA/Isaac-GR00T/blob/dac54b313160c201c450f97df0fd74ebd379c892/demo_data/droid_sample/meta/info.json",
+        "revision": "dac54b313160c201c450f97df0fd74ebd379c892",
+        "path": "demo_data/droid_sample/meta/info.json",
+        "sha256": "9cfaf37856f202f9cbd8f883639597974b04bc0c6d6a87ded33efb283cd2e569"
+      }
+    ]
+  }
+}

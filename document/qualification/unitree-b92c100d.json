@@ -1,0 +1,1132 @@
+{
+  "sdk_commit": "b92c100dcb2586846797eb40ddb357764b1cd26e",
+  "tree": "2947c96a08eb6da5ffcb85067d76042e9c116e19",
+  "host": "linux-x86_64",
+  "platform": "unitree",
+  "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+  "vm_git": "576aa42918eaa3baca12ca030e3c55482cb524ca",
+  "isolation": {
+    "parent_and_child_memory_max": 68719476736,
+    "parent_and_child_swap_max": 0,
+    "child_oom_group": 1,
+    "parent_oom_group": 0,
+    "build_network": "offline",
+    "temporary_storage": "project disk",
+    "home_and_cache": "empty on entry",
+    "xmake_vm_from_selection": true
+  },
+  "legacy_default_selections": {
+    "as": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-observation.wasm": "5661cc91d20da05e2c1c3969943ecd94b591c7bbf42389c7491e3bca119a84eb"
+      }
+    },
+    "c": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/go2-state.wasm": "e99cd89e8b006e92c3a529cc91ff0c14f3892a73d5fdcceb1052d650b7ddfc05"
+      }
+    },
+    "c_ffi_bridge": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "cpp": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/go2-state.wasm": "217a418be89d226a8a43116d964380c755ab54b2b15670e4c87729e73754dcee"
+      }
+    },
+    "csharp": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "d": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "fortran": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "fsharp": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "go": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "results/direct.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "results/independent.wasm": "21baf1b1f3b405964c3e21a7877a53777ec1eb8dbb2599715198adc24552b629"
+      }
+    },
+    "haskell": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "java": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "js": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-observation.wasm": "03ab10a3e1765edae1062e3d517fb4c024e61a2df88a6287116e9e55055fc1db"
+      }
+    },
+    "kotlin": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1,
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "lua": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "moonbit": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "nim": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "objectc": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "odin": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "php": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "py": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "r": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "rs": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/go2-state.wasm": "130f5d47a6f3430b469969a2567f506ed9787aebb56e36c6130d2ba2223cdb99"
+      }
+    },
+    "ruby": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "swift": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "tinygo": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+        "results/direct.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+        "results/independent.wasm": "9796ea34ea7d1d535f2af878bd6cfd4138f74668b09b41d46dd3545da80a307c"
+      }
+    },
+    "typescript": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        1,
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-observation.wasm": "a9410043cf6910ac764807de67f04d65d3d856a8f17570c60cc205b1e2606833"
+      }
+    },
+    "vbnet": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1,
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "wat": {
+      "install": "passed",
+      "attempt_exit_codes": [
+        0
+      ],
+      "offline_exit": 0,
+      "xmake_test": 0,
+      "xmake_build": 0,
+      "guest_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/go2-state.wasm": "4a9e7dfdccbfb1c93a23006e468473f17c71890f622073649c32150b09855406"
+      }
+    },
+    "zig": {
+      "install": "unsupported",
+      "attempt_exit_codes": [
+        1
+      ],
+      "installer_error": "Installation failed: unknown language or platform; use 'list' for available selections"
+    }
+  },
+  "go_binary_installations": {
+    "go-binary": {
+      "command_exit_codes": {
+        "direct-aot": 0,
+        "direct-build": 0,
+        "direct-int": 0,
+        "driver-sha": 0,
+        "go-compiler-version": 0,
+        "go-driver-buildinfo": 0,
+        "go-tools-shas": 0,
+        "host-go-version": 0,
+        "host-tool-shas": 0,
+        "producer-version": 0,
+        "sdk-vm-version": 0,
+        "sdk-xmake-version": 0,
+        "target": 0,
+        "xmake-build": 0,
+        "xmake-direct-cmp": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "results/direct.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d"
+      },
+      "binaries": {
+        "bin/uwvm2-ros": {
+          "bytes": 190202464,
+          "mode": 493,
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+        },
+        "bin/wrgo": {
+          "bytes": 3339087,
+          "mode": 493,
+          "sha256": "54b906f5296de686a68847f6c7bb921d62422f5631924679533cba820924ab53"
+        },
+        "bin/xmake": {
+          "bytes": 2823008,
+          "mode": 493,
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+        },
+        "libexec/go/bin/go": {
+          "bytes": 14314731,
+          "mode": 493,
+          "sha256": "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
+        },
+        "libexec/go/pkg/tool/linux_amd64/asm": {
+          "bytes": 6288457,
+          "mode": 493,
+          "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936"
+        },
+        "libexec/go/pkg/tool/linux_amd64/compile": {
+          "bytes": 28139575,
+          "mode": 493,
+          "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416"
+        },
+        "libexec/go/pkg/tool/linux_amd64/link": {
+          "bytes": 8660113,
+          "mode": 493,
+          "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc"
+        }
+      }
+    },
+    "go-default": {
+      "command_exit_codes": {
+        "direct-aot": 0,
+        "direct-build": 0,
+        "direct-int": 0,
+        "driver-sha": 0,
+        "go-compiler-version": 0,
+        "go-driver-buildinfo": 0,
+        "go-tools-shas": 0,
+        "host-go-version": 0,
+        "host-tool-shas": 0,
+        "independent-aot": 0,
+        "independent-build": 0,
+        "independent-int": 0,
+        "producer-version": 0,
+        "sdk-vm-version": 0,
+        "sdk-xmake-version": 0,
+        "target": 0,
+        "xmake-build": 0,
+        "xmake-direct-cmp": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "results/direct.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "results/independent.wasm": "21baf1b1f3b405964c3e21a7877a53777ec1eb8dbb2599715198adc24552b629"
+      },
+      "binaries": {
+        "bin/uwvm2-ros": {
+          "bytes": 190202464,
+          "mode": 493,
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+        },
+        "bin/wrgo": {
+          "bytes": 3339087,
+          "mode": 493,
+          "sha256": "54b906f5296de686a68847f6c7bb921d62422f5631924679533cba820924ab53"
+        },
+        "bin/xmake": {
+          "bytes": 2823008,
+          "mode": 493,
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+        },
+        "libexec/go/bin/go": {
+          "bytes": 14314731,
+          "mode": 493,
+          "sha256": "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
+        },
+        "libexec/go/pkg/tool/linux_amd64/asm": {
+          "bytes": 6288457,
+          "mode": 493,
+          "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936"
+        },
+        "libexec/go/pkg/tool/linux_amd64/compile": {
+          "bytes": 28139575,
+          "mode": 493,
+          "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416"
+        },
+        "libexec/go/pkg/tool/linux_amd64/link": {
+          "bytes": 8660113,
+          "mode": 493,
+          "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc"
+        }
+      }
+    },
+    "tinygo-binary": {
+      "command_exit_codes": {
+        "backend-shas": 0,
+        "direct-aot": 0,
+        "direct-build": 0,
+        "direct-int": 0,
+        "driver-sha": 0,
+        "frontend-sha": 0,
+        "frontend-version": 0,
+        "go-driver-buildinfo": 0,
+        "host-go-version": 0,
+        "host-tool-shas": 0,
+        "producer-version": 0,
+        "sdk-vm-version": 0,
+        "sdk-xmake-version": 0,
+        "target": 0,
+        "xmake-build": 0,
+        "xmake-direct-cmp": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+        "results/direct.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071"
+      },
+      "binaries": {
+        "bin/uwvm2-ros": {
+          "bytes": 190202464,
+          "mode": 493,
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+        },
+        "bin/wrtg": {
+          "bytes": 3339047,
+          "mode": 493,
+          "sha256": "e40664d3635ddab1d9956a67404b33de6e3ea979cd7c734f50bc7c8d212fe127"
+        },
+        "bin/xmake": {
+          "bytes": 2823008,
+          "mode": 493,
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+        },
+        "libexec/go/bin/go": {
+          "bytes": 14314731,
+          "mode": 493,
+          "sha256": "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
+        },
+        "libexec/go/pkg/tool/linux_amd64/asm": {
+          "bytes": 4650654,
+          "mode": 493,
+          "sha256": "0bdc8374e105da4f9f7920ea2ec00441020a416186321319b286fe743e91d305"
+        },
+        "libexec/go/pkg/tool/linux_amd64/compile": {
+          "bytes": 20905780,
+          "mode": 493,
+          "sha256": "ef351a2f138eef0ba46a2da0f0631c8b05a16cae435aea98d6f0c74de301d6e1"
+        },
+        "libexec/go/pkg/tool/linux_amd64/link": {
+          "bytes": 6230678,
+          "mode": 493,
+          "sha256": "7d28395c6aed1eaeedf75f5b5a97f744964e927a2a9ccdb9c22f40877fd7d7eb"
+        },
+        "libexec/tinygo/bin/tinygo": {
+          "bytes": 180395008,
+          "mode": 493,
+          "sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
+        },
+        "share/toolchains/tinygo-llvm/prepare-ir": {
+          "bytes": 14479616,
+          "mode": 493,
+          "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+        }
+      }
+    },
+    "tinygo-default": {
+      "command_exit_codes": {
+        "backend-shas": 0,
+        "direct-aot": 0,
+        "direct-build": 0,
+        "direct-int": 0,
+        "driver-sha": 0,
+        "frontend-sha": 0,
+        "frontend-version": 0,
+        "go-driver-buildinfo": 0,
+        "host-go-version": 0,
+        "host-tool-shas": 0,
+        "independent-aot": 0,
+        "independent-build": 0,
+        "independent-int": 0,
+        "producer-version": 0,
+        "sdk-vm-version": 0,
+        "sdk-xmake-version": 0,
+        "target": 0,
+        "xmake-build": 0,
+        "xmake-direct-cmp": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+        "results/direct.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+        "results/independent.wasm": "9796ea34ea7d1d535f2af878bd6cfd4138f74668b09b41d46dd3545da80a307c"
+      },
+      "binaries": {
+        "bin/uwvm2-ros": {
+          "bytes": 190202464,
+          "mode": 493,
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+        },
+        "bin/wrtg": {
+          "bytes": 3339047,
+          "mode": 493,
+          "sha256": "e40664d3635ddab1d9956a67404b33de6e3ea979cd7c734f50bc7c8d212fe127"
+        },
+        "bin/xmake": {
+          "bytes": 2823008,
+          "mode": 493,
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+        },
+        "libexec/go/bin/go": {
+          "bytes": 14314731,
+          "mode": 493,
+          "sha256": "34c159668bdf8e1a735cf61cb79301ef62aabaa8864ac1abef09e77071178c6a"
+        },
+        "libexec/go/pkg/tool/linux_amd64/asm": {
+          "bytes": 4650654,
+          "mode": 493,
+          "sha256": "0bdc8374e105da4f9f7920ea2ec00441020a416186321319b286fe743e91d305"
+        },
+        "libexec/go/pkg/tool/linux_amd64/compile": {
+          "bytes": 20905780,
+          "mode": 493,
+          "sha256": "ef351a2f138eef0ba46a2da0f0631c8b05a16cae435aea98d6f0c74de301d6e1"
+        },
+        "libexec/go/pkg/tool/linux_amd64/link": {
+          "bytes": 6230678,
+          "mode": 493,
+          "sha256": "7d28395c6aed1eaeedf75f5b5a97f744964e927a2a9ccdb9c22f40877fd7d7eb"
+        },
+        "libexec/tinygo/bin/tinygo": {
+          "bytes": 180395008,
+          "mode": 493,
+          "sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
+        },
+        "share/toolchains/tinygo-llvm/prepare-ir": {
+          "bytes": 14479616,
+          "mode": 493,
+          "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+        }
+      }
+    }
+  },
+  "upstream_ros2": {
+    "fastcdr": {
+      "cases": [
+        {
+          "bytes": 1180,
+          "label": "go2",
+          "nonzero_scalar_values": 349
+        },
+        {
+          "bytes": 2092,
+          "label": "hg",
+          "nonzero_scalar_values": 589
+        }
+      ],
+      "commit": "9f4e60f7ac958e0fbbfe949102de3929cbbc226f",
+      "version": "2.2.5"
+    },
+    "field_count": 257,
+    "schema_commit": "66ae09858245ac3d2231c0cc209e36a88f8d7d03",
+    "type_count": 43
+  },
+  "reference": "src/qualification/unitree/go",
+  "truncated_lengths": 6544,
+  "malformed_headers": 16,
+  "frame_sha256": {
+    "go2-be.cdr": "7adcbe17c7183e5d1199a3c5730cf8dfca12d222274992c36e43fb6e6311c73c",
+    "go2-le.cdr": "16c465859160dc4fdb9beb137f50a2c2a0ef142c7662c9a4b595768cf228eb52",
+    "hg-be.cdr": "78aab33ca5a5c62ee44ff33e275da878a352c21f3e57e6d26c01ad40fda9b4ce",
+    "hg-le.cdr": "44bbebad350337b99b81f6559661af1e16b1675bcbf63362c46051509cc1413b"
+  },
+  "binary_package_comparisons": {
+    "go-binary": {
+      "go-asm": {
+        "archive_bytes_identical": true,
+        "bytes": 6288457,
+        "executable_bytes_identical": true,
+        "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936"
+      },
+      "go-compile": {
+        "archive_bytes_identical": true,
+        "bytes": 28139575,
+        "executable_bytes_identical": true,
+        "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416"
+      },
+      "go-link": {
+        "archive_bytes_identical": true,
+        "bytes": 8660113,
+        "executable_bytes_identical": true,
+        "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc"
+      },
+      "go-wrgo": {
+        "archive_bytes_identical": true,
+        "bytes": 3339087,
+        "executable_bytes_identical": true,
+        "sha256": "54b906f5296de686a68847f6c7bb921d62422f5631924679533cba820924ab53"
+      },
+      "upstream_go_frontend_identical": true,
+      "uwvm2-ros": {
+        "archive_bytes_identical": true,
+        "bytes": 190202464,
+        "executable_bytes_identical": true,
+        "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "xmake": {
+        "archive_bytes_identical": true,
+        "bytes": 2823008,
+        "executable_bytes_identical": true,
+        "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+      }
+    },
+    "go-default": {
+      "go-asm": {
+        "archive_bytes_identical": true,
+        "bytes": 6288457,
+        "executable_bytes_identical": true,
+        "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936"
+      },
+      "go-compile": {
+        "archive_bytes_identical": true,
+        "bytes": 28139575,
+        "executable_bytes_identical": true,
+        "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416"
+      },
+      "go-link": {
+        "archive_bytes_identical": true,
+        "bytes": 8660113,
+        "executable_bytes_identical": true,
+        "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc"
+      },
+      "go-wrgo": {
+        "archive_bytes_identical": true,
+        "bytes": 3339087,
+        "executable_bytes_identical": true,
+        "sha256": "54b906f5296de686a68847f6c7bb921d62422f5631924679533cba820924ab53"
+      },
+      "upstream_go_frontend_identical": true,
+      "uwvm2-ros": {
+        "archive_bytes_identical": true,
+        "bytes": 190202464,
+        "executable_bytes_identical": true,
+        "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "xmake": {
+        "archive_bytes_identical": true,
+        "bytes": 2823008,
+        "executable_bytes_identical": true,
+        "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+      }
+    },
+    "tinygo-binary": {
+      "official_tinygo_frontend": {
+        "executable_bytes_identical": true,
+        "installed_sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2",
+        "sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
+      },
+      "tinygo-prepare-ir": {
+        "archive_bytes_identical": true,
+        "bytes": 14479616,
+        "executable_bytes_identical": true,
+        "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+      },
+      "tinygo-wrtg": {
+        "archive_bytes_identical": true,
+        "bytes": 3339047,
+        "executable_bytes_identical": true,
+        "sha256": "e40664d3635ddab1d9956a67404b33de6e3ea979cd7c734f50bc7c8d212fe127"
+      },
+      "upstream_go_frontend_identical": true,
+      "uwvm2-ros": {
+        "archive_bytes_identical": true,
+        "bytes": 190202464,
+        "executable_bytes_identical": true,
+        "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "xmake": {
+        "archive_bytes_identical": true,
+        "bytes": 2823008,
+        "executable_bytes_identical": true,
+        "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+      }
+    },
+    "tinygo-default": {
+      "official_tinygo_frontend": {
+        "executable_bytes_identical": true,
+        "installed_sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2",
+        "sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
+      },
+      "tinygo-prepare-ir": {
+        "archive_bytes_identical": true,
+        "bytes": 14479616,
+        "executable_bytes_identical": true,
+        "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+      },
+      "tinygo-wrtg": {
+        "archive_bytes_identical": true,
+        "bytes": 3339047,
+        "executable_bytes_identical": true,
+        "sha256": "e40664d3635ddab1d9956a67404b33de6e3ea979cd7c734f50bc7c8d212fe127"
+      },
+      "upstream_go_frontend_identical": true,
+      "uwvm2-ros": {
+        "archive_bytes_identical": true,
+        "bytes": 190202464,
+        "executable_bytes_identical": true,
+        "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "xmake": {
+        "archive_bytes_identical": true,
+        "bytes": 2823008,
+        "executable_bytes_identical": true,
+        "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+      }
+    }
+  },
+  "public_go_source": {
+    "offline_install_exit": 0,
+    "executables_compared_to_download": {
+      "go-asm": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936",
+      "go-compile": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416",
+      "go-link": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc",
+      "go-wrgo": "54b906f5296de686a68847f6c7bb921d62422f5631924679533cba820924ab53"
+    },
+    "offline_exit": 0,
+    "command_exit_codes": {
+      "direct-aot": 0,
+      "direct-build": 0,
+      "direct-int": 0,
+      "driver-sha": 0,
+      "go-compiler-version": 0,
+      "go-driver-buildinfo": 0,
+      "go-tools-shas": 0,
+      "host-go-version": 0,
+      "host-tool-shas": 0,
+      "independent-aot": 0,
+      "independent-build": 0,
+      "independent-int": 0,
+      "producer-version": 0,
+      "sdk-vm-version": 0,
+      "sdk-xmake-version": 0,
+      "target": 0,
+      "xmake-build": 0,
+      "xmake-direct-cmp": 0,
+      "xmake-test": 0
+    },
+    "guest_sha256": {
+      "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+      "results/direct.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+      "results/independent.wasm": "21baf1b1f3b405964c3e21a7877a53777ec1eb8dbb2599715198adc24552b629"
+    }
+  },
+  "tinygo_prepare_ir_clean_rebuild": {
+    "archive_bytes_identical": true,
+    "executable_bytes_identical": true,
+    "published": {
+      "bytes": 14479616,
+      "compressed_bytes": 4286400,
+      "compressed_sha256": "1341995f412d326e13e05a45ac82d763d77e368c74c412b43905d6a5ad5d435f",
+      "format": "tar.xz",
+      "member": "prepare-ir",
+      "path": "bin/packages/linux-x86_64/tinygo/prepare-ir-1341995f412d326e13e0.tar.xz",
+      "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+    },
+    "rebuilt": {
+      "bytes": 14479616,
+      "compressed_bytes": 4286400,
+      "compressed_sha256": "1341995f412d326e13e05a45ac82d763d77e368c74c412b43905d6a5ad5d435f",
+      "format": "tar.xz",
+      "member": "prepare-ir",
+      "path": "bin/packages/linux-x86_64/tinygo/prepare-ir-1341995f412d326e13e0.tar.xz",
+      "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+    }
+  },
+  "independent_xmake_no_mte_no_eh_o0": {
+    "go": {
+      "exit_code": 0,
+      "engines": [
+        "int",
+        "llvm-aot"
+      ],
+      "wasm_sha256": {
+        "unitree-independent-cdr-o0.wasm": "778e8ef09a05bb2410f615ad8e03dd7312b7521e8c25afe6caaba027a9950b65"
+      }
+    },
+    "tinygo": {
+      "exit_code": 0,
+      "engines": [
+        "int",
+        "llvm-aot"
+      ],
+      "wasm_sha256": {
+        "unitree-independent-cdr-o0.wasm": "a661bb698e7b9dc6f19071293b6ebc11666f4392b74d830b0f7eff0fe40a7ed1"
+      }
+    }
+  },
+  "cpu_benchmarks": {
+    "compiler_source_commit": "1d0395d054c609c01a954af52eae6d10292cfbfe",
+    "scope": "Go2 and HG encode/decode in guest memory; concurrent host builds; three trials, 16000 pairs and 52352000 bytes per direction per trial.",
+    "measurements": {
+      "go": {
+        "cpu_model": "Intel(R) Core(TM) i9-14900HX",
+        "guest": {
+          "bytes": 1653338,
+          "sha256": "44cb09c0a395dd7cd2db510d7356acda110a1f53b410e8613e3f57b416e8c9bb"
+        },
+        "engines": {
+          "aot": {
+            "exit": 0,
+            "median_pair_rate": 6298.777524006811,
+            "median_guest_ns": 2540175445,
+            "trials": [
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 2261281701,
+                "pair_rate": 7075.633253886222,
+                "pairs": 16000,
+                "repeat": 1
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 2540175445,
+                "pair_rate": 6298.777524006811,
+                "pairs": 16000,
+                "repeat": 2
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 2779880470,
+                "pair_rate": 5755.643155405168,
+                "pairs": 16000,
+                "repeat": 3
+              }
+            ]
+          },
+          "int": {
+            "exit": 0,
+            "median_pair_rate": 822.5319119530873,
+            "median_guest_ns": 19452132820,
+            "trials": [
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 20694773734,
+                "pair_rate": 773.14206019625,
+                "pairs": 16000,
+                "repeat": 1
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 16343787614,
+                "pair_rate": 978.9652421997021,
+                "pairs": 16000,
+                "repeat": 2
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 19452132820,
+                "pair_rate": 822.5319119530873,
+                "pairs": 16000,
+                "repeat": 3
+              }
+            ]
+          }
+        }
+      },
+      "tinygo": {
+        "cpu_model": "Intel(R) Core(TM) i9-14900HX",
+        "guest": {
+          "bytes": 49249,
+          "sha256": "9eae07a6ee4a0103ee6355594ebad39e06fd1031cce4fbb90d52e833159a6734"
+        },
+        "engines": {
+          "aot": {
+            "exit": 0,
+            "median_pair_rate": 2540.0204192463757,
+            "median_guest_ns": 6299161959,
+            "trials": [
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 6271657136,
+                "pair_rate": 2551.1598694001054,
+                "pairs": 16000,
+                "repeat": 1
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 6383730364,
+                "pair_rate": 2506.371523808301,
+                "pairs": 16000,
+                "repeat": 2
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 6299161959,
+                "pair_rate": 2540.0204192463757,
+                "pairs": 16000,
+                "repeat": 3
+              }
+            ]
+          },
+          "int": {
+            "exit": 0,
+            "median_pair_rate": 1456.8508724452565,
+            "median_guest_ns": 10982592867,
+            "trials": [
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 10960808707,
+                "pair_rate": 1459.7463041008805,
+                "pairs": 16000,
+                "repeat": 1
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 10982592867,
+                "pair_rate": 1456.8508724452565,
+                "pairs": 16000,
+                "repeat": 2
+              },
+              {
+                "bytes_each_direction": 52352000,
+                "checksum": 257036672,
+                "guest_ns": 11131589920,
+                "pair_rate": 1437.3508290359298,
+                "pairs": 16000,
+                "repeat": 3
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "open": [
+    "Both Go backends require wasm64 and shared Wasm threading work.",
+    "A TinyGo benchmark using os.Stderr.Write failed to link errno. The measured benchmark uses WASIp1 output.",
+    "Physical devices, upstream simulators, full-language and full-profile vendor qualification remain open."
+  ],
+  "tinygo_stdlib": {
+    "selection": "public default",
+    "clock_example": "time.Now / time.Since",
+    "stderr_example": "os.Stderr.Write",
+    "exit_codes": {
+      "clock-aot": 0,
+      "clock-build": 0,
+      "stderr-build": 1,
+      "clock-int": 0
+    },
+    "stderr_linker_diagnostic": "undefined symbol: errno",
+    "clock_wasm_sha256": "e08bdda7d3715046cf16015e28ec71f8175a26e223cc45ac91b9f8ea2713e035"
+  },
+  "tinygo_frontend_rebuild": {
+    "comparison": "independent offline host frontend source rebuild against official TinyGo ELF used in the public binary selection",
+    "official_host_elf_sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2",
+    "rebuilt_host_elf_sha256": "528baf13d4e5dfc3a5205cc99a92b882ef6f569dc1e8cbe128edc4ec92bdd37e",
+    "host_elf_byte_identical": false,
+    "source_versions": {
+      "tinygo": "0.38.0",
+      "go": "1.24.2",
+      "llvm": "19.1.2"
+    },
+    "guest_byte_identical": {
+      "direct": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+      "independent": "9796ea34ea7d1d535f2af878bd6cfd4138f74668b09b41d46dd3545da80a307c"
+    },
+    "exit_codes": {
+      "backend-shas": 0,
+      "direct-aot": 0,
+      "direct-build": 0,
+      "direct-int": 0,
+      "driver-sha": 0,
+      "frontend-sha": 0,
+      "frontend-version": 0,
+      "go-driver-buildinfo": 0,
+      "host-go-version": 0,
+      "host-tool-shas": 0,
+      "independent-aot": 0,
+      "independent-build": 0,
+      "independent-int": 0,
+      "producer-version": 0,
+      "sdk-vm-version": 0,
+      "sdk-xmake-version": 0,
+      "target": 0,
+      "xmake-build": 0,
+      "xmake-direct-cmp": 0,
+      "xmake-test": 0
+    }
+  },
+  "public_tinygo_source": {
+    "inputs": "55961 selected Git blobs and 6 LFS objects downloaded from the fixed GitHub revision; the unmodified inner installer ran offline on these inputs",
+    "download_attempt_exit_codes": [
+      1,
+      0
+    ],
+    "first_download_error": "upload-pack: not our ref e95e50b46e863327eceff5eee2e69ad58a2d38ec",
+    "ir_tool_bootstrap": "new frozen 23.1.5 LLVM build with independently verified byte-identical prepare-ir",
+    "offline_install_exit": 0,
+    "guest_command_exit_codes": {
+      "backend-shas": 0,
+      "direct-aot": 0,
+      "direct-build": 0,
+      "direct-int": 0,
+      "driver-sha": 0,
+      "frontend-sha": 0,
+      "frontend-version": 0,
+      "go-driver-buildinfo": 0,
+      "host-go-version": 0,
+      "host-tool-shas": 0,
+      "independent-aot": 0,
+      "independent-build": 0,
+      "independent-int": 0,
+      "producer-version": 0,
+      "sdk-vm-version": 0,
+      "sdk-xmake-version": 0,
+      "target": 0,
+      "xmake-build": 0,
+      "xmake-direct-cmp": 0,
+      "xmake-test": 0
+    },
+    "wasm": {
+      "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+      "results/direct.wasm": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071",
+      "results/independent.wasm": "9796ea34ea7d1d535f2af878bd6cfd4138f74668b09b41d46dd3545da80a307c"
+    },
+    "comparison": {
+      "direct_guest": {
+        "binary_mode": {
+          "bytes": 48741,
+          "sha256": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071"
+        },
+        "independent_source_rebuild": {
+          "bytes": 48741,
+          "sha256": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071"
+        },
+        "source_mode": {
+          "bytes": 48741,
+          "sha256": "0354168d17966afbe0107874c744d3dad100dc5b384cedef357a8578c1c23071"
+        },
+        "source_mode_matches_independent_bytes": true,
+        "source_mode_matches_official_binary_bytes": true
+      },
+      "independent_guest": {
+        "binary_mode": {
+          "bytes": 95878,
+          "sha256": "9796ea34ea7d1d535f2af878bd6cfd4138f74668b09b41d46dd3545da80a307c"
+        },
+        "independent_source_rebuild": {
+          "bytes": 95878,
+          "sha256": "9796ea34ea7d1d535f2af878bd6cfd4138f74668b09b41d46dd3545da80a307c"
+        },
+        "source_mode": {
+          "bytes": 95878,
+          "sha256": "9796ea34ea7d1d535f2af878bd6cfd4138f74668b09b41d46dd3545da80a307c"
+        },
+        "source_mode_matches_independent_bytes": true,
+        "source_mode_matches_official_binary_bytes": true
+      },
+      "prepare-ir": {
+        "binary_mode": {
+          "bytes": 14479616,
+          "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+        },
+        "independent_source_rebuild": {
+          "bytes": 14479616,
+          "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+        },
+        "source_mode": {
+          "bytes": 14479616,
+          "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+        },
+        "source_mode_matches_independent_bytes": true,
+        "source_mode_matches_official_binary_bytes": true
+      },
+      "tinygo": {
+        "binary_mode": {
+          "bytes": 180395008,
+          "sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2"
+        },
+        "independent_source_rebuild": {
+          "bytes": 176822824,
+          "sha256": "528baf13d4e5dfc3a5205cc99a92b882ef6f569dc1e8cbe128edc4ec92bdd37e"
+        },
+        "source_mode": {
+          "bytes": 176822824,
+          "sha256": "1a2cfe09c33aa803e19f6e6bc67ec8671dccfbb86e12d1f54be1212fbcb0cdd9"
+        },
+        "source_mode_matches_independent_bytes": false,
+        "source_mode_matches_official_binary_bytes": false
+      },
+      "wrtg": {
+        "binary_mode": {
+          "bytes": 3339047,
+          "sha256": "e40664d3635ddab1d9956a67404b33de6e3ea979cd7c734f50bc7c8d212fe127"
+        },
+        "independent_source_rebuild": {
+          "bytes": 3339047,
+          "sha256": "e40664d3635ddab1d9956a67404b33de6e3ea979cd7c734f50bc7c8d212fe127"
+        },
+        "source_mode": {
+          "bytes": 3339047,
+          "sha256": "e40664d3635ddab1d9956a67404b33de6e3ea979cd7c734f50bc7c8d212fe127"
+        },
+        "source_mode_matches_independent_bytes": true,
+        "source_mode_matches_official_binary_bytes": true
+      }
+    },
+    "source_elf_differences": [
+      ".debug_line_str",
+      ".note.gnu.build-id"
+    ],
+    "diagnostic_normalized_source_elf_sha256": "f877cad9b1b16dfe016ffde0821cd8de509425acd1918e940f6e3a08079c1e9e"
+  }
+}

@@ -1,0 +1,13 @@
+"""Carrier status numbers returned by uwvm_ros_v2."""
+SUCCESS = 0
+IO = 5
+BAD_HANDLE = 9
+AGAIN = 11
+NO_MEMORY = 12
+DENIED = 13
+CONFLICT = 17
+INVALID = 22
+TOO_LARGE = 90
+UNSUPPORTED = 95
+TIMEOUT = 110
+CANCELLED = 125

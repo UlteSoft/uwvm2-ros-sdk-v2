@@ -1,0 +1,10 @@
+set_project("nvidia-isaac-ros-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("nvidia-isaac-ros-observation")
+    set_kind("binary")
+    set_language("cpp")
+    set_ros_platform("nvidia-isaac-ros")
+    add_files("main.cpp")
+    add_wros_tests("int", "aot")
+target_end()

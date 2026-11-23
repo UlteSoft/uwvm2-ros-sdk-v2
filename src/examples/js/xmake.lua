@@ -1,0 +1,11 @@
+set_project("scene-abi")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("scene-abi")
+    set_kind("binary")
+    set_language("js")
+    add_files("main.mjs")
+    add_wros_operations("abi")
+    set_wros_test_queries("abi", "realtime-clock")
+    add_wros_tests("int", "aot")
+target_end()

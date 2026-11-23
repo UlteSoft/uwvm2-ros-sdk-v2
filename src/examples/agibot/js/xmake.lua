@@ -1,0 +1,11 @@
+set_project("agibot-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("agibot-observation")
+    set_kind("binary")
+    set_language("js")
+    set_ros_platform("agibot")
+    set_wros_test_queries("realtime-clock")
+    add_files("main.mjs")
+    add_wros_tests("int", "aot")
+target_end()

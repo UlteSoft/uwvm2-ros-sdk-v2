@@ -1,0 +1,13 @@
+set_project("unitree-python")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("unitree-python")
+    set_kind("binary")
+    set_language("py")
+    set_ros_platform("unitree")
+    set_wros_entry("main.py")
+    add_files("main.py", "vectors.py")
+    add_wros_operations("abi", "capability.open")
+    set_wros_test_queries("abi", "python-runtime")
+    add_wros_tests("int", "aot")
+target_end()

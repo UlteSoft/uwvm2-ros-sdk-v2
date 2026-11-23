@@ -1,0 +1,229 @@
+{
+  "interpreter": "CPython 3.14.8",
+  "profile": {
+    "address_bits": 32,
+    "wasm_version": "3.0",
+    "threads": false,
+    "mte": true,
+    "exceptions": "eh",
+    "triple": "wasm32-wasip1",
+    "abi": "wasi_snapshot_preview1",
+    "memtag_wire": "packed-v1",
+    "extensions": [
+      "wasmmte"
+    ]
+  },
+  "link_compiler_sha256": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+  "link_closure_sha256": "5f4559fb68f8fc4421cfe095f073df695eb8cad718dd754f2e5441b506272d90",
+  "libpython_sha256": "89cf990d56d71b714217c6d3386262be966bbcd3ca1b804e9fae6c04311000e3",
+  "sha256": "8c134e24989760ea008a5ce0b9e8acfb976b68c0272eaac53d8f08bc35087540",
+  "bytes": 16581183,
+  "imports": [
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "args_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "args_sizes_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "clock_res_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "clock_time_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i64",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_close",
+      "kind": 0,
+      "params": [
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_fdstat_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_filestat_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_prestat_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_prestat_dir_name",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_read",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_seek",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i64",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_tell",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "fd_write",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "path_filestat_get",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "path_open",
+      "kind": 0,
+      "params": [
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i32",
+        "i64",
+        "i64",
+        "i32",
+        "i32"
+      ],
+      "results": [
+        "i32"
+      ]
+    },
+    {
+      "module": "wasi_snapshot_preview1",
+      "name": "proc_exit",
+      "kind": 0,
+      "params": [
+        "i32"
+      ],
+      "results": []
+    }
+  ]
+}

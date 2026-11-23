@@ -1,0 +1,16 @@
+import * as observation from "uwrosv2/platform/trossen/observation";
+
+/* Constructed from the pinned upstream wire definition. */
+const sample = new Uint8Array([
+    0x02, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x6a, 0x6f, 0x69, 0x6e,
+    0x74, 0x30, 0x06, 0x00, 0x00, 0x00, 0x6a, 0x6f, 0x69, 0x6e, 0x74, 0x31,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x29, 0x00, 0x00, 0x00
+]);
+
+function check(data) {
+    if (observation.read_temps(data, 1) !== 41) throw Error("temps");
+    if (observation.read_temps(data.subarray(0, data.length - 1), 1) !== undefined) throw Error("truncated temps");
+    if (observation.read_temps(data, -1) !== undefined) throw Error("invalid index");
+}
+
+check(sample);

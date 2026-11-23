@@ -1,0 +1,11 @@
+set_project("abb-wire-verification")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("abb-wire-verification")
+    set_kind("binary")
+    set_language("go")
+    set_ros_platform("abb")
+    add_files("go.mod")
+    set_wros_test_queries("go-runtime")
+    add_wros_tests("int", "aot")
+target_end()

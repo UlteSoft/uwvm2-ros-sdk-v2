@@ -1,0 +1,14 @@
+{
+  "schema": 2,
+  "host": "linux-arm",
+  "launcher": {
+    "format": "tar.xz",
+    "member": "wrjava",
+    "compressed_bytes": 11548,
+    "compressed_sha256": "621f7686894cf228f34f2a7a39a155a100d5f1e22e27754386dba606d7d66ac9",
+    "bytes": 23024,
+    "sha256": "e675cf39e84c2dd25c8bd060175c5b98735a4ab1eb61164dba438903a3fe0e3c",
+    "path": "bin/packages/linux-arm/wrjava/java/wrjava-e675cf39e84c2dd25c8b.tar.xz"
+  },
+  "jdk_lock": "src/compilers/jvm/openjdk/debian/upstream.json"
+}

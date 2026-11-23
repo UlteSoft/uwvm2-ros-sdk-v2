@@ -1,0 +1,67 @@
+{
+  "format": 1,
+  "workspace": "src/compilers/wrwat",
+  "upstream": {
+    "repository": "https://github.com/bytecodealliance/wasm-tools",
+    "tag": "v1.263.0",
+    "commit": "7a2fa422cdf9aeeaf488a2acac8bc94a078bfa32",
+    "crates": [
+      {
+        "name": "wast",
+        "version": "263.0.0",
+        "repository_path": "crates/wast",
+        "workspace_path": "vendor/wast-263.0.0",
+        "crate_url": "https://static.crates.io/crates/wast/wast-263.0.0.crate",
+        "crate_sha256": "69d90bcf581b501aa1c358bc5dc0faa979cd375796908860ebcb6d1d70b907c7"
+      },
+      {
+        "name": "wasm-encoder",
+        "version": "0.263.0",
+        "repository_path": "crates/wasm-encoder",
+        "workspace_path": "vendor/wasm-encoder-0.263.0",
+        "crate_url": "https://static.crates.io/crates/wasm-encoder/wasm-encoder-0.263.0.crate",
+        "crate_sha256": "0b883a26aea02eaabe2d2c3fba7eb039ef5cdcb5d5201ae5551e73d5e251a81f"
+      },
+      {
+        "name": "wasmparser",
+        "version": "0.263.0",
+        "repository_path": "crates/wasmparser",
+        "workspace_path": "vendor/wasmparser-memtag",
+        "crate_url": "https://static.crates.io/crates/wasmparser/wasmparser-0.263.0.crate",
+        "crate_sha256": "4f5fa0a054ae153606df820eb0a84213e28cda41bbe04ba2628e71b6ba100fcb"
+      }
+    ]
+  },
+  "reader_fork": {
+    "repository": "https://github.com/UlteSoft/wasm-fuzzer",
+    "commit": "5beb8556ee40e249cd5f26449784a79f4616ee5c",
+    "path": "vendor/wasmparser-memtag",
+    "git_tree": "70a908cef7965e8ce0ad3da6137d1d7dbedc7b4f"
+  },
+  "sdk": {
+    "repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2",
+    "packed_wire_support": "d72ffb5d181dce67b5caa72d0633967899fc80ea",
+    "native_driver": "ad5cf148ee70a79afa4f09333227588832678a37",
+    "driver_files": [
+      "src/cli.rs",
+      "src/main.rs",
+      "src/policy.rs"
+    ],
+    "source_release": "476799fc80b1ebeea82721a82d658dee75fce9a6"
+  },
+  "patches": [
+    {
+      "file": "changes/01-reader-feature.patch",
+      "sha256": "1e0d30c95e44afc08129bb26ee8affecee38039a3b6a472517dbbca68aab05c1"
+    },
+    {
+      "file": "changes/02-sdk-text-encoding.patch",
+      "sha256": "ec8001d175ea04e7c35d80b6aa2154da5871586fda4302b3651ce1ba84001fd6"
+    }
+  ],
+  "licenses": [
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "LICENSE-Apache-2.0_WITH_LLVM-exception"
+  ]
+}

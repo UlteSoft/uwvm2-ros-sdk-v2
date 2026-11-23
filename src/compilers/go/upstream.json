@@ -1,0 +1,24 @@
+{
+  "bootstrap": "https://go.dev/dl/go1.24.2.linux-amd64.tar.gz",
+  "commit": "49860cf92a9a3ba434d2bc393faaefabe48d181e",
+  "license": "upstream/LICENSE",
+  "local_changes": "Wasm assembler encodings and linker memory/tag sections, runtime stack allocation/release, and terminal panic dispatch. Host test-key fixtures are redacted by test_fixtures.py.",
+  "local_files": {
+    "src/cmd/internal/obj/wasm/a.out.go": "01e60d7df29caf40f5be4570c9d94325bde51fcf2a5f6a272122cadb542effb6",
+    "src/cmd/internal/obj/wasm/anames.go": "1e7117e41e1f025d80dcd9ff9e94ef291dca0579ccf252d72642ef19775cc972",
+    "src/cmd/internal/obj/wasm/wasmobj.go": "fda52f6aef3d5574f3997682cfabfacc7b149d1e986dca274660ba6a0febbec2",
+    "src/cmd/link/internal/wasm/asm.go": "57f136a8c5d7d52eac8e0f51d425c24e38a2a3a59c89221234d46781be40c587",
+    "src/runtime/panic.go": "1e568e5a1dbcb5faad646496e4298730886e9f63486d828d5dc5c8a59ea85d16",
+    "src/runtime/panic_wros_default.go": "8810a3634bcbb1e4c88c0502dd869021d81a3a58562ebfcbd8a17b71cbea426f",
+    "src/runtime/panic_wros_wasm.go": "0807ee5a007b1093d2ae1360a8cccd61b16f07d9fa63ff16bdcf90b1be89ae62",
+    "src/runtime/panic_wros_wasm.s": "25dc7bba8dd70e622b1f066683899461b6a32a000945375411ee395af5189dfa",
+    "src/runtime/stack.go": "e76709fc9ec70f0afe4dec4dc3df5dc9504574d42a4162d2a107a240e2be980b",
+    "src/runtime/stack_wros_default.go": "7bb725548ebda8fa3bbc0e728502f5f4724a4fd9e5ed43d94c223411c0cfad88",
+    "src/runtime/stack_wros_wasm.go": "c0e2a3195bac0ee528b540dbed8d85a4866ef422fa82e1d48bb4301ac83d28f0",
+    "src/runtime/stack_wros_wasm.s": "97909642e121d737c4edf24c5e40e1c40bcd109cb43d7ced9c2a1d7b5e98c504"
+  },
+  "origin": "https://github.com/golang/go",
+  "test_fixture_manifest": "test-fixtures.json",
+  "upstream_tree": "98345007260938c37514d556e26595340c74f628",
+  "version": "go1.24.2"
+}

@@ -1,0 +1,2328 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+#include <uwvm2/utils/container/standard.h>
+#include <uwvm2/utils/allocator/resource_limit.h>
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+# include <cstdlib>
+# include <vector>
+# include <new>
+# include <stdexcept>
+#endif
+# include <cstdint>
+# include <climits>
+# include <cstring>
+# include <limits>
+# include <concepts>
+# include <bit>
+# include <memory>
+# include <utility>
+// macro
+# include <uwvm2/uwvm_predefine/utils/ansies/uwvm_color_push_macro.h>
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/imported/wasi/wasip1/feature/feature_push_macro.h>
+// platform
+# if !defined(_WIN32)
+#  include <errno.h>
+# endif
+# if defined(UWVM_ROS_ZERO_HOST_DEFAULTS) && defined(__linux__)
+#  include <sys/vfs.h>
+# include <sys/epoll.h>
+# include <sys/socket.h>
+# include <sys/uio.h>
+# include <netinet/in.h>
+# include <fcntl.h>
+# include <unistd.h>
+# endif
+// import
+# include <fast_io.h>
+# include <fast_io_device.h>
+# include <fast_io_dsal/string_view.h>
+# include <uwvm2/uwvm_predefine/utils/ansies/impl.h>
+# include <uwvm2/uwvm_predefine/io/impl.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/utf/impl.h>
+# include <uwvm2/object/memory/linear/impl.h>
+# include <uwvm2/imported/wasi/wasip1/abi/impl.h>
+# include <uwvm2/imported/wasi/wasip1/fd_manager/impl.h>
+# include <uwvm2/imported/wasi/wasip1/memory/impl.h>
+# include <uwvm2/imported/wasi/wasip1/environment/impl.h>
+# include "posix.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+#ifdef UWVM_IMPORT_WASI_WASIP1
+
+UWVM_MODULE_EXPORT namespace uwvm2::imported::wasi::wasip1::func
+{
+    // Host-call pointers must be checked against committed guest memory, even
+    // when the interpreter normally relies on mmap guard pages. A host syscall
+    // or a checked-memory helper must never turn bad guest input into a host trap.
+    template<typename Memory, ::std::unsigned_integral Offset, ::std::unsigned_integral Size>
+    [[nodiscard]] inline constexpr bool wasip1_guest_range_valid_unlocked(Memory const& memory, Offset offset, Size bytes) noexcept
+    {
+        return static_cast<bool>(::uwvm2::imported::wasi::wasip1::memory::checked_span_unlocked(
+            memory,static_cast<::std::uint64_t>(offset),static_cast<::std::uint64_t>(bytes)));
+    }
+
+    template<typename Memory, ::std::unsigned_integral Offset, ::std::unsigned_integral Size>
+    [[nodiscard]] inline constexpr bool check_wasip1_memory_bounds_wasm32(Memory const& memory, Offset offset, Size bytes) noexcept
+    {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        [[maybe_unused]] auto const guard{::uwvm2::imported::wasi::wasip1::memory::lock_memory(memory)};
+        return wasip1_guest_range_valid_unlocked(memory, offset, bytes);
+#else
+        ::uwvm2::imported::wasi::wasip1::memory::check_memory_bounds_wasm32(memory, offset, bytes);
+        return true;
+#endif
+    }
+
+    template<typename Memory, ::std::unsigned_integral Offset, ::std::unsigned_integral Size>
+    [[nodiscard]] inline constexpr bool check_wasip1_memory_bounds_wasm32_unlocked(Memory const& memory, Offset offset, Size bytes) noexcept
+    {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        return wasip1_guest_range_valid_unlocked(memory, offset, bytes);
+#else
+        ::uwvm2::imported::wasi::wasip1::memory::check_memory_bounds_wasm32_unlocked(memory, offset, bytes);
+        return true;
+#endif
+    }
+
+    template<typename Memory, ::std::unsigned_integral Offset, ::std::unsigned_integral Size>
+    [[nodiscard]] inline constexpr bool check_wasip1_memory_bounds_wasm64(Memory const& memory, Offset offset, Size bytes) noexcept
+    {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        [[maybe_unused]] auto const guard{::uwvm2::imported::wasi::wasip1::memory::lock_memory(memory)};
+        return wasip1_guest_range_valid_unlocked(memory, offset, bytes);
+#else
+        ::uwvm2::imported::wasi::wasip1::memory::check_memory_bounds_wasm64(memory, offset, bytes);
+        return true;
+#endif
+    }
+
+    template<typename Memory, ::std::unsigned_integral Offset, ::std::unsigned_integral Size>
+    [[nodiscard]] inline constexpr bool check_wasip1_memory_bounds_wasm64_unlocked(Memory const& memory, Offset offset, Size bytes) noexcept
+    {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        return wasip1_guest_range_valid_unlocked(memory, offset, bytes);
+#else
+        ::uwvm2::imported::wasi::wasip1::memory::check_memory_bounds_wasm64_unlocked(memory, offset, bytes);
+        return true;
+#endif
+    }
+
+    // Every directory traversal validates the object opened by the kernel.
+    // This also prevents an approved ancestor mount from reaching proc/sys
+    // magic links and exposing management descriptors through /proc/self/fd.
+    template<typename... Args>
+    [[nodiscard]] inline constexpr ::fast_io::dir_file open_authorized_directory(Args&&... args)
+    {
+        ::fast_io::dir_file opened{::std::forward<Args>(args)...};
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS) && defined(__linux__)
+        struct ::statfs filesystem{};
+        if(::fstatfs(opened.native_handle(), &filesystem)!=0) ::fast_io::throw_posix_error(errno);
+        if(filesystem.f_type==0x9fa0 || filesystem.f_type==0x62656572) ::fast_io::throw_posix_error(EPERM);
+#endif
+        return opened;
+    }
+
+    /// @brief Report a WASI Preview 1 guest-ABI pointer alignment violation and trap.
+    /// @note  This is deliberately separate from WebAssembly linear-memory load/store handling: ordinary non-atomic Wasm memory operations may use
+    ///        unaligned effective addresses. The stricter rule belongs only to pointer arguments crossing the WASI host-call boundary.
+    UWVM_GNU_COLD [[noreturn]] inline constexpr void output_wasip1_guest_pointer_alignment_error(
+        ::std::uint_least64_t guest_offset,
+        ::std::size_t required_alignment,
+        ::fast_io::u8string_view pointer_name) noexcept
+    {
+# ifdef UWVM
+        ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                            u8"uwvm: ",
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_LT_RED),
+                            u8"[fatal] ",
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                            u8"WASI Preview 1 guest pointer alignment trap: ",
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_YELLOW),
+                            pointer_name,
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                            u8" = ",
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_LT_RED),
+                            ::fast_io::mnp::addrvw(guest_offset),
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                            u8", required alignment = ",
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_CYAN),
+                            required_alignment,
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                            u8" bytes\n\n",
+                            ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL));
+# else
+        ::fast_io::io::perr(::fast_io::u8err(),
+                            u8"uwvm: [fatal] WASI Preview 1 guest pointer alignment trap: ",
+                            pointer_name,
+                            u8" = ",
+                            ::fast_io::mnp::addrvw(guest_offset),
+                            u8", required alignment = ",
+                            required_alignment,
+                            u8" bytes\n\n");
+# endif
+        ::fast_io::fast_terminate();
+    }
+
+    /// @brief Validate the alignment of a pointer argument in the guest ABI before any dereference or host-side syscall effect.
+    /// @details The normative WASI Preview 1 WITX rule states: "Pointer values are expected to be aligned, to the alignment of their pointee type. If a
+    ///          misaligned pointer is passed to a function, the function shall trap."
+    /// @see https://github.com/WebAssembly/WASI/blob/wasi-0.1/tools/witx-docs.md#pointers
+    /// @tparam RequiredAlignment Explicit alignment from the guest ABI layout; never infer this from a host C++ pointer or host ABI.
+    template <::std::size_t RequiredAlignment, ::std::unsigned_integral Pointer>
+    [[nodiscard]] inline constexpr bool check_wasip1_guest_pointer_alignment(Pointer guest_offset, [[maybe_unused]] ::fast_io::u8string_view pointer_name) noexcept
+    {
+        static_assert(RequiredAlignment != 0uz && (RequiredAlignment & (RequiredAlignment - 1uz)) == 0uz,
+                      "WASI guest pointer alignment must be a nonzero power of two");
+
+        if((guest_offset & static_cast<Pointer>(RequiredAlignment - 1uz)) != 0u) [[unlikely]]
+        {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+            return false;
+#else
+            output_wasip1_guest_pointer_alignment_error(static_cast<::std::uint_least64_t>(guest_offset), RequiredAlignment, pointer_name);
+#endif
+        }
+        return true;
+    }
+
+    template <::std::integral I>
+        requires (::std::signed_integral<I>)
+    inline constexpr bool add_overflow(I a, I b, I & result) noexcept
+    {
+# if UWVM_HAS_BUILTIN(__builtin_add_overflow)
+        return __builtin_add_overflow(a, b, ::std::addressof(result));
+# else
+        // The result of signed addition is undefined behavior.
+        // But the results still have to be provided.
+
+        if(b > 0 && a > ::std::numeric_limits<I>::max() - b)
+        {
+            // overflow
+            // The behavior of __builtin_add_overflow is well-defined as overflow wrap-around, so an unsigned implementation is used here.
+            using unsigned_I = ::std::make_unsigned_t<I>;
+            result = static_cast<I>(static_cast<unsigned_I>(a) + static_cast<unsigned_I>(b));
+            return true;
+        }
+
+        if(b < 0 && a < ::std::numeric_limits<I>::min() - b)
+        {
+            // underflow
+            // The behavior of __builtin_add_overflow is well-defined as overflow wrap-around, so an unsigned implementation is used here.
+            using unsigned_I = ::std::make_unsigned_t<I>;
+            result = static_cast<I>(static_cast<unsigned_I>(a) + static_cast<unsigned_I>(b));
+            return true;
+        }
+
+        // default, no overflow
+        result = a + b;
+        return false;
+# endif
+    }
+
+    template <::std::integral I>
+        requires (::std::unsigned_integral<I>)
+    inline constexpr bool add_overflow(I a, I b, I & result) noexcept
+    {
+# if defined(_MSC_VER) && !defined(__clang__)
+        if UWVM_IF_NOT_CONSTEVAL
+        {
+#  if defined(_M_X64) && !(defined(_M_ARM64EC) || defined(__arm64ec__))
+            if constexpr(::std::same_as<I, ::std::uint64_t>)
+            {
+                // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+                return ::fast_io::intrinsics::msvc::x86::_addcarry_u64(false, a, b, ::std::addressof(result));
+            }
+            else if constexpr(::std::same_as<I, ::std::uint32_t>)
+            {
+                // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+                return ::fast_io::intrinsics::msvc::x86::_addcarry_u32(false, a, b, ::std::addressof(result));
+            }
+            else if constexpr(::std::same_as<I, ::std::uint16_t>)
+            {
+                // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+                return ::fast_io::intrinsics::msvc::x86::_addcarry_u16(false, a, b, ::std::addressof(result));
+            }
+            else if constexpr(::std::same_as<I, ::std::uint8_t>)
+            {
+                // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+                return ::fast_io::intrinsics::msvc::x86::_addcarry_u8(false, a, b, ::std::addressof(result));
+            }
+            else
+            {
+                // msvc's `_addcarry_u32` does not specialize for `unsigned long`
+                result = static_cast<I>(a + b);
+                return result < a;
+            }
+
+#  elif defined(_M_X32)
+            if constexpr(::std::same_as<I, ::std::uint32_t>)
+            {
+                // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+                return ::fast_io::intrinsics::msvc::x86::_addcarry_u32(false, a, b, ::std::addressof(result));
+            }
+            else if constexpr(::std::same_as<I, ::std::uint16_t>)
+            {
+                // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+                return ::fast_io::intrinsics::msvc::x86::_addcarry_u16(false, a, b, ::std::addressof(result));
+            }
+            else if constexpr(::std::same_as<I, ::std::uint8_t>)
+            {
+                // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+                return ::fast_io::intrinsics::msvc::x86::_addcarry_u8(false, a, b, ::std::addressof(result));
+            }
+            else
+            {
+                result = static_cast<I>(a + b);
+                return result < a;
+            }
+
+#  else  // ARM, ARM64, ARM64ec
+            result = static_cast<I>(a + b);
+            return result < a;
+#  endif
+        }
+        else
+        {
+            result = static_cast<I>(a + b);
+            return result < a;
+        }
+
+# elif UWVM_HAS_BUILTIN(__builtin_add_overflow)
+        // Parameters can't be filled with ::std::addressof(i), to ensure determinism of exceptions.
+        return __builtin_add_overflow(a, b, ::std::addressof(result));
+
+# else
+        result = static_cast<I>(a + b);
+        return result < a;
+# endif
+    }
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+    // Temporary host allocations must report failure through the guest ABI.
+    // This adapter keeps the repository vector spelling without its fail-fast
+    // allocator; callers contain bad_alloc/length_error before returning.
+    template<typename T>
+    struct recoverable_host_vector : ::uwvm2::utils::container::std_vector<T,::uwvm2::utils::allocator::resource::std_allocator<T>>
+    {
+        using base_type = ::uwvm2::utils::container::std_vector<T,::uwvm2::utils::allocator::resource::std_allocator<T>>;
+        using base_type::base_type;
+        template<typename... Args> constexpr T& emplace_back_unchecked(Args&&... args)
+        { return this->emplace_back(static_cast<Args&&>(args)...); }
+        constexpr T& front_unchecked() noexcept { return this->front(); }
+        constexpr T const& front_unchecked() const noexcept { return this->front(); }
+        constexpr T& back_unchecked() noexcept { return this->back(); }
+        constexpr T const& back_unchecked() const noexcept { return this->back(); }
+        constexpr T& index_unchecked(::std::size_t index) noexcept { return (*this)[index]; }
+        constexpr T const& index_unchecked(::std::size_t index) const noexcept { return (*this)[index]; }
+    };
+#else
+    template<typename T> using recoverable_host_vector = ::uwvm2::utils::container::vector<T>;
+#endif
+
+    struct fast_io_io_scatter_t_allocator_guard
+    {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        struct allocator
+        {
+            [[nodiscard]] static ::fast_io::io_scatter_t* allocate(::std::size_t count) noexcept
+            {
+                if(count > SIZE_MAX / sizeof(::fast_io::io_scatter_t)) { return nullptr; }
+                return reinterpret_cast<::fast_io::io_scatter_t*>(::uwvm2::utils::allocator::resource::try_bytes<
+                    ::uwvm2::utils::allocator::resource::pool::auxiliary>(count * sizeof(::fast_io::io_scatter_t)));
+            }
+            static constexpr void deallocate(::fast_io::io_scatter_t* value) noexcept
+            { ::uwvm2::utils::allocator::resource::free_bytes<::uwvm2::utils::allocator::resource::pool::auxiliary>(reinterpret_cast<::std::byte*>(value)); }
+        };
+#else
+        using allocator = ::fast_io::native_typed_global_allocator<::fast_io::io_scatter_t>;
+#endif
+        ::fast_io::io_scatter_t* ptr{};
+
+        inline constexpr fast_io_io_scatter_t_allocator_guard() noexcept = default;
+
+        inline constexpr fast_io_io_scatter_t_allocator_guard(::fast_io::io_scatter_t* o_ptr) noexcept : ptr{o_ptr} {}
+
+        fast_io_io_scatter_t_allocator_guard(fast_io_io_scatter_t_allocator_guard const&) = delete;
+        fast_io_io_scatter_t_allocator_guard& operator= (fast_io_io_scatter_t_allocator_guard const&) = delete;
+
+        fast_io_io_scatter_t_allocator_guard(fast_io_io_scatter_t_allocator_guard&& other) = delete;
+        fast_io_io_scatter_t_allocator_guard& operator= (fast_io_io_scatter_t_allocator_guard&& other) = delete;
+
+        inline constexpr ~fast_io_io_scatter_t_allocator_guard()
+        {
+            // The deallocator performs internal null pointer checks.
+            allocator::deallocate(ptr);
+        }
+    };
+
+    // The path series functions of wasi cannot traverse paths beyond the specified path, not the preopen path.
+
+    enum class dir_type_e : ::std::uint_fast8_t
+    {
+        curr,
+        prev,
+        next,
+    };
+
+    struct split_path_t
+    {
+        ::uwvm2::utils::container::u8string next_name{};
+        dir_type_e dir_type{};
+    };
+
+    struct split_path_res_t
+    {
+        ::uwvm2::utils::container::vector<split_path_t> res{};
+        bool is_absolute{};
+    };
+
+    /// @note This function is not compatible with Windows, as Windows uses both forward slashes and backslashes as path separators. If you are using Windows,
+    /// you must add a backslash check for each subsequent level to prevent multi-level paths from occurring.
+    inline constexpr split_path_res_t split_posix_path(::uwvm2::utils::container::u8string_view path) noexcept
+    {
+        split_path_res_t result{};
+
+        // Indicates whether the path is absolute; the leading ‘/’ will be skipped during actual splitting.
+        result.is_absolute = !path.empty() && path.front_unchecked() == u8'/';
+
+        // Prevent extreme cases from exceeding boundaries (almost impossible to hit).
+        if(path.size() == ::std::numeric_limits<::std::size_t>::max()) [[unlikely]] { return {}; }
+
+        ::std::size_t i{};
+        while(i < path.size())
+        {
+            // Skip consecutive '/'
+            while(i < path.size() && path.index_unchecked(i) == u8'/') { ++i; }
+            if(i >= path.size()) { break; }
+
+            ::std::size_t j{i};
+            while(j < path.size() && path.index_unchecked(j) != u8'/') { ++j; }
+            ::uwvm2::utils::container::u8string_view token{path.subview_unchecked(i, j - i)};
+
+            // Precisely identify '.' and '..', otherwise treat as a normal name field.
+            if(token == u8".") { result.res.emplace_back(::uwvm2::utils::container::u8string{}, dir_type_e::curr); }
+            else if(token == u8"..") { result.res.emplace_back(::uwvm2::utils::container::u8string{}, dir_type_e::prev); }
+            else
+            {
+                result.res.emplace_back(::uwvm2::utils::container::u8string{token}, dir_type_e::next);
+            }
+
+            i = j + 1uz;
+        }
+
+        return result;
+    }
+
+    template <::uwvm2::imported::wasi::wasip1::environment::wasip1_memory memory_type, typename... Args>
+    inline constexpr void print_wasip1_trace_message(::uwvm2::imported::wasi::wasip1::environment::wasip1_environment<memory_type> & env,
+                                                     Args && ... args) noexcept
+    {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+        // Raw per-call formatting can expose arbitrary labels and block on the
+        // trace sink. The ROS launcher rejects this legacy facility; embedders
+        // cannot turn it into an unbounded guest-triggered output channel.
+        return;
+#endif
+        using trace_group_kind_t = ::uwvm2::imported::wasi::wasip1::environment::trace_wasip1_group_kind_t;
+        using trace_output_target_t = ::uwvm2::imported::wasi::wasip1::environment::trace_wasip1_output_target_t;
+
+        auto const trace_target{env.trace_wasip1_output_target};
+
+        auto const emit{
+            [&](auto&& out) constexpr noexcept
+            {
+                switch(env.trace_wasip1_group_kind)
+                {
+                    case trace_group_kind_t::global:
+                    {
+                        ::fast_io::io::perr(out, u8"[wasip1] global ", args..., u8" (wasi-trace)\n");
+                        return;
+                    }
+                    case trace_group_kind_t::single:
+                    {
+                        ::fast_io::io::perr(out, u8"[wasip1] single ", args..., u8" (wasi-trace)\n");
+                        return;
+                    }
+                    case trace_group_kind_t::custom_group:
+                    {
+                        ::fast_io::io::perr(out, u8"[wasip1] custom group:\"", env.trace_wasip1_group_name_storage, u8"\" ", args..., u8" (wasi-trace)\n");
+                        return;
+                    }
+                    [[unlikely]] default:
+                    {
+                        ::fast_io::io::perr(out, u8"[wasip1] ", args..., u8" (wasi-trace)\n");
+                        return;
+                    }
+                }
+            }};
+
+        switch(trace_target)
+        {
+            case trace_output_target_t::out:
+            {
+# if defined(__AVR__)
+                emit(::fast_io::u8c_stdout());
+# else
+                emit(::fast_io::u8out());
+# endif
+                break;
+            }
+            case trace_output_target_t::file:
+            {
+# if !defined(__AVR__) && !((defined(_WIN32) && !defined(__WINE__)) && defined(_WIN32_WINDOWS)) && !(defined(__MSDOS__) || defined(__DJGPP__)) &&              \
+     !(defined(__NEWLIB__) && !defined(__CYGWIN__)) && !defined(_PICOLIBC__) && !defined(__wasm__)
+                emit(env.trace_wasip1_output_file);
+# elif defined(__AVR__)
+                emit(::fast_io::u8c_stderr());
+# else
+                emit(::fast_io::u8err());
+# endif
+                break;
+            }
+            case trace_output_target_t::err: [[fallthrough]];
+            case trace_output_target_t::none:
+                [[fallthrough]];
+            [[unlikely]] default:
+            {
+# if defined(__AVR__)
+                emit(::fast_io::u8c_stderr());
+# else
+                emit(::fast_io::u8err());
+# endif
+                break;
+            }
+        }
+    }
+
+    inline constexpr ::uwvm2::imported::wasi::wasip1::abi::errno_t path_errno_from_fast_io_error(::fast_io::error e) noexcept
+    {
+# if defined(_WIN32) && !defined(__CYGWIN__)
+        switch(e.domain)
+        {
+            case ::fast_io::win32_domain_value:
+            {
+                switch(e.code)
+                {
+                    // If “ebadf” appears here, it is caused by a WASI implementation issue. This differs from WASI's
+                    // ‘ebadf’; here, “eio” is used instead.
+                    case 6uz /*ERROR_INVALID_HANDLE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 5uz /*ERROR_ACCESS_DENIED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eacces;
+                    case 1uz /*ERROR_INVALID_FUNCTION*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enosys;
+                    case 50uz /*ERROR_NOT_SUPPORTED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotsup;
+                    case 19uz /*ERROR_WRITE_PROTECT*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::erofs;
+                    case 87uz /*ERROR_INVALID_PARAMETER*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    case 1117uz /*ERROR_IO_DEVICE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 31uz /*ERROR_GEN_FAILURE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 1784uz /*ERROR_INVALID_USER_BUFFER*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::efault;
+                    case 2uz /*ERROR_FILE_NOT_FOUND*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enoent;
+                    case 3uz /*ERROR_PATH_NOT_FOUND*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enoent;
+                    case 4uz /*ERROR_TOO_MANY_OPEN_FILES*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::emfile;
+                    case 24uz /*ERROR_BAD_LENGTH*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    case 25uz /*ERROR_SEEK*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::espipe;
+                    case 21uz /*ERROR_NOT_READY*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 38uz /*ERROR_HANDLE_EOF*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 112uz /*ERROR_DISK_FULL*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enospc;
+                    case 12uz /*ERROR_INVALID_ACCESS*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eacces;
+                    case 32uz /*ERROR_SHARING_VIOLATION*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::ebusy;
+                    case 33uz /*ERROR_LOCK_VIOLATION*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eagain;
+                    case 109uz /*ERROR_BROKEN_PIPE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::epipe;
+                    case 232uz /*ERROR_NO_DATA*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::epipe;
+                    case 8uz /*ERROR_NOT_ENOUGH_MEMORY*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enomem;
+                    case 14uz /*ERROR_OUTOFMEMORY*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enomem;
+                    case 995uz /*ERROR_OPERATION_ABORTED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::ecanceled;
+                    case 997uz /*ERROR_IO_PENDING*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einprogress;
+                    case 267uz /*ERROR_DIRECTORY*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                    case 183uz /*ERROR_ALREADY_EXISTS*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eexist;
+                    case 206uz /*ERROR_FILENAME_EXCED_RANGE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enametoolong;
+                    case 123uz /*ERROR_INVALID_NAME*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    case 17uz /*ERROR_NOT_SAME_DEVICE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::exdev;
+                    case 80uz /*ERROR_FILE_EXISTS*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eexist;
+                    case 4390uz /*ERROR_NOT_A_REPARSE_POINT*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    case 145uz /*ERROR_DIR_NOT_EMPTY*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotempty;
+                    default: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                }
+
+                break;
+            }
+#  if !defined(_WIN32_WINDOWS)
+            case ::fast_io::nt_domain_value:
+            {
+                static_assert(sizeof(::fast_io::error::value_type) >= sizeof(::std::uint_least32_t));
+                switch(e.code)
+                {
+                    // If “ebadf” appears here, it is caused by a WASI implementation issue. This differs from WASI's
+                    // ‘ebadf’; here, “eio” is used instead.
+                    case 0xC0000008uz /*STATUS_INVALID_HANDLE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 0xC0000022uz /*STATUS_ACCESS_DENIED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eacces;
+                    case 0xC0000002uz /*STATUS_NOT_IMPLEMENTED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enosys;
+                    case 0xC00000BBuz /*STATUS_NOT_SUPPORTED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotsup;
+                    case 0xC00000A2uz /*STATUS_MEDIA_WRITE_PROTECTED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::erofs;
+                    case 0xC000000Duz /*STATUS_INVALID_PARAMETER*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    case 0xC0000185uz /*STATUS_IO_DEVICE_ERROR*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 0xC0000001uz /*STATUS_UNSUCCESSFUL*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 0xC00000E8uz /*STATUS_INVALID_USER_BUFFER*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::efault;
+                    case 0xC0000034uz /* STATUS_OBJECT_NAME_NOT_FOUND */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enoent;
+                    case 0xC000003Auz /* STATUS_OBJECT_PATH_NOT_FOUND */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enoent;
+                    case 0xC0000043uz /* STATUS_SHARING_VIOLATION */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::ebusy;
+                    case 0xC0000054uz /* STATUS_FILE_LOCK_CONFLICT */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eagain;
+                    case 0xC000007Fuz /* STATUS_DISK_FULL */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enospc;
+                    case 0xC0000010uz /* STATUS_INVALID_DEVICE_REQUEST */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enosys;
+                    case 0xC0000011uz /* STATUS_END_OF_FILE */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 0xC0000013uz /* STATUS_NO_MEDIA_IN_DEVICE */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enoent;
+                    case 0xC000000Euz /* STATUS_NO_SUCH_DEVICE */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enoent;
+                    case 0xC0000281uz /* STATUS_DIRECTORY_IS_A_REPARSE_POINT */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                    case 0xC00000BAuz /* STATUS_FILE_IS_A_DIRECTORY */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eisdir;
+                    case 0xC000009Auz /* STATUS_INSUFFICIENT_RESOURCES */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enomem;
+                    case 0xC0000017uz /* STATUS_NO_MEMORY */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enomem;
+                    case 0xC0000120uz /*STATUS_CANCELLED*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::ecanceled;
+                    case 0x00000103uz /*STATUS_PENDING*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einprogress;
+                    case 0xC000014Buz /*STATUS_PIPE_BROKEN*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::epipe;
+                    case 0xC0000035uz /*STATUS_OBJECT_NAME_COLLISION*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eexist;
+                    case 0xC0000106uz /*STATUS_NAME_TOO_LONG*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enametoolong;
+                    case 0xC0000103uz /*STATUS_NOT_A_DIRECTORY*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                    case 0xC0000033uz /*STATUS_OBJECT_NAME_INVALID*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    case 0xC00000D4uz /*STATUS_NOT_SAME_DEVICE*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::exdev;
+                    case 0xC000011Fuz /*STATUS_TOO_MANY_OPEN_FILES*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::emfile;
+                    case 0xC0000275uz /*STATUS_NOT_A_REPARSE_POINT*/: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    case 0xC0000101uz /* STATUS_DIRECTORY_NOT_EMPTY */: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotempty;
+                    default: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                }
+
+                break;
+            }
+#  endif
+            [[unlikely]] default:
+            {
+#  if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                // Security issues inherent to virtual machines
+                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#  endif
+                return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+            }
+        }
+# else
+        switch(e.code)
+        {
+            // If “ebadf” appears here, it is caused by a WASI implementation issue. This differs from WASI's ‘ebadf’;
+            // here, “eio” is used instead.
+            case EBADF: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+            case ENOSPC: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enospc;
+            case EFBIG: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::efbig;
+            case EINVAL: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+            case EACCES: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eacces;
+            case EPERM: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eperm;
+            case EISDIR: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eisdir;
+            case EROFS: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::erofs;
+#  if defined(EDQUOT)
+            case EDQUOT: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::edquot;
+#  endif
+            case EINTR: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eintr;
+#  if defined(EWOULDBLOCK) && (!defined(EAGAIN) || (EAGAIN != EWOULDBLOCK))
+            case EWOULDBLOCK: [[fallthrough]];
+#  endif
+            case EAGAIN: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eagain;
+            case ESPIPE: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::espipe;
+#  if defined(EOPNOTSUPP) && (!defined(ENOTSUP) || (ENOTSUP != EOPNOTSUPP))
+            case EOPNOTSUPP: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotsup;
+#  endif
+#  if defined(ENOTSUP)
+            case ENOTSUP: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotsup;
+#  endif
+            case EFAULT: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::efault;
+            case ENXIO: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enxio;
+            case ENODEV: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enodev;
+            case ENOENT: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enoent;
+            case ENOTDIR: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+            case EIO: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+            case ENOMEM: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enomem;
+            case EOVERFLOW: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eoverflow;
+#  if defined(ETIMEDOUT)
+            case ETIMEDOUT: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::etimedout;
+#  endif
+#  if defined(ECONNRESET)
+            case ECONNRESET: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::econnreset;
+#  endif
+#  if defined(ECONNABORTED)
+            case ECONNABORTED: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::econnaborted;
+#  endif
+#  if defined(ENOBUFS)
+            case ENOBUFS: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enobufs;
+#  endif
+#  if defined(EPROTO)
+            case EPROTO: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eproto;
+#  endif
+#  if defined(ENOTSOCK)
+            case ENOTSOCK: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotsock;
+#  endif
+#  if defined(ENOTCONN)
+            case ENOTCONN: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotconn;
+#  endif
+#  if defined(EPIPE)
+            case EPIPE: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::epipe;
+#  endif
+#  if defined(EEXIST)
+            case EEXIST: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eexist;
+#  endif
+#  if defined(EMFILE)
+            case EMFILE: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::emfile;
+#  endif
+#  if defined(ENAMETOOLONG)
+            case ENAMETOOLONG: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enametoolong;
+#  endif
+#  if defined(ELOOP)
+            case ELOOP: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eloop;
+#  endif
+#  if defined(EMLINK)
+            case EMLINK: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::emlink;
+#  endif
+#  if defined(EXDEV)
+            case EXDEV: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::exdev;
+#  endif
+#  if defined(EBUSY)
+            case EBUSY: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::ebusy;
+#  endif
+#  if defined(ENFILE)
+            case ENFILE: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enfile;
+#  endif
+#  if defined(ENOTEMPTY)
+            case ENOTEMPTY: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotempty;
+#  endif
+#  if defined(ESRCH)
+            case ESRCH: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::esrch;
+#  endif
+                // wasi no POLLERR, emscripten has POLLERR
+#  if defined(POLLNVAL) && (!defined(EPIPE) || (defined(EPIPE) && EPIPE != POLLNVAL)) && (!defined(ELOOP) || (defined(ELOOP) && ELOOP != POLLNVAL))
+            case POLLNVAL: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::epipe;
+#  endif
+            default: return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+        }
+# endif
+        return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+    }
+
+
+    // Dot/parent terminal components select an existing directory, but a new
+    // WASI open needs its own native description and requested open flags.
+    inline constexpr ::uwvm2::imported::wasi::wasip1::abi::errno_t path_open_independent_directory(
+        ::uwvm2::imported::wasi::wasip1::fd_manager::dir_stack_t& chain,
+        ::fast_io::open_mode mode) noexcept
+    {
+        if(chain.empty() || chain.dir_stack.back_unchecked().ptr == nullptr)
+        { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio; }
+# ifdef UWVM_CPP_EXCEPTIONS
+        try
+# endif
+        {
+            auto const& original{chain.dir_stack.back_unchecked().ptr->dir_stack};
+            ::fast_io::dir_io_observer directory{};
+            if(original.is_observer) { directory = original.storage.observer; }
+            else { directory = original.storage.file; }
+# if defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN32_WINDOWS)
+            // An empty NT relative name reopens the supplied directory itself.
+            // NT does not interpret the POSIX dot component in this operation.
+            auto opened{::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(directory), u8"", mode)};
+# else
+            auto opened{::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(directory), u8".", mode)};
+# endif
+            ::uwvm2::imported::wasi::wasip1::fd_manager::dir_stack_entry_ref_t replacement{};
+            replacement.ptr->dir_stack.name = original.name;
+            replacement.ptr->dir_stack.storage.file = ::std::move(opened);
+            // The new native root still belongs to the authentic configured mnt.
+            // Descendants propagate this owner through ordinary chain copies.
+            if(chain.dir_stack.size() == 1uz && !chain.checkpoint_mount_origin)
+            { chain.checkpoint_mount_origin = chain.dir_stack.front_unchecked(); }
+            chain.dir_stack.back_unchecked() = ::std::move(replacement);
+        }
+# ifdef UWVM_CPP_EXCEPTIONS
+        catch(::fast_io::error e) { return path_errno_from_fast_io_error(e); }
+# endif
+        return ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+    }
+
+    inline constexpr ::std::size_t max_symlink_depth{40uz};
+
+    inline constexpr ::uwvm2::imported::wasi::wasip1::abi::errno_t path_symlink_iterative_impl(
+        bool const disable_utf8_check,
+        ::std::size_t& symlink_depth,
+        ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+        ::uwvm2::utils::container::vector<::fast_io::dir_file>& curr_path_stack,
+        ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        if(++symlink_depth > max_symlink_depth) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eloop; }
+
+        if(symlink_symbol.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval; }
+
+        // WASI does not guarantee that strings are null-terminated, so you must check for zero characters in the middle and construct
+        // one yourself.
+        if(!disable_utf8_check) [[likely]]
+        {
+            auto const u8res{
+                ::uwvm2::utils::utf::check_legal_utf8<::uwvm2::utils::utf::utf8_specification::utf8_rfc3629_and_zero_illegal>(symlink_symbol.cbegin(),
+                                                                                                                              symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]]
+            {
+                // If the path string is not valid UTF-8, the function shall fail with ERRNO_ILSEQ.
+                return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq;
+            }
+        }
+        else
+        {
+            auto const u8res{::uwvm2::utils::utf::check_has_zero_illegal_unchecked(symlink_symbol.cbegin(), symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq; }
+        }
+
+        auto const split_path_res{::uwvm2::imported::wasi::wasip1::func::split_posix_path(symlink_symbol)};
+
+        if(split_path_res.is_absolute) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable; }
+
+# if (defined(_WIN32) || defined(__CYGWIN__)) || (defined(__MSDOS__) || defined(__DJGPP__))
+        // For the Windows API, the parsing strategy differs from POSIX. Windows supports the backslash as a delimiter while rejecting
+        // many characters.
+        // This only eliminates the possibility of multi-level paths; the remaining issue of invalid filenames is handled by the API.
+        for(auto const& split_curr: split_path_res.res)
+        {
+            if(split_curr.dir_type == ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next)
+            {
+                auto const& next_name{split_curr.next_name};
+                for(auto const curr_char: next_name)
+                {
+                    // Simultaneously eliminate errors at both the path syntax layer and the file system syntax layer.
+                    if(::fast_io::char_category::is_dos_file_invalid_character(curr_char)) [[unlikely]]
+                    {
+                        return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    }
+                }
+            }
+        }
+# endif
+
+        for(auto const& split_curr: split_path_res.res)
+        {
+            switch(split_curr.dir_type)
+            {
+                case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::curr:
+                {
+                    break;
+                }
+                case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::prev:
+                {
+                    if(curr_path_stack.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable; }
+                    else
+                    {
+                        curr_path_stack.pop_back_unchecked();
+                    }
+
+                    break;
+                }
+                case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next:
+                {
+                    auto const& next_name{split_curr.next_name};
+
+                    ::uwvm2::utils::container::u8string symlink_symbol{};
+                    bool is_symlink{};
+
+                    if(curr_path_stack.empty())
+                    {
+# ifdef UWVM_CPP_EXCEPTIONS
+                        try
+# endif
+                        {
+                            // readlinkat is symlink_nofollow
+                            symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_fd_native_dir_file), next_name);
+                            is_symlink = true;
+                        }
+# ifdef UWVM_CPP_EXCEPTIONS
+                        catch(::fast_io::error e)
+                        {
+                        }
+# endif
+
+                        if(is_symlink)
+                        {
+                            if(symlink_symbol.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio; }
+
+                            auto const errno_t{
+                                path_symlink_iterative_impl(disable_utf8_check,
+                                                            symlink_depth,
+                                                            curr_fd_native_dir_file,
+                                                            curr_path_stack,
+                                                            ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                            if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]] { return errno_t; }
+                        }
+                        else
+                        {
+                            ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // default is symlink_nofollow
+                                next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_fd_native_dir_file), next_name);
+
+                                // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                // opened simultaneously. A check must be added here.
+                                struct ::stat st;
+                                if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                {
+                                    return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                }
+                                if(!S_ISDIR(st.st_mode)) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                // required.
+                                ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                                // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                {
+                                    bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    try
+#   endif
+                                    {
+                                        // native_file default nofollow
+                                        ::fast_io::native_file{at(curr_fd_native_dir_file), next_name, ::fast_io::open_mode::in};
+                                        is_file = true;
+                                    }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    catch(::fast_io::error e)
+                                    {
+                                    }
+#   endif
+                                    if(is_file) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+                                }
+#  endif
+
+                                return ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                            }
+# endif
+
+                            curr_path_stack.push_back(::std::move(next));
+                        }
+                    }
+                    else
+                    {
+# ifdef UWVM_CPP_EXCEPTIONS
+                        try
+# endif
+                        {
+                            // readlinkat is symlink_nofollow
+                            symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_path_stack.back_unchecked()), next_name);
+                            is_symlink = true;
+                        }
+# ifdef UWVM_CPP_EXCEPTIONS
+                        catch(::fast_io::error e)
+                        {
+                        }
+# endif
+
+                        if(is_symlink)
+                        {
+                            if(symlink_symbol.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio; }
+
+                            auto const errno_t{
+                                path_symlink_iterative_impl(disable_utf8_check,
+                                                            symlink_depth,
+                                                            curr_fd_native_dir_file,
+                                                            curr_path_stack,
+                                                            ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                            if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]] { return errno_t; }
+                        }
+                        else
+                        {
+                            ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // default is symlink_nofollow
+                                next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_path_stack.back_unchecked()), next_name);
+
+                                // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                // opened simultaneously. A check must be added here.
+                                struct ::stat st;
+                                if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                {
+                                    return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                }
+                                if(!S_ISDIR(st.st_mode)) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                // required.
+                                ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                                // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                {
+                                    bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    try
+#   endif
+                                    {
+                                        // native_file default nofollow
+                                        ::fast_io::native_file{at(curr_path_stack.back_unchecked()), next_name, ::fast_io::open_mode::in};
+                                        is_file = true;
+                                    }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    catch(::fast_io::error e)
+                                    {
+                                    }
+#   endif
+                                    if(is_file) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+                                }
+#  endif
+
+                                return ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                            }
+# endif
+
+                            curr_path_stack.push_back(::std::move(next));
+                        }
+                    }
+
+                    break;
+                }
+                [[unlikely]] default:
+                {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                    ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                    ::std::unreachable();
+                }
+            }
+        }
+
+        return ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+    }
+
+    inline constexpr ::uwvm2::imported::wasi::wasip1::abi::errno_t path_symlink_iterative(
+        bool const disable_utf8_check,
+        ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+        ::uwvm2::utils::container::vector<::fast_io::dir_file>& curr_path_stack,
+        ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        ::std::size_t symlink_depth{};
+        return path_symlink_iterative_impl(disable_utf8_check, symlink_depth, curr_fd_native_dir_file, curr_path_stack, symlink_symbol);
+    }
+
+    struct file_symlink_iterative_res_t
+    {
+        ::uwvm2::imported::wasi::wasip1::abi::errno_t err{};
+        ::uwvm2::utils::container::u8string file_name{};
+    };
+
+    inline constexpr file_symlink_iterative_res_t file_symlink_iterative_impl(bool const disable_utf8_check,
+                                                                              ::std::size_t& symlink_depth,
+                                                                              ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+                                                                              ::uwvm2::utils::container::vector<::fast_io::dir_file>& curr_path_stack,
+                                                                              ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        file_symlink_iterative_res_t res{};
+
+        if(++symlink_depth > max_symlink_depth) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eloop;
+            return res;
+        }
+
+        if(symlink_symbol.empty()) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+            return res;
+        }
+
+        if(!disable_utf8_check) [[likely]]
+        {
+            // WASI does not guarantee that strings are null-terminated, so you must check for zero characters in the middle and construct
+            // one yourself.
+            auto const u8res{
+                ::uwvm2::utils::utf::check_legal_utf8<::uwvm2::utils::utf::utf8_specification::utf8_rfc3629_and_zero_illegal>(symlink_symbol.cbegin(),
+                                                                                                                              symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]]
+            {
+                // If the path string is not valid UTF-8, the function shall fail with ERRNO_ILSEQ.
+                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq;
+                return res;
+            }
+        }
+        else
+        {
+            auto const u8res{::uwvm2::utils::utf::check_has_zero_illegal_unchecked(symlink_symbol.cbegin(), symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]]
+            {
+                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq;
+                return res;
+            }
+        }
+
+        auto const split_path_res{::uwvm2::imported::wasi::wasip1::func::split_posix_path(symlink_symbol)};
+
+        if(split_path_res.is_absolute) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable;
+            return res;
+        }
+
+# if (defined(_WIN32) || defined(__CYGWIN__)) || (defined(__MSDOS__) || defined(__DJGPP__))
+        // For the Windows API, the parsing strategy differs from POSIX. Windows supports the backslash as a delimiter while rejecting
+        // many characters.
+        // This only eliminates the possibility of multi-level paths; the remaining issue of invalid filenames is handled by the API.
+        for(auto const& split_curr: split_path_res.res)
+        {
+            if(split_curr.dir_type == ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next)
+            {
+                auto const& next_name{split_curr.next_name};
+                for(auto const curr_char: next_name)
+                {
+                    // Simultaneously eliminate errors at both the path syntax layer and the file system syntax layer.
+                    if(::fast_io::char_category::is_dos_file_invalid_character(curr_char)) [[unlikely]]
+                    {
+                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                        return res;
+                    }
+                }
+            }
+        }
+# endif
+
+        if(split_path_res.res.empty()) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+            return res;
+        }
+
+        auto const split_path_res_last_ptr{split_path_res.res.cend() - 1u};
+
+        for(auto& split_curr: split_path_res.res)
+        {
+            // split_curr cannot be const because it will be moved later.
+
+            if(::std::addressof(split_curr) == split_path_res_last_ptr)
+            {
+                // The last one that isn't a symbolic link is a file.
+                switch(split_curr.dir_type)
+                {
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::curr:
+                    {
+                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eisdir;
+                        return res;
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::prev:
+                    {
+                        if(curr_path_stack.empty()) [[unlikely]]
+                        {
+                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable;
+                            return res;
+                        }
+                        else
+                        {
+                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eisdir;
+                            return res;
+                        }
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next:
+                    {
+                        auto& next_name{split_curr.next_name};
+
+                        ::uwvm2::utils::container::u8string symlink_symbol{};
+                        bool is_symlink{};
+
+                        if(curr_path_stack.empty())
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_fd_native_dir_file), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                return file_symlink_iterative_impl(disable_utf8_check,
+                                                                   symlink_depth,
+                                                                   curr_fd_native_dir_file,
+                                                                   curr_path_stack,
+                                                                   ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()});
+                            }
+                            else
+                            {
+                                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+                                res.file_name = ::std::move(next_name);
+                                return res;
+                            }
+                        }
+                        else
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_path_stack.back_unchecked()), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                return file_symlink_iterative_impl(disable_utf8_check,
+                                                                   symlink_depth,
+                                                                   curr_fd_native_dir_file,
+                                                                   curr_path_stack,
+                                                                   ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()});
+                            }
+                            else
+                            {
+                                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+                                res.file_name = ::std::move(next_name);
+                                return res;
+                            }
+                        }
+
+                        break;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+            else
+            {
+                switch(split_curr.dir_type)
+                {
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::curr:
+                    {
+                        break;
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::prev:
+                    {
+                        if(curr_path_stack.empty()) [[unlikely]]
+                        {
+                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable;
+                            return res;
+                        }
+                        else
+                        {
+                            curr_path_stack.pop_back_unchecked();
+                        }
+
+                        break;
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next:
+                    {
+                        auto const& next_name{split_curr.next_name};
+
+                        ::uwvm2::utils::container::u8string symlink_symbol{};
+                        bool is_symlink{};
+
+                        if(curr_path_stack.empty())
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_fd_native_dir_file), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                auto const errno_t{
+                                    path_symlink_iterative_impl(disable_utf8_check,
+                                                                symlink_depth,
+                                                                curr_fd_native_dir_file,
+                                                                curr_path_stack,
+                                                                ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                                if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]]
+                                {
+                                    res.err = errno_t;
+                                    return res;
+                                }
+                            }
+                            else
+                            {
+                                ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                                try
+# endif
+                                {
+                                    // default is symlink_nofollow
+                                    next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_fd_native_dir_file), next_name);
+
+                                    // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                    // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                    // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                    // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                    // opened simultaneously. A check must be added here.
+                                    struct ::stat st;
+                                    if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                        return res;
+                                    }
+                                    if(!S_ISDIR(st.st_mode))
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                        return res;
+                                    }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                    // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                    // required.
+                                    ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                                }
+# ifdef UWVM_CPP_EXCEPTIONS
+                                catch(::fast_io::error e)
+                                {
+                                    // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                    if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                    {
+                                        bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        try
+#   endif
+                                        {
+                                            // native_file default nofollow
+                                            ::fast_io::native_file{at(curr_fd_native_dir_file), next_name, ::fast_io::open_mode::in};
+                                            is_file = true;
+                                        }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        catch(::fast_io::error e)
+                                        {
+                                        }
+#   endif
+                                        if(is_file)
+                                        {
+                                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                            return res;
+                                        }
+                                    }
+#  endif
+
+                                    res.err = ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                                    return res;
+                                }
+# endif
+
+                                curr_path_stack.push_back(::std::move(next));
+                            }
+                        }
+                        else
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_path_stack.back_unchecked()), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                auto const errno_t{
+                                    path_symlink_iterative_impl(disable_utf8_check,
+                                                                symlink_depth,
+                                                                curr_fd_native_dir_file,
+                                                                curr_path_stack,
+                                                                ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                                if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]]
+                                {
+                                    res.err = errno_t;
+                                    return res;
+                                }
+                            }
+                            else
+                            {
+                                ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                                try
+# endif
+                                {
+                                    // default is symlink_nofollow
+                                    next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_path_stack.back_unchecked()), next_name);
+
+                                    // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                    // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                    // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                    // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                    // opened simultaneously. A check must be added here.
+                                    struct ::stat st;
+                                    if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                        return res;
+                                    }
+                                    if(!S_ISDIR(st.st_mode))
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                        return res;
+                                    }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                    // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                    // required.
+                                    ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                                }
+# ifdef UWVM_CPP_EXCEPTIONS
+                                catch(::fast_io::error e)
+                                {
+                                    // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                    if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                    {
+                                        bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        try
+#   endif
+                                        {
+                                            // native_file default nofollow
+                                            ::fast_io::native_file{at(curr_path_stack.back_unchecked()), next_name, ::fast_io::open_mode::in};
+                                            is_file = true;
+                                        }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        catch(::fast_io::error e)
+                                        {
+                                        }
+#   endif
+                                        if(is_file)
+                                        {
+                                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                            return res;
+                                        }
+                                    }
+#  endif
+
+                                    res.err = ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                                    return res;
+                                }
+# endif
+
+                                curr_path_stack.push_back(::std::move(next));
+                            }
+                        }
+
+                        break;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+        }
+
+        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+        return res;
+    }
+
+    inline constexpr file_symlink_iterative_res_t file_symlink_iterative(bool const disable_utf8_check,
+                                                                         ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+                                                                         ::uwvm2::utils::container::vector<::fast_io::dir_file>& curr_path_stack,
+                                                                         ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        ::std::size_t symlink_depth{};
+        return file_symlink_iterative_impl(disable_utf8_check, symlink_depth, curr_fd_native_dir_file, curr_path_stack, symlink_symbol);
+    }
+
+    struct dir_with_name_t
+    {
+        ::uwvm2::utils::container::u8string name{};
+        ::fast_io::dir_file file{};
+    };
+
+    inline constexpr ::uwvm2::imported::wasi::wasip1::abi::errno_t path_symlink_iterative_with_name_impl(
+        bool const disable_utf8_check,
+        ::std::size_t& symlink_depth,
+        ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+        ::uwvm2::utils::container::vector<dir_with_name_t>& curr_path_stack,
+        ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        if(++symlink_depth > max_symlink_depth) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eloop; }
+
+        if(symlink_symbol.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval; }
+
+        if(!disable_utf8_check) [[likely]]
+        {
+            // WASI does not guarantee that strings are null-terminated, so you must check for zero characters in the middle and construct
+            // one yourself.
+            auto const u8res{
+                ::uwvm2::utils::utf::check_legal_utf8<::uwvm2::utils::utf::utf8_specification::utf8_rfc3629_and_zero_illegal>(symlink_symbol.cbegin(),
+                                                                                                                              symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]]
+            {
+                // If the path string is not valid UTF-8, the function shall fail with ERRNO_ILSEQ.
+                return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq;
+            }
+        }
+        else
+        {
+            auto const u8res{::uwvm2::utils::utf::check_has_zero_illegal_unchecked(symlink_symbol.cbegin(), symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq; }
+        }
+
+        auto const split_path_res{::uwvm2::imported::wasi::wasip1::func::split_posix_path(symlink_symbol)};
+
+        if(split_path_res.is_absolute) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable; }
+
+# if (defined(_WIN32) || defined(__CYGWIN__)) || (defined(__MSDOS__) || defined(__DJGPP__))
+        // For the Windows API, the parsing strategy differs from POSIX. Windows supports the backslash as a delimiter while rejecting
+        // many characters.
+        // This only eliminates the possibility of multi-level paths; the remaining issue of invalid filenames is handled by the API.
+        for(auto const& split_curr: split_path_res.res)
+        {
+            if(split_curr.dir_type == ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next)
+            {
+                auto const& next_name{split_curr.next_name};
+                for(auto const curr_char: next_name)
+                {
+                    // Simultaneously eliminate errors at both the path syntax layer and the file system syntax layer.
+                    if(::fast_io::char_category::is_dos_file_invalid_character(curr_char)) [[unlikely]]
+                    {
+                        return ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                    }
+                }
+            }
+        }
+# endif
+
+        for(auto& split_curr: split_path_res.res)
+        {
+            switch(split_curr.dir_type)
+            {
+                case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::curr:
+                {
+                    break;
+                }
+                case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::prev:
+                {
+                    if(curr_path_stack.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable; }
+                    else
+                    {
+                        curr_path_stack.pop_back_unchecked();
+                    }
+
+                    break;
+                }
+                case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next:
+                {
+                    auto& next_name{split_curr.next_name};
+
+                    ::uwvm2::utils::container::u8string symlink_symbol{};
+                    bool is_symlink{};
+
+                    if(curr_path_stack.empty())
+                    {
+# ifdef UWVM_CPP_EXCEPTIONS
+                        try
+# endif
+                        {
+                            // readlinkat is symlink_nofollow
+                            symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_fd_native_dir_file), next_name);
+                            is_symlink = true;
+                        }
+# ifdef UWVM_CPP_EXCEPTIONS
+                        catch(::fast_io::error e)
+                        {
+                        }
+# endif
+
+                        if(is_symlink)
+                        {
+                            if(symlink_symbol.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio; }
+
+                            auto const errno_t{
+                                path_symlink_iterative_with_name_impl(disable_utf8_check,
+                                                                      symlink_depth,
+                                                                      curr_fd_native_dir_file,
+                                                                      curr_path_stack,
+                                                                      ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                            if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]] { return errno_t; }
+                        }
+                        else
+                        {
+                            ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // default is symlink_nofollow
+                                next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_fd_native_dir_file), next_name);
+
+                                // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                // opened simultaneously. A check must be added here.
+                                struct ::stat st;
+                                if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                {
+                                    return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                }
+                                if(!S_ISDIR(st.st_mode)) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                // required.
+                                ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                                // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                {
+                                    bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    try
+#   endif
+                                    {
+                                        // native_file default nofollow
+                                        ::fast_io::native_file{at(curr_fd_native_dir_file), next_name, ::fast_io::open_mode::in};
+                                        is_file = true;
+                                    }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    catch(::fast_io::error e)
+                                    {
+                                    }
+#   endif
+                                    if(is_file) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+                                }
+#  endif
+
+                                return ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                            }
+# endif
+
+                            curr_path_stack.emplace_back(::std::move(next_name), ::std::move(next));
+                        }
+                    }
+                    else
+                    {
+# ifdef UWVM_CPP_EXCEPTIONS
+                        try
+# endif
+                        {
+                            // readlinkat is symlink_nofollow
+                            symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_path_stack.back_unchecked().file), next_name);
+                            is_symlink = true;
+                        }
+# ifdef UWVM_CPP_EXCEPTIONS
+                        catch(::fast_io::error e)
+                        {
+                        }
+# endif
+
+                        if(is_symlink)
+                        {
+                            if(symlink_symbol.empty()) [[unlikely]] { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio; }
+
+                            auto const errno_t{
+                                path_symlink_iterative_with_name_impl(disable_utf8_check,
+                                                                      symlink_depth,
+                                                                      curr_fd_native_dir_file,
+                                                                      curr_path_stack,
+                                                                      ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                            if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]] { return errno_t; }
+                        }
+                        else
+                        {
+                            ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // default is symlink_nofollow
+                                next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_path_stack.back_unchecked().file), next_name);
+
+                                // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                // opened simultaneously. A check must be added here.
+                                struct ::stat st;
+                                if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                {
+                                    return ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                }
+                                if(!S_ISDIR(st.st_mode)) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                // required.
+                                ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                                // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                {
+                                    bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    try
+#   endif
+                                    {
+                                        // native_file default nofollow
+                                        ::fast_io::native_file{at(curr_path_stack.back_unchecked().file), next_name, ::fast_io::open_mode::in};
+                                        is_file = true;
+                                    }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                    catch(::fast_io::error e)
+                                    {
+                                    }
+#   endif
+                                    if(is_file) { return ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir; }
+                                }
+#  endif
+
+                                return ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                            }
+# endif
+
+                            curr_path_stack.emplace_back(::std::move(next_name), ::std::move(next));
+                        }
+                    }
+
+                    break;
+                }
+                [[unlikely]] default:
+                {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                    ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                    ::std::unreachable();
+                }
+            }
+        }
+
+        return ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+    }
+
+    inline constexpr ::uwvm2::imported::wasi::wasip1::abi::errno_t path_symlink_iterative_with_name(
+        bool const disable_utf8_check,
+        ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+        ::uwvm2::utils::container::vector<dir_with_name_t>& curr_path_stack,
+        ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        ::std::size_t symlink_depth{};
+        return path_symlink_iterative_with_name_impl(disable_utf8_check, symlink_depth, curr_fd_native_dir_file, curr_path_stack, symlink_symbol);
+    }
+
+    inline constexpr file_symlink_iterative_res_t file_symlink_iterative_with_name_impl(bool const disable_utf8_check,
+                                                                                        ::std::size_t& symlink_depth,
+                                                                                        ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+                                                                                        ::uwvm2::utils::container::vector<dir_with_name_t>& curr_path_stack,
+                                                                                        ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        file_symlink_iterative_res_t res{};
+
+        if(++symlink_depth > max_symlink_depth) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eloop;
+            return res;
+        }
+
+        if(symlink_symbol.empty()) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+            return res;
+        }
+
+        if(!disable_utf8_check) [[likely]]
+        {
+            // WASI does not guarantee that strings are null-terminated, so you must check for zero characters in the middle and construct
+            // one yourself.
+            auto const u8res{
+                ::uwvm2::utils::utf::check_legal_utf8<::uwvm2::utils::utf::utf8_specification::utf8_rfc3629_and_zero_illegal>(symlink_symbol.cbegin(),
+                                                                                                                              symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]]
+            {
+                // If the path string is not valid UTF-8, the function shall fail with ERRNO_ILSEQ.
+                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq;
+                return res;
+            }
+        }
+        else
+        {
+            auto const u8res{::uwvm2::utils::utf::check_has_zero_illegal_unchecked(symlink_symbol.cbegin(), symlink_symbol.cend())};
+            if(u8res.err != ::uwvm2::utils::utf::utf_error_code::success) [[unlikely]]
+            {
+                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eilseq;
+                return res;
+            }
+        }
+
+        auto const split_path_res{::uwvm2::imported::wasi::wasip1::func::split_posix_path(symlink_symbol)};
+
+        if(split_path_res.is_absolute) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable;
+            return res;
+        }
+
+# if (defined(_WIN32) || defined(__CYGWIN__)) || (defined(__MSDOS__) || defined(__DJGPP__))
+        // For the Windows API, the parsing strategy differs from POSIX. Windows supports the backslash as a delimiter while rejecting
+        // many characters.
+        // This only eliminates the possibility of multi-level paths; the remaining issue of invalid filenames is handled by the API.
+        for(auto const& split_curr: split_path_res.res)
+        {
+            if(split_curr.dir_type == ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next)
+            {
+                auto const& next_name{split_curr.next_name};
+                for(auto const curr_char: next_name)
+                {
+                    // Simultaneously eliminate errors at both the path syntax layer and the file system syntax layer.
+                    if(::fast_io::char_category::is_dos_file_invalid_character(curr_char)) [[unlikely]]
+                    {
+                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::einval;
+                        return res;
+                    }
+                }
+            }
+        }
+# endif
+
+        if(split_path_res.res.empty()) [[unlikely]]
+        {
+            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+            return res;
+        }
+
+        auto const split_path_res_last_ptr{split_path_res.res.cend() - 1u};
+
+        for(auto& split_curr: split_path_res.res)
+        {
+            // split_curr cannot be const because it will be moved later.
+
+            if(::std::addressof(split_curr) == split_path_res_last_ptr)
+            {
+                // The last one that isn't a symbolic link is a file.
+                switch(split_curr.dir_type)
+                {
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::curr:
+                    {
+                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eisdir;
+                        return res;
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::prev:
+                    {
+                        if(curr_path_stack.empty()) [[unlikely]]
+                        {
+                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable;
+                            return res;
+                        }
+                        else
+                        {
+                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eisdir;
+                            return res;
+                        }
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next:
+                    {
+                        auto& next_name{split_curr.next_name};
+
+                        ::uwvm2::utils::container::u8string symlink_symbol{};
+                        bool is_symlink{};
+
+                        if(curr_path_stack.empty())
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_fd_native_dir_file), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                return file_symlink_iterative_with_name_impl(
+                                    disable_utf8_check,
+                                    symlink_depth,
+                                    curr_fd_native_dir_file,
+                                    curr_path_stack,
+                                    ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()});
+                            }
+                            else
+                            {
+                                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+                                res.file_name = ::std::move(next_name);
+                                return res;
+                            }
+                        }
+                        else
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_path_stack.back_unchecked().file), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                return file_symlink_iterative_with_name_impl(
+                                    disable_utf8_check,
+                                    symlink_depth,
+                                    curr_fd_native_dir_file,
+                                    curr_path_stack,
+                                    ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()});
+                            }
+                            else
+                            {
+                                res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+                                res.file_name = ::std::move(next_name);
+                                return res;
+                            }
+                        }
+
+                        break;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+            else
+            {
+                switch(split_curr.dir_type)
+                {
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::curr:
+                    {
+                        break;
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::prev:
+                    {
+                        if(curr_path_stack.empty()) [[unlikely]]
+                        {
+                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotcapable;
+                            return res;
+                        }
+                        else
+                        {
+                            curr_path_stack.pop_back_unchecked();
+                        }
+
+                        break;
+                    }
+                    case ::uwvm2::imported::wasi::wasip1::func::dir_type_e::next:
+                    {
+                        auto& next_name{split_curr.next_name};
+
+                        ::uwvm2::utils::container::u8string symlink_symbol{};
+                        bool is_symlink{};
+
+                        if(curr_path_stack.empty())
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_fd_native_dir_file), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                auto const errno_t{path_symlink_iterative_with_name_impl(
+                                    disable_utf8_check,
+                                    symlink_depth,
+                                    curr_fd_native_dir_file,
+                                    curr_path_stack,
+                                    ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                                if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]]
+                                {
+                                    res.err = errno_t;
+                                    return res;
+                                }
+                            }
+                            else
+                            {
+                                ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                                try
+# endif
+                                {
+                                    // default is symlink_nofollow
+                                    next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_fd_native_dir_file), next_name);
+
+                                    // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                    // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                    // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                    // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                    // opened simultaneously. A check must be added here.
+                                    struct ::stat st;
+                                    if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                        return res;
+                                    }
+                                    if(!S_ISDIR(st.st_mode))
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                        return res;
+                                    }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                    // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                    // required.
+                                    ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                                }
+# ifdef UWVM_CPP_EXCEPTIONS
+                                catch(::fast_io::error e)
+                                {
+                                    // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                    if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                    {
+                                        bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        try
+#   endif
+                                        {
+                                            // native_file default nofollow
+                                            ::fast_io::native_file{at(curr_fd_native_dir_file), next_name, ::fast_io::open_mode::in};
+                                            is_file = true;
+                                        }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        catch(::fast_io::error e)
+                                        {
+                                        }
+#   endif
+                                        if(is_file)
+                                        {
+                                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                            return res;
+                                        }
+                                    }
+#  endif
+
+                                    res.err = ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                                    return res;
+                                }
+# endif
+
+                                curr_path_stack.emplace_back(::std::move(next_name), ::std::move(next));
+                            }
+                        }
+                        else
+                        {
+# ifdef UWVM_CPP_EXCEPTIONS
+                            try
+# endif
+                            {
+                                // readlinkat is symlink_nofollow
+                                symlink_symbol = ::fast_io::native_readlinkat<char8_t>(at(curr_path_stack.back_unchecked().file), next_name);
+                                is_symlink = true;
+                            }
+# ifdef UWVM_CPP_EXCEPTIONS
+                            catch(::fast_io::error e)
+                            {
+                            }
+# endif
+
+                            if(is_symlink)
+                            {
+                                if(symlink_symbol.empty()) [[unlikely]]
+                                {
+                                    res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                    return res;
+                                }
+
+                                auto const errno_t{path_symlink_iterative_with_name_impl(
+                                    disable_utf8_check,
+                                    symlink_depth,
+                                    curr_fd_native_dir_file,
+                                    curr_path_stack,
+                                    ::uwvm2::utils::container::u8string_view{symlink_symbol.data(), symlink_symbol.size()})};
+
+                                if(errno_t != ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess) [[unlikely]]
+                                {
+                                    res.err = errno_t;
+                                    return res;
+                                }
+                            }
+                            else
+                            {
+                                ::fast_io::dir_file next{};
+# ifdef UWVM_CPP_EXCEPTIONS
+                                try
+# endif
+                                {
+                                    // default is symlink_nofollow
+                                    next = ::uwvm2::imported::wasi::wasip1::func::open_authorized_directory(at(curr_path_stack.back_unchecked().file), next_name);
+
+                                    // The `Win32 CreateFileW` function can simultaneously open both a directory and a file when specifying a
+                                    // directory. However, under the current fast_io strategy, `dir_file` does not utilize `CreateFileW`.
+                                    // Instead, it employs `NTCreateFile` on NT systems and `FindNextFile` on Win9x systems.
+
+# if defined(__CYGWIN__)
+                                    // Cygwin uses the Win32 CreateFile function internally to open directories, allowing both directories and files to be
+                                    // opened simultaneously. A check must be added here.
+                                    struct ::stat st;
+                                    if(::uwvm2::imported::wasi::wasip1::func::posix::fstat(next.native_handle(), ::std::addressof(st)) < 0) [[unlikely]]
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::eio;
+                                        return res;
+                                    }
+                                    if(!S_ISDIR(st.st_mode))
+                                    {
+                                        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                        return res;
+                                    }
+# elif defined(__MSDOS__) || defined(__DJGPP__)
+                                    // djgpp's `open` function does not distinguish between directories and files; manual differentiation is
+                                    // required.
+                                    ::fast_io::details::check_dos_fd_is_dir(next.native_handle());
+# endif
+                                }
+# ifdef UWVM_CPP_EXCEPTIONS
+                                catch(::fast_io::error e)
+                                {
+                                    // Windows 9x can only distinguish between a directory and other items (files or nothing at all).
+
+#  if defined(_WIN32) && defined(_WIN32_WINDOWS)
+                                    if(e.code == 2uz /*ERROR_FILE_NOT_FOUND*/) [[unlikely]]
+                                    {
+                                        bool is_file{};
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        try
+#   endif
+                                        {
+                                            // native_file default nofollow
+                                            ::fast_io::native_file{at(curr_path_stack.back_unchecked().file), next_name, ::fast_io::open_mode::in};
+                                            is_file = true;
+                                        }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                                        catch(::fast_io::error e)
+                                        {
+                                        }
+#   endif
+                                        if(is_file)
+                                        {
+                                            res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::enotdir;
+                                            return res;
+                                        }
+                                    }
+#  endif
+
+                                    res.err = ::uwvm2::imported::wasi::wasip1::func::path_errno_from_fast_io_error(e);
+                                    return res;
+                                }
+# endif
+
+                                curr_path_stack.emplace_back(::std::move(next_name), ::std::move(next));
+                            }
+                        }
+
+                        break;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+        }
+
+        res.err = ::uwvm2::imported::wasi::wasip1::abi::errno_t::esuccess;
+        return res;
+    }
+
+    inline constexpr file_symlink_iterative_res_t file_symlink_iterative_with_name(bool const disable_utf8_check,
+                                                                                   ::fast_io::dir_io_observer const& curr_fd_native_dir_file,
+                                                                                   ::uwvm2::utils::container::vector<dir_with_name_t>& curr_path_stack,
+                                                                                   ::uwvm2::utils::container::u8string_view symlink_symbol) noexcept
+    {
+        ::std::size_t symlink_depth{};
+        return file_symlink_iterative_with_name_impl(disable_utf8_check, symlink_depth, curr_fd_native_dir_file, curr_path_stack, symlink_symbol);
+    }
+
+}  // namespace uwvm2::imported::wasi::wasip1::func
+
+#include "socket_capability.h"
+
+#endif
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/imported/wasi/wasip1/feature/feature_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+# include <uwvm2/uwvm_predefine/utils/ansies/uwvm_color_pop_macro.h>
+#endif

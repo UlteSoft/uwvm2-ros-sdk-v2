@@ -1,0 +1,50 @@
+{
+  "url": "https://github.com/ros-industrial/abb_egm_rws_managers",
+  "commit": "7d69d3dd066d55db27c02b991b398b6f17eb1932",
+  "license": "BSD-3-Clause",
+  "license_file": "LICENSE",
+  "local_changes": [],
+  "selection": "Public API and wire reference for ABB guest bindings. Driver registrations are included for mapping ROS names to native types.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "git_blob": "1aa59051f42af33595fe079046ff05c0242a98a9",
+      "sha256": "1b33168f61edcb96c6291078e922d1bd24afc553cb9c826c48105f02a2a6ea76"
+    },
+    {
+      "path": "include/abb_egm_rws_managers/data_containers.h",
+      "git_blob": "2c9e15c218442cc8e8321307773d4cddef98b315",
+      "sha256": "56428065ad51bd0f869d12fb8470af32e2e6a1c2b113e10ccddbef8a915a1cb9"
+    },
+    {
+      "path": "include/abb_egm_rws_managers/egm_manager.h",
+      "git_blob": "888ba3752f8eb3ef0af62ca8acf612d5f8db22a5",
+      "sha256": "34bad4200b9197dcebcd83faa0dc5ab2fb23c10ff9177065d448f16411209cf9"
+    },
+    {
+      "path": "include/abb_egm_rws_managers/rws_manager.h",
+      "git_blob": "29ac9a0a29480c8794f07ced447e9f315033d180",
+      "sha256": "212c6da651ea803066478b55efa0c70dbe7f48961a90069951d87e5a61e9ba58"
+    },
+    {
+      "path": "include/abb_egm_rws_managers/system_data_parser.h",
+      "git_blob": "813f2f35a3245ba67b14dc198e0fadd26998bcdb",
+      "sha256": "b4b698f153dc0413f8c50453c70f895c242e11f74ea5f788a8e68b023de5be99"
+    },
+    {
+      "path": "include/abb_egm_rws_managers/utilities.h",
+      "git_blob": "8133a70f17573b47974be3fc388c7d9e7879a99e",
+      "sha256": "c19c17c9494b90488201c8a3256e8a749dc2e560b1512f62a564d982c571deb4"
+    },
+    {
+      "path": "package.xml",
+      "git_blob": "8fbbfa56892471b257e64844b297633910c41906",
+      "sha256": "fb2a76857349c2b38491876410c7874dd63737d9a50d25341ccbe5faee36ba9f"
+    },
+    {
+      "path": "proto/robot_controller_description.proto",
+      "git_blob": "44a47dbed5ffcdc6ced92e135f61bab75c65c9c3",
+      "sha256": "f901159c8e5742132a8221faae67d5f9a3a0908687b78f1101348d4e21802ca3"
+    }
+  ]
+}

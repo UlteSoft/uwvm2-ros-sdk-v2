@@ -1,0 +1,2402 @@
+[
+  {
+    "package": "angles",
+    "source_id": "4501a1c7fceb2d32ec8d94a8",
+    "manifest": "angles-galactic-devel/angles/package.xml",
+    "source_url": "https://github.com/ros/angles.git",
+    "source_ref": "galactic-devel",
+    "archive_sha256": "e50e886e59025d3100ec90e6a9bca9909fd2fcbec51a7514057dae034927224b"
+  },
+  {
+    "package": "rcutils",
+    "source_id": "372572bb559dc482cb9517ac",
+    "manifest": "rcutils-ardent/package.xml",
+    "source_url": "https://github.com/ros2/rcutils.git",
+    "source_ref": "ardent",
+    "archive_sha256": "011116f478a40b7a84f9c2733425608a37325a887d2bfe0909208038f229ef2e"
+  },
+  {
+    "package": "rosidl_runtime_c",
+    "source_id": "f368526506390a2433532e78",
+    "manifest": "rosidl-lyrical/rosidl_runtime_c/package.xml",
+    "source_url": "https://github.com/ros2/rosidl.git",
+    "source_ref": "lyrical",
+    "archive_sha256": "f38134f3e111b08721b2d53c28c034fc1f52b775316429aacd2f89c611b5ba95"
+  },
+  {
+    "package": "tf2",
+    "source_id": "1fa93863898dc827416cabb7",
+    "manifest": "geometry2-release-upstream-0.31.8/tf2/package.xml",
+    "source_url": "https://github.com/ros2-gbp/geometry2-release.git",
+    "source_ref": "upstream/0.31.8",
+    "archive_sha256": "335e8c74f74a361fb54c52088d17827c863d8b1b4abb6b8c5740ceaba62e708a"
+  },
+  {
+    "package": "tobas_simulation_gui",
+    "source_id": "d6c4be6fc2f01c2f5d0f45d6",
+    "manifest": "tobas-rolling/src/tobas_gui/tobas_simulation_gui/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "rolling",
+    "archive_sha256": "60a4cc6c092eda023bace481cea76870dd074c561ea698b2c37131555a937111"
+  },
+  {
+    "package": "raspigibbon_msgs",
+    "source_id": "e6cb5b88311682ad807cf803",
+    "manifest": "raspigibbon_ros-kinetic-devel/raspigibbon_msgs/package.xml",
+    "source_url": "https://github.com/raspberrypigibbon/raspigibbon_ros.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "c8d6585fb7aa72db9c2067fc5cf5f4562f80998bf35c1611a009aa8f4ed7d2f8"
+  },
+  {
+    "package": "ewellix_sim",
+    "source_id": "bb7eb9b99038b437ed875a0a",
+    "manifest": "ewellix_lift_common-humble/ewellix_sim/package.xml",
+    "source_url": "https://github.com/clearpathrobotics/ewellix_lift_common.git",
+    "source_ref": "humble",
+    "archive_sha256": "1a8b289399031f208ff9362cfd0d50465926ad459c18ca1b3ff3a312cb4c441e"
+  },
+  {
+    "package": "turtlebot3_autorace",
+    "source_id": "b9378d07e9b7bcc7b849b10e",
+    "manifest": "turtlebot3_autorace-humble/turtlebot3_autorace/package.xml",
+    "source_url": "https://github.com/ROBOTIS-GIT/turtlebot3_autorace.git",
+    "source_ref": "humble",
+    "archive_sha256": "168b55137502f539c4efc34d7fc61550dcdb373055bf535103213f24be14769d"
+  },
+  {
+    "package": "yocs_navi_toolkit",
+    "source_id": "6826674a02714340b2f3476e",
+    "manifest": "yujin_ocs-kinetic/yocs_navi_toolkit/package.xml",
+    "source_url": "https://github.com/yujinrobot/yujin_ocs.git",
+    "source_ref": "kinetic",
+    "archive_sha256": "716562346b412909837b0122d82c7a59e9796d1f1eb9a32f844fb0224fa70cf8"
+  },
+  {
+    "package": "ros2_medkit_serialization",
+    "source_id": "75be7b9ac39976568c6fca40",
+    "manifest": "ros2_medkit-main/src/ros2_medkit_serialization/package.xml",
+    "source_url": "https://github.com/selfpatch/ros2_medkit.git",
+    "source_ref": "main",
+    "archive_sha256": "9a5514e29b84493a67622f311083ba11324a3eeb793e62a99162dd9b0c93f76e"
+  },
+  {
+    "package": "object_recognition_msgs",
+    "source_id": "09c84d6e2b3418c5112f27e4",
+    "manifest": "object_recognition_msgs-master/package.xml",
+    "source_url": "https://github.com/wg-perception/object_recognition_msgs.git",
+    "source_ref": "master",
+    "archive_sha256": "43814e45627ea6cc5dea42a329a4dd704bca4ac4e2b0188ef6aadbc2aaf0ffef"
+  },
+  {
+    "package": "mrpt_path_planning",
+    "source_id": "eb09c0439a2616a12261a1db",
+    "manifest": "mrpt_path_planning-develop/mrpt_path_planning/package.xml",
+    "source_url": "https://github.com/MRPT/mrpt_path_planning.git",
+    "source_ref": "develop",
+    "archive_sha256": "3c29572e49323859f1436cb538b1dda30e04226d52459c2efeed3c96162d96ff"
+  },
+  {
+    "package": "raptor_dbw_can",
+    "source_id": "802231d7506fe35f836a748e",
+    "manifest": "raptor-dbw-ros-master/raptor_dbw_can/package.xml",
+    "source_url": "https://github.com/NewEagleRaptor/pacifica-dbw-ros.git",
+    "source_ref": "master",
+    "archive_sha256": "be1efa8194a0f1fa14ad300dce7889942326cc13ea08bd9c95d736504640227b"
+  },
+  {
+    "package": "navmap_tools",
+    "source_id": "1d5dfb94d92de30f010d18ed",
+    "manifest": "NavMap-humble/navmap_tools/package.xml",
+    "source_url": "https://github.com/EasyNavigation/NavMap.git",
+    "source_ref": "humble",
+    "archive_sha256": "59c60b40edab8894695849682f4cf4f075ebcee6e5752f1c4f49e178d6c6b2a9"
+  },
+  {
+    "package": "mrpt_common",
+    "source_id": "3a1ea51ec6b7293e94f970ef",
+    "manifest": "mrpt-develop/modules/mrpt_common/package.xml",
+    "source_url": "https://github.com/MRPT/mrpt.git",
+    "source_ref": "develop",
+    "archive_sha256": "696a9686717fbc9ecb49470fd4ca280614d53a00fed67dd432cf2815935cfb47"
+  },
+  {
+    "package": "rosfmt",
+    "source_id": "2198cab69e657326da8d66c2",
+    "manifest": "rosfmt-master/package.xml",
+    "source_url": "https://github.com/xqms/rosfmt.git",
+    "source_ref": "master",
+    "archive_sha256": "e51ec40f80678957f2d22077f44dcf17be629ea37784c11f71529b936e0db445"
+  },
+  {
+    "package": "turtlebot_create",
+    "source_id": "0c83e0b209894f5cb7e491ca",
+    "manifest": "turtlebot_create-release-upstream-2.3.0/turtlebot_create/package.xml",
+    "source_url": "https://github.com/turtlebot-release/turtlebot_create-release.git",
+    "source_ref": "upstream/2.3.0",
+    "archive_sha256": "17163287a04f554bde22711e27b6bb2fa662bea86397a0eada2c3228f386bcfd"
+  },
+  {
+    "package": "rtabmap_legacy",
+    "source_id": "9f6dde7b8a6612388d073c28",
+    "manifest": "rtabmap_ros-noetic-devel/rtabmap_legacy/package.xml",
+    "source_url": "https://github.com/introlab/rtabmap_ros.git",
+    "source_ref": "noetic-devel",
+    "archive_sha256": "6d83a2f478fb0515962d1c8aa61eaaf91100cbac824a31f019236699ed2b42f4"
+  },
+  {
+    "package": "gazebo_version_helpers",
+    "source_id": "9571cc41440f8a48c0d59ac3",
+    "manifest": "gazebo-pkgs-master/gazebo_version_helpers/package.xml",
+    "source_url": "https://github.com/JenniferBuehler/gazebo-pkgs.git",
+    "source_ref": "master",
+    "archive_sha256": "2b147bd1ed72b9e8121a19663d8ffc083e96361391be38baa96d1a66311ec536"
+  },
+  {
+    "package": "smach",
+    "source_id": "95611d320255ee37cf7fac74",
+    "manifest": "executive_smach-ros2/smach/package.xml",
+    "source_url": "https://github.com/ros/executive_smach.git",
+    "source_ref": "ros2",
+    "archive_sha256": "8de3ef3bc77d3f2d6763bbd97939abdd91048410cbd67d2219c699814d74e210"
+  },
+  {
+    "package": "tobas_landing_detection",
+    "source_id": "d6c4be6fc2f01c2f5d0f45d6",
+    "manifest": "tobas-rolling/src/tobas_core/tobas_landing_detection/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "rolling",
+    "archive_sha256": "60a4cc6c092eda023bace481cea76870dd074c561ea698b2c37131555a937111"
+  },
+  {
+    "package": "summit_xl_localization",
+    "source_id": "4ecb3252f36d27678a8425a4",
+    "manifest": "summit_xl_common-kinetic-devel/summit_xl_localization/package.xml",
+    "source_url": "https://github.com/RobotnikAutomation/summit_xl_common.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "5d89bf274c7a5701d06b02ef018edb0a99f31e0f43162aa32b0e501cb0d01388"
+  },
+  {
+    "package": "ecl_streams",
+    "source_id": "089d5d7d59644f26af6b9b48",
+    "manifest": "ecl_core-release-upstream-0.60.8/ecl_streams/package.xml",
+    "source_url": "https://github.com/yujinrobot-release/ecl_core-release.git",
+    "source_ref": "upstream/0.60.8",
+    "archive_sha256": "649136bf3ea3125b54562b3b4ab3f1161c639fd47f2c1e372898cd3d6bdcc5f2"
+  },
+  {
+    "package": "robotiq_action_server",
+    "source_id": "da03be0ce6ff2d14a4247ff3",
+    "manifest": "robotiq-indigo-devel/robotiq_action_server/package.xml",
+    "source_url": "https://github.com/ros-industrial/robotiq.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "17adf21e8aaf6d93f2a696c12c8a5127e5aff8871782fbb9fc2442e0708787c2"
+  },
+  {
+    "package": "vrep_ros_plugin",
+    "source_id": "e34bd09edec1a23611795092",
+    "manifest": "vrep_ros_bridge-master/vrep_ros_plugin/package.xml",
+    "source_url": "https://github.com/lagadic/vrep_ros_bridge.git",
+    "source_ref": "master",
+    "archive_sha256": "00170f1596853dbeeb17a9fc8b99020e99713482124979fdeacf2130edad1759"
+  },
+  {
+    "package": "attribute_assigner",
+    "source_id": "00779a42b0c88e71f195e375",
+    "manifest": "wato_monorepo-main/src/perception/attribute_assigner/package.xml",
+    "source_url": "https://github.com/WATonomous/wato_monorepo.git",
+    "source_ref": "main",
+    "archive_sha256": "9bfefff4092a432af2bf3984eb0256f08a52fa80f474293b7b9574504c2b8efe"
+  },
+  {
+    "package": "fanuc_driver",
+    "source_id": "85377f9525bc532a7f18acde",
+    "manifest": "fanuc-indigo-devel/fanuc_driver/package.xml",
+    "source_url": "https://github.com/ros-industrial/fanuc.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "1ff7f86adb4db55fe1cd8ea5beed5318a8c1d17b482cc6a303da8954fd7c3813"
+  },
+  {
+    "package": "off_highway_sensor_drivers_examples",
+    "source_id": "2d05e9223f14405856a26fda",
+    "manifest": "off_highway_sensor_drivers-rolling-devel/off_highway_sensor_drivers_examples/package.xml",
+    "source_url": "https://github.com/bosch-engineering/off_highway_sensor_drivers.git",
+    "source_ref": "rolling-devel",
+    "archive_sha256": "8791b1f8d43581139faf938d34757c9502df41058d1860d741e14999a99f55d5"
+  },
+  {
+    "package": "puma_motor_msgs",
+    "source_id": "54c8a14dede2ba64a41949ac",
+    "manifest": "puma_motor_driver-release-upstream-0.1.2/puma_motor_msgs/package.xml",
+    "source_url": "https://github.com/clearpath-gbp/puma_motor_driver-release.git",
+    "source_ref": "upstream/0.1.2",
+    "archive_sha256": "cf79c6b9d76ffd36ae2ba974634c474cb1de3b19e24408cfc6329ad26e0aa5b2"
+  },
+  {
+    "package": "cvp_mesh_planner",
+    "source_id": "51d285f15aee55fdb96f9a95",
+    "manifest": "mesh_navigation-release-upstream-1.0.1/cvp_mesh_planner/package.xml",
+    "source_url": "https://github.com/uos-gbp/mesh_navigation-release.git",
+    "source_ref": "upstream/1.0.1",
+    "archive_sha256": "f09985a3a9585b972c07f273ce25bf35a0533741cc8475e21b97be40f0bded68"
+  },
+  {
+    "package": "moveit_ros_perception",
+    "source_id": "88fe71fdd65d3dafb7d4c537",
+    "manifest": "moveit-jade-devel/moveit_ros/perception/package.xml",
+    "source_url": "https://github.com/ros-planning/moveit.git",
+    "source_ref": "jade-devel",
+    "archive_sha256": "61302bd2373cbdd54813ca67d3b77995f9d01d88981234f49a7495746e879438"
+  },
+  {
+    "package": "tf2_client",
+    "source_id": "76af9229db17f7465d6b94cf",
+    "manifest": "tf2_client-master/package.xml",
+    "source_url": "https://github.com/tpet/tf2_client.git",
+    "source_ref": "master",
+    "archive_sha256": "39f3888c801e61e20d59d0ef3ee865b632d0ea7f1ae070dfca8a052d6b6c8ac4"
+  },
+  {
+    "package": "ndt_registration",
+    "source_id": "7f658609107c25d1bf78f1dc",
+    "manifest": "perception_oru-release-release-source/ndt_registration/package.xml",
+    "source_url": "https://github.com/tstoyanov/perception_oru-release.git",
+    "source_ref": "release-source",
+    "archive_sha256": "9a0da7a43e6a9062ab391166959eb6a8508abbb4d6c7c9768cd3f4a305f6ef0b"
+  },
+  {
+    "package": "image_tools",
+    "source_id": "67adc712f7d1816f10bd001c",
+    "manifest": "demos-eloquent/image_tools/package.xml",
+    "source_url": "https://github.com/ros2/demos.git",
+    "source_ref": "eloquent",
+    "archive_sha256": "5f11fcd2ada8b6cc442c2e697063108b427d341b489f0deaeba758f5a301e1d1"
+  },
+  {
+    "package": "urdf",
+    "source_id": "655593488299b43c88e13b53",
+    "manifest": "robot_model-release-upstream-1.11.14/urdf/package.xml",
+    "source_url": "https://github.com/ros-gbp/robot_model-release.git",
+    "source_ref": "upstream/1.11.14",
+    "archive_sha256": "0f45e8cd256bc45856b216e7ae87937725f18a744e480ae80c159f5ddb315db8"
+  },
+  {
+    "package": "fanuc_lrmate200i_moveit_config",
+    "source_id": "85377f9525bc532a7f18acde",
+    "manifest": "fanuc-indigo-devel/fanuc_lrmate200i_moveit_config/package.xml",
+    "source_url": "https://github.com/ros-industrial/fanuc.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "1ff7f86adb4db55fe1cd8ea5beed5318a8c1d17b482cc6a303da8954fd7c3813"
+  },
+  {
+    "package": "etsi_its_mapem_ts_conversion",
+    "source_id": "67d288c2b84577db81e9c2e9",
+    "manifest": "etsi_its_messages-main/etsi_its_conversion/etsi_its_mapem_ts_conversion/package.xml",
+    "source_url": "https://github.com/ika-rwth-aachen/etsi_its_messages.git",
+    "source_ref": "main",
+    "archive_sha256": "5c1d49682f175d6cca02b0aa67cf40d9543cb3eaaf8358b1fe07f47ac32e57b8"
+  },
+  {
+    "package": "thormang3_action_module_msgs",
+    "source_id": "ac633629bdf98823e12121af",
+    "manifest": "ROBOTIS-THORMANG-msgs-kinetic-devel/thormang3_action_module_msgs/package.xml",
+    "source_url": "https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-msgs.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "ebc4dba0bd310845dcac803e8ef22e459b31cb078895d685e29352e25ad0e9b4"
+  },
+  {
+    "package": "teraranger",
+    "source_id": "8b5fe3d3bb84fb8c1cb2cf28",
+    "manifest": "teraranger-master/package.xml",
+    "source_url": "https://github.com/Terabee/teraranger.git",
+    "source_ref": "master",
+    "archive_sha256": "dcd6ba2e26f3b9bdf78d7cc8b79925a533d1d0a174022c0759de89679229e744"
+  },
+  {
+    "package": "costmap_converter",
+    "source_id": "2fa552393819304e41a0d5e4",
+    "manifest": "costmap_converter-release-upstream-0.0.12/package.xml",
+    "source_url": "https://github.com/rst-tu-dortmund/costmap_converter-release.git",
+    "source_ref": "upstream/0.0.12",
+    "archive_sha256": "2de4ceba34cf05748d2e70a281f7a8250ae90b9bcc00393c2f1907ee28d4f4ca"
+  },
+  {
+    "package": "velodyne_driver",
+    "source_id": "139c71b4dd2f2b00b4ed9897",
+    "manifest": "velodyne-foxy-devel/velodyne_driver/package.xml",
+    "source_url": "https://github.com/ros-drivers/velodyne.git",
+    "source_ref": "foxy-devel",
+    "archive_sha256": "e32cf6a1f3a032f54fc9e66378fce49fb0188fbaab637713529af68a6095a688"
+  },
+  {
+    "package": "mrpt_libposes",
+    "source_id": "e2cde5c3f355e7f16e65f411",
+    "manifest": "mrpt_ros-release-upstream-2.14.5/mrpt_libposes/package.xml",
+    "source_url": "https://github.com/ros2-gbp/mrpt_ros-release.git",
+    "source_ref": "upstream/2.14.5",
+    "archive_sha256": "7b872d54a6218e46c7a22402c5583cb50749fff82d121ce4a47916ad673e2a3e"
+  },
+  {
+    "package": "vision_visp",
+    "source_id": "9178553390e0b2a41286272e",
+    "manifest": "vision_visp-kinetic-devel/vision_visp/package.xml",
+    "source_url": "https://github.com/lagadic/vision_visp.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "7bfa263f863aa36e2f5cb3cfa0b5fa867ff5cc936550f42edffe3ba398394a46"
+  },
+  {
+    "package": "irobot_create_gazebo_plugins",
+    "source_id": "8a4c0de28b1d8909c0e0bb32",
+    "manifest": "create3_sim-release-upstream-2.1.0/irobot_create_gazebo/irobot_create_gazebo_plugins/package.xml",
+    "source_url": "https://github.com/ros2-gbp/create3_sim-release.git",
+    "source_ref": "upstream/2.1.0",
+    "archive_sha256": "c6ae50d83d723561cb1217ca17c2a22f240549473c310578ebeee6fba2db20f8"
+  },
+  {
+    "package": "dji_sdk_read_cam",
+    "source_id": "fbed85aa8ede67f4a438df0a",
+    "manifest": "Onboard-SDK-ROS-Release-upstream-0.1.9/dji_sdk_read_cam/package.xml",
+    "source_url": "https://github.com/dji-sdk/Onboard-SDK-ROS-Release.git",
+    "source_ref": "upstream/0.1.9",
+    "archive_sha256": "7f404d8cf39a9a8faf3a58b01843d3fa6c0b6bc7f697d0306a084f43e5b54b5f"
+  },
+  {
+    "package": "rmf_visualization_building_systems",
+    "source_id": "54e3af5063bd427063ac2148",
+    "manifest": "rmf_visualization-release-upstream-2.1.2/rmf_visualization_building_systems/package.xml",
+    "source_url": "https://github.com/ros2-gbp/rmf_visualization-release.git",
+    "source_ref": "upstream/2.1.2",
+    "archive_sha256": "3d353eac0505e8f552f32701d8c5f8ae31bc1abbca630d6fa24487bf0f525525"
+  },
+  {
+    "package": "rslidar_msg",
+    "source_id": "09191839475983a2ceab2061",
+    "manifest": "rslidar_msg-master/package.xml",
+    "source_url": "https://github.com/RoboSense-LiDAR/rslidar_msg.git",
+    "source_ref": "master",
+    "archive_sha256": "7b0faa7544574fd3b9a014842756e77ad5047b81ac76453976f07610102858c6"
+  },
+  {
+    "package": "depthai_ros_driver",
+    "source_id": "f91ec988c1d41b9f8daa4226",
+    "manifest": "depthai-ros-develop/depthai_ros_driver/package.xml",
+    "source_url": "https://github.com/luxonis/depthai-ros.git",
+    "source_ref": "develop",
+    "archive_sha256": "699a3631715acf7b9d68d6bf827924af9fab69a73d4588ddf5473827426c1926"
+  },
+  {
+    "package": "pid_control",
+    "source_id": "00779a42b0c88e71f195e375",
+    "manifest": "wato_monorepo-main/src/interfacing/pid_control/package.xml",
+    "source_url": "https://github.com/WATonomous/wato_monorepo.git",
+    "source_ref": "main",
+    "archive_sha256": "9bfefff4092a432af2bf3984eb0256f08a52fa80f474293b7b9574504c2b8efe"
+  },
+  {
+    "package": "industrial_robot_angle_conversions",
+    "source_id": "a5f79ef9f6a1be2f46a52f4f",
+    "manifest": "industrial_robot_angle_conversions-melodic-940da50593179c161263359e5c250af1dc494d93/package.xml",
+    "source_url": "https://gitlab.com/InstitutMaupertuis/industrial_robot_angle_conversions.git",
+    "source_ref": "melodic",
+    "archive_sha256": "79f067e8452b52aad890beaeaeacec831940267fccdf38ae815929dcdad1b7fd"
+  },
+  {
+    "package": "heifu",
+    "source_id": "ff7c2b0fb27e2fa96abf7e0b",
+    "manifest": "heifu-release-upstream-0.7.7/heifu/package.xml",
+    "source_url": "https://github.com/BV-OpenSource/heifu-release.git",
+    "source_ref": "upstream/0.7.7",
+    "archive_sha256": "90d08c84f08b8bc463fb542046e7ecff6111b3ffbdeab722ab841784f6d07d6f"
+  },
+  {
+    "package": "rail_pick_and_place",
+    "source_id": "806179cce4570cb90b0fb841",
+    "manifest": "rail_pick_and_place-develop/rail_pick_and_place/package.xml",
+    "source_url": "https://github.com/GT-RAIL/rail_pick_and_place.git",
+    "source_ref": "develop",
+    "archive_sha256": "5152b21c265d8700daa67e825ad60d6354523abf413f5ba896ee762b8cf94f14"
+  },
+  {
+    "package": "marti_common_msgs",
+    "source_id": "7230db51dbaec7c529646329",
+    "manifest": "marti_messages-ros2-devel/marti_common_msgs/package.xml",
+    "source_url": "https://github.com/swri-robotics/marti_messages.git",
+    "source_ref": "ros2-devel",
+    "archive_sha256": "c47e14243a4ab7dc66440440a91dd2bf19156ca8100a6570080047e3a4b5af3c"
+  },
+  {
+    "package": "homer_navigation",
+    "source_id": "c46ec0848ad916fdb5907c6c",
+    "manifest": "homer_mapnav-upstream-1.0.16-8a6e8a9b19bda76bddcb6cdf236cea2c426a306c/homer_navigation/package.xml",
+    "source_url": "https://gitlab.uni-koblenz.de/robbie/homer_mapnav.git",
+    "source_ref": "upstream/1.0.16",
+    "archive_sha256": "098f450b3265d96f2e9bb514c2fec438a2690f6ab06796d873b736561964214e"
+  },
+  {
+    "package": "audio_common_msgs",
+    "source_id": "f3138472b9b20e153e380d72",
+    "manifest": "audio_common-release-upstream-0.3.17/audio_common_msgs/package.xml",
+    "source_url": "https://github.com/ros-gbp/audio_common-release.git",
+    "source_ref": "upstream/0.3.17",
+    "archive_sha256": "4237c42bdfec13fe8221cc7477214e4ba01f399ce6b1bd0bc0a6783d53cc924b"
+  },
+  {
+    "package": "cram_manipulation_knowledge",
+    "source_id": "f05cc9072f127ae6b24745f0",
+    "manifest": "cram_highlevel-HEAD/cram_manipulation_knowledge/package.xml",
+    "source_url": "https://github.com/cram-code/cram_highlevel.git",
+    "source_ref": "HEAD",
+    "archive_sha256": "417aa2d1be06db683bc7bffdb636c9f3f3de4dfbe77f6a31139a0b58d1467c71"
+  },
+  {
+    "package": "cl_transforms_stamped",
+    "source_id": "e1afc2bb976553de08010d6e",
+    "manifest": "roslisp_common-master/cl_transforms_stamped/package.xml",
+    "source_url": "https://github.com/ros/roslisp_common.git",
+    "source_ref": "master",
+    "archive_sha256": "10e84d16a7ad0dee681cd356ce84379900e36000a75a70c599325a7258457f77"
+  },
+  {
+    "package": "camera_calibration_parsers",
+    "source_id": "5da97d2454f942fbf1d41ee7",
+    "manifest": "image_common-dashing/camera_calibration_parsers/package.xml",
+    "source_url": "https://github.com/ros-perception/image_common.git",
+    "source_ref": "dashing",
+    "archive_sha256": "da2739917eb76e37a59626d49e0709e0c657c23d80c52352c6cbebc9a435264d"
+  },
+  {
+    "package": "nav2_regulated_pure_pursuit_controller",
+    "source_id": "d1243b757c67d47932d6fabd",
+    "manifest": "navigation2-lyrical/nav2_regulated_pure_pursuit_controller/package.xml",
+    "source_url": "https://github.com/ros-planning/navigation2.git",
+    "source_ref": "lyrical",
+    "archive_sha256": "411289adc6134ee085c9698da1fb357a9e667913a09daeb0424e8cd2e6b1eda1"
+  },
+  {
+    "package": "gspeech",
+    "source_id": "29e7ebf0d8bd05cebb6b8f65",
+    "manifest": "hmi_robin-hydro-devel/gspeech/package.xml",
+    "source_url": "https://github.com/robinJKU/hmi_robin.git",
+    "source_ref": "hydro-devel",
+    "archive_sha256": "d58cd4b7b1558774cc282dd61913946bc03b87b63e774f9da25327b6c7a20825"
+  },
+  {
+    "package": "siftgpu",
+    "source_id": "ff9f0d62aed84c4b2e3acdf0",
+    "manifest": "perception_blort-hydro-devel/siftgpu/package.xml",
+    "source_url": "https://github.com/pal-robotics/perception_blort.git",
+    "source_ref": "hydro-devel",
+    "archive_sha256": "6740cc4d6a7d4187106ceb73d49116425e2c34fd836401ce177e24c55409501a"
+  },
+  {
+    "package": "navigation_layers",
+    "source_id": "5fb74a562e00921d553de7c6",
+    "manifest": "navigation_layers-melodic/navigation_layers/package.xml",
+    "source_url": "https://github.com/DLu/navigation_layers.git",
+    "source_ref": "melodic",
+    "archive_sha256": "5900ca17e0ff7ba92dc1eeac90631b92165702875f356042b10668b8e76dab79"
+  },
+  {
+    "package": "robotino_description",
+    "source_id": "541bb1dc7dc2efa525f5dd24",
+    "manifest": "squirrel_common-release-upstream-0.0.24/robotino_description/package.xml",
+    "source_url": "https://github.com/squirrel-project/squirrel_common-release.git",
+    "source_ref": "upstream/0.0.24",
+    "archive_sha256": "d425807bad089199bd2524f6da58bef87023febfcae395ec3b1c127e52c9416b"
+  },
+  {
+    "package": "uuv_world_ros_plugins_msgs",
+    "source_id": "94a28a5c449aa90b4864a7eb",
+    "manifest": "uuv_simulator-master/uuv_world_plugins/uuv_world_ros_plugins_msgs/package.xml",
+    "source_url": "https://github.com/uuvsimulator/uuv_simulator.git",
+    "source_ref": "master",
+    "archive_sha256": "b311d09738b0dd153efc991bd4201de0e45082d548abb16f1f6c709ce2c412f9"
+  },
+  {
+    "package": "pal_robotiq_gripper_wrapper",
+    "source_id": "18c316f08a097f185142bea7",
+    "manifest": "pal_robotiq_gripper-humble-devel/pal_robotiq_gripper_wrapper/package.xml",
+    "source_url": "https://github.com/pal-robotics/pal_robotiq_gripper.git",
+    "source_ref": "humble-devel",
+    "archive_sha256": "d4bf8cddafd2082419d8460e44e7a823678448d5f7872f05e1533cc7975b9155"
+  },
+  {
+    "package": "hebiros",
+    "source_id": "c07dbd0ff60807a09f87ed34",
+    "manifest": "HEBI-ROS-DEPRECATED-master/hebiros/package.xml",
+    "source_url": "https://github.com/HebiRobotics/HEBI-ROS.git",
+    "source_ref": "master",
+    "archive_sha256": "cc6a7cf2b5eb642b898e52bbd32da676cc9b0b60cb8d04e5a2fc08140c8f0e3d"
+  },
+  {
+    "package": "imu_handler",
+    "source_id": "e34bd09edec1a23611795092",
+    "manifest": "vrep_ros_bridge-master/imu_handler/package.xml",
+    "source_url": "https://github.com/lagadic/vrep_ros_bridge.git",
+    "source_ref": "master",
+    "archive_sha256": "00170f1596853dbeeb17a9fc8b99020e99713482124979fdeacf2130edad1759"
+  },
+  {
+    "package": "industrial_moveit_benchmarking",
+    "source_id": "a9b451290a5a07a24974262a",
+    "manifest": "industrial_moveit-release-upstream-0.1.1/industrial_moveit_benchmarking/package.xml",
+    "source_url": "https://github.com/ros-industrial-release/industrial_moveit-release.git",
+    "source_ref": "upstream/0.1.1",
+    "archive_sha256": "f70dd51ed2eb9407d11e10c13f414e7d6e2ba896478673dd8776cc70f54431d2"
+  },
+  {
+    "package": "clock_relay",
+    "source_id": "6b785e51640767f537099051",
+    "manifest": "cpr_multimaster_tools-kinetic-devel/clock_relay/package.xml",
+    "source_url": "https://github.com/clearpathrobotics/cpr_multimaster_tools.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "b5a9a2cdd58f37373f331f8d22692686eb4965e4679ba185d7f8f488c70a1ba3"
+  },
+  {
+    "package": "orientus_sdk_c",
+    "source_id": "29cefba63d375d3db0f1910f",
+    "manifest": "orientus_driver-hydro-devel/orientus_sdk_c/package.xml",
+    "source_url": "https://github.com/RIVeR-Lab/orientus_driver.git",
+    "source_ref": "hydro-devel",
+    "archive_sha256": "06b793b8e27e2162c49fdeaf021f788856abe3c06347f2b6ce2d49317b314839"
+  },
+  {
+    "package": "tuw_uvc",
+    "source_id": "ba04c5046b8a5ac54442a307",
+    "manifest": "tuw_uvc-kinetic/package.xml",
+    "source_url": "https://github.com/tuw-robotics/tuw_uvc.git",
+    "source_ref": "kinetic",
+    "archive_sha256": "06c9d26aaefed2a0e828476dc53b368f85200b19ee1bee578d5fa6bd5132f7f7"
+  },
+  {
+    "package": "sensor_filters",
+    "source_id": "32d962f5b849ad40fdffed40",
+    "manifest": "sensor_filters-ros2/package.xml",
+    "source_url": "https://github.com/ctu-vras/sensor_filters.git",
+    "source_ref": "ros2",
+    "archive_sha256": "946cf06bf9d058ab143ddb7a54d3fa18abae21f7605a07467d5bacc5d05b4c7b"
+  },
+  {
+    "package": "ros_control",
+    "source_id": "5e736c99c818d806bb64d612",
+    "manifest": "ros_control-release-upstream-0.10.2/ros_control/package.xml",
+    "source_url": "https://github.com/ros-gbp/ros_control-release.git",
+    "source_ref": "upstream/0.10.2",
+    "archive_sha256": "91bb47ddf8425809b498fe48dde12feeb25fb9442fd06a0a5e2a5c053059b5b7"
+  },
+  {
+    "package": "autoware_msgs",
+    "source_id": "4b879466609e068ff8cae2f0",
+    "manifest": "autoware_ai_messages-master/autoware_msgs/package.xml",
+    "source_url": "https://github.com/autoware-ai/messages.git",
+    "source_ref": "master",
+    "archive_sha256": "93b86f7b91803e6730976cdb18d771c06a27e0a91cdf9c77b9a15cf57b4e9054"
+  },
+  {
+    "package": "mrpt_sensor_gnss_nmea",
+    "source_id": "7d6db5704fe79ad46c92aa6b",
+    "manifest": "mrpt_sensors-ros2/mrpt_sensor_gnss_nmea/package.xml",
+    "source_url": "https://github.com/mrpt-ros-pkg/mrpt_sensors.git",
+    "source_ref": "ros2",
+    "archive_sha256": "377239b1ddfec32e22e29302dc53bc9dd18c6efab1fd67f0c6ceb55a727893ed"
+  },
+  {
+    "package": "kingfisher_teleop",
+    "source_id": "04dc4083fbb973d12fc68107",
+    "manifest": "kingfisher-hydro-devel/kingfisher_teleop/package.xml",
+    "source_url": "https://github.com/kf/kingfisher.git",
+    "source_ref": "hydro-devel",
+    "archive_sha256": "2dc07f4f7dd0d90a658959656556585fc3c72fb581feedbbec4630e875177fd2"
+  },
+  {
+    "package": "ewellix_moveit_config",
+    "source_id": "bb7eb9b99038b437ed875a0a",
+    "manifest": "ewellix_lift_common-humble/ewellix_moveit_config/package.xml",
+    "source_url": "https://github.com/clearpathrobotics/ewellix_lift_common.git",
+    "source_ref": "humble",
+    "archive_sha256": "1a8b289399031f208ff9362cfd0d50465926ad459c18ca1b3ff3a312cb4c441e"
+  },
+  {
+    "package": "parameter_expression",
+    "source_id": "346143f136e615a17c2e9fc9",
+    "manifest": "parameter_expression-main/package.xml",
+    "source_url": "https://github.com/ForteFibre/parameter_expression.git",
+    "source_ref": "main",
+    "archive_sha256": "113538cd98a884aadc3a4d6d1693adb8341f56e2cfa9e3471e4806867fab8765"
+  },
+  {
+    "package": "roch_safety_controller",
+    "source_id": "702af830dcec305bbcf13676",
+    "manifest": "roch_robot-kinetic/roch_safety_controller/package.xml",
+    "source_url": "https://github.com/SawYer-Robotics/roch_robot.git",
+    "source_ref": "kinetic",
+    "archive_sha256": "dddef541a59146782f53df612842a58301ddf21bd646d869191343fa2290612b"
+  },
+  {
+    "package": "gazebo_taskboard",
+    "source_id": "76cf30e49a5b2b3c8c096624",
+    "manifest": "nasa_r2_simulator_release-upstream-0.5.3/gazebo_taskboard/package.xml",
+    "source_url": "https://github.com/brown-release/nasa_r2_simulator_release.git",
+    "source_ref": "upstream/0.5.3",
+    "archive_sha256": "3f41ac7ae526c86a7ebd2f36b9a5013a04616f73fa411bbcda6fb93f4e307e39"
+  },
+  {
+    "package": "test_rclcpp",
+    "source_id": "7e92bfcfd2e1bdf32c12c4f3",
+    "manifest": "system_tests-lyrical/test_rclcpp/package.xml",
+    "source_url": "https://github.com/ros2/system_tests.git",
+    "source_ref": "lyrical",
+    "archive_sha256": "f9a8e99d1588fb5ff3315e3eafebed28859f4a1d844ace8656a9c4863391de13"
+  },
+  {
+    "package": "reemc_bringup",
+    "source_id": "ed0b1f54b0c4b6d1bf6c3632",
+    "manifest": "reemc_robot-hydro-devel/reemc_bringup/package.xml",
+    "source_url": "https://github.com/pal-robotics/reemc_robot.git",
+    "source_ref": "hydro-devel",
+    "archive_sha256": "a897f87f7b561d3360f12135a1f10bcbd90dc0bb1234e2d2f4cbf85954bd6f1a"
+  },
+  {
+    "package": "tuw_marker_server",
+    "source_id": "2511dba5f944a764422f45e3",
+    "manifest": "tuw_marker_filter-kinetic/tuw_marker_server/package.xml",
+    "source_url": "https://github.com/tuw-robotics/tuw_marker_filter.git",
+    "source_ref": "kinetic",
+    "archive_sha256": "d846ce85f94b67bd520530cde550fa380c8eb60b866d487ea74be790fd95c631"
+  },
+  {
+    "package": "as2_platform_mavlink",
+    "source_id": "b16de1e3a90823fc88296387",
+    "manifest": "as2_platform_mavlink-main/package.xml",
+    "source_url": "https://github.com/aerostack2/as2_platform_mavlink.git",
+    "source_ref": "main",
+    "archive_sha256": "4da10582710a8dfe8a0d5847b05bba27c17b2f7a268726a7d9b84d60269f80bd"
+  },
+  {
+    "package": "tuw_multi_robot_demo",
+    "source_id": "7f3f9b49de55af23a99556c6",
+    "manifest": "tuw_multi_robot-kinetic/tuw_multi_robot_demo/package.xml",
+    "source_url": "https://github.com/tuw-robotics/tuw_multi_robot.git",
+    "source_ref": "kinetic",
+    "archive_sha256": "a20fb21ecf85c324d8f7b3950356765fe8b157fd916f2493965a68f284c4abd0"
+  },
+  {
+    "package": "asr_recognizer_prediction_psm",
+    "source_id": "1005fd2146d1f817310e9e8b",
+    "manifest": "asr_recognizer_prediction_psm-master/package.xml",
+    "source_url": "https://github.com/asr-ros/asr_recognizer_prediction_psm.git",
+    "source_ref": "master",
+    "archive_sha256": "b2971b2b26142572e263974ed9c74ceb2bd192457de3251b0241d5dbe9578156"
+  },
+  {
+    "package": "tornado",
+    "source_id": "1f0a5df60a58d24e924d0351",
+    "manifest": "tornado-rosrelease-upstream-4.2.1/package.xml",
+    "source_url": "https://github.com/asmodehn/tornado-rosrelease.git",
+    "source_ref": "upstream/4.2.1",
+    "archive_sha256": "4bf70d9cc8b16fd60571af0d5b052859bac0de7b1137e2daca9d44218ec00f66"
+  },
+  {
+    "package": "cop_collision_interface",
+    "source_id": "e64c2ff91991a4214e02eb83",
+    "manifest": "ias_perception-HEAD/cop_collision_interface/manifest.xml",
+    "source_url": "https://github.com/code-iai/ias_perception.git",
+    "source_ref": "HEAD",
+    "archive_sha256": "badee66067e13d459001838202cc5879052f187e954ce9eb6ebc337d7613a1ac"
+  },
+  {
+    "package": "autoware_behavior_velocity_planner",
+    "source_id": "5c493534646781d8167b37e1",
+    "manifest": "autoware_core-main/planning/behavior_velocity_planner/autoware_behavior_velocity_planner/package.xml",
+    "source_url": "https://github.com/autowarefoundation/autoware_core.git",
+    "source_ref": "main",
+    "archive_sha256": "4dd22f7399b0febccf518007fa7f74afb537eb28d8c49e204d644d46ec44a545"
+  },
+  {
+    "package": "world_canvas_client_examples",
+    "source_id": "ed423bfbb44e14f9b360eb29",
+    "manifest": "world_canvas_libs-master/world_canvas_client_examples/package.xml",
+    "source_url": "https://github.com/corot/world_canvas_libs.git",
+    "source_ref": "master",
+    "archive_sha256": "e10dc85f0722e7cb35e68bc6d0b3d5d14c184f1112015ca2ee8585c2827ff12e"
+  },
+  {
+    "package": "tedusar_nav_msgs",
+    "source_id": "47435c69872de8d13d8ec6d2",
+    "manifest": "tedusar_ros_pkg-master/tedusar_nav_msgs/package.xml",
+    "source_url": "https://github.com/johmau85/tedusar_ros_pkg.git",
+    "source_ref": "master",
+    "archive_sha256": "4bf06cbdfee4178e2552b165c8cfc41ed375c1250f44bee78f8e5bd19c069615"
+  },
+  {
+    "package": "mrpt_nav_interfaces",
+    "source_id": "7db32cc8b33d74e43e46d81b",
+    "manifest": "mrpt_navigation-release-upstream-2.2.1/mrpt_nav_interfaces/package.xml",
+    "source_url": "https://github.com/ros2-gbp/mrpt_navigation-release.git",
+    "source_ref": "upstream/2.2.1",
+    "archive_sha256": "f21f8afc66e2110aaf937ee31b3d5987f99b45e5e11bed6e6ac99701d8efded2"
+  },
+  {
+    "package": "plansys2_msgs",
+    "source_id": "a153d8a833af0158ee4efc81",
+    "manifest": "ros2_planning_system-kilted-devel/plansys2_msgs/package.xml",
+    "source_url": "https://github.com/PlanSys2/ros2_planning_system.git",
+    "source_ref": "kilted-devel",
+    "archive_sha256": "e1f813a4352929a594c7f92d12d5a123b6886664d7e680e80d5c41835c5636d0"
+  },
+  {
+    "package": "kuka_drivers_core",
+    "source_id": "a1ba830161ae5a76b112e2c9",
+    "manifest": "kuka_drivers-release-upstream-1.1.0/kuka_drivers_core/package.xml",
+    "source_url": "https://github.com/ros2-gbp/kuka_drivers-release.git",
+    "source_ref": "upstream/1.1.0",
+    "archive_sha256": "2997b83d16a30251c453ee28b36b8af5054b0c837932ba8a1ab0830735b36ecd"
+  },
+  {
+    "package": "husarion_ugv_lights",
+    "source_id": "d7c71043ba0720be763a4e65",
+    "manifest": "husarion_ugv_ros-humble/husarion_ugv_lights/package.xml",
+    "source_url": "https://github.com/husarion/husarion_ugv_ros.git",
+    "source_ref": "humble",
+    "archive_sha256": "5d9d78eca010009a382726536d8202e3152c3d0d2af49eeb75738c52c2e4aeb9"
+  },
+  {
+    "package": "mesh_client",
+    "source_id": "51d285f15aee55fdb96f9a95",
+    "manifest": "mesh_navigation-release-upstream-1.0.1/mesh_client/package.xml",
+    "source_url": "https://github.com/uos-gbp/mesh_navigation-release.git",
+    "source_ref": "upstream/1.0.1",
+    "archive_sha256": "f09985a3a9585b972c07f273ce25bf35a0533741cc8475e21b97be40f0bded68"
+  },
+  {
+    "package": "fanuc_m430ia2f_moveit_config",
+    "source_id": "85377f9525bc532a7f18acde",
+    "manifest": "fanuc-indigo-devel/fanuc_m430ia2f_moveit_config/package.xml",
+    "source_url": "https://github.com/ros-industrial/fanuc.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "1ff7f86adb4db55fe1cd8ea5beed5318a8c1d17b482cc6a303da8954fd7c3813"
+  },
+  {
+    "package": "rosserial_msgs",
+    "source_id": "0c35089ee687580c99d0372f",
+    "manifest": "rosserial-noetic-devel/rosserial_msgs/package.xml",
+    "source_url": "https://github.com/ros-drivers/rosserial.git",
+    "source_ref": "noetic-devel",
+    "archive_sha256": "c21dafaefac7e636204a89c467719bcbcaaee205ac4d0534b3559ee8f8304c8c"
+  },
+  {
+    "package": "bosch_navigator_bridge",
+    "source_id": "7532bd82b408136376d9edee",
+    "manifest": "rokit_ros_bridge-humble/bosch_navigator_bridge/package.xml",
+    "source_url": "https://github.com/boschglobal/locator_ros_bridge.git",
+    "source_ref": "humble",
+    "archive_sha256": "1028444bc2e453aca43e73c5a9ada83b413d7ecf956f06fa2f556f65dc9f4848"
+  },
+  {
+    "package": "hironx_rpc_msgs",
+    "source_id": "e854303e1df43fef570c4938",
+    "manifest": "hironx_rpc-release-upstream-0.0.5/hironx_rpc_msgs/package.xml",
+    "source_url": "https://github.com/tork-a/hironx_rpc-release.git",
+    "source_ref": "upstream/0.0.5",
+    "archive_sha256": "27e54245e256fc1d2078679d452737e3cc1b07fc0160499be270ff6349a745b2"
+  },
+  {
+    "package": "iiwa_msgs",
+    "source_id": "ee59ad4bc16d34553c97e176",
+    "manifest": "iiwa_stack-release-upstream-1.4.1/iiwa_msgs/package.xml",
+    "source_url": "https://github.com/ipa-rwu/iiwa_stack-release.git",
+    "source_ref": "upstream/1.4.1",
+    "archive_sha256": "a990392e12146a42daa40deb8fea5ef15132d997baca514d6a3717b89d5f6286"
+  },
+  {
+    "package": "denso_robot_core",
+    "source_id": "57d15cf6a9cdf6bfdd8b50de",
+    "manifest": "denso_robot_ros-kinetic-devel/denso_robot_core/package.xml",
+    "source_url": "https://github.com/DENSORobot/denso_robot_ros.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "51d9cd9ad0619892f12fd4f87ef7afbbaeb8c56c75720a77497c6d191f222eb4"
+  },
+  {
+    "package": "gazesense_msgs",
+    "source_id": "488abac8140896a48bf6c68b",
+    "manifest": "eyeware-ros-master/gazesense_msgs/package.xml",
+    "source_url": "https://github.com/eyeware/eyeware-ros.git",
+    "source_ref": "master",
+    "archive_sha256": "3dee7ed0e029a1396117c95fe6a17544f4aa8004f88c6c97d2d4554c2694745b"
+  },
+  {
+    "package": "ublox_dgnss_node",
+    "source_id": "8b032ef7841cf5e3d35f5185",
+    "manifest": "ublox_dgnss-main/ublox_dgnss_node/package.xml",
+    "source_url": "https://github.com/aussierobots/ublox_dgnss.git",
+    "source_ref": "main",
+    "archive_sha256": "8c6aa9e1b962e9bc5686dbfd747d126ee4cecb3efea9d2c4f164dfca1c91467a"
+  },
+  {
+    "package": "opencv_tests",
+    "source_id": "b5533e7e683f14102fc0331d",
+    "manifest": "vision_opencv-release-upstream-2.0.5/opencv_tests/package.xml",
+    "source_url": "https://github.com/ros2-gbp/vision_opencv-release.git",
+    "source_ref": "upstream/2.0.5",
+    "archive_sha256": "cb12dced2aa17ef1051184bd282b61ad0724c830de15dfc3a32bb0e2c614e73c"
+  },
+  {
+    "package": "social_nav_metrics",
+    "source_id": "f94e7dc6e5b8a1fcec55e9f8",
+    "manifest": "social_nav_ros-main/social_nav_metrics/package.xml",
+    "source_url": "https://github.com/MetroRobots/social_nav_ros.git",
+    "source_ref": "main",
+    "archive_sha256": "57b0fb59647b192cae9aeefd8c7b7339f058048106adda3795ce7cc7c12489a7"
+  },
+  {
+    "package": "bwi_kr_execution",
+    "source_id": "87f75a2b98ff4bc9f4423bef",
+    "manifest": "bwi_common-release-upstream-0.3.12/bwi_kr_execution/package.xml",
+    "source_url": "https://github.com/utexas-bwi-gbp/bwi_common-release.git",
+    "source_ref": "upstream/0.3.12",
+    "archive_sha256": "121b9eac3111667966f45d86d1715f7d841c584f23cb19d40e0de3cc66263135"
+  },
+  {
+    "package": "mrpt1",
+    "source_id": "75e968a40a73c89956d5aca8",
+    "manifest": "mrpt-mrpt-1.5/package.xml",
+    "source_url": "https://github.com/mrpt/mrpt.git",
+    "source_ref": "mrpt-1.5",
+    "archive_sha256": "8c0bad9f3a0c5a17f96c63b217636a2b0f846c431a43bb8c414a60e377cc9c79"
+  },
+  {
+    "package": "arni_gui",
+    "source_id": "50fca7c9e0ea5057f018f45f",
+    "manifest": "arni-master/arni_gui/package.xml",
+    "source_url": "https://github.com/ROS-PSE/arni.git",
+    "source_ref": "master",
+    "archive_sha256": "1b5de8629d6c88ed33840ed6959e59ef4b19a499491f1c82f0b822fcac10d370"
+  },
+  {
+    "package": "quadrotor_tk_handler",
+    "source_id": "e34bd09edec1a23611795092",
+    "manifest": "vrep_ros_bridge-master/quadrotor_tk_handler/package.xml",
+    "source_url": "https://github.com/lagadic/vrep_ros_bridge.git",
+    "source_ref": "master",
+    "archive_sha256": "00170f1596853dbeeb17a9fc8b99020e99713482124979fdeacf2130edad1759"
+  },
+  {
+    "package": "tiago_pro_mujoco",
+    "source_id": "a712638d276c3c2f4970fa50",
+    "manifest": "tiago_pro_simulation-humble-devel/tiago_pro_mujoco/package.xml",
+    "source_url": "https://github.com/pal-robotics/tiago_pro_simulation.git",
+    "source_ref": "humble-devel",
+    "archive_sha256": "79dde9817bdba181cb1eb7bc7fb83fda3faf8d3e461ecf7bd7fae1826f2bfe6c"
+  },
+  {
+    "package": "tobas_cyclonedds_config",
+    "source_id": "d6c4be6fc2f01c2f5d0f45d6",
+    "manifest": "tobas-rolling/src/tobas_gui/tobas_cyclonedds_config/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "rolling",
+    "archive_sha256": "60a4cc6c092eda023bace481cea76870dd074c561ea698b2c37131555a937111"
+  },
+  {
+    "package": "innok_heros_driver",
+    "source_id": "f7b828a48c67dc3971c8016e",
+    "manifest": "innok_heros_driver-release-upstream-1.0.3/package.xml",
+    "source_url": "https://github.com/innokrobotics/innok_heros_driver-release.git",
+    "source_ref": "upstream/1.0.3",
+    "archive_sha256": "6471e2e23f9eb6f40e9fe439c48a8f7fd9ff1053f6c38cf57220e72523919403"
+  },
+  {
+    "package": "fetch_description",
+    "source_id": "1f175a45d94f0a1d7edb6896",
+    "manifest": "fetch_ros-ros1/fetch_description/package.xml",
+    "source_url": "https://github.com/fetchrobotics/fetch_ros.git",
+    "source_ref": "ros1",
+    "archive_sha256": "0f5939a7546faf4b08def20d9f469c05246498782212f084d418885cec9e4422"
+  },
+  {
+    "package": "mola_input_paris_luco_dataset",
+    "source_id": "d7a5cf3662f8644eb721bf08",
+    "manifest": "mola_academic_datasets-develop/mola_input_paris_luco_dataset/package.xml",
+    "source_url": "https://github.com/MOLAorg/mola_academic_datasets.git",
+    "source_ref": "develop",
+    "archive_sha256": "276abba69fdcf973487f83bb4601ccab304a57fd2500fdfc22068104d16d96b5"
+  },
+  {
+    "package": "leo_bringup",
+    "source_id": "a36bb6431412e784f4ab8f28",
+    "manifest": "leo_robot-ros2-jazzy/leo_bringup/package.xml",
+    "source_url": "https://github.com/LeoRover/leo_robot-ros2.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "1e354c4ded795001dd7927cbc6adbac4d3750dc01a21499349cbe53d5f1f7bcc"
+  },
+  {
+    "package": "webots_ros2_ur_e_description",
+    "source_id": "9683564d6249b49a6e929eb3",
+    "manifest": "webots_ros2-release-upstream-1.0.2/webots_ros2_ur_e_description/package.xml",
+    "source_url": "https://github.com/cyberbotics/webots_ros2-release.git",
+    "source_ref": "upstream/1.0.2",
+    "archive_sha256": "d893d176aad129bab283dd86dab45794b88d6be755195f866d8ad8c7a29eea9a"
+  },
+  {
+    "package": "clearpath_viz",
+    "source_id": "2e8420ce87b0ddf2cf144f0f",
+    "manifest": "clearpath_desktop-main/clearpath_viz/package.xml",
+    "source_url": "https://github.com/clearpathrobotics/clearpath_desktop.git",
+    "source_ref": "main",
+    "archive_sha256": "6160ce31947b91a9483085f68a35ff33160b76ef0b0be91f9210b25e1947932f"
+  },
+  {
+    "package": "tork_rpc",
+    "source_id": "db90e18fd8973c74e567be23",
+    "manifest": "tork_rpc-master/tork_rpc/package.xml",
+    "source_url": "https://github.com/tork-a/tork_rpc.git",
+    "source_ref": "master",
+    "archive_sha256": "84c4b62d08c999171cacd3b11f0980048ee451fff31629dca03561b17a7da0e8"
+  },
+  {
+    "package": "sciurus17_msgs",
+    "source_id": "d5406cb1008823b525052050",
+    "manifest": "sciurus17_ros-master/sciurus17_msgs/package.xml",
+    "source_url": "https://github.com/rt-net/sciurus17_ros.git",
+    "source_ref": "master",
+    "archive_sha256": "1a155bc82915fd109f0a40351ba61b94a064f803b24321636d8e62796179c996"
+  },
+  {
+    "package": "op3_offset_tuner_client",
+    "source_id": "b4c5b299d092515705501169",
+    "manifest": "ROBOTIS-OP3-Tools-kinetic-devel/op3_offset_tuner_client/package.xml",
+    "source_url": "https://github.com/ROBOTIS-GIT/ROBOTIS-OP3-Tools.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "471b31d8d10013cfac81813bdefdba9bfa65d7fc491e27051016e55ce3367221"
+  },
+  {
+    "package": "fanuc_grinding_publish_meshfile",
+    "source_id": "7e5a231d2b418de273d0872c",
+    "manifest": "fanuc_grinding-kinetic-a78864cf7d459ddd290d095056109b8591166bd8/publish_meshfile/package.xml",
+    "source_url": "https://gitlab.com/InstitutMaupertuis/fanuc_grinding.git",
+    "source_ref": "kinetic",
+    "archive_sha256": "a58411ab08fa58d1dd6fd0a76acefea816c2774a583ebe1aadb4cc54cde8abae"
+  },
+  {
+    "package": "choreo_task_sequence_external_planner",
+    "source_id": "7bb5f1c98e6f68fc54f8ceb7",
+    "manifest": "choreo-kinetic-devel/choreo_task_sequence_external_planner/package.xml",
+    "source_url": "https://github.com/yijiangh/Choreo.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "e43cab895767bef36dc20eec7678d8ea495aeec2162ca6fe48b013197986eec0"
+  },
+  {
+    "package": "uav_optimal_coverage",
+    "source_id": "0a49cbc81f444d5e327d1b51",
+    "manifest": "swarm_behaviors-kinetic-devel/uav_optimal_coverage/package.xml",
+    "source_url": "https://github.com/cpswarm/swarm_behaviors.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "07c9754c2de6420dbfa33d928ded5578cbefb0c9a9c05c1a538d936fc4373950"
+  },
+  {
+    "package": "motoman_csda10f_moveit_config",
+    "source_id": "4a06516d6202ecbc27aa66bc",
+    "manifest": "motoman_experimental-kinetic-devel/motoman_csda10f_moveit_config/package.xml",
+    "source_url": "https://github.com/ros-industrial/motoman_experimental.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "90f9b61a5c8f1f8beba96672d4c0cc4472c46c360eb09f6277a52bda7082957a"
+  },
+  {
+    "package": "tobas_property_common",
+    "source_id": "05468a484b89365d43986a0d",
+    "manifest": "tobas-jazzy/tobas_core/tobas_property/tobas_property_common/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "6b987027d71569d7364f03a2f3c37f32ff3138104ff039ae4754f04859f96cfe"
+  },
+  {
+    "package": "interactive_behavior_201409",
+    "source_id": "8fbf0c83829918e13ba60818",
+    "manifest": "jsk_demos-release-upstream-0.0.4/interactive_behavior_201409/package.xml",
+    "source_url": "https://github.com/tork-a/jsk_demos-release.git",
+    "source_ref": "upstream/0.0.4",
+    "archive_sha256": "d8eff3f71e317d1bc8ef44b7444f9fde4159b526c664c16ac9aa6e59d671bb94"
+  },
+  {
+    "package": "franka_mobile",
+    "source_id": "b295c418c412d1a3ad9a57d0",
+    "manifest": "franka_ros2-humble/franka_mobile/package.xml",
+    "source_url": "https://github.com/frankaemika/franka_ros2.git",
+    "source_ref": "humble",
+    "archive_sha256": "93572510b9d00b65a099b377cdb610e4dd3525b97bd847a43667582f6e227192"
+  },
+  {
+    "package": "jsk_tilt_laser",
+    "source_id": "c4817bbfb3a1dcf682fcb14e",
+    "manifest": "jsk_common-release-upstream-1.0.40/jsk_tilt_laser/manifest.xml",
+    "source_url": "https://github.com/tork-a/jsk_common-release.git",
+    "source_ref": "upstream/1.0.40",
+    "archive_sha256": "17a6176d522f5b92019e847dbb5af5a023d3c753f91859baf490d74754bf4104"
+  },
+  {
+    "package": "odom_tf_publish",
+    "source_id": "f86de373b5d1ace83a9c69b2",
+    "manifest": "tensor_field_nav-master/odom_tf_publish/package.xml",
+    "source_url": "https://github.com/zlt1991/tensor_field_nav.git",
+    "source_ref": "master",
+    "archive_sha256": "1f40c17ff0dd593f2e32e08696eaa624673da1440563dbe8371c4529ad69272d"
+  },
+  {
+    "package": "electronic_io",
+    "source_id": "4553d829b5bd8a4ae27b0a22",
+    "manifest": "electronic-io-master/electronic_io/package.xml",
+    "source_url": "https://github.com/ctu-vras/electronic-io.git",
+    "source_ref": "master",
+    "archive_sha256": "ccb0ac09a2d5f1a24161725317f17415363d928e8fa66f332dba21ca7f8c45ea"
+  },
+  {
+    "package": "force_torque_sensor_calib",
+    "source_id": "d6b5bd51b1ea17c8880f90b1",
+    "manifest": "force_torque_tools-indigo/force_torque_sensor_calib/package.xml",
+    "source_url": "https://github.com/kth-ros-pkg/force_torque_tools.git",
+    "source_ref": "indigo",
+    "archive_sha256": "59dca0e615b8d89e6c60f53b88e7dfb7bbccdc7ee41045154e4cdbe2fcf2c1b9"
+  },
+  {
+    "package": "mitre_fast_layered_map",
+    "source_id": "869ee01433831cfeb90b6b4f",
+    "manifest": "mitre_fast_layered_map-kinetic-devel/package.xml",
+    "source_url": "https://github.com/mitre/mitre_fast_layered_map.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "a72b8d24da178f94262c84970b2e542fe89ac1ab3248711cae2109307dbb77a7"
+  },
+  {
+    "package": "annin_ar4_moveit_config",
+    "source_id": "7e69fa557aaa11a4a0c9b03e",
+    "manifest": "ar4_ros_driver-main/annin_ar4_moveit_config/package.xml",
+    "source_url": "https://github.com/ycheng517/ar4_ros_driver.git",
+    "source_ref": "main",
+    "archive_sha256": "715c70724ace19a746446f54c61239affc0e2fddb455b7fbf9070737fa4d4017"
+  },
+  {
+    "package": "talos_description",
+    "source_id": "e42325abb3d655e393589c91",
+    "manifest": "talos_robot-humble-devel/talos_description/package.xml",
+    "source_url": "https://github.com/pal-robotics/talos_robot.git",
+    "source_ref": "humble-devel",
+    "archive_sha256": "d9f3ccb02d3c272f9cca89f647164785e29aa90d68849906da594340fb0d47c8"
+  },
+  {
+    "package": "robot_face",
+    "source_id": "9fe2440c92e874ebe2700b4f",
+    "manifest": "homer_robot_face-upstream-1.0.7-8c128d7c2b13fc69df5356d2bc4aad459bd0c419/robot_face/package.xml",
+    "source_url": "https://gitlab.uni-koblenz.de/robbie/homer_robot_face.git",
+    "source_ref": "upstream/1.0.7",
+    "archive_sha256": "84d73456f3cebd6d0fd0374943c2394c26202da1bc33a738021a0655b526bca7"
+  },
+  {
+    "package": "dolly_ignition",
+    "source_id": "0600769cf1efee36e239d18b",
+    "manifest": "dolly-galactic/dolly_ignition/package.xml",
+    "source_url": "https://github.com/chapulina/dolly.git",
+    "source_ref": "galactic",
+    "archive_sha256": "9439629e6392b5443f55c391f614808521b17fa0bd84c1d3818375854e088ac9"
+  },
+  {
+    "package": "rmf_demos_dashboard_resources",
+    "source_id": "823c126516e254e99b56ca5b",
+    "manifest": "rmf_demos-galactic/rmf_demos_dashboard_resources/package.xml",
+    "source_url": "https://github.com/open-rmf/rmf_demos.git",
+    "source_ref": "galactic",
+    "archive_sha256": "a2cb4b762bb946d5ede2e8c084803ae32fd2114bfb816aa0d9b6a48ad6f0d9e6"
+  },
+  {
+    "package": "tobas_rc_teleop",
+    "source_id": "d6c4be6fc2f01c2f5d0f45d6",
+    "manifest": "tobas-rolling/src/tobas_core/tobas_rc_teleop/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "rolling",
+    "archive_sha256": "60a4cc6c092eda023bace481cea76870dd074c561ea698b2c37131555a937111"
+  },
+  {
+    "package": "microstrain_inertial_description",
+    "source_id": "9b2ad79aac4eaf302955b7f0",
+    "manifest": "microstrain_inertial-ros/microstrain_inertial_description/package.xml",
+    "source_url": "https://github.com/LORD-MicroStrain/microstrain_inertial.git",
+    "source_ref": "ros",
+    "archive_sha256": "06d8a519bb2a5644f9a81a5d5493925333d6c167648428a723bb122ea3acb9dd"
+  },
+  {
+    "package": "r2_gazebo",
+    "source_id": "76cf30e49a5b2b3c8c096624",
+    "manifest": "nasa_r2_simulator_release-upstream-0.5.3/r2_gazebo/package.xml",
+    "source_url": "https://github.com/brown-release/nasa_r2_simulator_release.git",
+    "source_ref": "upstream/0.5.3",
+    "archive_sha256": "3f41ac7ae526c86a7ebd2f36b9a5013a04616f73fa411bbcda6fb93f4e307e39"
+  },
+  {
+    "package": "qglv_pcl",
+    "source_id": "42ba2c9366d65e2cb0cf9ab5",
+    "manifest": "qglv_toolkit-release-upstream-0.1.7/qglv_pcl/package.xml",
+    "source_url": "https://github.com/yujinrobot-release/qglv_toolkit-release.git",
+    "source_ref": "upstream/0.1.7",
+    "archive_sha256": "d8c8640fc366aadb403197697d1aac043e97d453f81c19b745a7395383e8b0da"
+  },
+  {
+    "package": "lsc_ros_driver",
+    "source_id": "95a7ee90131df8aed30b0b83",
+    "manifest": "lsc_ros_driver-master/package.xml",
+    "source_url": "https://github.com/AutonicsLiDAR/lsc_ros_driver.git",
+    "source_ref": "master",
+    "archive_sha256": "3638e5a39d87f22575a3dc0426d9910104124f4e68e0470125c5ad90f3a89e43"
+  },
+  {
+    "package": "laser_scan_matcher",
+    "source_id": "fc0a1247b2fd83495e234e86",
+    "manifest": "scan_tools-release-upstream-0.3.1/laser_scan_matcher/package.xml",
+    "source_url": "https://github.com/ros-gbp/scan_tools-release.git",
+    "source_ref": "upstream/0.3.1",
+    "archive_sha256": "f8a6bede270f82451a5db87b167fac45927f271e8e18f325cbe39684cc52980f"
+  },
+  {
+    "package": "visp_hand2eye_calibration",
+    "source_id": "9178553390e0b2a41286272e",
+    "manifest": "vision_visp-kinetic-devel/visp_hand2eye_calibration/package.xml",
+    "source_url": "https://github.com/lagadic/vision_visp.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "7bfa263f863aa36e2f5cb3cfa0b5fa867ff5cc936550f42edffe3ba398394a46"
+  },
+  {
+    "package": "rh_p12_rn_manager",
+    "source_id": "0f28805d096ec04e17380e7c",
+    "manifest": "RH-P12-RN-kinetic-devel/rh_p12_rn_manager/package.xml",
+    "source_url": "https://github.com/ROBOTIS-GIT/RH-P12-RN.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "949e3f07d867d758b34c87cb7ccde7b83cf838eb1a29e11b173c24c268e7f57a"
+  },
+  {
+    "package": "tiago_pro_controller_configuration",
+    "source_id": "6d7bf9b4bcde896d56cb9816",
+    "manifest": "tiago_pro_robot-humble-devel/tiago_pro_controller_configuration/package.xml",
+    "source_url": "https://github.com/pal-robotics/tiago_pro_robot.git",
+    "source_ref": "humble-devel",
+    "archive_sha256": "8c12fd99da399b67a6d45896c5149dc18672ffdb5e1f5235adfd90625876783b"
+  },
+  {
+    "package": "webots_ros2_abb",
+    "source_id": "9683564d6249b49a6e929eb3",
+    "manifest": "webots_ros2-release-upstream-1.0.2/webots_ros2_abb/package.xml",
+    "source_url": "https://github.com/cyberbotics/webots_ros2-release.git",
+    "source_ref": "upstream/1.0.2",
+    "archive_sha256": "d893d176aad129bab283dd86dab45794b88d6be755195f866d8ad8c7a29eea9a"
+  },
+  {
+    "package": "roboplan",
+    "source_id": "aa432463722a04207a8ffa67",
+    "manifest": "roboplan-main/roboplan/package.xml",
+    "source_url": "https://github.com/open-planning/roboplan.git",
+    "source_ref": "main",
+    "archive_sha256": "19184dad41b330c55b6987a8db38607bbbd0075e671b1a4f80aede830982ee4a"
+  },
+  {
+    "package": "easynav_playground_tiago_description",
+    "source_id": "00d17cce7b919574d2b9184b",
+    "manifest": "easynav_playgrounds-jazzy/playground_tiago/easynav_playground_tiago_description/package.xml",
+    "source_url": "https://github.com/EasyNavigation/easynav_playgrounds.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "1ef58cde0e2bf62cc828997d966bf5740e563e35e41c600e8a9e929bcde5241a"
+  },
+  {
+    "package": "rosrun",
+    "source_id": "6e32e9703178d09a742040af",
+    "manifest": "win_ros-groovy-devel/msvc/rosrun/package.xml",
+    "source_url": "https://github.com/ros-windows/win_ros.git",
+    "source_ref": "groovy-devel",
+    "archive_sha256": "8d9ce98bd79795c830567f94b8b361d06d95b01ece51470b2604d9c4c90db36c"
+  },
+  {
+    "package": "calibration",
+    "source_id": "d2f3d37de6a21ee490609109",
+    "manifest": "calibration-groovy-devel/calibration/package.xml",
+    "source_url": "https://github.com/ros-perception/calibration.git",
+    "source_ref": "groovy-devel",
+    "archive_sha256": "f3805d06a0a4f7243835124c73ccdd633cdc49220ea630414a08bccd01d24bd5"
+  },
+  {
+    "package": "autoware_gyro_odometer",
+    "source_id": "5c493534646781d8167b37e1",
+    "manifest": "autoware_core-main/localization/autoware_gyro_odometer/package.xml",
+    "source_url": "https://github.com/autowarefoundation/autoware_core.git",
+    "source_ref": "main",
+    "archive_sha256": "4dd22f7399b0febccf518007fa7f74afb537eb28d8c49e204d644d46ec44a545"
+  },
+  {
+    "package": "baxter_sim_hardware",
+    "source_id": "5a7026c30e8864b636dbd8cb",
+    "manifest": "baxter_simulator-release-upstream-1.2.12/baxter_sim_hardware/package.xml",
+    "source_url": "https://github.com/RethinkRobotics-release/baxter_simulator-release.git",
+    "source_ref": "upstream/1.2.12",
+    "archive_sha256": "4c04c982106cc09ee006464566cfc6fc7954a3d64de89f6f1188e93baa2ea65e"
+  },
+  {
+    "package": "rosbag2_to_video",
+    "source_id": "22d6a4a13697fa61fd2b6e7d",
+    "manifest": "rosbag2_to_video-ros2/package.xml",
+    "source_url": "https://github.com/fictionlab/rosbag2_to_video.git",
+    "source_ref": "ros2",
+    "archive_sha256": "d36b5e6719a01a8aa7d7f28cbeabf03dbba54eed5d0942d9cb897bb8d56c8a3b"
+  },
+  {
+    "package": "freight_calibration",
+    "source_id": "5ad544df54faef4ac60f15c8",
+    "manifest": "fetch_ros-release-upstream-0.7.10/freight_calibration/package.xml",
+    "source_url": "https://github.com/fetchrobotics-gbp/fetch_ros-release.git",
+    "source_ref": "upstream/0.7.10",
+    "archive_sha256": "15400c7a45cd5689d9f57606a68ef6077a51814e0c785f27b44bc53d16700784"
+  },
+  {
+    "package": "vl53l0x_mraa_ros",
+    "source_id": "86f1e3f19c5e444809f76219",
+    "manifest": "jsk_apc-master/demos/sphand_ros/vl53l0x_mraa_ros/package.xml",
+    "source_url": "https://github.com/start-jsk/jsk_apc.git",
+    "source_ref": "master",
+    "archive_sha256": "b6cb77beea1a3b41314cfaece1d6924aeef491d10f7ab40bb05090526e4e9129"
+  },
+  {
+    "package": "eus_qpoases",
+    "source_id": "0c2fa9fed1f8284664fb5ab7",
+    "manifest": "jsk_control-release-upstream-0.1.6/eus_qpoases/manifest.xml",
+    "source_url": "https://github.com/tork-a/jsk_control-release.git",
+    "source_ref": "upstream/0.1.6",
+    "archive_sha256": "333a95f979d17391777fe1d92b3e08d57d4d48c41e348a5b11b2110103e0ced9"
+  },
+  {
+    "package": "project_description",
+    "source_id": "87d6b511ce03a85eaf244f2b",
+    "manifest": "clearpath_common-humble/clearpath_customization/project_description/package.xml",
+    "source_url": "https://github.com/clearpathrobotics/clearpath_common.git",
+    "source_ref": "humble",
+    "archive_sha256": "a2ae2e3b138d7851610c5af016e10e4c7409bdd3438003733ae72487758281d8"
+  },
+  {
+    "package": "leo_gz_worlds",
+    "source_id": "4d8d5f87b92a39c867977385",
+    "manifest": "leo_simulator-release-upstream-1.1.1/leo_gz_worlds/package.xml",
+    "source_url": "https://github.com/ros2-gbp/leo_simulator-release.git",
+    "source_ref": "upstream/1.1.1",
+    "archive_sha256": "28141a78645a50040d1d3b5ad00168f0dbc8fa1ccb80e9f91e3b7882a4cebd3d"
+  },
+  {
+    "package": "autoware_control_msgs",
+    "source_id": "4956cc33749eb10b2275f9e9",
+    "manifest": "autoware_msgs-main/autoware_control_msgs/package.xml",
+    "source_url": "https://github.com/autowarefoundation/autoware_msgs.git",
+    "source_ref": "main",
+    "archive_sha256": "28e40ee49e7d9ba21b7de57d2a6ed2cf7a8ec9995241617eeeb1d388b2446539"
+  },
+  {
+    "package": "turtlebot_android",
+    "source_id": "0949e1c11471797a02cb6544",
+    "manifest": "turtlebot_android-hydro-devel/package.xml",
+    "source_url": "https://github.com/turtlebot/turtlebot_android.git",
+    "source_ref": "hydro-devel",
+    "archive_sha256": "1994b2005524d37308d95723ac9723326fcbdaf9b12af3da48777ef0147b8e99"
+  },
+  {
+    "package": "ground_dds_ros_bridge",
+    "source_id": "79da01479698d35a6f7b2d83",
+    "manifest": "astrobee-master/communications/ground_dds_ros_bridge/package.xml",
+    "source_url": "https://github.com/nasa/astrobee.git",
+    "source_ref": "master",
+    "archive_sha256": "8899d4d2ac3ec7cc19357aea88d6330ed497a1a01175d4b1b0b8efada0fb550c"
+  },
+  {
+    "package": "squirrel_mhand_msgs",
+    "source_id": "541bb1dc7dc2efa525f5dd24",
+    "manifest": "squirrel_common-release-upstream-0.0.24/squirrel_mhand_msgs/package.xml",
+    "source_url": "https://github.com/squirrel-project/squirrel_common-release.git",
+    "source_ref": "upstream/0.0.24",
+    "archive_sha256": "d425807bad089199bd2524f6da58bef87023febfcae395ec3b1c127e52c9416b"
+  },
+  {
+    "package": "orbbec_description",
+    "source_id": "7c22ee90b926483b15935026",
+    "manifest": "OrbbecSDK_ROS2-2-main/orbbec_description/package.xml",
+    "source_url": "https://github.com/orbbec/OrbbecSDK_ROS2.git",
+    "source_ref": "v2-main",
+    "archive_sha256": "e77b8924cf29ee150aa3a43fefb91fd83cbdbf739dc83a977cc4be7911d14541"
+  },
+  {
+    "package": "rviz_2d_overlay_msgs",
+    "source_id": "fb31d1c66f723bf343967379",
+    "manifest": "rviz_2d_overlay_plugins-main/rviz_2d_overlay_msgs/package.xml",
+    "source_url": "https://github.com/teamspatzenhirn/rviz_2d_overlay_plugins.git",
+    "source_ref": "main",
+    "archive_sha256": "59650a07765a74091b73b7708a5cc0b60ffff8d0d8029e805f0ae5f549d99198"
+  },
+  {
+    "package": "bcr_arm_description",
+    "source_id": "feb1734818e7ae18686450f1",
+    "manifest": "bcr_arm-ros2/bcr_arm_description/package.xml",
+    "source_url": "https://github.com/blackcoffeerobotics/bcr_arm.git",
+    "source_ref": "ros2",
+    "archive_sha256": "58b553fa189f7105f2a4d03a035764f78df80b460f5bd3dfdc3c78fb8ce28dd3"
+  },
+  {
+    "package": "etsi_its_cam_coding",
+    "source_id": "67d288c2b84577db81e9c2e9",
+    "manifest": "etsi_its_messages-main/etsi_its_coding/etsi_its_cam_coding/package.xml",
+    "source_url": "https://github.com/ika-rwth-aachen/etsi_its_messages.git",
+    "source_ref": "main",
+    "archive_sha256": "5c1d49682f175d6cca02b0aa67cf40d9543cb3eaaf8358b1fe07f47ac32e57b8"
+  },
+  {
+    "package": "zstd_image_transport",
+    "source_id": "417ee17ecc06b92828350dda",
+    "manifest": "image_transport_plugins-jazzy/zstd_image_transport/package.xml",
+    "source_url": "https://github.com/ros-perception/image_transport_plugins.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "5b9ccb0c34b3e6114ef40b79b61ca71f72ba0e951efe9356ef59a3419f0f532d"
+  },
+  {
+    "package": "move_base",
+    "source_id": "c41d0d0857f2b7ca2d7e9d0c",
+    "manifest": "navigation-ardent/move_base/package.xml",
+    "source_url": "https://github.com/ros2/navigation.git",
+    "source_ref": "ardent",
+    "archive_sha256": "e97f9cdfb9a78cb65d877e5ec8f956e9d3cd7e647b6e6901c0497638205e1441"
+  },
+  {
+    "package": "turtlebot4_bringup",
+    "source_id": "c3e477bd02547c6cab78181c",
+    "manifest": "turtlebot4_robot-galactic/turtlebot4_bringup/package.xml",
+    "source_url": "https://github.com/turtlebot/turtlebot4_robot.git",
+    "source_ref": "galactic",
+    "archive_sha256": "9b2430cf82a97999beae80bb52b7ad58ae0ad84d881daac042654b4f2a1cffcc"
+  },
+  {
+    "package": "vrpn",
+    "source_id": "7b0b9c05f4d8933139780f0e",
+    "manifest": "vrpn-release-upstream-7.34.0/package.xml",
+    "source_url": "https://github.com/ros-drivers-gbp/vrpn-release.git",
+    "source_ref": "upstream/7.34.0",
+    "archive_sha256": "fa68234771769e482ea8a87fc969aada0be033527a4c1334ea11db2fa83827a3"
+  },
+  {
+    "package": "qc_buffer",
+    "source_id": "33b8e77fe461c688135903a1",
+    "manifest": "rosidl_buffer_backends-main/qc_buffer_backend/qc_buffer/package.xml",
+    "source_url": "https://github.com/ros2/rosidl_buffer_backends.git",
+    "source_ref": "main",
+    "archive_sha256": "868bfbb0f13d4ff5368f3c89e4348b11d2ffcd16a1e425f86772ea9fac1b42d0"
+  },
+  {
+    "package": "rm_common",
+    "source_id": "10883a85f761b4daca190878",
+    "manifest": "rm_control-master/rm_common/package.xml",
+    "source_url": "https://github.com/rm-controls/rm_control.git",
+    "source_ref": "master",
+    "archive_sha256": "9da2126d5e92aaad4b77802508c8585466754dcfdb58bcb63d8b60dd409cd206"
+  },
+  {
+    "package": "rocon_python_utils",
+    "source_id": "5da29bef9a08298936441501",
+    "manifest": "rocon_tools-release-0.1-indigo/rocon_python_utils/package.xml",
+    "source_url": "https://github.com/robotics-in-concert/rocon_tools.git",
+    "source_ref": "release/0.1-indigo",
+    "archive_sha256": "c7ebf21e110e2b0c1e1171872f7903a66af52013e53dc756b258994d2359d06d"
+  },
+  {
+    "package": "gazebo_video_monitor_msgs",
+    "source_id": "aa6007bf7f156a059046c60b",
+    "manifest": "gazebo_video_monitors-ros1/gazebo_video_monitor_msgs/package.xml",
+    "source_url": "https://github.com/nlamprian/gazebo_video_monitors.git",
+    "source_ref": "ros1",
+    "archive_sha256": "c669297d767a9721656e7ad0455c3b2c6d1f378ac94b3d2c1926837bdbca2df2"
+  },
+  {
+    "package": "lanelet2_python",
+    "source_id": "6b2ce3fa6446f4750ccb92db",
+    "manifest": "Lanelet2-master/lanelet2_python/package.xml",
+    "source_url": "https://github.com/fzi-forschungszentrum-informatik/lanelet2.git",
+    "source_ref": "master",
+    "archive_sha256": "f0b7e97f3e7b7a71eab8846431375c2e67e52927b0300474e4b6b207c509e67e"
+  },
+  {
+    "package": "etsi_its_denm_msgs",
+    "source_id": "67d288c2b84577db81e9c2e9",
+    "manifest": "etsi_its_messages-main/etsi_its_msgs/etsi_its_denm_msgs/package.xml",
+    "source_url": "https://github.com/ika-rwth-aachen/etsi_its_messages.git",
+    "source_ref": "main",
+    "archive_sha256": "5c1d49682f175d6cca02b0aa67cf40d9543cb3eaaf8358b1fe07f47ac32e57b8"
+  },
+  {
+    "package": "py_binding_tools",
+    "source_id": "94d06f309b283b7cbb36e603",
+    "manifest": "py_binding_tools-ros2/package.xml",
+    "source_url": "https://github.com/ros-planning/py_binding_tools.git",
+    "source_ref": "ros2",
+    "archive_sha256": "07ca03e81129cff2756e9d20d7e789e0876cc809d47cd44df69e38e8109aafa9"
+  },
+  {
+    "package": "atlas_v3_moveit_config",
+    "source_id": "3e38d1328d27c7553114c166",
+    "manifest": "moveit_robots-release-upstream-1.0.7/atlas_v3_moveit_config/package.xml",
+    "source_url": "https://github.com/ros-gbp/moveit_robots-release.git",
+    "source_ref": "upstream/1.0.7",
+    "archive_sha256": "2f9639e7750c02fb1d49701a68b1db77c82da409aa46deee16443e03050e51d0"
+  },
+  {
+    "package": "tf2_web_republisher_interfaces",
+    "source_id": "7eeb2bcc39df31bae0c8ffb3",
+    "manifest": "tf2_web_republisher-ros2/tf2_web_republisher_interfaces/package.xml",
+    "source_url": "https://github.com/RobotWebTools/tf2_web_republisher.git",
+    "source_ref": "ros2",
+    "archive_sha256": "8be0bdf1ab4e5e0331ed2c11e87ff7c515080ec43abd2185d5a72c19f2a4ab89"
+  },
+  {
+    "package": "sick_safevisionary_msgs",
+    "source_id": "77202473307dc9ba119f247b",
+    "manifest": "sick_safevisionary_ros1-main/sick_safevisionary_msgs/package.xml",
+    "source_url": "https://github.com/SICKAG/sick_safevisionary_ros1.git",
+    "source_ref": "main",
+    "archive_sha256": "eb8d1a2d06f6960bf628e2a5450abed680927cbb15a081089abfdba42e6c2275"
+  },
+  {
+    "package": "mrp2_slam",
+    "source_id": "119c863ff0c509c5e4040d5f",
+    "manifest": "mrp2_common-melodic-devel/mrp2_mapping/package.xml",
+    "source_url": "https://github.com/milvusrobotics/mrp2_common.git",
+    "source_ref": "melodic-devel",
+    "archive_sha256": "48487b85f16fd7c5191c03653b9663e319fb487ca6d4e302638272e2df25f1fa"
+  },
+  {
+    "package": "rosfoo",
+    "source_id": "dd567f5d78407d3243f4b973",
+    "manifest": "rospack-kinetic-devel/test/test/rosfoo/manifest.xml",
+    "source_url": "https://github.com/ros/rospack.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "cb2ad4136cb471195590316ece964a82701a683abb07569893e9ea2157245ecf"
+  },
+  {
+    "package": "rclc_lifecycle",
+    "source_id": "5ae237c65010dc2012331fc7",
+    "manifest": "rclc-release-upstream-5.0.1/rclc_lifecycle/package.xml",
+    "source_url": "https://github.com/ros2-gbp/rclc-release.git",
+    "source_ref": "upstream/5.0.1",
+    "archive_sha256": "5680b92b66501b9079612e45cd8638bf423e19c49b0b1c02dbae66099d2954b5"
+  },
+  {
+    "package": "sm_data_sharing_1",
+    "source_id": "be164e1b14b931c9829a9071",
+    "manifest": "SMACC2-jazzy/smacc2_sm_reference_library/sm_data_sharing_1/package.xml",
+    "source_url": "https://github.com/robosoft-ai/SMACC2.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "ad7e3ff338ef51eea92e42751fb9ba9d28d66dbd426ad427469fdd4a64684245"
+  },
+  {
+    "package": "hrpsys_ros_bridge",
+    "source_id": "3731865c85133468096d299d",
+    "manifest": "rtmros_common-master/hrpsys_ros_bridge/package.xml",
+    "source_url": "https://github.com/start-jsk/rtmros_common.git",
+    "source_ref": "master",
+    "archive_sha256": "8d79bea6908cb2fd13c944d70b85244d5485fc078ad32ca8c8a0c24cd827109a"
+  },
+  {
+    "package": "position_controllers",
+    "source_id": "1125d919533c053798dcb643",
+    "manifest": "ros_controllers-noetic-devel/position_controllers/package.xml",
+    "source_url": "https://github.com/ros-controls/ros_controllers.git",
+    "source_ref": "noetic-devel",
+    "archive_sha256": "a4849abfc585896e2d519520bc601c0750d7c0a1a2cdde643ba0758f127eef8c"
+  },
+  {
+    "package": "bz2_transport",
+    "source_id": "37e08d1bb1868e8502739930",
+    "manifest": "ros-message-transport-master/bz2_transport/manifest.xml",
+    "source_url": "https://github.com/ethz-asl/ros-message-transport.git",
+    "source_ref": "master",
+    "archive_sha256": "ef9b976f1a408807f52f8db9e9931792bca053935430a6631f766777472c0bb1"
+  },
+  {
+    "package": "aws_ros2_common",
+    "source_id": "fc65973805f21895f6cfcad0",
+    "manifest": "utils-ros2-master/aws_ros2_common/package.xml",
+    "source_url": "https://github.com/aws-robotics/utils-ros2.git",
+    "source_ref": "master",
+    "archive_sha256": "f61adeaeccdf1e46f773775dba538f6eea1c0e25ca334f03bd67d599cd9ae4cd"
+  },
+  {
+    "package": "rh_p12_rn_gui",
+    "source_id": "0f28805d096ec04e17380e7c",
+    "manifest": "RH-P12-RN-kinetic-devel/rh_p12_rn_gui/package.xml",
+    "source_url": "https://github.com/ROBOTIS-GIT/RH-P12-RN.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "949e3f07d867d758b34c87cb7ccde7b83cf838eb1a29e11b173c24c268e7f57a"
+  },
+  {
+    "package": "qglv_opencv",
+    "source_id": "42ba2c9366d65e2cb0cf9ab5",
+    "manifest": "qglv_toolkit-release-upstream-0.1.7/qglv_opencv/package.xml",
+    "source_url": "https://github.com/yujinrobot-release/qglv_toolkit-release.git",
+    "source_ref": "upstream/0.1.7",
+    "archive_sha256": "d8c8640fc366aadb403197697d1aac043e97d453f81c19b745a7395383e8b0da"
+  },
+  {
+    "package": "keyboard",
+    "source_id": "44e1ccc599b7de91761fd810",
+    "manifest": "ros-keyboard-master/package.xml",
+    "source_url": "https://github.com/lrse/ros-keyboard.git",
+    "source_ref": "master",
+    "archive_sha256": "7378949c748fa3c854e5b2a61f653506ba20b5ce0376a50e6f2dacbd95885044"
+  },
+  {
+    "package": "tobas_control_system",
+    "source_id": "d6c4be6fc2f01c2f5d0f45d6",
+    "manifest": "tobas-rolling/src/tobas_gui/tobas_control_system/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "rolling",
+    "archive_sha256": "60a4cc6c092eda023bace481cea76870dd074c561ea698b2c37131555a937111"
+  },
+  {
+    "package": "qml6_ros2_plugin",
+    "source_id": "597227b3e822628e73721839",
+    "manifest": "qml6_ros2_plugin-rolling/package.xml",
+    "source_url": "https://github.com/StefanFabian/qml6_ros2_plugin.git",
+    "source_ref": "rolling",
+    "archive_sha256": "06e04fb372a183c8325cc2de0e6208bc0cc897cfaddcc65cf10a46e872cef5fc"
+  },
+  {
+    "package": "rqt_py_trees",
+    "source_id": "d08829cc9de15e1e209aa112",
+    "manifest": "rqt_py_trees-release-0.3-melodic/package.xml",
+    "source_url": "https://github.com/stonier/rqt_py_trees.git",
+    "source_ref": "release/0.3-melodic",
+    "archive_sha256": "9dc9af4a5cd76df4de93aeb23b98e03cf927de116581d591e5686b5fbc295ea5"
+  },
+  {
+    "package": "ros_tutorials",
+    "source_id": "af47f7e909b464721dd85f73",
+    "manifest": "ros_tutorials-eloquent-devel/ros_tutorials/package.xml",
+    "source_url": "https://github.com/ros/ros_tutorials.git",
+    "source_ref": "eloquent-devel",
+    "archive_sha256": "73aa2723e9e695ab211c65c38ac6e48723bbf25ac986f6e2a75909a8a51989ac"
+  },
+  {
+    "package": "laser_joint_projector",
+    "source_id": "11dd85515b2e2c63de57c248",
+    "manifest": "pr2_calibration-release-upstream-1.0.9/laser_joint_projector/package.xml",
+    "source_url": "https://github.com/UNR-RoboticsResearchLab/pr2_calibration-release.git",
+    "source_ref": "upstream/1.0.9",
+    "archive_sha256": "43b324c74ecdd91c523048c5482fb8425304ac653de630e92c6a6be39297e1da"
+  },
+  {
+    "package": "meta",
+    "source_id": "454fef6f0ac0fae465bb726b",
+    "manifest": "PlotJuggler-main/packaging/installer/packages/io.plotjuggler.application/meta/package.xml",
+    "source_url": "https://github.com/facontidavide/PlotJuggler.git",
+    "source_ref": "main",
+    "archive_sha256": "48a2f2b143e2d56184cd11ac9fca1f6c77d77b9380cc6745257a89a6bbb1eb00"
+  },
+  {
+    "package": "pcl",
+    "source_id": "fda5869007467ef885b54985",
+    "manifest": "pcl-release-release-hydro-pcl/package.xml",
+    "source_url": "https://github.com/ros-gbp/pcl-release.git",
+    "source_ref": "release/hydro/pcl",
+    "archive_sha256": "ec3d7fc0d1734e59bbc22f6e00ecf05c4ca4883592520319be093f4cef457786"
+  },
+  {
+    "package": "rosbridge_suite",
+    "source_id": "a4e6ce6a519819ef3d19bd61",
+    "manifest": "rosbridge_suite-release-upstream-0.11.13/rosbridge_suite/package.xml",
+    "source_url": "https://github.com/RobotWebTools-release/rosbridge_suite-release.git",
+    "source_ref": "upstream/0.11.13",
+    "archive_sha256": "6c8b29dc79c652b26aefdb9fa381c51029a81272109f9f6d8bd14034288e1494"
+  },
+  {
+    "package": "ament_cmake_gtest",
+    "source_id": "920e5387c774a9a191aa16ba",
+    "manifest": "ament_cmake-humble/ament_cmake_gtest/package.xml",
+    "source_url": "https://github.com/ament/ament_cmake.git",
+    "source_ref": "humble",
+    "archive_sha256": "3b13ff02f4a96bf4d2025f8074e25f276a31c34b38be07e31abaf67136be2322"
+  },
+  {
+    "package": "optris_drivers",
+    "source_id": "013301c2984bfb686ba957a8",
+    "manifest": "optris_drivers-kinetic-devel/package.xml",
+    "source_url": "https://github.com/evocortex/optris_drivers.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "b2cb0c393540a2373b60710393cdaf9e54c22875246428c19ff9e400d7c82fe1"
+  },
+  {
+    "package": "off_highway_sensor_drivers",
+    "source_id": "2d05e9223f14405856a26fda",
+    "manifest": "off_highway_sensor_drivers-rolling-devel/off_highway_sensor_drivers/package.xml",
+    "source_url": "https://github.com/bosch-engineering/off_highway_sensor_drivers.git",
+    "source_ref": "rolling-devel",
+    "archive_sha256": "8791b1f8d43581139faf938d34757c9502df41058d1860d741e14999a99f55d5"
+  },
+  {
+    "package": "unique_identifier",
+    "source_id": "5331782373782db562f3de09",
+    "manifest": "unique_identifier-master/unique_identifier/package.xml",
+    "source_url": "https://github.com/ros-geographic-info/unique_identifier.git",
+    "source_ref": "master",
+    "archive_sha256": "c77314071ecb08b299f6e56cfd3264f4adaba9edff91e847385ce02f67d5a6f0"
+  },
+  {
+    "package": "rqt_joint_trajectory_plot",
+    "source_id": "b49ffea790fa4bc170fc64af",
+    "manifest": "rqt_joint_trajectory_plot-release-upstream-0.0.4/package.xml",
+    "source_url": "https://github.com/tork-a/rqt_joint_trajectory_plot-release.git",
+    "source_ref": "upstream/0.0.4",
+    "archive_sha256": "d62a925e5989045554d64769bebd9b18a686338fb5d6416fa99388b79492bc5e"
+  },
+  {
+    "package": "rh_p12_rn",
+    "source_id": "0f28805d096ec04e17380e7c",
+    "manifest": "RH-P12-RN-kinetic-devel/rh_p12_rn/package.xml",
+    "source_url": "https://github.com/ROBOTIS-GIT/RH-P12-RN.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "949e3f07d867d758b34c87cb7ccde7b83cf838eb1a29e11b173c24c268e7f57a"
+  },
+  {
+    "package": "psdk_wrapper",
+    "source_id": "db70354aab6f6876a71d6d04",
+    "manifest": "psdk_ros2-main/psdk_wrapper/package.xml",
+    "source_url": "https://github.com/umdlife/psdk_ros2.git",
+    "source_ref": "main",
+    "archive_sha256": "e106473b2e1378170115a64ad3315b99063e96b187a68f76ca73531ae383f484"
+  },
+  {
+    "package": "mola_state_estimation_smoother",
+    "source_id": "713751492e6090a6aaa990b0",
+    "manifest": "mola_state_estimation-develop/mola_state_estimation_smoother/package.xml",
+    "source_url": "https://github.com/MOLAorg/mola_state_estimation.git",
+    "source_ref": "develop",
+    "archive_sha256": "a774e6d5f203f62fe853243fccbbd473696818364074f610bb06545ba02b7ddf"
+  },
+  {
+    "package": "ecl_formatters",
+    "source_id": "089d5d7d59644f26af6b9b48",
+    "manifest": "ecl_core-release-upstream-0.60.8/ecl_formatters/package.xml",
+    "source_url": "https://github.com/yujinrobot-release/ecl_core-release.git",
+    "source_ref": "upstream/0.60.8",
+    "archive_sha256": "649136bf3ea3125b54562b3b4ab3f1161c639fd47f2c1e372898cd3d6bdcc5f2"
+  },
+  {
+    "package": "yujin_yrl_package",
+    "source_id": "0980e4054ec3617211b00e31",
+    "manifest": "yujin_lidar-master/yujin_lidar_rosmelodic_driver_ubuntu1804/yujin_yrl_package/package.xml",
+    "source_url": "https://github.com/yujinrobot/yujin_lidar.git",
+    "source_ref": "master",
+    "archive_sha256": "4c622d34f4a111176de1b734f2dd38c4cb18b7c0e545e06891acfca4708166e6"
+  },
+  {
+    "package": "mola_rgbd_slam",
+    "source_id": "d3ac60dde33d5cd82503e235",
+    "manifest": "mola_vision-develop/mola_rgbd_slam/package.xml",
+    "source_url": "https://github.com/MOLAorg/mola_vision.git",
+    "source_ref": "develop",
+    "archive_sha256": "1b1778a853e1ff5ee669c65f998a1b4b448576e181cdf0fd4fedc7a09096c7a0"
+  },
+  {
+    "package": "orb_slam2_with_maps-odom",
+    "source_id": "a12cc69bc6383bf87963914f",
+    "manifest": "ORB_SLAM2_With_MAPS_ODOM-master/package.xml",
+    "source_url": "https://github.com/Inspur-ROS/ORB_SLAM2_WITH_MAPS_ODOM.git",
+    "source_ref": "master",
+    "archive_sha256": "665b16d7213cb5571938656ec5e7cb537c457751d34ff36ccf512c24b2383f65"
+  },
+  {
+    "package": "problib",
+    "source_id": "5f6bd293c18ee9035017512a",
+    "manifest": "wire-master/problib/package.xml",
+    "source_url": "https://github.com/tue-robotics/wire.git",
+    "source_ref": "master",
+    "archive_sha256": "d76435a1ebc2cf1606dbb7d152d8c4ceac90b2e1f2efdc51b9a67f9b72e2f9ce"
+  },
+  {
+    "package": "ecl_threads",
+    "source_id": "089d5d7d59644f26af6b9b48",
+    "manifest": "ecl_core-release-upstream-0.60.8/ecl_threads/package.xml",
+    "source_url": "https://github.com/yujinrobot-release/ecl_core-release.git",
+    "source_ref": "upstream/0.60.8",
+    "archive_sha256": "649136bf3ea3125b54562b3b4ab3f1161c639fd47f2c1e372898cd3d6bdcc5f2"
+  },
+  {
+    "package": "kobuki_ros_interfaces",
+    "source_id": "1356dfb9cfe16412a562fcfa",
+    "manifest": "kobuki_ros_interfaces-release-1.0.x/package.xml",
+    "source_url": "https://github.com/kobuki-base/kobuki_ros_interfaces.git",
+    "source_ref": "release/1.0.x",
+    "archive_sha256": "378a4c05f39e9f69de01ef7610fb8875bf10d5ebeab1f7b0f8cf93d56e781f10"
+  },
+  {
+    "package": "tf2_ros_py",
+    "source_id": "1fa93863898dc827416cabb7",
+    "manifest": "geometry2-release-upstream-0.31.8/tf2_ros_py/package.xml",
+    "source_url": "https://github.com/ros2-gbp/geometry2-release.git",
+    "source_ref": "upstream/0.31.8",
+    "archive_sha256": "335e8c74f74a361fb54c52088d17827c863d8b1b4abb6b8c5740ceaba62e708a"
+  },
+  {
+    "package": "cob_hardware_config",
+    "source_id": "c14979eb5ea67ede23cdbbbf",
+    "manifest": "cob_robots-indigo_dev/cob_hardware_config/package.xml",
+    "source_url": "https://github.com/ipa320/cob_robots.git",
+    "source_ref": "indigo_dev",
+    "archive_sha256": "052fc1a9ccc6c7643f9b25764bd0a2a3d63ef78e34aed9e5f2827e88e1d5dd29"
+  },
+  {
+    "package": "autoware_auto_planning_msgs",
+    "source_id": "d96e9be3454a318912236576",
+    "manifest": "autoware_auto_msgs-master-818d3587d41728422b768898e9c8d2e55bad9e5f/autoware_auto_planning_msgs/package.xml",
+    "source_url": "https://gitlab.com/autowarefoundation/autoware.auto/autoware_auto_msgs.git",
+    "source_ref": "master",
+    "archive_sha256": "cc6e0aceb04d275380db16045c0f7a98e45e46682cd9a3d6bf523ad584e5fb52"
+  },
+  {
+    "package": "sm_cl_ros2_timer_unit_test_1",
+    "source_id": "711247bf8376d26883b47c75",
+    "manifest": "SMACC2-humble/smacc2_sm_reference_library/sm_cl_ros2_timer_unit_test_1/package.xml",
+    "source_url": "https://github.com/robosoft-ai/SMACC2.git",
+    "source_ref": "humble",
+    "archive_sha256": "2d2c30d40ef0f59045568f91efdefb8293f08bc11d0da58800f68904d9965a82"
+  },
+  {
+    "package": "adhoc_communication",
+    "source_id": "8de606246273a27cd40c2afc",
+    "manifest": "aau_multi_robot-hydro/adhoc_communication/package.xml",
+    "source_url": "https://github.com/aau-ros/aau_multi_robot.git",
+    "source_ref": "hydro",
+    "archive_sha256": "cfc0100abbbd735b37e5de8a1a214c76bc7cc9b5db0af79273697028bf2d7612"
+  },
+  {
+    "package": "maxwell_navigation",
+    "source_id": "0f41fedaf3d4fa32f1718d4b",
+    "manifest": "maxwell-indigo-devel/maxwell_navigation/package.xml",
+    "source_url": "https://github.com/mikeferguson/maxwell.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "379d79a1252edebea197112071428023ea9b20b30df3aed3062e718a72b249e3"
+  },
+  {
+    "package": "pybullet_fleet_rmf",
+    "source_id": "7ff6df05d1e39136036147f8",
+    "manifest": "PyBulletFleet-release-jazzy-0.1.0/ros2_bridge/pybullet_fleet_rmf/package.xml",
+    "source_url": "https://github.com/yuokamoto/PyBulletFleet.git",
+    "source_ref": "release/jazzy-0.1.0",
+    "archive_sha256": "e6e16b8ab24753e84687f99aa44c5e687808af8371b61d900e96b9c642d819a2"
+  },
+  {
+    "package": "uwb_hardware_driver",
+    "source_id": "d5254e70bbafe219bfd4248e",
+    "manifest": "uwb_hardware_driver-master/package.xml",
+    "source_url": "https://github.com/inomuh/uwb_hardware_driver.git",
+    "source_ref": "master",
+    "archive_sha256": "2ede390597b49abd58de1f2871315c7600634c217a6e94683912d0b6798a7dc5"
+  },
+  {
+    "package": "robotiq_modbus_rtu",
+    "source_id": "c6af05f6be4990f565cd0bd7",
+    "manifest": "robotiq-kinetic-devel/robotiq_modbus_rtu/package.xml",
+    "source_url": "https://github.com/ros-industrial/robotiq.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "9ff3038d59411dbf9f065a44d18d542a77858d315a67a6fa28a017adf60b810a"
+  },
+  {
+    "package": "tf2_eigen_kdl",
+    "source_id": "1fa93863898dc827416cabb7",
+    "manifest": "geometry2-release-upstream-0.31.8/tf2_eigen_kdl/package.xml",
+    "source_url": "https://github.com/ros2-gbp/geometry2-release.git",
+    "source_ref": "upstream/0.31.8",
+    "archive_sha256": "335e8c74f74a361fb54c52088d17827c863d8b1b4abb6b8c5740ceaba62e708a"
+  },
+  {
+    "package": "octomap_msgs",
+    "source_id": "c03296f09b6f219e9f6e6c77",
+    "manifest": "octomap_msgs-groovy-devel/package.xml",
+    "source_url": "https://github.com/OctoMap/octomap_msgs.git",
+    "source_ref": "groovy-devel",
+    "archive_sha256": "4f5aec3f5eab47617ddd47c92f3b94e2cf924f66b01e9cceb88c99d766fcec9f"
+  },
+  {
+    "package": "xiaoqiang_freenect_launch",
+    "source_id": "3f36bb07a7904a8aea712818",
+    "manifest": "xiaoqiang-kinetic-devel/xiaoqiang_freenect/xiaoqiang_freenect_launch/package.xml",
+    "source_url": "https://github.com/bluewhalerobot/xiaoqiang.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "f8eb6ffbf2d0afc065ecddc2a229e92e4bb04c94ae8e4a2428f86ce92e52f6c8"
+  },
+  {
+    "package": "google_cloud_texttospeech",
+    "source_id": "51ac56861f7d72fb570c15c5",
+    "manifest": "jsk_3rdparty-release-upstream-2.1.31/3rdparty/google_cloud_texttospeech/package.xml",
+    "source_url": "https://github.com/tork-a/jsk_3rdparty-release.git",
+    "source_ref": "upstream/2.1.31",
+    "archive_sha256": "5786def5923db1d521625a9252e60efaf968346ca2c8f6ff9982b3cf296d482b"
+  },
+  {
+    "package": "ublox_serialization",
+    "source_id": "d2734f18f436b7cb9e6b5649",
+    "manifest": "ublox-HEAD/ublox_serialization/package.xml",
+    "source_url": "https://github.com/tu-darmstadt-ros-pkg/ublox.git",
+    "source_ref": "HEAD",
+    "archive_sha256": "2a20196057bea9b7252338391c321cb2c3d8dd1e539560d93e635d356ff035de"
+  },
+  {
+    "package": "rmf_visualization_msgs",
+    "source_id": "dd9a2a14ccf74031d330a27e",
+    "manifest": "rmf_visualization_msgs-kilted/rmf_visualization_msgs/package.xml",
+    "source_url": "https://github.com/open-rmf/rmf_visualization_msgs.git",
+    "source_ref": "kilted",
+    "archive_sha256": "6917668e9795c9e8214024436149eda1094097ac11797c0adfffb2b40c8bf4d1"
+  },
+  {
+    "package": "jsk_fetch_accessories",
+    "source_id": "2d0b4f8db273abc842bb1375",
+    "manifest": "jsk_robot-master/jsk_fetch_robot/jsk_fetch_accessories/package.xml",
+    "source_url": "https://github.com/jsk-ros-pkg/jsk_robot.git",
+    "source_ref": "master",
+    "archive_sha256": "a98dbedb176f8672c1510ff3a387df1cd18f2f530d7f204f652b3a7ed8b559ff"
+  },
+  {
+    "package": "rtest",
+    "source_id": "4d04e647a2f8ee44d42cdab6",
+    "manifest": "rtest-kilted/rtest/package.xml",
+    "source_url": "https://github.com/Beam-and-Spyrosoft/rtest.git",
+    "source_ref": "kilted",
+    "archive_sha256": "df0297fce1231e8e46465aab2487f1fc4b271d1682edc68c72cad668eca77d0c"
+  },
+  {
+    "package": "tobas_examples_py",
+    "source_id": "d6c4be6fc2f01c2f5d0f45d6",
+    "manifest": "tobas-rolling/src/tobas_examples/tobas_examples_py/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "rolling",
+    "archive_sha256": "60a4cc6c092eda023bace481cea76870dd074c561ea698b2c37131555a937111"
+  },
+  {
+    "package": "lslidar_n301_msgs",
+    "source_id": "b499fa392e4f9713b19ca8f1",
+    "manifest": "LSN301-master/lslidar_n301/lslidar_n301_msgs/package.xml",
+    "source_url": "https://github.com/leishen-lidar/LSN301.git",
+    "source_ref": "master",
+    "archive_sha256": "7bf291c9363554f349c4b21c0f67877ac38414422b5e356332e933befc6a932c"
+  },
+  {
+    "package": "tobas_kdl",
+    "source_id": "d6c4be6fc2f01c2f5d0f45d6",
+    "manifest": "tobas-rolling/src/tobas_core/tobas_common/tobas_kdl/package.xml",
+    "source_url": "https://github.com/TobasFlightControl/tobas.git",
+    "source_ref": "rolling",
+    "archive_sha256": "60a4cc6c092eda023bace481cea76870dd074c561ea698b2c37131555a937111"
+  },
+  {
+    "package": "cl_generic_sensor",
+    "source_id": "be164e1b14b931c9829a9071",
+    "manifest": "SMACC2-jazzy/smacc2_client_library/cl_generic_sensor/package.xml",
+    "source_url": "https://github.com/robosoft-ai/SMACC2.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "ad7e3ff338ef51eea92e42751fb9ba9d28d66dbd426ad427469fdd4a64684245"
+  },
+  {
+    "package": "ros1_pytemplate",
+    "source_id": "cf20e660ceef6eff0e663f05",
+    "manifest": "ros1_template-master/ros1_pytemplate/package.xml",
+    "source_url": "https://github.com/pyros-dev/ros1_template.git",
+    "source_ref": "master",
+    "archive_sha256": "e3becf582061a20b52f6ddf5e47f27e08132d05f4d0c9bf018bb4f4127f5e691"
+  },
+  {
+    "package": "points_preprocessor",
+    "source_id": "991d39702d6543580bb34296",
+    "manifest": "core_perception-points_preprocessor_release/points_preprocessor/package.xml",
+    "source_url": "https://github.com/nobleo/core_perception.git",
+    "source_ref": "points_preprocessor_release",
+    "archive_sha256": "b951cca3b6332bd0194036b1e2ccc6b116ca601c43ea11f614a859f8918683b8"
+  },
+  {
+    "package": "wave_gazebo_plugins",
+    "source_id": "c69a2bde004e6dc5848bca73",
+    "manifest": "vrx-release-upstream-1.3.0/wave_gazebo_plugins/package.xml",
+    "source_url": "https://github.com/ros-gbp/vrx-release.git",
+    "source_ref": "upstream/1.3.0",
+    "archive_sha256": "666e483e56a16ab4bd0826ef2311c172d40db0ddadfb40fe985236e685bef5dd"
+  },
+  {
+    "package": "rrt_exploration",
+    "source_id": "17a6b1efddd1e1b6bbd142fe",
+    "manifest": "rrt_exploration-indigo-devel/package.xml",
+    "source_url": "https://github.com/hasauino/rrt_exploration.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "5e9bb5a13c87ba8c586da5255adabaaddd838466c8c578f2748960fc5be77555"
+  },
+  {
+    "package": "asctec_hl_firmware",
+    "source_id": "1de03882e2a50e3ffbef3da5",
+    "manifest": "asctec_mav_framework-master/asctec_hl_firmware/package.xml",
+    "source_url": "https://github.com/ethz-asl/asctec_mav_framework.git",
+    "source_ref": "master",
+    "archive_sha256": "a6f396d545629ba1ccbcf2f120de5ab0497ba0ead01ec341a5ffa3625991c0cb"
+  },
+  {
+    "package": "csapex_util",
+    "source_id": "51f8dd2427f9211290a21d7c",
+    "manifest": "csapex-master/src/csapex_util/package.xml",
+    "source_url": "https://github.com/cogsys-tuebingen/csapex.git",
+    "source_ref": "master",
+    "archive_sha256": "f36c8439c5683126c79b81e071d42c490a76d835853ace4ad32156106d108240"
+  },
+  {
+    "package": "drchubo",
+    "source_id": "43357b39409309371b90c1e1",
+    "manifest": "ros-dartsim-release-upstream-6.3.1/data/urdf/drchubo/package.xml",
+    "source_url": "https://github.com/dartsim/ros-dartsim-release.git",
+    "source_ref": "upstream/6.3.1",
+    "archive_sha256": "e60542f06d1cff83cff1513bbbace6e82dfcdf19cdbf4bb8fac17a7917ef05fc"
+  },
+  {
+    "package": "rmw_gurumdds_cpp",
+    "source_id": "9e93d2723ec321a511887b49",
+    "manifest": "rmw_gurumdds-dashing/rmw_gurumdds_cpp/package.xml",
+    "source_url": "https://github.com/ros2/rmw_gurumdds.git",
+    "source_ref": "dashing",
+    "archive_sha256": "a753d85dc1ff32830c8ce69c7d789b9b9309ea202b66d266b816999b3917b5e7"
+  },
+  {
+    "package": "moose_msgs",
+    "source_id": "a11573d1a31d9e95e6ecfa98",
+    "manifest": "moose-master/moose_msgs/package.xml",
+    "source_url": "https://github.com/moose-cpr/moose.git",
+    "source_ref": "master",
+    "archive_sha256": "b7ed8e09bb2cfceaa5eafdf4d8ff6052cc73a6643de1fc152aaeaefbfb81226b"
+  },
+  {
+    "package": "dynamixel_interface",
+    "source_id": "23a7dcc3b7b01005963f41a0",
+    "manifest": "dynamixel_interface-noetic-devel/package.xml",
+    "source_url": "https://github.com/csiro-robotics/dynamixel_interface.git",
+    "source_ref": "noetic-devel",
+    "archive_sha256": "c35087ed7bf2e4e37f464ffeb8c3edb269c246cecf8c488afb355561410e457b"
+  },
+  {
+    "package": "audio_play",
+    "source_id": "f3138472b9b20e153e380d72",
+    "manifest": "audio_common-release-upstream-0.3.17/audio_play/package.xml",
+    "source_url": "https://github.com/ros-gbp/audio_common-release.git",
+    "source_ref": "upstream/0.3.17",
+    "archive_sha256": "4237c42bdfec13fe8221cc7477214e4ba01f399ce6b1bd0bc0a6783d53cc924b"
+  },
+  {
+    "package": "rosidl_generator_ada",
+    "source_id": "82e35e464e2e3b3566d8e4b3",
+    "manifest": "rosidl_generator_ada-foxy/package.xml",
+    "source_url": "https://github.com/ada-ros/rosidl_generator_ada.git",
+    "source_ref": "foxy",
+    "archive_sha256": "723bf04365f81ac62c6c91715497a0130b2066817aaaf6482e6c804c6c70a056"
+  },
+  {
+    "package": "roscompile",
+    "source_id": "e08a0751a0c5f60c12503d36",
+    "manifest": "roscompile-main/roscompile/package.xml",
+    "source_url": "https://github.com/DLu/roscompile.git",
+    "source_ref": "main",
+    "archive_sha256": "07e3aa07efeefe90e735acc6053bbbd7a588abe8ace402b974783e76e3dd824e"
+  },
+  {
+    "package": "openni_camera",
+    "source_id": "745a702a328b2b48cb2b2c5d",
+    "manifest": "openni_camera-release-upstream-1.11.0/openni_camera/package.xml",
+    "source_url": "https://github.com/ros-gbp/openni_camera-release.git",
+    "source_ref": "upstream/1.11.0",
+    "archive_sha256": "4054323aebc03930d4a016adbbdc823323574c5fb82a1a583922d2e29fd8d544"
+  },
+  {
+    "package": "cram_test_utilities",
+    "source_id": "740581bb56f64bffda938420",
+    "manifest": "cram_core-master/cram_test_utilities/package.xml",
+    "source_url": "https://github.com/cram-code/cram_core.git",
+    "source_ref": "master",
+    "archive_sha256": "477eb4eb6e51fa20a7a87343c01cbc67f1754ab7d18580f413c118fd23f375e6"
+  },
+  {
+    "package": "gripper_action_controller",
+    "source_id": "1125d919533c053798dcb643",
+    "manifest": "ros_controllers-noetic-devel/gripper_action_controller/package.xml",
+    "source_url": "https://github.com/ros-controls/ros_controllers.git",
+    "source_ref": "noetic-devel",
+    "archive_sha256": "a4849abfc585896e2d519520bc601c0750d7c0a1a2cdde643ba0758f127eef8c"
+  },
+  {
+    "package": "staubli_tx60_gazebo",
+    "source_id": "ae37a8e26f4dfc247f7aa942",
+    "manifest": "staubli_experimental-kinetic-devel/staubli_tx60_gazebo/package.xml",
+    "source_url": "https://github.com/ros-industrial/staubli_experimental.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "0841c29b99db2bae13731ccde61f77c8f4476ad9684e0a18e4f4aaab96c2402c"
+  },
+  {
+    "package": "uuid_msgs",
+    "source_id": "5331782373782db562f3de09",
+    "manifest": "unique_identifier-master/uuid_msgs/package.xml",
+    "source_url": "https://github.com/ros-geographic-info/unique_identifier.git",
+    "source_ref": "master",
+    "archive_sha256": "c77314071ecb08b299f6e56cfd3264f4adaba9edff91e847385ce02f67d5a6f0"
+  },
+  {
+    "package": "tesseract",
+    "source_id": "e5f8774d3f6391f07c74bf31",
+    "manifest": "tesseract-master/package.xml",
+    "source_url": "https://github.com/ros-industrial-consortium/tesseract.git",
+    "source_ref": "master",
+    "archive_sha256": "1e3e18e42596d51fcdf60f759b236d57460be946c13f258063fe7a911a42ba5c"
+  },
+  {
+    "package": "pid_controller",
+    "source_id": "b45e1e01e86491bbe9d3ca68",
+    "manifest": "ros2_controllers-humble/pid_controller/package.xml",
+    "source_url": "https://github.com/ros-controls/ros2_controllers.git",
+    "source_ref": "humble",
+    "archive_sha256": "044aa6311ccea516bb7119698e2db1619939c3962e650ebbd3ee1430605ced56"
+  },
+  {
+    "package": "rtabmap_util",
+    "source_id": "298e7481d70da3e18bd6f88d",
+    "manifest": "rtabmap_ros-lyrical-devel/rtabmap_util/package.xml",
+    "source_url": "https://github.com/introlab/rtabmap_ros.git",
+    "source_ref": "lyrical-devel",
+    "archive_sha256": "ae3a893d459b4fa59d200f026fd7b4bf79485e96008f405deb7c3bc33d8ab5b3"
+  },
+  {
+    "package": "sm_nav2_gazebo_test_2",
+    "source_id": "be164e1b14b931c9829a9071",
+    "manifest": "SMACC2-jazzy/smacc2_sm_reference_library/sm_nav2_gazebo_test_2/package.xml",
+    "source_url": "https://github.com/robosoft-ai/SMACC2.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "ad7e3ff338ef51eea92e42751fb9ba9d28d66dbd426ad427469fdd4a64684245"
+  },
+  {
+    "package": "tutorial_examples",
+    "source_id": "79da01479698d35a6f7b2d83",
+    "manifest": "astrobee-master/localization/tutorial_examples/package.xml",
+    "source_url": "https://github.com/nasa/astrobee.git",
+    "source_ref": "master",
+    "archive_sha256": "8899d4d2ac3ec7cc19357aea88d6330ed497a1a01175d4b1b0b8efada0fb550c"
+  },
+  {
+    "package": "applanix_driver",
+    "source_id": "019673872724f99019fa2e44",
+    "manifest": "applanix_driver-hydro-devel/applanix_driver/package.xml",
+    "source_url": "https://github.com/clearpathrobotics/applanix_driver.git",
+    "source_ref": "hydro-devel",
+    "archive_sha256": "934fecc5c4218d1dcb4f65a2c5f301cf3dcbcba195ae97b9ddd4209dccd12d7e"
+  },
+  {
+    "package": "sr_edc_ethercat_drivers",
+    "source_id": "09487a5fd5bfe2ea65e6e1ed",
+    "manifest": "sr-ros-interface-ethercat-release-upstream-1.4.0/sr_edc_ethercat_drivers/package.xml",
+    "source_url": "https://github.com/shadow-robot/sr-ros-interface-ethercat-release.git",
+    "source_ref": "upstream/1.4.0",
+    "archive_sha256": "cb64e1856cd49b797859ff28b3e89f858f55d04f30bcc148b17d81307692219d"
+  },
+  {
+    "package": "dlut_place_recognition",
+    "source_id": "bab5ce5278e82710e53d13b7",
+    "manifest": "dlut_smartrob-groovy-devel/dlut_place_recognition/manifest.xml",
+    "source_url": "https://github.com/ZhuangYanDLUT/dlut_smartrob.git",
+    "source_ref": "groovy-devel",
+    "archive_sha256": "0adb30b88c9838e3911a5d1e8aff4678bac0b2672fbb11ce83f0f63cc01110d8"
+  },
+  {
+    "package": "rtshell_core",
+    "source_id": "6506a33332c299edc78da98c",
+    "manifest": "rtshell_core-master/rtshell_core/package.xml",
+    "source_url": "https://github.com/start-jsk/rtshell_core.git",
+    "source_ref": "master",
+    "archive_sha256": "a1e64d8b957ebba235f56eddda1a27c32de3e31659409bf43139c70ee7d592c6"
+  },
+  {
+    "package": "rmf_traffic_editor_test_maps",
+    "source_id": "e3923586111915e185f6b969",
+    "manifest": "rmf_traffic_editor-iron/rmf_traffic_editor_test_maps/package.xml",
+    "source_url": "https://github.com/open-rmf/rmf_traffic_editor.git",
+    "source_ref": "iron",
+    "archive_sha256": "f9fc670302f3b3d26dc88ae290eaed01022576bf5245863ae3f4ce9a3878bfc8"
+  },
+  {
+    "package": "camera_umd",
+    "source_id": "a4ad6dcb7ddb6bb854a3d7fd",
+    "manifest": "camera_umd-master/camera_umd/package.xml",
+    "source_url": "https://github.com/ktossell/camera_umd.git",
+    "source_ref": "master",
+    "archive_sha256": "64b60cc977c66475e2a00060bd000c7c9ff1ade66eda580fdeac3440ec8cae5e"
+  },
+  {
+    "package": "husarion_ugv_teleop",
+    "source_id": "4a19d033fc684ea6bc3de0b4",
+    "manifest": "husarion_ugv_ros-ros2/husarion_ugv_teleop/package.xml",
+    "source_url": "https://github.com/husarion/husarion_ugv_ros.git",
+    "source_ref": "ros2",
+    "archive_sha256": "5504e54e28e715a6131bd850660b94a30c9745c448d80848d555f52675ee5e72"
+  },
+  {
+    "package": "dnn_detect",
+    "source_id": "8d030a512aa3811da4cb13df",
+    "manifest": "dnn_detect-release-upstream-0.1.0/package.xml",
+    "source_url": "https://github.com/UbiquityRobotics-release/dnn_detect-release.git",
+    "source_ref": "upstream/0.1.0",
+    "archive_sha256": "6e41aeb0134b2d42a4840fd58baed7f284d29c432ebfe2ae96ff5a70ca77e4e4"
+  },
+  {
+    "package": "tinyxml2_vendor",
+    "source_id": "b431be7126b87e9c97067f40",
+    "manifest": "tinyxml2_vendor-bouncy/package.xml",
+    "source_url": "https://github.com/ros2/tinyxml2_vendor.git",
+    "source_ref": "bouncy",
+    "archive_sha256": "8598e61740d687ab4d73d53177358f38e195e10eb21ca6811560294bebe0ca5e"
+  },
+  {
+    "package": "pocketsphinx",
+    "source_id": "79480b18b03351eb446a3cb1",
+    "manifest": "pocketsphinx-groovy-devel/package.xml",
+    "source_url": "https://github.com/mikeferguson/pocketsphinx.git",
+    "source_ref": "groovy-devel",
+    "archive_sha256": "76336879829d935873e9c496cb4c157067d1b08c5130c5983c028fa6634d1f69"
+  },
+  {
+    "package": "python3_torch_cuda_vendor",
+    "source_id": "33b8e77fe461c688135903a1",
+    "manifest": "rosidl_buffer_backends-main/torch_vendor/python3_torch_cuda_vendor/package.xml",
+    "source_url": "https://github.com/ros2/rosidl_buffer_backends.git",
+    "source_ref": "main",
+    "archive_sha256": "868bfbb0f13d4ff5368f3c89e4348b11d2ffcd16a1e425f86772ea9fac1b42d0"
+  },
+  {
+    "package": "edrone_server",
+    "source_id": "9180c165e3da6ac993fdad33",
+    "manifest": "eyantra_drone-master/edrone_server/package.xml",
+    "source_url": "https://github.com/simmubhangu/eyantra_drone.git",
+    "source_ref": "master",
+    "archive_sha256": "8920538ab4cc4bde08840d5e7ce43954094cca2a5254980205553785106e0611"
+  },
+  {
+    "package": "mesh_navigation",
+    "source_id": "51d285f15aee55fdb96f9a95",
+    "manifest": "mesh_navigation-release-upstream-1.0.1/mesh_navigation/package.xml",
+    "source_url": "https://github.com/uos-gbp/mesh_navigation-release.git",
+    "source_ref": "upstream/1.0.1",
+    "archive_sha256": "f09985a3a9585b972c07f273ce25bf35a0533741cc8475e21b97be40f0bded68"
+  },
+  {
+    "package": "derived_object_msgs",
+    "source_id": "a3552c3843b0e48d5b9286c8",
+    "manifest": "astuff_sensor_msgs-release-upstream-3.0.1/derived_object_msgs/package.xml",
+    "source_url": "https://github.com/astuff/astuff_sensor_msgs-release.git",
+    "source_ref": "upstream/3.0.1",
+    "archive_sha256": "d15b1e10385b679a79e70856288a093306c89faced43f2587be7cb6a3302e9c3"
+  },
+  {
+    "package": "tensorflow_ros_rqt",
+    "source_id": "287b30d6e3b02055ec437e86",
+    "manifest": "image_recognition-release-upstream-0.0.4/tensorflow_ros_rqt/package.xml",
+    "source_url": "https://github.com/tue-robotics/image_recognition-release.git",
+    "source_ref": "upstream/0.0.4",
+    "archive_sha256": "9d791c78676acf3720fe1a01993124a2a65fe4c81fcaa8ebafbbedeba65fe10d"
+  },
+  {
+    "package": "moose_description",
+    "source_id": "a11573d1a31d9e95e6ecfa98",
+    "manifest": "moose-master/moose_description/package.xml",
+    "source_url": "https://github.com/moose-cpr/moose.git",
+    "source_ref": "master",
+    "archive_sha256": "b7ed8e09bb2cfceaa5eafdf4d8ff6052cc73a6643de1fc152aaeaefbfb81226b"
+  },
+  {
+    "package": "gnc_visualizer",
+    "source_id": "79da01479698d35a6f7b2d83",
+    "manifest": "astrobee-master/tools/gnc_visualizer/package.xml",
+    "source_url": "https://github.com/nasa/astrobee.git",
+    "source_ref": "master",
+    "archive_sha256": "8899d4d2ac3ec7cc19357aea88d6330ed497a1a01175d4b1b0b8efada0fb550c"
+  },
+  {
+    "package": "p2os_driver",
+    "source_id": "07e8b54e549412e87bf514b5",
+    "manifest": "p2os-HEAD/p2os_driver/package.xml",
+    "source_url": "https://github.com/allenh1/p2os.git",
+    "source_ref": "HEAD",
+    "archive_sha256": "b854578f79cc2d441c44cdc83f549007db7dd71ede13a02d47f27351969f1cbd"
+  },
+  {
+    "package": "dingo_msgs",
+    "source_id": "13c84956da0714a781faba2b",
+    "manifest": "dingo-melodic-devel/dingo_msgs/package.xml",
+    "source_url": "https://github.com/dingo-cpr/dingo.git",
+    "source_ref": "melodic-devel",
+    "archive_sha256": "2ffdaa22ed134514cc94cfa1b93f51aaec85e13e2d8a6aae5e60af1fb4c04686"
+  },
+  {
+    "package": "mujoco_ros2_control_plugins",
+    "source_id": "3a716edff2641f14fbb132eb",
+    "manifest": "mujoco_ros2_control-main/mujoco_ros2_control_plugins/package.xml",
+    "source_url": "https://github.com/ros-controls/mujoco_ros2_control.git",
+    "source_ref": "main",
+    "archive_sha256": "8d4e91e9f62d953bbac5b88e3979567a3b10198da63333edfc35fdeaf6142b0f"
+  },
+  {
+    "package": "so_arm_100_moveit_config",
+    "source_id": "25b63e5b70007f8814fcb5de",
+    "manifest": "SO-100-arm-main/so_arm_100_moveit_config/package.xml",
+    "source_url": "https://github.com/brukg/SO-100-arm.git",
+    "source_ref": "main",
+    "archive_sha256": "2318ec7d43f5303a8889e4036a55d61f951f1047766a2409009ae411735b9268"
+  },
+  {
+    "package": "orocos_kdl_vendor",
+    "source_id": "443894cc7e6aff93fcb0b63a",
+    "manifest": "orocos_kdl_vendor-release-upstream-0.3.4/orocos_kdl_vendor/package.xml",
+    "source_url": "https://github.com/ros2-gbp/orocos_kdl_vendor-release.git",
+    "source_ref": "upstream/0.3.4",
+    "archive_sha256": "4dc547620a6f273de5b0d0c67e45dbead5e2c09ecbf5825ba3fb3ab12bde1abf"
+  },
+  {
+    "package": "autoware_core_map",
+    "source_id": "5c493534646781d8167b37e1",
+    "manifest": "autoware_core-main/map/autoware_core_map/package.xml",
+    "source_url": "https://github.com/autowarefoundation/autoware_core.git",
+    "source_ref": "main",
+    "archive_sha256": "4dd22f7399b0febccf518007fa7f74afb537eb28d8c49e204d644d46ec44a545"
+  },
+  {
+    "package": "test_security",
+    "source_id": "7e92bfcfd2e1bdf32c12c4f3",
+    "manifest": "system_tests-lyrical/test_security/package.xml",
+    "source_url": "https://github.com/ros2/system_tests.git",
+    "source_ref": "lyrical",
+    "archive_sha256": "f9a8e99d1588fb5ff3315e3eafebed28859f4a1d844ace8656a9c4863391de13"
+  },
+  {
+    "package": "contracting_curve_density_algorithm",
+    "source_id": "e64c2ff91991a4214e02eb83",
+    "manifest": "ias_perception-HEAD/contracting_curve_density_algorithm/manifest.xml",
+    "source_url": "https://github.com/code-iai/ias_perception.git",
+    "source_ref": "HEAD",
+    "archive_sha256": "badee66067e13d459001838202cc5879052f187e954ce9eb6ebc337d7613a1ac"
+  },
+  {
+    "package": "fanuc_post_processor_example",
+    "source_id": "4182abdd2e5602ea8ea1d759",
+    "manifest": "fanuc_post_processor-kinetic-d17d843cfd8f36f6dc8a799ceed3268a9328789a/fanuc_post_processor_example/package.xml",
+    "source_url": "https://gitlab.com/InstitutMaupertuis/fanuc_post_processor.git",
+    "source_ref": "kinetic",
+    "archive_sha256": "530567f5451af3ece8ccfb8c2f67efbf31a8f9711bc6c0673ec770ca415d1394"
+  },
+  {
+    "package": "squirrel_prediction_msgs",
+    "source_id": "541bb1dc7dc2efa525f5dd24",
+    "manifest": "squirrel_common-release-upstream-0.0.24/squirrel_prediction_msgs/package.xml",
+    "source_url": "https://github.com/squirrel-project/squirrel_common-release.git",
+    "source_ref": "upstream/0.0.24",
+    "archive_sha256": "d425807bad089199bd2524f6da58bef87023febfcae395ec3b1c127e52c9416b"
+  },
+  {
+    "package": "pass_through_controllers",
+    "source_id": "8d6adb662fe1ddac8274e079",
+    "manifest": "Universal_Robots_ROS_passthrough_controllers-main/package.xml",
+    "source_url": "https://github.com/UniversalRobots/Universal_Robots_ROS_passthrough_controllers.git",
+    "source_ref": "main",
+    "archive_sha256": "916335166863fb107edecb132f3cee2e1c224fc1bade3389b4e2aa0e61bed5f4"
+  },
+  {
+    "package": "jackal_cartographer_navigation",
+    "source_id": "caa25360491fabf997961290",
+    "manifest": "jackal_cartographer_navigation-melodic-devel/package.xml",
+    "source_url": "https://github.com/jackal/jackal_cartographer_navigation.git",
+    "source_ref": "melodic-devel",
+    "archive_sha256": "2c8db0eb45162d082c7adb26ea39f1bc0337b7a0cd98a1f0a31f5330f6414b21"
+  },
+  {
+    "package": "rosidl_cli",
+    "source_id": "f368526506390a2433532e78",
+    "manifest": "rosidl-lyrical/rosidl_cli/package.xml",
+    "source_url": "https://github.com/ros2/rosidl.git",
+    "source_ref": "lyrical",
+    "archive_sha256": "f38134f3e111b08721b2d53c28c034fc1f52b775316429aacd2f89c611b5ba95"
+  },
+  {
+    "package": "rocon_unreliable_experiments",
+    "source_id": "d5210d118e49164e0642f3e4",
+    "manifest": "rocon_multimaster-release-0.7-indigo/experiments/rocon_unreliable_experiments/package.xml",
+    "source_url": "https://github.com/robotics-in-concert/rocon_multimaster.git",
+    "source_ref": "release/0.7-indigo",
+    "archive_sha256": "2eb5281327c89b4d0668a843d82357403c07dfeda66b2f77517a855d7806c0cd"
+  },
+  {
+    "package": "rmw_implementation",
+    "source_id": "e741da00657639203f3a00e5",
+    "manifest": "rmw_implementation-foxy/rmw_implementation/package.xml",
+    "source_url": "https://github.com/ros2/rmw_implementation.git",
+    "source_ref": "foxy",
+    "archive_sha256": "4d62919d9a7b865eb303147723fe3397fe3f82d4ccccb789a86ea40db0ff9c32"
+  },
+  {
+    "package": "euscollada",
+    "source_id": "cda27fca5885e69e5382711b",
+    "manifest": "jsk_model_tools-master/euscollada/package.xml",
+    "source_url": "https://github.com/jsk-ros-pkg/jsk_model_tools.git",
+    "source_ref": "master",
+    "archive_sha256": "4a6777fd063950bc1e74e3c1e351824ade3190f056f11fec3656b97747d8fd6d"
+  },
+  {
+    "package": "roboplan_ros_cpp",
+    "source_id": "bc2dbcf450c24b34e6d039c9",
+    "manifest": "roboplan-ros-main/roboplan_ros_cpp/package.xml",
+    "source_url": "https://github.com/open-planning/roboplan-ros.git",
+    "source_ref": "main",
+    "archive_sha256": "fcb6e286b1d4f989b1a37e2ded00e8b475e71dca8ad010949aa26ff824d6f3fa"
+  },
+  {
+    "package": "motoman_gp4_support",
+    "source_id": "4a2c900ea25433ff882f26e5",
+    "manifest": "motoman-kinetic-devel/motoman_gp4_support/package.xml",
+    "source_url": "https://github.com/ros-industrial/motoman.git",
+    "source_ref": "kinetic-devel",
+    "archive_sha256": "8406c746efe6d6e1845095ba48d8fab0b71a43ed5ac8740652df86f6ea48fafe"
+  },
+  {
+    "package": "fanuc_r1000ia80f_moveit_config",
+    "source_id": "85377f9525bc532a7f18acde",
+    "manifest": "fanuc-indigo-devel/fanuc_r1000ia80f_moveit_config/package.xml",
+    "source_url": "https://github.com/ros-industrial/fanuc.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "1ff7f86adb4db55fe1cd8ea5beed5318a8c1d17b482cc6a303da8954fd7c3813"
+  },
+  {
+    "package": "sm_nav2_gazebo_test_3",
+    "source_id": "be164e1b14b931c9829a9071",
+    "manifest": "SMACC2-jazzy/smacc2_sm_reference_library/sm_nav2_gazebo_test_3/package.xml",
+    "source_url": "https://github.com/robosoft-ai/SMACC2.git",
+    "source_ref": "jazzy",
+    "archive_sha256": "ad7e3ff338ef51eea92e42751fb9ba9d28d66dbd426ad427469fdd4a64684245"
+  },
+  {
+    "package": "hector_elevation_visualization",
+    "source_id": "e1be91d3330aef26f8d4d763",
+    "manifest": "hector_navigation-catkin/hector_elevation_visualization/package.xml",
+    "source_url": "https://github.com/tu-darmstadt-ros-pkg/hector_navigation.git",
+    "source_ref": "catkin",
+    "archive_sha256": "f1376adebadd49f32f5569063788a4ddd4f2a82ba850c7e7ab362e20978bedba"
+  },
+  {
+    "package": "evarobot_slam",
+    "source_id": "08f952e2163dbc3537dc70cb",
+    "manifest": "evapc_ros-indigo-devel/evarobot_slam/package.xml",
+    "source_url": "https://github.com/inomuh/evapc_ros.git",
+    "source_ref": "indigo-devel",
+    "archive_sha256": "db5bdd35e257957259deed391bd74e9307d466e72e355e235813a3f5bf7088a2"
+  },
+  {
+    "package": "opennav_following_msgs",
+    "source_id": "a3d727e5ffcff828b824b44c",
+    "manifest": "opennav_docking-humble/opennav_following_msgs/package.xml",
+    "source_url": "https://github.com/open-navigation/opennav_docking.git",
+    "source_ref": "humble",
+    "archive_sha256": "68e36b2cc946432493a56da5001361fe3832d7172bad2be74048b5f6414f2b7d"
+  }
+]

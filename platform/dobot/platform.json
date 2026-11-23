@@ -1,0 +1,32 @@
+{
+  "id": "dobot",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "dobot_msgs_v4/RobotStatus",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_is_enable",
+        "field": "is_enable",
+        "type": "bool",
+        "indexed": false
+      },
+      {
+        "name": "read_is_connected",
+        "field": "is_connected",
+        "type": "bool",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/Dobot-Arm/DOBOT_6Axis_ROS2_V4/blob/ec201c40d5db63185a3593ec9c39f80fe25aa527/dobot_msgs_v4/msg/RobotStatus.msg",
+        "revision": "ec201c40d5db63185a3593ec9c39f80fe25aa527",
+        "path": "dobot_msgs_v4/msg/RobotStatus.msg",
+        "sha256": "1ec166dc668196f7f34f2cb41726c021019be19328d434c90a5ba85015998bba"
+      }
+    ]
+  }
+}

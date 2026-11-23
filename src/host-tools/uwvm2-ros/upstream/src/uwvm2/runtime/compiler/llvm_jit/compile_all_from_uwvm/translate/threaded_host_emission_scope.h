@@ -1,0 +1,125 @@
+#pragma once
+#include <uwvm2/utils/container/standard.h>
+// Native COLD compiler scope only. It emits no ordinary guest instruction.
+// This is an independent threaded owner route, not checkpoint/Restore authority.
+#ifndef UWVM_MODULE
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+#endif
+#ifndef UWVM_MODULE
+namespace llvm { class Module; class Function; }
+#endif
+namespace uwvm2::uwvm::runtime::initializer { extern "C++" { class ThreadedChildWorld; } }
+namespace uwvm2::runtime::lib { extern "C++" { class ThreadedLlvmChild; } }
+#ifndef UWVM_MODULE_EXPORT
+#define UWVM_MODULE_EXPORT
+#endif
+UWVM_MODULE_EXPORT namespace uwvm2::runtime::compiler::llvm_jit::compile_all_from_uwvm::details
+{
+    struct threaded_native_bridge final
+    {
+        ::llvm::Function* declaration{};
+        ::std::uintptr_t original{}; // actual compiler-selected native Fn, not wire DATA
+    };
+    struct threaded_forbidden_memory_span final
+    {
+        ::std::uintptr_t begin{};
+        ::std::size_t bytes{};
+        [[nodiscard]] constexpr bool contains(::std::uintptr_t address) const noexcept
+        { return begin!=0u&&address>=begin&&address-begin<bytes; }
+    };
+    class threaded_host_emission_scope final
+    {
+        friend class ::uwvm2::runtime::lib::ThreadedLlvmChild;
+        inline static thread_local threaded_host_emission_scope* current_{};
+        ::uwvm2::uwvm::runtime::initializer::ThreadedChildWorld const* world_{};
+        ::llvm::Module const* module_{};
+        ::uwvm2::uwvm::runtime::storage::wasm_module_storage_t const* wasm_module_{};
+        ::std::uintptr_t original_views_{},owned_views_{};
+        ::uwvm2::utils::container::std_vector<threaded_native_bridge>* bridges_{};
+        threaded_forbidden_memory_span const* forbidden_{};
+        ::std::size_t forbidden_count_{};
+        threaded_host_emission_scope* previous_{};
+        bool valid_{true};
+        ::std::uintptr_t instruction_target_{};
+        void* instruction_context_{};
+        bool (*instruction_site_)(void*,::std::size_t,::std::size_t,::std::size_t&) noexcept {};
+        threaded_host_emission_scope(
+            ::uwvm2::uwvm::runtime::initializer::ThreadedChildWorld const& world,
+            ::uwvm2::uwvm::runtime::storage::wasm_module_storage_t const& wasm_module,
+            ::llvm::Module const& module, ::uwvm2::utils::container::std_vector<threaded_native_bridge>& bridges,
+            ::std::uintptr_t original_views, ::std::uintptr_t owned_views,
+            threaded_forbidden_memory_span const* forbidden,::std::size_t forbidden_count,
+            ::std::uintptr_t instruction_target=0u,void* instruction_context=nullptr,
+            bool (*instruction_site)(void*,::std::size_t,::std::size_t,::std::size_t&) noexcept=nullptr) noexcept
+            : world_{::std::addressof(world)},module_{::std::addressof(module)},wasm_module_{::std::addressof(wasm_module)},original_views_{original_views},owned_views_{owned_views},bridges_{::std::addressof(bridges)},forbidden_{forbidden},forbidden_count_{forbidden_count},previous_{current_}
+        {
+            // The factory has already checked genuine owner/module membership
+            // and reserved the finite bridge array before lowering can allocate.
+            if(previous_!=nullptr || bridges.capacity()<256u || !bridges.empty() ||
+               forbidden_count>32u || (forbidden_count!=0u&&forbidden==nullptr))valid_=false;
+            instruction_target_=instruction_target;instruction_context_=instruction_context;instruction_site_=instruction_site;
+            if((instruction_target!=0u)!=(instruction_context!=nullptr&&instruction_site!=nullptr))valid_=false;
+            current_=this;
+        }
+        threaded_host_emission_scope(threaded_host_emission_scope const&)=delete;
+        threaded_host_emission_scope& operator=(threaded_host_emission_scope const&)=delete;
+    public:
+        enum class selection : unsigned { ordinary, owned, rejected };
+        ~threaded_host_emission_scope(){current_=previous_;}
+        [[nodiscard]] bool valid() const noexcept{return valid_;}
+        [[nodiscard]] static ::std::uintptr_t object_address(::std::uintptr_t original) noexcept
+        {
+            // Tagged shared Guest data and allocation tags must never enter
+            // generated raw pointer IR. Owner/length objects remain legitimate
+            // authenticated helper operands; only actual backing spans refuse.
+            if(current_!=nullptr&&!current_->valid_)return 0u;
+            if(current_!=nullptr)
+                for(::std::size_t i{};i<current_->forbidden_count_;++i)
+                    if(current_->forbidden_[i].contains(original))
+                    {current_->valid_=false;return 0u;}
+            if(current_!=nullptr&&original!=0u&&original==current_->original_views_)
+            {if(current_->owned_views_==0u){current_->valid_=false;return 0u;}return current_->owned_views_;}
+            return original;
+        }
+        [[nodiscard]] static bool owns_module(::uwvm2::uwvm::runtime::storage::wasm_module_storage_t const& module) noexcept
+        {
+            if(current_==nullptr)return false;
+            if(current_->valid_&&current_->wasm_module_==::std::addressof(module))return true;
+            current_->valid_=false;return false;
+        }
+        [[nodiscard]] static ::std::uintptr_t owned_table_views() noexcept
+        {return current_!=nullptr&&current_->valid_?current_->owned_views_:0u;}
+        [[nodiscard]] static bool selected() noexcept{return current_!=nullptr;}
+        // Cold compiler-only configuration. The callback and native target are
+        // supplied solely by the genuine private Child compiler, never by file
+        // DATA or a Guest. Nonselected compilation emits no instruction hook.
+        [[nodiscard]] static ::std::uintptr_t instruction_target() noexcept
+        {return current_!=nullptr&&current_->valid_?current_->instruction_target_:0u;}
+        [[nodiscard]] static bool instruction_site(::std::size_t function,::std::size_t offset,::std::size_t& ordinal) noexcept
+        {
+            if(!instruction_target())return false;
+            if(current_->instruction_site_(current_->instruction_context_,function,offset,ordinal))return true;
+            current_->valid_=false;return false;
+        }
+        [[nodiscard]] static selection select(::llvm::Module const* module) noexcept
+        {
+            if(current_==nullptr)return selection::ordinary;
+            if(current_->valid_&&current_->world_!=nullptr&&current_->module_==module)return selection::owned;
+            current_->valid_=false;return selection::rejected;
+        }
+        [[nodiscard]] static selection bind(::llvm::Module const* module,::llvm::Function& declaration,
+            ::std::uintptr_t original) noexcept
+        {
+            auto const choice=select(module);if(choice!=selection::owned)return choice;
+            auto& self=*current_;auto& bridges=*self.bridges_;
+            if(original==0u){self.valid_=false;return selection::rejected;}
+            for(auto const& entry:bridges)if(entry.declaration==::std::addressof(declaration))
+            {if(entry.original==original)return selection::owned;self.valid_=false;return selection::rejected;}
+            if(bridges.size()>=256u||bridges.size()==bridges.capacity())
+            {self.valid_=false;return selection::rejected;}
+            bridges.push_back({::std::addressof(declaration),original});return selection::owned;
+        }
+    };
+}

@@ -1,0 +1,12 @@
+set_project("cpython-guest")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("cpython-guest")
+    set_kind("binary")
+    set_language("python")
+    set_wros_entry("main.py")
+    add_files("main.py", "samples.py")
+    add_wros_operations("abi")
+    set_wros_test_queries("abi", "python-runtime")
+    add_wros_tests("int", "aot")
+target_end()

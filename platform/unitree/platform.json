@@ -1,0 +1,12 @@
+{
+  "id": "unitree",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [{
+    "alias": "go2-state",
+    "profile": "unitree/go2/low-state/v1",
+    "provider": "buffer.read",
+    "contract": "go2-low-state.contract",
+    "source": "https://github.com/UlteSoft/wasmros-deployer/blob/69e5e1be8fe3d669af962e5f63c147959ec45ad7/tests/support/unitree_low_state_contract.txt"
+  }]
+}

@@ -1,0 +1,1142 @@
+{
+  "public_commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+  "tree": "d7344c057264f551af57be6730bf2fe2f9070ef0",
+  "platform": "unitree",
+  "host": "linux-x86_64",
+  "root_install_py_sha256": "ef1ba0ecc1c1b562e7b0520b73142b2732224047001862960930d13a08b7072f",
+  "legacy_default_count": 29,
+  "default_cold_passed": [
+    "as",
+    "c",
+    "cpp",
+    "go",
+    "js",
+    "typescript",
+    "wat"
+  ],
+  "isolated_host": {
+    "slice": "wrosvendor.slice",
+    "cgroup_parent_and_child_memory_max": 68719476736,
+    "cgroup_parent_and_child_swap_max": 0,
+    "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+    "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e"
+  },
+  "execution": "Each selection downloaded its own public installer into an empty environment. Builds and runs used external Xmake and VM in an offline namespace.",
+  "installed_modes": {
+    "as-default": {
+      "option": "as",
+      "mode_argument": "default",
+      "install": "passed",
+      "offline_tests": {
+        "isolation": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-observation.wasm": "5661cc91d20da05e2c1c3969943ecd94b591c7bbf42389c7491e3bca119a84eb"
+      }
+    },
+    "c-default": {
+      "option": "c",
+      "mode_argument": "default",
+      "install": "passed",
+      "offline_tests": {
+        "isolation": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/go2-state.wasm": "e99cd89e8b006e92c3a529cc91ff0c14f3892a73d5fdcceb1052d650b7ddfc05"
+      }
+    },
+    "c_ffi_bridge-default": {
+      "option": "c_ffi_bridge",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "cpp-default": {
+      "option": "cpp",
+      "mode_argument": "default",
+      "install": "passed",
+      "offline_tests": {
+        "isolation": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/go2-state.wasm": "217a418be89d226a8a43116d964380c755ab54b2b15670e4c87729e73754dcee"
+      }
+    },
+    "csharp-default": {
+      "option": "csharp",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "d-default": {
+      "option": "d",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "fortran-default": {
+      "option": "fortran",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "fsharp-default": {
+      "option": "fsharp",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "go-binary": {
+      "option": "go",
+      "mode_argument": "binary",
+      "install": "passed",
+      "offline_tests": {
+        "direct-aot": 0,
+        "direct-build": 0,
+        "direct-int": 0,
+        "independent-aot": 0,
+        "independent-build": 0,
+        "independent-int": 0,
+        "isolation": 0,
+        "producer-version": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "direct.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "independent.wasm": "21baf1b1f3b405964c3e21a7877a53777ec1eb8dbb2599715198adc24552b629"
+      }
+    },
+    "go-default": {
+      "option": "go",
+      "mode_argument": "default",
+      "install": "passed",
+      "offline_tests": {
+        "direct-aot": 0,
+        "direct-build": 0,
+        "direct-int": 0,
+        "independent-aot": 0,
+        "independent-build": 0,
+        "independent-int": 0,
+        "isolation": 0,
+        "producer-version": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "direct.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "independent.wasm": "21baf1b1f3b405964c3e21a7877a53777ec1eb8dbb2599715198adc24552b629"
+      },
+      "offline_log_sha256": "894758dc2efb0f251a96c7249a54ded9a921d0871efca85b444b80cec4b9879c"
+    },
+    "go-source": {
+      "option": "go",
+      "mode_argument": "source",
+      "install": "passed",
+      "offline_tests": {
+        "direct-aot": 0,
+        "direct-build": 0,
+        "direct-int": 0,
+        "independent-aot": 0,
+        "independent-build": 0,
+        "independent-int": 0,
+        "isolation": 0,
+        "producer-version": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "direct.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-low-state.wasm": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+        "independent.wasm": "21baf1b1f3b405964c3e21a7877a53777ec1eb8dbb2599715198adc24552b629"
+      },
+      "offline_log_sha256": "f6386283bc4ba0d453f2cb1df752453d8269fb53a12f2a1d49f114f4469ebfff"
+    },
+    "haskell-default": {
+      "option": "haskell",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "java-default": {
+      "option": "java",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "js-default": {
+      "option": "js",
+      "mode_argument": "default",
+      "install": "passed",
+      "offline_tests": {
+        "isolation": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-observation.wasm": "957f387e5e93f005587590eced966ad988b6bced47cdf3638c789ba7fe4ca6be"
+      }
+    },
+    "kotlin-default": {
+      "option": "kotlin",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "lua-default": {
+      "option": "lua",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "moonbit-default": {
+      "option": "moonbit",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "nim-default": {
+      "option": "nim",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "objectc-default": {
+      "option": "objectc",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "odin-default": {
+      "option": "odin",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "php-default": {
+      "option": "php",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "py-default": {
+      "option": "py",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "r-default": {
+      "option": "r",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "rs-default": {
+      "option": "rs",
+      "mode_argument": "default",
+      "install": "failed",
+      "reason": "missing Rust 1.97.1 stage0 in cold HOME"
+    },
+    "ruby-default": {
+      "option": "ruby",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "swift-default": {
+      "option": "swift",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "tinygo-binary": {
+      "option": "tinygo",
+      "mode_argument": "binary",
+      "install": "failed"
+    },
+    "tinygo-default": {
+      "option": "tinygo",
+      "mode_argument": "default",
+      "install": "failed",
+      "reason": "wrtg binary not published"
+    },
+    "tinygo-source": {
+      "option": "tinygo",
+      "mode_argument": "source",
+      "install": "failed"
+    },
+    "typescript-default": {
+      "option": "typescript",
+      "mode_argument": "default",
+      "install": "passed",
+      "offline_tests": {
+        "isolation": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/unitree-observation.wasm": "94b401d489f0ddafce56ba65ddec7a6ccab920ffd049c16a889d29aa32a3eebf"
+      }
+    },
+    "vbnet-default": {
+      "option": "vbnet",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    },
+    "wat-default": {
+      "option": "wat",
+      "mode_argument": "default",
+      "install": "passed",
+      "offline_tests": {
+        "isolation": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "wasm_sha256": {
+        "external-project/build/wasm-wasip1/wasm32/release/go2-state.wasm": "4a9e7dfdccbfb1c93a23006e468473f17c71890f622073649c32150b09855406"
+      }
+    },
+    "zig-default": {
+      "option": "zig",
+      "mode_argument": "default",
+      "install": "unsupported",
+      "reason": "unknown language or platform"
+    }
+  },
+  "go_artifacts": {
+    "go-default": {
+      "mode": "binary",
+      "sha256": {
+        "asm": {
+          "bytes": 6288457,
+          "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936",
+          "compressed_sha256": "893de23e8a6e28072a0c985120296b0cd80e35432ce9ee75b3999e2e42e910b3"
+        },
+        "compile": {
+          "bytes": 28139575,
+          "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416",
+          "compressed_sha256": "c2176c3d5512b7e60a6d96f35770cb7ceb619b3e69370df5e72ab7ee872d38ef"
+        },
+        "link": {
+          "bytes": 8660113,
+          "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc",
+          "compressed_sha256": "61ceebb5e13d4851b043ec779be48b7273783f5b9f360776127ea66489901091"
+        },
+        "wrgo": {
+          "bytes": 3339591,
+          "sha256": "70119cf8037aae3b8ad368ebc50b4e98897836075ab34788faf70a0520a33458",
+          "compressed_sha256": "42eefef7f260d2f49c81d4d2f5a82876902fb63c91b7956e45de2ff53a1caa03"
+        }
+      }
+    },
+    "go-source": {
+      "mode": "source",
+      "sha256": {
+        "asm": {
+          "bytes": 6288457,
+          "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936"
+        },
+        "compile": {
+          "bytes": 28139575,
+          "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416"
+        },
+        "link": {
+          "bytes": 8660113,
+          "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc"
+        },
+        "wrgo": {
+          "bytes": 3339591,
+          "sha256": "70119cf8037aae3b8ad368ebc50b4e98897836075ab34788faf70a0520a33458"
+        }
+      }
+    }
+  },
+  "go_runtime_axes": {
+    "default": {
+      "flags": [
+        "--mte",
+        "--eh",
+        "--memory64",
+        "--no-threads"
+      ],
+      "project": "workload",
+      "build": 0,
+      "wasm": {
+        "bytes": 1591371,
+        "sha256": "4e296b12ec9fc316eaab58b291e1241bb6e41859d793e32bfd3a282301f1ed7c",
+        "memories": [
+          {
+            "flags": 1,
+            "bits": 32,
+            "shared": false,
+            "minimum": 29,
+            "maximum": 4096
+          }
+        ],
+        "imports": [
+          [
+            "wasi_snapshot_preview1",
+            "sched_yield",
+            1
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "proc_exit",
+            2
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "clock_time_get",
+            4
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "fd_write",
+            5
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "random_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "poll_oneoff",
+            5
+          ],
+          [
+            "uwvm_ros_v2",
+            "abi",
+            1
+          ]
+        ],
+        "defined_exception_tags": 1,
+        "packed_mte_code_patterns": {
+          "claimz": 1,
+          "release": 1
+        }
+      },
+      "vm": {
+        "int": 0,
+        "aot": 0
+      }
+    },
+    "strict-memory32": {
+      "flags": [
+        "--mte",
+        "--eh",
+        "--no-memory64",
+        "--no-threads"
+      ],
+      "project": "workload",
+      "build": 0,
+      "wasm": {
+        "bytes": 1591371,
+        "sha256": "4e296b12ec9fc316eaab58b291e1241bb6e41859d793e32bfd3a282301f1ed7c",
+        "memories": [
+          {
+            "flags": 1,
+            "bits": 32,
+            "shared": false,
+            "minimum": 29,
+            "maximum": 4096
+          }
+        ],
+        "imports": [
+          [
+            "wasi_snapshot_preview1",
+            "sched_yield",
+            1
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "proc_exit",
+            2
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "clock_time_get",
+            4
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "fd_write",
+            5
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "random_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "poll_oneoff",
+            5
+          ],
+          [
+            "uwvm_ros_v2",
+            "abi",
+            1
+          ]
+        ],
+        "defined_exception_tags": 1,
+        "packed_mte_code_patterns": {
+          "claimz": 1,
+          "release": 1
+        }
+      },
+      "same_sha_as_default": true,
+      "vm": {
+        "int": 0,
+        "aot": 0
+      }
+    },
+    "no-mte": {
+      "flags": [
+        "--no-mte",
+        "--eh",
+        "--memory64",
+        "--no-threads"
+      ],
+      "project": "workload",
+      "build": 0,
+      "wasm": {
+        "bytes": 1590369,
+        "sha256": "c39a6b287bef18213e81edf91b0b363ffd42140e74ce8846759c3acad2d8bb29",
+        "memories": [
+          {
+            "flags": 0,
+            "bits": 32,
+            "shared": false,
+            "minimum": 29,
+            "maximum": null
+          }
+        ],
+        "imports": [
+          [
+            "wasi_snapshot_preview1",
+            "sched_yield",
+            1
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "proc_exit",
+            2
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "clock_time_get",
+            4
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "fd_write",
+            5
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "random_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "poll_oneoff",
+            5
+          ],
+          [
+            "uwvm_ros_v2",
+            "abi",
+            1
+          ]
+        ],
+        "defined_exception_tags": 1,
+        "packed_mte_code_patterns": {
+          "claimz": 0,
+          "release": 0
+        }
+      },
+      "vm": {
+        "int": 0,
+        "aot": 0
+      }
+    },
+    "no-eh": {
+      "flags": [
+        "--mte",
+        "--no-eh",
+        "--memory64",
+        "--no-threads"
+      ],
+      "project": "workload",
+      "build": 0,
+      "wasm": {
+        "bytes": 1590912,
+        "sha256": "efe73bdd3d6b08431e772df62548796f833af0f83530c7a5a2a9d2133daacc30",
+        "memories": [
+          {
+            "flags": 1,
+            "bits": 32,
+            "shared": false,
+            "minimum": 29,
+            "maximum": 4096
+          }
+        ],
+        "imports": [
+          [
+            "wasi_snapshot_preview1",
+            "sched_yield",
+            1
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "proc_exit",
+            2
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "clock_time_get",
+            4
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "fd_write",
+            5
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "random_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "poll_oneoff",
+            5
+          ],
+          [
+            "uwvm_ros_v2",
+            "abi",
+            1
+          ]
+        ],
+        "defined_exception_tags": 0,
+        "packed_mte_code_patterns": {
+          "claimz": 1,
+          "release": 1
+        }
+      },
+      "vm": {
+        "int": 0,
+        "aot": 0
+      }
+    },
+    "no-eh-no-mte": {
+      "flags": [
+        "--no-mte",
+        "--no-eh",
+        "--no-memory64",
+        "--no-threads"
+      ],
+      "project": "workload",
+      "build": 0,
+      "wasm": {
+        "bytes": 1589912,
+        "sha256": "213e8f327ad220849e59fe074725caa361593a1ead9264f84772944e5714cf21",
+        "memories": [
+          {
+            "flags": 0,
+            "bits": 32,
+            "shared": false,
+            "minimum": 29,
+            "maximum": null
+          }
+        ],
+        "imports": [
+          [
+            "wasi_snapshot_preview1",
+            "sched_yield",
+            1
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "proc_exit",
+            2
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "clock_time_get",
+            4
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "fd_write",
+            5
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "random_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "poll_oneoff",
+            5
+          ],
+          [
+            "uwvm_ros_v2",
+            "abi",
+            1
+          ]
+        ],
+        "defined_exception_tags": 0,
+        "packed_mte_code_patterns": {
+          "claimz": 0,
+          "release": 0
+        }
+      },
+      "vm": {
+        "int": 0,
+        "aot": 0
+      }
+    },
+    "terminal-panic-eh": {
+      "flags": [
+        "--mte",
+        "--eh",
+        "--memory64",
+        "--no-threads"
+      ],
+      "project": "panic",
+      "build": 0,
+      "wasm": {
+        "bytes": 1581530,
+        "sha256": "3fa13b5ca69e9a0346c17436460a9f97275f79c587f16f04f34d099933e0e684",
+        "memories": [
+          {
+            "flags": 1,
+            "bits": 32,
+            "shared": false,
+            "minimum": 29,
+            "maximum": 4096
+          }
+        ],
+        "imports": [
+          [
+            "wasi_snapshot_preview1",
+            "sched_yield",
+            1
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "proc_exit",
+            2
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "clock_time_get",
+            4
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "fd_write",
+            5
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "random_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "poll_oneoff",
+            5
+          ],
+          [
+            "uwvm_ros_v2",
+            "abi",
+            1
+          ]
+        ],
+        "defined_exception_tags": 1,
+        "packed_mte_code_patterns": {
+          "claimz": 1,
+          "release": 1
+        }
+      },
+      "vm": {
+        "int": 121,
+        "aot": 121
+      }
+    },
+    "terminal-panic-no-eh": {
+      "flags": [
+        "--mte",
+        "--no-eh",
+        "--memory64",
+        "--no-threads"
+      ],
+      "project": "panic",
+      "build": 0,
+      "wasm": {
+        "bytes": 1581073,
+        "sha256": "4bf815107d53a7828d0124bab47c20bb786c401c5fb65f8328b7c37411748c15",
+        "memories": [
+          {
+            "flags": 1,
+            "bits": 32,
+            "shared": false,
+            "minimum": 29,
+            "maximum": 4096
+          }
+        ],
+        "imports": [
+          [
+            "wasi_snapshot_preview1",
+            "sched_yield",
+            1
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "proc_exit",
+            2
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "args_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "clock_time_get",
+            4
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "environ_sizes_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "fd_write",
+            5
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "random_get",
+            3
+          ],
+          [
+            "wasi_snapshot_preview1",
+            "poll_oneoff",
+            5
+          ],
+          [
+            "uwvm_ros_v2",
+            "abi",
+            1
+          ]
+        ],
+        "defined_exception_tags": 0,
+        "packed_mte_code_patterns": {
+          "claimz": 1,
+          "release": 1
+        }
+      },
+      "vm": {
+        "int": 2,
+        "aot": 2
+      }
+    }
+  },
+  "go_limitations": {
+    "mvp": {
+      "flags": [
+        "--core",
+        "mvp"
+      ],
+      "exit": 1,
+      "diagnostic": "wrgo: this compiler targets single-threaded Core 3.0 modules with a 32-bit linear memory"
+    },
+    "threads": {
+      "flags": [
+        "--threads"
+      ],
+      "exit": 1,
+      "diagnostic": "wrgo: this compiler targets single-threaded Core 3.0 modules with a 32-bit linear memory"
+    },
+    "wasm64": {
+      "flags": [
+        "--target",
+        "wasm64"
+      ],
+      "exit": 1,
+      "diagnostic": "wrgo: this compiler targets single-threaded Core 3.0 modules with a 32-bit linear memory"
+    },
+    "wrong-go-word": {
+      "flags": [
+        "--go-word-bits",
+        "32"
+      ],
+      "exit": 1,
+      "diagnostic": "wrgo: go has 64-bit Go int, pointer and uintptr on this target"
+    }
+  },
+  "independent_ros2": {
+    "upstream_commit": "66ae09858245ac3d2231c0cc209e36a88f8d7d03",
+    "schemas_by_package": {
+      "unitreeapi": 8,
+      "unitreego": 24,
+      "unitreehg": 11
+    },
+    "types": 43,
+    "fields": 257,
+    "fastcdr": {
+      "commit": "9f4e60f7ac958e0fbbfe949102de3929cbbc226f",
+      "version": "2.2.5",
+      "cases": [
+        {
+          "label": "go2",
+          "bytes": 1180,
+          "nonzero_scalar_values": 349
+        },
+        {
+          "label": "hg",
+          "bytes": 2092,
+          "nonzero_scalar_values": 589
+        }
+      ]
+    },
+    "fastcdr_fixture_sha256": {
+      "go2-be.cdr": "7adcbe17c7183e5d1199a3c5730cf8dfca12d222274992c36e43fb6e6311c73c",
+      "go2-le.cdr": "16c465859160dc4fdb9beb137f50a2c2a0ef142c7662c9a4b595768cf228eb52",
+      "hg-be.cdr": "78aab33ca5a5c62ee44ff33e275da878a352c21f3e57e6d26c01ad40fda9b4ce",
+      "hg-le.cdr": "44bbebad350337b99b81f6559661af1e16b1675bcbf63362c46051509cc1413b"
+    },
+    "go_default_fixture_guest": {
+      "exit_codes": {
+        "aot": 0,
+        "build": 0,
+        "int": 0
+      },
+      "sha256": "21baf1b1f3b405964c3e21a7877a53777ec1eb8dbb2599715198adc24552b629"
+    },
+    "reject_truncated_cases_in_go_fixture": 6544,
+    "reject_invalid_header_cases_in_go_fixture": 16,
+    "go_project": {
+      "directory": "src/qualification/unitree/go",
+      "files_sha256": {
+        "go.mod": "ca95eaede19c9b1d99e5bb1070181008af714386c0d61be32ec3e60bbadcef4c",
+        "fixtures.go": "b3a7cbe546ad46e8c135f0f1d6946cf4e6a496e7dc2336b8b0bf5d05027711a9",
+        "main.go": "afefc564a61441d5b506ccc26737d080370f10ae25610992b20c623947c0fdc4",
+        "word.go": "fa774708a28a9fb520fd9da761b451770d77724116be6d9efec2e88afb9cee3d"
+      }
+    }
+  },
+  "fixture_directory": "src/qualification/unitree",
+  "tinygo_source_failure": {
+    "first_attempt": "Git upload-pack reported not our ref for one compiler source blob.",
+    "fresh_retry": "Reached LLVM configuration and failed because the selected LLVM sources omit libc.",
+    "log_sha256": "c648c5290046ad8c739497ce6364e4c66283bed01fe885782bbd27033b428cbd"
+  },
+  "limits": [
+    "No live Unitree transport, simulator or robot was used.",
+    "The alternate TinyGo assembly and libc changes tested in scratch do not qualify a published TinyGo toolchain."
+  ],
+  "tinygo_diagnostic": {
+    "source": "af3020996179781215e3f76add6c5adb6482c7c0",
+    "compiler_input": {
+      "official_input_sha256": "edc3476ec69e309f0fd4afc1ec79c34e00a14bc3848a7133ac53f814e72faebd",
+      "native_frontend_sha256": "200a3efbcfc4088ae9daf3de656d6a683ab9ae3f0fbf9a147c61f5b8996e4bf2",
+      "frontend_bytes": 180395008
+    },
+    "unpublished_sdk_changes": [
+      "Select LLVM libc and configure LLVM_INCLUDE_DOCS=OFF.",
+      "Select -mexception-handling for panic.S on EH builds.",
+      "Provide strlen at link time for optimized complete LowState projects."
+    ],
+    "external_guest_exit_codes": {
+      "independent-eh": {
+        "aot": 0,
+        "build": 0,
+        "int": 0
+      },
+      "independent-no-eh": {
+        "aot": 0,
+        "build": 0,
+        "int": 0
+      },
+      "unitree-eh": {
+        "aot": 0,
+        "build": 0,
+        "int": 0
+      },
+      "unitree-no-eh": {
+        "aot": 0,
+        "build": 0,
+        "int": 0
+      }
+    },
+    "no_optimization_unresolved_import": "env.tinygo_longjmp",
+    "linear_memory": {
+      "exit_codes": {
+        "aot": 0,
+        "int": 0
+      },
+      "wasm_memory64_sha256": "d0467625fbbc3d1cbc69f4a62d483ce5e60a61797fc50fa8b0913748159ccab2",
+      "wasm_no_memory64_sha256": "d0467625fbbc3d1cbc69f4a62d483ce5e60a61797fc50fa8b0913748159ccab2"
+    },
+    "upstream_frontend_rebuild": {
+      "llvm_commit": "510a078c1ad4aee4460818bcb38ff0ba3fbf6a83",
+      "llvm_tree": "66f80f04a78c41c1c4f4081511e9d3c3ceccd6b8",
+      "llvm_ninja_jobs_done_total": [
+        3272,
+        3403
+      ],
+      "result": "stopped_after_sparse_input_failure",
+      "missing_upstream_path": "libunwind/include/mach-o/compact_unwind_encoding.h",
+      "missing_upstream_blob": "4c48e33c3c177d9cdf7e4805fc4797628ff54ac4",
+      "required_by": "lld/MachO/Target.h:23",
+      "root_cause": "independent sparse source selection omitted the upstream libunwind sibling directory",
+      "binary_sha256": null,
+      "build_log_sha256": "60c46421bc52122311cb74d3d6beeb81c77cc75a5195bac2f83a8cee95d0c838"
+    }
+  }
+}

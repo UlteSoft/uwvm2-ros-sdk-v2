@@ -1,0 +1,13 @@
+import { encode_read, decode_result } from "uwrosv2/platform/unitree/go2_low_state";
+const request = encode_read(7n, 1000n);
+if (request.length !== 48 || request[40] !== 16) throw Error("read envelope");
+const frame = new Uint8Array(40), view = new DataView(frame.buffer);
+view.setBigUint64(8, 24n, true);
+view.setBigUint64(16, 16n, true);
+view.setBigUint64(24, 41347n, true);
+view.setFloat32(32, 0.125, true);
+const state = decode_result(frame);
+if (!state || state.tick !== 41347 || state.first_joint_position !== 0.125) throw Error("Go2 low state");
+if (decode_result(frame.subarray(1)) !== undefined) throw Error("truncated result");
+view.setFloat32(32, Infinity, true);
+if (decode_result(frame) !== undefined) throw Error("nonfinite joint position");

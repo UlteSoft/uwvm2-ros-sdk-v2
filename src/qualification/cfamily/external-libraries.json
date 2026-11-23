@@ -1,0 +1,259 @@
+{
+  "upstreams": {
+    "lz4": {
+      "repository": "https://github.com/lz4/lz4",
+      "tag": "v1.10.0",
+      "commit": "ebb370ca83af193212df4dcbadcc5d87bc0de2f0",
+      "git_blobs": {
+        "LICENSE": "ba8a2900f8b180fefc0c16f8a35076ef290c9492",
+        "examples/COPYING": "c728282bf0c88d16f64db747332efb440f652c05",
+        "examples/simple_buffer.c": "f5c6eb2111eacfd6fc78ef9a725a0cc05f36160b",
+        "lib/LICENSE": "488491695a6b6984aa3a49a8392b192ed2bcac1d",
+        "lib/lz4.c": "a2f7abee19fb9a5c768f2a6c266acf5b571f0855",
+        "lib/lz4.h": "80e3e5ca04d22db9ec4980dfc43672a13984aa15"
+      }
+    },
+    "cjson": {
+      "repository": "https://github.com/DaveGamble/cJSON",
+      "tag": "v1.7.18",
+      "commit": "acc76239bee01d8e9c858ae2cab296704e52d916",
+      "git_blobs": {
+        "LICENSE": "78deb0406d713ab9730e3c2447be1abdbd70b9a2",
+        "cJSON.c": "61483d903c6e77c2e66446532947bad555433de3",
+        "cJSON.h": "88cf0bcfa274fb686a989ba77f3b16d1aa78be67",
+        "tests/common.h": "4db6bf8c2d1fd9c794697dc0ef9bda6209be2cdd",
+        "tests/parse_array.c": "d013f2247c578339a545939ea305cd9405ce15d0",
+        "tests/parse_number.c": "4cb72ec229505d82f0cf117a24ba3c66fb3b0ea9",
+        "tests/print_string.c": "e6f5b92dc641a3d7f1df89f6bae6c1daa4ecd99b",
+        "tests/unity/docs/license.txt": "d66fba53e5845843ad40ee19442894db4448dcd8",
+        "tests/unity/examples/unity_config.h": "a2f161a7a7220b13064aac865cc3856e5c2d788c",
+        "tests/unity/src/unity.c": "d02610a72615c4a1390c381a869ee49080fa1048",
+        "tests/unity/src/unity.h": "32ff0e6df468df16d61e74626ba8a605d3448ccd",
+        "tests/unity/src/unity_internals.h": "f78cebace4e271dc508b74b012d17c5db2b512ea"
+      }
+    },
+    "uthash": {
+      "repository": "https://github.com/troydhanson/uthash",
+      "tag": "v2.3.0",
+      "commit": "e493aa90a2833b4655927598f169c31cfcdf7861",
+      "git_blobs": {
+        "LICENSE": "e75a243af9b994394b853b4276c66dd283e43faf",
+        "src/uthash.h": "ac78fdab5a4f53d17c8d2be242ba04def214302e",
+        "tests/test1.ans": "0b08c48c3d1fa04480adf9d0ec5e3b1ff663749a",
+        "tests/test1.c": "5e457ab3b188836923e2932f30866026e37b1bbc",
+        "tests/test18.ans": "db48dcf10350b0d9ef7621fcd835469d43c6db0a",
+        "tests/test18.c": "623cf569c84c530454544c235359e2932a81487a",
+        "tests/test24.ans": "4a2034ac8e331763ea1d383e626121c31d2d9941",
+        "tests/test24.c": "459d6bd015286bc9ba5853e3387588adb9a7eb2c",
+        "tests/test9.ans": "13a9402eda48f295444120124bbb134b683113f9",
+        "tests/test9.c": "93dd7db70dfbb7037795689bedd950038f21d6b0"
+      }
+    },
+    "pugixml": {
+      "repository": "https://github.com/zeux/pugixml",
+      "tag": "v1.15",
+      "commit": "ee86beb30e4973f5feffe3ce63bfa4fbadf72f38",
+      "git_blobs": {
+        "LICENSE.md": "1ea0d5eef9a8c6613843b678d947f62b9be561f5",
+        "src/pugiconfig.hpp": "5f1bafdbe91e559e0d918d6e8f79ad3e6051bbc9",
+        "src/pugixml.cpp": "53a0526e42d46f70b68cf9f8970b3439a28fb057",
+        "src/pugixml.hpp": "74e884b53ec2cc7c6ba1fc11e3e0d1f5436b9734"
+      }
+    },
+    "fast_float": {
+      "repository": "https://github.com/fastfloat/fast_float",
+      "tag": "v8.0.2",
+      "commit": "50a80a73ab2ab256ba1c3bf86923ddd8b4202bc7",
+      "git_blobs": {
+        "LICENSE-APACHE": "26f4398f24999c3908a11653e3b5ba6f9d681123",
+        "LICENSE-BOOST": "127a5bc39ba030c7cb99cc0aedc4f280ffe27310",
+        "LICENSE-MIT": "2fb2a37ad7fda521092c8b7b16911176c3f8a81b",
+        "include/fast_float/ascii_number.h": "97f0681077eba9e386f37a4b3b3de254b110e77a",
+        "include/fast_float/bigint.h": "74901e3956f2ee87ebd3d1db43b4dc358a6818bc",
+        "include/fast_float/constexpr_feature_detect.h": "6751afecd6bbea2819b8d5b4eb012642c41da670",
+        "include/fast_float/decimal_to_binary.h": "948768265eb3d0e513d1d5e0d11ace75f2be44c9",
+        "include/fast_float/digit_comparison.h": "d7ef3d9acc1620316a99db8565b5fb2ec172fd79",
+        "include/fast_float/fast_float.h": "af65c96bde370d6d5bddc77b376015853dfa89d1",
+        "include/fast_float/fast_table.h": "69f9b2c9245f63dc57884807391377e754b2bf99",
+        "include/fast_float/float_common.h": "8fd0560296299de272e3fee7ee4b52ee49450394",
+        "include/fast_float/parse_number.h": "e74c478f5da87f3558530b3d284ce7598e676c7a",
+        "tests/example_comma_test.cpp": "79a8e1d044e7fed0e7acd362650d627fb77aee6d",
+        "tests/example_test.cpp": "cefaf29a017aa213bcfe0c7a5bd0dcbdff0e73c4",
+        "tests/json_fmt.cpp": "1ba0d5ae7d6968c3a962bd765ec90161201880dd",
+        "tests/wide_char_test.cpp": "3b6ccd69b98daf2b1a016dcff9f38ec773049929"
+      }
+    },
+    "tinyxml2": {
+      "repository": "https://github.com/leethomason/tinyxml2",
+      "tag": "11.0.0",
+      "commit": "9148bdf719e997d1f474be6bcc7943881046dba1",
+      "git_blobs": {
+        "LICENSE.txt": "85a6a36f0ddf7cda552b7a031a9682f2c062d722",
+        "tinyxml2.cpp": "66ef0c962eea6f915ced9b26df1cd28f0120928c",
+        "tinyxml2.h": "8179f57b42cac37c6abd3c9458d32632b3b85896"
+      }
+    }
+  },
+  "cases": [
+    {
+      "family": "lz4",
+      "path": "upstream/lz4/examples/simple_buffer.c",
+      "language": "c",
+      "includes": [
+        "lib"
+      ],
+      "units": [
+        "lib/lz4.c"
+      ]
+    },
+    {
+      "family": "cjson",
+      "path": "upstream/cjson/tests/parse_array.c",
+      "language": "c",
+      "includes": [
+        "tests/unity/examples"
+      ],
+      "units": [
+        "tests/unity/src/unity.c"
+      ],
+      "defines": [
+        "UNITY_EXCLUDE_SETJMP_H",
+        "UNITY_INCLUDE_DOUBLE",
+        "UNITY_INCLUDE_CONFIG_H"
+      ]
+    },
+    {
+      "family": "cjson",
+      "path": "upstream/cjson/tests/parse_number.c",
+      "language": "c",
+      "includes": [
+        "tests/unity/examples"
+      ],
+      "units": [
+        "tests/unity/src/unity.c"
+      ],
+      "defines": [
+        "UNITY_EXCLUDE_SETJMP_H",
+        "UNITY_INCLUDE_DOUBLE",
+        "UNITY_INCLUDE_CONFIG_H"
+      ]
+    },
+    {
+      "family": "cjson",
+      "path": "upstream/cjson/tests/print_string.c",
+      "language": "c",
+      "includes": [
+        "tests/unity/examples"
+      ],
+      "units": [
+        "tests/unity/src/unity.c"
+      ],
+      "defines": [
+        "UNITY_EXCLUDE_SETJMP_H",
+        "UNITY_INCLUDE_DOUBLE",
+        "UNITY_INCLUDE_CONFIG_H"
+      ]
+    },
+    {
+      "family": "uthash",
+      "path": "upstream/uthash/tests/test1.c",
+      "language": "c",
+      "includes": [
+        "src"
+      ],
+      "units": [],
+      "expected_stdout": "tests/test1.ans"
+    },
+    {
+      "family": "uthash",
+      "path": "upstream/uthash/tests/test9.c",
+      "language": "c",
+      "includes": [
+        "src"
+      ],
+      "units": [],
+      "expected_stdout": "tests/test9.ans"
+    },
+    {
+      "family": "uthash",
+      "path": "upstream/uthash/tests/test18.c",
+      "language": "c",
+      "includes": [
+        "src"
+      ],
+      "units": [],
+      "expected_stdout": "tests/test18.ans"
+    },
+    {
+      "family": "uthash",
+      "path": "upstream/uthash/tests/test24.c",
+      "language": "c",
+      "includes": [
+        "src"
+      ],
+      "units": [],
+      "expected_stdout": "tests/test24.ans"
+    },
+    {
+      "family": "fast_float",
+      "path": "upstream/fast_float/tests/example_test.cpp",
+      "language": "cpp",
+      "includes": [
+        "include"
+      ],
+      "units": []
+    },
+    {
+      "family": "fast_float",
+      "path": "upstream/fast_float/tests/example_comma_test.cpp",
+      "language": "cpp",
+      "includes": [
+        "include"
+      ],
+      "units": []
+    },
+    {
+      "family": "fast_float",
+      "path": "upstream/fast_float/tests/json_fmt.cpp",
+      "language": "cpp",
+      "includes": [
+        "include"
+      ],
+      "units": []
+    },
+    {
+      "family": "fast_float",
+      "path": "upstream/fast_float/tests/wide_char_test.cpp",
+      "language": "cpp",
+      "includes": [
+        "include"
+      ],
+      "units": []
+    },
+    {
+      "family": "pugixml",
+      "path": "clients/pugixml.cpp",
+      "language": "cpp",
+      "includes": [
+        "src"
+      ],
+      "units": [
+        "src/pugixml.cpp"
+      ],
+      "noeh_defines": [
+        "PUGIXML_NO_EXCEPTIONS"
+      ]
+    },
+    {
+      "family": "tinyxml2",
+      "path": "clients/tinyxml2.cpp",
+      "language": "cpp",
+      "includes": [
+        "."
+      ],
+      "units": [
+        "tinyxml2.cpp"
+      ]
+    }
+  ]
+}

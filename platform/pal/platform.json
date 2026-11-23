@@ -1,0 +1,32 @@
+{
+  "id": "pal",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "pal_device_msgs/BatteryState",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_charge_state",
+        "field": "charge_state",
+        "type": "i8",
+        "indexed": false
+      },
+      {
+        "name": "read_battery_percentage",
+        "field": "battery_percentage",
+        "type": "f32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/pal-robotics/pal_msgs/blob/a9b3d52908626e0cf1f230b4dc4a962299d232f3/pal_device_msgs/msg/BatteryState.msg",
+        "revision": "a9b3d52908626e0cf1f230b4dc4a962299d232f3",
+        "path": "pal_device_msgs/msg/BatteryState.msg",
+        "sha256": "e255c9d5705957dfbcedbdb2c39c3c664c09479adf6bc9c6ea6959b9d1ddb9e2"
+      }
+    ]
+  }
+}

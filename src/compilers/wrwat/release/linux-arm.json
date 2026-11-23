@@ -1,0 +1,19 @@
+{
+  "wasm_tools_commit": "7a2fa422cdf9aeeaf488a2acac8bc94a078bfa32",
+  "wasmparser_memtag_commit": "5beb8556ee40e249cd5f26449784a79f4616ee5c",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "wire": "ff-packed-u32-v1-linear1",
+  "binary_bytes": 3426248,
+  "binary_sha256": "a0ed3b8d1b5d781e195bb6755fb41b37a041cdcaff4b5d1c099b06f2a436c81e",
+  "host": "linux-arm",
+  "executable": "bin/wrwat",
+  "source_root": "src/compilers/wrwat",
+  "package": "bin/packages/linux-arm/wrwat/wrwat.tar.xz",
+  "compressed_sha256": "b742d10e70b3d2c994133381e0bd8ccd375cc01a63cbe0441da7d77122483e16",
+  "compressed_bytes": 731368,
+  "package_member": "wrwat",
+  "rust_target": "armv5te-unknown-linux-musleabi",
+  "rustc_commit": "88d9e12ae178fab0fb5cc050a94da85685d449ea",
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "linker": "LLD 22.1.8 (/checkout/src/llvm-project/llvm 52ed14fcd56afc30f9cccd8ca8ce237c2eef7e04)"
+}

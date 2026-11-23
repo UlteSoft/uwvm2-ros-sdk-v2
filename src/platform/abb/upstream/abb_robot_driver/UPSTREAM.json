@@ -1,0 +1,70 @@
+{
+  "url": "https://github.com/ros-industrial/abb_robot_driver",
+  "commit": "d1678957d3792e6aa54582ff894db62b6a51dac0",
+  "license": "BSD-3-Clause",
+  "license_file": "LICENSE",
+  "local_changes": [],
+  "selection": "Public API and wire reference for ABB guest bindings. Driver registrations are included for mapping ROS names to native types.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "git_blob": "1aa59051f42af33595fe079046ff05c0242a98a9",
+      "sha256": "1b33168f61edcb96c6291078e922d1bd24afc553cb9c826c48105f02a2a6ea76"
+    },
+    {
+      "path": "abb_egm_state_controller/include/abb_egm_state_controller/egm_state_controller.h",
+      "git_blob": "537996b5580d6c3bef614963702513d91787c314",
+      "sha256": "3f59e414ebb02bad2fd754db6cc14e012459d404f7e27b13b5da3b91857f2bff"
+    },
+    {
+      "path": "abb_egm_state_controller/src/egm_state_controller.cpp",
+      "git_blob": "7aacd9ca2963173d088fb6b7a6ac951e86d7ebb1",
+      "sha256": "32b432dfcd608782171f77b3013f9a406061f2d6930932e90436c03fdc9b8ff5"
+    },
+    {
+      "path": "abb_rws_service_provider/include/abb_rws_service_provider/rws_service_provider.h",
+      "git_blob": "095b868fdab2a2ee88162b65194c0652665fb04c",
+      "sha256": "152342868f6304c28805b064bd92d213ab08a8c718c9c3c3ef8c33cb2e769e54"
+    },
+    {
+      "path": "abb_rws_service_provider/src/main.cpp",
+      "git_blob": "b9a8ed1456cf165507e54ee68667e7e54d724d54",
+      "sha256": "e04257a85c62abb3333f2e839740c59df8d84a89ba80fbf6f09aeb05fd1091c9"
+    },
+    {
+      "path": "abb_rws_service_provider/src/rws_service_provider.cpp",
+      "git_blob": "3a0205671d76a1ca020df71521c1954d9ef32980",
+      "sha256": "ea765db459916af00675bf13538bd30e86c346eac224a6f37771ac7764158bca"
+    },
+    {
+      "path": "abb_rws_service_provider/src/rws_service_provider_core_srvs.cpp",
+      "git_blob": "d4677cc9c553d98d12fd675dad6846ec1b2340b6",
+      "sha256": "473b640a95a552f212b76a48bdc6d633017f539a031457cb71b6b2bab12d7747"
+    },
+    {
+      "path": "abb_rws_service_provider/src/rws_service_provider_sm_srvs.cpp",
+      "git_blob": "a5d6ebb36ccc97200bb3df2267025ee9a48163be",
+      "sha256": "41439be149420072e3c46b9b015cce111ac520bea9dcb9d59ee919f97600d223"
+    },
+    {
+      "path": "abb_rws_state_publisher/include/abb_rws_state_publisher/rws_state_publisher.h",
+      "git_blob": "d37593fe3e9d108c5774f047ed357eb3d7293aac",
+      "sha256": "10fa6bbd54eea1b12a98a98a78e6bed68e0197b4d44f92a1862663eb5d117dda"
+    },
+    {
+      "path": "abb_rws_state_publisher/src/main.cpp",
+      "git_blob": "992800c9119fc7c8bf9780dce66c413df34a988e",
+      "sha256": "a0f50c4a48cb1191b63ea2e2d0f7f98e437c3dbd9f6b167c84a08db412b6310b"
+    },
+    {
+      "path": "abb_rws_state_publisher/src/rws_state_publisher.cpp",
+      "git_blob": "89fdd83f4f99072f17c5904ff5162c473dbca3ed",
+      "sha256": "cf9c01cab77152126c6619710b0a362d9b99d883282d330215ba6b4ae12cda09"
+    },
+    {
+      "path": "pkgs_only_sources.repos",
+      "git_blob": "b4b6f70723cab30e856e532dbf2f02bc6786ae37",
+      "sha256": "6b02b7209de0013a03a76de19736708ae664213e653a308fd76f3c5e546ca4a3"
+    }
+  ]
+}

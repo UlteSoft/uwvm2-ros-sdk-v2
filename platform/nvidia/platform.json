@@ -1,0 +1,50 @@
+{
+  "id": "nvidia",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "isaac_ros_nova_interfaces/EncoderTicks",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_left_ticks",
+        "field": "left_ticks",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_right_ticks",
+        "field": "right_ticks",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_encoder_timestamp",
+        "field": "encoder_timestamp",
+        "type": "u64",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/blob/7bec6ae5dbb2faa11617f40226e8932a4a94e6e4/isaac_ros_nova_interfaces/msg/EncoderTicks.msg",
+        "revision": "7bec6ae5dbb2faa11617f40226e8932a4a94e6e4",
+        "path": "isaac_ros_nova_interfaces/msg/EncoderTicks.msg",
+        "sha256": "930b7bba46f99b3c255a11d516b4e181b769d61e4d9d08a73cec901b52c28afe"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/std_msgs/msg/Header.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "std_msgs/msg/Header.msg",
+        "sha256": "d2cea14630e39ed0fa5b432ba9160a7c38855b9427d3344f99e83e83facb53c2"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      }
+    ]
+  }
+}

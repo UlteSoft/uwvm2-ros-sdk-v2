@@ -1,0 +1,11 @@
+set_project("pal-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("pal-observation")
+    set_kind("binary")
+    set_language("typescript")
+    set_ros_platform("pal")
+    set_wros_test_queries("realtime-clock")
+    add_files("main.ts")
+    add_wros_tests("int", "aot")
+target_end()

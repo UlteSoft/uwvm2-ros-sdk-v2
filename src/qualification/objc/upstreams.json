@@ -1,0 +1,179 @@
+{
+  "objfw": {
+    "repository": "https://github.com/ObjFW/ObjFW",
+    "revision": "064d85fb1f9eec36e9037cd22d6d10a7bdad09d2",
+    "release": "1.3.2-release",
+    "license": "LGPL-3.0-only",
+    "license_files": [
+      "COPYING",
+      "COPYING.LESSER"
+    ],
+    "files": {
+      "COPYING": {
+        "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+        "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7"
+      },
+      "COPYING.LESSER": {
+        "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+        "git_blob": "0a041280bd00a9d068f503b8ee7ce35214bd24a1"
+      },
+      "src/OFCRC32.m": {
+        "sha256": "ecea56a4a2c9f2eb53962d651d2bdbc0752031084e203a2bc23ae646cead3ff3",
+        "git_blob": "86588f6198b4af44593e9a3380dd65ed4d5fc3c9"
+      },
+      "src/OFCRC32.h": {
+        "sha256": "ef7d9b87b261419a6e09109a786b16de9aaa07d3780589e39e93152cfdff2a34",
+        "git_blob": "05b90488fd4972afae7930f8885c840cb0de49be"
+      },
+      "src/macros.h": {
+        "sha256": "2042b4e5536185beccc5dcbe4031751031c9341184d649a070c7b102c703b118",
+        "git_blob": "88ead6c7646d9c9c214a6ba4c504eee4477e4f02"
+      },
+      "src/platform.h": {
+        "sha256": "05effa866dc5a4f8bf1dcf6ba8208ffb35d9f1dbecd26bd70cd78beb6e916c9c",
+        "git_blob": "2f475fb531279ca1eb99b9f8f3746de707e2f91f"
+      }
+    }
+  },
+  "gcc": {
+    "repository": "https://github.com/gcc-mirror/gcc",
+    "revision": "5115c7e447fc07457443df874bf57840e8316d5f",
+    "release": "releases/gcc-15.2.0",
+    "canonical_repository": "https://gcc.gnu.org/git/gcc.git",
+    "license": "GPL-3.0-or-later WITH GCC-exception-3.1",
+    "license_files": [
+      "COPYING3",
+      "COPYING.RUNTIME"
+    ],
+    "files": {
+      "COPYING3": {
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "git_blob": "94a9ed024d3859793618152ea559a168bbcbb5e2"
+      },
+      "COPYING.RUNTIME": {
+        "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+        "git_blob": "e1b3c69c179dfaff5744ea4bf853e6b0d90c9ef9"
+      },
+      "libobjc/Object.m": {
+        "sha256": "d63950ac6d03c0ee4f7d37199dab2ba9bd602d66d4df45ea6bafe2413b0e21e4",
+        "git_blob": "d3bc6bf1dfbb7fcb0852a89232753dd6485619c9"
+      },
+      "libobjc/objc-private/common.h": {
+        "sha256": "43ad6c44c1f967844db4bdbefa07950cf7e080e2134847362a9a238b2b859246",
+        "git_blob": "eb3b4b40b232f6b6f98ae452d820f99b4aae811d"
+      }
+    }
+  },
+  "chromium": {
+    "repository": "https://chromium.googlesource.com/chromium/src",
+    "revision": "c23ff452476d1b6322d73b9b629420ef119d0388",
+    "release": "143.0.7499.40",
+    "license": "BSD-3-Clause",
+    "license_files": [
+      "LICENSE"
+    ],
+    "files": {
+      "LICENSE": {
+        "sha256": "368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b",
+        "git_blob": "2249a28657f86c645f8978b75babc1bd52aca318"
+      },
+      "base/apple/scoped_objc_class_swizzler.mm": {
+        "sha256": "e88bf7322d5d9ebc4c98a562b72b8d82c91f89d30535172bfa31da98a4540a4f",
+        "git_blob": "fb9d706a1ae8f60b013f3eaf1674802170e12fd5"
+      },
+      "base/apple/scoped_objc_class_swizzler.h": {
+        "sha256": "c7c27b8035dd7c2a061d34ea0a23792479ec077aad7d318867ccaa579de53327",
+        "git_blob": "279e59f42639baa0619857ccf12f7ed60e0f5be5"
+      },
+      "base/base_export.h": {
+        "sha256": "bf8e625312db80b7f4902b2a23fe24df6f9b53c42a34a2b1968e3df5a7c32049",
+        "git_blob": "dd4c5912e5dc09c90a5973d7cc2549ea99e13ca5"
+      }
+    }
+  },
+  "objectivecpp": {
+    "repository": "https://github.com/macmade/Objective-CPP",
+    "revision": "05e277553cdf0e34669ab8204d177d27d918950d",
+    "license": "MIT",
+    "license_files": [
+      "LICENSE"
+    ],
+    "files": {
+      "LICENSE": {
+        "sha256": "2ac665a65eb3597af0aefa36d73e2142846ff5132bd8a9920d99e46604228d67",
+        "git_blob": "86535c061fdec9017dc1917f24b45fa80f06e8f1"
+      },
+      "ObjectiveCPP/source/NSString+ObjectiveCPP.mm": {
+        "sha256": "dc45f55a7993d3580e0dbba4192d573c00da13bab632307387fd760188698281",
+        "git_blob": "5db0e1a4d0dee6c1ff1eb1ac530faf9e41a9de30"
+      },
+      "ObjectiveCPP/include/ObjectiveCPP.hpp": {
+        "sha256": "46e493c4e56e3931e74ca74d8d0c18ddd7d0c305fa70fbde2036c0b0333268d2",
+        "git_blob": "565a57951bb527478730f3f1282f81620339dc97"
+      },
+      "ObjectiveCPP/include/ObjectiveCPP/NSString+ObjectiveCPP.hpp": {
+        "sha256": "a56555422508fed3ab0f59f17b3bae835668ee0ec2905341200576f754f98280",
+        "git_blob": "3bb377f879b6acc909fb57e7c9841e7055d33be0"
+      },
+      "ObjectiveCPP/include/ObjectiveCPP/List.hpp": {
+        "sha256": "6ed29e7f2202d3b93184a2110708b11005ef624f5ed4ac252fbb08fe86ba1b21",
+        "git_blob": "e1eb5b3bb113a4eb390ded99fd6486b693872cea"
+      },
+      "ObjectiveCPP/include/ObjectiveCPP/Map.hpp": {
+        "sha256": "621dbf29cd2a504d149c8c5178b775fc0fecd75ed96dd3be89fc27bc98aa2625",
+        "git_blob": "d559f50e5ecf608f9687677126c31fdf9c645ae5"
+      },
+      "ObjectiveCPP/include/ObjectiveCPP/Vector.hpp": {
+        "sha256": "735443bdabe6a061f3317b06f32d12bb1c624991ea5c3575b4fd2c071a9c3fbb",
+        "git_blob": "40c222fc7e27ec0d67c0564aa89cdc88eae90d7e"
+      }
+    }
+  },
+  "libobjc2": {
+    "repository": "https://github.com/gnustep/libobjc2",
+    "revision": "e877e782fb965c4e870d2ecf6aff58dddc6290ae",
+    "release": "v2.3",
+    "license": "MIT",
+    "license_files": [
+      "COPYING"
+    ],
+    "files": {
+      "COPYING": {
+        "sha256": "56b923b1db99c7975c4e4ad4847381b32d3c9401fb2c8270b41fb6d31d6014fb",
+        "git_blob": "8647a56b739dfc73c8501a1a06ecbd7e75f737e4"
+      },
+      "Test/Test.h": {
+        "sha256": "635138b6cd4b19ffd7669456f20f592e4da3587179820cf889d242e49fb2c110",
+        "git_blob": "04b12fb441973d09c815c20234d67fffd104e7b4"
+      },
+      "Test/Test.m": {
+        "sha256": "aa1acb20fa19ab9b7ca03b3873e79e72a5ab55720da028b2db8549d709836d6d",
+        "git_blob": "c8c9b4a26ff350d1f6f29882864d3f0e396563b5"
+      },
+      "Test/Category.m": {
+        "sha256": "de5eb60298f48d07f9ce65ae35a84cc0c31f14b183aebd12ad0391c4edc29f66",
+        "git_blob": "44df27ec0c5f124ab420b03debd7d8ebde75fd72"
+      },
+      "Test/FastRefCount.m": {
+        "sha256": "2a6f1f021530a2b42c8339ac1f576a178c236a15eed7fe7068ee49248b06d3d0",
+        "git_blob": "0154a101046103e44162851b705f8ec2c59a0359"
+      },
+      "Test/ExceptionTest.m": {
+        "sha256": "f46297853c701497a43d836957e310bb1c129ce94826c7b3439d0d84aed557e3",
+        "git_blob": "5a7295c2a26a4da83744571dbb34c7c5bb0265a2"
+      },
+      "Test/ObjCXXEHInteropTwice.mm": {
+        "sha256": "e6e365450147f5063184a2f259606433c2027bd4149c0e5be611e46b8bb24fd4",
+        "git_blob": "11d542d5a4dbca34d05dba2043c25d2e80265b69"
+      },
+      "Test/ObjCXXEHInterop.m": {
+        "sha256": "590c33550c6e9aae4c2562aa0e973e848e613bd59bef800294b4cef79fd6b81e",
+        "git_blob": "36be8b9d4654730e618c2253fa374c8301368a94"
+      },
+      "Test/ObjCXXEHInterop.mm": {
+        "sha256": "158149165a5d165fbf3d6e587c0cd08ac8c9658e253ecb6dffcf95d664e5c907",
+        "git_blob": "37527d9408e590c81a1100e44d7ef80760a924b8"
+      }
+    }
+  }
+}

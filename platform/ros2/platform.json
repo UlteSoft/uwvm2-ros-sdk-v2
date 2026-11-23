@@ -1,0 +1,32 @@
+{
+  "id": "ros2",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "builtin_interfaces/Duration",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_sec",
+        "field": "sec",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_nanosec",
+        "field": "nanosec",
+        "type": "u32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Duration.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Duration.msg",
+        "sha256": "57da13a4201e7d258a2931323145b953e47e46967494e62ba66c2faca4fbade2"
+      }
+    ]
+  }
+}

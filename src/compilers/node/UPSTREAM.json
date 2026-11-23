@@ -1,0 +1,26 @@
+{
+  "project": "Node.js",
+  "repository": "https://github.com/nodejs/node",
+  "tag": "v22.22.3",
+  "commit": "fdfa0ff0dbaf0fbf4d7d6d89a2ab807f3177fa5c",
+  "license": "MIT and the dependency notices in upstream/LICENSE",
+  "distribution": "https://nodejs.org/dist/v22.22.3/",
+  "source_archive": "node-v22.22.3.tar.xz",
+  "source_archive_sha256": "f3e6a578db1ab335a4a72785c1e87ad18a2cf6d2fc25747a1d741fb34af0bd0f",
+  "host_archive": "node-v22.22.3-linux-x64.tar.xz",
+  "host_archive_sha256": "2e5d13569282d016861fae7c8f935e741693c269101a5bebcf761a5376d1f99f",
+  "upstream_build_guide": "upstream/BUILDING.md",
+  "source_build": [
+    "./configure",
+    "make -j4 node"
+  ],
+  "source_build_directory": "upstream",
+  "wros_changes": [
+    "Omit upstream test keys and their associated key fixture files as enumerated in omitted-fixtures.json."
+  ],
+  "host_program": {
+    "bytes": 124819136,
+    "sha256": "e6ec2c188d83d813f81f2de8aea084d74dce603ac1abedd0a30ad941b10087b2"
+  },
+  "source_rebuild_status": "unverified"
+}

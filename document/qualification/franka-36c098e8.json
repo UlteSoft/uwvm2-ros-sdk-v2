@@ -1,0 +1,349 @@
+{
+  "platform": "franka",
+  "candidate": "36c098e85098d7ccc26562972af32f47aafe7560",
+  "root_bootstrap": "35160a793faaca9ea7de9d6820687288b5373a78",
+  "frozen_source": "952722cb886f229a5ae9b8abfef6a3e10f22a440",
+  "local_equivalent": "bc5c26be963a5b04fec4c51117121fbd6ae1c616",
+  "installed_count": 7,
+  "legacy_choice_count": 29,
+  "rejected_legacy_count": 22,
+  "upstream_definitions": {
+    "franka_msgs": {
+      "version": "3.6.0",
+      "input_definitions": {
+        "action": 5,
+        "msg": 6,
+        "srv": 7
+      },
+      "definition_count": 18,
+      "fields": 133,
+      "constants": 11,
+      "expected_rosidl_records": 77,
+      "empty_components": 4
+    },
+    "franka_spine_msgs": {
+      "version": "3.6.0",
+      "input_definitions": {
+        "action": 1,
+        "msg": 4,
+        "srv": 7
+      },
+      "definition_count": 12,
+      "fields": 40,
+      "constants": 0,
+      "expected_rosidl_records": 35,
+      "empty_components": 7
+    }
+  },
+  "missing_public_elbow_fields": [
+    "commanded_position",
+    "commanded_velocity",
+    "commanded_acceleration"
+  ],
+  "validated_scopes": 42,
+  "release_vendor_qualification": "incomplete",
+  "isolation": {
+    "parent_and_child_memory_bytes": 68719476736,
+    "parent_and_child_swap_bytes": 0,
+    "empty_home_and_cache": true,
+    "offline_build_and_execution": true
+  },
+  "selections": {
+    "as": [
+      "installed_verified_revision"
+    ],
+    "c": [
+      "github_transient_ref_fetch_failure",
+      "installed_verified_revision"
+    ],
+    "c_ffi_bridge": [
+      "rejected_unknown_selection"
+    ],
+    "cpp": [
+      "installed_verified_revision"
+    ],
+    "csharp": [
+      "rejected_unknown_selection"
+    ],
+    "d": [
+      "rejected_unknown_selection"
+    ],
+    "fortran": [
+      "rejected_unknown_selection"
+    ],
+    "fsharp": [
+      "rejected_unknown_selection"
+    ],
+    "go": [
+      "rejected_unknown_selection"
+    ],
+    "haskell": [
+      "rejected_unknown_selection"
+    ],
+    "java": [
+      "rejected_unknown_selection"
+    ],
+    "js": [
+      "installed_verified_revision"
+    ],
+    "kotlin": [
+      "rejected_unknown_selection"
+    ],
+    "lua": [
+      "rejected_unknown_selection"
+    ],
+    "moonbit": [
+      "rejected_unknown_selection"
+    ],
+    "nim": [
+      "rejected_unknown_selection"
+    ],
+    "objectc": [
+      "rejected_unknown_selection"
+    ],
+    "odin": [
+      "rejected_unknown_selection"
+    ],
+    "php": [
+      "rejected_unknown_selection"
+    ],
+    "py": [
+      "rejected_unknown_selection"
+    ],
+    "r": [
+      "rejected_unknown_selection"
+    ],
+    "rs": [
+      "requires_explicit_rust_bindings_flags",
+      "installed_verified_revision"
+    ],
+    "ruby": [
+      "rejected_unknown_selection"
+    ],
+    "swift": [
+      "rejected_unknown_selection"
+    ],
+    "tinygo": [
+      "rejected_unknown_selection"
+    ],
+    "typescript": [
+      "installed_verified_revision"
+    ],
+    "vbnet": [
+      "rejected_unknown_selection"
+    ],
+    "wat": [
+      "installed_verified_revision"
+    ],
+    "zig": [
+      "rejected_unknown_selection"
+    ]
+  },
+  "oracle": {
+    "upstream": "frankarobotics/franka_ros2@4acc05c01ebfcdf916ee6b3df966df0ad7b2f9ec",
+    "serializer": "eProsima/Fast-CDR@9f4e60f7ac958e0fbbfe949102de3929cbbc226f",
+    "serializer_version": "v2.2.5",
+    "representation": "XCDRv1 PLAIN_CDR",
+    "fixtures": {
+      "le": {
+        "size": 84,
+        "sha256": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22",
+        "hex": "00010000000000000000f23f000000000000f0bf000000000000e8bf000000000000f03f000000000000d03f000000000000f0bf000000000000a03f000000000000b0bf000000000000c03f000000000000d0bf",
+        "values": [
+          1.125,
+          -1.0,
+          -0.75,
+          1.0,
+          0.25,
+          -1.0,
+          0.03125,
+          -0.0625,
+          0.125,
+          -0.25
+        ]
+      },
+      "be": {
+        "size": 84,
+        "sha256": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "hex": "000000003ff2000000000000bff0000000000000bfe80000000000003ff00000000000003fd0000000000000bff00000000000003fa0000000000000bfb00000000000003fc0000000000000bfd0000000000000",
+        "values": [
+          1.125,
+          -1.0,
+          -0.75,
+          1.0,
+          0.25,
+          -1.0,
+          0.03125,
+          -0.0625,
+          0.125,
+          -0.25
+        ]
+      }
+    }
+  },
+  "public_elbow_accessors": [
+    "read_position",
+    "read_desired_position"
+  ],
+  "candidate_schema_status": {
+    "outcome": "syntax_error",
+    "location": "src/platform/franka/schema.py:43"
+  },
+  "missing_toolchain": {
+    "rust": "wrrs and its guest target libraries",
+    "as": "Node.js 22.22.3",
+    "typescript": "Node.js 22.22.3"
+  },
+  "module_executions": [
+    {
+      "language": "c",
+      "project": "stock",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "815de8e94cb0a8f1d51e41bf1ada372b004173bb963780280d05ce1cfe189b6d",
+      "bytes": 24151,
+      "imports": [],
+      "import_policy_matches": true
+    },
+    {
+      "language": "c",
+      "project": "fastcdr-oracle",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "3081074a5ab03e5ad009639623eb9e127dbcbf1343df5595c9fff8529c3036f7",
+      "bytes": 26382,
+      "imports": [],
+      "import_policy_matches": true
+    },
+    {
+      "language": "cpp",
+      "project": "stock",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "8a74dfbf2f1120e79f020cd3973f062c88e1cbd19409846f64f474e31a984f99",
+      "bytes": 24568,
+      "imports": [],
+      "import_policy_matches": true
+    },
+    {
+      "language": "cpp",
+      "project": "fastcdr-oracle",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "1505aa89e6a802eff19426af454b60bc844d5ecb6c663ce91c0907f62baf6441",
+      "bytes": 27075,
+      "imports": [],
+      "import_policy_matches": true
+    },
+    {
+      "language": "wat",
+      "project": "stock",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "58a2556359f606c34b764fb3f71df4e22bb47a237d87777fba941276ef471ee0",
+      "bytes": 2126,
+      "imports": [],
+      "import_policy_matches": true
+    },
+    {
+      "language": "wat",
+      "project": "fastcdr-oracle",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "2d54b8ac9119c5897bb85841e3a7253a8b55523bb43d26c1b5c8e57d9f65091b",
+      "bytes": 2532,
+      "imports": [],
+      "import_policy_matches": true
+    },
+    {
+      "language": "js",
+      "project": "stock",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "a0f51b660508245889e5ddb05b2c07d2c264cd95576d7ee0c67526b0d050b881",
+      "bytes": 4719304,
+      "imports": [
+        "wasi_snapshot_preview1.clock_time_get"
+      ],
+      "import_policy_matches": true
+    },
+    {
+      "language": "js",
+      "project": "fastcdr-oracle",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "9cd99558cb342e341a8097d0c1796c907627d39ab8651f4b3286d71a63eb5f7f",
+      "bytes": 4719567,
+      "imports": [
+        "wasi_snapshot_preview1.clock_time_get"
+      ],
+      "import_policy_matches": true
+    },
+    {
+      "language": "rust",
+      "project": "stock",
+      "build": 255,
+      "xmake_test": 255,
+      "int": null,
+      "aot": null
+    },
+    {
+      "language": "rust",
+      "project": "fastcdr-oracle",
+      "build": 255,
+      "xmake_test": 255,
+      "int": null,
+      "aot": null
+    },
+    {
+      "language": "as",
+      "project": "stock",
+      "build": 255,
+      "xmake_test": 255,
+      "int": null,
+      "aot": null
+    },
+    {
+      "language": "as",
+      "project": "fastcdr-oracle",
+      "build": 255,
+      "xmake_test": 255,
+      "int": null,
+      "aot": null
+    },
+    {
+      "language": "typescript",
+      "project": "stock",
+      "build": 255,
+      "xmake_test": 255,
+      "int": null,
+      "aot": null
+    },
+    {
+      "language": "typescript",
+      "project": "fastcdr-oracle",
+      "build": 255,
+      "xmake_test": 255,
+      "int": null,
+      "aot": null
+    }
+  ],
+  "cpp_oracle_entry": "The independent C++ test guest uses C linkage for its _start export.",
+  "vendor_driver_or_simulator": "untested"
+}

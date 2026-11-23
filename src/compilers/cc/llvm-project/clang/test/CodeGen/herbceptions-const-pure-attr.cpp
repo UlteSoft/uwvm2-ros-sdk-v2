@@ -1,0 +1,70 @@
+// RUN: %clang -std=c++20 -fherbceptions -fno-exceptions -S -fdiscard-value-names -emit-llvm -Werror -o - %s | FileCheck %s
+
+// 'const'/'pure' are honored on herbceptions functions: the failure
+// discriminant is part of the return value ({union{T,E}, i1}), so call
+// elision/dedup preserves it and the attributes remain sound. -Werror also
+// pins that no "attribute ignored" diagnostic is emitted.
+
+namespace std {
+struct error_domain_singleton {};
+struct error {
+  void *d;
+  __SIZE_TYPE__ c;
+};
+// `coff` below is a `return_failure{int}` callee auto-propagated into the
+// std::error channel of a `throws` function, which requires converting its
+// int payload through std::error_domain<int>.
+template <class T> class error_domain;
+template <> class error_domain<int> {
+public:
+  static error_domain_singleton *domain() noexcept;
+  static __SIZE_TYPE__ code(int) noexcept;
+};
+} // namespace std
+
+struct Big { long long a, b, c, d, e, f, g, h; }; // ABI-indirect payload
+
+__attribute__((const)) int cof(int x) throws;
+__attribute__((pure)) int puf(int x) throws;
+__attribute__((const)) int coff(int x) return_failure{int};
+__attribute__((const)) Big cobf(int x) throws;
+
+int caller(int x) throws {
+  // CHECK: call { { ptr, i64 }, i1 } @_Z3cofDri(i32 noundef %{{.*}}) #[[CONST_CALL:[0-9]+]]
+  return try(cof(x));
+}
+// Register return: full memory(none); the discriminant is just another
+// result component.
+// CHECK-LABEL: declare { { ptr, i64 }, i1 } @_Z3cofDri(i32 noundef)
+// CHECK-SAME:  #[[CONST_ATTRS:[0-9]+]]
+
+int caller2(int x) throws {
+  // CHECK: call { { ptr, i64 }, i1 } @_Z3pufDri(i32 noundef %{{.*}}) #[[PURE_CALL:[0-9]+]]
+  return try(puf(x));
+}
+// CHECK-LABEL: declare { { ptr, i64 }, i1 } @_Z3pufDri(i32 noundef)
+// CHECK-SAME:  #[[PURE_ATTRS:[0-9]+]]
+
+int caller3(int x) throws {
+  // CHECK: call { i32, i1 } @_Z4coffDEiEi(i32 noundef %{{.*}}) #[[CONST_CALL]]
+  return try(coff(x));
+}
+// CHECK-LABEL: declare { i32, i1 } @_Z4coffDEiEi(i32 noundef)
+// CHECK-SAME:  #[[CONST_ATTRS]]
+
+Big bcaller(int x) throws {
+  // CHECK: call { { ptr, i64 }, i1 } @_Z4cobfDri(ptr writable herbthrows_sret(%struct.Big) align 8 %{{.*}}, i32 noundef %{{.*}}) #[[SRET_CALL:[0-9]+]]
+  return try(cobf(x));
+}
+// Indirect payload: the payload is written through the 'herbthrows_sret' pointer,
+// so the memory effect is weakened to argmem -- exactly like a plain 'sret'
+// return. The discriminant still rides in the {E, i1} result.
+// CHECK-LABEL: declare { { ptr, i64 }, i1 } @_Z4cobfDri(ptr writable herbthrows_sret(%struct.Big) align 8, i32 noundef)
+// CHECK-SAME:  #[[SRET_ATTRS:[0-9]+]]
+
+// CHECK-DAG: attributes #[[CONST_ATTRS]] = { {{.*}}herbthrows{{.*}}willreturn memory(none){{.*}} }
+// CHECK-DAG: attributes #[[PURE_ATTRS]] = { {{.*}}herbthrows{{.*}}willreturn memory(read){{.*}} }
+// CHECK-DAG: attributes #[[SRET_ATTRS]] = { {{.*}}herbthrows{{.*}}willreturn memory(argmem: readwrite){{.*}} }
+// CHECK-DAG: attributes #[[CONST_CALL]] = { {{.*}}herbthrows{{.*}}memory(none) }
+// CHECK-DAG: attributes #[[PURE_CALL]] = { {{.*}}herbthrows{{.*}}memory(read) }
+// CHECK-DAG: attributes #[[SRET_CALL]] = { {{.*}}herbthrows{{.*}}memory(argmem: readwrite) }

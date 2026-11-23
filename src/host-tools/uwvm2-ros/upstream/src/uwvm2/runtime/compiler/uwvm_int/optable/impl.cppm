@@ -1,0 +1,71 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-04-05
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+/// @note This requires a dependency after uwvm2.uwvm.runtime.storage.
+
+module;
+
+export module uwvm2.runtime.compiler.uwvm_int.optable;
+
+export import :define;
+export import :storage;
+export import :call;
+export import :exception;
+export import :exception_throw;
+export import :exception_metadata;
+export import :compare;
+export import :constop;
+export import :control;
+export import :convert;
+export import :memory;
+export import :memory64;
+export import :memtag;
+export import :memtag_bulk;
+export import :memory64_simd;
+export import :memtag_simd;
+export import :memory64_bulk;
+// The public selector API is declared by :register_ring and is consumed through
+// this primary interface by the retained full translator.
+export import :register_ring;
+export import :wasm1p1;
+export import :gc;
+export import :table64;
+export import :threads;
+export import :memtag_threads;
+export import :memory64_atomic;
+export import :numeric;
+export import :stack;
+export import :variable;
+export import :conbine;
+export import :delay_local;
+export import :instruction_reorder;
+export import :conbine_heavy;
+export import :combine_extra_heavy;
+
+#ifndef UWVM_MODULE
+# define UWVM_MODULE
+#endif
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT export
+#endif
+
+#include "impl.h"

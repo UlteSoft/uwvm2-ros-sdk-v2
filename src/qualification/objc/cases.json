@@ -1,0 +1,48 @@
+[
+  {
+    "id": "gcc-object", "language": "objc", "project": "gcc", "kind": "library-component",
+    "member": "upstream/gcc/libobjc/Object.m", "client": "clients/gcc-object.m",
+    "defines": ["Object=QualificationGCCObject"], "stdout": "gcc-libobjc-object-ok\n"
+  },
+  {
+    "id": "objfw-crc32", "language": "objc", "project": "objfw", "kind": "library-component",
+    "member": "upstream/objfw/src/OFCRC32.m", "client": "clients/objfw-crc32.m",
+    "includes": ["upstream/objfw/src", "ports/objfw"], "stdout": "objfw-crc32-ok\n"
+  },
+  {
+    "id": "chromium-swizzler", "language": "objcpp", "project": "chromium", "kind": "library-component",
+    "member": "upstream/chromium/base/apple/scoped_objc_class_swizzler.mm", "client": "clients/chromium-swizzler.mm",
+    "includes": ["upstream/chromium", "ports/chromium"], "stdout": "chromium-scoped-objc-swizzler-ok\n"
+  },
+  {
+    "id": "objectivecpp-foundation", "language": "objcpp", "project": "objectivecpp", "kind": "dependency-probe",
+    "member": "upstream/objectivecpp/ObjectiveCPP/source/NSString+ObjectiveCPP.mm",
+    "includes": ["upstream/objectivecpp/ObjectiveCPP/include"], "missing_header": "Foundation/Foundation.h"
+  },
+  {
+    "id": "gnustep-category", "language": "objc", "project": "libobjc2", "kind": "upstream-runtime-test",
+    "units": ["Test/Category.m", "Test/Test.m"], "stdout": ""
+  },
+  {
+    "id": "gnustep-refcount", "language": "objc", "project": "libobjc2", "kind": "upstream-runtime-test",
+    "units": ["Test/FastRefCount.m", "Test/Test.m"], "stdout": ""
+  },
+  {
+    "id": "gnustep-objc-eh", "language": "objc", "project": "libobjc2", "kind": "upstream-runtime-test",
+    "units": ["Test/ExceptionTest.m", "Test/Test.m"], "requires_eh": true, "stdout": ""
+  },
+  {
+    "id": "gnustep-objcpp-eh-twice", "language": "objcpp", "project": "libobjc2", "kind": "upstream-runtime-test",
+    "units": ["Test/ObjCXXEHInteropTwice.mm", "Test/Test.m"], "requires_eh": true,
+    "stdout": "Raising Test\nCaught\nRaising Test\nCaught\n"
+  },
+  {
+    "id": "gnustep-cross-unit-eh", "language": "objcpp", "project": "libobjc2", "kind": "upstream-runtime-test",
+    "units": ["Test/ObjCXXEHInterop.mm", "Test/ObjCXXEHInterop.m", "Test/Test.m"], "requires_eh": true,
+    "stdout_pattern": "Poking from minRepM\nRaising MyException\nCaught - re-raising\nIn NS_HANDLER block, 0x0*[1-9a-fA-F][0-9a-fA-F]*\n"
+  },
+  {
+    "id": "mixed-eh", "language": "objcpp", "kind": "sdk-interop-test", "requires_eh": true,
+    "client": "clients/mixed-eh.mm", "stdout": "mixed-objc-cxx-eh-ok\n"
+  }
+]

@@ -1,0 +1,2119 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+# include <cstdint>
+# include <cstring>
+# include <concepts>
+# include <limits>
+# include <memory>
+# include <type_traits>
+# include <utility>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/runtime/compiler/uwvm_int/macro/push_macros.h>
+# include <uwvm2/uwvm/runtime/macro/push_macros.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/impl.h>
+# include <uwvm2/object/impl.h>
+# include <uwvm2/uwvm/runtime/storage/gc_object.h>
+# include <uwvm2/uwvm/wasm/type/all_module.h>
+# include "define.h"
+# include "register_ring.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+#ifndef UWVM_MODULE
+# include <uwvm2/runtime/lib/uwvm_runtime_local_imported_provider_callbacks.h>
+# include <uwvm2/runtime/lib/uwvm_runtime_wasm_fp_environment.h>
+#endif
+
+#if defined(UWVM_RUNTIME_UWVM_INTERPRETER)
+# if !(__cpp_pack_indexing >= 202311L)
+#  error "UWVM requires at least C++26 standard compiler. See https://en.cppreference.com/w/cpp/feature_test#cpp_pack_indexing"
+# endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::runtime::compiler::uwvm_int::optable
+{
+    namespace variable_details
+    {
+        using wasm_i32 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_i32;
+        using wasm_i64 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_i64;
+        using wasm_f32 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_f32;
+        using wasm_f64 = ::uwvm2::parser::wasm::standard::wasm1::type::wasm_f64;
+        using wasm_v128 = ::uwvm2::parser::wasm::standard::wasm1p1::type::wasm_v128;
+        using wasm_funcref = ::uwvm2::object::global::wasm_funcref_t;
+        using wasm_externref = ::uwvm2::object::global::wasm_externref_t;
+
+        using local_offset_t = ::std::size_t;
+        using global_storage_t = ::uwvm2::object::global::wasm_global_storage_t;
+        using local_imported_t = ::uwvm2::uwvm::wasm::type::local_imported_t;
+
+        template <typename T>
+        UWVM_ALWAYS_INLINE inline constexpr T read_imm(::std::byte const*& ip) noexcept
+        {
+            T v;  // no init
+            ::std::memcpy(::std::addressof(v), ip, sizeof(v));
+            // [compiler-emitted bytecode slots][successor] | stream end
+            // [complete typed slots                    ] | no guest Wasm read
+            // ^^ ip: read_imm consumes a complete compiler-owned slot; no guest bytecode is read here.
+            ip += sizeof(v);
+            return v;
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename OperandT>
+        inline consteval bool stacktop_enabled_for() noexcept
+        {
+            if constexpr(::std::same_as<OperandT, wasm_i32>) { return CompileOption.i32_stack_top_begin_pos != CompileOption.i32_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_i64>) { return CompileOption.i64_stack_top_begin_pos != CompileOption.i64_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_f32>) { return CompileOption.f32_stack_top_begin_pos != CompileOption.f32_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_f64>) { return CompileOption.f64_stack_top_begin_pos != CompileOption.f64_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_v128>)
+            {
+                return CompileOption.v128_stack_top_begin_pos != CompileOption.v128_stack_top_end_pos;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename OperandT>
+        inline consteval ::std::size_t range_begin() noexcept
+        {
+            if constexpr(::std::same_as<OperandT, wasm_i32>) { return CompileOption.i32_stack_top_begin_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_i64>) { return CompileOption.i64_stack_top_begin_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_f32>) { return CompileOption.f32_stack_top_begin_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_f64>) { return CompileOption.f64_stack_top_begin_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_v128>) { return CompileOption.v128_stack_top_begin_pos; }
+            else
+            {
+                return SIZE_MAX;
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename OperandT>
+        inline consteval ::std::size_t range_end() noexcept
+        {
+            if constexpr(::std::same_as<OperandT, wasm_i32>) { return CompileOption.i32_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_i64>) { return CompileOption.i64_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_f32>) { return CompileOption.f32_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_f64>) { return CompileOption.f64_stack_top_end_pos; }
+            else if constexpr(::std::same_as<OperandT, wasm_v128>) { return CompileOption.v128_stack_top_end_pos; }
+            else
+            {
+                return SIZE_MAX;
+            }
+        }
+
+        template <typename GlobalT>
+        // Globals and locals are transport, not arithmetic. Use destination references
+        // plus memcpy for FP storage in both directions: GCC -O0 may expose an x87
+        // return/copy even when the source expression is only bit_cast or assignment.
+        // A control-register guard cannot reconstruct an sNaN already quieted by the
+        // value ABI. Keep the uncached local/global opfunc paths byte-based as well.
+        UWVM_ALWAYS_INLINE inline constexpr void load_global(global_storage_t* global_p, GlobalT& v) noexcept
+        {
+            if constexpr(::std::same_as<GlobalT, wasm_i32>) { v = global_p->storage.i32; }
+            else if constexpr(::std::same_as<GlobalT, wasm_i64>) { v = global_p->storage.i64; }
+            else if constexpr(::std::same_as<GlobalT, wasm_f32>) { ::std::memcpy(::std::addressof(v), ::std::addressof(global_p->storage.f32), sizeof(v)); }
+            else if constexpr(::std::same_as<GlobalT, wasm_f64>) { ::std::memcpy(::std::addressof(v), ::std::addressof(global_p->storage.f64), sizeof(v)); }
+            else if constexpr(::std::same_as<GlobalT, wasm_v128>) { v = global_p->storage.v128; }
+            else if constexpr(::std::same_as<GlobalT, wasm_funcref> || ::std::same_as<GlobalT, wasm_externref>) { v.ref = global_p->storage.ref; }
+            else { static_assert(::std::same_as<GlobalT, wasm_i32>); }
+        }
+
+        template <typename GlobalT>
+        UWVM_ALWAYS_INLINE inline constexpr void store_global(global_storage_t* global_p, GlobalT const& v) noexcept
+        {
+            if constexpr(::std::same_as<GlobalT, wasm_i32>) { global_p->storage.i32 = v; }
+            else if constexpr(::std::same_as<GlobalT, wasm_i64>) { global_p->storage.i64 = v; }
+            else if constexpr(::std::same_as<GlobalT, wasm_f32>) { ::std::memcpy(::std::addressof(global_p->storage.f32), ::std::addressof(v), sizeof(v)); }
+            else if constexpr(::std::same_as<GlobalT, wasm_f64>) { ::std::memcpy(::std::addressof(global_p->storage.f64), ::std::addressof(v), sizeof(v)); }
+            else if constexpr(::std::same_as<GlobalT, wasm_v128>) { global_p->storage.v128 = v; }
+            else if constexpr(::std::same_as<GlobalT, wasm_funcref> || ::std::same_as<GlobalT, wasm_externref>)
+            {
+                auto const* receiving_store{static_cast<::uwvm2::uwvm::runtime::storage::gc_object_store const*>(
+                    global_p->ref_lease_store)};
+                if(::uwvm2::uwvm::runtime::storage::uwvm2_gc_retain_reference(
+                    receiving_store, ::std::addressof(v.ref)) !=
+                   ::uwvm2::uwvm::runtime::storage::gc_object_status::ok) [[unlikely]]
+                { ::fast_io::fast_terminate(); }
+                global_p->storage.ref = v.ref;
+            }
+            else { static_assert(::std::same_as<GlobalT, wasm_i32>); }
+        }
+
+#if !defined(UWVM_RUNTIME_LLVM_JIT)
+        // The guard must finish in this ordinary helper frame BEFORE the opfunc's
+        // musttail dispatch. A live RAII guard in the tail-dispatch frame would need
+        // destruction after the callee, violating the intended tail-call lifetime.
+        // Byte output also prevents a second FP ABI conversion after restoration.
+        // Keep the control-register work in one small native frame, not in every register-ring opfunc. In particular,
+        // restore controls before the caller reloads its cached FP registers. Inline linkage retains header-only use;
+        // noinline avoids duplicating this boundary for every value type and interpreter register configuration.
+        UWVM_NOINLINE inline void local_imported_global_get_preserving_fp_control(local_imported_t* local_imported_module,
+                                                                                 ::std::size_t global_index,
+                                                                                 ::std::byte* out) noexcept
+        {
+            ::uwvm2::runtime::lib::details::scoped_wasm_host_fp_control_restore fp_environment_guard{};
+            if(!fp_environment_guard.ready()) [[unlikely]] { ::fast_io::fast_terminate(); }
+            local_imported_module->global_get_from_index(global_index, out);
+        }
+
+        UWVM_NOINLINE inline bool local_imported_global_set_preserving_fp_control(local_imported_t* local_imported_module,
+                                                                                 ::std::size_t global_index,
+                                                                                 ::std::byte const* in) noexcept
+        {
+            ::uwvm2::runtime::lib::details::scoped_wasm_host_fp_control_restore fp_environment_guard{};
+            if(!fp_environment_guard.ready()) [[unlikely]] { ::fast_io::fast_terminate(); }
+            return local_imported_module->global_set_from_index(global_index, in);
+        }
+#endif
+
+        template <typename GlobalT>
+        UWVM_ALWAYS_INLINE inline constexpr void load_local_imported_global(local_imported_t* local_imported_module,
+                                                                            ::std::size_t global_index, GlobalT& v) noexcept
+        {
+            static_assert(::std::is_trivially_copyable_v<GlobalT>);
+            if(local_imported_module == nullptr) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+#if defined(UWVM_RUNTIME_LLVM_JIT)
+            ::uwvm2::runtime::lib::details::invoke_local_imported_provider_global_get(
+                local_imported_module, global_index, reinterpret_cast<::std::byte*>(::std::addressof(v)));
+#else
+            // Restore controls before dispatch without returning through a native floating-point register.
+            if constexpr(::uwvm2::runtime::lib::details::wasm_fp_environment_is_fixed)
+            { local_imported_module->global_get_from_index(global_index, reinterpret_cast<::std::byte*>(::std::addressof(v))); }
+            else
+            { local_imported_global_get_preserving_fp_control(local_imported_module, global_index, reinterpret_cast<::std::byte*>(::std::addressof(v))); }
+#endif
+        }
+
+        template <typename GlobalT>
+        UWVM_ALWAYS_INLINE inline constexpr void store_local_imported_global(local_imported_t* local_imported_module,
+                                                                              ::std::size_t global_index,
+                                                                              GlobalT const& v) noexcept
+        {
+            static_assert(::std::is_trivially_copyable_v<GlobalT>);
+            if(local_imported_module == nullptr) [[unlikely]] { ::fast_io::fast_terminate(); }
+#if defined(UWVM_RUNTIME_LLVM_JIT)
+            if(!::uwvm2::runtime::lib::details::invoke_local_imported_provider_global_set(
+                   local_imported_module, global_index, reinterpret_cast<::std::byte const*>(::std::addressof(v)))) [[unlikely]]
+#else
+            bool const success{[&]() noexcept
+            {
+                if constexpr(::uwvm2::runtime::lib::details::wasm_fp_environment_is_fixed)
+                { return local_imported_module->global_set_from_index(global_index, reinterpret_cast<::std::byte const*>(::std::addressof(v))); }
+                else
+                { return local_imported_global_set_preserving_fp_control(local_imported_module, global_index,
+                                                                         reinterpret_cast<::std::byte const*>(::std::addressof(v))); }
+            }()};
+            if(!success) [[unlikely]]
+#endif
+            {
+                ::fast_io::fast_terminate();
+            }
+        }
+    }  // namespace variable_details
+
+    // ========================
+    // local.get / local.set / local.tee
+    // ========================
+
+    /// @brief `local.get` opcode (tail-call): pushes a local value onto the operand stack.
+    /// @details
+    /// - Stack-top optimization: supported for the local value type.
+    /// - `type[0]` layout: `[opfunc_ptr][local_offset:local_offset_t][next_opfunc_ptr]`.
+    /// @note `local_offset` is a byte offset from `type...[2u]` (local base) and is provided by the translator.
+    template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_get_typed(Type... type) UWVM_THROWS
+    {
+        static_assert(sizeof...(Type) >= 3uz);
+        static_assert(::std::same_as<Type...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[2u]>, ::std::byte*>);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ type...[0] advances by sizeof(uwvm_interpreter_opfunc_t<Type...>); the emitter wrote this complete opfunc slot.
+        type...[0] += sizeof(uwvm_interpreter_opfunc_t<Type...>);
+
+        variable_details::local_offset_t const off{variable_details::read_imm<variable_details::local_offset_t>(type...[0])};
+
+        if constexpr(variable_details::stacktop_enabled_for<CompileOption, LocalT>())
+        {
+            LocalT v;
+            ::std::memcpy(::std::addressof(v), type...[2u] + off, sizeof(v));
+            constexpr ::std::size_t range_begin{variable_details::range_begin<CompileOption, LocalT>()};
+            constexpr ::std::size_t range_end{variable_details::range_end<CompileOption, LocalT>()};
+            static_assert(sizeof...(Type) >= range_end);
+            static_assert(range_begin <= curr_stack_top && curr_stack_top < range_end);
+
+            constexpr ::std::size_t new_pos{details::ring_prev_pos(curr_stack_top, range_begin, range_end)};
+            details::set_curr_val_to_stacktop_cache<CompileOption, LocalT, new_pos>(v, type...);
+        }
+        else
+        {
+            ::std::memcpy(type...[1u], type...[2u] + off, sizeof(LocalT));
+            // operand frame: operand_base ... [live bytes][typed result bytes] | frame_end
+            //                [validated post-op stack depth           ] unsafe past frame_end
+            // ^^ type...[1u] advances by sizeof(LocalT); operand_stack_byte_max reserves this result.
+            type...[1u] += sizeof(LocalT);
+        }
+
+        uwvm_interpreter_opfunc_t<Type...> next_interpreter;  // no init
+        ::std::memcpy(::std::addressof(next_interpreter), type...[0], sizeof(next_interpreter));
+        UWVM_MUSTTAIL return next_interpreter(type...);
+    }
+
+    /// @brief `local.set` opcode (tail-call): pops a value and writes it to a local.
+    /// @details
+    /// - Stack-top optimization: supported for the local value type.
+    /// - `type[0]` layout: `[opfunc_ptr][local_offset:local_offset_t][next_opfunc_ptr]`.
+    template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_set_typed(Type... type) UWVM_THROWS
+    {
+        static_assert(sizeof...(Type) >= 3uz);
+        static_assert(::std::same_as<Type...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[2u]>, ::std::byte*>);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ type...[0] advances by sizeof(uwvm_interpreter_opfunc_t<Type...>); the emitter wrote this complete opfunc slot.
+        type...[0] += sizeof(uwvm_interpreter_opfunc_t<Type...>);
+
+        variable_details::local_offset_t const off{variable_details::read_imm<variable_details::local_offset_t>(type...[0])};
+
+        if constexpr(variable_details::stacktop_enabled_for<CompileOption, LocalT>())
+        {
+            constexpr ::std::size_t range_begin{variable_details::range_begin<CompileOption, LocalT>()};
+            constexpr ::std::size_t range_end{variable_details::range_end<CompileOption, LocalT>()};
+            static_assert(range_begin <= curr_stack_top && curr_stack_top < range_end);
+            LocalT const v{get_curr_val_from_operand_stack_top<CompileOption, LocalT, curr_stack_top>(type...)};
+            ::std::memcpy(type...[2u] + off, ::std::addressof(v), sizeof(v));
+        }
+        else
+        {
+            // operand frame: operand_base ... [live prefix][typed input bytes] old_top ... frame_end
+            //                [validated existing stack depth       ] unsafe before operand_base
+            // ^^ type...[1u] retreats by sizeof(LocalT); the emitter proved this typed input was live.
+            type...[1u] -= sizeof(LocalT);
+            ::std::memcpy(type...[2u] + off, type...[1u], sizeof(LocalT));
+        }
+
+        uwvm_interpreter_opfunc_t<Type...> next_interpreter;  // no init
+        ::std::memcpy(::std::addressof(next_interpreter), type...[0], sizeof(next_interpreter));
+        UWVM_MUSTTAIL return next_interpreter(type...);
+    }
+
+    /// @brief `local.tee` opcode (tail-call): writes the current top value to a local without popping it.
+    /// @details
+    /// - Stack-top optimization: supported for the local value type.
+    /// - `type[0]` layout: `[opfunc_ptr][local_offset:local_offset_t][next_opfunc_ptr]`.
+    template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_tee_typed(Type... type) UWVM_THROWS
+    {
+        static_assert(sizeof...(Type) >= 3uz);
+        static_assert(::std::same_as<Type...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[2u]>, ::std::byte*>);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ type...[0] advances by sizeof(uwvm_interpreter_opfunc_t<Type...>); the emitter wrote this complete opfunc slot.
+        type...[0] += sizeof(uwvm_interpreter_opfunc_t<Type...>);
+
+        variable_details::local_offset_t const off{variable_details::read_imm<variable_details::local_offset_t>(type...[0])};
+
+        if constexpr(variable_details::stacktop_enabled_for<CompileOption, LocalT>())
+        {
+            constexpr ::std::size_t range_begin{variable_details::range_begin<CompileOption, LocalT>()};
+            constexpr ::std::size_t range_end{variable_details::range_end<CompileOption, LocalT>()};
+            static_assert(range_begin <= curr_stack_top && curr_stack_top < range_end);
+            LocalT const v{get_curr_val_from_operand_stack_top<CompileOption, LocalT, curr_stack_top>(type...)};
+            ::std::memcpy(type...[2u] + off, ::std::addressof(v), sizeof(v));
+        }
+        else
+        {
+            ::std::memcpy(type...[2u] + off, type...[1u] - sizeof(LocalT), sizeof(LocalT));
+        }
+
+        uwvm_interpreter_opfunc_t<Type...> next_interpreter;  // no init
+        ::std::memcpy(::std::addressof(next_interpreter), type...[0], sizeof(next_interpreter));
+        UWVM_MUSTTAIL return next_interpreter(type...);
+    }
+
+    // Direct fptr helpers for local.get
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_get_i32_ptr() noexcept
+    { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_i32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_get_i64_ptr() noexcept
+    { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_i64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_get_f32_ptr() noexcept
+    { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_f32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_get_f64_ptr() noexcept
+    { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_f64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_get_v128_ptr() noexcept
+    { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_v128, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_get_funcref_ptr() noexcept
+    { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_funcref, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_get_externref_ptr() noexcept
+    { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_externref, curr_stack_top, Type...>; }
+
+    // Direct fptr helpers for local.set
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_set_i32_ptr() noexcept
+    { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_i32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_set_i64_ptr() noexcept
+    { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_i64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_set_f32_ptr() noexcept
+    { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_f32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_set_f64_ptr() noexcept
+    { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_f64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_set_v128_ptr() noexcept
+    { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_v128, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_set_funcref_ptr() noexcept
+    { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_funcref, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_set_externref_ptr() noexcept
+    { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_externref, curr_stack_top, Type...>; }
+
+    // Direct fptr helpers for local.tee
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_tee_i32_ptr() noexcept
+    { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_i32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_tee_i64_ptr() noexcept
+    { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_i64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_tee_f32_ptr() noexcept
+    { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_f32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_tee_f64_ptr() noexcept
+    { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_f64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_tee_v128_ptr() noexcept
+    { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_v128, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_tee_funcref_ptr() noexcept
+    { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_funcref, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_local_tee_externref_ptr() noexcept
+    { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_externref, curr_stack_top, Type...>; }
+
+    // Byref (non-tail-call) variants
+
+    template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeRef>
+        requires (!CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_get_typed(TypeRef & ... typeref) UWVM_THROWS
+    {
+        static_assert(sizeof...(TypeRef) >= 3uz);
+        static_assert(::std::same_as<TypeRef...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[2u]>, ::std::byte*>);
+        static_assert(CompileOption.i32_stack_top_begin_pos == SIZE_MAX && CompileOption.i32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.i64_stack_top_begin_pos == SIZE_MAX && CompileOption.i64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f32_stack_top_begin_pos == SIZE_MAX && CompileOption.f32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f64_stack_top_begin_pos == SIZE_MAX && CompileOption.f64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.v128_stack_top_begin_pos == SIZE_MAX && CompileOption.v128_stack_top_end_pos == SIZE_MAX);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ typeref...[0] advances by sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>); the emitter wrote this complete opfunc slot.
+        typeref...[0] += sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>);
+
+        variable_details::local_offset_t const off{variable_details::read_imm<variable_details::local_offset_t>(typeref...[0])};
+
+        ::std::memcpy(typeref...[1u], typeref...[2u] + off, sizeof(LocalT));
+        // result push: operand_base ... [current stack][result bytes] | frame_end
+        // [safe compiled post-op byte depth                   ] unsafe (past frame_end)
+        // ^^ typeref...[1u] advances by sizeof(LocalT); the frame reserves operand_stack_byte_max from validation.
+        typeref...[1u] += sizeof(LocalT);
+    }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeRef>
+        requires (!CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_set_typed(TypeRef & ... typeref) UWVM_THROWS
+    {
+        static_assert(sizeof...(TypeRef) >= 3uz);
+        static_assert(::std::same_as<TypeRef...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[2u]>, ::std::byte*>);
+        static_assert(CompileOption.i32_stack_top_begin_pos == SIZE_MAX && CompileOption.i32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.i64_stack_top_begin_pos == SIZE_MAX && CompileOption.i64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f32_stack_top_begin_pos == SIZE_MAX && CompileOption.f32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f64_stack_top_begin_pos == SIZE_MAX && CompileOption.f64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.v128_stack_top_begin_pos == SIZE_MAX && CompileOption.v128_stack_top_end_pos == SIZE_MAX);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ typeref...[0] advances by sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>); the emitter wrote this complete opfunc slot.
+        typeref...[0] += sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>);
+
+        variable_details::local_offset_t const off{variable_details::read_imm<variable_details::local_offset_t>(typeref...[0])};
+
+        // operand pop: operand_base ... [validated live bytes] old_top ... frame_end
+        // [safe existing stack prefix                   ] unsafe (before operand_base)
+        // ^^ typeref...[1u] retreats by sizeof(LocalT); the emitted stack effect proves those bytes are live.
+        typeref...[1u] -= sizeof(LocalT);
+        ::std::memcpy(typeref...[2u] + off, typeref...[1u], sizeof(LocalT));
+    }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeRef>
+        requires (!CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_tee_typed(TypeRef & ... typeref) UWVM_THROWS
+    {
+        static_assert(sizeof...(TypeRef) >= 3uz);
+        static_assert(::std::same_as<TypeRef...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[2u]>, ::std::byte*>);
+        static_assert(CompileOption.i32_stack_top_begin_pos == SIZE_MAX && CompileOption.i32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.i64_stack_top_begin_pos == SIZE_MAX && CompileOption.i64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f32_stack_top_begin_pos == SIZE_MAX && CompileOption.f32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f64_stack_top_begin_pos == SIZE_MAX && CompileOption.f64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.v128_stack_top_begin_pos == SIZE_MAX && CompileOption.v128_stack_top_end_pos == SIZE_MAX);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ typeref...[0] advances by sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>); the emitter wrote this complete opfunc slot.
+        typeref...[0] += sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>);
+
+        variable_details::local_offset_t const off{variable_details::read_imm<variable_details::local_offset_t>(typeref...[0])};
+
+        ::std::memcpy(typeref...[2u] + off, typeref...[1u] - sizeof(LocalT), sizeof(LocalT));
+    }
+
+    // ========================
+    // global.get / global.set
+    // ========================
+
+    /// @brief `global.get` opcode (tail-call): pushes a global value.
+    /// @details
+    /// - Stack-top optimization: supported for the global value type.
+    /// - `type[0]` layout: `[opfunc_ptr][global_ptr:wasm_global_storage_t*][next_opfunc_ptr]`.
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_global_get_typed(Type... type) UWVM_THROWS
+    {
+        using global_storage_t = ::uwvm2::object::global::wasm_global_storage_t;
+
+        static_assert(sizeof...(Type) >= 3uz);
+        static_assert(::std::same_as<Type...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[2u]>, ::std::byte*>);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ type...[0] advances by sizeof(uwvm_interpreter_opfunc_t<Type...>); the emitter wrote this complete opfunc slot.
+        type...[0] += sizeof(uwvm_interpreter_opfunc_t<Type...>);
+
+        global_storage_t* global_p{variable_details::read_imm<global_storage_t*>(type...[0])};
+        GlobalT v;
+        variable_details::load_global(global_p, v);
+
+        if constexpr(variable_details::stacktop_enabled_for<CompileOption, GlobalT>())
+        {
+            constexpr ::std::size_t range_begin{variable_details::range_begin<CompileOption, GlobalT>()};
+            constexpr ::std::size_t range_end{variable_details::range_end<CompileOption, GlobalT>()};
+            static_assert(sizeof...(Type) >= range_end);
+            static_assert(range_begin <= curr_stack_top && curr_stack_top < range_end);
+
+            constexpr ::std::size_t new_pos{details::ring_prev_pos(curr_stack_top, range_begin, range_end)};
+            details::set_curr_val_to_stacktop_cache<CompileOption, GlobalT, new_pos>(v, type...);
+        }
+        else
+        {
+            ::std::memcpy(type...[1u], ::std::addressof(v), sizeof(v));
+            // operand frame: operand_base ... [live bytes][typed result bytes] | frame_end
+            //                [validated post-op stack depth           ] unsafe past frame_end
+            // ^^ type...[1u] advances by sizeof(v); operand_stack_byte_max reserves this result.
+            type...[1u] += sizeof(v);
+        }
+
+        uwvm_interpreter_opfunc_t<Type...> next_interpreter;  // no init
+        ::std::memcpy(::std::addressof(next_interpreter), type...[0], sizeof(next_interpreter));
+        UWVM_MUSTTAIL return next_interpreter(type...);
+    }
+
+    /// @brief `global.set` opcode (tail-call): pops a value and writes it to a global.
+    /// @details
+    /// - Stack-top optimization: supported for the global value type.
+    /// - `type[0]` layout: `[opfunc_ptr][global_ptr:wasm_global_storage_t*][next_opfunc_ptr]`.
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_global_set_typed(Type... type) UWVM_THROWS
+    {
+        using global_storage_t = ::uwvm2::object::global::wasm_global_storage_t;
+
+        static_assert(sizeof...(Type) >= 3uz);
+        static_assert(::std::same_as<Type...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[2u]>, ::std::byte*>);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ type...[0] advances by sizeof(uwvm_interpreter_opfunc_t<Type...>); the emitter wrote this complete opfunc slot.
+        type...[0] += sizeof(uwvm_interpreter_opfunc_t<Type...>);
+
+        global_storage_t* global_p{variable_details::read_imm<global_storage_t*>(type...[0])};
+
+        GlobalT v;  // no init
+        if constexpr(variable_details::stacktop_enabled_for<CompileOption, GlobalT>())
+        {
+            constexpr ::std::size_t range_begin{variable_details::range_begin<CompileOption, GlobalT>()};
+            constexpr ::std::size_t range_end{variable_details::range_end<CompileOption, GlobalT>()};
+            static_assert(range_begin <= curr_stack_top && curr_stack_top < range_end);
+            v = get_curr_val_from_operand_stack_top<CompileOption, GlobalT, curr_stack_top>(type...);
+        }
+        else
+        {
+            // operand frame: operand_base ... [live prefix][typed input bytes] old_top ... frame_end
+            //                [validated existing stack depth       ] unsafe before operand_base
+            // ^^ type...[1u] retreats by sizeof(GlobalT); the emitter proved this typed input was live.
+            type...[1u] -= sizeof(GlobalT);
+            ::std::memcpy(::std::addressof(v), type...[1u], sizeof(v));
+        }
+
+        variable_details::store_global(global_p, v);
+
+        uwvm_interpreter_opfunc_t<Type...> next_interpreter;  // no init
+        ::std::memcpy(::std::addressof(next_interpreter), type...[0], sizeof(next_interpreter));
+        UWVM_MUSTTAIL return next_interpreter(type...);
+    }
+
+    /// @brief `global.get` through a local-imported module (tail-call).
+    /// @details `type[0]` layout:
+    /// `[opfunc_ptr][module_ptr:local_imported_t*][global_index:size_t][next_opfunc_ptr]`.
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_imported_global_get_typed(Type... type) UWVM_THROWS
+    {
+        using local_imported_t = variable_details::local_imported_t;
+
+        static_assert(sizeof...(Type) >= 3uz);
+        static_assert(::std::same_as<Type...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[2u]>, ::std::byte*>);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ type...[0] advances by sizeof(uwvm_interpreter_opfunc_t<Type...>); the emitter wrote this complete opfunc slot.
+        type...[0] += sizeof(uwvm_interpreter_opfunc_t<Type...>);
+
+        local_imported_t* local_imported_module{variable_details::read_imm<local_imported_t*>(type...[0])};
+        ::std::size_t const global_index{variable_details::read_imm<::std::size_t>(type...[0])};
+        GlobalT v;
+        variable_details::load_local_imported_global(local_imported_module, global_index, v);
+
+        if constexpr(variable_details::stacktop_enabled_for<CompileOption, GlobalT>())
+        {
+            constexpr ::std::size_t range_begin{variable_details::range_begin<CompileOption, GlobalT>()};
+            constexpr ::std::size_t range_end{variable_details::range_end<CompileOption, GlobalT>()};
+            static_assert(sizeof...(Type) >= range_end);
+            static_assert(range_begin <= curr_stack_top && curr_stack_top < range_end);
+
+            constexpr ::std::size_t new_pos{details::ring_prev_pos(curr_stack_top, range_begin, range_end)};
+            details::set_curr_val_to_stacktop_cache<CompileOption, GlobalT, new_pos>(v, type...);
+        }
+        else
+        {
+            ::std::memcpy(type...[1u], ::std::addressof(v), sizeof(v));
+            // operand frame: operand_base ... [live bytes][typed result bytes] | frame_end
+            //                [validated post-op stack depth           ] unsafe past frame_end
+            // ^^ type...[1u] advances by sizeof(v); operand_stack_byte_max reserves this result.
+            type...[1u] += sizeof(v);
+        }
+
+        uwvm_interpreter_opfunc_t<Type...> next_interpreter;  // no init
+        ::std::memcpy(::std::addressof(next_interpreter), type...[0], sizeof(next_interpreter));
+        UWVM_MUSTTAIL return next_interpreter(type...);
+    }
+
+    /// @brief `global.set` through a local-imported module (tail-call).
+    /// @details `type[0]` layout:
+    /// `[opfunc_ptr][module_ptr:local_imported_t*][global_index:size_t][next_opfunc_ptr]`.
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_imported_global_set_typed(Type... type) UWVM_THROWS
+    {
+        using local_imported_t = variable_details::local_imported_t;
+
+        static_assert(sizeof...(Type) >= 3uz);
+        static_assert(::std::same_as<Type...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<Type...[2u]>, ::std::byte*>);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ type...[0] advances by sizeof(uwvm_interpreter_opfunc_t<Type...>); the emitter wrote this complete opfunc slot.
+        type...[0] += sizeof(uwvm_interpreter_opfunc_t<Type...>);
+
+        local_imported_t* local_imported_module{variable_details::read_imm<local_imported_t*>(type...[0])};
+        ::std::size_t const global_index{variable_details::read_imm<::std::size_t>(type...[0])};
+
+        // The provider callback is synchronous and must not retain the value pointer.  End the value's address-taken
+        // lifetime in a nested scope before musttail dispatch, as required by GCC's musttail lifetime analysis.
+        {
+            GlobalT v;  // no init
+            if constexpr(variable_details::stacktop_enabled_for<CompileOption, GlobalT>())
+            {
+                constexpr ::std::size_t range_begin{variable_details::range_begin<CompileOption, GlobalT>()};
+                constexpr ::std::size_t range_end{variable_details::range_end<CompileOption, GlobalT>()};
+                static_assert(range_begin <= curr_stack_top && curr_stack_top < range_end);
+                v = get_curr_val_from_operand_stack_top<CompileOption, GlobalT, curr_stack_top>(type...);
+            }
+            else
+            {
+                // operand frame: operand_base ... [live prefix][typed input bytes] old_top ... frame_end
+                //                [validated existing stack depth       ] unsafe before operand_base
+                // ^^ type...[1u] retreats by sizeof(GlobalT); the emitter proved this typed input was live.
+                type...[1u] -= sizeof(GlobalT);
+                ::std::memcpy(::std::addressof(v), type...[1u], sizeof(v));
+            }
+
+            variable_details::store_local_imported_global(local_imported_module, global_index, v);
+        }
+
+        uwvm_interpreter_opfunc_t<Type...> next_interpreter;  // no init
+        ::std::memcpy(::std::addressof(next_interpreter), type...[0], sizeof(next_interpreter));
+        UWVM_MUSTTAIL return next_interpreter(type...);
+    }
+
+    // Direct fptr helpers for global.get/global.set (avoid wrapper-call stack growth in tail-call interpreter mode)
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_get_i32_ptr() noexcept
+    { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_i32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_get_i64_ptr() noexcept
+    { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_i64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_get_f32_ptr() noexcept
+    { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_f32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_get_f64_ptr() noexcept
+    { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_f64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_get_v128_ptr() noexcept
+    { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_v128, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_get_funcref_ptr() noexcept
+    { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_funcref, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_get_externref_ptr() noexcept
+    { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_externref, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_set_i32_ptr() noexcept
+    { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_i32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_set_i64_ptr() noexcept
+    { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_i64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_set_f32_ptr() noexcept
+    { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_f32, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_set_f64_ptr() noexcept
+    { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_f64, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_set_v128_ptr() noexcept
+    { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_v128, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_set_funcref_ptr() noexcept
+    { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_funcref, curr_stack_top, Type...>; }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, ::std::size_t curr_stack_top, uwvm_int_stack_top_type... Type>
+        requires (CompileOption.is_tail_call)
+    inline constexpr uwvm_interpreter_opfunc_t<Type...> uwvmint_global_set_externref_ptr() noexcept
+    { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_externref, curr_stack_top, Type...>; }
+
+    // Byref variants for global.*
+
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeRef>
+        requires (!CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_global_get_typed(TypeRef & ... typeref) UWVM_THROWS
+    {
+        using global_storage_t = ::uwvm2::object::global::wasm_global_storage_t;
+
+        static_assert(sizeof...(TypeRef) >= 3uz);
+        static_assert(::std::same_as<TypeRef...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[2u]>, ::std::byte*>);
+        static_assert(CompileOption.i32_stack_top_begin_pos == SIZE_MAX && CompileOption.i32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.i64_stack_top_begin_pos == SIZE_MAX && CompileOption.i64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f32_stack_top_begin_pos == SIZE_MAX && CompileOption.f32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f64_stack_top_begin_pos == SIZE_MAX && CompileOption.f64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.v128_stack_top_begin_pos == SIZE_MAX && CompileOption.v128_stack_top_end_pos == SIZE_MAX);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ typeref...[0] advances by sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>); the emitter wrote this complete opfunc slot.
+        typeref...[0] += sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>);
+
+        global_storage_t* global_p{variable_details::read_imm<global_storage_t*>(typeref...[0])};
+        GlobalT v;
+        variable_details::load_global(global_p, v);
+
+        ::std::memcpy(typeref...[1u], ::std::addressof(v), sizeof(v));
+        // result push: operand_base ... [current stack][result bytes] | frame_end
+        // [safe compiled post-op byte depth                   ] unsafe (past frame_end)
+        // ^^ typeref...[1u] advances by sizeof(v); the frame reserves operand_stack_byte_max from validation.
+        typeref...[1u] += sizeof(v);
+    }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeRef>
+        requires (!CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_global_set_typed(TypeRef & ... typeref) UWVM_THROWS
+    {
+        using global_storage_t = ::uwvm2::object::global::wasm_global_storage_t;
+
+        static_assert(sizeof...(TypeRef) >= 3uz);
+        static_assert(::std::same_as<TypeRef...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[2u]>, ::std::byte*>);
+        static_assert(CompileOption.i32_stack_top_begin_pos == SIZE_MAX && CompileOption.i32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.i64_stack_top_begin_pos == SIZE_MAX && CompileOption.i64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f32_stack_top_begin_pos == SIZE_MAX && CompileOption.f32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f64_stack_top_begin_pos == SIZE_MAX && CompileOption.f64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.v128_stack_top_begin_pos == SIZE_MAX && CompileOption.v128_stack_top_end_pos == SIZE_MAX);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ typeref...[0] advances by sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>); the emitter wrote this complete opfunc slot.
+        typeref...[0] += sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>);
+
+        global_storage_t* global_p{variable_details::read_imm<global_storage_t*>(typeref...[0])};
+        GlobalT v;
+        // operand pop: operand_base ... [validated live bytes] old_top ... frame_end
+        // [safe existing stack prefix                   ] unsafe (before operand_base)
+        // ^^ typeref...[1u] retreats by sizeof(GlobalT); the emitted stack effect proves those bytes are live.
+        typeref...[1u] -= sizeof(GlobalT);
+        ::std::memcpy(::std::addressof(v), typeref...[1u], sizeof(v));
+
+        variable_details::store_global(global_p, v);
+    }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeRef>
+        requires (!CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_imported_global_get_typed(TypeRef & ... typeref) UWVM_THROWS
+    {
+        using local_imported_t = variable_details::local_imported_t;
+
+        static_assert(sizeof...(TypeRef) >= 3uz);
+        static_assert(::std::same_as<TypeRef...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[2u]>, ::std::byte*>);
+        static_assert(CompileOption.i32_stack_top_begin_pos == SIZE_MAX && CompileOption.i32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.i64_stack_top_begin_pos == SIZE_MAX && CompileOption.i64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f32_stack_top_begin_pos == SIZE_MAX && CompileOption.f32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f64_stack_top_begin_pos == SIZE_MAX && CompileOption.f64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.v128_stack_top_begin_pos == SIZE_MAX && CompileOption.v128_stack_top_end_pos == SIZE_MAX);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ typeref...[0] advances by sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>); the emitter wrote this complete opfunc slot.
+        typeref...[0] += sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>);
+
+        local_imported_t* local_imported_module{variable_details::read_imm<local_imported_t*>(typeref...[0])};
+        ::std::size_t const global_index{variable_details::read_imm<::std::size_t>(typeref...[0])};
+        GlobalT v;
+        variable_details::load_local_imported_global(local_imported_module, global_index, v);
+
+        ::std::memcpy(typeref...[1u], ::std::addressof(v), sizeof(v));
+        // result push: operand_base ... [current stack][result bytes] | frame_end
+        // [safe compiled post-op byte depth                   ] unsafe (past frame_end)
+        // ^^ typeref...[1u] advances by sizeof(v); the frame reserves operand_stack_byte_max from validation.
+        typeref...[1u] += sizeof(v);
+    }
+
+    template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeRef>
+        requires (!CompileOption.is_tail_call)
+    UWVM_INTERPRETER_OPFUNC_HOT_MACRO inline constexpr void uwvmint_local_imported_global_set_typed(TypeRef & ... typeref) UWVM_THROWS
+    {
+        using local_imported_t = variable_details::local_imported_t;
+
+        static_assert(sizeof...(TypeRef) >= 3uz);
+        static_assert(::std::same_as<TypeRef...[0u], ::std::byte const*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[1u]>, ::std::byte*>);
+        static_assert(::std::same_as<::std::remove_cvref_t<TypeRef...[2u]>, ::std::byte*>);
+        static_assert(CompileOption.i32_stack_top_begin_pos == SIZE_MAX && CompileOption.i32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.i64_stack_top_begin_pos == SIZE_MAX && CompileOption.i64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f32_stack_top_begin_pos == SIZE_MAX && CompileOption.f32_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.f64_stack_top_begin_pos == SIZE_MAX && CompileOption.f64_stack_top_end_pos == SIZE_MAX);
+        static_assert(CompileOption.v128_stack_top_begin_pos == SIZE_MAX && CompileOption.v128_stack_top_end_pos == SIZE_MAX);
+
+        // bytecode: [current opfunc pointer][emitted operands / successor] | stream_end
+        //           [complete pointer slot ] safe to its end; unsafe past stream_end
+        // ^^ typeref...[0] advances by sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>); the emitter wrote this complete opfunc slot.
+        typeref...[0] += sizeof(uwvm_interpreter_opfunc_byref_t<TypeRef...>);
+
+        local_imported_t* local_imported_module{variable_details::read_imm<local_imported_t*>(typeref...[0])};
+        ::std::size_t const global_index{variable_details::read_imm<::std::size_t>(typeref...[0])};
+        GlobalT v;
+        // operand pop: operand_base ... [validated live bytes] old_top ... frame_end
+        // [safe existing stack prefix                   ] unsafe (before operand_base)
+        // ^^ typeref...[1u] retreats by sizeof(GlobalT); the emitted stack effect proves those bytes are live.
+        typeref...[1u] -= sizeof(GlobalT);
+        ::std::memcpy(::std::addressof(v), typeref...[1u], sizeof(v));
+
+        variable_details::store_local_imported_global(local_imported_module, global_index, v);
+    }
+
+    // ========================
+    // translate helpers
+    // ========================
+
+    namespace translate
+    {
+        namespace details
+        {
+            template <uwvm_interpreter_translate_option_t CompileOption,
+                      ::std::size_t Curr,
+                      ::std::size_t End,
+                      typename OpWrapper,
+                      uwvm_int_stack_top_type... Type>
+                requires (CompileOption.is_tail_call)
+            inline constexpr uwvm_interpreter_opfunc_t<Type...> select_stacktop_fptr_by_currpos_impl_variable(::std::size_t pos) noexcept
+            {
+                static_assert(Curr < End);
+                if(pos == Curr) { return OpWrapper::template fptr<CompileOption, Curr, Type...>(); }
+                else
+                {
+                    if constexpr(Curr + 1uz < End)
+                    {
+                        return select_stacktop_fptr_by_currpos_impl_variable<CompileOption, Curr + 1uz, End, OpWrapper, Type...>(pos);
+                    }
+                    else
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::fast_io::fast_terminate();
+                    }
+                }
+            }
+
+            struct local_get_i32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_get_i32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_get_i64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_get_i64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_get_f32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_get_f32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_get_f64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_get_f64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_set_i32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_set_i32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_set_i64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_set_i64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_set_f32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_set_f32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_set_f64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_set_f64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_tee_i32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_tee_i32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_tee_i64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_tee_i64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_tee_f32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_tee_f32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct local_tee_f64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_tee_f64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_get_i32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_get_i32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_get_i64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_get_i64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_get_f32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_get_f32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_get_f64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_get_f64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_set_i32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_set_i32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_set_i64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_set_i64_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_set_f32_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_set_f32_ptr<Opt, Pos, Type...>(); }
+            };
+
+            struct global_set_f64_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_set_f64_ptr<Opt, Pos, Type...>(); }
+            };
+        }  // namespace details
+
+        // local.* fptrs (tail-call)
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_get_i32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i32_stack_top_begin_pos != CompileOption.i32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i32_stack_top_begin_pos,
+                                                                              CompileOption.i32_stack_top_end_pos,
+                                                                              details::local_get_i32_op,
+                                                                              Type...>(curr.i32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_get_i32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_get_i64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i64_stack_top_begin_pos != CompileOption.i64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i64_stack_top_begin_pos,
+                                                                              CompileOption.i64_stack_top_end_pos,
+                                                                              details::local_get_i64_op,
+                                                                              Type...>(curr.i64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_get_i64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_get_f32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f32_stack_top_begin_pos != CompileOption.f32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f32_stack_top_begin_pos,
+                                                                              CompileOption.f32_stack_top_end_pos,
+                                                                              details::local_get_f32_op,
+                                                                              Type...>(curr.f32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_get_f32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_get_f64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f64_stack_top_begin_pos != CompileOption.f64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f64_stack_top_begin_pos,
+                                                                              CompileOption.f64_stack_top_end_pos,
+                                                                              details::local_get_f64_op,
+                                                                              Type...>(curr.f64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_get_f64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        // Similar helpers for local.set/local.tee/global.get/global.set are intentionally symmetrical.
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_set_i32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i32_stack_top_begin_pos != CompileOption.i32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i32_stack_top_begin_pos,
+                                                                              CompileOption.i32_stack_top_end_pos,
+                                                                              details::local_set_i32_op,
+                                                                              Type...>(curr.i32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_set_i32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_set_i64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i64_stack_top_begin_pos != CompileOption.i64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i64_stack_top_begin_pos,
+                                                                              CompileOption.i64_stack_top_end_pos,
+                                                                              details::local_set_i64_op,
+                                                                              Type...>(curr.i64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_set_i64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_set_f32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f32_stack_top_begin_pos != CompileOption.f32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f32_stack_top_begin_pos,
+                                                                              CompileOption.f32_stack_top_end_pos,
+                                                                              details::local_set_f32_op,
+                                                                              Type...>(curr.f32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_set_f32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_set_f64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f64_stack_top_begin_pos != CompileOption.f64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f64_stack_top_begin_pos,
+                                                                              CompileOption.f64_stack_top_end_pos,
+                                                                              details::local_set_f64_op,
+                                                                              Type...>(curr.f64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_set_f64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_tee_i32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i32_stack_top_begin_pos != CompileOption.i32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i32_stack_top_begin_pos,
+                                                                              CompileOption.i32_stack_top_end_pos,
+                                                                              details::local_tee_i32_op,
+                                                                              Type...>(curr.i32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_tee_i32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_tee_i64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i64_stack_top_begin_pos != CompileOption.i64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i64_stack_top_begin_pos,
+                                                                              CompileOption.i64_stack_top_end_pos,
+                                                                              details::local_tee_i64_op,
+                                                                              Type...>(curr.i64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_tee_i64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_tee_f32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f32_stack_top_begin_pos != CompileOption.f32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f32_stack_top_begin_pos,
+                                                                              CompileOption.f32_stack_top_end_pos,
+                                                                              details::local_tee_f32_op,
+                                                                              Type...>(curr.f32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_tee_f32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_tee_f64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f64_stack_top_begin_pos != CompileOption.f64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f64_stack_top_begin_pos,
+                                                                              CompileOption.f64_stack_top_end_pos,
+                                                                              details::local_tee_f64_op,
+                                                                              Type...>(curr.f64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_local_tee_f64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        // global.* fptrs (tail-call)
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_get_i32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i32_stack_top_begin_pos != CompileOption.i32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i32_stack_top_begin_pos,
+                                                                              CompileOption.i32_stack_top_end_pos,
+                                                                              details::global_get_i32_op,
+                                                                              Type...>(curr.i32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_get_i32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_get_i64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i64_stack_top_begin_pos != CompileOption.i64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i64_stack_top_begin_pos,
+                                                                              CompileOption.i64_stack_top_end_pos,
+                                                                              details::global_get_i64_op,
+                                                                              Type...>(curr.i64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_get_i64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_get_f32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f32_stack_top_begin_pos != CompileOption.f32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f32_stack_top_begin_pos,
+                                                                              CompileOption.f32_stack_top_end_pos,
+                                                                              details::global_get_f32_op,
+                                                                              Type...>(curr.f32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_get_f32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_get_f64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f64_stack_top_begin_pos != CompileOption.f64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f64_stack_top_begin_pos,
+                                                                              CompileOption.f64_stack_top_end_pos,
+                                                                              details::global_get_f64_op,
+                                                                              Type...>(curr.f64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_get_f64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_set_i32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i32_stack_top_begin_pos != CompileOption.i32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i32_stack_top_begin_pos,
+                                                                              CompileOption.i32_stack_top_end_pos,
+                                                                              details::global_set_i32_op,
+                                                                              Type...>(curr.i32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_set_i32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_set_i64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.i64_stack_top_begin_pos != CompileOption.i64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.i64_stack_top_begin_pos,
+                                                                              CompileOption.i64_stack_top_end_pos,
+                                                                              details::global_set_i64_op,
+                                                                              Type...>(curr.i64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_set_i64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_set_f32_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f32_stack_top_begin_pos != CompileOption.f32_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f32_stack_top_begin_pos,
+                                                                              CompileOption.f32_stack_top_end_pos,
+                                                                              details::global_set_f32_op,
+                                                                              Type...>(curr.f32_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_set_f32_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_set_f64_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            if constexpr(CompileOption.f64_stack_top_begin_pos != CompileOption.f64_stack_top_end_pos)
+            {
+                return details::select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                              CompileOption.f64_stack_top_begin_pos,
+                                                                              CompileOption.f64_stack_top_end_pos,
+                                                                              details::global_set_f64_op,
+                                                                              Type...>(curr.f64_stack_top_curr_pos);
+            }
+            else
+            {
+                return uwvmint_global_set_f64_ptr<CompileOption, 0uz, Type...>();
+            }
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        // Byref fptrs: no currpos selection required.
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_get_i32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_i32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_get_i64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_i64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_get_f32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_f32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_get_f64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_get_typed<CompileOption, variable_details::wasm_f64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_set_i32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_i32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_set_i64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_i64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_set_f32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_f32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_set_f64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_set_typed<CompileOption, variable_details::wasm_f64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_tee_i32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_i32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_tee_i64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_i64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_tee_f32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_f32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_tee_f64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_tee_typed<CompileOption, variable_details::wasm_f64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_get_i32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_i32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_get_i64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_i64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_get_f32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_f32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_get_f64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_get_typed<CompileOption, variable_details::wasm_f64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_set_i32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_i32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_i32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_i32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_set_i64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_i64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_i64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_i64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_set_f32_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_f32, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_f32_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_f32_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_set_f64_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_set_typed<CompileOption, variable_details::wasm_f64, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_f64_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                         ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_f64_fptr<CompileOption, TypeInTuple...>(curr); }
+
+        namespace details
+        {
+            template <typename LocalT>
+            struct local_get_typed_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_get_typed<Opt, LocalT, Pos, Type...>; }
+            };
+
+            template <typename LocalT>
+            struct local_set_typed_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_set_typed<Opt, LocalT, Pos, Type...>; }
+            };
+
+            template <typename LocalT>
+            struct local_tee_typed_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_tee_typed<Opt, LocalT, Pos, Type...>; }
+            };
+
+            template <typename GlobalT>
+            struct global_get_typed_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_get_typed<Opt, GlobalT, Pos, Type...>; }
+            };
+
+            template <typename GlobalT>
+            struct global_set_typed_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_global_set_typed<Opt, GlobalT, Pos, Type...>; }
+            };
+
+            template <typename GlobalT>
+            struct local_imported_global_get_typed_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_imported_global_get_typed<Opt, GlobalT, Pos, Type...>; }
+            };
+
+            template <typename GlobalT>
+            struct local_imported_global_set_typed_op
+            {
+                template <uwvm_interpreter_translate_option_t Opt, ::std::size_t Pos, uwvm_int_stack_top_type... Type>
+                static constexpr uwvm_interpreter_opfunc_t<Type...> fptr() noexcept
+                { return uwvmint_local_imported_global_set_typed<Opt, GlobalT, Pos, Type...>; }
+            };
+
+            template <typename ValT>
+            [[nodiscard]] inline constexpr ::std::size_t typed_stacktop_currpos(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+            {
+                if constexpr(::std::same_as<ValT, variable_details::wasm_i32>) { return curr.i32_stack_top_curr_pos; }
+                else if constexpr(::std::same_as<ValT, variable_details::wasm_i64>) { return curr.i64_stack_top_curr_pos; }
+                else if constexpr(::std::same_as<ValT, variable_details::wasm_f32>) { return curr.f32_stack_top_curr_pos; }
+                else if constexpr(::std::same_as<ValT, variable_details::wasm_f64>) { return curr.f64_stack_top_curr_pos; }
+                else if constexpr(::std::same_as<ValT, variable_details::wasm_v128>) { return curr.v128_stack_top_curr_pos; }
+                else { return SIZE_MAX; }
+            }
+
+            template <uwvm_interpreter_translate_option_t CompileOption, typename ValT, typename OpWrapper, uwvm_int_stack_top_type... Type>
+                requires (CompileOption.is_tail_call)
+            inline constexpr uwvm_interpreter_opfunc_t<Type...> get_typed_stacktop_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+            {
+                if constexpr(variable_details::stacktop_enabled_for<CompileOption, ValT>())
+                {
+                    return select_stacktop_fptr_by_currpos_impl_variable<CompileOption,
+                                                                         variable_details::range_begin<CompileOption, ValT>(),
+                                                                         variable_details::range_end<CompileOption, ValT>(),
+                                                                         OpWrapper,
+                                                                         Type...>(typed_stacktop_currpos<ValT>(curr));
+                }
+                else
+                {
+                    return OpWrapper::template fptr<CompileOption, 0uz, Type...>();
+                }
+            }
+        }  // namespace details
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_get_typed_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        { return details::get_typed_stacktop_fptr<CompileOption, LocalT, details::local_get_typed_op<LocalT>, Type...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                          ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_typed_fptr<CompileOption, LocalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_set_typed_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        { return details::get_typed_stacktop_fptr<CompileOption, LocalT, details::local_set_typed_op<LocalT>, Type...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                          ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_typed_fptr<CompileOption, LocalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_local_tee_typed_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        { return details::get_typed_stacktop_fptr<CompileOption, LocalT, details::local_tee_typed_op<LocalT>, Type...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                          ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_typed_fptr<CompileOption, LocalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_get_typed_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        { return details::get_typed_stacktop_fptr<CompileOption, GlobalT, details::global_get_typed_op<GlobalT>, Type...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                           ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...> get_uwvmint_global_set_typed_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        { return details::get_typed_stacktop_fptr<CompileOption, GlobalT, details::global_set_typed_op<GlobalT>, Type...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                           ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...>
+            get_uwvmint_local_imported_global_get_typed_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            return details::get_typed_stacktop_fptr<CompileOption,
+                                                    GlobalT,
+                                                    details::local_imported_global_get_typed_op<GlobalT>,
+                                                    Type...>(curr);
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto
+            get_uwvmint_local_imported_global_get_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_imported_global_get_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_t<Type...>
+            get_uwvmint_local_imported_global_set_typed_fptr(uwvm_interpreter_stacktop_currpos_t const& curr) noexcept
+        {
+            return details::get_typed_stacktop_fptr<CompileOption,
+                                                    GlobalT,
+                                                    details::local_imported_global_set_typed_op<GlobalT>,
+                                                    Type...>(curr);
+        }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (CompileOption.is_tail_call)
+        inline constexpr auto
+            get_uwvmint_local_imported_global_set_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_imported_global_set_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_get_typed_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_get_typed<CompileOption, LocalT, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_get_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                          ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_get_typed_fptr<CompileOption, LocalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_set_typed_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_set_typed<CompileOption, LocalT, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_set_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                          ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_set_typed_fptr<CompileOption, LocalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_local_tee_typed_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_tee_typed<CompileOption, LocalT, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename LocalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_local_tee_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                          ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_tee_typed_fptr<CompileOption, LocalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_get_typed_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_get_typed<CompileOption, GlobalT, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_get_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                           ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_get_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...> get_uwvmint_global_set_typed_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_global_set_typed<CompileOption, GlobalT, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto get_uwvmint_global_set_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                           ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_global_set_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...>
+            get_uwvmint_local_imported_global_get_typed_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_imported_global_get_typed<CompileOption, GlobalT, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto
+            get_uwvmint_local_imported_global_get_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_imported_global_get_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... Type>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr uwvm_interpreter_opfunc_byref_t<Type...>
+            get_uwvmint_local_imported_global_set_typed_fptr(uwvm_interpreter_stacktop_currpos_t const&) noexcept
+        { return uwvmint_local_imported_global_set_typed<CompileOption, GlobalT, Type...>; }
+
+        template <uwvm_interpreter_translate_option_t CompileOption, typename GlobalT, uwvm_int_stack_top_type... TypeInTuple>
+            requires (!CompileOption.is_tail_call)
+        inline constexpr auto
+            get_uwvmint_local_imported_global_set_typed_fptr_from_tuple(uwvm_interpreter_stacktop_currpos_t const& curr,
+                                                                        ::uwvm2::utils::container::tuple<TypeInTuple...> const&) noexcept
+        { return get_uwvmint_local_imported_global_set_typed_fptr<CompileOption, GlobalT, TypeInTuple...>(curr); }
+    }  // namespace translate
+}
+#endif
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/runtime/macro/pop_macros.h>
+# include <uwvm2/runtime/compiler/uwvm_int/macro/pop_macros.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

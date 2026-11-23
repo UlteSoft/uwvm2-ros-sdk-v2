@@ -1,0 +1,44 @@
+{
+  "id": "nvidia-isaac-sim",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "Isaac Sim ROS2 Publish Clock / rosgraph_msgs/Clock",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_clock_sec",
+        "field": "clock_sec",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_clock_nanosec",
+        "field": "clock_nanosec",
+        "type": "u32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/isaac-sim/IsaacSim/blob/87c95274f50836068b44eeb030bf62aa2108bdf8/source/extensions/isaacsim.ros2.nodes/nodes/OgnROS2PublishClock.ogn",
+        "revision": "87c95274f50836068b44eeb030bf62aa2108bdf8",
+        "path": "source/extensions/isaacsim.ros2.nodes/nodes/OgnROS2PublishClock.ogn",
+        "sha256": "8983fe8736a2df74849d654f379dec693363b6001ee137faea24468f506a5586"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/rosgraph_msgs/msg/Clock.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "rosgraph_msgs/msg/Clock.msg",
+        "sha256": "a8d1d14b0057bea4040f2e9662279e6ee270bd9fd6d00e1b2bcfb449bf4d521c"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      }
+    ]
+  }
+}

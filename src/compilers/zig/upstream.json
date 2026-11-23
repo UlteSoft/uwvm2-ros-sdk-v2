@@ -1,0 +1,29 @@
+{
+  "name": "Zig",
+  "upstream_url": "https://codeberg.org/ziglang/zig.git",
+  "tag": "0.16.0",
+  "tag_object": "44d9672fed001115e674fd5ddb32747ef43a7af4",
+  "commit": "24fdd5b7a4c1c8b5deb5b56756b9dbc8e08c86a8",
+  "upstream_tree": "8ee1bfcb4df3bdb2861ed16dc6fdc3fce4ecab21",
+  "files": 21918,
+  "license": "upstream/LICENSE",
+  "directory": "upstream",
+  "local_changes_within_upstream": [
+    "src/dev.zig defines the freestanding WROS compiler profile with the Zig semantic analyzer and LLVM bitcode writer.",
+    "src/main.zig handles SDK commands and emits the complete reachable Zig module through the native frontend.",
+    "src/codegen/llvm.zig completes a bitcode-only WROS build after the native builder has written its output."
+  ],
+  "sdk_sources": {
+    "mark_mte.cpp": {
+      "origin": "existing SDK v2 Zig LLVM marker, from the uncommitted working tree",
+      "origin_sha256": "cd0aa0673a1ee9ec0cb5b709aa96c1dcdbba54e5e41aed5b09cc8c483d75e687",
+      "changes": "Preserve original source paths emitted by the module-aware frontend and check the _start function signature."
+    }
+  },
+  "qualification": "The native compiler packages are build inputs. Independent installation, guest execution and MTE qualification are recorded separately.",
+  "bootstrap": {
+    "url": "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz",
+    "bytes": 55478392,
+    "sha256": "70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
+  }
+}

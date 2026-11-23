@@ -1,0 +1,872 @@
+{
+  "public_commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+  "git_tree": "d7344c057264f551af57be6730bf2fe2f9070ef0",
+  "platform": "abb",
+  "host": "linux-x86_64",
+  "environment": "Fresh HOME and caches for every GitHub root install. Offline guest builds and executions in a mount namespace with the developer tree hidden. Parent and child cgroups limited to 64 GiB and zero swap. VM and Xmake supplied as external test prerequisites.",
+  "vm": {
+    "commit": "576aa42918eaa3baca12ca030e3c55482cb524ca",
+    "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+  },
+  "default_working": [
+    "c",
+    "cpp",
+    "as",
+    "js",
+    "typescript",
+    "wat"
+  ],
+  "public_attempts": {
+    "public-legacy-c_ffi_bridge": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "cf27da784bf09f398b44f9a4dd7e0db91766499e08c0ac637fe04105eb0b7748",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-csharp": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "fdae0240e810b657af7ffe36c84986d24550eda9eb785cf5288cf84d465ae7fd",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-d": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "107531a352a9a0ecb4070044debf13fc7e68fa1a141f44c01565d6003ffa4d4f",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-fortran": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "4baa445d1f4067987ed8fbd9031c5247773699cc3ee579e5ea3683fbacdc3f87",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-fsharp": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "7b077970d9106024a4375751cff5771011b859b22eb35c6493f01182f38752fc",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-haskell": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "5ebab27dfc290f94da6d80518e1bbff7c7df5e2281150da58c7cbf422e9eec12",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-java": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "7a47c1ce5d184c9545451d290b35e809f8235e356c095eb145bb5411bd8fa9d1",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-kotlin": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "52d51f86bc5b72f17ee589477e61b74827fef7a2b29411a867e083dddefda972",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-lua": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "4afdbab803b174b7c2b470bdbcf503b11121411f774f34e65729e207d28ceb74",
+      "offline": "untested",
+      "diagnostic": "First attempt had a transient Git transport error; the clean retry reached the installer."
+    },
+    "public-legacy-moonbit": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "12e7c6a0c8667815482dce7e555967d475ebe88ddcb886ddbf2da022cc499492",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-nim": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "af49f8b446ea6d8ea87f5c8682b078b067401284f7054448c8fd53186b900d7d",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-objectc": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "e103ed38fe33a10811612276eeb31a0e0e6a490d3c855e0feaca903ffcedfc5e",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-odin": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "13405e0ce2719005e70431de51d5f2b66446acf9adcdf1d72561404963e22238",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-php": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "40c25e5af49bcce83707407919b16588a498a9914116213f7c23258e4e4aa870",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-py": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "6ca68cae5f6a2ed6a637351df151ab878ec194e8175bf20a0808fe23158077d7",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-r": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "bd545194fd91b489a10dae1aa7ec81cb22953264cb9ca6e882657229218d12ea",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-retry-lua": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "17125a2d4f0ad3054a682e3d398d1545337cb91eeaa5fbbc55ec0f05bb53bb80",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-ruby": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "c37c2cfccabd86775b43f05de89bd969b3fe08db971a67cdc469703a7a1c1582",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-swift": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "a0a1f79187c7816c103479336611bd7bb3b1bb76a20044e603f06f4582e1bc16",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-vbnet": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "facb65512b678e219b41a01075eec12fb5fe71b3b618f684987138377104b7e6",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-legacy-zig": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "3a29f8ffe9874319764388bfad1c58053b77f91ed819921e6a209df30d0cc6b3",
+      "offline": "untested",
+      "diagnostic": "The installer rejected the language or platform."
+    },
+    "public-try1-as": {
+      "scope_exit": 0,
+      "public_install": "passed",
+      "effective_offline_status": "passed",
+      "offline_scope_exit": 0,
+      "log_sha256": "a4c99d7cecd97208df2d93423b7fa1f13c42707075b8154a6eb43c4e475b453a",
+      "receipt": {
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "language": "as",
+        "mode": "binary",
+        "platform": "abb"
+      },
+      "offline": {
+        "language": "as",
+        "mode": "binary",
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "cases": {
+          "observation": {
+            "direct": {
+              "compile": 0,
+              "int": 0,
+              "aot": 0,
+              "wasm": {
+                "bytes": 787,
+                "sha256": "7023c18df8ed1fb7c20c63c0f36126428489e00556b84206e7d726d03e9d2aa6",
+                "imports": [],
+                "import_count": 0,
+                "imports_match": true,
+                "start_defined": true,
+                "objdump_exit": 0
+              }
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 787,
+              "sha256": "7023c18df8ed1fb7c20c63c0f36126428489e00556b84206e7d726d03e9d2aa6",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          }
+        },
+        "inventory_files": 192,
+        "tools": {
+          "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+          "bundled_node_sha256": "e6ec2c188d83d813f81f2de8aea084d74dce603ac1abedd0a30ad941b10087b2",
+          "bundled_node_version": 0,
+          "xmake_version": 0
+        }
+      }
+    },
+    "public-try1-c": {
+      "scope_exit": 0,
+      "public_install": "passed",
+      "effective_offline_status": "passed",
+      "offline_scope_exit": 0,
+      "log_sha256": "6d668eace6244b4af25b76cf92107e8ad1fc02d9bad46b1c2849eb14fc4bf1b0",
+      "receipt": {
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "language": "c",
+        "mode": "binary",
+        "platform": "abb"
+      },
+      "offline": {
+        "language": "c",
+        "mode": "binary",
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "cases": {
+          "observation": {
+            "direct": {
+              "compile": 0,
+              "int": 0,
+              "aot": 0,
+              "wasm": {
+                "bytes": 20500,
+                "sha256": "adf51700163a09e120bfa3d35a8a196264e788f810cb1bbe6299ef2c79af5487",
+                "imports": [],
+                "import_count": 0,
+                "imports_match": true,
+                "start_defined": true,
+                "objdump_exit": 0
+              }
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 20500,
+              "sha256": "adf51700163a09e120bfa3d35a8a196264e788f810cb1bbe6299ef2c79af5487",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          },
+          "ros1-records": {
+            "direct": {
+              "compile": 0,
+              "int": 0,
+              "aot": 0,
+              "wasm": {
+                "bytes": 56313,
+                "sha256": "2feabe96100f7180117bb496ac5418a01f42d65ed974f7d1da63d0c1658dea45",
+                "imports": [],
+                "import_count": 0,
+                "imports_match": true,
+                "start_defined": true,
+                "objdump_exit": 0
+              }
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 56313,
+              "sha256": "2feabe96100f7180117bb496ac5418a01f42d65ed974f7d1da63d0c1658dea45",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          },
+          "genpy-oracle": {
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 724102,
+              "sha256": "b69c0dc38d13ed3a8ff2f08478a765ada131e930496852e54aed77df79ff6b97",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          }
+        },
+        "inventory_files": 4611,
+        "tools": {
+          "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+          "xmake_version": 0
+        }
+      }
+    },
+    "public-try1-cpp": {
+      "scope_exit": 0,
+      "public_install": "passed",
+      "effective_offline_status": "passed",
+      "offline_scope_exit": 0,
+      "log_sha256": "664551e06fabeb4f4dda4618b3b1fcd118caa9d70543a5ff4cd314fa9383bf91",
+      "receipt": {
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "language": "cpp",
+        "mode": "binary",
+        "platform": "abb"
+      },
+      "offline": {
+        "language": "cpp",
+        "mode": "binary",
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "cases": {
+          "observation": {
+            "direct": {
+              "compile": 0,
+              "int": 0,
+              "aot": 0,
+              "wasm": {
+                "bytes": 20626,
+                "sha256": "3f996f72025219d30bd79e1c6cd262f29bebef9971b30e1c41d68f26af7ecc6b",
+                "imports": [],
+                "import_count": 0,
+                "imports_match": true,
+                "start_defined": true,
+                "objdump_exit": 0
+              }
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 20626,
+              "sha256": "3f996f72025219d30bd79e1c6cd262f29bebef9971b30e1c41d68f26af7ecc6b",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          },
+          "ros1-records": {
+            "direct": {
+              "compile": 0,
+              "int": 0,
+              "aot": 0,
+              "wasm": {
+                "bytes": 75918,
+                "sha256": "31ea483b4807fdd961a896fafc3a73e8eb18bf48a3e2e4720fe830b11bfd50ca",
+                "imports": [],
+                "import_count": 0,
+                "imports_match": true,
+                "start_defined": true,
+                "objdump_exit": 0
+              }
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 75918,
+              "sha256": "31ea483b4807fdd961a896fafc3a73e8eb18bf48a3e2e4720fe830b11bfd50ca",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          },
+          "genpy-oracle": {
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 1243684,
+              "sha256": "d0bdbeda676ff7326799cfe9001a254a3f055e68cfb48fd1bc0c5c3fe78e290e",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          }
+        },
+        "inventory_files": 4612,
+        "tools": {
+          "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+          "xmake_version": 0
+        }
+      }
+    },
+    "public-try1-go": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "304083d7013080db7c4cf71946d050e767f260e0e8193fa1e66b9e7059786e77",
+      "offline": "untested",
+      "diagnostic": "The selected compiler has no ABB platform bindings."
+    },
+    "public-try1-js": {
+      "scope_exit": 0,
+      "public_install": "passed",
+      "effective_offline_status": "passed after retry",
+      "offline_scope_exit": 0,
+      "offline_retry_scope_exit": 0,
+      "log_sha256": "7b083422e5a1e1630b1453c5c25a1d04799687b2506b6bb02fbb1c2462058845",
+      "receipt": {
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "language": "js",
+        "mode": "binary",
+        "platform": "abb"
+      },
+      "offline": {
+        "language": "js",
+        "mode": "binary",
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "cases": {
+          "observation": {
+            "direct": {
+              "compile": 0,
+              "int": 0,
+              "aot": 124,
+              "wasm": {
+                "bytes": 4717650,
+                "sha256": "330b9dc0d6882280084b213f2edc48a8e640e077dc16eeca00783cab72bc3624",
+                "imports": [
+                  [
+                    "wasi_snapshot_preview1",
+                    "clock_time_get",
+                    "(i32, i64, i32) -> i32"
+                  ]
+                ],
+                "import_count": 1,
+                "imports_match": true,
+                "start_defined": true,
+                "objdump_exit": 0
+              }
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 4718202,
+              "sha256": "4168ba5d940803e9fed37e1401c7a63103cab5dc27105201576d61cf95320341",
+              "imports": [
+                [
+                  "wasi_snapshot_preview1",
+                  "clock_time_get",
+                  "(i32, i64, i32) -> i32"
+                ]
+              ],
+              "import_count": 1,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          }
+        },
+        "inventory_files": 2406,
+        "tools": {
+          "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+          "xmake_version": 0
+        }
+      },
+      "runtime_retry": {
+        "language": "js",
+        "prior": {
+          "direct-aot": 124,
+          "xmake-test": 0,
+          "xmake-int": 0,
+          "xmake-aot": 0
+        },
+        "retried": {
+          "direct-aot": {
+            "exit": 0,
+            "elapsed_seconds": 75.98
+          }
+        },
+        "sha256": {
+          "direct_module": "330b9dc0d6882280084b213f2edc48a8e640e077dc16eeca00783cab72bc3624",
+          "xmake_module": "4168ba5d940803e9fed37e1401c7a63103cab5dc27105201576d61cf95320341"
+        }
+      }
+    },
+    "public-try1-rust": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "6b963a9f61b1819bd04b5bd47e5e4cad44bfeab3c0d029f040a1d62772c7043c",
+      "offline": "untested",
+      "diagnostic": "Official Rust 1.97.1 stage0 and host std were absent in the clean environment."
+    },
+    "public-try1-rust-bindings": {
+      "scope_exit": 0,
+      "public_install": "passed",
+      "effective_offline_status": "passed",
+      "offline_scope_exit": 0,
+      "log_sha256": "8d1bb556af2de913c3773d048923118f1ca423bc78556e38cc2ca8182df81411",
+      "receipt": {
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "language": "rust",
+        "mode": "bindings",
+        "platform": "abb"
+      },
+      "offline": {
+        "language": "rust",
+        "mode": "bindings",
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "cases": {
+          "observation": {
+            "direct": {
+              "compile": "untested: no native wrrs in upstream bindings mode"
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 622761,
+              "sha256": "850c45cbe1b972f1f362fe63ede917e454df78700e137afbb06d64aac4928728",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          },
+          "ros1-records": {
+            "direct": {
+              "compile": "untested: no native wrrs in upstream bindings mode"
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 628648,
+              "sha256": "a829d4f9b4440f79d314f49ffc00c7ac34c4f47118b549260fb783d157d651a1",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          },
+          "genpy-oracle": {
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 1128223,
+              "sha256": "11ae8d6998b15d09ea76b475543c456f1315ac52e51729f22be8f4603017b998",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          }
+        },
+        "inventory_files": 68,
+        "tools": {
+          "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+          "external_rust": 0,
+          "xmake_version": 0
+        }
+      }
+    },
+    "public-try1-rust-stage0": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "c418d38d38f17901e8030801eaea4c7ae71a1c1d16b9bff0e0c4b86cbb3fe0e5",
+      "offline": "untested",
+      "diagnostic": "With verified official stage0, the build reached bootstrap and failed on the omitted upstream .gitmodules."
+    },
+    "public-try1-tinygo": {
+      "scope_exit": 1,
+      "public_install": "failed",
+      "effective_offline_status": "untested",
+      "log_sha256": "3f308faa1214b0119f3527d688d3d38cc1566520f05120beb6e3223a005baca5",
+      "offline": "untested",
+      "diagnostic": "The selected compiler has no ABB platform bindings."
+    },
+    "public-try1-typescript": {
+      "scope_exit": 0,
+      "public_install": "passed",
+      "effective_offline_status": "passed after retry",
+      "offline_scope_exit": 1,
+      "offline_retry_scope_exit": 0,
+      "log_sha256": "ca82602b2009bd8a23bc9598ac91af983ba2561b2899d9face3923b5a525d751",
+      "receipt": {
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "language": "typescript",
+        "mode": "binary",
+        "platform": "abb"
+      },
+      "offline": {
+        "language": "typescript",
+        "mode": "binary",
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "cases": {},
+        "inventory_files": 2514,
+        "tools": {
+          "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+          "bundled_node_sha256": "e6ec2c188d83d813f81f2de8aea084d74dce603ac1abedd0a30ad941b10087b2",
+          "bundled_node_version": 0,
+          "xmake_version": 0
+        }
+      },
+      "runtime_retry": {
+        "language": "typescript",
+        "prior": {
+          "direct-aot": 0,
+          "xmake-test": 124,
+          "xmake-int": null,
+          "xmake-aot": null
+        },
+        "retried": {
+          "xmake-test": {
+            "exit": 0,
+            "elapsed_seconds": 105.61
+          },
+          "xmake-int": {
+            "exit": 0,
+            "elapsed_seconds": 0.22
+          },
+          "xmake-aot": {
+            "exit": 0,
+            "elapsed_seconds": 74.54
+          }
+        },
+        "sha256": {
+          "direct_module": "943a8427a0499c71da17f26bf7e34f49c51cf7e4a580b13a8a7f1131055c64ca",
+          "xmake_module": "894ca5f49bbb006b6238d49b04328a9cfc885e0bd83986f448a84cf6769dacd8"
+        }
+      }
+    },
+    "public-try1-wat": {
+      "scope_exit": 0,
+      "public_install": "passed",
+      "effective_offline_status": "passed",
+      "offline_scope_exit": 0,
+      "log_sha256": "4d57d9e0509e28f2d6aabeb6a8c9fa81b397c458a1742428bc8b6ec4e42164b3",
+      "receipt": {
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "language": "wat",
+        "mode": "binary",
+        "platform": "abb"
+      },
+      "offline": {
+        "language": "wat",
+        "mode": "binary",
+        "commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+        "cases": {
+          "observation": {
+            "direct": {
+              "compile": 0,
+              "int": 0,
+              "aot": 0,
+              "wasm": {
+                "bytes": 1640,
+                "sha256": "e7a4d530d1cf9e2f3c7ceafea36d71008a4b7b54da87c1310cd645cecca4a709",
+                "imports": [],
+                "import_count": 0,
+                "imports_match": true,
+                "start_defined": true,
+                "objdump_exit": 0
+              }
+            },
+            "xmake_build": 0,
+            "xmake_test": 0,
+            "xmake_wasm": {
+              "bytes": 1640,
+              "sha256": "e7a4d530d1cf9e2f3c7ceafea36d71008a4b7b54da87c1310cd645cecca4a709",
+              "imports": [],
+              "import_count": 0,
+              "imports_match": true,
+              "start_defined": true,
+              "objdump_exit": 0
+            },
+            "int": 0,
+            "aot": 0
+          }
+        },
+        "inventory_files": 65,
+        "tools": {
+          "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+          "xmake_version": 0
+        }
+      }
+    }
+  },
+  "oracle": {
+    "genmsg": "f64190bcd7f36ef4ee401041714480473f96742b",
+    "genpy": "9e32c6a06364d271ac18625718a6349afb8ee210",
+    "definitions": 48,
+    "md5": 48,
+    "bodies": 70,
+    "vectors": 140,
+    "candidate_whole_json_match": true
+  },
+  "oracle_inputs": "src/qualification/abb/ros1-vectors.json",
+  "abi": {
+    "source_regeneration_scope_exit": 0,
+    "all_domains": {
+      "c": 163,
+      "cpp": 163,
+      "rust": 163
+    },
+    "runtime_cases_total": 30,
+    "runtime_cases_pass": 30
+  },
+  "service_available": {
+    "native_mock_dispatch_scope_exit": 0,
+    "native_mock_dispatch_groups": 12,
+    "native_mock_valid_direct_client_and_valid_paired_source": "passed",
+    "wasm_no_live_client": [
+      "int deny without provisioned client",
+      "int allow without provisioned client",
+      "int hidden exit=127",
+      "aot deny without provisioned client",
+      "aot allow without provisioned client",
+      "aot hidden exit=127"
+    ],
+    "wasm_no_live_client_scope_exit": 0,
+    "wasm_live_client_direct_grant": "untested",
+    "wasm_live_client_observer_plus_source_grant": "untested"
+  },
+  "rust_diagnostic": {
+    "frozen_commit": "973934c0e4a50c61aff0413b5c78452a76b7d49a",
+    "exact_scope_exit": 1,
+    "llvm_exact": "untested",
+    "stage1_exact": "untested",
+    "restore_gitmodules_only_scope_exit": 1,
+    "restore_sources_scope_exit": 0,
+    "llvm_diagnostic_identity_scope_exit": 0,
+    "stage1_diagnostic": "passed",
+    "stage_sdk_scope_exit": 0,
+    "offline_scope_exit": 0,
+    "minimal_bootstrap_dry_run": 0,
+    "wasm64_and_mte_negative_scope_exit": 0,
+    "independent_wasm_shape": {
+      "external/observation/direct.wasm": {
+        "bytes": 9130,
+        "sha256": "a2b6992847a91399726282bc47e81c6abc710a4509075d915b20c8451761431e",
+        "import_count": 0,
+        "start": 25
+      },
+      "external/ros1-records/direct.wasm": {
+        "bytes": 17645,
+        "sha256": "fd9de3d7904b026cef94fb15ded5ec70cdfc7f6c06f8f810f703fac740d85267",
+        "import_count": 0,
+        "start": 32
+      },
+      "external/genpy-oracle/build/wasm-wasip1/wasm32/release/abb-genpy-oracle.wasm": {
+        "bytes": 916780,
+        "sha256": "13c1a389b539e66463527ca3b00a8854f5d4b7f6ffef937de7086e9b907fe004",
+        "import_count": 0,
+        "start": 303
+      },
+      "external/observation/build/wasm-wasip1/wasm32/release/abb-observation.wasm": {
+        "bytes": 9130,
+        "sha256": "a2b6992847a91399726282bc47e81c6abc710a4509075d915b20c8451761431e",
+        "import_count": 0,
+        "start": 25
+      },
+      "external/ros1-records/build/wasm-wasip1/wasm32/release/abb-ros1-records.wasm": {
+        "bytes": 17645,
+        "sha256": "fd9de3d7904b026cef94fb15ded5ec70cdfc7f6c06f8f810f703fac740d85267",
+        "import_count": 0,
+        "start": 32
+      }
+    },
+    "wrrs_independent_163": {
+      "sha256": "d46d0bfcce297a40ffcd254dc3c611b3153c315326c8b6fa126c6e56e16c572e",
+      "import_count": 163,
+      "entry": 166,
+      "service_available_signature": {
+        "parameters": [
+          "i64",
+          "i32",
+          "i64",
+          "i64",
+          "i64",
+          "i64",
+          "i64"
+        ],
+        "results": [
+          "i32"
+        ]
+      },
+      "runtime": {
+        "int": 0,
+        "aot": 0
+      }
+    },
+    "package_sha256": {
+      "wrrs": {
+        "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9",
+        "compressed_sha256": "ed3689868ebfd06651c6497c081d90db1d3e876c8653fa96fb74dfd8bbd4db2a"
+      },
+      "wrrs-librustc-driver-aff9448c053be314-so": {
+        "sha256": "002f2f423911cad122cc20cc6bb0672e788dfe734cbb62240d696b1db1b277db",
+        "compressed_sha256": "8a99747417c5699f26f0c3689e9d16827133dab1145e03642eae58e08527838f"
+      }
+    },
+    "scope": "These diagnostic packages were built after restoring missing upstream input in scratch. They are not published in this revision."
+  },
+  "notes": [
+    "QuickJS and TypeScript reached the test time limit under concurrent AOT. Retries completed and are recorded separately.",
+    "The upstream Rust bindings test used external Rust 1.98.0 and its wasm32-unknown-unknown standard library.",
+    "Host dispatch acceptance and the six real Wasm denied or hidden cases are recorded separately. Positive service availability with a provisioned live client was not exercised by a Wasm guest."
+  ]
+}

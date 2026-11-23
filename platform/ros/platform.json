@@ -1,0 +1,50 @@
+{
+  "id": "ros",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "geometry_msgs/Quaternion",
+    "format": "quaternion",
+    "fields": [
+      {
+        "name": "read_x",
+        "field": "x",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_y",
+        "field": "y",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_z",
+        "field": "z",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_w",
+        "field": "w",
+        "type": "f64",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/ros/common_msgs/blob/092bc230c8153dd4cfee0c84c9796cc7e6b09fdb/geometry_msgs/msg/Quaternion.msg",
+        "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+        "path": "geometry_msgs/msg/Quaternion.msg",
+        "sha256": "84f92e899c4d40fe49e7f823a8a73e5024bcf129d4aa97200a27ae4f9ff9ec6e"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Quaternion.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Quaternion.msg",
+        "sha256": "298495eb67a139642ffd37cc9029eae085e6c39a8789828b7517868a487939ed"
+      }
+    ]
+  }
+}

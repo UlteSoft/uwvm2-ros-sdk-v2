@@ -1,0 +1,10 @@
+set_project("fanuc-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("fanuc-observation")
+    set_kind("binary")
+    set_language("c")
+    set_ros_platform("fanuc")
+    add_files("main.c")
+    add_wros_tests("int", "aot")
+target_end()

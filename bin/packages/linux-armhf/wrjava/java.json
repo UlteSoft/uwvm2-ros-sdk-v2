@@ -1,0 +1,19 @@
+{
+  "schema": 2,
+  "host": "linux-armhf",
+  "launcher": {
+    "format": "tar.xz",
+    "member": "wrjava",
+    "compressed_bytes": 11096,
+    "compressed_sha256": "8f4b8eaf75da7c17dcd4057c0bf9e151485b82dbdc53e115f0f121a395326256",
+    "bytes": 22152,
+    "sha256": "9edad6f39de5530a2e126fc16b7fa3527d7bd9526f3def9ad53e91aeb1569f33",
+    "path": "bin/packages/linux-armhf/wrjava/java/wrjava-9edad6f39de5530a2e12.tar.xz",
+    "required_hwcap": [
+      "vfp",
+      "vfpv3",
+      "neon"
+    ]
+  },
+  "jdk_lock": "src/compilers/jvm/openjdk/debian/upstream.json"
+}

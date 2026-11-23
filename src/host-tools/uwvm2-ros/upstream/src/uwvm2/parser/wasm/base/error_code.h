@@ -1,0 +1,508 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-04-27
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+# include <cstdint>
+# include <limits>
+# include <type_traits>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/precfloat/impl.h>
+# include <uwvm2/utils/container/impl.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::parser::wasm::base
+{
+    /// @brief define possible errors in wasm parser
+    enum class wasm_parse_error_code : ::std::uint_least32_t
+    {
+        ok = 0u,
+        illegal_begin_pointer,
+        illegal_wasm_file_format,
+        no_wasm_section_found,
+        invalid_section_length,
+        illegal_section_length,
+        not_enough_space_unmarked,
+        illegal_section_id,
+        invalid_custom_name_length,
+        illegal_custom_name_length,
+        invalid_parameter_length,
+        illegal_parameter_length,
+        illegal_value_type,
+        invalid_result_length,
+        illegal_result_length,
+        wasm1_not_allow_multi_value,
+        illegal_type_prefix,
+        duplicate_section,
+        invalid_type_count,
+        type_section_resolved_exceeded_the_actual_number,
+        type_section_resolved_not_match_the_actual_number,
+        forward_dependency_missing,
+        invalid_import_count,
+        import_section_resolved_exceeded_the_actual_number,
+        import_section_resolved_not_match_the_actual_number,
+        invalid_import_module_name_length,
+        import_module_name_length_cannot_be_zero,
+        import_module_name_too_length,
+        invalid_import_extern_name_length,
+        import_extern_name_length_cannot_be_zero,
+        import_extern_name_too_length,
+        import_missing_import_type,
+        illegal_importdesc_prefix,
+        invalid_type_index,
+        illegal_type_index,
+        not_enough_space,
+        table_type_cannot_find_element,
+        table_type_illegal_element,
+        limit_type_cannot_find_flag,
+        limit_type_illegal_flag,
+        limit_type_invalid_min,
+        limit_type_invalid_max,
+        global_type_cannot_find_valtype,
+        global_type_illegal_valtype,
+        global_type_cannot_find_mut,
+        global_type_illegal_mut,
+        invalid_func_count,
+        func_section_resolved_exceeded_the_actual_number,
+        func_section_resolved_not_match_the_actual_number,
+        size_exceeds_the_maximum_value_of_size_t,
+        duplicate_imports_of_the_same_import_type,
+        invalid_char_sequence,
+        invalid_table_count,
+        wasm1_not_allow_multi_table,
+        table_section_resolved_exceeded_the_actual_number,
+        table_section_resolved_not_match_the_actual_number,
+        invalid_memory_count,
+        wasm1_not_allow_multi_memory,
+        memory_section_resolved_exceeded_the_actual_number,
+        memory_section_resolved_not_match_the_actual_number,
+        memory_section_resolved_exceeded_the_maximum_value,
+        imp_def_num_exceed_u32max,
+        invalid_global_count,
+        global_section_resolved_exceeded_the_actual_number,
+        global_section_resolved_not_match_the_actual_number,
+        init_const_expr_terminator_not_found,
+        invalid_export_count,
+        export_section_resolved_exceeded_the_actual_number,
+        export_name_length_cannot_be_zero,
+        export_name_too_length,
+        export_missing_export_type,
+        illegal_exportdesc_prefix,
+        duplicate_exports_of_the_same_export_type,
+        export_missing_export_idx,
+        export_section_resolved_not_match_the_actual_number,
+        invalid_export_idx,
+        exported_index_exceeds_maxvul,
+        invalid_export_name_length,
+        invalid_start_idx,
+        start_index_exceeds_maxvul,
+        invalid_elem_count,
+        elem_section_resolved_exceeded_the_actual_number,
+        invalid_elem_table_idx,
+        elem_table_index_exceeds_maxvul,
+        invalid_elem_funcidx_count,
+        invalid_elem_funcidx,
+        elem_func_index_exceeds_maxvul,
+        element_section_resolved_not_match_the_actual_number,
+        invalid_code_count,
+        code_ne_defined_func,
+        code_section_resolved_exceeded_the_actual_number,
+        invalid_code_body_size,
+        illegal_code_body_size,
+        code_missing_local_type,
+        invalid_clocal_n,
+        final_list_of_locals_exceeds_the_maximum_value_of_u32max_minus_parameter_size,
+        code_section_resolved_not_match_the_actual_number,
+        invalid_local_count,
+        func_ref_by_start_has_illegal_sign,
+        invalid_data_count,
+        data_section_resolved_exceeded_the_actual_number,
+        invalid_data_memory_idx,
+        data_memory_index_exceeds_maxvul,
+        invalid_data_byte_size_count,
+        illegal_data_byte_size_count,
+        data_section_resolved_not_match_the_actual_number,
+        invalid_section_canonical_order,
+        invalid_elem_kind,
+        invalid_data_kind,
+        limit_type_max_lt_min,
+        counter_overflows,
+        duplicate_type_function,
+        unexpected_section_data,
+        init_const_expr_stack_should_be_only_one_element,
+        init_const_expr_illegal_instruction,
+        init_const_expr_type_mismatch,
+        init_const_expr_stack_empty,
+        init_const_expr_illegal_data,
+        init_const_expr_ref_illegal_imported_global,
+        init_const_expr_ref_mutable_imported_global,
+        illegal_custom_section_order,
+        missing_code_body_end,
+        exceed_the_max_parser_limit,
+        wasm1p1_feature_required,
+        wasm2_feature_required,
+        wasm3_extended_const_disabled,
+        wasm3_table_initializer_disabled,
+        wasm1p1_invalid_data_count_section_count,
+        wasm1p1_data_count_section_resolved_not_match_the_actual_number,
+        wasm1p1_invalid_element_segment_flag,
+        wasm1p1_invalid_data_segment_flag,
+        wasm1p1_invalid_element_kind_byte,
+        wasm1p1_invalid_reference_type,
+        wasm1p1_invalid_elem_expr_count,
+        wasm1p1_element_table_type_mismatch,
+        wasm1p1_reference_type_mismatch,
+        wasm1p1_init_ref_func_index_exceeds_maxvul,
+        wasm3_limit_type_max_lt_min,
+        wasm3_memory_limit_out_of_range,
+        wasm3_table_limit_out_of_range,
+        wasm3_rich_signature_not_integrated,
+        wasm3_rich_value_not_integrated,
+        wasm3_invalid_tag_type,
+        wasm3_invalid_tag_count
+    };
+
+    /// @brief used for duplicate_imports_of_the_same_import_type
+    struct duplic_imports_t
+    {
+        ::uwvm2::utils::container::u8string_view module_name;
+        ::uwvm2::utils::container::u8string_view extern_name;
+        ::std::uint_least8_t type;
+    };
+
+    /// @brief used for duplicate_exports_of_the_same_export_type
+    struct duplic_exports_t
+    {
+        ::uwvm2::utils::container::u8string_view export_name;
+        ::std::uint_least8_t type;
+    };
+
+    /// @brief Used to set the output of module_name errors
+    struct module_name_err_t
+    {
+        ::uwvm2::utils::container::u8string_view module_name;
+        ::std::uint_least32_t type;
+    };
+
+    /// @brief Used to set the output of imp_def_num_exceed_u32max errors
+    struct imp_def_num_exceed_u32max_err_t
+    {
+        ::std::uint_least32_t imported;
+        ::std::uint_least32_t defined;
+        ::std::uint_least8_t type;
+    };
+
+    /// @brief Used to set the output of exported_index_exceeds_maxvul errors
+    struct exported_index_exceeds_maxvul_t
+    {
+        ::std::uint_least32_t idx;
+        ::std::uint_least32_t maxval;
+        ::std::uint_least8_t type;
+    };
+
+    /// @brief Used to set the output of start_index_exceeds_maxvul errors
+    struct start_index_exceeds_maxvul_t
+    {
+        ::std::uint_least32_t idx;
+        ::std::uint_least32_t maxval;
+    };
+
+    /// @brief Used to set the output of elem_table_index_exceeds_maxvul errors
+    struct elem_table_index_exceeds_maxvul_t
+    {
+        ::std::uint_least32_t idx;
+        ::std::uint_least32_t maxval;
+    };
+
+    /// @brief Used to set the output of elem_func_index_exceeds_maxvul errors
+    struct elem_func_index_exceeds_maxvul_t
+    {
+        ::std::uint_least32_t idx;
+        ::std::uint_least32_t maxval;
+    };
+
+    /// @brief Used to set the output of illegal_custom_section_order errors
+    struct illegal_custom_section_order_t
+    {
+        ::uwvm2::utils::container::u8string_view custom_name;
+        ::std::uint_least8_t custom_order;
+        ::std::uint_least8_t wasm_order;
+        ::std::uint_least8_t wasm_sec;
+    };
+
+    /// @brief Used to set the output of exceed_the_max_parser_limit errors
+    struct exceed_the_max_parser_limit_t
+    {
+        ::uwvm2::utils::container::u8string_view name;
+        ::std::size_t value;
+        ::std::size_t maxval;
+    };
+
+    /// @brief WebAssembly 1.1 feature groups used by wasm1p1_feature_required.
+    enum class wasm1p1_feature_kind : ::std::uint_least8_t
+    {
+        multi_value,
+        bulk_memory,
+        reference_types,
+        sign_extension,
+        nontrapping_float_to_int,
+        simd,
+        relaxed_simd,
+        multi_memory,
+        threads,
+        tail_call,
+        memory64,
+        table64,
+        function_references,
+        gc,
+        exceptions,
+        extended_const,
+        table_initializer,
+        memtag_extension
+    };
+
+    /// @brief WebAssembly 1.1 syntax/semantic site used by wasm1p1-specific diagnostics.
+    enum class wasm1p1_error_subject : ::std::uint_least8_t
+    {
+        data_count_section,
+        element_segment,
+        data_segment,
+        element_kind,
+        reference_type,
+        table_type,
+        instruction,
+        init_ref_null,
+        init_ref_func,
+        init_v128_const,
+        memory_type,
+        function_type,
+        local_type,
+        global_type,
+        tag_type
+    };
+
+    // Constant-expression instruction requirements retain their actual source
+    // site independently of the expression's result type. A GC-to-externref
+    // conversion must not erase the requirement of its preceding GC opcodes.
+    // Every scalar defaults to zero, preserving zero-default storage contracts.
+    struct constant_expression_opcode_requirement
+    {
+        bool required{};
+        unsigned value{};
+        wasm1p1_error_subject subject{};
+    };
+    struct constant_expression_opcode_requirements
+    {
+        constant_expression_opcode_requirement gc{}, exceptions{}, function_references{}, reference_types{}, simd{};
+    };
+    static_assert(::std::is_trivially_copyable_v<constant_expression_opcode_requirements> &&
+                  ::std::is_trivially_destructible_v<constant_expression_opcode_requirements>);
+    inline constexpr void record_constant_expression_opcode_requirement(
+        constant_expression_opcode_requirement& target, unsigned value, wasm1p1_error_subject subject) noexcept
+    {
+        if(!target.required) { target = {.required = true, .value = value, .subject = subject}; }
+    }
+    inline constexpr void merge_constant_expression_opcode_requirements(
+        constant_expression_opcode_requirements& target, constant_expression_opcode_requirements const& source) noexcept
+    {
+        // Fixed five scalar records, not a declaration, expression or byte walk.
+        if(!target.gc.required && source.gc.required) { target.gc = source.gc; }
+        if(!target.exceptions.required && source.exceptions.required) { target.exceptions = source.exceptions; }
+        if(!target.function_references.required && source.function_references.required) { target.function_references = source.function_references; }
+        if(!target.reference_types.required && source.reference_types.required) { target.reference_types = source.reference_types; }
+        if(!target.simd.required && source.simd.required) { target.simd = source.simd; }
+    }
+
+    /// @brief Used to set the output of wasm1p1_feature_required errors.
+    struct wasm1p1_feature_required_t
+    {
+        ::std::uint_least32_t value;
+        wasm1p1_feature_kind feature;
+        wasm1p1_error_subject subject;
+    };
+
+    /// @brief WebAssembly 2.0 feature groups used by wasm2_feature_required.
+    enum class wasm2_feature_kind : ::std::uint_least8_t
+    {
+        table_instructions,
+        multiple_tables
+    };
+
+    /// @brief WebAssembly 2.0 syntax/semantic site used by wasm2-specific diagnostics.
+    enum class wasm2_error_subject : ::std::uint_least8_t
+    {
+        element_segment,
+        table_type,
+        instruction
+    };
+
+    /// @brief Used to set the output of wasm2_feature_required errors.
+    struct wasm2_feature_required_t
+    {
+        ::std::uint_least32_t value;
+        wasm2_feature_kind feature;
+        wasm2_error_subject subject;
+    };
+
+    /// @brief Used to set the output of wasm1p1 data count mismatch errors.
+    struct wasm1p1_data_count_mismatch_t
+    {
+        ::std::uint_least32_t actual;
+        ::std::uint_least32_t expected;
+    };
+
+    /// @brief Used to set the output of wasm1p1 reference type parse errors.
+    struct wasm1p1_reference_type_t
+    {
+        ::std::uint_least8_t value;
+        wasm1p1_error_subject subject;
+    };
+
+    /// @brief Used to set the output of wasm1p1 reference type mismatch errors.
+    struct wasm1p1_reference_type_mismatch_t
+    {
+        ::std::uint_least8_t expected;
+        ::std::uint_least8_t actual;
+        wasm1p1_error_subject subject;
+    };
+
+    /// @brief Used to set the output of wasm1p1 element-table reference type mismatch errors.
+    struct wasm1p1_element_table_type_mismatch_t
+    {
+        ::std::uint_least32_t table_idx;
+        ::std::uint_least8_t segment_type;
+        ::std::uint_least8_t table_type;
+        // Core 3 reference metadata accompanies the legacy one-byte carrier so
+        // two distinct typed function heaps never print as funcref vs funcref.
+        ::std::int_least64_t segment_heap;
+        ::std::int_least64_t table_heap;
+        bool segment_nullable;
+        bool table_nullable;
+    };
+
+    /// @brief Used to set the output of wasm1p1 init ref.func index errors.
+    struct wasm1p1_func_index_exceeds_maxvul_t
+    {
+        ::std::uint_least32_t idx;
+        ::std::uint_least32_t maxval;
+    };
+
+    /// @brief define IEEE 754 F32 and F64
+    using error_f32 = ::uwvm2::utils::precfloat::float32_t;
+    using error_f64 = ::uwvm2::utils::precfloat::float64_t;
+
+    /// @brief Additional information provided by wasm error
+    union err_selectable_t
+    {
+        duplic_imports_t duplic_imports;
+        static_assert(::std::is_trivially_copyable_v<duplic_imports_t> && ::std::is_trivially_destructible_v<duplic_imports_t>);
+        duplic_exports_t duplic_exports;
+        static_assert(::std::is_trivially_copyable_v<duplic_exports_t> && ::std::is_trivially_destructible_v<duplic_exports_t>);
+        module_name_err_t error_module_name;
+        static_assert(::std::is_trivially_copyable_v<module_name_err_t> && ::std::is_trivially_destructible_v<module_name_err_t>);
+        imp_def_num_exceed_u32max_err_t imp_def_num_exceed_u32max;
+        static_assert(::std::is_trivially_copyable_v<imp_def_num_exceed_u32max_err_t> && ::std::is_trivially_destructible_v<imp_def_num_exceed_u32max_err_t>);
+        exported_index_exceeds_maxvul_t exported_index_exceeds_maxvul;
+        static_assert(::std::is_trivially_copyable_v<exported_index_exceeds_maxvul_t> && ::std::is_trivially_destructible_v<exported_index_exceeds_maxvul_t>);
+        start_index_exceeds_maxvul_t start_index_exceeds_maxvul;
+        static_assert(::std::is_trivially_copyable_v<start_index_exceeds_maxvul_t> && ::std::is_trivially_destructible_v<start_index_exceeds_maxvul_t>);
+        elem_table_index_exceeds_maxvul_t elem_table_index_exceeds_maxvul;
+        static_assert(::std::is_trivially_copyable_v<elem_table_index_exceeds_maxvul_t> &&
+                      ::std::is_trivially_destructible_v<elem_table_index_exceeds_maxvul_t>);
+        elem_func_index_exceeds_maxvul_t elem_func_index_exceeds_maxvul;
+        static_assert(::std::is_trivially_copyable_v<elem_func_index_exceeds_maxvul_t> && ::std::is_trivially_destructible_v<elem_func_index_exceeds_maxvul_t>);
+        illegal_custom_section_order_t illegal_custom_section_order;
+        static_assert(::std::is_trivially_copyable_v<illegal_custom_section_order_t> && ::std::is_trivially_destructible_v<illegal_custom_section_order_t>);
+        exceed_the_max_parser_limit_t exceed_the_max_parser_limit;
+        static_assert(::std::is_trivially_copyable_v<exceed_the_max_parser_limit_t> && ::std::is_trivially_destructible_v<exceed_the_max_parser_limit_t>);
+        wasm1p1_feature_required_t wasm1p1_feature_required;
+        static_assert(::std::is_trivially_copyable_v<wasm1p1_feature_required_t> && ::std::is_trivially_destructible_v<wasm1p1_feature_required_t>);
+        wasm2_feature_required_t wasm2_feature_required;
+        static_assert(::std::is_trivially_copyable_v<wasm2_feature_required_t> && ::std::is_trivially_destructible_v<wasm2_feature_required_t>);
+        wasm1p1_data_count_mismatch_t wasm1p1_data_count_mismatch;
+        static_assert(::std::is_trivially_copyable_v<wasm1p1_data_count_mismatch_t> && ::std::is_trivially_destructible_v<wasm1p1_data_count_mismatch_t>);
+        wasm1p1_reference_type_t wasm1p1_reference_type;
+        static_assert(::std::is_trivially_copyable_v<wasm1p1_reference_type_t> && ::std::is_trivially_destructible_v<wasm1p1_reference_type_t>);
+        wasm1p1_reference_type_mismatch_t wasm1p1_reference_type_mismatch;
+        static_assert(::std::is_trivially_copyable_v<wasm1p1_reference_type_mismatch_t> &&
+                      ::std::is_trivially_destructible_v<wasm1p1_reference_type_mismatch_t>);
+        wasm1p1_element_table_type_mismatch_t wasm1p1_element_table_type_mismatch;
+        static_assert(::std::is_trivially_copyable_v<wasm1p1_element_table_type_mismatch_t> &&
+                      ::std::is_trivially_destructible_v<wasm1p1_element_table_type_mismatch_t>);
+        wasm1p1_func_index_exceeds_maxvul_t wasm1p1_func_index_exceeds_maxvul;
+        static_assert(::std::is_trivially_copyable_v<wasm1p1_func_index_exceeds_maxvul_t> &&
+                      ::std::is_trivially_destructible_v<wasm1p1_func_index_exceeds_maxvul_t>);
+
+        ::std::byte const* err_end;
+        ::std::size_t err_uz;
+        ::std::ptrdiff_t err_pdt;
+
+        ::std::uint_least64_t u64;
+        ::std::int_least64_t i64;
+        ::std::uint_least32_t u32;
+        ::std::int_least32_t i32;
+        ::std::uint_least16_t u16;
+        ::std::int_least16_t i16;
+        ::std::uint_least8_t u8;
+        ::std::int_least8_t i8;
+
+        error_f64 f64;
+        error_f32 f32;
+        bool boolean;
+
+        ::std::uint_least64_t u64arr[2];
+        ::std::int_least64_t i64arr[1];
+        ::std::uint_least32_t u32arr[2];
+        ::std::int_least32_t i32arr[2];
+        ::std::uint_least16_t u16arr[4];
+        ::std::int_least16_t i16arr[4];
+        ::std::uint_least8_t u8arr[8];
+        ::std::int_least8_t i8arr[8];
+
+        error_f64 f64arr[1];
+        error_f32 f32arr[2];
+        bool booleanarr[8];
+    };
+
+    /// @brief Structured structure, with reference form as formal parameter
+    struct error_impl
+    {
+        err_selectable_t err_selectable{};
+        ::std::byte const* err_curr{};
+        wasm_parse_error_code err_code{};
+    };
+}
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

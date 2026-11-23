@@ -1,0 +1,3 @@
+# Java scene API
+
+Import `u2rosv2.Scene` from the installed Java SDK. `Scene.abi()` reads the major version exposed to the guest. Open a capability with its ASCII alias bytes and a writable `long[1]` handle slot. On success the method returns zero and stores the opaque handle in the slot. Supply the handle and a deployed clock identifier to `Scene.readClock` with a writable buffer of at least 32 bytes. Decode its four little-endian 64-bit words as the signed time, epoch, started flag and kind. Close the capability using `Scene.close(handle)`. Each call returns the scene status defined by the deployment ABI. [Bindings](src/u2rosv2/Scene.java) · [Language guide](../../../../document/en/languages/java.md)

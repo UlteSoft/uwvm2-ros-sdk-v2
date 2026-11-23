@@ -1,0 +1,11 @@
+set_project("objcpp-abi")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("objcpp-abi")
+    set_kind("binary")
+    set_language("objcpp")
+    set_wros_profile({std = "c++17"})
+    add_files("main.mm")
+    set_wros_test_queries("abi")
+    add_wros_tests("int", "aot")
+target_end()

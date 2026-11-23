@@ -1,0 +1,10 @@
+set_project("leju-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("leju-observation")
+    set_kind("binary")
+    set_language("rust")
+    set_ros_platform("leju")
+    add_files("main.rs")
+    add_wros_tests("int", "aot")
+target_end()

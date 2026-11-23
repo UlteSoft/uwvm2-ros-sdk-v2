@@ -1,0 +1,845 @@
+// Cold display decoder for a copied, validated compiler-owned source image.
+// Bytecode boundaries are distinct from surviving executable safe points. This
+// decoder never authorizes stepping, breakpoints or access to native code.
+#pragma once
+#ifndef UWVM_MODULE
+#include <uwvm2/extension/memtag/encoding.h>
+#include <fast_io.h>
+#include <fast_io_dsal/string.h>
+#include <fast_io_dsal/string_view.h>
+#include <span>
+#include <cstddef>
+#include <cstdint>
+#endif
+namespace uwvm2::uwvm::debugger::wasm_listing
+{
+using view=::fast_io::string_view;
+[[nodiscard]] inline view mnemonic(unsigned op, unsigned extension) noexcept
+{
+    if(op==::uwvm2::extension::memtag::opcode_prefix)
+    {
+        if(auto const* descriptor=::uwvm2::extension::memtag::find_instruction(extension))
+        {
+            ::std::size_t size{};while(descriptor->mnemonic[size]!=u8'\0') { ++size; }
+            return view{reinterpret_cast<char const*>(descriptor->mnemonic),size};
+        }
+    }
+    switch(op)
+    {
+        case 0x00u: return "unreachable";
+        case 0x01u: return "nop";
+        case 0x02u: return "block";
+        case 0x03u: return "loop";
+        case 0x04u: return "if";
+        case 0x05u: return "else";
+        case 0x08u: return "throw";
+        case 0x0au: return "throw_ref";
+        case 0x0bu: return "end";
+        case 0x0cu: return "br";
+        case 0x0du: return "br_if";
+        case 0x0eu: return "br_table";
+        case 0x0fu: return "return";
+        case 0x10u: return "call";
+        case 0x11u: return "call_indirect";
+        case 0x12u: return "return_call";
+        case 0x13u: return "return_call_indirect";
+        case 0x14u: return "call_ref";
+        case 0x15u: return "return_call_ref";
+        case 0x1au: return "drop";
+        case 0x1bu: return "select";
+        case 0x1cu: return "select_t";
+        case 0x1fu: return "try_table";
+        case 0x20u: return "local.get";
+        case 0x21u: return "local.set";
+        case 0x22u: return "local.tee";
+        case 0x23u: return "global.get";
+        case 0x24u: return "global.set";
+        case 0x25u: return "table.get";
+        case 0x26u: return "table.set";
+        case 0x28u: return "i32.load";
+        case 0x29u: return "i64.load";
+        case 0x2au: return "f32.load";
+        case 0x2bu: return "f64.load";
+        case 0x2cu: return "i32.load8_s";
+        case 0x2du: return "i32.load8_u";
+        case 0x2eu: return "i32.load16_s";
+        case 0x2fu: return "i32.load16_u";
+        case 0x30u: return "i64.load8_s";
+        case 0x31u: return "i64.load8_u";
+        case 0x32u: return "i64.load16_s";
+        case 0x33u: return "i64.load16_u";
+        case 0x34u: return "i64.load32_s";
+        case 0x35u: return "i64.load32_u";
+        case 0x36u: return "i32.store";
+        case 0x37u: return "i64.store";
+        case 0x38u: return "f32.store";
+        case 0x39u: return "f64.store";
+        case 0x3au: return "i32.store8";
+        case 0x3bu: return "i32.store16";
+        case 0x3cu: return "i64.store8";
+        case 0x3du: return "i64.store16";
+        case 0x3eu: return "i64.store32";
+        case 0x3fu: return "memory.size";
+        case 0x40u: return "memory.grow";
+        case 0x41u: return "i32.const";
+        case 0x42u: return "i64.const";
+        case 0x43u: return "f32.const";
+        case 0x44u: return "f64.const";
+        case 0x45u: return "i32.eqz";
+        case 0x46u: return "i32.eq";
+        case 0x47u: return "i32.ne";
+        case 0x48u: return "i32.lt_s";
+        case 0x49u: return "i32.lt_u";
+        case 0x4au: return "i32.gt_s";
+        case 0x4bu: return "i32.gt_u";
+        case 0x4cu: return "i32.le_s";
+        case 0x4du: return "i32.le_u";
+        case 0x4eu: return "i32.ge_s";
+        case 0x4fu: return "i32.ge_u";
+        case 0x50u: return "i64.eqz";
+        case 0x51u: return "i64.eq";
+        case 0x52u: return "i64.ne";
+        case 0x53u: return "i64.lt_s";
+        case 0x54u: return "i64.lt_u";
+        case 0x55u: return "i64.gt_s";
+        case 0x56u: return "i64.gt_u";
+        case 0x57u: return "i64.le_s";
+        case 0x58u: return "i64.le_u";
+        case 0x59u: return "i64.ge_s";
+        case 0x5au: return "i64.ge_u";
+        case 0x5bu: return "f32.eq";
+        case 0x5cu: return "f32.ne";
+        case 0x5du: return "f32.lt";
+        case 0x5eu: return "f32.gt";
+        case 0x5fu: return "f32.le";
+        case 0x60u: return "f32.ge";
+        case 0x61u: return "f64.eq";
+        case 0x62u: return "f64.ne";
+        case 0x63u: return "f64.lt";
+        case 0x64u: return "f64.gt";
+        case 0x65u: return "f64.le";
+        case 0x66u: return "f64.ge";
+        case 0x67u: return "i32.clz";
+        case 0x68u: return "i32.ctz";
+        case 0x69u: return "i32.popcnt";
+        case 0x6au: return "i32.add";
+        case 0x6bu: return "i32.sub";
+        case 0x6cu: return "i32.mul";
+        case 0x6du: return "i32.div_s";
+        case 0x6eu: return "i32.div_u";
+        case 0x6fu: return "i32.rem_s";
+        case 0x70u: return "i32.rem_u";
+        case 0x71u: return "i32.and";
+        case 0x72u: return "i32.or";
+        case 0x73u: return "i32.xor";
+        case 0x74u: return "i32.shl";
+        case 0x75u: return "i32.shr_s";
+        case 0x76u: return "i32.shr_u";
+        case 0x77u: return "i32.rotl";
+        case 0x78u: return "i32.rotr";
+        case 0x79u: return "i64.clz";
+        case 0x7au: return "i64.ctz";
+        case 0x7bu: return "i64.popcnt";
+        case 0x7cu: return "i64.add";
+        case 0x7du: return "i64.sub";
+        case 0x7eu: return "i64.mul";
+        case 0x7fu: return "i64.div_s";
+        case 0x80u: return "i64.div_u";
+        case 0x81u: return "i64.rem_s";
+        case 0x82u: return "i64.rem_u";
+        case 0x83u: return "i64.and";
+        case 0x84u: return "i64.or";
+        case 0x85u: return "i64.xor";
+        case 0x86u: return "i64.shl";
+        case 0x87u: return "i64.shr_s";
+        case 0x88u: return "i64.shr_u";
+        case 0x89u: return "i64.rotl";
+        case 0x8au: return "i64.rotr";
+        case 0x8bu: return "f32.abs";
+        case 0x8cu: return "f32.neg";
+        case 0x8du: return "f32.ceil";
+        case 0x8eu: return "f32.floor";
+        case 0x8fu: return "f32.trunc";
+        case 0x90u: return "f32.nearest";
+        case 0x91u: return "f32.sqrt";
+        case 0x92u: return "f32.add";
+        case 0x93u: return "f32.sub";
+        case 0x94u: return "f32.mul";
+        case 0x95u: return "f32.div";
+        case 0x96u: return "f32.min";
+        case 0x97u: return "f32.max";
+        case 0x98u: return "f32.copysign";
+        case 0x99u: return "f64.abs";
+        case 0x9au: return "f64.neg";
+        case 0x9bu: return "f64.ceil";
+        case 0x9cu: return "f64.floor";
+        case 0x9du: return "f64.trunc";
+        case 0x9eu: return "f64.nearest";
+        case 0x9fu: return "f64.sqrt";
+        case 0xa0u: return "f64.add";
+        case 0xa1u: return "f64.sub";
+        case 0xa2u: return "f64.mul";
+        case 0xa3u: return "f64.div";
+        case 0xa4u: return "f64.min";
+        case 0xa5u: return "f64.max";
+        case 0xa6u: return "f64.copysign";
+        case 0xa7u: return "i32.wrap_i64";
+        case 0xa8u: return "i32.trunc_f32_s";
+        case 0xa9u: return "i32.trunc_f32_u";
+        case 0xaau: return "i32.trunc_f64_s";
+        case 0xabu: return "i32.trunc_f64_u";
+        case 0xacu: return "i64.extend_i32_s";
+        case 0xadu: return "i64.extend_i32_u";
+        case 0xaeu: return "i64.trunc_f32_s";
+        case 0xafu: return "i64.trunc_f32_u";
+        case 0xb0u: return "i64.trunc_f64_s";
+        case 0xb1u: return "i64.trunc_f64_u";
+        case 0xb2u: return "f32.convert_i32_s";
+        case 0xb3u: return "f32.convert_i32_u";
+        case 0xb4u: return "f32.convert_i64_s";
+        case 0xb5u: return "f32.convert_i64_u";
+        case 0xb6u: return "f32.demote_f64";
+        case 0xb7u: return "f64.convert_i32_s";
+        case 0xb8u: return "f64.convert_i32_u";
+        case 0xb9u: return "f64.convert_i64_s";
+        case 0xbau: return "f64.convert_i64_u";
+        case 0xbbu: return "f64.promote_f32";
+        case 0xbcu: return "i32.reinterpret_f32";
+        case 0xbdu: return "i64.reinterpret_f64";
+        case 0xbeu: return "f32.reinterpret_i32";
+        case 0xbfu: return "f64.reinterpret_i64";
+        case 0xc0u: return "i32.extend8_s";
+        case 0xc1u: return "i32.extend16_s";
+        case 0xc2u: return "i64.extend8_s";
+        case 0xc3u: return "i64.extend16_s";
+        case 0xc4u: return "i64.extend32_s";
+        case 0xd0u: return "ref.null";
+        case 0xd1u: return "ref.is_null";
+        case 0xd2u: return "ref.func";
+        case 0xd3u: return "ref.eq";
+        case 0xd4u: return "ref.as_non_null";
+        case 0xd5u: return "br_on_null";
+        case 0xd6u: return "br_on_non_null";
+        case 0xfcu: switch(extension) {
+            case 0x0u: return "i32.trunc_sat_f32_s";
+            case 0x1u: return "i32.trunc_sat_f32_u";
+            case 0x2u: return "i32.trunc_sat_f64_s";
+            case 0x3u: return "i32.trunc_sat_f64_u";
+            case 0x4u: return "i64.trunc_sat_f32_s";
+            case 0x5u: return "i64.trunc_sat_f32_u";
+            case 0x6u: return "i64.trunc_sat_f64_s";
+            case 0x7u: return "i64.trunc_sat_f64_u";
+            case 0x8u: return "memory.init";
+            case 0x9u: return "data.drop";
+            case 0xau: return "memory.copy";
+            case 0xbu: return "memory.fill";
+            case 0xcu: return "table.init";
+            case 0xdu: return "elem.drop";
+            case 0xeu: return "table.copy";
+            case 0xfu: return "table.grow";
+            case 0x10u: return "table.size";
+            case 0x11u: return "table.fill";
+            default: return "extended-opcode"; }
+        case 0xfdu: switch(extension) {
+            case 0x0u: return "v128.load";
+            case 0x1u: return "v128.load8x8_s";
+            case 0x2u: return "v128.load8x8_u";
+            case 0x3u: return "v128.load16x4_s";
+            case 0x4u: return "v128.load16x4_u";
+            case 0x5u: return "v128.load32x2_s";
+            case 0x6u: return "v128.load32x2_u";
+            case 0x7u: return "v128.load8_splat";
+            case 0x8u: return "v128.load16_splat";
+            case 0x9u: return "v128.load32_splat";
+            case 0xau: return "v128.load64_splat";
+            case 0xbu: return "v128.store";
+            case 0xcu: return "v128.const";
+            case 0xdu: return "i8x16.shuffle";
+            case 0xeu: return "i8x16.swizzle";
+            case 0xfu: return "i8x16.splat";
+            case 0x10u: return "i16x8.splat";
+            case 0x11u: return "i32x4.splat";
+            case 0x12u: return "i64x2.splat";
+            case 0x13u: return "f32x4.splat";
+            case 0x14u: return "f64x2.splat";
+            case 0x15u: return "i8x16.extract_lane_s";
+            case 0x16u: return "i8x16.extract_lane_u";
+            case 0x17u: return "i8x16.replace_lane";
+            case 0x18u: return "i16x8.extract_lane_s";
+            case 0x19u: return "i16x8.extract_lane_u";
+            case 0x1au: return "i16x8.replace_lane";
+            case 0x1bu: return "i32x4.extract_lane";
+            case 0x1cu: return "i32x4.replace_lane";
+            case 0x1du: return "i64x2.extract_lane";
+            case 0x1eu: return "i64x2.replace_lane";
+            case 0x1fu: return "f32x4.extract_lane";
+            case 0x20u: return "f32x4.replace_lane";
+            case 0x21u: return "f64x2.extract_lane";
+            case 0x22u: return "f64x2.replace_lane";
+            case 0x23u: return "i8x16.eq";
+            case 0x24u: return "i8x16.ne";
+            case 0x25u: return "i8x16.lt_s";
+            case 0x26u: return "i8x16.lt_u";
+            case 0x27u: return "i8x16.gt_s";
+            case 0x28u: return "i8x16.gt_u";
+            case 0x29u: return "i8x16.le_s";
+            case 0x2au: return "i8x16.le_u";
+            case 0x2bu: return "i8x16.ge_s";
+            case 0x2cu: return "i8x16.ge_u";
+            case 0x2du: return "i16x8.eq";
+            case 0x2eu: return "i16x8.ne";
+            case 0x2fu: return "i16x8.lt_s";
+            case 0x30u: return "i16x8.lt_u";
+            case 0x31u: return "i16x8.gt_s";
+            case 0x32u: return "i16x8.gt_u";
+            case 0x33u: return "i16x8.le_s";
+            case 0x34u: return "i16x8.le_u";
+            case 0x35u: return "i16x8.ge_s";
+            case 0x36u: return "i16x8.ge_u";
+            case 0x37u: return "i32x4.eq";
+            case 0x38u: return "i32x4.ne";
+            case 0x39u: return "i32x4.lt_s";
+            case 0x3au: return "i32x4.lt_u";
+            case 0x3bu: return "i32x4.gt_s";
+            case 0x3cu: return "i32x4.gt_u";
+            case 0x3du: return "i32x4.le_s";
+            case 0x3eu: return "i32x4.le_u";
+            case 0x3fu: return "i32x4.ge_s";
+            case 0x40u: return "i32x4.ge_u";
+            case 0x41u: return "f32x4.eq";
+            case 0x42u: return "f32x4.ne";
+            case 0x43u: return "f32x4.lt";
+            case 0x44u: return "f32x4.gt";
+            case 0x45u: return "f32x4.le";
+            case 0x46u: return "f32x4.ge";
+            case 0x47u: return "f64x2.eq";
+            case 0x48u: return "f64x2.ne";
+            case 0x49u: return "f64x2.lt";
+            case 0x4au: return "f64x2.gt";
+            case 0x4bu: return "f64x2.le";
+            case 0x4cu: return "f64x2.ge";
+            case 0x4du: return "v128.not";
+            case 0x4eu: return "v128.and";
+            case 0x4fu: return "v128.andnot";
+            case 0x50u: return "v128.or";
+            case 0x51u: return "v128.xor";
+            case 0x52u: return "v128.bitselect";
+            case 0x53u: return "v128.any_true";
+            case 0x54u: return "v128.load8_lane";
+            case 0x55u: return "v128.load16_lane";
+            case 0x56u: return "v128.load32_lane";
+            case 0x57u: return "v128.load64_lane";
+            case 0x58u: return "v128.store8_lane";
+            case 0x59u: return "v128.store16_lane";
+            case 0x5au: return "v128.store32_lane";
+            case 0x5bu: return "v128.store64_lane";
+            case 0x5cu: return "v128.load32_zero";
+            case 0x5du: return "v128.load64_zero";
+            case 0x5eu: return "f32x4.demote_f64x2_zero";
+            case 0x5fu: return "f64x2.promote_low_f32x4";
+            case 0x60u: return "i8x16.abs";
+            case 0x61u: return "i8x16.neg";
+            case 0x62u: return "i8x16.popcnt";
+            case 0x63u: return "i8x16.all_true";
+            case 0x64u: return "i8x16.bitmask";
+            case 0x65u: return "i8x16.narrow_i16x8_s";
+            case 0x66u: return "i8x16.narrow_i16x8_u";
+            case 0x67u: return "f32x4.ceil";
+            case 0x68u: return "f32x4.floor";
+            case 0x69u: return "f32x4.trunc";
+            case 0x6au: return "f32x4.nearest";
+            case 0x6bu: return "i8x16.shl";
+            case 0x6cu: return "i8x16.shr_s";
+            case 0x6du: return "i8x16.shr_u";
+            case 0x6eu: return "i8x16.add";
+            case 0x6fu: return "i8x16.add_sat_s";
+            case 0x70u: return "i8x16.add_sat_u";
+            case 0x71u: return "i8x16.sub";
+            case 0x72u: return "i8x16.sub_sat_s";
+            case 0x73u: return "i8x16.sub_sat_u";
+            case 0x74u: return "f64x2.ceil";
+            case 0x75u: return "f64x2.floor";
+            case 0x76u: return "i8x16.min_s";
+            case 0x77u: return "i8x16.min_u";
+            case 0x78u: return "i8x16.max_s";
+            case 0x79u: return "i8x16.max_u";
+            case 0x7au: return "f64x2.trunc";
+            case 0x7bu: return "i8x16.avgr_u";
+            case 0x7cu: return "i16x8.extadd_pairwise_i8x16_s";
+            case 0x7du: return "i16x8.extadd_pairwise_i8x16_u";
+            case 0x7eu: return "i32x4.extadd_pairwise_i16x8_s";
+            case 0x7fu: return "i32x4.extadd_pairwise_i16x8_u";
+            case 0x80u: return "i16x8.abs";
+            case 0x81u: return "i16x8.neg";
+            case 0x82u: return "i16x8.q15mulr_sat_s";
+            case 0x83u: return "i16x8.all_true";
+            case 0x84u: return "i16x8.bitmask";
+            case 0x85u: return "i16x8.narrow_i32x4_s";
+            case 0x86u: return "i16x8.narrow_i32x4_u";
+            case 0x87u: return "i16x8.extend_low_i8x16_s";
+            case 0x88u: return "i16x8.extend_high_i8x16_s";
+            case 0x89u: return "i16x8.extend_low_i8x16_u";
+            case 0x8au: return "i16x8.extend_high_i8x16_u";
+            case 0x8bu: return "i16x8.shl";
+            case 0x8cu: return "i16x8.shr_s";
+            case 0x8du: return "i16x8.shr_u";
+            case 0x8eu: return "i16x8.add";
+            case 0x8fu: return "i16x8.add_sat_s";
+            case 0x90u: return "i16x8.add_sat_u";
+            case 0x91u: return "i16x8.sub";
+            case 0x92u: return "i16x8.sub_sat_s";
+            case 0x93u: return "i16x8.sub_sat_u";
+            case 0x94u: return "f64x2.nearest";
+            case 0x95u: return "i16x8.mul";
+            case 0x96u: return "i16x8.min_s";
+            case 0x97u: return "i16x8.min_u";
+            case 0x98u: return "i16x8.max_s";
+            case 0x99u: return "i16x8.max_u";
+            case 0x9bu: return "i16x8.avgr_u";
+            case 0x9cu: return "i16x8.extmul_low_i8x16_s";
+            case 0x9du: return "i16x8.extmul_high_i8x16_s";
+            case 0x9eu: return "i16x8.extmul_low_i8x16_u";
+            case 0x9fu: return "i16x8.extmul_high_i8x16_u";
+            case 0xa0u: return "i32x4.abs";
+            case 0xa1u: return "i32x4.neg";
+            case 0xa3u: return "i32x4.all_true";
+            case 0xa4u: return "i32x4.bitmask";
+            case 0xa7u: return "i32x4.extend_low_i16x8_s";
+            case 0xa8u: return "i32x4.extend_high_i16x8_s";
+            case 0xa9u: return "i32x4.extend_low_i16x8_u";
+            case 0xaau: return "i32x4.extend_high_i16x8_u";
+            case 0xabu: return "i32x4.shl";
+            case 0xacu: return "i32x4.shr_s";
+            case 0xadu: return "i32x4.shr_u";
+            case 0xaeu: return "i32x4.add";
+            case 0xb1u: return "i32x4.sub";
+            case 0xb5u: return "i32x4.mul";
+            case 0xb6u: return "i32x4.min_s";
+            case 0xb7u: return "i32x4.min_u";
+            case 0xb8u: return "i32x4.max_s";
+            case 0xb9u: return "i32x4.max_u";
+            case 0xbau: return "i32x4.dot_i16x8_s";
+            case 0xbcu: return "i32x4.extmul_low_i16x8_s";
+            case 0xbdu: return "i32x4.extmul_high_i16x8_s";
+            case 0xbeu: return "i32x4.extmul_low_i16x8_u";
+            case 0xbfu: return "i32x4.extmul_high_i16x8_u";
+            case 0xc0u: return "i64x2.abs";
+            case 0xc1u: return "i64x2.neg";
+            case 0xc3u: return "i64x2.all_true";
+            case 0xc4u: return "i64x2.bitmask";
+            case 0xc7u: return "i64x2.extend_low_i32x4_s";
+            case 0xc8u: return "i64x2.extend_high_i32x4_s";
+            case 0xc9u: return "i64x2.extend_low_i32x4_u";
+            case 0xcau: return "i64x2.extend_high_i32x4_u";
+            case 0xcbu: return "i64x2.shl";
+            case 0xccu: return "i64x2.shr_s";
+            case 0xcdu: return "i64x2.shr_u";
+            case 0xceu: return "i64x2.add";
+            case 0xd1u: return "i64x2.sub";
+            case 0xd5u: return "i64x2.mul";
+            case 0xd6u: return "i64x2.eq";
+            case 0xd7u: return "i64x2.ne";
+            case 0xd8u: return "i64x2.lt_s";
+            case 0xd9u: return "i64x2.gt_s";
+            case 0xdau: return "i64x2.le_s";
+            case 0xdbu: return "i64x2.ge_s";
+            case 0xdcu: return "i64x2.extmul_low_i32x4_s";
+            case 0xddu: return "i64x2.extmul_high_i32x4_s";
+            case 0xdeu: return "i64x2.extmul_low_i32x4_u";
+            case 0xdfu: return "i64x2.extmul_high_i32x4_u";
+            case 0xe0u: return "f32x4.abs";
+            case 0xe1u: return "f32x4.neg";
+            case 0xe3u: return "f32x4.sqrt";
+            case 0xe4u: return "f32x4.add";
+            case 0xe5u: return "f32x4.sub";
+            case 0xe6u: return "f32x4.mul";
+            case 0xe7u: return "f32x4.div";
+            case 0xe8u: return "f32x4.min";
+            case 0xe9u: return "f32x4.max";
+            case 0xeau: return "f32x4.pmin";
+            case 0xebu: return "f32x4.pmax";
+            case 0xecu: return "f64x2.abs";
+            case 0xedu: return "f64x2.neg";
+            case 0xefu: return "f64x2.sqrt";
+            case 0xf0u: return "f64x2.add";
+            case 0xf1u: return "f64x2.sub";
+            case 0xf2u: return "f64x2.mul";
+            case 0xf3u: return "f64x2.div";
+            case 0xf4u: return "f64x2.min";
+            case 0xf5u: return "f64x2.max";
+            case 0xf6u: return "f64x2.pmin";
+            case 0xf7u: return "f64x2.pmax";
+            case 0xf8u: return "i32x4.trunc_sat_f32x4_s";
+            case 0xf9u: return "i32x4.trunc_sat_f32x4_u";
+            case 0xfau: return "f32x4.convert_i32x4_s";
+            case 0xfbu: return "f32x4.convert_i32x4_u";
+            case 0xfcu: return "i32x4.trunc_sat_f64x2_s_zero";
+            case 0xfdu: return "i32x4.trunc_sat_f64x2_u_zero";
+            case 0xfeu: return "f64x2.convert_low_i32x4_s";
+            case 0xffu: return "f64x2.convert_low_i32x4_u";
+            case 0x100u: return "i8x16.relaxed_swizzle";
+            case 0x101u: return "i32x4.relaxed_trunc_f32x4_s";
+            case 0x102u: return "i32x4.relaxed_trunc_f32x4_u";
+            case 0x103u: return "i32x4.relaxed_trunc_f64x2_s_zero";
+            case 0x104u: return "i32x4.relaxed_trunc_f64x2_u_zero";
+            case 0x105u: return "f32x4.relaxed_madd";
+            case 0x106u: return "f32x4.relaxed_nmadd";
+            case 0x107u: return "f64x2.relaxed_madd";
+            case 0x108u: return "f64x2.relaxed_nmadd";
+            case 0x109u: return "i8x16.relaxed_laneselect";
+            case 0x10au: return "i16x8.relaxed_laneselect";
+            case 0x10bu: return "i32x4.relaxed_laneselect";
+            case 0x10cu: return "i64x2.relaxed_laneselect";
+            case 0x10du: return "f32x4.relaxed_min";
+            case 0x10eu: return "f32x4.relaxed_max";
+            case 0x10fu: return "f64x2.relaxed_min";
+            case 0x110u: return "f64x2.relaxed_max";
+            case 0x111u: return "i16x8.relaxed_q15mulr_s";
+            case 0x112u: return "i16x8.relaxed_dot_i8x16_i7x16_s";
+            case 0x113u: return "i32x4.relaxed_dot_i8x16_i7x16_add_s";
+            default: return "extended-opcode"; }
+        case 0xfeu: switch(extension) {
+            case 0x0u: return "memory.atomic.notify";
+            case 0x1u: return "memory.atomic.wait32";
+            case 0x2u: return "memory.atomic.wait64";
+            case 0x3u: return "atomic.fence";
+            case 0x10u: return "i32.atomic.load";
+            case 0x11u: return "i64.atomic.load";
+            case 0x12u: return "i32.atomic.load8_u";
+            case 0x13u: return "i32.atomic.load16_u";
+            case 0x14u: return "i64.atomic.load8_u";
+            case 0x15u: return "i64.atomic.load16_u";
+            case 0x16u: return "i64.atomic.load32_u";
+            case 0x17u: return "i32.atomic.store";
+            case 0x18u: return "i64.atomic.store";
+            case 0x19u: return "i32.atomic.store8";
+            case 0x1au: return "i32.atomic.store16";
+            case 0x1bu: return "i64.atomic.store8";
+            case 0x1cu: return "i64.atomic.store16";
+            case 0x1du: return "i64.atomic.store32";
+            case 0x1eu: return "i32.atomic.rmw.add";
+            case 0x1fu: return "i64.atomic.rmw.add";
+            case 0x20u: return "i32.atomic.rmw8.add_u";
+            case 0x21u: return "i32.atomic.rmw16.add_u";
+            case 0x22u: return "i64.atomic.rmw8.add_u";
+            case 0x23u: return "i64.atomic.rmw16.add_u";
+            case 0x24u: return "i64.atomic.rmw32.add_u";
+            case 0x25u: return "i32.atomic.rmw.sub";
+            case 0x26u: return "i64.atomic.rmw.sub";
+            case 0x27u: return "i32.atomic.rmw8.sub_u";
+            case 0x28u: return "i32.atomic.rmw16.sub_u";
+            case 0x29u: return "i64.atomic.rmw8.sub_u";
+            case 0x2au: return "i64.atomic.rmw16.sub_u";
+            case 0x2bu: return "i64.atomic.rmw32.sub_u";
+            case 0x2cu: return "i32.atomic.rmw.and";
+            case 0x2du: return "i64.atomic.rmw.and";
+            case 0x2eu: return "i32.atomic.rmw8.and_u";
+            case 0x2fu: return "i32.atomic.rmw16.and_u";
+            case 0x30u: return "i64.atomic.rmw8.and_u";
+            case 0x31u: return "i64.atomic.rmw16.and_u";
+            case 0x32u: return "i64.atomic.rmw32.and_u";
+            case 0x33u: return "i32.atomic.rmw.or";
+            case 0x34u: return "i64.atomic.rmw.or";
+            case 0x35u: return "i32.atomic.rmw8.or_u";
+            case 0x36u: return "i32.atomic.rmw16.or_u";
+            case 0x37u: return "i64.atomic.rmw8.or_u";
+            case 0x38u: return "i64.atomic.rmw16.or_u";
+            case 0x39u: return "i64.atomic.rmw32.or_u";
+            case 0x3au: return "i32.atomic.rmw.xor";
+            case 0x3bu: return "i64.atomic.rmw.xor";
+            case 0x3cu: return "i32.atomic.rmw8.xor_u";
+            case 0x3du: return "i32.atomic.rmw16.xor_u";
+            case 0x3eu: return "i64.atomic.rmw8.xor_u";
+            case 0x3fu: return "i64.atomic.rmw16.xor_u";
+            case 0x40u: return "i64.atomic.rmw32.xor_u";
+            case 0x41u: return "i32.atomic.rmw.xchg";
+            case 0x42u: return "i64.atomic.rmw.xchg";
+            case 0x43u: return "i32.atomic.rmw8.xchg_u";
+            case 0x44u: return "i32.atomic.rmw16.xchg_u";
+            case 0x45u: return "i64.atomic.rmw8.xchg_u";
+            case 0x46u: return "i64.atomic.rmw16.xchg_u";
+            case 0x47u: return "i64.atomic.rmw32.xchg_u";
+            case 0x48u: return "i32.atomic.rmw.cmpxchg";
+            case 0x49u: return "i64.atomic.rmw.cmpxchg";
+            case 0x4au: return "i32.atomic.rmw8.cmpxchg_u";
+            case 0x4bu: return "i32.atomic.rmw16.cmpxchg_u";
+            case 0x4cu: return "i64.atomic.rmw8.cmpxchg_u";
+            case 0x4du: return "i64.atomic.rmw16.cmpxchg_u";
+            case 0x4eu: return "i64.atomic.rmw32.cmpxchg_u";
+            default: return "extended-opcode"; }
+        case 0xfbu: switch(extension) {
+            case 0x0u: return "struct.new";
+            case 0x1u: return "struct.new_default";
+            case 0x2u: return "struct.get";
+            case 0x3u: return "struct.get_s";
+            case 0x4u: return "struct.get_u";
+            case 0x5u: return "struct.set";
+            case 0x6u: return "array.new";
+            case 0x7u: return "array.new_default";
+            case 0x8u: return "array.new_fixed";
+            case 0x9u: return "array.new_data";
+            case 0xau: return "array.new_elem";
+            case 0xbu: return "array.get";
+            case 0xcu: return "array.get_s";
+            case 0xdu: return "array.get_u";
+            case 0xeu: return "array.set";
+            case 0xfu: return "array.len";
+            case 0x10u: return "array.fill";
+            case 0x11u: return "array.copy";
+            case 0x12u: return "array.init_data";
+            case 0x13u: return "array.init_elem";
+            case 0x14u: return "ref.test";
+            case 0x15u: return "ref.test_null";
+            case 0x16u: return "ref.cast";
+            case 0x17u: return "ref.cast_null";
+            case 0x18u: return "br_on_cast";
+            case 0x19u: return "br_on_cast_fail";
+            case 0x1au: return "any.convert_extern";
+            case 0x1bu: return "extern.convert_any";
+            case 0x1cu: return "ref.i31";
+            case 0x1du: return "i31.get_s";
+            case 0x1eu: return "i31.get_u";
+            default: return "extended-opcode"; }
+        default: return "opcode";
+    }
+}
+// This cursor is deliberately independent of the optimizer's safe-point bitmap:
+// unreachable instructions and closing control delimiters still belong in WAT.
+// All reads are bounded even if a copied image is unexpectedly incomplete.
+struct display_cursor
+{
+    ::std::span<::std::byte const> bytes;
+    ::std::size_t at{};
+    bool skip(::std::size_t n) noexcept
+    { if(n>bytes.size()-at) { return false; } at+=n;return true; }
+    bool byte(unsigned& value) noexcept
+    { if(at==bytes.size()) { return false; } value=::std::to_integer<unsigned>(bytes[at++]);return true; }
+    bool leb(unsigned bits,bool sign,::std::uint64_t* value=nullptr) noexcept
+    {
+        ::std::uint64_t result{};
+        for(unsigned shift{};shift<bits;shift+=7u)
+        {
+            unsigned b{};if(!byte(b)) { return false; }
+            auto const remaining{bits-shift};
+            if(remaining<7u)
+            {
+                auto const mask{(1u<<remaining)-1u};
+                auto const upper{b&127u&~mask};
+                auto const negative{sign && (b&(1u<<(remaining-1u)))};
+                if(upper!=(negative?(127u&~mask):0u)) { return false; }
+            }
+            result|=static_cast<::std::uint64_t>(b&127u)<<shift;
+            if(!(b&128u))
+            {
+                if(sign && (b&64u) && shift+7u<64u) { result|=(~::std::uint64_t{})<<(shift+7u); }
+                if(value) { *value=result; } return true;
+            }
+        }
+        return false;
+    }
+    bool u32(::std::uint64_t* value=nullptr) noexcept { return leb(32u,false,value); }
+    bool value_type() noexcept
+    {
+        unsigned b{};if(!byte(b)) { return false; }
+        if(b==0x63u || b==0x64u) { return leb(33u,true); }
+        return (b>=0x69u && b<=0x74u) || (b>=0x7bu && b<=0x7fu);
+    }
+    bool block_type() noexcept
+    {
+        if(at==bytes.size()) { return false; }
+        auto const b{::std::to_integer<unsigned>(bytes[at])};
+        if(b==0x63u || b==0x64u) { ++at; }
+        return leb(33u,true);
+    }
+    bool memarg() noexcept
+    {
+        ::std::uint64_t flags{};
+        return u32(&flags) && flags<128u && (!(flags&64u) || u32()) && leb(64u,false);
+    }
+};
+
+// Zero means unavailable, never "try the next byte". Decoding is sequential
+// from offset zero of the authenticated body, never from a guessed address.
+[[nodiscard]] inline ::std::size_t instruction_size(::std::span<::std::byte const> bytes) noexcept
+{
+    display_cursor c{bytes};unsigned op{};
+    if(!c.byte(op)) { return 0u; }
+    ::std::uint64_t ext{};
+    if(op==::uwvm2::extension::memtag::opcode_prefix)
+    {
+        auto const* current{bytes.data()+1u};
+        auto const result{::uwvm2::extension::memtag::scan_opcode(current,bytes.data()+bytes.size())};
+        if(result.error!=::uwvm2::extension::memtag::encoding_error::none ||
+           !::uwvm2::extension::memtag::find_instruction(result.subopcode)) { return 0u; }
+        c.at=static_cast<::std::size_t>(current-bytes.data());
+        return c.u32()?c.at:0u;
+    }
+    if(op>=0xfbu && !c.u32(&ext)) { return 0u; }
+    auto const name{mnemonic(op,static_cast<unsigned>(ext))};
+    if(name=="opcode" || name=="extended-opcode") { return 0u; }
+    bool ok{true};
+    if(op==0x02u || op==0x03u || op==0x04u) { ok=c.block_type(); }
+    else if(op==0x1fu)
+    {
+        ::std::uint64_t count{};ok=c.block_type() && c.u32(&count);
+        // Every catch uses at least two bytes; a malicious count cannot cause
+        // an unbounded loop after the copied expression has ended.
+        for(::std::uint64_t i{};ok && i<count;++i)
+        { unsigned kind{};ok=c.byte(kind) && kind<=3u && (kind>=2u || c.u32()) && c.u32(); }
+    }
+    else if(op==0x0eu)
+    {
+        ::std::uint64_t count{};ok=c.u32(&count);
+        for(::std::uint64_t i{};ok && i<=count;++i) { ok=c.u32(); }
+    }
+    else if(op==0x1cu)
+    {
+        ::std::uint64_t count{};ok=c.u32(&count);
+        for(::std::uint64_t i{};ok && i<count;++i) { ok=c.value_type(); }
+    }
+    else if(op==0x11u || op==0x13u) { ok=c.u32() && c.u32(); }
+    else if(op==0x08u || op==0x0cu || op==0x0du || op==0x10u || op==0x12u || op==0x14u || op==0x15u ||
+            (op>=0x20u && op<=0x26u) || op==0x3fu || op==0x40u || op==0xd2u || op==0xd5u || op==0xd6u)
+    { ok=c.u32(); }
+    else if(op>=0x28u && op<=0x3eu) { ok=c.memarg(); }
+    else if(op==0x41u || op==0x42u || op==0xd0u) { ok=c.leb(op==0x41u?32u:op==0x42u?64u:33u,true); }
+    else if(op==0x43u || op==0x44u) { ok=c.skip(op==0x43u?4u:8u); }
+    else if(op==0xfbu)
+    {
+        if(ext<=14u || (ext>=16u && ext<=19u))
+        { ok=c.u32();if((ext>=2u && ext<=5u) || (ext>=8u && ext<=10u) || (ext>=17u && ext<=19u)) { ok=ok && c.u32(); } }
+        else if(ext>=20u && ext<=23u) { ok=c.leb(33u,true); }
+        else if(ext==24u || ext==25u)
+        { unsigned flags{};ok=c.byte(flags) && flags<=3u && c.u32() && c.leb(33u,true) && c.leb(33u,true); }
+    }
+    else if(op==0xfcu)
+    {
+        if(ext>=8u && ext<=17u)
+        { ok=c.u32();if(ext==8u || ext==10u || ext==12u || ext==14u) { ok=ok && c.u32(); } }
+    }
+    else if(op==0xfdu)
+    {
+        if(ext<=0x0bu || (ext>=0x54u && ext<=0x5du))
+        { ok=c.memarg();if(ext>=0x54u && ext<=0x5bu) { ok=ok && c.skip(1u); } }
+        else if(ext==0x0cu || ext==0x0du) { ok=c.skip(16u); }
+        else if(ext>=0x15u && ext<=0x22u) { ok=c.skip(1u); }
+    }
+    else if(op==0xfeu)
+    {
+        if(ext==3u) { unsigned reserved{};ok=c.byte(reserved) && !reserved; }
+        else { ok=c.memarg(); }
+    }
+    return ok?c.at:0u;
+}
+
+[[nodiscard]] inline ::fast_io::string instruction(::std::span<::std::byte const> bytes)
+{
+    if(bytes.empty()) { return {}; }
+    auto const op{::std::to_integer<unsigned>(bytes[0])}; unsigned extended{}; ::std::size_t after{1u};
+    auto const* first{reinterpret_cast<unsigned char const*>(bytes.data())}; auto const* end{first+bytes.size()};
+    if(op==::uwvm2::extension::memtag::opcode_prefix)
+    {
+        auto const* current{bytes.data()+1u}; // bytes is nonempty, so one-past is valid.
+        auto const decoded{::uwvm2::extension::memtag::scan_opcode(current,bytes.data()+bytes.size())};
+        if(decoded.error!=::uwvm2::extension::memtag::encoding_error::none)
+        { return ::fast_io::concat_fast_io("invalid memtag namespace"); }
+        extended=decoded.subopcode;after=static_cast<::std::size_t>(current-bytes.data());
+    }
+    else if(op>=0xfbu)
+    { auto result{::fast_io::parse_by_scan(first+1u,end,::fast_io::mnp::leb128_get(extended))};
+      if(result.code!=::fast_io::parse_code::ok) { return ::fast_io::concat_fast_io("invalid opcode"); } after=result.iter-first; }
+    auto const namespace_text{op==::uwvm2::extension::memtag::opcode_prefix ? view{"uwvm.linear.v1::"} : view{}};
+    auto text{::fast_io::concat_fast_io(namespace_text,mnemonic(op,extended))};
+    bool complete{bytes.size()==after && mnemonic(op,extended)!="opcode" && mnemonic(op,extended)!="extended-opcode"};
+    if((op==::uwvm2::extension::memtag::opcode_prefix) &&
+       ::uwvm2::extension::memtag::find_instruction(extended)!=nullptr)
+    {
+        // Experimental memtag instructions have one u32 memory index, not a
+        // memarg. Keep every byte inside the actual compiler-proven boundary.
+        complete=false;::std::uint32_t memory{};
+        auto const parsed{::fast_io::parse_by_scan(first+after,end,::fast_io::mnp::leb128_get(memory))};
+        if(parsed.code==::fast_io::parse_code::ok && parsed.iter==end)
+        { text.append(::fast_io::concat_fast_io(" ",memory));complete=true; }
+    }
+    else if((op>=0x20u && op<=0x26u) || op==0x08u || op==0x10u || op==0x12u || op==0x14u || op==0x15u ||
+            op==0x0cu || op==0x0du || op==0x3fu || op==0x40u || op==0xd2u || op==0xd5u || op==0xd6u)
+    { complete=false;::std::uint64_t index{}; auto parsed{::fast_io::parse_by_scan(first+after,end,::fast_io::mnp::leb128_get(index))};
+      if(parsed.code==::fast_io::parse_code::ok) { text.append(::fast_io::concat_fast_io(" ",index));complete=parsed.iter==end; } }
+    else if(op==0x11u || op==0x13u ||
+            (op==0xfbu && (extended<=14u || (extended>=16u && extended<=19u))) ||
+            (op==0xfcu && extended>=8u && extended<=17u))
+    {
+        display_cursor c{bytes,after};::std::uint64_t value{};complete=c.u32(&value);
+        if(complete) { text.append(::fast_io::concat_fast_io(" ",value)); }
+        auto const two{op==0x11u || op==0x13u ||
+            (op==0xfbu && ((extended>=2u && extended<=5u) || (extended>=8u && extended<=10u) || (extended>=17u && extended<=19u))) ||
+            (op==0xfcu && (extended==8u || extended==10u || extended==12u || extended==14u))};
+        if(complete && two)
+        { complete=c.u32(&value);if(complete) { text.append(::fast_io::concat_fast_io(" ",value)); } }
+        complete=complete && c.at==bytes.size();
+    }
+    else if(op==0x02u || op==0x03u || op==0x04u)
+    {
+        // A nonempty block signature is useful in the instruction view. Keep
+        // typed-reference signatures as exact bytes until they are rendered.
+        display_cursor c{bytes,after};::std::uint64_t value{};
+        complete=c.leb(33u,true,&value) && c.at==bytes.size();
+        if(complete)
+        {
+            auto const signed_value{static_cast<::std::int64_t>(value)};
+            if(signed_value>=0) { text.append(::fast_io::concat_fast_io(" type=",value)); }
+            else if(signed_value!=-64)
+            {
+                view type{};
+                switch(signed_value)
+                { case -1:type="i32";break;case -2:type="i64";break;case -3:type="f32";break;
+                  case -4:type="f64";break;case -5:type="v128";break;case -16:type="funcref";break;
+                  case -17:type="externref";break;default:complete=false;break; }
+                if(complete) { text.append(::fast_io::concat_fast_io(" result=",type)); }
+            }
+        }
+    }
+    else if(op==0x41u || op==0x42u)
+    { complete=false;::std::int64_t value{}; auto parsed{::fast_io::parse_by_scan(first+after,end,::fast_io::mnp::leb128_get(value))};
+      if(parsed.code==::fast_io::parse_code::ok) { text.append(::fast_io::concat_fast_io(" ",value));complete=parsed.iter==end; } }
+    else if((op>=0x28u && op<=0x3eu) ||
+            (op==0xfeu && (extended<=2u || (extended>=0x10u && extended<=0x4eu))) ||
+            (op==0xfdu && (extended<=0x0bu || (extended>=0x54u && extended<=0x5du))))
+    {
+        complete=false;
+        ::std::uint32_t flags{},memory{};::std::uint64_t offset{};
+        auto alignment{::fast_io::parse_by_scan(first+after,end,::fast_io::mnp::leb128_get(flags))};
+        if(alignment.code==::fast_io::parse_code::ok && flags<128u)
+        {
+            auto const indexed{(flags&64u)!=0u};
+            auto current{alignment.iter};
+            bool valid{true};
+            if(indexed)
+            {
+                auto const parsed{::fast_io::parse_by_scan(current,end,::fast_io::mnp::leb128_get(memory))};
+                valid=parsed.code==::fast_io::parse_code::ok;current=parsed.iter;
+            }
+            if(valid)
+            {
+                auto const parsed{::fast_io::parse_by_scan(current,end,::fast_io::mnp::leb128_get(offset))};
+                current=parsed.iter;valid=parsed.code==::fast_io::parse_code::ok;
+                bool const has_lane{op==0xfdu && extended>=0x54u && extended<=0x5bu};
+                if(valid && ((!has_lane && current==end) || (has_lane && end-current==1)))
+                {
+                    if(indexed) { text.append(::fast_io::concat_fast_io(" memory=",memory)); }
+                    text.append(::fast_io::concat_fast_io(" offset=",offset," align=",::std::uint64_t{1u}<<(flags&63u)));
+                    if(has_lane) { text.append(::fast_io::concat_fast_io(" lane=",static_cast<unsigned>(*current))); }
+                    complete=true;
+                }
+            }
+        }
+    }
+    else if(op==0xfeu && extended==3u)
+    { complete=end-(first+after)==1 && first[after]==0u; } // atomic.fence has a required reserved zero byte.
+    if(complete) { return text; }
+    text.append("  ; bytes:");
+    for(::std::size_t i{}; i<::std::min(bytes.size(),::std::size_t{20u}); ++i)
+    { text.append(::fast_io::concat_fast_io(" ",::fast_io::mnp::hex<false,true>(::std::to_integer<unsigned char>(bytes[i])))); }
+    if(bytes.size()>20u) { text.append(" ..."); } return text;
+}
+}

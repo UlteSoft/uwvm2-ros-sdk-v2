@@ -1,0 +1,50 @@
+{
+  "id": "fourier",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "simulator_pub_msg",
+    "format": "lcm",
+    "fields": [
+      {
+        "name": "read_timestamp",
+        "field": "timestamp",
+        "type": "i64",
+        "indexed": false
+      },
+      {
+        "name": "read_q",
+        "field": "q",
+        "type": "f64",
+        "indexed": true
+      },
+      {
+        "name": "read_q_dot",
+        "field": "q_dot",
+        "type": "f64",
+        "indexed": true
+      },
+      {
+        "name": "read_lf_touch",
+        "field": "lf_touch",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_rf_touch",
+        "field": "rf_touch",
+        "type": "f64",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/FFTAI/fourier_aurora_sdk/blob/b434869719ae256d02d8285e88ea2b22c1515602/sim/mujoco/simulator_pub_msg.py",
+        "revision": "b434869719ae256d02d8285e88ea2b22c1515602",
+        "path": "sim/mujoco/simulator_pub_msg.py",
+        "sha256": "516f1746f9f3f2758d931417f9098efcbc0240235a936c88e381bbef7c848813"
+      }
+    ]
+  }
+}

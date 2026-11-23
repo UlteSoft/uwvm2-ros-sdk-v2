@@ -1,0 +1,356 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2026-06-14
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+#include <uwvm2/utils/container/standard.h>
+
+#ifndef UWVM_MODULE
+// std
+# include <atomic>
+# include <cstddef>
+# include <cstdint>
+# if defined(UWVM2_TEST_CAPTURE_NATIVE_JIT_OBJECT)
+#  include <fcntl.h>
+#  include <uwvm2/runtime/lib/uwvm_runtime_posix_abi.h>
+# endif
+# include <memory>
+# include <limits>
+# include <string>
+# include <utility>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/runtime/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+# if defined(UWVM_RUNTIME_LLVM_JIT)
+#  include <llvm/ADT/StringRef.h>
+#  include <llvm/Bitcode/BitcodeWriter.h>
+#  include <llvm/ExecutionEngine/ObjectCache.h>
+#  include <llvm/IR/Module.h>
+#include <uwvm2/runtime/compiler/llvm_jit/fast_io_support.h>
+#  include <llvm/Support/MemoryBuffer.h>
+#  include <llvm/Support/raw_ostream.h>
+# endif
+// import
+# include <fast_io.h>
+# include <fast_io_crypto.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# include "environment.h"
+# include "store.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+#if defined(UWVM_RUNTIME_LLVM_JIT)
+# if defined(__linux__) && (defined(__GNUC__) || defined(__clang__))
+#  pragma GCC visibility push(hidden)
+# endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::runtime::llvm_jit_cache
+{
+    namespace details
+    {
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string llvm_ref_to_u8(llvm::StringRef ref) noexcept
+        {
+            ::uwvm2::utils::container::u8string out{};
+            if(!ref.empty())
+            {
+                // LLVM identifiers are byte strings; copying them to UTF-8 storage keeps logging/cache APIs uniform.
+                ::uwvm2::utils::container::u8string_ref_uwvm out_ref{::std::addressof(out)};
+                ::fast_io::io::print(out_ref, ::uwvm2::utils::container::u8string_view{reinterpret_cast<char8_t const*>(ref.data()), ref.size()});
+            }
+            return out;
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string module_bitcode_hash(llvm::Module const& module) UWVM_THROWS
+        {
+            ::uwvm2::utils::container::std_string bitcode{};
+            ::uwvm2::runtime::compiler::llvm_jit::fast_io_support::string_stream os{bitcode};
+            // Bitcode hashing keys the cache by module contents, not by unstable names or source file paths.
+            ::llvm::WriteBitcodeToFile(module, os);
+            os.flush();
+
+            auto const first{reinterpret_cast<::std::byte const*>(bitcode.data())};
+            // The complete serialization stays owned and unchanged until the
+            // digest returns. Hash it directly instead of duplicating the whole
+            // bitcode buffer, preserving exactly the existing cache identity.
+            return sha256_hex_for_path(first, first + bitcode.size());
+        }
+
+        [[nodiscard]] inline constexpr ::uwvm2::utils::container::u8string_view module_identifier_view(llvm::Module const& module) noexcept
+        {
+            auto const& identifier{module.getModuleIdentifier()};
+            return ::uwvm2::utils::container::u8string_view{reinterpret_cast<char8_t const*>(identifier.data()), identifier.size()};
+        }
+
+        template <typename... Args>
+        inline constexpr void runtime_log_line(Args&&... args) noexcept
+        {
+# if defined(UWVM)
+            runtime_cache_log_line(::std::forward<Args>(args)...);
+# else
+            ((void)args, ...);
+# endif
+        }
+    }  // namespace details
+
+    class llvm_jit_object_cache final : public ::llvm::ObjectCache
+    {
+        cache_context base_context{};
+        cache_policy policy{};
+        ::llvm::Module const* derived_context_module{};
+        cache_context derived_context{};
+        bool has_derived_context{};
+
+        [[nodiscard]] inline cache_context make_module_context(::llvm::Module const& module) UWVM_THROWS
+        {
+            auto ctx{base_context};
+            auto const& layout{module.getDataLayoutStr()};
+            ctx.data_layout.clear();
+            ::fast_io::io::print(::uwvm2::utils::container::u8string_ref_uwvm{::std::addressof(ctx.data_layout)},
+                                 ::uwvm2::utils::container::u8string_view{reinterpret_cast<char8_t const*>(layout.data()), layout.size()});
+            // Some callers already provide a fully qualified cache key, so avoid expensive bitcode hashing in that path.
+            if(ctx.cache_key_is_complete) { return ctx; }
+
+            // One ObjectCache instance is attached to one freshly-created ExecutionEngine and its single input Module.
+            // LLVM asks getObject before code generation and notifyObjectCompiled afterwards; optimization/codegen may
+            // mutate that Module between callbacks. Reuse the lookup identity so a miss is stored under the exact key
+            // queried on the next process run, and avoid serializing a large lazy CU twice on the compile path.
+            if(has_derived_context && derived_context_module == ::std::addressof(module)) { return derived_context; }
+
+            auto key{details::make_cache_key(u8"llvm-module-object")};
+            details::append_cache_key_value(key, u8"base-key", ctx.cache_key);
+            // The module hash is appended after the base key to let embedders partition cache namespaces explicitly.
+            auto bitcode_hash{details::module_bitcode_hash(module)};
+            details::append_cache_key_value(key, u8"bitcode-hash", bitcode_hash);
+            ctx.cache_key = ::std::move(key);
+            derived_context_module = ::std::addressof(module);
+            derived_context = ctx;
+            has_derived_context = true;
+            return ctx;
+        }
+
+        inline static constexpr void warn_signature_missing_once() noexcept
+        {
+# if defined(UWVM)
+            static ::std::atomic_bool warned{};  // [global]
+            // Unsigned cache hits can repeat for every module, so one warning is enough to explain the policy rejection.
+            if(warned.exchange(true, ::std::memory_order_relaxed)) { return; }
+
+            if(!::uwvm2::uwvm::io::show_runtime_warning) { return; }
+
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_YELLOW),
+                                u8"[warn]  ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                u8"LLVM JIT cache object has no identity signature; rejected because signature verification is enabled. ",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_CYAN),
+                                u8"Unsigned native cache objects are never accepted by this build.",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_ORANGE),
+                                u8" (runtime)\n",
+                                ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL));
+
+            if(::uwvm2::uwvm::io::runtime_warning_fatal) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_LT_RED),
+                                    u8"[fatal] ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_WHITE),
+                                    u8"Convert warnings to fatal errors. ",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_ORANGE),
+                                    u8"(runtime)\n\n",
+                                    ::fast_io::mnp::cond(::uwvm2::uwvm::utils::ansies::put_color, UWVM_COLOR_U8_RST_ALL));
+                ::uwvm2::uwvm::io::fast_exit(::uwvm2::uwvm::io::diagnostic_exit_status::invalid_option);
+            }
+# endif
+        }
+
+    public:
+        // Borrow THIS stack-owned adapter's configured context after its real
+        // constructor consumed the materializer's local context. Full callers
+        // obtain their exact final-IR identity during lookup. This is
+        // compiler-input DATA, not cache adoption.
+        // The actual materializer keeps this owner alive through finalizeObject,
+        // symbol resolution, and synchronous receipt copy; the borrow never
+        // escapes into the publication. This metadata copy explicitly strips the weak origin.
+        [[nodiscard]] inline cache_context actual_materializer_base_context() const noexcept
+        {
+            auto data{has_derived_context ? derived_context : base_context};
+            data.origin.reset();
+            return data;
+        }
+
+        inline llvm_jit_object_cache() noexcept = default;
+
+        inline explicit llvm_jit_object_cache(cache_context ctx, cache_policy pol = default_cache_policy()) noexcept :
+            base_context{::std::move(ctx)}, policy{pol}
+        {
+        }
+
+        inline constexpr void notifyObjectCompiled(::llvm::Module const* module, ::llvm::MemoryBufferRef object) UWVM_THROWS override
+        {
+            if(module == nullptr) [[unlikely]] { return; }
+            auto ctx{make_module_context(*module)};
+            auto const module_name{details::module_identifier_view(*module)};
+            // LLVM may call this after a previous process populated the cache; skip redundant writes when the blob is valid.
+            if(load_object(ctx, policy).status == cache_status::ok)
+            {
+                details::runtime_log_line(u8"object-cache-store-skip module=\"", module_name, u8"\" reason=object-cache-hit");
+                return;
+            }
+
+            auto const buffer{object.getBuffer()};
+            auto const first{reinterpret_cast<::std::byte const*>(buffer.data())};
+# if defined(UWVM2_TEST_CAPTURE_NATIVE_JIT_OBJECT)
+            // Test-only, compile-time object capture lets QEMU inspect the
+            // actual MCJIT output on targets whose persistent cache must stay
+            // disabled because its object embeds process-local addresses.
+            // This writes bytes for inspection only; getObject never loads them.
+#  if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__WINE__)
+#   ifndef _WIN32_WINDOWS
+            auto const capture_path{details::win32_environment_variable(u"UWVM2_TEST_CAPTURE_NATIVE_JIT_OBJECT")};
+#   else
+            auto const capture_path{details::win32_environment_variable("UWVM2_TEST_CAPTURE_NATIVE_JIT_OBJECT")};
+#   endif
+            auto const path{reinterpret_cast<char const*>(capture_path.c_str())};
+#  else
+            auto const path{::uwvm2::runtime::lib::posix_abi::getenv_noexcept("UWVM2_TEST_CAPTURE_NATIVE_JIT_OBJECT")};
+#  endif
+            if(path != nullptr && *path != '\0')
+            {
+                // The emitted object may contain process-local addresses. The
+                // harness supplies a private directory; exclusive no-follow
+                // creation prevents overwriting another file or symlink.
+#  if defined(UWVM_CPP_EXCEPTIONS)
+                try
+#  endif
+                {
+                    // native_file owns the exclusive capture through every
+                    // partial write/error. No follow/inherit mode is supplied,
+                    // so fast_io retains O_NOFOLLOW/O_CLOEXEC on POSIX.
+                    ::fast_io::native_file capture{::fast_io::mnp::os_c_str(path),
+                                                   ::fast_io::open_mode::out | ::fast_io::open_mode::excl,
+                                                   static_cast<::fast_io::perms>(0600)};
+                    if(buffer.size() > static_cast<::std::size_t>((::std::numeric_limits<::std::ptrdiff_t>::max)())) { ::fast_io::fast_terminate(); }
+                    if(!buffer.empty())
+                    {
+                        // [first, first + buffer.size()) is the live LLVM object.
+                        // [safe                       ] unsafe (one-past)
+                        //         ^^ end is formed only after the size bound above;
+                        // write_all_bytes owns the bounded partial-write cursor.
+                        auto const end{first + buffer.size()};
+                        ::fast_io::operations::write_all_bytes(capture, first, end);
+                    }
+                    // The checked fast_io close invalidates its owner even on
+                    // failure; destruction can never close a recycled handle.
+                    capture.close();
+                }
+#  if defined(UWVM_CPP_EXCEPTIONS)
+                catch(::fast_io::error const&)
+                {
+                    ::fast_io::fast_terminate();
+                }
+#  endif
+            }
+# endif
+            // Store asynchronously because object emission is on the JIT compile path and disk latency should not block it.
+            auto const status{store_object_async(ctx, first, buffer.size(), policy, module_name, true)};
+            details::runtime_log_line(u8"object-cache-store-enqueue module=\"",
+                                      module_name,
+                                      u8"\" status=",
+                                      cache_status_name(status),
+                                      u8" bytes=",
+                                      buffer.size());
+            details::log_cache_refusal(status);
+        }
+
+        [[nodiscard]] inline constexpr ::std::unique_ptr<::llvm::MemoryBuffer> getObject(::llvm::Module const* module) UWVM_THROWS override
+        {
+            if(module == nullptr) [[unlikely]] { return {}; }
+            auto ctx{make_module_context(*module)};
+            auto load{load_object(ctx, policy)};
+            if(load.status != cache_status::ok)
+            {
+                // A miss returns nullptr so LLVM falls back to compiling the module normally.
+                // Report the actual refusal before compilation. A selected cache path alone
+                // does not establish a usable cache or qualify a warm-start measurement.
+                details::runtime_log_line(u8"object-cache-miss module=\"",
+                                          details::module_identifier_view(*module),
+                                          u8"\" status=",
+                                          cache_status_name(load.status));
+                details::log_cache_refusal(load.status);
+                // Component fingerprints let users compare two verbose runs:
+                // no cache entry is adopted merely because these fields match.
+                // The full signed context and current origin are still checked.
+                if(::uwvm2::uwvm::io::show_verbose)
+                {
+                    auto const isa{make_isa_metadata(ctx)};
+                    auto const context{make_context_metadata(ctx)};
+                    auto const fingerprint{[](auto const& value) noexcept
+                    {
+                        ::uwvm2::utils::container::vector<::std::byte> bytes{};
+                        bytes.reserve(value.size());
+                        auto const first{reinterpret_cast<::std::byte const*>(value.data())};
+                        if(!value.empty()) { details::append_bytes(bytes, first, first + value.size()); }
+                        return details::sha256_hex_for_path(bytes);
+                    }};
+                    details::runtime_log_line(u8"lookup-context key=", details::cache_key_hash(ctx),
+                        u8" ir=", fingerprint(ctx.cache_key), u8" compiler=", ctx.compiler_build_id,
+                        u8" isa=", details::sha256_hex_for_path(isa),
+                        u8" context=", details::sha256_hex_for_path(context),
+                        u8" llvm=", ctx.llvm_version, u8" abi=", fingerprint(ctx.uwvm_abi),
+                        u8" policy=", fingerprint(ctx.codegen_policy), u8" ttl=none");
+                }
+                if(load.status == cache_status::signature_missing) [[unlikely]] { warn_signature_missing_once(); }
+                return {};
+            }
+            details::runtime_log_line(u8"object-cache-hit module=\"",
+                                      details::module_identifier_view(*module),
+                                      u8"\" bytes=",
+                                      load.object.size(),
+                                      u8" signature_verified=",
+                                      load.signature_verified ? u8"1" : u8"0");
+            auto const first{reinterpret_cast<char const*>(load.object.data())};
+            // LLVM owns the returned MemoryBuffer, so copy from the temporary vector into a stable buffer.
+            return ::llvm::MemoryBuffer::getMemBufferCopy(::llvm::StringRef{first, load.object.size()}, "uwvm2ros-llvm-jit-cache");
+        }
+    };
+}  // namespace uwvm2::runtime::llvm_jit_cache
+#endif
+
+#if defined(__linux__) && (defined(__GNUC__) || defined(__clang__))
+# pragma GCC visibility pop
+#endif
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/uwvm/runtime/macro/pop_macros.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

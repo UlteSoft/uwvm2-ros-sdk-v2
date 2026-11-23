@@ -1,0 +1,288 @@
+diff --git a/vendor/wasmparser-memtag/WASM-GIT-PATCH.md b/vendor/wasmparser-memtag/WASM-GIT-PATCH.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..c3df02515a7af11e1b3cdc97324565b413019f7b
+--- /dev/null
++++ b/vendor/wasmparser-memtag/WASM-GIT-PATCH.md
+@@ -0,0 +1,19 @@
++# Local reader provenance
++
++This is wasmparser 0.263.0 from wasm-tools revision
++`7a2fa422cdf9aeeaf488a2acac8bc94a078bfa32`, extended with the uwvm packed-wire
++memtag grammar, independent feature gate and typed operator validation. It is
++not an unmodified upstream release. The canonical crate SHA-256 is
++`4f5fa0a054ae153606df820eb0a84213e28cda41bbe04ba2628e71b6ba100fcb`.
++
++The memtag patch originated in wasm-git at
++`42e2c5e48ec657853b8d435342e8fdb617101538` and was ported to this release.
++The private flag uses bit 63 to avoid upstream component-feature bits. The
++previous local bounds-overflow fix is now supplied by upstream's checked
++reader implementation; no validation rule is relaxed. All upstream license
++files and VCS metadata remain intact.
++
++Memtag globals v2 metadata validation belongs to the enclosing project;
++this reader alone, like upstream wasmparser, treats custom payloads as opaque.
++
++See [THIRD_PARTY.md](../../THIRD_PARTY.md) for all generator dependencies.
+diff --git a/vendor/wasmparser-memtag/src/binary_reader.rs b/vendor/wasmparser-memtag/src/binary_reader.rs
+index 6bb3e456b37d56e5f1aaf4f9f6ce37fb7bfda746..be913a212b3d6024ad80e92c9fd00dbfbc145e4c 100644
+--- a/vendor/wasmparser-memtag/src/binary_reader.rs
++++ b/vendor/wasmparser-memtag/src/binary_reader.rs
+@@ -1132,6 +1132,7 @@ impl<'a> BinaryReader<'a> {
+                 bail!(pos, "unexpected SIMD opcode: 0x{code:x}")
+             }
+             0xfe => self.visit_0xfe_operator(pos, visitor)?,
++            0xff => self.visit_uwvm2_ros_operator(pos, visitor)?,
+ 
+             _ => bail!(pos, "illegal opcode: 0x{code:x}"),
+         })
+@@ -1434,6 +1435,56 @@ impl<'a> BinaryReader<'a> {
+         })
+     }
+ 
++    // uwvm2-ros VM instruction extension: FF ULEB32(opcode), followed by
++    // opcode-specific operands. The u32 namespace has no global bit layout,
++    // version field, memory-index operand, or payload length.
++    fn visit_uwvm2_ros_operator<T>(
++        &mut self,
++        pos: u64,
++        visitor: &mut T,
++    ) -> Result<<T as VisitOperator<'a>>::Output>
++    where
++        T: VisitOperator<'a>,
++    {
++        let mut probe = self.clone();
++        let opcode = probe.read_var_u32()?;
++        // Only these registered WasmMTE instructions have a memory-index
++        // operand. Future extension families can have entirely different
++        // grammars. Unknown opcodes never license an operand read.
++        macro_rules! memory_instruction {
++            ($visit:ident) => {{
++                let mem = probe.read_var_u32()?;
++                *self = probe;
++                visitor.$visit(mem)
++            }};
++        }
++        Ok(match opcode {
++            0x0101_0020 => memory_instruction!(visit_memtag_status),
++            0x0101_0021 => memory_instruction!(visit_memtag_extract),
++            0x0101_0022 => memory_instruction!(visit_memtag_insert),
++            0x0101_0023 => memory_instruction!(visit_memtag_tagbits),
++            0x0101_0024 => memory_instruction!(visit_memtag_startbit),
++            0x0101_0025 => memory_instruction!(visit_memtag_copy),
++            0x0101_0026 => memory_instruction!(visit_memtag_sub),
++            0x0101_0027 => memory_instruction!(visit_memtag_load),
++            0x0101_0028 => memory_instruction!(visit_memtag_untag),
++            0x0101_0029 => memory_instruction!(visit_memtag_untagstore),
++            0x0101_002a => memory_instruction!(visit_memtag_untagstorez),
++            0x0101_002b => memory_instruction!(visit_memtag_store),
++            0x0101_002c => memory_instruction!(visit_memtag_storez),
++            0x0101_002d => memory_instruction!(visit_memtag_random),
++            0x0101_002e => memory_instruction!(visit_memtag_randomstore),
++            0x0101_002f => memory_instruction!(visit_memtag_randomstorez),
++            0x0101_0036 => memory_instruction!(visit_memtag_hint),
++            0x0101_0037 => memory_instruction!(visit_memtag_hintstore),
++            0x0101_0038 => memory_instruction!(visit_memtag_hintstorez),
++            _ => bail!(
++                pos,
++                "unknown uwvm2-ros VM instruction extension opcode: 0x{opcode:x}"
++            ),
++        })
++    }
++
+     #[cfg(feature = "simd")]
+     pub(super) fn visit_0xfd_operator<T>(
+         &mut self,
+diff --git a/vendor/wasmparser-memtag/src/features.rs b/vendor/wasmparser-memtag/src/features.rs
+index 03d5ffdde7241617e6dd7547b90d470852b3fc85..a948c10b4a7a409b71da25ee685072cbbbbe980b 100644
+--- a/vendor/wasmparser-memtag/src/features.rs
++++ b/vendor/wasmparser-memtag/src/features.rs
+@@ -383,6 +383,9 @@ define_wasm_features! {
+         ///
+         /// [proposal]: https://github.com/WebAssembly/multibyte-array-access
+         pub multibyte_array_access: MULTIBYTE_ARRAY_ACCESS(1 << 45) = false;
++
++        /// WasmMTE in the uwvm2-ros VM instruction extension; not Core.
++        pub memtag_extension: MEMTAG_EXTENSION(1 << 63) = false;
+     }
+ }
+ 
+diff --git a/vendor/wasmparser-memtag/src/lib.rs b/vendor/wasmparser-memtag/src/lib.rs
+index 2c365d15552557ac5e25be18f81223c456b9b9f9..6db8ae2885e303ee8e4c65566587e013f2547420 100644
+--- a/vendor/wasmparser-memtag/src/lib.rs
++++ b/vendor/wasmparser-memtag/src/lib.rs
+@@ -374,6 +374,30 @@ macro_rules! _for_each_operator_group {
+                 MemoryDiscard { mem: u32 } => visit_memory_discard (arity 2 -> 0)
+             }
+ 
++            // WasmMTE instructions in the uwvm2-ros VM instruction extension.
++            // Each operand/result has the selected memory's index type.
++            @memtag_extension {
++                MemtagStatus { mem: u32 } => visit_memtag_status (arity 0 -> 1)
++                MemtagExtract { mem: u32 } => visit_memtag_extract (arity 1 -> 1)
++                MemtagInsert { mem: u32 } => visit_memtag_insert (arity 2 -> 1)
++                MemtagTagbits { mem: u32 } => visit_memtag_tagbits (arity 0 -> 1)
++                MemtagStartbit { mem: u32 } => visit_memtag_startbit (arity 0 -> 1)
++                MemtagCopy { mem: u32 } => visit_memtag_copy (arity 2 -> 1)
++                MemtagSub { mem: u32 } => visit_memtag_sub (arity 2 -> 1)
++                MemtagLoad { mem: u32 } => visit_memtag_load (arity 1 -> 1)
++                MemtagUntag { mem: u32 } => visit_memtag_untag (arity 1 -> 1)
++                MemtagUntagstore { mem: u32 } => visit_memtag_untagstore (arity 2 -> 1)
++                MemtagUntagstorez { mem: u32 } => visit_memtag_untagstorez (arity 2 -> 1)
++                MemtagStore { mem: u32 } => visit_memtag_store (arity 2 -> 0)
++                MemtagStorez { mem: u32 } => visit_memtag_storez (arity 2 -> 0)
++                MemtagRandom { mem: u32 } => visit_memtag_random (arity 1 -> 1)
++                MemtagRandomstore { mem: u32 } => visit_memtag_randomstore (arity 2 -> 1)
++                MemtagRandomstorez { mem: u32 } => visit_memtag_randomstorez (arity 2 -> 1)
++                MemtagHint { mem: u32 } => visit_memtag_hint (arity 3 -> 1)
++                MemtagHintstore { mem: u32 } => visit_memtag_hintstore (arity 4 -> 1)
++                MemtagHintstorez { mem: u32 } => visit_memtag_hintstorez (arity 4 -> 1)
++            }
++
+             // 0xFE prefixed operators
+             // threads
+             // https://github.com/WebAssembly/threads
+diff --git a/vendor/wasmparser-memtag/src/validator/operators.rs b/vendor/wasmparser-memtag/src/validator/operators.rs
+index 24c6826cc3884434b29b60acbd5c678f57603299..58d23a2555c16983d702f071c0d5fcd15b3aea0b 100644
+--- a/vendor/wasmparser-memtag/src/validator/operators.rs
++++ b/vendor/wasmparser-memtag/src/validator/operators.rs
+@@ -2099,6 +2099,7 @@ macro_rules! validate_proposal {
+     (desc tail_call) => ("tail calls");
+     (desc function_references) => ("function references");
+     (desc memory_control) => ("memory control");
++    (desc memtag_extension) => ("experimental WasmMTE memory tagging");
+     (desc gc) => ("gc");
+     (desc legacy_exceptions) => ("legacy exceptions");
+     (desc stack_switching) => ("stack switching");
+@@ -3497,6 +3498,132 @@ where
+         self.pop_operand(Some(ty))?;
+         Ok(())
+     }
++    fn visit_memtag_status(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_extract(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_insert(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_tagbits(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_startbit(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_copy(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_sub(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_load(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_untag(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_untagstore(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_untagstorez(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_store(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        Ok(())
++    }
++    fn visit_memtag_storez(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        Ok(())
++    }
++    fn visit_memtag_random(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_randomstore(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_randomstorez(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_hint(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_hintstore(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
++    fn visit_memtag_hintstorez(&mut self, mem: u32) -> Self::Output {
++        let ty = self.check_memory_index(mem)?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.pop_operand(Some(ty))?;
++        self.push_operand(ty)?;
++        Ok(())
++    }
+     fn visit_memory_discard(&mut self, mem: u32) -> Self::Output {
+         let ty = self.check_memory_index(mem)?;
+         self.pop_operand(Some(ty))?;

@@ -1,0 +1,56 @@
+{
+  "id": "hello_robot",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "Wacc_Protocol_P0.unpack_status",
+    "format": "packed",
+    "fields": [
+      {
+        "name": "read_ax",
+        "field": "ax",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_az",
+        "field": "az",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_a0",
+        "field": "a0",
+        "type": "i16",
+        "indexed": false
+      },
+      {
+        "name": "read_single_tap_count",
+        "field": "single_tap_count",
+        "type": "u32",
+        "indexed": false
+      },
+      {
+        "name": "read_timestamp",
+        "field": "timestamp",
+        "type": "u32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/hello-robot/stretch_body/blob/92c9db0cc9ade6535f822e83bbf10cbd0c68136a/body/stretch_body/wacc.py",
+        "revision": "92c9db0cc9ade6535f822e83bbf10cbd0c68136a",
+        "path": "body/stretch_body/wacc.py",
+        "sha256": "0061ed277eb2b648eced3372b6c861a5f43487ca4664c69784b4b9a9847cb026"
+      },
+      {
+        "url": "https://github.com/hello-robot/stretch_body/blob/92c9db0cc9ade6535f822e83bbf10cbd0c68136a/body/stretch_body/transport.py",
+        "revision": "92c9db0cc9ade6535f822e83bbf10cbd0c68136a",
+        "path": "body/stretch_body/transport.py",
+        "sha256": "bd6811a48ac4b89939befbd481f05141367021e67c137ebbb229f75a842edcab"
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// import
+# include <fast_io.h>
+# include <uwvm2/parser/wasm/concepts/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/type/impl.h>
+# include <uwvm2/parser/wasm_custom/customs/impl.h>
+# include <uwvm2/uwvm/wasm/base/impl.h>
+# include <uwvm2/uwvm/wasm/feature/impl.h>
+# include <uwvm2/uwvm/wasm/type/impl.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::wasm::storage
+{
+    inline ::uwvm2::uwvm::wasm::type::wasm_file_t execute_wasm{};  // [global] No global variable dependencies from other translation units
+
+    namespace details
+    {
+        // Borrow only into the selected nonmoving native full_source_instance.
+        // This low-layer selector avoids loader importing runtime storage.
+        inline ::uwvm2::uwvm::wasm::type::wasm_file_t* selected_execute_wasm{};
+        inline bool selected_execute_wasm_initialized{};
+    }
+    [[nodiscard]] inline constexpr ::uwvm2::uwvm::wasm::type::wasm_file_t& active_execute_wasm() noexcept
+    { return details::selected_execute_wasm ? *details::selected_execute_wasm : execute_wasm; }
+
+}  // namespace uwvm2::uwvm::wasm::storage

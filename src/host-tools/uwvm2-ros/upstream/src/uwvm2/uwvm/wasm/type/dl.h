@@ -1,0 +1,262 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+#include <uwvm2/utils/security/trusted_driver.h>
+
+#ifndef UWVM_MODULE
+// std
+# include <cstdint>
+# include <cstddef>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/parser/wasm/concepts/impl.h>
+# include <uwvm2/parser/wasm/standard/wasm1/type/impl.h>
+# include <uwvm2/parser/wasm_custom/customs/impl.h>
+# include <uwvm2/uwvm/wasm/base/impl.h>
+# include <uwvm2/uwvm/wasm/feature/impl.h>
+# include "para.h"
+# include "cwrapper.h"
+# include "preload_module_attribute.h"
+# include "wasip1_api.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::wasm::type
+{
+
+    // There is no need to add the UWVM_SUPPORT_PRELOAD_DL macro here, as it will be reused by the weak symbol module.
+
+    extern "C"
+    {
+        struct capi_module_name_t
+        {
+            char const* name;
+            ::std::size_t name_length;
+        };
+
+        /// @brief uwvm_get_module_name
+        using capi_get_module_name_t = capi_module_name_t (*)();
+
+        struct capi_custom_handler_t
+        {
+            char const* custom_name_ptr;
+            ::std::size_t custom_name_length;
+            ::uwvm2::uwvm::wasm::type::imported_c_handlefunc_ptr_t custom_handle_func;
+        };
+
+        struct capi_custom_handler_vec_t
+        {
+            capi_custom_handler_t const* custom_handler_begin;
+            ::std::size_t custom_handler_size;
+        };
+
+        /// @brief uwvm_get_custom_handler_vec
+        using capi_get_custom_handler_vec_t = capi_custom_handler_vec_t (*)();
+
+        using capi_wasm_function = void (*)(::std::byte* res, ::std::byte* para);
+
+        /*
+            `capi_wasm_function` ABI and preload-DL authoring example:
+            the parameter/result structs must use `packed` or `aligned(1)`.
+
+            ```cpp
+            #include <cstddef>
+            #include <cstdint>
+            #include "dl.h"
+            #include "preload_api.h"
+
+            using namespace uwvm2::uwvm::wasm::type;
+
+            struct __attribute__((packed)) add_para
+            {
+                ::std::uint_least32_t lhs;
+                ::std::uint_least32_t rhs;
+            };
+
+            struct __attribute__((packed)) add_res
+            {
+                ::std::uint_least32_t value;
+            };
+
+            static uwvm_preload_host_api_v1 const* g_preload_host_api{};
+            static char const module_name[] = "demo";
+            static char const function_name[] = "add_i32";
+            static ::std::uint_least8_t const para_types[] = {WASM_VALTYPE_I32, WASM_VALTYPE_I32};
+            static ::std::uint_least8_t const res_types[] = {WASM_VALTYPE_I32};
+
+            extern "C" void uwvm_set_preload_host_api_v1(uwvm_preload_host_api_v1 const* api) noexcept
+            {
+                g_preload_host_api = api;
+            }
+
+            extern "C" capi_module_name_t uwvm_get_module_name() noexcept
+            {
+                return capi_module_name_t{module_name, sizeof(module_name) - 1u};
+            }
+
+            extern "C" void add_i32(add_res* result, add_para const* para) noexcept
+            {
+                result->value = para->lhs + para->rhs;
+            }
+
+            extern "C" capi_function_vec_t uwvm_function() noexcept
+            {
+                static capi_function_t const functions[] = {
+                    {function_name,
+                     sizeof(function_name) - 1u,
+                     para_types,
+                     sizeof(para_types) / sizeof(para_types[0]),
+                     res_types,
+                     sizeof(res_types) / sizeof(res_types[0]),
+                     reinterpret_cast<capi_wasm_function>(&add_i32)},
+                };
+                return capi_function_vec_t{functions, sizeof(functions) / sizeof(functions[0])};
+            }
+            ```
+
+            Recommended plugin authoring workflow:
+            - export `uwvm_get_module_name()`;
+            - export `uwvm_function()`;
+            - export `uwvm_get_custom_handler()` only when you actually provide custom sections;
+            - export `uwvm_set_preload_host_api_v1()` when the plugin wants the stable host API;
+            - export `uwvm_set_wasip1_host_api_v1()` when the plugin wants optional WASI Preview 1 access;
+            - keep wasm-facing ABI structs trivial, packed, and byte-layout stable;
+            - route all memory interaction through the delivery-state contract documented in `preload_api.h`;
+            - include `wasip1_api.h` when the plugin wants to call the host-provided WASI Preview 1 table.
+
+            If memory access is required, prefer the stable preload host API from `preload_api.h`
+            instead of relying on internal hooks or runtime-private layouts.
+        */
+
+        struct capi_function_t
+        {
+            char const* func_name_ptr;
+            ::std::size_t func_name_length;
+
+            ::std::uint_least8_t const* para_type_vec_begin;
+            ::std::size_t para_type_vec_size;
+
+            ::std::uint_least8_t const* res_type_vec_begin;
+            ::std::size_t res_type_vec_size;
+
+            capi_wasm_function func_ptr;
+        };
+
+        struct capi_function_vec_t
+        {
+            capi_function_t const* function_begin;
+            ::std::size_t function_size;
+        };
+
+        /// @brief uwvm_get_function_vec_t
+        using capi_get_function_vec_t = capi_function_vec_t (*)();
+    }
+
+    struct wasm_dl_storage_t
+    {
+        capi_get_module_name_t get_module_name{};
+        capi_get_custom_handler_vec_t get_custom_handler_vec{};
+        capi_get_function_vec_t get_function_vec{};
+
+        capi_module_name_t capi_module_name{};
+        capi_custom_handler_vec_t capi_custom_handler_vec{};
+        capi_function_vec_t capi_function_vec{};
+
+        // Function identity belongs to one registration, even when dlopen returns
+        // the same DSO and its getter returns the same static array for aliases.
+        ::uwvm2::utils::container::vector<capi_function_t> owned_function_records{};
+
+        wasm_dl_storage_t() noexcept = default;
+        wasm_dl_storage_t(wasm_dl_storage_t const&) = delete;
+        wasm_dl_storage_t& operator=(wasm_dl_storage_t const&) = delete;
+        wasm_dl_storage_t(wasm_dl_storage_t&&) noexcept = default;
+        wasm_dl_storage_t& operator=(wasm_dl_storage_t&&) noexcept = default;
+
+        inline constexpr void retain_function_records() noexcept
+        {
+            if(!owned_function_records.empty() || capi_function_vec.function_begin == nullptr ||
+               capi_function_vec.function_size == 0uz) { return; }
+            auto const begin{capi_function_vec.function_begin};
+            owned_function_records.reserve(capi_function_vec.function_size);
+            for(::std::size_t i{}; i != capi_function_vec.function_size; ++i)
+            { owned_function_records.emplace_back(begin[i]); }
+            capi_function_vec.function_begin = owned_function_records.data();
+        }
+
+    };
+
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+    // the wasm_dl_t only supported on the platform which make the UWVM_SUPPORT_PRELOAD_DL macro defined
+    struct wasm_dl_t
+    {
+        // wasm file name
+        ::uwvm2::utils::container::u8cstring_view file_name{};
+        // Accurate module names that must work
+        ::uwvm2::utils::container::u8string_view module_name{};
+        // Retain the immutable file identity until AFTER dlclose. Closing and
+        // reusing a /proc/self/fd pathname early can alias another DSO in ld.so.
+        ::uwvm2::utils::security::trusted_driver::image verified_image{};
+        // DL File
+        ::fast_io::native_dll_file import_dll_file{};
+        // DL handler
+        wasm_dl_storage_t wasm_dl_storage{};
+        // One native setter can also be registered through weak-symbol aliases.
+        uwvm_set_wasip1_host_api_v1_t set_wasip1_host_api_v1{};
+        // wasm_parameter_t
+        ::uwvm2::uwvm::wasm::type::wasm_parameter_t wasm_parameter{};
+        // preload memory attribute
+        ::uwvm2::uwvm::wasm::type::preload_module_memory_attribute_t preload_module_memory_attribute{};
+
+        wasm_dl_t() noexcept = default;
+        wasm_dl_t(wasm_dl_t const&) = delete;
+        wasm_dl_t& operator=(wasm_dl_t const&) = delete;
+        wasm_dl_t(wasm_dl_t&&) noexcept = default;
+        wasm_dl_t& operator=(wasm_dl_t&& other) noexcept
+        {
+            if(this!=::std::addressof(other))
+            {
+                // Retire the old loader handle before releasing its /proc FD
+                // identity, including vector move-assignment/compaction.
+                import_dll_file=::std::move(other.import_dll_file);
+                verified_image=::std::move(other.verified_image);
+                file_name=other.file_name;module_name=other.module_name;
+                wasm_dl_storage=::std::move(other.wasm_dl_storage);
+                set_wasip1_host_api_v1=other.set_wasip1_host_api_v1;
+                wasm_parameter=::std::move(other.wasm_parameter);
+                preload_module_memory_attribute=::std::move(other.preload_module_memory_attribute);
+            }
+            return *this;
+        }
+    };
+#endif
+}  // namespace uwvm2::uwvm::wasm::storage
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

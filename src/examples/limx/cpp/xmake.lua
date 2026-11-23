@@ -1,0 +1,10 @@
+set_project("limx-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("limx-observation")
+    set_kind("binary")
+    set_language("cpp")
+    set_ros_platform("limx")
+    add_files("main.cpp")
+    add_wros_tests("int", "aot")
+target_end()

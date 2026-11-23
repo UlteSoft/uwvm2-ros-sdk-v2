@@ -1,0 +1,10 @@
+set_project("go-abi")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("go-abi")
+    set_kind("binary")
+    set_language("go")
+    add_files("go.mod")
+    set_wros_test_queries("abi", "go-runtime")
+    add_wros_tests("int", "aot")
+target_end()

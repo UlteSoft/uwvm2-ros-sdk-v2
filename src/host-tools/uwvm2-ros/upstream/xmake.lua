@@ -1,0 +1,1420 @@
+set_xmakever("2.9.8")
+
+set_project("uwvm2-ros")
+set_policy("check.auto_ignore_flags", false)
+
+-- Version
+set_version("2.0.3")
+add_defines("UWVM_VERSION_X=2")
+add_defines("UWVM_VERSION_Y=0")
+add_defines("UWVM_VERSION_Z=3")
+add_defines("UWVM_VERSION_S=0")
+add_defines("UWVM_VERSION_DEV")
+
+-- ROS release policy is independent of the retained upstream platform sources.
+set_allowedplats("linux")
+
+includes("xmake/language_debug.lua")
+includes("xmake/impl.lua")
+includes("xmake/ros_product_rule.lua")
+includes("xmake/mach_exc_protected.lua")
+includes("xmake/platform/impl.lua")
+includes("xmake/basic_test.lua")
+add_moduledirs("xmake")
+
+-- The wider platform implementations above remain upstream source assets.
+-- ros_product.lua rejects targets outside the current Linux ROS ABI matrix.
+-- Currently, there are no plugins.
+-- add_plugindirs("xmake/plugins")
+
+set_defaultmode("release")
+set_allowedmodes(support_rules_table)
+
+local function uwvm_target_supports_llvm_jit()
+	local arch = string.lower(tostring(get_config("arch") or os.arch() or ""))
+	local is_powerpc = string.sub(arch, 1, 3) == "ppc" or string.sub(arch, 1, 7) == "powerpc"
+	local is_32_bit_powerpc = is_powerpc and string.find(arch, "64", 1, true) == nil
+	local is_sparc = string.sub(arch, 1, 5) == "sparc"
+	if is_32_bit_powerpc then
+		-- Compilation also checks the actual configured LLVM loader capability;
+		-- its linked ABI query rejects new headers paired with stale archives.
+		return is_plat("linux") and not arch:find("le", 1, true)
+	end
+	if is_sparc then
+		return is_plat("linux") and (arch:find("64", 1, true) ~= nil or arch == "sparcv9")
+	end
+	return true
+end
+
+-- Xmake's project-description scope has error(), but no global Lua assert().
+local function uwvm_require_build_config(condition, message)
+	if not condition then
+		error(message)
+	end
+end
+
+function def_build(opt)
+	add_rules("uwvm_ros_product")
+	-- Unsupported products must reach the full sandbox policy diagnostic;
+	-- do not enter retained platform recipes from declarative scope.
+	if (get_config("plat") or os.host()) ~= "linux" then return end
+	opt = opt or {}
+	uwvm_apply_language_debug_options()
+	-- The command line remains opt-in per module. This only makes the offline
+	-- verifier available; unsupported platforms keep an explicit deny backend.
+	if get_config("enable-wsea") and is_plat("linux", "macosx", "unix", "bsd", "freebsd", "dragonflybsd", "netbsd", "openbsd", "sun") then
+		add_defines("UWVM_WSEA_OPENSSL")
+		uwvm_add_llvm_jit_cache_openssl()
+	end
+	if is_mode("debug") then
+		add_rules("debug")
+	elseif is_mode("release") then
+		add_rules("release")
+	elseif is_mode("minsizerel") then
+		add_rules("minsizerel")
+	elseif is_mode("releasedbg") then
+		add_rules("releasedbg")
+	end
+
+	set_languages("c23", "cxx26")
+	if get_config("use-llvm-compiler") and is_arch("armeb", "aarch64_be", "aarch64be", "arm64be") then
+		-- Endian conversion adds constexpr work to the command-line alias table.
+		add_cxxflags("-fconstexpr-steps=8388608", {force = true})
+	end
+
+	set_encodings("utf-8")
+	set_warnings("all", "extra", "pedantic", "error")
+	if is_plat("macosx") and (is_arch("arm64", "aarch64") or
+		(is_arch("x86_64", "x64", "amd64") and get_config("macos-x64-native-step"))) then
+		-- Protected Mach exception admission reads the process entitlement.
+		add_frameworks("Security", "CoreFoundation")
+	end
+
+	add_rules("native_stack_probes")
+
+	local build_source_id = get_config("build-source-id")
+	if build_source_id and build_source_id ~= "none" then
+		if #build_source_id ~= 71 or not build_source_id:match("^sha256:[0-9a-f]+$") then
+			error("invalid --build-source-id: expected sha256:<64 lowercase hexadecimal digits>")
+		end
+		-- This is the builder's assertion of a verified source-manifest identity;
+		-- the syntax check above does not compute or authenticate that manifest.
+		-- Refresh it when the covered sources change. Reusing an old value for
+		-- an incremental diagnostic build does not make its caches distributable.
+		-- Consumed by the cache policy header, also when built as a module unit.
+		add_defines("UWVM2_BUILD_SOURCE_ID=u8\"" .. build_source_id .. "\"")
+	end
+
+	-- Compile the independent ROSv2 host by default. Deprecated ROSv1 and
+	-- in-process native preloading require explicit build opt-ins. Apply the
+	-- same choices to runtime, CLI, named modules and test translation units.
+	if get_config("import-u2rosv2") then
+        add_defines("UWVM_IMPORT_ROSV2", "UWVM_ROS_ATTACHMENT_OPENSSL")
+        uwvm_add_openssl()
+    end
+	for _, ros_version in ipairs({1, 2}) do
+		if get_config("import-u2rosv1-ros" .. ros_version) then
+			add_defines("UWVM_IMPORT_ROS" .. ros_version)
+		end
+	end
+	if get_config("enable-preload-dl") then add_defines("UWVM_ENABLE_PRELOAD_DL=1") end
+	-- @brief Apply the selected SDK registry capacities to every translation unit.
+	-- @details Runtime, CLI and test targets must share these compile-time limits.
+	-- Vendor catalogs can exceed the defaults; option declarations alone do not
+	-- override custom_registry_limits.h. These limits grant no ROS permissions.
+	local ros_registry_interfaces = uwvm_ros_registry_max_interfaces()
+	local ros_registry_cells = uwvm_ros_registry_max_cells()
+	add_rules("uwvm.ros.registry_capacity")
+	add_defines("UWVM_ROS_MAX_CUSTOM_INTERFACES=" .. tostring(ros_registry_interfaces))
+	add_defines("UWVM_ROS_MAX_CUSTOM_CELLS=" .. tostring(ros_registry_cells))
+	local custom_ros_registry = uwvm_ros_selected_vendor_registry()
+	if custom_ros_registry and custom_ros_registry ~= "none" then
+		if not (get_config("import-u2rosv1-ros1") or get_config("import-u2rosv1-ros2")) then
+			error("--ros-custom-registry-header requires an explicit ROS host import")
+		end
+		-- Select trusted generated source at build time. This option does not
+		-- enable ROS, create a target, or supply any capability/connection field.
+		if custom_ros_registry:find('[\"\r\n]') or not os.isfile(custom_ros_registry) then
+			error("--ros-custom-registry-header requires an existing path without quotes or newlines")
+		end
+		add_defines('UWVM_ROS_CUSTOM_TOPIC_MANIFEST=\"' .. path.absolute(custom_ros_registry):gsub("\\", "/") .. '\"')
+	end
+
+	local original_control_registry = get_config("ros-original-control-manifest-header")
+	if original_control_registry and original_control_registry ~= "none" then
+		if not get_config("import-u2rosv1-ros2") then
+			error("--ros-original-control-manifest-header requires explicit --import-u2rosv1-ros2=y")
+		end
+		-- This is reviewed compiled schema source, not a permission/profile file.
+		-- Its independent namespace coexists with the ordinary vendor manifest.
+		if original_control_registry:find('[;\"\r\n]') or not os.isfile(original_control_registry) then
+			error("--ros-original-control-manifest-header requires an existing safe source path")
+		end
+		add_defines('UWVM_ROS_ORIGINAL_CONTROL_MANIFEST=\"' .. path.absolute(original_control_registry):gsub("\\", "/") .. '\"')
+	end
+
+	-- ROS categories enlarge the existing constexpr alias table.
+	if (get_config("import-u2rosv2") or get_config("import-u2rosv1-ros1") or get_config("import-u2rosv1-ros2")) and get_config("use-llvm-compiler") then
+		add_cxxflags("-fconstexpr-steps=8388608", {force = true})
+	end
+
+	local enable_cxx_module = get_config("use-cxx-module")
+	if enable_cxx_module then
+		add_defines("UWVM_MODULE")
+		if (is_plat("macosx") or is_plat("mingw")) and get_config("use-llvm-compiler") then
+			-- Partition wrappers repeat this identical macro after the command
+			-- line definition so their included headers also build standalone.
+			add_cxxflags("-Wno-macro-redefined", { force = true })
+		end
+		set_policy("build.c++.modules", true)
+		-- Check the bootstrap compiler's real initializer code generation, not
+		-- its version string or the unrelated bundled LLVM dependency version.
+		add_rules("module_initializer_check")
+		-- The project uses named modules but does not import `std`. Do not make xmake synthesize a standard-library module:
+		-- its compiler-shipped std.cc must exactly match the selected C++ standard library and is not a project dependency.
+		set_policy("build.c++.modules.std", false)
+	end
+
+	local use_stdlib = get_config("stdlib")
+	if use_stdlib ~= "default" and use_stdlib then
+		local flags = "-stdlib=" .. use_stdlib
+		add_cxflags(flags)
+		add_ldflags(flags)
+	end
+
+	local disable_cpp_exceptions = get_config("fno-exceptions")
+	if disable_cpp_exceptions then
+		set_exceptions("no-cxx")
+	end
+
+	local enable_debug_timer = get_config("debug-timer")
+	if enable_debug_timer then
+		add_defines("UWVM_TIMER")
+	end
+
+	local wasm_memory_model = get_config("wasm-memory-model") or "default"
+	if wasm_memory_model == "default" then
+		-- Keep the existing automatic backend selection.
+	elseif wasm_memory_model == "mmap" then
+		add_defines("UWVM_FORCE_USE_MMAP")
+	elseif wasm_memory_model == "multi-thread-alloc" then
+		add_defines("UWVM_FORCE_DISABLE_MMAP")
+		add_defines("UWVM_USE_MULTITHREAD_ALLOCATOR")
+	elseif wasm_memory_model == "single-thread-alloc" then
+		add_defines("UWVM_FORCE_DISABLE_MMAP")
+	else
+		error("unsupported wasm-memory-model: " .. tostring(wasm_memory_model))
+	end
+
+	-- The SDK uses scene communication and a socket-free WASI Preview 1.
+	add_defines("UWVM_ENABLE_LOCAL_IMPORTED_WASIP1_WASM64")
+
+	local execution_int = get_config("execution-int")
+	if not execution_int or execution_int == "none" then
+		add_defines("UWVM_DISABLE_INT")
+	elseif execution_int == "uwvm-int" then
+		add_defines("UWVM_USE_UWVM_INT")
+	else
+		error("ROS supports only execution-int=uwvm-int or none")
+	end
+
+	local execution_jit = get_config("execution-jit")
+	uwvm_require_build_config(not execution_jit or execution_jit == "none" or execution_jit == "llvm", "ROS supports only execution-jit=llvm or none")
+	local enable_llvm_jit = execution_jit == "llvm" and uwvm_target_supports_llvm_jit()
+	if not enable_llvm_jit then
+		add_defines("UWVM_DISABLE_JIT")
+	elseif execution_jit == "llvm" then
+		add_defines("UWVM_USE_LLVM_JIT")
+		add_options("llvm-jit-env")
+	end
+
+	-- A stock LLVM must not be required to emit the downstream owner table.
+	-- The LLVM SDK option supplies its authenticated producer define to every
+	-- consumer (runtime and CLI), after resolving the exact SDK version.
+
+	-- Native unwind is an execution requirement, independent of debugger mode.
+	local unwind_arch = string.lower(tostring(get_config("arch") or os.arch() or ""))
+	if enable_llvm_jit and is_plat("linux") and string.sub(unwind_arch, 1, 3) == "arm" and
+		not string.find(unwind_arch, "64", 1, true) then
+		add_defines("UWVM2_ENABLE_LINUX_ARM_EHABI_PRODUCT=1")
+		add_ldflags("-Wl,--export-dynamic-symbol=__gnu_Unwind_Find_exidx", {force = true})
+		add_shflags("-Wl,--export-dynamic-symbol=__gnu_Unwind_Find_exidx", {force = true})
+	end
+
+	if get_config("linux-native-debug") or get_config("linux-x64-native-debug") then
+		uwvm_require_build_config(enable_llvm_jit and is_plat("linux") and get_config("use-llvm-compiler"),
+			"linux-native-debug requires a Linux LLVM/Clang JIT build and the native-owner-table-v2 SDK")
+		if get_config("linux-x64-native-debug") then
+			uwvm_require_build_config(is_arch("x86_64", "x64", "amd64"), "linux-x64-native-debug requires Linux x86-64; use linux-native-debug for other supported Linux targets")
+		end
+		-- Runtime and CLI share the same authenticated owner/trap contract.
+		-- An SDK without the actual emitted owner table remains unavailable.
+		add_defines("UWVM_EXPERIMENTAL_NATIVE_OWNER_TABLE_V2=1")
+		local native_debug_target = string.lower(tostring(get_config("target") or ""))
+		local native_debug_llvm_target = string.lower(tostring(get_config("llvm-target") or ""))
+		if is_arch("x86_64", "x64", "amd64", "x86", "i386", "i686", "riscv64", "arm64", "aarch64", "arm", "armsf", "armhf", "armv7", "armv7a", "armv7-a", "loong64", "loongarch64", "mips64", "mips64el") or
+			string.find(native_debug_target, "^mips64el%-") or string.find(native_debug_llvm_target, "^mips64el%-") or
+			string.find(native_debug_target, "^mips64%-") or string.find(native_debug_llvm_target, "^mips64%-") then
+			add_defines("UWVM2_ENABLE_DEBUG_NATIVE_CONTINUATION_LINUX_PRODUCT=1")
+		end
+	end
+
+	if get_config("macos-x64-native-step") then
+		uwvm_require_build_config(enable_llvm_jit and is_plat("macosx") and is_arch("x86_64", "x64", "amd64") and
+			get_config("use-llvm-compiler"), "macos-x64-native-step requires a macOS x86-64 LLVM/Clang JIT build")
+		add_defines("UWVM2_ENABLE_DEBUG_NATIVE_STEP_MACOS_X64_PRODUCT=1")
+	end
+
+	if enable_llvm_jit then
+		if is_plat("mingw") and is_arch("x86_64") and get_config("use-llvm-compiler") then
+			-- The Win64 native-step bridge uses Clang/GNU SEH assembly. Enable it
+			-- in both uwvm_runtime and uwvm so the LLVM-full debugger can execute
+			-- actual machine-instruction steps in the Windows product.
+			add_defines("UWVM2_ENABLE_DEBUG_NATIVE_STEP_WINDOWS_PRODUCT")
+		end
+		add_cxxflags("-Wno-deprecated-declarations", { force = true })
+
+		on_load(function(target)
+			local utility = import("utility.utility", { anonymous = true })
+			local llvm_jit_options = utility.get_llvm_jit_options()
+			for _, field in ipairs({
+				"linkdirs",
+				"frameworkdirs",
+				"frameworks",
+				"links",
+				"syslinks",
+				"ldflags",
+				"shflags"
+			}) do
+				for _, value in ipairs(llvm_jit_options[field] or {}) do
+					if field == "ldflags" or field == "shflags" then
+						target:add(field, value, { force = true })
+					else
+						target:add(field, value)
+					end
+				end
+			end
+			local builtins = os.getenv("UWVM_WINDOWS_QUALIFIED_BUILTINS")
+			if builtins and builtins ~= "" then
+				uwvm_require_build_config(is_plat("mingw") and is_arch("x86_64") and
+					path.is_absolute(builtins) and os.isfile(builtins),
+					"Qualified Windows builtins require an explicit existing Win64 archive")
+				-- The qualification builder checks every COFF member and required
+				-- helper before publishing this explicit link input. Append after
+				-- LLVM without changing compiler flags, SDK or C++ EH runtimes.
+				target:add("ldflags", builtins, { force = true })
+			end
+		end)
+	end
+
+	if enable_llvm_jit and (is_plat("macosx") or is_plat("iphoneos") or is_plat("watchos")) then
+		on_load(function(target)
+			local utility = import("utility.utility", { anonymous = true })
+			-- Only the selected bootstrap C++ runtime may need dynamic lookup;
+			-- the bundled LLVM dependency itself is always an absolute static archive.
+			local llvm_jit_options = utility.get_llvm_jit_options()
+			for _, llvm_libdir in ipairs(llvm_jit_options.linkdirs or {}) do
+				if llvm_libdir and llvm_libdir ~= "" then
+					target:add("ldflags", "-Wl,-rpath," .. llvm_libdir, { force = true })
+				end
+			end
+		end)
+	end
+
+	if execution_int == "default" or execution_int == "uwvm-int" then
+		local combine_ops_mode = get_config("enable-uwvm-int-combine-ops")
+
+		if combine_ops_mode ~= "none" then
+			-- Soft/light combine is enabled by default unless explicitly set to "none".
+			add_defines("UWVM_ENABLE_UWVM_INT_COMBINE_OPS")
+
+			if combine_ops_mode == "heavy" or combine_ops_mode == "extra" then
+				add_defines("UWVM_ENABLE_UWVM_INT_HEAVY_COMBINE_OPS")
+				if combine_ops_mode == "extra" then
+					add_defines("UWVM_ENABLE_UWVM_INT_EXTRA_HEAVY_COMBINE_OPS")
+				end
+			end
+		end
+
+		local delay_local_mode = get_config("enable-uwvm-int-delay-local")
+		if delay_local_mode == "soft" or delay_local_mode == "heavy" then
+			add_defines("UWVM_ENABLE_UWVM_INT_DELAY_LOCAL_SOFT")
+			if delay_local_mode == "heavy" then
+				add_defines("UWVM_ENABLE_UWVM_INT_DELAY_LOCAL_HEAVY")
+			end
+		end
+
+		local enable_uwvm_int_instruction_reorder = get_config("enable-uwvm-int-instruction-reorder")
+		if enable_uwvm_int_instruction_reorder then
+			add_defines("UWVM_ENABLE_UWVM_INT_INSTRUCTION_REORDER")
+		end
+
+		local enable_uwvm_int_loop_unwind = get_config("enable-uwvm-int-loop-unwind")
+		if enable_uwvm_int_loop_unwind then
+			add_defines("UWVM_ENABLE_UWVM_INT_LOOP_UNWIND")
+		end
+	end
+
+	if get_config("numeric-exception-fused") then
+		uwvm_require_build_config(enable_llvm_jit and is_plat("linux") and is_arch("x86_64", "x64", "amd64"),
+			"numeric-exception-fused requires Linux x86-64 LLVM JIT")
+		add_defines("UWVM_EXPERIMENTAL_PENDING_NUMERIC_FUSED_CATCH=1")
+	end
+
+	local gc_jit_access_profile = get_config("gc-jit-access-profile") or "default"
+	if gc_jit_access_profile == "typed-array-load" or gc_jit_access_profile == "typed-array-access" or gc_jit_access_profile == "typed-array-access-inline" or gc_jit_access_profile == "typed-array-access-private" then
+		uwvm_require_build_config(enable_llvm_jit and is_plat("linux") and is_arch("x86_64", "x64", "amd64"),
+			"typed array access requires Linux x86-64 LLVM JIT")
+		-- Keep the store and generated native ABI consistent in every translation unit.
+		add_defines("UWVM_EXPERIMENTAL_SCALAR_ARRAY_LENGTH=1")
+		add_defines("UWVM_EXPERIMENTAL_TYPED_ARRAY_LOAD=1")
+		if gc_jit_access_profile == "typed-array-access" or gc_jit_access_profile == "typed-array-access-inline" or gc_jit_access_profile == "typed-array-access-private" then
+			add_defines("UWVM_EXPERIMENTAL_TYPED_ARRAY_STORE=1")
+		end
+		if gc_jit_access_profile == "typed-array-access-inline" or gc_jit_access_profile == "typed-array-access-private" then
+			add_defines("UWVM_EXPERIMENTAL_INLINE_ARRAY_AUTH=1")
+		end
+		if gc_jit_access_profile == "typed-array-access-private" then
+			-- Elide locks only for constructor-local arrays in a whole function without publication.
+			add_defines("UWVM_EXPERIMENTAL_PRIVATE_NUMERIC_ARRAY_LOCK=1")
+		end
+	elseif gc_jit_access_profile ~= "default" then
+		error("unsupported gc-jit-access-profile: " .. tostring(gc_jit_access_profile))
+	end
+
+	local gc_allocation_profile = get_config("gc-allocation-profile") or "default"
+	if gc_allocation_profile == "general-slab" then
+		uwvm_require_build_config(enable_llvm_jit and is_plat("linux") and is_arch("x86_64", "x64", "amd64"),
+			"general-slab is currently qualified for Linux x86-64 LLVM JIT")
+		uwvm_require_build_config(get_config("use-thread-local"), "general-slab requires use-thread-local")
+		-- One storage/publication policy in every runtime and CLI translation unit.
+		add_defines("UWVM_EXPERIMENTAL_GENERAL_GC_SLAB=1")
+		add_defines("UWVM_EXPERIMENTAL_COLLECTION_LOCAL_MEMBERSHIP=1")
+		add_defines("UWVM_EXPERIMENTAL_SINGLE_CAS_GC_PUBLICATION=1")
+	elseif gc_allocation_profile ~= "default" then
+		error("unsupported gc-allocation-profile: " .. tostring(gc_allocation_profile))
+	end
+
+	local use_thread_local = get_config("use-thread-local")
+	if use_thread_local then
+		add_defines("UWVM_USE_THREAD_LOCAL")
+	end
+
+	local detailed_debug_check = get_config("detailed-debug-check")
+	if is_mode("debug") and detailed_debug_check then
+		add_defines("UWVM_ENABLE_DETAILED_DEBUG_CHECK")
+	end
+
+	if is_plat("windows") then
+		windows_target()
+	elseif is_plat("mingw") then
+		mingw_target()
+	elseif is_plat("linux") then
+		linux_target()
+	elseif is_plat("macosx", "iphoneos", "watchos") then
+		darwin_target(opt)
+	elseif is_plat("djgpp") then
+		djgpp_target()
+	elseif is_plat("unix", "bsd", "freebsd", "dragonflybsd", "netbsd", "openbsd") then
+		bsd_target()
+	elseif is_plat("wasm-wasi", "wasm-wasip1", "wasm-wasip2", "wasm-wasip3", "wasm-wasi-threads", "wasm-wasip1-threads", "wasm-wasip2-threads", "wasm-wasip3-threads") then
+		wasm_wasi_target()
+	elseif is_plat("wasm-emscripten") then
+		wasm_emscripten_target()
+	elseif is_plat("cygwin") then
+		cygwin_target()
+	elseif is_plat("none") then
+		none_target()
+	end
+
+	local use_llvm_compiler = get_config("use-llvm-compiler")
+	if use_llvm_compiler then
+		local llvm_target = get_config("llvm-target")
+		if llvm_target ~= "detect" and llvm_target then
+			local llvm_target_cvt = "--target=" .. llvm_target
+			add_cxflags(llvm_target_cvt, { force = true })
+			add_ldflags(llvm_target_cvt, { force = true })
+		end
+
+		-- Since neither LLVM nor Wextra supports this parameter by default, this addition prevents compilation.
+		add_cxflags("-Wimplicit-fallthrough", { force = true })
+	else
+		-- Keep the non-LLVM toolchain path portable: some Clang builds do not
+		-- recognize this warning class at all, which turns the suppression into a
+		-- hard error under `-Werror`.
+	end
+
+	before_build(
+		function(target)
+			try
+			{
+				function()
+					local function git_available()
+						local result = os.iorun("git --version")
+						return result and not result:find("fatal:") and not result:find("not found")
+					end
+
+					local function is_git_repo()
+						if not git_available() then return false end
+						local result = os.iorun("git rev-parse --is-inside-work-tree")
+						return result and result:trim() == "true"
+					end
+
+					if not git_available() or not is_git_repo() then
+						return
+					end
+
+					-- General Git commands execute functions and return results or nil
+					local function git_command(cmd)
+						local result = os.iorun(cmd)
+						if result and not result:find("fatal:") then
+							return result:trim()
+						end
+						return nil
+					end
+
+					-- Only a verified object id is a usable source identity. Never turn a failed Git query into a
+					-- defined "unknown" commit: the persistent native-object cache treats a defined id as provenance.
+					local commit_id = git_command("git rev-parse --verify HEAD")
+					if commit_id then
+						local commit_id_length = #commit_id
+						if (commit_id_length ~= 40 and commit_id_length ~= 64) or not commit_id:match("^[0-9a-fA-F]+$") then
+							commit_id = nil
+						else
+							commit_id = commit_id:lower()
+						end
+					end
+
+					-- Get the current branch name (may be empty, such as the separation HEAD status)
+					local current_branch = git_command("git branch --show-current")
+
+					-- Dynamically resolve the associated remote name
+					local remote_name = nil
+					if current_branch then
+						-- Get the traced remote name through git config
+						remote_name = git_command("git config branch." .. current_branch .. ".remote")
+					end
+
+					-- If the remote name is not found, try to resolve it through HEAD upstream
+					local upstream_branch = git_command("git rev-parse --abbrev-ref --symbolic-full-name HEAD") or "unknown"
+					if not remote_name then
+						local upstream_branch_tmp = git_command("git rev-parse --abbrev-ref --symbolic-full-name @{u}")
+						if upstream_branch_tmp then
+							-- Resolve the remote name of the upstream branch (format: remote_name/branch_name)
+							remote_name = upstream_branch_tmp:match("^(.-)/")
+						end
+					end
+
+					-- If there is still no remote name, go back to the first remote or default value
+					local remote_url = "unknown"
+					if remote_name then
+						remote_url = git_command("git remote get-url " .. remote_name) or "unknown"
+					else
+						-- Get all remote lists, the first one
+						local remotes = git_command("git remote")
+						if remotes then
+							local first_remote = remotes:match("[^\r\n]+")
+							if first_remote then
+								remote_url = git_command("git remote get-url " .. first_remote) or "unknown"
+							end
+						end
+					end
+
+					-- Get submission timestamp (UTC)
+					local timestamp_str = git_command("git log -1 --format=%ct HEAD")
+					local timestamp = tonumber(timestamp_str) or 0
+
+					-- Convert timestamp to date string (UTC time zone)
+					local commit_date = "unknown"
+					if timestamp > 0 then
+						commit_date = os.date("!%Y-%m-%d", timestamp) -- Attention '! 'means forcing UTC
+					end
+
+					local status_output = git_command("git status --porcelain")
+					-- Failure to inspect the worktree is not evidence of a clean tree, so fail closed as dirty.
+					local is_dirty = status_output == nil or status_output ~= ""
+
+					if commit_id then
+						target:add("defines", "UWVM_GIT_COMMIT_ID=u8\"" .. commit_id .. "\"")
+					end
+					target:add("defines", "UWVM_GIT_REMOTE_URL=u8\"" .. remote_url .. "\"")
+					target:add("defines", "UWVM_GIT_COMMIT_DATA=u8\"" .. commit_date .. "\"")
+					target:add("defines", "UWVM_GIT_UPSTREAM_BRANCH=u8\"" .. upstream_branch .. "\"")
+					if is_dirty then
+						target:add("defines", "UWVM_GIT_HAS_UNCOMMITTED_MODIFICATIONS")
+					end
+				end,
+				catch
+				{
+					function()
+						return nil
+					end
+				}
+			}
+		end
+	)
+end
+
+local uwvm_uses_uwvm_int = get_config("execution-int") == "uwvm-int"
+local uwvm_uses_llvm_jit = (get_config("execution-jit") == "llvm") and
+	uwvm_target_supports_llvm_jit()
+local uwvm_has_runtime_backend = uwvm_uses_uwvm_int or uwvm_uses_llvm_jit
+
+local function uwvm_add_runtime_interface_module_files(is_public)
+	-- Own the same backend-neutral provider graph in the runtime target and
+	-- standalone module-test targets. This lists interfaces only, never a
+	-- second runtime implementation TU or a foreign backend's partitions.
+	add_files("src/uwvm2/runtime/lib/**.cppm", { public = is_public })
+	add_files("src/uwvm2/runtime/exception/**.cppm", { public = is_public })
+	add_files("src/uwvm2/runtime/diagnostic/**.cppm", { public = is_public })
+	add_files("src/uwvm2/runtime/gc/**.cppm", { public = is_public })
+	add_files("src/uwvm2/runtime/checkpoint/**.cppm", { public = is_public })
+	add_files("src/uwvm2/runtime/wasm_threads/**.cppm", { public = is_public })
+	if uwvm_has_runtime_backend then
+		add_files("src/uwvm2/runtime/compiler/shared/**.cppm", { public = is_public })
+	end
+	if uwvm_uses_uwvm_int then
+		add_files("src/uwvm2/runtime/compiler/uwvm_int/**.cppm", { public = is_public })
+	end
+	if uwvm_uses_llvm_jit and not uwvm_uses_uwvm_int then
+		-- The genuine threaded bridge owns the bounded integer child backend too.
+		-- This is not an ordinary interpreter selection or permission.
+		add_files("src/uwvm2/runtime/compiler/uwvm_int/threaded/**.cppm", { public = is_public })
+	end
+	if uwvm_uses_llvm_jit then
+		add_files("src/uwvm2/runtime/compiler/llvm_jit/**.cppm", { public = is_public })
+		add_files("src/uwvm2/runtime/llvm_jit_cache/**.cppm", { public = is_public })
+	end
+end
+
+local function uwvm_add_frontend_module_files(is_public)
+	-- Keep the exported partition graph independent of backend macros. Each
+	-- partition's included header guards its backend-specific declarations.
+	if is_plat("mingw") and is_arch("x86_64") and get_config("use-llvm-compiler") then
+		-- This cold CLI callback imports the full runtime module graph. Clang 22
+		-- otherwise needs more than the 64 GiB qualification cgroup merely to
+		-- emit its BMI at -O3. Its code runs only while parsing command-line
+		-- options, never on the Wasm/JIT execution path. Keep all other modules
+		-- and the runtime object at the product's release optimization level.
+		add_files("src/uwvm2/uwvm/**.cppm|cmdline/callback/runtime_llvm_jit_call_stack.cppm", { public = is_public })
+		add_files("src/uwvm2/uwvm/cmdline/callback/runtime_llvm_jit_call_stack.cppm",
+			{ public = is_public, optimize = "none" })
+	else
+		add_files("src/uwvm2/uwvm/**.cppm", { public = is_public })
+	end
+	if not uwvm_language_debug_enabled("cpp") then
+		remove_files("src/uwvm2/uwvm/debugger/source_pretty_coroutine.cppm")
+	end
+end
+
+if (uwvm_uses_llvm_jit or get_config("import-u2rosv2") or (get_config("enable-wsea") and
+	is_plat("linux", "macosx", "unix", "bsd", "freebsd", "dragonflybsd", "netbsd", "openbsd", "sun"))) and get_config("openssl-root") == "default" and get_config("openssl-provider") == "package" then
+	add_requires(get_config("import-u2rosv2") and "openssl >=3.2.0" or "openssl >=3.0.0", {configs = {shared = false}})
+end
+
+function uwvm_add_openssl()
+	local openssl_root = get_config("openssl-root")
+	if openssl_root and openssl_root ~= "default" then
+		add_rules("uwvm.prebuilt-openssl")
+	elseif get_config("openssl-provider") == "package" then
+		add_packages("openssl")
+	else
+		add_rules("uwvm.bundled-openssl")
+	end
+end
+
+function uwvm_add_llvm_jit_cache_openssl()
+	add_defines("UWVM_RUNTIME_LLVM_JIT_CACHE_USE_OPENSSL_ED25519")
+	uwvm_add_openssl()
+end
+
+includes("xmake/openssl.lua")
+
+target("uwvm2-ros")
+	set_kind("binary")
+	def_build({ skip_static_libcxx = uwvm_uses_llvm_jit })
+
+	if is_plat("mingw") and is_arch("x86_64") and get_config("use-llvm-compiler") and
+		get_config("use-cxx-module") then
+		-- Xmake creates a consumer BMI for every public uwvm_runtime module.
+		-- The large LLVM call-stack CLI callback therefore has a second BMI
+		-- here, even though its initializer object is linked only once from
+		-- uwvm_runtime. This executable target contains only startup/host API
+		-- glue; its consumer BMI must also avoid Clang 22's >64 GiB -O3 peak.
+		-- uwvm_runtime keeps release -O3 for all execution/JIT code.
+		add_cxxflags("-O0", { force = true })
+	end
+
+	-- uwvm uses precise floating-point model to ensure determinism.
+	set_fpmodels("precise") 
+
+	local is_debug_mode = is_mode("debug")  -- public all modules in debug mode
+	local enable_cxx_module = get_config("use-cxx-module")
+
+	-- third-parties/fast_io
+	add_includedirs("third-parties/fast_io/include")
+
+	-- Module interfaces and their initializer objects belong to uwvm_runtime.
+	-- Consume its public BMIs through add_deps below; compiling the same .cppm
+	-- here links two strong module initializers, even when all C++ APIs inline.
+
+	-- third-parties/bizwen
+	add_includedirs("third-parties/bizwen/include")
+
+	-- third-parties/boost
+	add_includedirs("third-parties/boost_unordered/include")
+
+	if uwvm_uses_llvm_jit then
+		uwvm_add_llvm_jit_cache_openssl()
+		if is_plat("mingw") and is_arch("x86_64") then
+			-- Bundled LLVM's static Support archive uses MinGW compiler helpers
+			-- and Crypt32. Keep these after the LLVM archives at executable link.
+			add_syslinks("crypt32")
+			if not get_config("use-llvm-compiler") or get_config("rtlib") ~= "compiler-rt" then
+				add_syslinks("gcc")
+			end
+		end
+	end
+
+	-- uwvm
+	add_defines("UWVM=2")
+
+	-- src
+	add_includedirs("src/")
+
+	add_headerfiles("src/**.h")
+
+	if enable_cxx_module then
+		-- uwvm main
+		add_files("src/uwvm2/uwvm/main.module.cpp")
+		add_files("src/uwvm2/uwvm/host_api.module.cpp")
+	else
+		-- uwvm main
+		add_files("src/uwvm2/uwvm/main.default.cpp")
+		add_files("src/uwvm2/uwvm/host_api.default.cpp")
+		if is_plat("macosx") and is_arch("arm64", "aarch64") and get_config("macos-4gib-test") then
+			-- Keep the full LLVM JIT feature set while compiling the large CLI
+			-- callback graph in bounded, independently linked translation units.
+			-- This only changes startup compilation; Wasm execution uses the same
+			-- runtime object and the default product remains unchanged.
+			add_defines("UWVM_MACOS_4GIB_TEST")
+			add_files("src/uwvm2/uwvm/cmdline/low_memory_parse.default.cpp")
+			add_files("src/uwvm2/uwvm/run/low_memory_run.default.cpp")
+			for _, group in ipairs({"core", "runtime", "wasi_a", "wasi_b", "wasi_c", "wasi_d", "wasi_e", "log"}) do
+				add_files("src/uwvm2/uwvm/cmdline/callback/low_memory_" .. group .. ".default.cpp")
+			end
+		end
+	end
+
+	-- uwvm_runtime also provides non-backend host API shims used by uwvm.
+	add_deps("uwvm_runtime")
+
+target_end()
+
+-- The Windows late-attach broker is a small host executable. It must never
+-- link the Wasm runtime or inherit its LLVM/JIT options; its sole capability
+-- is the private HANDLE list passed to one LLVM-full uwvm child.
+if is_plat("windows", "mingw") and is_arch("x86_64") then
+	target("uwvm-debug-server")
+		set_kind("binary")
+		set_languages("cxx23")
+		set_encodings("utf-8")
+		set_warnings("all", "extra", "pedantic", "error")
+		if is_plat("windows") then
+			windows_target()
+		else
+			mingw_target()
+		end
+		if is_plat("mingw") then
+			-- The broker has a Unicode wmain entry point.
+			add_ldflags("-municode", {force = true})
+		end
+		add_includedirs("third-parties/fast_io/include", "src")
+		local stdlib = get_config("stdlib")
+		if stdlib and stdlib ~= "default" then
+			add_cxflags("-stdlib=" .. stdlib)
+			add_ldflags("-stdlib=" .. stdlib)
+		end
+		add_files("tools/debug/secure_server_windows.cpp")
+		add_syslinks("bcrypt", "advapi32", "ntdll")
+	target_end()
+end
+
+-- uwvm_runtime: build the shared runtime unit separately so it can use its own FP flags.
+target("uwvm_runtime")
+	set_kind("object")
+	def_build({ skip_static_libcxx = true })
+	if is_plat("macosx") and (is_arch("arm64", "aarch64") or
+		(is_arch("x86_64", "x64", "amd64") and get_config("macos-x64-native-step"))) then
+		-- One SDK-generated MIG server object serves the protected native
+		-- exception-state callback, independent of C++ module mode.
+		add_files("xmake/mach_exc_protected.lua", {rule = "uwvm.mach_exc_protected"})
+	end
+	-- Own every production interface once, including backend-neutral frontend
+	-- partitions. Public here means available to dependent xmake targets in
+	-- Release too, not a C++ export of otherwise private declarations. A consumer
+	-- may need its own compatible BMI, but must not add a second initializer
+	-- object. Do not fix duplicate symbols with allow-multiple-definition.
+
+	-- Interpreter/runtime execution unit: disable observable floating-point side effects
+	-- (errno, traps, dynamic rounding, and FMA contraction) to preserve WebAssembly FP semantics.
+	add_cxflags("-fno-math-errno", "-fno-trapping-math", "-fno-rounding-math", "-ffp-contract=off")
+
+	-- third-parties/fast_io
+	add_includedirs("third-parties/fast_io/include")
+
+	if enable_cxx_module then
+		add_files("third-parties/fast_io/share/fast_io/fast_io.cppm", { public = true })
+		-- Source/checkpoint SHA providers are backend-neutral; this does not
+		-- select LLVM cache/compiler modules or OpenSSL signing support.
+		add_files("third-parties/fast_io/share/fast_io/fast_io_crypto.cppm", { public = true })
+	end
+
+	-- third-parties/bizwen
+	add_includedirs("third-parties/bizwen/include")
+
+	-- third-parties/boost
+	add_includedirs("third-parties/boost_unordered/include")
+
+	if uwvm_uses_llvm_jit then
+		uwvm_add_llvm_jit_cache_openssl()
+	end
+
+	-- src
+	add_includedirs("src/")
+
+	add_defines("UWVM=2")
+
+	if enable_cxx_module then
+		-- uwvm predefine
+		add_files("src/uwvm2/uwvm_predefine/**.cppm", { public = true })
+
+		-- utils
+		add_files("src/uwvm2/utils/**.cppm", { public = true })
+
+		-- object
+		add_files("src/uwvm2/object/**.cppm", { public = true })
+
+		-- imported
+		add_files("src/uwvm2/imported/**.cppm", { public = true })
+
+		-- wasm parser
+		add_files("src/uwvm2/parser/**.cppm", { public = true })
+
+		-- validation
+		add_files("src/uwvm2/validation/**.cppm", { public = true })
+
+		-- uwvm
+		uwvm_add_frontend_module_files(true)
+
+		-- Compiler/cache selection stays in the shared interface graph helper.
+		uwvm_add_runtime_interface_module_files(true)
+	end
+
+	if uwvm_has_runtime_backend then
+		if enable_cxx_module then
+			add_files("src/uwvm2/runtime/lib/uwvm_runtime.module.cpp")
+		else
+			add_files("src/uwvm2/runtime/lib/uwvm_runtime.default.cpp")
+		end
+	else
+		if enable_cxx_module then
+			add_files("src/uwvm2/runtime/lib/uwvm_stub_runtime.module.cpp")
+		else
+			add_files("src/uwvm2/runtime/lib/uwvm_stub_runtime.default.cpp")
+		end
+	end
+
+target_end()
+
+-- test unit
+for _, file in ipairs(os.files("test/**.cc")) do
+	local is_0013_uwvm_int = (string.find(file, "test/0013.uwvm_int/", 1, true) ~= nil) or (string.find(file, "test\\0013.uwvm_int\\", 1, true) ~= nil)
+	local is_0014_llvm_jit = (string.find(file, "test/0014.llvm_jit/", 1, true) ~= nil) or (string.find(file, "test\\0014.llvm_jit\\", 1, true) ~= nil)
+	local is_0015_backend_fuzzer = (string.find(file, "test/0015.backend_fuzzer/", 1, true) ~= nil) or (string.find(file, "test\\0015.backend_fuzzer\\", 1, true) ~= nil)
+	local is_libfuzzer = (string.find(file, "test/0009.libfuzzer/", 1, true) ~= nil) or
+		(string.find(file, "test\\0009.libfuzzer\\", 1, true) ~= nil)
+	local is_llvm_jit_test = is_0014_llvm_jit or (string.find(file, "llvm_jit", 1, true) ~= nil)
+	local is_parallel_compile_failure_state = string.find(file, "parallel_compile_failure_state.cc", 1, true) ~= nil
+	local is_wasm_entry_integer = string.find(file, "wasm_entry_integer.cc", 1, true) ~= nil
+	local is_uwvm_int_fp_environment = string.find(file, "uwvm_int_fp_environment.cc", 1, true) ~= nil
+	local test_libfuzzer = get_config("test-libfuzzer")
+
+	if not ((is_0013_uwvm_int and (not get_config("enable-test-uwvm-int") or not uwvm_uses_uwvm_int)) or
+		(is_0014_llvm_jit and not get_config("enable-test-llvm-jit")) or
+		(is_llvm_jit_test and not uwvm_uses_llvm_jit) or
+		(is_parallel_compile_failure_state and not uwvm_uses_uwvm_int) or
+		(is_wasm_entry_integer and not uwvm_has_runtime_backend) or
+		is_0015_backend_fuzzer or
+		(is_libfuzzer and not test_libfuzzer)) then
+		local name = path.basename(file)
+		target(name)
+		local group = path.directory(file):gsub("\\\\", "/")
+		set_group(group)
+		set_kind("binary")
+		def_build({ skip_static_libcxx = (is_libfuzzer and test_libfuzzer) or is_llvm_jit_test })
+
+		if uwvm_uses_llvm_jit and is_llvm_jit_test then
+			add_deps("uwvm_runtime")
+			add_deps("uwvm2-ros")
+		end
+
+		-- In a combined interpreter/LLVM build, interpreter optables route local-imported provider access through
+		-- backend-neutral guarded entry points implemented by uwvm_runtime. Even header-driven interpreter tests must
+		-- link that object target once those templates are instantiated.
+		if uwvm_uses_llvm_jit and is_0013_uwvm_int then
+			add_deps("uwvm_runtime")
+		end
+
+		if string.find(file, "uwvm_int_fp_bit_environment.cc", 1, true) ~= nil then
+			add_deps("uwvm_runtime")
+			add_deps("uwvm2-ros")
+		end
+		-- This regression calls the production entry even in interpreter-only builds.
+		if is_uwvm_int_fp_environment then
+			add_deps("uwvm_runtime")
+		end
+
+		-- uwvm uses precise floating-point model to ensure determinism.
+		set_fpmodels("precise")
+
+		set_default(false)
+
+	local enable_cxx_module = get_config("use-cxx-module")
+		-- Runtime-backed tests consume the same public interfaces as the CLI.
+		-- Re-registering them here would link duplicate module initializers;
+		-- standalone tests without that dependency still own their interfaces.
+		local test_uses_runtime = (uwvm_uses_llvm_jit and (is_llvm_jit_test or is_0013_uwvm_int)) or
+			(string.find(file, "uwvm_int_fp_bit_environment.cc", 1, true) ~= nil) or is_uwvm_int_fp_environment
+
+		-- third-parties/fast_io
+		add_includedirs("third-parties/fast_io/include")
+
+		if enable_cxx_module and not test_uses_runtime then
+			add_files("third-parties/fast_io/share/fast_io/fast_io.cppm", { public = is_debug_mode })
+			add_files("third-parties/fast_io/share/fast_io/fast_io_crypto.cppm", { public = is_debug_mode })
+		end
+		-- third-parties/bizwen
+		add_includedirs("third-parties/bizwen/include")
+
+		-- third-parties/boost
+		add_includedirs("third-parties/boost_unordered/include")
+
+		if uwvm_uses_llvm_jit and is_llvm_jit_test then
+			uwvm_add_llvm_jit_cache_openssl()
+		end
+
+		-- uwvm
+		add_defines("UWVM=2")
+		-- uwvm test
+		add_defines("UWVM_TEST=2")
+
+		-- src
+		add_includedirs("src/")
+
+		if enable_cxx_module and not test_uses_runtime then
+			-- uwvm predefine
+			add_files("src/uwvm2/uwvm_predefine/**.cppm", { public = is_debug_mode })
+
+			-- utils
+			add_files("src/uwvm2/utils/**.cppm", { public = is_debug_mode })
+
+			-- object
+			add_files("src/uwvm2/object/**.cppm", { public = is_debug_mode })
+
+			-- imported
+			add_files("src/uwvm2/imported/**.cppm", { public = is_debug_mode })
+
+			-- wasm parser
+			add_files("src/uwvm2/parser/**.cppm", { public = is_debug_mode })
+
+			-- validation
+			add_files("src/uwvm2/validation/**.cppm", { public = is_debug_mode })
+
+			-- Frontend imports need the same runtime interfaces. Runtime-backed
+			-- tests consume public BMIs instead and never enter this owner branch.
+			uwvm_add_runtime_interface_module_files(is_debug_mode)
+
+			-- uwvm
+			uwvm_add_frontend_module_files(is_debug_mode)
+		end
+
+		set_warnings("all", "extra", "error")
+		
+		if get_config("use-llvm-compiler") then
+			-- Test targets include CLI glue headers that currently trigger
+			-- `-Wundefined-inline` under LLVM. Keep src/* at full warning-as-error
+			-- strictness and only downgrade this diagnostic for tests.
+			add_cxxflags("-Wno-error=undefined-inline")
+			add_cxxflags("-Wno-undefined-inline")
+		end
+
+		if is_libfuzzer then
+			if get_config("use-llvm-compiler") and test_libfuzzer then
+				local need_wabt = (string.find(file, "wabt", 1, true) ~= nil)
+				if need_wabt then
+					before_build(function(target)
+						local utility = import("utility.utility", { anonymous = true })
+						local require_static_wabt = utility.is_static_non_system_mode()
+						local llvm_jit_options = utility.get_llvm_jit_options()
+
+						local function append_unique(values, seen, value)
+							if not value or value == "" or seen[value] then
+								return
+							end
+
+							seen[value] = true
+							table.insert(values, value)
+						end
+
+						local function append_cmake_cache_value(cache_values, line)
+							local key, value = line:match("^([%w_]+):[^=]*=(.*)$")
+							if key and value then
+								cache_values[key] = value
+							end
+						end
+
+						local function read_cmake_cache(cache_file)
+							if not os.isfile(cache_file) then
+								return {}
+							end
+
+							local cache_values = {}
+							local cache_text = io.readfile(cache_file) or ""
+							cache_text = cache_text:gsub("\r\n", "\n")
+							for line in (cache_text .. "\n"):gmatch("(.-)\n") do
+								append_cmake_cache_value(cache_values, line)
+							end
+							return cache_values
+						end
+
+						local function wabt_uses_compatible_llvm_abi(wabt_root)
+							local wabt_build = path.join(wabt_root, "build")
+							local cache_values = read_cmake_cache(path.join(wabt_build, "CMakeCache.txt"))
+							if cache_values["CMAKE_CXX_COMPILER"] == nil and cache_values["CMAKE_CXX_FLAGS"] == nil then
+								return false
+							end
+
+							local expected_cxx = target:tool("cxx")
+							local actual_cxx = cache_values["CMAKE_CXX_COMPILER"]
+							if not expected_cxx or not actual_cxx then
+								return false
+							end
+
+							if path.normalize(expected_cxx) ~= path.normalize(actual_cxx) then
+								return false
+							end
+
+							local expected_stdlib = nil
+							for _, flag in ipairs(llvm_jit_options.cxxflags or {}) do
+								if flag:startswith("-stdlib=") then
+									expected_stdlib = flag
+									break
+								end
+							end
+
+							if expected_stdlib then
+								local actual_cxx_flags = cache_values["CMAKE_CXX_FLAGS"] or ""
+								if actual_cxx_flags:find(expected_stdlib, 1, true) == nil then
+									return false
+								end
+							end
+
+							return true
+						end
+
+						local function wabt_uses_external_crypto(wabt_config)
+							if not os.isfile(wabt_config) then
+								return false
+							end
+
+							local config = io.readfile(wabt_config)
+							return config and config:find("#define HAVE_OPENSSL_SHA_H 1", 1, true) ~= nil
+						end
+
+						local function has_wabt(wabt_root)
+							local wabt_include = path.join(wabt_root, "include")
+							local wabt_build = path.join(wabt_root, "build")
+							local wabt_config = path.join(wabt_build, "include/wabt/config.h")
+							local has_static_lib = os.isfile(path.join(wabt_build, "libwabt.a")) or os.isfile(path.join(wabt_build, "wabt.lib"))
+							local has_lib = has_static_lib or
+								(not require_static_wabt and (os.isfile(path.join(wabt_build, "libwabt.so")) or os.isfile(path.join(wabt_build, "libwabt.dylib"))))
+
+							return os.isdir(wabt_include)
+								and os.isfile(wabt_config)
+								and has_lib
+								and not wabt_uses_external_crypto(wabt_config)
+								and wabt_uses_compatible_llvm_abi(wabt_root)
+						end
+
+						local function make_wabt_cmake_args(wabt_root)
+							local build_dir = path.join(wabt_root, "build")
+							local cmake_args = {
+								"-S", wabt_root,
+								"-B", build_dir,
+								"-DCMAKE_BUILD_TYPE=Release",
+								"-DBUILD_TESTS=OFF",
+								"-DBUILD_TOOLS=OFF",
+								"-DBUILD_LIBWASM=OFF",
+								"-DUSE_INTERNAL_SHA256=ON",
+								"-DHAVE_OPENSSL_SHA_H=OFF"
+							}
+
+							local cc = target:tool("cc")
+							local cxx = target:tool("cxx")
+							if cc then
+								table.insert(cmake_args, "-DCMAKE_C_COMPILER=" .. cc)
+							end
+							if cxx then
+								table.insert(cmake_args, "-DCMAKE_CXX_COMPILER=" .. cxx)
+							end
+
+							local cflags = {}
+							local cflags_seen = {}
+							local cxxflags = {}
+							local cxxflags_seen = {}
+							local linkerflags = {}
+							local linkerflags_seen = {}
+
+							local function append_common_compile_flag(flag)
+								append_unique(cflags, cflags_seen, flag)
+								append_unique(cxxflags, cxxflags_seen, flag)
+							end
+
+							local function append_cxx_system_include(dir)
+								if not dir or dir == "" then
+									return
+								end
+
+								table.insert(cxxflags, "-isystem")
+								table.insert(cxxflags, dir)
+							end
+
+							local sysroot_para = get_config("sysroot")
+							if sysroot_para ~= "detect" and sysroot_para ~= "none" and sysroot_para ~= "no" and sysroot_para then
+								local sysroot_flag = "--sysroot=" .. sysroot_para
+								append_common_compile_flag(sysroot_flag)
+								append_unique(linkerflags, linkerflags_seen, sysroot_flag)
+							end
+
+							local target_para = get_config("target")
+							if target_para ~= "detect" and target_para then
+								local target_flag = "--target=" .. target_para
+								append_common_compile_flag(target_flag)
+								append_unique(linkerflags, linkerflags_seen, target_flag)
+							end
+
+							local llvm_target = get_config("llvm-target")
+							if llvm_target ~= "detect" and llvm_target then
+								local llvm_target_flag = "--target=" .. llvm_target
+								append_common_compile_flag(llvm_target_flag)
+								append_unique(linkerflags, linkerflags_seen, llvm_target_flag)
+							end
+
+							for _, include_dir in ipairs(llvm_jit_options.sysincludedirs or {}) do
+								append_cxx_system_include(include_dir)
+							end
+
+							for _, flag in ipairs(llvm_jit_options.cxxflags or {}) do
+								append_unique(cxxflags, cxxflags_seen, flag)
+							end
+
+							if target:is_plat("linux") or target:is_plat("macosx") or target:is_plat("iphoneos") or target:is_plat("watchos") then
+								append_unique(linkerflags, linkerflags_seen, "-fuse-ld=lld")
+							end
+							for _, linkdir in ipairs(llvm_jit_options.linkdirs or {}) do
+								append_unique(linkerflags, linkerflags_seen, "-L" .. linkdir)
+							end
+							for _, flag in ipairs(llvm_jit_options.ldflags or {}) do
+								append_unique(linkerflags, linkerflags_seen, flag)
+							end
+							for _, syslink in ipairs(llvm_jit_options.syslinks or {}) do
+								append_unique(linkerflags, linkerflags_seen, "-l" .. syslink)
+							end
+
+							if #cflags ~= 0 then
+								table.insert(cmake_args, "-DCMAKE_C_FLAGS=" .. os.args(cflags))
+							end
+							if #cxxflags ~= 0 then
+								table.insert(cmake_args, "-DCMAKE_CXX_FLAGS=" .. os.args(cxxflags))
+							end
+							if #linkerflags ~= 0 then
+								local linkerflags_str = os.args(linkerflags)
+								table.insert(cmake_args, "-DCMAKE_EXE_LINKER_FLAGS=" .. linkerflags_str)
+								table.insert(cmake_args, "-DCMAKE_SHARED_LINKER_FLAGS=" .. linkerflags_str)
+							end
+
+							return cmake_args
+						end
+
+						local function with_wabt_prepare_lock(action)
+							local scheduler = import("core.base.scheduler")
+							local lock_name = "uwvm2.wabt.prepare"
+							local lock_dir = "build/test/third-parties"
+
+							scheduler.co_lock(lock_name)
+							local lock = nil
+							local action_errors = nil
+							try {
+								function()
+									os.mkdir(lock_dir)
+									lock = io.openlock(path.join(lock_dir, "wabt.prepare.lock"))
+									lock:lock()
+									action()
+								end,
+								catch {
+									function(errors)
+										action_errors = errors
+									end
+								},
+								finally {
+									function()
+										if lock then
+											lock:unlock()
+											lock:close()
+										end
+										scheduler.co_unlock(lock_name)
+									end
+								}
+							}
+
+							if action_errors then
+								raise(action_errors)
+							end
+						end
+
+						if not (has_wabt("build/test/third-parties/wabt") or has_wabt("wabt")) then
+							with_wabt_prepare_lock(function()
+								if has_wabt("build/test/third-parties/wabt") or has_wabt("wabt") then
+									return
+								end
+
+								local wabt_root = "build/test/third-parties/wabt"
+								-- Check if directory exists AND contains CMakeLists.txt to ensure it's not just an empty placeholder
+								if not os.isdir(wabt_root) or not os.isfile(path.join(wabt_root, "CMakeLists.txt")) then
+									print("wabt source not found or incomplete. Attempting to pull...")
+									if not os.isdir(wabt_root) then
+										os.mkdir(wabt_root)
+									end
+									-- Use git clone/pull instead of submodule
+									if not os.isdir(path.join(wabt_root, ".git")) then
+										os.vrunv("git", {"clone", "https://github.com/WebAssembly/wabt.git", wabt_root, "--recursive"})
+									else
+										os.vrunv("git", {"-C", wabt_root, "pull"})
+										os.vrunv("git", {"-C", wabt_root, "submodule", "update", "--init", "--recursive"})
+									end
+								end
+
+								if not os.isdir(wabt_root) then
+									wabt_root = "wabt"
+								end
+
+								if os.isdir(wabt_root) then
+									print("wabt is required for " .. target:name() .. " but no built artifacts were found. Building wabt...")
+									local build_dir = path.join(wabt_root, "build")
+									os.tryrm(build_dir)
+									-- Build WABT in Release so libwabt is compiled with NDEBUG and won't abort on debug assertions
+									-- when fed malformed inputs (important for fuzzing/differential validation).
+									-- Use WABT's internal SHA-256 implementation so Darwin cross sysroots do not need OpenSSL libcrypto.
+									os.vrunv("cmake", make_wabt_cmake_args(wabt_root))
+									os.vrunv("cmake", {"--build", build_dir, "--target", "wabt", "--config", "Release"})
+								else
+									raise("wabt is required for " .. target:name() .. " but neither source nor built artifacts were found.")
+								end
+							end)
+						end
+					end)
+				end
+
+				after_load(function(target)
+					if need_wabt then
+						local utility = import("utility.utility", { anonymous = true })
+						local require_static_wabt = utility.is_static_non_system_mode()
+
+						local function try_add_wabt(wabt_root, force)
+							local wabt_include = path.join(wabt_root, "include")
+							local wabt_build = path.join(wabt_root, "build")
+							local wabt_config = path.join(wabt_build, "include/wabt/config.h")
+							local has_lib = os.isfile(path.join(wabt_build, "libwabt.a")) or
+								os.isfile(path.join(wabt_build, "libwabt.so")) or
+								os.isfile(path.join(wabt_build, "libwabt.dylib")) or
+								os.isfile(path.join(wabt_build, "wabt.lib"))
+
+							if force or (os.isdir(wabt_include) and os.isfile(wabt_config) and has_lib) then
+								target:add("includedirs", wabt_include, path.join(wabt_build, "include"))
+								target:add("linkdirs", wabt_build)
+								if require_static_wabt then
+									local wabt_archive = utility.find_static_library("wabt", wabt_build)
+									if not wabt_archive and force then
+										wabt_archive = path.join(wabt_build, target:is_plat("windows") and "wabt.lib" or "libwabt.a")
+									end
+									if not wabt_archive then
+										return false
+									end
+									target:add("ldflags", wabt_archive, { force = true })
+								else
+									target:add("links", "wabt")
+								end
+								return true
+							end
+
+							return false
+						end
+
+						-- Try to find existing wabt, if not found, force configure build/third-parties/wabt
+						-- assuming before_build will handle the build.
+						if not try_add_wabt("build/test/third-parties/wabt", false) and not try_add_wabt("wabt", false) then
+							try_add_wabt("build/test/third-parties/wabt", true)
+						end
+					end
+
+					if target:is_plat("macosx") or target:is_plat("iphoneos") or target:is_plat("watchos") then
+						local clang_runtime_dir = os.iorunv("clang", {"--print-runtime-dir"})
+						clang_runtime_dir = clang_runtime_dir and string.trim(clang_runtime_dir) or nil
+						if clang_runtime_dir and clang_runtime_dir ~= "" and os.isdir(clang_runtime_dir) then
+							target:add("runenvs", "DYLD_LIBRARY_PATH", clang_runtime_dir)
+						end
+					end
+				end)
+
+				add_cxflags("-fsanitize=fuzzer", { force = true })
+				add_ldflags("-fsanitize=fuzzer", { force = true })
+				-- change the env variables in ci to change the default values
+				local rss     = os.getenv("FUZZ_RSS") or "512"
+				local maxtime = os.getenv("FUZZ_MAX_TIME") or "10"
+				local maxlen  = os.getenv("FUZZ_MAX_LEN") or "1024"
+				local timeout = os.getenv("FUZZ_TIMEOUT") or "5"
+				add_tests("fuzz",
+					{ group = "libfuzzer", runargs = { "-rss_limit_mb=" .. rss, "-max_total_time=" .. maxtime, "-max_len=" .. maxlen, "-timeout=" .. timeout } })    -- xmake test -g libfuzzer
+				add_files(file)
+			elseif not get_config("use-llvm-compiler") and test_libfuzzer then
+				raise("Libfuzzer is not supported on this platform, please use llvm toolchain.")
+			end
+		else
+			add_tests("unit", { group = "default" }) -- xmake test -g default
+			add_files(file)
+		end
+
+		target_end()
+	end
+end
+
+if get_config("enable-test-backend-fuzzer") then
+	local backend_fuzzer_has_int = uwvm_uses_uwvm_int
+	local backend_fuzzer_has_jit = uwvm_uses_llvm_jit
+	if not backend_fuzzer_has_int or not backend_fuzzer_has_jit then
+		raise("test/0015.backend_fuzzer requires --execution-int=uwvm-int and --execution-jit=llvm.")
+	end
+
+	target("backend_fuzzer")
+		set_group("test/0015.backend_fuzzer")
+		set_kind("phony")
+		set_default(false)
+
+		on_run(function(target)
+			local root = os.projectdir()
+			os.execv("bash", {path.join(root, "test/0015.backend_fuzzer/run_backend_fuzzer.sh")}, {curdir = root})
+		end)
+
+		on_test(function(target, opt)
+			local root = os.projectdir()
+			local status, errors = os.execv("bash", {path.join(root, "test/0015.backend_fuzzer/run_backend_fuzzer.sh")},
+				{try = true, curdir = root})
+			if status ~= 0 then
+				opt.errors = errors or ("backend fuzzer failed with exit code: " .. tostring(status))
+				return false
+			end
+			return true
+		end)
+
+		local timeout = tonumber(os.getenv("UWVM_BACKEND_FUZZ_TIMEOUT")) or 600
+		add_tests("run", { group = "backend_fuzzer", realtime_output = true, run_timeout = timeout })
+	target_end()
+end
+
+-- LLVM AOT mirror of the 0013 strict uwvm-int suites. These sources still inspect
+-- interpreter translation artifacts, so register the mirrors only for combined builds.
+-- Pure LLVM builds retain the native 0014 LLVM tests without pulling in the int harness.
+if get_config("enable-test-llvm-jit") and uwvm_uses_uwvm_int and uwvm_uses_llvm_jit then
+	-- LLVM now executes these bulk-memory, reference/table and SIMD operations.
+	-- The historical seven-file exclusion also hid multi-value if and validator
+	-- alignment regressions; all seven compile and execute through the LLVM
+	-- runner. Keep the complete inventory instead of silently omitting suites
+	-- based on obsolete backend limitations. Interpreter translation artifacts
+	-- are still inspected, which is why this remains a combined-backend target.
+	local llvm_jit_strict_files = os.files("test/0013.uwvm_int/strict/**.cc")
+	table.sort(llvm_jit_strict_files)
+	for index, file in ipairs(llvm_jit_strict_files) do
+		local rel = file:gsub("\\", "/")
+		rel = rel:gsub("^test/0013%.uwvm_int/strict/", "")
+		local name = string.format("lj13s_%03d", index)
+
+		target(name)
+			set_group("test/0014.llvm_jit")
+			set_kind("binary")
+			def_build({ skip_static_libcxx = true })
+
+			add_deps("uwvm_runtime")
+			add_deps("uwvm2-ros")
+
+			-- uwvm uses precise floating-point model to ensure determinism.
+			set_fpmodels("precise")
+
+			set_default(false)
+
+			-- third-parties/fast_io
+			add_includedirs("third-parties/fast_io/include")
+
+			-- Public module interfaces come from the uwvm_runtime dependency.
+			-- third-parties/bizwen
+			add_includedirs("third-parties/bizwen/include")
+
+			-- third-parties/boost
+			add_includedirs("third-parties/boost_unordered/include")
+
+			uwvm_add_llvm_jit_cache_openssl()
+
+			-- uwvm
+			add_defines("UWVM=2")
+			-- uwvm test
+			add_defines("UWVM_TEST=2")
+			add_defines("UWVM2TEST_RUNNER_USE_LLVM_JIT")
+
+			-- src
+			add_includedirs("src/")
+
+
+			set_warnings("all", "extra", "error")
+
+			if get_config("use-llvm-compiler") then
+				-- Test targets include CLI glue headers that currently trigger
+				-- `-Wundefined-inline` under LLVM. Keep src/* at full warning-as-error
+				-- strictness and only downgrade this diagnostic for tests.
+				add_cxxflags("-Wno-error=undefined-inline")
+				add_cxxflags("-Wno-undefined-inline")
+			end
+
+			add_tests("unit", { group = "default" }) -- xmake test -g default
+			add_files(file)
+		target_end()
+	end
+
+end
+
+-- Explicit, non-default source/link/value contract for the real module graph.
+-- Future invocation is separate from Source review and Native/Guest credit.
+if get_config("use-cxx-module") and is_plat("linux") and uwvm_has_runtime_backend and
+    (get_config("import-u2rosv1-ros1") or get_config("import-u2rosv1-ros2")) then
+    target("named_module_threaded_contract")
+        set_kind("binary")
+        set_default(false)
+        def_build({ skip_static_libcxx = uwvm_uses_llvm_jit })
+        add_deps("uwvm_runtime")
+        add_includedirs("src", "third-parties/fast_io/include", "third-parties/boost_unordered/include", "third-parties/bizwen/include")
+        add_cxxflags("-UNDEBUG", {force = true})
+        add_files("test/0050.high_level_languages/threaded_profile/named-module/*.cpp")
+        if uwvm_uses_llvm_jit then
+            uwvm_add_llvm_jit_cache_openssl()
+        end
+    target_end()
+end

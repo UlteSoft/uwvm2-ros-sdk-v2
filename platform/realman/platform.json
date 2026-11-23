@@ -1,0 +1,32 @@
+{
+  "id": "realman",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "rm_ros_interfaces/Jointerrorcode",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_joint_error",
+        "field": "joint_error",
+        "type": "u16",
+        "indexed": true
+      },
+      {
+        "name": "read_dof",
+        "field": "dof",
+        "type": "u8",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/RealManRobot/ros2_rm_robot/blob/5fc226e93358e73c165b2af54b583389f813049e/rm_ros_interfaces/msg/Jointerrorcode.msg",
+        "revision": "5fc226e93358e73c165b2af54b583389f813049e",
+        "path": "rm_ros_interfaces/msg/Jointerrorcode.msg",
+        "sha256": "b1242a1696bd5a16061d2852e20972b606668623b372ded357266ac9f0c799a0"
+      }
+    ]
+  }
+}

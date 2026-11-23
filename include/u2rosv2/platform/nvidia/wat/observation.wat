@@ -1,0 +1,174 @@
+;; Read-only isaac_ros_nova_interfaces/EncoderTicks.
+(module
+  (memory $private (export "memory") 1)
+  ;; The caller supplies a readable guest range. Every offset below is bounds checked
+  ;; against that range in i64 before it is converted to a wasm32 address.
+  (func $obs_align (param $pos i64) (param $width i32) (param $cdr i32) (result i64)
+    (if (result i64) (local.get $cdr)
+      (then (i64.and
+        (i64.add (local.get $pos) (i64.extend_i32_u (i32.sub (local.get $width) (i32.const 1))))
+        (i64.sub (i64.const 0) (i64.extend_i32_u (local.get $width)))))
+      (else (local.get $pos))))
+
+  (func $obs_word (param $base i32) (param $pos i64) (param $width i32) (param $big i32) (result i64)
+    (local $i i32) (local $shift i32) (local $result i64)
+    (loop $bytes
+      (local.set $shift (select (i32.sub (i32.sub (local.get $width) (i32.const 1)) (local.get $i))
+                                (local.get $i) (local.get $big)))
+      (local.set $result (i64.or (local.get $result)
+        (i64.shl (i64.load8_u (i32.add (local.get $base)
+                  (i32.add (i32.wrap_i64 (local.get $pos)) (local.get $i))))
+                 (i64.extend_i32_u (i32.shl (local.get $shift) (i32.const 3))))))
+      (local.set $i (i32.add (local.get $i) (i32.const 1)))
+      (br_if $bytes (i32.lt_u (local.get $i) (local.get $width))))
+    (local.get $result))
+
+  ;; Returns next offset (-1 on error), saved count, selected bits, and a hit flag.
+  (func $obs_field (param $p i32) (param $size i64) (param $pos i64)
+    (param $width i32) (param $repeat i32) (param $kind i32) (param $saved i64)
+    (param $cdr i32) (param $big i32) (param $wanted i32) (param $index i32)
+    (result i64 i64 i64 i32)
+    (local $count i64) (local $bytes i64) (local $end i64) (local $value i64) (local $hit i32)
+    (block $bad
+      (if (i32.eqz (local.get $repeat))
+        (then
+          (local.set $pos (call $obs_align (local.get $pos) (i32.const 4) (local.get $cdr)))
+          (br_if $bad (i64.gt_u (i64.add (local.get $pos) (i64.const 4)) (local.get $size)))
+          (local.set $count (call $obs_word (local.get $p) (local.get $pos) (i32.const 4) (local.get $big)))
+          (local.set $pos (i64.add (local.get $pos) (i64.const 4))))
+        (else
+          (if (i32.gt_s (local.get $repeat) (i32.const 0))
+            (then (local.set $count (i64.extend_i32_u (local.get $repeat))))
+            (else (if (i32.eq (local.get $repeat) (i32.const -1))
+              (then (local.set $count (local.get $saved)))
+              (else
+                (local.set $bytes (i64.sub (local.get $size) (local.get $pos)))
+                (br_if $bad (i64.ne (i64.rem_u (local.get $bytes)
+                  (i64.extend_i32_u (i32.mul (i32.sub (i32.const -1) (local.get $repeat))
+                                                (local.get $width)))) (i64.const 0)))
+                (local.set $count (i64.div_u (local.get $bytes) (i64.extend_i32_u (local.get $width))))))))))
+      (if (i32.eqz (local.get $width))
+        (then
+          (block $done_strings (loop $strings
+            (br_if $done_strings (i64.eqz (local.get $count)))
+            (local.set $pos (call $obs_align (local.get $pos) (i32.const 4) (local.get $cdr)))
+            (br_if $bad (i64.gt_u (i64.add (local.get $pos) (i64.const 4)) (local.get $size)))
+            (local.set $bytes (call $obs_word (local.get $p) (local.get $pos) (i32.const 4) (local.get $big)))
+            (local.set $pos (i64.add (i64.add (local.get $pos) (i64.const 4)) (local.get $bytes)))
+            (br_if $bad (i64.gt_u (local.get $pos) (local.get $size)))
+            (if (local.get $cdr) (then
+              (br_if $bad (i64.eqz (local.get $bytes)))
+              (br_if $bad (i32.load8_u (i32.add (local.get $p)
+                  (i32.wrap_i64 (i64.sub (local.get $pos) (i64.const 1))))))))
+            (local.set $count (i64.sub (local.get $count) (i64.const 1)))
+            (br $strings))))
+        (else (if (i64.ne (local.get $count) (i64.const 0)) (then
+          (local.set $pos (call $obs_align (local.get $pos) (local.get $width) (local.get $cdr)))
+          (local.set $end (i64.add (local.get $pos)
+                            (i64.mul (i64.extend_i32_u (local.get $width)) (local.get $count))))
+          (br_if $bad (i64.gt_u (local.get $end) (local.get $size)))
+          (if (i32.eq (local.get $kind) (i32.const 2)) (then
+            (local.set $saved (call $obs_word (local.get $p) (local.get $pos) (i32.const 4) (local.get $big)))
+            (br_if $bad (i64.gt_u (local.get $saved) (i64.const 2147483647)))))
+          (if (i32.and (local.get $wanted) (i64.lt_u (i64.extend_i32_u (local.get $index)) (local.get $count)))
+            (then
+              (local.set $hit (i32.const 1))
+              (local.set $value (call $obs_word (local.get $p)
+                (i64.add (local.get $pos) (i64.mul (i64.extend_i32_u (local.get $index)) (i64.extend_i32_u (local.get $width))))
+                (local.get $width) (local.get $big)))))
+          (if (i32.eq (local.get $kind) (i32.const 1)) (then
+            (loop $booleans
+              (br_if $bad (i32.gt_u (i32.load8_u (i32.add (local.get $p) (i32.wrap_i64 (local.get $pos)))) (i32.const 1)))
+              (local.set $pos (i64.add (local.get $pos) (i64.const 1)))
+              (br_if $booleans (i64.lt_u (local.get $pos) (local.get $end))))))
+          (local.set $pos (local.get $end))))))
+      (return (local.get $pos) (local.get $saved) (local.get $value) (local.get $hit)))
+    (i64.const -1) (i64.const 0) (i64.const 0) (i32.const 0))
+  (func $obs_project (param $p i32) (param $length i32) (param $wanted i32) (param $index i32)
+    (result i32 i64)
+    (local $size i64) (local $pos i64) (local $cdr i32) (local $big i32) (local $tail i64)
+    (local $saved i64) (local $v i64) (local $hit i32) (local $bits i64) (local $found i32)
+    (local.set $size (i64.extend_i32_u (local.get $length)))
+    (block $bad
+      (local.set $cdr (i32.const 1))
+      (if (local.get $cdr) (then
+        (br_if $bad (i32.lt_u (local.get $length) (i32.const 4)))
+        (br_if $bad (i32.load8_u (local.get $p)))
+        (br_if $bad (i32.gt_u (i32.load8_u offset=1 (local.get $p)) (i32.const 1)))
+        (br_if $bad (i32.load8_u offset=2 (local.get $p)))
+        (local.set $tail (i64.load8_u offset=3 (local.get $p)))
+        (br_if $bad (i64.gt_u (local.get $tail) (i64.const 3)))
+        (local.set $big (i32.eqz (i32.load8_u offset=1 (local.get $p))))
+        (local.set $size (i64.sub (local.get $size) (i64.const 4)))
+        (local.set $p (i32.add (local.get $p) (i32.const 4)))))
+      ;; header_stamp_sec
+      (call $obs_field (local.get $p) (local.get $size) (local.get $pos)
+        (i32.const 4) (i32.const 1) (i32.const 0) (local.get $saved)
+        (local.get $cdr) (local.get $big) (i32.eq (local.get $wanted) (i32.const 0)) (local.get $index))
+      (local.set $hit) (local.set $v) (local.set $saved) (local.set $pos)
+      (br_if $bad (i64.lt_s (local.get $pos) (i64.const 0)))
+      (if (local.get $hit) (then (local.set $found (i32.const 1)) (local.set $bits (local.get $v))))
+      ;; header_stamp_nanosec
+      (call $obs_field (local.get $p) (local.get $size) (local.get $pos)
+        (i32.const 4) (i32.const 1) (i32.const 0) (local.get $saved)
+        (local.get $cdr) (local.get $big) (i32.eq (local.get $wanted) (i32.const 1)) (local.get $index))
+      (local.set $hit) (local.set $v) (local.set $saved) (local.set $pos)
+      (br_if $bad (i64.lt_s (local.get $pos) (i64.const 0)))
+      (if (local.get $hit) (then (local.set $found (i32.const 1)) (local.set $bits (local.get $v))))
+      ;; header_frame_id
+      (call $obs_field (local.get $p) (local.get $size) (local.get $pos)
+        (i32.const 0) (i32.const 1) (i32.const 0) (local.get $saved)
+        (local.get $cdr) (local.get $big) (i32.eq (local.get $wanted) (i32.const 2)) (local.get $index))
+      (local.set $hit) (local.set $v) (local.set $saved) (local.set $pos)
+      (br_if $bad (i64.lt_s (local.get $pos) (i64.const 0)))
+      (if (local.get $hit) (then (local.set $found (i32.const 1)) (local.set $bits (local.get $v))))
+      ;; left_ticks
+      (call $obs_field (local.get $p) (local.get $size) (local.get $pos)
+        (i32.const 4) (i32.const 1) (i32.const 0) (local.get $saved)
+        (local.get $cdr) (local.get $big) (i32.eq (local.get $wanted) (i32.const 3)) (local.get $index))
+      (local.set $hit) (local.set $v) (local.set $saved) (local.set $pos)
+      (br_if $bad (i64.lt_s (local.get $pos) (i64.const 0)))
+      (if (local.get $hit) (then (local.set $found (i32.const 1)) (local.set $bits (local.get $v))))
+      ;; right_ticks
+      (call $obs_field (local.get $p) (local.get $size) (local.get $pos)
+        (i32.const 4) (i32.const 1) (i32.const 0) (local.get $saved)
+        (local.get $cdr) (local.get $big) (i32.eq (local.get $wanted) (i32.const 4)) (local.get $index))
+      (local.set $hit) (local.set $v) (local.set $saved) (local.set $pos)
+      (br_if $bad (i64.lt_s (local.get $pos) (i64.const 0)))
+      (if (local.get $hit) (then (local.set $found (i32.const 1)) (local.set $bits (local.get $v))))
+      ;; encoder_timestamp
+      (call $obs_field (local.get $p) (local.get $size) (local.get $pos)
+        (i32.const 8) (i32.const 1) (i32.const 0) (local.get $saved)
+        (local.get $cdr) (local.get $big) (i32.eq (local.get $wanted) (i32.const 5)) (local.get $index))
+      (local.set $hit) (local.set $v) (local.set $saved) (local.set $pos)
+      (br_if $bad (i64.lt_s (local.get $pos) (i64.const 0)))
+      (if (local.get $hit) (then (local.set $found (i32.const 1)) (local.set $bits (local.get $v))))
+      (br_if $bad (i32.eqz (local.get $found)))
+      (if (i64.ne (local.get $size) (local.get $pos)) (then
+        (br_if $bad (i64.ne (i64.sub (local.get $size) (local.get $pos)) (local.get $tail)))))
+      (if (i64.ne (local.get $tail) (i64.const 0)) (then
+        (br_if $bad (i64.ne (local.get $tail) (i64.and (i64.sub (i64.const 0) (local.get $pos)) (i64.const 3))))))
+      (return (i32.const 1) (local.get $bits)))
+    (i32.const 0) (i64.const 0))
+  (func $read_left_ticks (export "read_left_ticks") (param $p i32) (param $size i32) (param $out i32) (result i32)
+    (local $ok i32) (local $bits i64)
+    (call $obs_project (local.get $p) (local.get $size) (i32.const 3) (i32.const 0))
+    (local.set $bits) (local.set $ok)
+    (if (local.get $ok) (then (i64.store32 (local.get $out) (local.get $bits))))
+    (local.get $ok))
+
+  (func $read_right_ticks (export "read_right_ticks") (param $p i32) (param $size i32) (param $out i32) (result i32)
+    (local $ok i32) (local $bits i64)
+    (call $obs_project (local.get $p) (local.get $size) (i32.const 4) (i32.const 0))
+    (local.set $bits) (local.set $ok)
+    (if (local.get $ok) (then (i64.store32 (local.get $out) (local.get $bits))))
+    (local.get $ok))
+
+  (func $read_encoder_timestamp (export "read_encoder_timestamp") (param $p i32) (param $size i32) (param $out i32) (result i32)
+    (local $ok i32) (local $bits i64)
+    (call $obs_project (local.get $p) (local.get $size) (i32.const 5) (i32.const 0))
+    (local.set $bits) (local.set $ok)
+    (if (local.get $ok) (then (i64.store (local.get $out) (local.get $bits))))
+    (local.get $ok))
+
+)

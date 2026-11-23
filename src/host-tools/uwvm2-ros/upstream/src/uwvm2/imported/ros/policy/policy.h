@@ -1,0 +1,468 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+#pragma once
+#include <uwvm2/utils/container/standard.h>
+#include "../common/format.h"
+
+#include <array>
+#include <set>
+#include <tuple>
+#include "schema.h"
+#include "../common/manifest.h"
+#include "../common/action_qos_contract.h"
+#include "../common/service_availability.h"
+
+namespace uwvm2::imported::ros
+{
+    inline bool connection_key(version v, ::std::string_view key) noexcept
+    {
+        if(key == "connect-timeout-ms.on-proc-exit") { return true; }
+        if(key == "call-boundary") { return true; }
+        if(key == "audit-deny-max-rate-hz" || key == "audit-deny-burst" || key == "audit-deny-max-records" || key == "audit-deny-max-bytes") { return true; }
+        if(key == "gateway-socket" || key == "gateway-uid" || key == "node-name" || key == "namespace" || key == "connect-timeout-ms") { return true; }
+        if(v == version::ros1) { return key == "master-uri" || key == "advertise-host" || key == "transport"; }
+        return key == "domain-id" || key == "rmw-implementation" || key == "security-mode" || key == "keystore" || key == "enclave";
+    }
+
+    inline result validate_connection_value(version v, ::std::string_view key, ::std::string_view value)
+    {
+        if(!valid_version(v) || !connection_key(v, key) || value.empty() || value.size() > 1024 || value.find('\0') != ::std::string_view::npos)
+        {
+            return {errc::invalid_argument, "unknown or empty connection field"};
+        }
+        if(key == "connect-timeout-ms.on-proc-exit")
+        {
+            if(value!="cancel" && value!="wait") { return {errc::invalid_argument,"connection exit action requires cancel or wait"}; }
+        }
+        else if(key == "call-boundary")
+        {
+            if(value != "same-module" && value != "module-exports") { return {errc::invalid_argument, "call-boundary requires same-module or module-exports"}; }
+        }
+        else if(key == "audit-deny-max-rate-hz")
+        {
+            double n{};
+            if(value!="unlimited" && value!="0" && !parse_positive_double(value,n)) { return {errc::invalid_argument, "denial audit rate must be nonnegative finite or unlimited"}; }
+        }
+        else if(key == "audit-deny-burst" || key == "audit-deny-max-records" || key == "audit-deny-max-bytes")
+        {
+            ::std::uint64_t n{};
+            if(!quota_integer(value,n)) { return {errc::invalid_argument, "denial audit integer limit outside public range"}; }
+        }
+        else if(key == "gateway-socket")
+        {
+            if(value.front() != '/' || value.size() > 107 || value.find('\0') != ::std::string_view::npos || value.find("/../") != ::std::string_view::npos || value.ends_with("/..") || value.find("/./") != ::std::string_view::npos || value.find("//") != ::std::string_view::npos)
+            { return {errc::invalid_argument, "gateway socket needs a canonical absolute Unix socket path"}; }
+        }
+        else if(key == "node-name")
+        {
+            if(value.find('/') != ::std::string_view::npos || !canonical_resource(::uwvm2::utils::container::concat("/",value))) { return {errc::invalid_argument, "invalid ROS node basename"}; }
+        }
+        else if(key == "namespace")
+        { if(!canonical_resource(value, true)) { return {errc::invalid_argument, "namespace must be canonical and absolute"}; } }
+        else if(key == "connect-timeout-ms")
+        {
+            ::std::uint64_t n{};
+            if(value!="unlimited" && (!quota_integer(value,n) || n>UINT32_MAX))
+            { return {errc::invalid_argument,"connection timeout must fit the millisecond ABI or be unlimited"}; }
+        }
+        else if(key == "gateway-uid" || key == "domain-id")
+        {
+            ::std::uint64_t n{};
+            if(!parse_u64(value, n) || (key == "gateway-uid" && n > 4294967294ULL) || (key == "domain-id" && n > 232))
+            { return {errc::invalid_argument, "connection number outside explicit range"}; }
+        }
+        else if(key == "transport") { if(value != "tcpros") { return {errc::unsupported, "only TCPROS is implemented"}; } }
+        else if(key == "security-mode") { if(value != "enforce" && value != "disabled-test") { return {errc::invalid_argument, "security-mode requires enforce or disabled-test"}; } }
+        else if(key == "keystore")
+        { if(value != "not-applicable" && (value.front() != '/' || value.find('\0') != ::std::string_view::npos)) { return {errc::invalid_argument, "keystore requires absolute path or explicit not-applicable"}; } }
+        else if(key == "enclave")
+        { if(value != "not-applicable" && !canonical_resource(value, true)) { return {errc::invalid_argument, "enclave requires canonical absolute name or not-applicable"}; } }
+        else if(key == "master-uri")
+        {
+            if(!value.starts_with("http://") || value.find_first_of(" \t\r\n?#@") != ::std::string_view::npos)
+            { return {errc::invalid_argument, "Master URI must be explicit http://host:port"}; }
+            auto authority{value.substr(7)};
+            if(authority.ends_with('/')) { authority.remove_suffix(1); }
+            auto colon{authority.rfind(':')};
+            ::std::uint64_t port{};
+            if(colon == ::std::string_view::npos || !colon || authority.substr(0, colon).find('/') != ::std::string_view::npos || !parse_u64(authority.substr(colon + 1), port) || !port || port > 65535)
+            { return {errc::invalid_argument, "Master URI requires an explicit port"}; }
+        }
+        else if(value.find_first_of(" \t\r\n/\\\0") != ::std::string_view::npos)
+        { return {errc::invalid_argument, "invalid connection identity"}; }
+        return {};
+    }
+
+    inline result validate_target(target_policy const& target)
+    {
+        if(!valid_version(target.ros_version) || (target.target_scope == scope::single ? !valid_module_name(target.name) : target.target_scope == scope::group ? !valid_identifier(target.name) : target.target_scope != scope::global))
+        { return {errc::invalid_argument, "invalid target identity"}; }
+        // Delegation belongs to one explicitly named library module. A Global
+        // or Group policy cannot turn every member's exports into ROS authority.
+        if(target.connection.contains("call-boundary") && target.target_scope != scope::single)
+        {
+            return {errc::invalid_argument, "call-boundary requires a Single module target"};
+        }
+        for(auto const& [key, value]: target.connection)
+        {
+            if(auto r{validate_connection_value(target.ros_version, key, value)}; !r) { return r; }
+        }
+        if(target.enabled && !target.capabilities.empty())
+        {
+            ::uwvm2::utils::container::std_vector<::std::string_view> required{"gateway-socket",
+                                                       "gateway-uid",
+                                                       "node-name",
+                                                       "namespace"};
+            if(target.ros_version == version::ros1) { required.insert(required.end(), {"master-uri", "advertise-host", "transport"}); }
+            else
+            {
+                required.insert(required.end(), {"domain-id", "rmw-implementation", "security-mode", "keystore", "enclave"});
+            }
+            for(auto key: required)
+            {
+                if(!target.connection.contains(key))
+                {
+                    return {errc::invalid_argument, ::uwvm2::utils::container::concat("enabled target missing explicit connection field: ", ::std::string_view{key})};
+                }
+            }
+            if(target.ros_version == version::ros2)
+            {
+                bool enforce{target.connection.at("security-mode") == "enforce"};
+                bool keystore_unused{target.connection.at("keystore") == "not-applicable"};
+                bool enclave_unused{target.connection.at("enclave") == "not-applicable"};
+                if((enforce && (keystore_unused || enclave_unused)) || (!enforce && (!keystore_unused || !enclave_unused)))
+                {
+                    return {errc::invalid_argument, "ROS2 security mode and explicit keystore/enclave conflict"};
+                }
+            }
+        }
+        auto const rate{target.connection.find("audit-deny-max-rate-hz")};
+        auto const burst{target.connection.find("audit-deny-burst")};
+        bool const finite_rate{rate!=target.connection.end() && rate->second!="unlimited"};
+        bool const finite_burst{burst!=target.connection.end() && burst->second!="unlimited"};
+        if(finite_rate!=finite_burst)
+        { return {errc::invalid_argument,"denial audit rate and burst must be finite together"}; }
+        ::uwvm2::utils::container::std_set<::std::tuple<::uwvm2::utils::container::std_string, ::uwvm2::utils::container::std_string, ::uwvm2::utils::container::std_string>> duplicates{};
+        ::uwvm2::utils::container::std_map<::uwvm2::utils::container::std_string, ::uwvm2::utils::container::std_string, ::std::less<>> resource_types{};
+        for(auto const& [alias, cap] : target.capabilities)
+        {
+            if(alias != cap.alias) { return {errc::invalid_argument, "capability alias key mismatch"}; }
+            auto r{validate_capability(target.ros_version, cap)};
+            if(!r && (target.enabled || r.code != errc::unsupported)) { return r; }
+            auto duplicate_resource{cap.resource};
+            if(cap.operation == "event.observe")
+            {
+                auto source{target.capabilities.find(cap.limits.at("event-source-alias"))};
+                if(source == target.capabilities.end() || source->second.operation == "event.observe" || source->second.resource != cap.resource)
+                { return {errc::invalid_argument, "event observer requires a present source on the exact same resource"}; }
+                ::std::uint32_t kinds{};ipc::parse_event_kinds(cap.limits.at("event-kinds"),kinds);
+                ipc::event_kind payload{};::std::uint8_t flags{};
+                bool has_payload{ipc::event_source_kind(source->second.operation,payload,flags)};
+                auto allowed{ipc::event_bit(ipc::event_kind::resource_error)|ipc::event_bit(ipc::event_kind::resource_closed)};
+                if(has_payload) { allowed |= ipc::event_bit(payload); }
+                if(kinds & ~allowed) { return {errc::permission_denied, "event payload kind exceeds its independently granted source operation"}; }
+                ::fast_io::print(::uwvm2::utils::container::ostring_ref{::std::addressof(duplicate_resource)},"|",source->first);
+            }
+            if(cap.operation == "service.available")
+            {
+                auto source{target.capabilities.find(cap.limits.at("service-source-alias"))};
+                if(source==target.capabilities.end()||!service_availability_pair(target.ros_version,cap,source->second))
+                { return {errc::permission_denied, "availability requires its independently granted exact typed service.call source and QoS"}; }
+            }
+            if(!duplicates.emplace(cap.operation, duplicate_resource, cap.type).second) { return {errc::conflict, "duplicate resource grant under another alias"}; }
+            if(cap.operation.starts_with("topic.") || cap.operation.starts_with("service.") || cap.operation.starts_with("action."))
+            {
+                auto const resource_key{::uwvm2::utils::container::concat(::std::string_view{cap.operation}.substr(0,cap.operation.find('.')),":",cap.resource)};
+                auto type_key{::uwvm2::utils::container::concat(cap.type,"|",cap.type_identity)};
+                // try_emplace leaves type_key intact when the key exists, so
+                // the same owned bytes serve insertion or conflict checking.
+                auto [it, inserted]{resource_types.try_emplace(resource_key,::std::move(type_key))};
+                if(!inserted && it->second != type_key) { return {errc::conflict, "resource has incompatible trusted types"}; }
+            }
+        }
+        if(target.ros_version == version::ros2)
+        {
+            for(auto const& [response_alias, response] : target.capabilities)
+            {
+                if(response.operation != "service.respond") { continue; }
+                for(auto const& [server_alias, server] : target.capabilities)
+                {
+                    if(server.operation != "service.advertise" || server.resource != response.resource || server.type != response.type || server.type_identity != response.type_identity) { continue; }
+                    for(auto field : {"qos.reliability", "qos.durability", "qos.history", "qos.depth", "qos.deadline", "qos.lifespan", "qos.liveliness", "qos.liveliness-lease-duration"})
+                    {
+                        if(server.limits.at(field) != response.limits.at(field))
+                        { return {errc::conflict, "service response QoS differs from its explicit server contract"}; }
+                    }
+                }
+            }
+            for(auto const& [response_alias, response] : target.capabilities)
+            {
+                if(response.operation != "action.respond") { continue; }
+                for(auto const& [server_alias, server] : target.capabilities)
+                {
+                    if(server.operation != "action.advertise" || server.resource != response.resource || server.type != response.type || server.type_identity != response.type_identity) { continue; }
+                    if(!equal_action_server_qos_contract(server, response))
+                    { return {errc::conflict, "action response QoS differs from its explicit server contract"}; }
+                }
+            }
+        }
+        return {};
+    }
+
+    inline ::uwvm2::utils::container::std_string json_quote(::std::string_view text)
+    { return ::uwvm2::utils::container::concat(json_quoted{text}); }
+
+    class policy_store
+    {
+        using key_type = ::std::tuple<version, scope, ::uwvm2::utils::container::std_string>;
+        using key_view = ::std::tuple<version, scope, ::std::string_view>;
+        struct target_less
+        {
+            using is_transparent = void;
+            template<typename LeftName, typename RightName>
+            bool operator()(::std::tuple<version, scope, LeftName> const& left, ::std::tuple<version, scope, RightName> const& right) const noexcept
+            {
+                return key_view{::std::get<0>(left), ::std::get<1>(left), ::std::string_view{::std::get<2>(left)}} <
+                       key_view{::std::get<0>(right), ::std::get<1>(right), ::std::string_view{::std::get<2>(right)}};
+            }
+        };
+        struct binding_less
+        {
+            using is_transparent = void;
+            template<typename LeftName, typename RightName>
+            bool operator()(::std::pair<version, LeftName> const& left, ::std::pair<version, RightName> const& right) const noexcept
+            {
+                return ::std::pair{left.first, ::std::string_view{left.second}} < ::std::pair{right.first, ::std::string_view{right.second}};
+            }
+        };
+        ::uwvm2::utils::container::std_map<key_type, target_policy, target_less> targets{};
+        ::uwvm2::utils::container::std_map<::std::pair<version, ::uwvm2::utils::container::std_string>, ::std::pair<scope, ::uwvm2::utils::container::std_string>, binding_less> bindings{};
+
+        static ::std::string_view target_name(scope s, ::std::string_view name) noexcept { return s == scope::global ? ::std::string_view{} : name; }
+        target_policy* mutable_target(version v, scope s, ::std::string_view name)
+        {
+            auto it{targets.find(key_view{v, s, target_name(s, name)})};
+            return it == targets.end() ? nullptr : &it->second;
+        }
+    public:
+        policy_store()
+        {
+            for(auto v : {version::ros1, version::ros2}) { targets.emplace(key_type{v, scope::global, ""}, target_policy{v, scope::global, "", false, {}, {}}); }
+        }
+        result create_target(version v, scope s, ::std::string_view name)
+        {
+            if(!valid_version(v) || (s != scope::single && s != scope::group) || (s == scope::single ? !valid_module_name(name) : !valid_identifier(name)))
+            { return {errc::invalid_argument, "only explicitly named Single/Group targets can be created"}; }
+            if(targets.contains(key_view{v, s, name})) { return {errc::conflict, "target already exists"}; }
+            if(s == scope::single && bindings.contains(::std::pair{v, name})) { return {errc::conflict, "module already has an explicit target in this ROS version"}; }
+            targets.emplace(key_type{v, s, ::uwvm2::utils::container::std_string(name)}, target_policy{v, s, ::uwvm2::utils::container::std_string(name), false, {}, {}});
+            if(s == scope::single) { bindings.emplace(::std::pair{v, ::uwvm2::utils::container::std_string(name)}, ::std::pair{s, ::uwvm2::utils::container::std_string(name)}); }
+            return {};
+        }
+        result bind_module(version v, ::std::string_view group, ::std::string_view module)
+        {
+            if(!find_target(v, scope::group, group) || !valid_module_name(module)) { return {errc::invalid_argument, "unknown Group or invalid module binding"}; }
+            if(!bindings.emplace(::std::pair{v, ::uwvm2::utils::container::std_string(module)}, ::std::pair{scope::group, ::uwvm2::utils::container::std_string(group)}).second)
+            { return {errc::conflict, "module already explicitly bound in this ROS version"}; }
+            return {};
+        }
+        result bind_global_module(version v, ::std::string_view module)
+        {
+            if(!valid_version(v) || !valid_module_name(module))
+            { return {errc::invalid_argument, "invalid explicit Global module binding"}; }
+            if(!bindings.emplace(::std::pair{v, ::uwvm2::utils::container::std_string(module)}, ::std::pair{scope::global, ::uwvm2::utils::container::std_string{}}).second)
+            { return {errc::conflict, "module already explicitly bound in this ROS version"}; }
+            return {};
+        }
+        [[nodiscard]] static constexpr bool namespace_matches(version v, ::std::string_view name_space) noexcept
+        {
+            return v == version::ros1 ?
+                (name_space == "uwvm_ros1_v1" || name_space == "uwvm_ros1_client_v1") :
+                v == version::ros2 &&
+                (name_space == "uwvm_ros2_v1" || name_space == "uwvm_ros2_client_v1" ||
+                 name_space == "uwvm_ros2_rmw_v1" || name_space == "uwvm_ros2_rmw_sub_v1" ||
+                 name_space == "uwvm_ros2_rmw_srv_v1" || name_space == "uwvm_portable_robot_v1");
+        }
+        [[nodiscard]] bool host_import_visible(version v, ::std::string_view module,
+                                                ::std::string_view name_space, ::std::string_view function) const noexcept
+        {
+            auto const target{effective(v, module)};
+            // Version enable exposes its complete registered ABI. It creates
+            // no operation, resource, native connection or portable grant.
+            return namespace_matches(v,name_space) && target && target->enabled && target->interfaces.exposed(
+                ::uwvm2::utils::control::host_interfaces::find(name_space,function));
+        }
+        result set_interface(version v, scope s, ::std::string_view name, ::std::string_view key, ::std::string_view state)
+        {
+            namespace api=::uwvm2::utils::control::host_interfaces;
+            auto target=mutable_target(v,s,name);api::access value{};
+            auto index=api::find(v==version::ros1?api::family::ros1:api::family::ros2,key);
+            if(!target || !api::parse_access(state,value) || !target->interfaces.set(index,value))
+            { return {errc::invalid_argument,"unknown target, API, duplicate policy or invalid access (hidden|deny|allow)"}; }
+            return {};
+        }
+        result set_enabled(version v, scope s, ::std::string_view name, bool enabled)
+        {
+            auto target{mutable_target(v, s, name)};
+            if(!target) { return {errc::invalid_argument, "unknown target"}; }
+            target->enabled = enabled;
+            return {};
+        }
+        result set_connection(version v, scope s, ::std::string_view name, ::std::string_view key, ::std::string_view value)
+        {
+            auto target{mutable_target(v, s, name)};
+            if(!target) { return {errc::invalid_argument, "unknown target"}; }
+            if(auto r{validate_connection_value(v, key, value)}; !r) { return r; }
+            if(!target->connection.emplace(key, value).second) { return {errc::conflict, "connection field specified more than once"}; }
+            return {};
+        }
+        result grant(version v, scope s, ::std::string_view name, capability_spec cap)
+        {
+            auto target{mutable_target(v, s, name)};
+            if(!target || !valid_identifier(cap.alias) || !canonical_resource(cap.resource, cap.operation.starts_with("graph.") || cap.operation == "param.list") || operation_schema(v, cap.operation).empty())
+            { return {errc::invalid_argument, "invalid target, alias, resource or operation"}; }
+            if(cap.type.empty() || cap.type_identity.empty()) { return {errc::invalid_argument, "type and trusted identity must be explicit"}; }
+            auto alias{cap.alias};
+            if(!target->capabilities.emplace(::std::move(alias), ::std::move(cap)).second) { return {errc::conflict, "capability alias already granted"}; }
+            return {};
+        }
+        result set_capability(version v, scope s, ::std::string_view name, ::std::string_view alias, ::std::string_view key, ::std::string_view value)
+        {
+            auto target{mutable_target(v, s, name)};
+            if(!target) { return {errc::invalid_argument, "unknown target"}; }
+            auto it{target->capabilities.find(alias)};
+            if(it == target->capabilities.end()) { return {errc::invalid_argument, "unknown capability alias"}; }
+            auto fields{operation_schema(v, it->second.operation, it->second.type)};
+            bool action_field{};
+            if(key.ends_with(".on-exhausted") || key.ends_with(".on-proc-exit"))
+            {
+                auto base{key.substr(0,key.size()-13)};
+                action_field=(base=="native-wait" && key.ends_with(".on-proc-exit")) ||
+                    (resource_quota_field(base) && (::std::find(fields.begin(),fields.end(),base)!=fields.end() ||
+                     base=="max-pending-events" || base=="max-pending-event-bytes" || base=="max-parameter-elements"));
+            }
+            bool parent_search{v == version::ros1 && it->second.operation == "param.search" && key == "search-parent-namespaces"};
+            bool custom_codec{key == "adapter-codec-identity" &&
+                              (ipc::find_custom_topic_for_operation(static_cast<unsigned>(v), it->second.type, it->second.operation) ||
+                               ipc::find_custom_service(static_cast<unsigned>(v), it->second.type) ||
+                               ipc::find_custom_action(static_cast<unsigned>(v), it->second.type))};
+            bool pending_field{(key == "max-pending-events" || key == "max-pending-event-bytes") && ::std::find(fields.begin(),fields.end(),"overflow-policy") != fields.end()};
+            if(value.empty() || value.size() > 1024 || (::std::find(fields.begin(), fields.end(), key) == fields.end() && key != "twist.linear-max-abs" && key != "twist.angular-max-abs" && key != "parameter-min-value" && key != "parameter-max-value" && key != "max-parameter-elements" && !parent_search && !custom_codec && !pending_field && !action_field))
+            { return {errc::invalid_argument, "unknown/inapplicable capability field"}; }
+            if(parent_search && value != "true" && value != "false")
+            { return {errc::invalid_argument, "parent parameter search must explicitly be true or false"}; }
+            if(!it->second.limits.emplace(key, value).second) { return {errc::conflict, "capability field specified more than once"}; }
+            return {};
+        }
+        target_policy const* find_target(version v, scope s, ::std::string_view name) const noexcept
+        {
+            auto it{targets.find(key_view{v, s, target_name(s, name)})};
+            return it == targets.end() ? nullptr : &it->second;
+        }
+        target_policy const* effective(version v, ::std::string_view module) const noexcept
+        {
+            auto it{bindings.find(::std::pair{v, module})};
+            if(it == bindings.end())
+            {
+// Unassigned modules share the zero-authority Global environment.
+                // An explicit Single/Group binding above replaces it entirely.
+                return find_target(v, scope::global, "");
+            }
+            return find_target(v, it->second.first, it->second.second);
+        }
+        ::uwvm2::utils::container::std_vector<target_policy const*> configured_targets() const
+        {
+            ::uwvm2::utils::container::std_vector<target_policy const*> out{};
+            out.reserve(targets.size());
+            for(auto const& item : targets) { out.push_back(&item.second); }
+            return out;
+        }
+        // Cold, allocation-free configured-state enumeration. The policy is
+        // frozen before Guest execution; no effective authority is synthesized.
+        template<typename Visitor> bool visit_configured_targets(Visitor&& visitor) const
+        {
+            for(auto const& item : targets) { if(!visitor(item.second)) { return false; } }
+            return true;
+        }
+        template<typename Visitor> bool visit_configured_bindings(Visitor&& visitor) const
+        {
+            for(auto const& [module,target] : bindings)
+            { if(!visitor(module.first,::std::string_view{module.second},target.first,::std::string_view{target.second})) { return false; } }
+            return true;
+        }
+        result validate(::std::span<::uwvm2::utils::container::std_string const> loaded_modules, bool verify_bindings = true) const
+        {
+            // These views only live until validation returns to the span's owner.
+            ::uwvm2::utils::container::std_set<::std::string_view, ::std::less<>> loaded{};
+            for(auto const& name : loaded_modules)
+            {
+                if(!valid_module_name(name)) { return {errc::invalid_argument, "invalid loaded module name"}; }
+                if(!loaded.emplace(name).second) { return {errc::conflict, "duplicate loaded module name"}; }
+            }
+            for(auto const& [key, target] : targets) { if(auto r{validate_target(target)}; !r) { return {r.code, ::uwvm2::utils::container::concat(to_string(target.ros_version), "/", to_string(target.target_scope), "/", target.name, ": ", r.detail)}; } }
+            if(verify_bindings)
+            {
+                for(auto const& [module, target] : bindings)
+                { if(!loaded.contains(module.second)) { return {errc::unknown_module, "ROS binding refers to absent module: " + module.second}; } }
+            }
+            return {};
+        }
+        ::uwvm2::utils::container::std_string canonical_dump(version v, ::std::span<::uwvm2::utils::container::std_string const> modules) const
+        {
+            ::uwvm2::utils::container::std_string out{};
+            ::uwvm2::utils::container::ostring_ref stream{::std::addressof(out)};
+            ::fast_io::print(stream,"{\"version\":",json_quoted{to_string(v)},",\"targets\":[");
+            bool first_target{true};
+            for(auto const& [key, target] : targets)
+            {
+                if(target.ros_version != v) { continue; }
+                if(!first_target) { ::fast_io::print(stream,","); } first_target = false;
+                ::fast_io::print(stream,"{\"scope\":",json_quoted{to_string(target.target_scope)},
+                    ",\"name\":",json_quoted{target.name},",\"enabled\":",::std::string_view{target.enabled ? "true" : "false"},",\"connection\":{");
+                bool first{true};
+                for(auto const& [field, value] : target.connection)
+                { if(!first) { ::fast_io::print(stream,","); } first = false; ::fast_io::print(stream,json_quoted{field},":",json_quoted{value}); }
+                ::fast_io::print(stream,"},\"interfaces\":{"); first = true;
+                namespace api=::uwvm2::utils::control::host_interfaces;
+                for(::std::size_t i{};i<api::catalogue.size();++i)
+                {
+                    if(!target.interfaces.configured[i])continue;
+                    if(!first){::fast_io::print(stream,",");}
+                    first=false;
+                    ::fast_io::print(stream,json_quoted{api::catalogue[i].key},":",json_quoted{api::name(target.interfaces.entries[i])});
+                }
+                ::fast_io::print(stream,"},\"capabilities\":["); first = true;
+                for(auto const& [alias, cap] : target.capabilities)
+                {
+                    if(!first) { ::fast_io::print(stream,","); } first = false;
+                    ::fast_io::print(stream,"{\"alias\":",json_quoted{alias},",\"operation\":",json_quoted{cap.operation},
+                        ",\"resource\":",json_quoted{cap.resource},",\"type\":",json_quoted{cap.type},
+                        ",\"type_identity\":",json_quoted{cap.type_identity},",\"limits\":{");
+                    bool first_limit{true};
+                    for(auto const& [field, value] : cap.limits)
+                    { if(!first_limit) { ::fast_io::print(stream,","); } first_limit = false; ::fast_io::print(stream,json_quoted{field},":",json_quoted{value}); }
+                    ::fast_io::print(stream,"}}");
+                }
+                ::fast_io::print(stream,"]}");
+            }
+            ::fast_io::print(stream,"],\"modules\":[");
+            // The caller's strings outlive this local set; no borrowed key is retained.
+            ::uwvm2::utils::container::std_set<::std::string_view, ::std::less<>> sorted{modules.begin(), modules.end()};
+            bool first{true};
+            for(auto const& name : sorted)
+            {
+                if(!first) { ::fast_io::print(stream,","); } first = false;
+                auto target{effective(v, name)};
+                ::fast_io::print(stream,"{\"module\":",json_quoted{name},",\"scope\":",json_quoted{target ? to_string(target->target_scope) : "unbound"},
+                    ",\"target\":",json_quoted{target ? ::std::string_view{target->name} : ::std::string_view{}},
+                    ",\"enabled\":",::std::string_view{target && target->enabled ? "true" : "false"},"}");
+            }
+            ::fast_io::print(stream,"]}");
+            return out;
+        }
+
+    };
+}

@@ -1,0 +1,1120 @@
+{
+  "abb": {
+    "type": "abb_rapid_msgs/Pos",
+    "wire_modules": ["ros1"],
+    "wire_summary": "C, C++ and Rust encode and decode 25 ABB ROS 1 messages, 22 service request/response pairs and the shared Header.",
+    "wire_summary_zh": "C、C++ 和 Rust 可编解码 25 种 ABB ROS 1 消息、22 对服务请求与响应，以及公共的 Header。",
+    "format": "ros1",
+    "layout": [
+      "f32 x",
+      "f32 y",
+      "f32 z"
+    ],
+    "read": {
+      "x": 12.5,
+      "y": -2.75,
+      "z": 0.5
+    },
+    "description": "Read X, Y and Z from the ROS representation of a RAPID pos.",
+    "description_zh": "读取 RAPID pos 在 ROS 消息中的 X、Y、Z 三个分量。",
+    "sources": [
+      {
+        "url": "https://github.com/ros-industrial/abb_robot_driver_interfaces/blob/da809cd0bb6f270c0814fca07d7d4a5c0385fc39/abb_rapid_msgs/msg/Pos.msg",
+        "revision": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+        "path": "abb_rapid_msgs/msg/Pos.msg",
+        "sha256": "feccb992c3b666d431efd20eb4f7cbef5fa5b921a5a95337656cff1e7735333f"
+      }
+    ]
+  },
+  "agibot": {
+    "type": "aimdk_msgs/JointState",
+    "format": "cdr",
+    "layout": [
+      "str name",
+      "f64 position",
+      "f64 velocity",
+      "f64 effort",
+      "u16 error_code"
+    ],
+    "read": {
+      "position": 0.5,
+      "velocity": -0.25,
+      "effort": 1.75,
+      "error_code": 257
+    },
+    "description": "Read joint feedback after the variable-length joint name. The final uint16 is the joint error code.",
+    "description_zh": "跳过可变长度的关节名后读取位置、速度、力和末尾的 16 位错误码。",
+    "sources": [
+      {
+        "url": "https://x2-aimdk.agibot.com/downloads/aimdk-sdk-v1_0_0-aimdk-aarch64-a424add7-artifacts.zip",
+        "revision": "5bbcf724d54fb28f153db0d272f9acb7906bb1d2cac7dd7ccdc699a5c7eeab35",
+        "path": "src/aimdk_msgs/interface/robot/hal/msg/JointState.msg",
+        "sha256": "bdc131e7aa452b5ccc22e5f22cd5d28dcee5929c7794ff2fed0625ae910c9e72"
+      }
+    ]
+  },
+  "agilex": {
+    "type": "scout_msgs/ScoutBmsStatus",
+    "format": "ros1",
+    "layout": [
+      "f64 soc",
+      "f64 soh",
+      "f64 battery_voltage",
+      "f64 battery_current",
+      "f64 battery_temperature",
+      "u8 alarm_status_1",
+      "u8 alarm_status_2",
+      "u8 warning_status_1",
+      "u8 warning_status_2"
+    ],
+    "read": {
+      "soc": 73.5,
+      "battery_voltage": 48.25,
+      "battery_current": -1.5,
+      "alarm_status_1": 2
+    },
+    "description": "Read the Scout battery management system charge, voltage, current and first alarm byte.",
+    "description_zh": "读取 Scout 电池管理系统的荷电状态、电压、电流和首个报警字节。",
+    "sources": [
+      {
+        "url": "https://github.com/agilexrobotics/scout_ros/blob/01e07881cdc566c3a657e288c59a75577992d13e/scout_msgs/msg/ScoutBmsStatus.msg",
+        "revision": "01e07881cdc566c3a657e288c59a75577992d13e",
+        "path": "scout_msgs/msg/ScoutBmsStatus.msg",
+        "sha256": "a6c5a324919b3d94502164c70c1be34304ca7c6f2107c9b0d29459bb8f77909d"
+      }
+    ]
+  },
+  "booster": {
+    "type": "booster_interface/ImuState",
+    "format": "cdr",
+    "layout": [
+      "f32[3] rpy",
+      "f32[3] gyro",
+      "f32[3] acc"
+    ],
+    "read": {
+      "rpy": 0.25,
+      "gyro": -1.5,
+      "acc": 9.75
+    },
+    "description": "Read an indexed roll/pitch/yaw, gyroscope or accelerometer component. Each array has three elements.",
+    "description_zh": "读取三元素数组中的姿态角、角速度或加速度分量。",
+    "sources": [
+      {
+        "url": "https://github.com/BoosterRobotics/robocup_demo/blob/fa4f31ccb4428a9e60e90b4f54eb80499caeb0ca/src/interface/booster_ros2_interface/msg/ImuState.msg",
+        "revision": "fa4f31ccb4428a9e60e90b4f54eb80499caeb0ca",
+        "path": "src/interface/booster_ros2_interface/msg/ImuState.msg",
+        "sha256": "aab374da59a0ad77db57eb3d55bed5a5ba2080a100a592e88dcf2d9866dfa00a"
+      }
+    ]
+  },
+  "boston_dynamics": {
+    "type": "bosdyn.api.PointCloud.data",
+    "format": "packed",
+    "layout": [
+      "f32[rest3] xyz"
+    ],
+    "read": {
+      "x": {
+        "field": "xyz",
+        "step": 3,
+        "base": 0,
+        "value": -0.5
+      },
+      "y": {
+        "field": "xyz",
+        "step": 3,
+        "base": 1,
+        "value": 1.25
+      },
+      "z": {
+        "field": "xyz",
+        "step": 3,
+        "base": 2,
+        "value": 0.75
+      }
+    },
+    "description": "Read the XYZ_32F data field of a Spot point cloud. Each point contains three consecutive little-endian float32s. Pass the extracted protobuf bytes field and a zero-based point index.",
+    "description_zh": "读取 Spot 点云的 XYZ_32F 数据字段。每个点包含三个连续的小端 float32。传入已提取的 protobuf 字节字段和从零开始的点索引。",
+    "sources": [
+      {
+        "url": "https://github.com/boston-dynamics/spot-sdk/blob/16a98aae3b818082288504c6e53b59a67666aaeb/protos/bosdyn/api/point_cloud.proto",
+        "revision": "16a98aae3b818082288504c6e53b59a67666aaeb",
+        "path": "protos/bosdyn/api/point_cloud.proto",
+        "sha256": "5b6fa58ee76d528d19de90f6f63545a71ac7ecf108e9644c640248d89ff9fcb6"
+      }
+    ]
+  },
+  "clearpath": {
+    "type": "clearpath_dock_msgs/DockState",
+    "format": "ros1",
+    "layout": [
+      "u8 state"
+    ],
+    "read": {
+      "state": 3
+    },
+    "description": "Read the docking state. The upstream enum assigns 1 to DOCKED and 3 to FAILED.",
+    "description_zh": "读取充电座对接状态。上游枚举中 DOCKED 为 1，FAILED 为 3。",
+    "sources": [
+      {
+        "url": "https://github.com/clearpathrobotics/clearpath_msgs/blob/c17b52e7ba7061310493b43d5b1cd4ffd33cc9b6/clearpath_outdoornav_msgs/clearpath_dock_msgs/msg/DockState.msg",
+        "revision": "c17b52e7ba7061310493b43d5b1cd4ffd33cc9b6",
+        "path": "clearpath_outdoornav_msgs/clearpath_dock_msgs/msg/DockState.msg",
+        "sha256": "de991e17e3311d74dfd558af9edd045c62b490488a8d770d20d784119f80c6da"
+      }
+    ],
+    "constants": {
+      "UNDOCKED": 0,
+      "DOCKED": 1,
+      "IN_PROGRESS": 2,
+      "FAILED": 3,
+      "CANCELLED": 4
+    }
+  },
+  "deep_robotics": {
+    "type": "drdds/ImuDataValue",
+    "format": "cdr",
+    "layout": [
+      "f32 roll",
+      "f32 pitch",
+      "f32 yaw",
+      "f32 omega_x",
+      "f32 omega_y",
+      "f32 omega_z",
+      "f32 acc_x",
+      "f32 acc_y",
+      "f32 acc_z"
+    ],
+    "read": {
+      "roll": 0.25,
+      "yaw": -0.75,
+      "omega_z": 1.5,
+      "acc_z": 9.5
+    },
+    "description": "Read attitude and inertial components from the ImuDataValue carried inside drdds/ImuData.",
+    "description_zh": "读取 drdds/ImuData 内层 ImuDataValue 的姿态与惯性测量分量。",
+    "sources": [
+      {
+        "url": "https://github.com/DeepRoboticsLab/sdk_deploy/blob/9ea6ee94bfe90c9a36f5799d39f8dc1d821128db/src/drdds/msg/ImuDataValue.msg",
+        "revision": "9ea6ee94bfe90c9a36f5799d39f8dc1d821128db",
+        "path": "src/drdds/msg/ImuDataValue.msg",
+        "sha256": "22bebf5075489f7bf9e717c3872a50e319c5db7101d65b276c892c6a1c8e211f"
+      }
+    ]
+  },
+  "dobot": {
+    "type": "dobot_msgs_v4/RobotStatus",
+    "format": "cdr",
+    "layout": [
+      "bool is_enable",
+      "bool is_connected"
+    ],
+    "read": {
+      "is_enable": 0,
+      "is_connected": 1
+    },
+    "description": "Read the independent enable and connection flags in the six-axis V4 status message.",
+    "description_zh": "分别读取六轴 V4 状态消息中的使能标志和连接标志。",
+    "sources": [
+      {
+        "url": "https://github.com/Dobot-Arm/DOBOT_6Axis_ROS2_V4/blob/ec201c40d5db63185a3593ec9c39f80fe25aa527/dobot_msgs_v4/msg/RobotStatus.msg",
+        "revision": "ec201c40d5db63185a3593ec9c39f80fe25aa527",
+        "path": "dobot_msgs_v4/msg/RobotStatus.msg",
+        "sha256": "1ec166dc668196f7f34f2cb41726c021019be19328d434c90a5ba85015998bba"
+      }
+    ]
+  },
+  "doosan": {
+    "type": "dsr_msgs/LogAlarm",
+    "format": "ros1",
+    "layout": [
+      "i32 level",
+      "i32 group",
+      "i32 index",
+      "str[3] param"
+    ],
+    "read": {
+      "level": 2,
+      "group": 3,
+      "index": -7
+    },
+    "description": "Read alarm level, group and index, with bounds checks on all three trailing parameter strings.",
+    "description_zh": "读取报警等级、分组和索引，并校验末尾三个参数字符串的长度。",
+    "sources": [
+      {
+        "url": "https://github.com/DoosanRobotics/doosan-robot/blob/19d520d7df599dc9751f3e8a41337c399c418a47/robot_ws/src/dsr_msgs/msg/LogAlarm.msg",
+        "revision": "19d520d7df599dc9751f3e8a41337c399c418a47",
+        "path": "robot_ws/src/dsr_msgs/msg/LogAlarm.msg",
+        "sha256": "e9d3a01151050c3f917427398a025fc73b1f74b0363b2af6624a57c92093b11f"
+      }
+    ]
+  },
+  "elephant": {
+    "type": "myarm_communication/MyArmPumpStatus",
+    "format": "ros1",
+    "layout": [
+      "bool status",
+      "i8 pin1",
+      "i8 pin2"
+    ],
+    "read": {
+      "status": 1,
+      "pin1": -1,
+      "pin2": 2
+    },
+    "description": "Read myArm pump status and the two signed pin fields.",
+    "description_zh": "读取 myArm 泵状态和两个有符号引脚字段。",
+    "sources": [
+      {
+        "url": "https://github.com/elephantrobotics/mycobot_ros/blob/3a0357d2afec2706c299f6d51ac46b6b128067f8/myArm/myarm_communication/msg/MyArmPumpStatus.msg",
+        "revision": "3a0357d2afec2706c299f6d51ac46b6b128067f8",
+        "path": "myArm/myarm_communication/msg/MyArmPumpStatus.msg",
+        "sha256": "4126837fed94e7f5ef94f448706c02b225128a006b0780f748065fa9ed4f92bc"
+      }
+    ]
+  },
+  "fanuc": {
+    "type": "fanuc_msgs/ForceSensor",
+    "format": "cdr",
+    "layout": [
+      "f32 force_x",
+      "f32 force_y",
+      "f32 force_z",
+      "f32 moment_x",
+      "f32 moment_y",
+      "f32 moment_z",
+      "u32 fs_type"
+    ],
+    "read": {
+      "force_x": -2.5,
+      "force_z": 8.25,
+      "moment_z": -0.125,
+      "fs_type": 2
+    },
+    "description": "Read sensor force in newtons, moment in newton-metres and sensor type (2 denotes an external sensor).",
+    "description_zh": "读取单位为牛顿的力、单位为牛米的力矩与传感器类型（2 表示外接）。",
+    "sources": [
+      {
+        "url": "https://github.com/FANUC-CORPORATION/fanuc_driver/blob/da5db3f611cdc9dffe687e056c4e79bea584bf5c/fanuc_msgs/msg/ForceSensor.msg",
+        "revision": "da5db3f611cdc9dffe687e056c4e79bea584bf5c",
+        "path": "fanuc_msgs/msg/ForceSensor.msg",
+        "sha256": "9c1fbfff859e53e1d9e12c8ec7dc6fad4644897dcbecbdd9b880a6a95d880bb3"
+      }
+    ]
+  },
+  "flexiv": {
+    "type": "flexiv_msgs/Digital",
+    "format": "cdr",
+    "layout": [
+      "u8 pin",
+      "bool state"
+    ],
+    "read": {
+      "pin": 6,
+      "state": 1
+    },
+    "description": "Read the digital pin number and its boolean state from a flexiv_msgs/Digital element.",
+    "description_zh": "从 flexiv_msgs/Digital 元素读取引脚号及其布尔状态。",
+    "sources": [
+      {
+        "url": "https://github.com/flexivrobotics/flexiv_ros2/blob/5188d2a4473e556a88ee0cfbe858e84ddd6979b8/flexiv_msgs/msg/Digital.msg",
+        "revision": "5188d2a4473e556a88ee0cfbe858e84ddd6979b8",
+        "path": "flexiv_msgs/msg/Digital.msg",
+        "sha256": "d0497cd504a632e323f13952188672a59396e70ed0e4fb5ddb35db51a70d1b5b"
+      }
+    ]
+  },
+  "fourier": {
+    "type": "simulator_pub_msg",
+    "format": "lcm",
+    "layout": [
+      "i64 timestamp",
+      "i32 motor_num",
+      "f64[saved] q",
+      "f64[saved] q_dot",
+      "f64[3] acc",
+      "f64[3] omega",
+      "f64[4] quat",
+      "f64 lf_touch",
+      "f64 rf_touch",
+      "f64[3] pos",
+      "f64[3] vel"
+    ],
+    "read": {
+      "timestamp": 4294967302,
+      "q": -0.125,
+      "q_dot": 0.5,
+      "lf_touch": 0.25,
+      "rf_touch": 0.75
+    },
+    "description": "Decode the complete Fourier Aurora MuJoCo simulator feedback message including its LCM fingerprint, signed motor count and big-endian joint and contact values.",
+    "description_zh": "解码 Fourier Aurora MuJoCo 仿真反馈，包括 LCM 指纹、有符号电机数量以及大端编码的关节和接触值。",
+    "sources": [
+      {
+        "url": "https://github.com/FFTAI/fourier_aurora_sdk/blob/b434869719ae256d02d8285e88ea2b22c1515602/sim/mujoco/simulator_pub_msg.py",
+        "revision": "b434869719ae256d02d8285e88ea2b22c1515602",
+        "path": "sim/mujoco/simulator_pub_msg.py",
+        "sha256": "516f1746f9f3f2758d931417f9098efcbc0240235a936c88e381bbef7c848813"
+      }
+    ]
+  },
+  "franka": {
+    "type": "franka_msgs/Elbow",
+    "format": "cdr",
+    "wire_modules": ["cdr"],
+    "wire_summary": "C, C++, Rust and Go (standard Go and TinyGo) encode and decode 137 ROS 2 XCDRv1 records for the Franka arm, gripper, spine and their standard dependencies.",
+    "wire_summary_zh": "C、C++、Rust 和 Go（标准 Go 与 TinyGo）可编解码 137 个 ROS 2 XCDRv1 记录，覆盖 Franka 机械臂、夹爪、脊柱及其标准依赖。",
+    "example_frames": "franka/elbow_fixtures.json",
+    "layout": [
+      "f64[2] position",
+      "f64[2] desired_position",
+      "f64[2] commanded_position",
+      "f64[2] commanded_velocity",
+      "f64[2] commanded_acceleration"
+    ],
+    "read": {
+      "position": -1.0,
+      "desired_position": 1.0,
+      "commanded_position": -1.0,
+      "commanded_velocity": -0.0625,
+      "commanded_acceleration": -0.25
+    },
+    "description": "Read either component of all five elbow arrays and validate the complete record.",
+    "description_zh": "读取肘部五个数组中任一分量，并校验完整记录。",
+    "sources": [
+      {
+        "url": "https://github.com/frankarobotics/franka_ros2/blob/4acc05c01ebfcdf916ee6b3df966df0ad7b2f9ec/franka_msgs/msg/Elbow.msg",
+        "revision": "4acc05c01ebfcdf916ee6b3df966df0ad7b2f9ec",
+        "path": "franka_msgs/msg/Elbow.msg",
+        "sha256": "3bdb18227176ab8f368f00b47ee06aa843bd2df4cd60e40034bf6b69d42f496e"
+      }
+    ]
+  },
+  "hello_robot": {
+    "type": "Wacc_Protocol_P0.unpack_status",
+    "format": "packed",
+    "layout": [
+      "f32 ax",
+      "f32 ay",
+      "f32 az",
+      "i16 a0",
+      "u8 d0",
+      "u8 d1",
+      "u8 d2",
+      "u8 d3",
+      "u32 single_tap_count",
+      "u32 state",
+      "u32 timestamp",
+      "u32 debug"
+    ],
+    "read": {
+      "ax": 0.5,
+      "az": 9.5,
+      "a0": -120,
+      "single_tap_count": 513,
+      "timestamp": 305419896
+    },
+    "description": "Read the unextended Stretch wrist accelerometer P0 status body on its little-endian host, after the RPC identifier or optional extension. Timestamp is the raw device counter before host-side conversion.",
+    "description_zh": "读取 Stretch 腕部加速度计在小端主机上的 P0 状态正文，输入从 RPC 标识或可选扩展之后开始。时间戳为主机转换前的设备计数。",
+    "sources": [
+      {
+        "url": "https://github.com/hello-robot/stretch_body/blob/92c9db0cc9ade6535f822e83bbf10cbd0c68136a/body/stretch_body/wacc.py",
+        "revision": "92c9db0cc9ade6535f822e83bbf10cbd0c68136a",
+        "path": "body/stretch_body/wacc.py",
+        "sha256": "0061ed277eb2b648eced3372b6c861a5f43487ca4664c69784b4b9a9847cb026"
+      },
+      {
+        "url": "https://github.com/hello-robot/stretch_body/blob/92c9db0cc9ade6535f822e83bbf10cbd0c68136a/body/stretch_body/transport.py",
+        "revision": "92c9db0cc9ade6535f822e83bbf10cbd0c68136a",
+        "path": "body/stretch_body/transport.py",
+        "sha256": "bd6811a48ac4b89939befbd481f05141367021e67c137ebbb229f75a842edcab"
+      }
+    ]
+  },
+  "kinova": {
+    "type": "kortex_driver/ActuatorCyclic_Feedback",
+    "format": "ros1",
+    "layout": [
+      "u32 feedback_id_identifier",
+      "u32 status_flags",
+      "u32 jitter_comm",
+      "f32 position",
+      "f32 velocity",
+      "f32 torque",
+      "f32 current_motor",
+      "f32 voltage",
+      "f32 temperature_motor",
+      "f32 temperature_core",
+      "u32 fault_bank_a",
+      "u32 fault_bank_b",
+      "u32 warning_bank_a",
+      "u32 warning_bank_b"
+    ],
+    "read": {
+      "feedback_id_identifier": 1234,
+      "jitter_comm": 150,
+      "voltage": 47.5,
+      "temperature_motor": 42.25
+    },
+    "description": "Read Kortex actuator feedback ID, communication jitter, main-board voltage and motor temperature from the generated ROS message.",
+    "description_zh": "读取 Kortex 生成的 ROS 执行器反馈消息中的反馈 ID、通信抖动、主板电压和电机温度。",
+    "sources": [
+      {
+        "url": "https://github.com/Kinovarobotics/ros_kortex/blob/c3280d8a6a6b5d96590d51538e3f265710a6c77d/kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_Feedback.msg",
+        "revision": "c3280d8a6a6b5d96590d51538e3f265710a6c77d",
+        "path": "kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_Feedback.msg",
+        "sha256": "9cc841526e40b8bc2f8e66177a90baf52838a835b770ddcba392e4b204a4a371"
+      },
+      {
+        "url": "https://github.com/Kinovarobotics/ros_kortex/blob/c3280d8a6a6b5d96590d51538e3f265710a6c77d/kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_MessageId.msg",
+        "revision": "c3280d8a6a6b5d96590d51538e3f265710a6c77d",
+        "path": "kortex_driver/msg/generated/actuator_cyclic/ActuatorCyclic_MessageId.msg",
+        "sha256": "d4189f71113bf8c3574df21fa1120a7d0740a3527ce017114004ac6913dd949d"
+      }
+    ]
+  },
+  "kuka": {
+    "type": "kuka_driver_interfaces/KssStatus",
+    "format": "cdr",
+    "layout": [
+      "u8 control_mode",
+      "u8 cycle_time",
+      "bool drives_powered",
+      "bool emergency_stop",
+      "bool guard_stop",
+      "bool in_motion",
+      "bool motion_possible",
+      "u8 operation_mode",
+      "bool robot_stopped"
+    ],
+    "read": {
+      "cycle_time": 2,
+      "drives_powered": 1,
+      "guard_stop": 0,
+      "operation_mode": 3
+    },
+    "description": "Read the reported RSI cycle (1 means 4 ms, 2 means 12 ms), drive power, guard stop and operation mode.",
+    "description_zh": "读取报告的 RSI 周期（1 为 4 ms，2 为 12 ms）、驱动电源、防护停止和操作模式。",
+    "sources": [
+      {
+        "url": "https://github.com/kuka-ros/kuka_drivers/blob/15fbb6941356390c38bbd135a0676dfd96a050c0/kuka_driver_interfaces/msg/KssStatus.msg",
+        "revision": "15fbb6941356390c38bbd135a0676dfd96a050c0",
+        "path": "kuka_driver_interfaces/msg/KssStatus.msg",
+        "sha256": "6bb238b937abab031f855506796d1a4b6412d65a0d3d3ab24bd5d420714cc388"
+      }
+    ],
+    "constants": {
+      "UNSPECIFIED": 0,
+      "JOINT_POSITION_CONTROL": 1,
+      "CARTESIAN_POSITION_CONTROL": 5,
+      "RSI_4MS": 1,
+      "RSI_12MS": 2,
+      "T1": 1,
+      "T2": 2,
+      "AUT": 3,
+      "EXT": 4
+    }
+  },
+  "leju": {
+    "type": "kuavo_msgs/BatteryInfo",
+    "format": "ros1",
+    "layout": [
+      "u8 battery_id",
+      "u32 voltage",
+      "i32 current",
+      "u32 remaining_capacity",
+      "u32 full_capacity",
+      "u8 percentage",
+      "u16 cycle_count",
+      "u32 protection_flags",
+      "i16[6] temperatures",
+      "u32 timestamp_sec",
+      "u32 timestamp_nsec"
+    ],
+    "read": {
+      "voltage": 48750,
+      "current": -2100,
+      "percentage": 65,
+      "temperatures": -3
+    },
+    "description": "Read millivolts, signed milliamperes, percentage and six NTC temperatures in degrees Celsius.",
+    "description_zh": "读取毫伏电压、有符号毫安电流、剩余百分比和六个摄氏度 NTC 温度。",
+    "sources": [
+      {
+        "url": "https://github.com/LejuRobotics/kuavo-ros-opensource/blob/2634d9fa891bb9b4987cddc7977599922342a316/src/kuavo_msgs/msg/BatteryInfo.msg",
+        "revision": "2634d9fa891bb9b4987cddc7977599922342a316",
+        "path": "src/kuavo_msgs/msg/BatteryInfo.msg",
+        "sha256": "6241779961ded20266ddc135090967a783991845762add12440fe6b4bd2dfe69"
+      }
+    ]
+  },
+  "limx": {
+    "type": "limxsdk::msg::perception_msgs::HeightEstimateResult",
+    "format": "ros1",
+    "layout": [
+      "u32 header_seq",
+      "u32 header_stamp_sec",
+      "u32 header_stamp_nsec",
+      "str header_frame_id",
+      "f64 estimate_height",
+      "str desc"
+    ],
+    "read": {
+      "estimate_height": 0.625,
+      "header_seq": 524
+    },
+    "description": "Read the LimX height estimate and header sequence from the compact little-endian mros message, including its trailing description string.",
+    "description_zh": "从 LimX 小端 mros 消息读取高度估计和消息头序号，并校验末尾的说明字符串。",
+    "sources": [
+      {
+        "url": "https://github.com/limxdynamics/limxsdk-lowlevel/blob/61624b58663b47928717069ff0eab2f1c85ec733/include/limxsdk/msg/perception_msgs/HeightEstimateResult.h",
+        "revision": "61624b58663b47928717069ff0eab2f1c85ec733",
+        "path": "include/limxsdk/msg/perception_msgs/HeightEstimateResult.h",
+        "sha256": "432fe763728abcf2d0a3f4f8dd0f2e3e6f09cc7128c6f117379cbdb32437142c"
+      },
+      {
+        "url": "https://github.com/limxdynamics/limxsdk-lowlevel/blob/61624b58663b47928717069ff0eab2f1c85ec733/include/limxsdk/codec/codec.h",
+        "revision": "61624b58663b47928717069ff0eab2f1c85ec733",
+        "path": "include/limxsdk/codec/codec.h",
+        "sha256": "8762c752bab0227f2027e0dc60141117e5f3814c9d722c8485febc74d53668bf"
+      }
+    ]
+  },
+  "nvidia": {
+    "type": "isaac_ros_nova_interfaces/EncoderTicks",
+    "format": "cdr",
+    "layout": [
+      "i32 header_stamp_sec",
+      "u32 header_stamp_nanosec",
+      "str header_frame_id",
+      "u32 left_ticks",
+      "u32 right_ticks",
+      "u64 encoder_timestamp"
+    ],
+    "read": {
+      "left_ticks": 305419896,
+      "right_ticks": 7654321,
+      "encoder_timestamp": 4294967301
+    },
+    "description": "Read Nova left/right wheel tick counts and the encoder-provided 64-bit timestamp after the ROS header.",
+    "description_zh": "跳过 ROS 消息头后读取 Nova 左右轮脉冲数及编码器提供的 64 位时间戳。",
+    "sources": [
+      {
+        "url": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/blob/7bec6ae5dbb2faa11617f40226e8932a4a94e6e4/isaac_ros_nova_interfaces/msg/EncoderTicks.msg",
+        "revision": "7bec6ae5dbb2faa11617f40226e8932a4a94e6e4",
+        "path": "isaac_ros_nova_interfaces/msg/EncoderTicks.msg",
+        "sha256": "930b7bba46f99b3c255a11d516b4e181b769d61e4d9d08a73cec901b52c28afe"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/std_msgs/msg/Header.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "std_msgs/msg/Header.msg",
+        "sha256": "d2cea14630e39ed0fa5b432ba9160a7c38855b9427d3344f99e83e83facb53c2"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      }
+    ]
+  },
+  "nvidia-groot": {
+    "type": "DROID observation.state",
+    "format": "packed",
+    "layout": [
+      "f32[9] eef_9d",
+      "f32 gripper_position",
+      "f32[7] joint_position"
+    ],
+    "read": {
+      "eef_9d": 0.125,
+      "gripper_position": 0.75,
+      "joint_position": -0.25
+    },
+    "description": "Read one DROID sample from the GR00T demonstration dataset. Supply the 17 decoded float32 values in little-endian order. The end-effector slice is [0,9), gripper [9,10), and seven joints [10,17).",
+    "description_zh": "读取 GR00T 演示数据集中的一行 DROID 状态。传入已解出的 17 个小端 float32。末端执行器占 [0,9)，夹爪占 [9,10)，七个关节占 [10,17)。",
+    "sources": [
+      {
+        "url": "https://github.com/NVIDIA/Isaac-GR00T/blob/dac54b313160c201c450f97df0fd74ebd379c892/demo_data/droid_sample/meta/modality.json",
+        "revision": "dac54b313160c201c450f97df0fd74ebd379c892",
+        "path": "demo_data/droid_sample/meta/modality.json",
+        "sha256": "9ccdf1c25a2422b62dfd23abc511010809d3d72595580914507c9013a9736861"
+      },
+      {
+        "url": "https://github.com/NVIDIA/Isaac-GR00T/blob/dac54b313160c201c450f97df0fd74ebd379c892/demo_data/droid_sample/meta/info.json",
+        "revision": "dac54b313160c201c450f97df0fd74ebd379c892",
+        "path": "demo_data/droid_sample/meta/info.json",
+        "sha256": "9cfaf37856f202f9cbd8f883639597974b04bc0c6d6a87ded33efb283cd2e569"
+      }
+    ]
+  },
+  "nvidia-isaac-ros": {
+    "type": "isaac_ros_tensor_list_interfaces/TensorShape",
+    "format": "cdr",
+    "layout": [
+      "u8 rank",
+      "u32[] dims"
+    ],
+    "read": {
+      "rank": 2,
+      "dims": 640
+    },
+    "description": "Read declared tensor rank and an indexed dimension from its length-prefixed uint32 dimension sequence.",
+    "description_zh": "读取张量声明的秩与带有长度前缀的 uint32 维度数组中的指定元素。",
+    "sources": [
+      {
+        "url": "https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/blob/7bec6ae5dbb2faa11617f40226e8932a4a94e6e4/isaac_ros_tensor_list_interfaces/msg/TensorShape.msg",
+        "revision": "7bec6ae5dbb2faa11617f40226e8932a4a94e6e4",
+        "path": "isaac_ros_tensor_list_interfaces/msg/TensorShape.msg",
+        "sha256": "1f99decc52025409c6cb8c9f9f2b6003569cb9d1466cd0a6adac64924aed7f66"
+      }
+    ]
+  },
+  "nvidia-isaac-sim": {
+    "type": "Isaac Sim ROS2 Publish Clock / rosgraph_msgs/Clock",
+    "format": "cdr",
+    "layout": [
+      "i32 clock_sec",
+      "u32 clock_nanosec"
+    ],
+    "read": {
+      "clock_sec": 5,
+      "clock_nanosec": 62500000
+    },
+    "description": "Read simulator time from the ROS2 Clock output of the Isaac Sim ROS2 Publish Clock graph node. Its timeStamp input is expressed in seconds.",
+    "description_zh": "读取 Isaac Sim ROS2 Publish Clock 图节点输出的时钟消息。该节点的 timeStamp 输入以秒为单位。",
+    "sources": [
+      {
+        "url": "https://github.com/isaac-sim/IsaacSim/blob/87c95274f50836068b44eeb030bf62aa2108bdf8/source/extensions/isaacsim.ros2.nodes/nodes/OgnROS2PublishClock.ogn",
+        "revision": "87c95274f50836068b44eeb030bf62aa2108bdf8",
+        "path": "source/extensions/isaacsim.ros2.nodes/nodes/OgnROS2PublishClock.ogn",
+        "sha256": "8983fe8736a2df74849d654f379dec693363b6001ee137faea24468f506a5586"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/rosgraph_msgs/msg/Clock.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "rosgraph_msgs/msg/Clock.msg",
+        "sha256": "a8d1d14b0057bea4040f2e9662279e6ee270bd9fd6d00e1b2bcfb449bf4d521c"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      }
+    ]
+  },
+  "pal": {
+    "type": "pal_device_msgs/BatteryState",
+    "format": "ros1",
+    "layout": [
+      "i8 charge_state",
+      "f32 battery_percentage"
+    ],
+    "read": {
+      "charge_state": 3,
+      "battery_percentage": 67.5
+    },
+    "description": "Read PAL battery charge state and percentage. The MEDIUM charge state has value 3.",
+    "description_zh": "读取 PAL 电量等级和百分比，其中 MEDIUM 的值为 3。",
+    "sources": [
+      {
+        "url": "https://github.com/pal-robotics/pal_msgs/blob/a9b3d52908626e0cf1f230b4dc4a962299d232f3/pal_device_msgs/msg/BatteryState.msg",
+        "revision": "a9b3d52908626e0cf1f230b4dc4a962299d232f3",
+        "path": "pal_device_msgs/msg/BatteryState.msg",
+        "sha256": "e255c9d5705957dfbcedbdb2c39c3c664c09479adf6bc9c6ea6959b9d1ddb9e2"
+      }
+    ],
+    "constants": {
+      "FULL": 5,
+      "HIGH": 4,
+      "MEDIUM": 3,
+      "LOW": 2,
+      "CRITICAL_LOW": 1
+    }
+  },
+  "realman": {
+    "type": "rm_ros_interfaces/Jointerrorcode",
+    "format": "cdr",
+    "layout": [
+      "u16[] joint_error",
+      "u8 dof"
+    ],
+    "read": {
+      "joint_error": 258,
+      "dof": 2
+    },
+    "description": "Read an indexed 16-bit joint error code and the separately reported degree-of-freedom count.",
+    "description_zh": "读取指定关节的 16 位错误码及消息单独报告的自由度数。",
+    "sources": [
+      {
+        "url": "https://github.com/RealManRobot/ros2_rm_robot/blob/5fc226e93358e73c165b2af54b583389f813049e/rm_ros_interfaces/msg/Jointerrorcode.msg",
+        "revision": "5fc226e93358e73c165b2af54b583389f813049e",
+        "path": "rm_ros_interfaces/msg/Jointerrorcode.msg",
+        "sha256": "b1242a1696bd5a16061d2852e20972b606668623b372ded357266ac9f0c799a0"
+      }
+    ]
+  },
+  "robotis": {
+    "type": "turtlebot3_msgs/SensorState",
+    "format": "ros1",
+    "layout": [
+      "u32 header_seq",
+      "u32 header_stamp_sec",
+      "u32 header_stamp_nsec",
+      "str header_frame_id",
+      "u8 bumper",
+      "f32 cliff",
+      "f32 sonar",
+      "f32 illumination",
+      "u8 led",
+      "u8 button",
+      "bool torque",
+      "i32 left_encoder",
+      "i32 right_encoder",
+      "f32 battery"
+    ],
+    "read": {
+      "bumper": 3,
+      "left_encoder": -105,
+      "right_encoder": 300,
+      "battery": 12.25
+    },
+    "description": "Read the TurtleBot3 bumper bitmask, signed wheel encoders and battery field after its variable-size ROS header.",
+    "description_zh": "从含可变长度消息头的 TurtleBot3 状态中读取碰撞开关位掩码、带符号轮编码器和电池字段。",
+    "sources": [
+      {
+        "url": "https://github.com/ROBOTIS-GIT/turtlebot3_msgs/blob/76e78b0a34e07cf1dd16dafdc54c44f35c5b83eb/msg/SensorState.msg",
+        "revision": "76e78b0a34e07cf1dd16dafdc54c44f35c5b83eb",
+        "path": "msg/SensorState.msg",
+        "sha256": "1a9e0c633878fbe28695f1a5490a5655acbfaf871df3d58d197b7f2d51ded8c1"
+      },
+      {
+        "url": "https://github.com/ros/std_msgs/blob/34198520757d1aab358118a0ef294fe2609fde33/msg/Header.msg",
+        "revision": "34198520757d1aab358118a0ef294fe2609fde33",
+        "path": "msg/Header.msg",
+        "sha256": "5e64e71bb8d9d47019367f6a621934aab7e6ffedc6cfdcc912486aa5576ed693"
+      }
+    ],
+    "constants": {
+      "BUMPER_FORWARD": 1,
+      "BUMPER_BACKWARD": 2,
+      "CLIFF": 1,
+      "SONAR": 1,
+      "ILLUMINATION": 1,
+      "BUTTON0": 1,
+      "BUTTON1": 2,
+      "ERROR_LEFT_MOTOR": 1,
+      "ERROR_RIGHT_MOTOR": 2,
+      "TORQUE_ON": 1,
+      "TORQUE_OFF": 2
+    }
+  },
+  "ros": {
+    "type": "geometry_msgs/Quaternion",
+    "format": "quaternion",
+    "layout": [
+      "f64 x",
+      "f64 y",
+      "f64 z",
+      "f64 w"
+    ],
+    "read": {
+      "x": 0.5,
+      "y": -0.5,
+      "z": 0.5,
+      "w": 0.5
+    },
+    "description": "Read quaternion components in ROS x, y, z, w order. The decoder accepts a packed ROS 1 body or an encapsulated ROS 2 CDR1 body.",
+    "description_zh": "按 ROS 的 x、y、z、w 顺序读取四元数分量，支持 ROS 1 紧凑正文与含封装头的 ROS 2 CDR1 正文。",
+    "sources": [
+      {
+        "url": "https://github.com/ros/common_msgs/blob/092bc230c8153dd4cfee0c84c9796cc7e6b09fdb/geometry_msgs/msg/Quaternion.msg",
+        "revision": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+        "path": "geometry_msgs/msg/Quaternion.msg",
+        "sha256": "84f92e899c4d40fe49e7f823a8a73e5024bcf129d4aa97200a27ae4f9ff9ec6e"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Quaternion.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Quaternion.msg",
+        "sha256": "298495eb67a139642ffd37cc9029eae085e6c39a8789828b7517868a487939ed"
+      }
+    ]
+  },
+  "ros1": {
+    "type": "std_msgs/Time",
+    "format": "ros1",
+    "layout": [
+      "u32 data_sec",
+      "u32 data_nsec"
+    ],
+    "read": {
+      "data_sec": 301,
+      "data_nsec": 750000000
+    },
+    "description": "Read ROS 1 time as two unsigned 32-bit values, seconds and nanoseconds.",
+    "description_zh": "按两个无符号 32 位整数字段读取 ROS 1 时间的秒和纳秒分量。",
+    "sources": [
+      {
+        "url": "https://github.com/ros/std_msgs/blob/34198520757d1aab358118a0ef294fe2609fde33/msg/Time.msg",
+        "revision": "34198520757d1aab358118a0ef294fe2609fde33",
+        "path": "msg/Time.msg",
+        "sha256": "98fb80122583159aab57692b30d22bd5aed45b1bb31192d24bbe492b426b080d"
+      }
+    ]
+  },
+  "ros2": {
+    "type": "builtin_interfaces/Duration",
+    "format": "cdr",
+    "layout": [
+      "i32 sec",
+      "u32 nanosec"
+    ],
+    "read": {
+      "sec": -2,
+      "nanosec": 300000000
+    },
+    "description": "Read normalized ROS 2 duration fields. For instance, -2 seconds and 300000000 nanoseconds represent -1.7 seconds.",
+    "description_zh": "读取 ROS 2 时长的有符号秒与无符号纳秒。例如 -2 秒加 300000000 纳秒表示 -1.7 秒。",
+    "sources": [
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Duration.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Duration.msg",
+        "sha256": "57da13a4201e7d258a2931323145b953e47e46967494e62ba66c2faca4fbade2"
+      }
+    ]
+  },
+  "trossen": {
+    "type": "interbotix_xs_msgs/JointTemps",
+    "format": "ros1",
+    "layout": [
+      "str[] names",
+      "i32[] temps"
+    ],
+    "read": {
+      "temps": 41
+    },
+    "description": "Read a joint temperature in degrees Celsius by its index in the diagnostic message. The joint names precede the temperature sequence.",
+    "description_zh": "按诊断消息中的索引读取关节的摄氏温度。温度数组之前是一组可变长度的关节名。",
+    "sources": [
+      {
+        "url": "https://github.com/Interbotix/interbotix_ros_core/blob/172841ffa93f7556fff9c7455ad0e77688fa156e/interbotix_ros_xseries/interbotix_xs_msgs/msg/JointTemps.msg",
+        "revision": "172841ffa93f7556fff9c7455ad0e77688fa156e",
+        "path": "interbotix_ros_xseries/interbotix_xs_msgs/msg/JointTemps.msg",
+        "sha256": "e0798d4b96836b4836a540161fefb8071998ef948e5fb09b5e29a8bb3d9a4622"
+      }
+    ]
+  },
+  "ubtech": {
+    "type": "grab_demo_msgs/GraspCandidate",
+    "format": "cdr",
+    "layout": [
+      "i32 header_stamp_sec",
+      "u32 header_stamp_nanosec",
+      "str header_frame_id",
+      "i32 pose_header_stamp_sec",
+      "u32 pose_header_stamp_nanosec",
+      "str pose_header_frame_id",
+      "f64 pose_pose_position_x",
+      "f64 pose_pose_position_y",
+      "f64 pose_pose_position_z",
+      "f64 pose_pose_orientation_x",
+      "f64 pose_pose_orientation_y",
+      "f64 pose_pose_orientation_z",
+      "f64 pose_pose_orientation_w",
+      "str group_name",
+      "f32 confidence",
+      "str object_class"
+    ],
+    "read": {
+      "confidence": 0.75,
+      "pose_pose_position_z": 0.125
+    },
+    "description": "Read the detection confidence and candidate height reported by the perception node. The message includes two stamped frames, group and class strings.",
+    "description_zh": "读取感知节点报告的检测置信度及候选位置的高度，校验两个带时间戳的坐标系以及分组、类别字符串。",
+    "sources": [
+      {
+        "url": "https://github.com/UBTECH-Robot/tk_sdk_demo/blob/3df9f9dc7689203fb673a21d8205bb597ed4fafe/src/grab_demo_msgs/msg/GraspCandidate.msg",
+        "revision": "3df9f9dc7689203fb673a21d8205bb597ed4fafe",
+        "path": "src/grab_demo_msgs/msg/GraspCandidate.msg",
+        "sha256": "c6acb64fe6ff41c571c80f2f269834e5d041027d16c937d5086f9b1bc992cf4c"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/std_msgs/msg/Header.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "std_msgs/msg/Header.msg",
+        "sha256": "d2cea14630e39ed0fa5b432ba9160a7c38855b9427d3344f99e83e83facb53c2"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/PoseStamped.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/PoseStamped.msg",
+        "sha256": "31898ab0eb64a6c44c27ab4959819a32ec3bc3ee847c8fe1b01c897d48e311e5"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Pose.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Pose.msg",
+        "sha256": "3eceb77c63ebbb544c11d7f991e475e9819e0cf534deb1a879392c1b3dc997de"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Point.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Point.msg",
+        "sha256": "eb4c07e591cf0269ccb17245dcd4f998162feb09cc8add85fa082c8a30bfc91d"
+      },
+      {
+        "url": "https://github.com/ros2/common_interfaces/blob/a941f14bb318d8d904505ed935ccbb97f24a70a4/geometry_msgs/msg/Quaternion.msg",
+        "revision": "a941f14bb318d8d904505ed935ccbb97f24a70a4",
+        "path": "geometry_msgs/msg/Quaternion.msg",
+        "sha256": "298495eb67a139642ffd37cc9029eae085e6c39a8789828b7517868a487939ed"
+      }
+    ]
+  },
+  "ufactory": {
+    "type": "xarm_msgs/IOState",
+    "format": "ros1",
+    "layout": [
+      "i32 digital_1",
+      "i32 digital_2",
+      "f32 analog_1",
+      "f32 analog_2"
+    ],
+    "read": {
+      "digital_1": 1,
+      "digital_2": 0,
+      "analog_1": 1.25,
+      "analog_2": 3.5
+    },
+    "description": "Read both digital and both analog input-port states from xArm IOState.",
+    "description_zh": "从 xArm IOState 读取两路数字输入和两路模拟输入。",
+    "sources": [
+      {
+        "url": "https://github.com/xArm-Developer/xarm_ros/blob/3bc6c4da51769d90ce2a6d1419a0b65446d177e3/xarm_msgs/msg/IOState.msg",
+        "revision": "3bc6c4da51769d90ce2a6d1419a0b65446d177e3",
+        "path": "xarm_msgs/msg/IOState.msg",
+        "sha256": "c3d02e687885003c4a9bbab24d5a256f1eb6ee05bd0ff777230cdb90dd568106"
+      }
+    ]
+  },
+  "universal_robots": {
+    "display_name": "Universal Robots",
+    "type": "ur_dashboard_msgs/SafetyStatus",
+    "format": "cdr",
+    "wire_modules": ["cdr"],
+    "wire_guide_labels": {"cdr": {"en": "Dashboard message codecs", "zh": "仪表板消息编解码"}},
+    "wire_summary": "C, C++ and Rust provide typed XCDRv1 codecs for all eight ur_dashboard_msgs messages from Universal Robots ROS 2 Driver 7.3.0. Independent qualification is pending.",
+    "wire_summary_zh": "C、C++ 和 Rust 提供 Universal Robots ROS 2 Driver 7.3.0 中全部八种 ur_dashboard_msgs 消息的类型与 XCDRv1 编解码器，独立验收待完成。",
+    "layout": [
+      "i8 status"
+    ],
+    "read": {
+      "status": 3
+    },
+    "description": "Read the dashboard safety-state code. The named constants include PROTECTIVE_STOP (3) and SAFEGUARD_STOP (5).",
+    "description_zh": "读取仪表板安全状态码，包括 PROTECTIVE_STOP（3）和 SAFEGUARD_STOP（5）。",
+    "sources": [
+      {
+        "url": "https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/262330ed9b5467a17c8ceae09567991e22d13944/ur_dashboard_msgs/msg/SafetyStatus.msg",
+        "revision": "262330ed9b5467a17c8ceae09567991e22d13944",
+        "path": "ur_dashboard_msgs/msg/SafetyStatus.msg",
+        "sha256": "0ca8884a85b851d24091fb3f4100237f98a5977981cee919c75e4b6d1b98d9ef"
+      }
+    ],
+    "constants": {
+      "NORMAL": 1,
+      "REDUCED": 2,
+      "PROTECTIVE_STOP": 3,
+      "RECOVERY": 4,
+      "SAFEGUARD_STOP": 5,
+      "SYSTEM_EMERGENCY_STOP": 6,
+      "ROBOT_EMERGENCY_STOP": 7,
+      "VIOLATION": 8,
+      "FAULT": 9,
+      "VALIDATE_JOINT_ID": 10,
+      "UNDEFINED_SAFETY_MODE": 11,
+      "AUTOMATIC_MODE_SAFEGUARD_STOP": 12,
+      "SYSTEM_THREE_POSITION_ENABLING_STOP": 13,
+      "TP_THREE_POSITION_ENABLING_STOP": 14,
+      "IMMI_EMERGENCY_STOP": 15,
+      "IMMI_SAFEGUARD_STOP": 16,
+      "PROFISAFE_WAITING_FOR_PARAMETERS": 17,
+      "PROFISAFE_AUTOMATIC_MODE_SAFEGUARD_STOP": 18,
+      "PROFISAFE_SAFEGUARD_STOP": 19,
+      "PROFISAFE_EMERGENCY_STOP": 20,
+      "SAFETY_API_SAFEGUARD_STOP": 22,
+      "IO_PLANE_STOP": 23
+    }
+  },
+  "wasi": {
+    "type": "__wasi_fdstat_t",
+    "format": "packed",
+    "layout": [
+      "u8 fs_filetype",
+      "u8 pad1",
+      "u16 fs_flags",
+      "u8[4] pad2",
+      "u64 fs_rights_base",
+      "u64 fs_rights_inheriting"
+    ],
+    "read": {
+      "fs_filetype": 4,
+      "fs_flags": 1,
+      "fs_rights_base": 66,
+      "fs_rights_inheriting": 4294967297
+    },
+    "description": "Read the WASI Preview 1 fd_fdstat_get result in guest memory, including both 64-bit rights masks. The ABI places these masks at offsets 8 and 16.",
+    "description_zh": "读取 guest 内存中的 WASI Preview 1 fd_fdstat_get 结果，包括位于偏移 8 和 16 的两个 64 位权限掩码。",
+    "sources": [
+      {
+        "url": "https://github.com/WebAssembly/wasi-libc/blob/2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13/libc-bottom-half/headers/public/wasi/wasip1.h",
+        "revision": "2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13",
+        "path": "libc-bottom-half/headers/public/wasi/wasip1.h",
+        "sha256": "db122dfbbd0a51c28c888aabc7163814e9b400689d4c76727b54e404e0e754b6"
+      }
+    ]
+  },
+  "yaskawa": {
+    "type": "motoros2_interfaces/ErrorInfo",
+    "format": "cdr",
+    "layout": [
+      "u32 number",
+      "str message",
+      "i32 sub_code",
+      "i32 datetime_sec",
+      "u32 datetime_nanosec"
+    ],
+    "read": {
+      "number": 1027,
+      "sub_code": -2,
+      "datetime_sec": -1,
+      "datetime_nanosec": 1000
+    },
+    "description": "Read MotoROS2 error number, signed subcode and split timestamp across the variable-length message text.",
+    "description_zh": "读取 MotoROS2 错误编号、有符号子码和时间戳，正确处理消息正文的可变长度。",
+    "sources": [
+      {
+        "url": "https://github.com/Yaskawa-Global/motoros2_interfaces/blob/24a63cf8a7a582c9fa6744507d605415462c9c17/msg/ErrorInfo.msg",
+        "revision": "24a63cf8a7a582c9fa6744507d605415462c9c17",
+        "path": "msg/ErrorInfo.msg",
+        "sha256": "71046bedd075abe0de6e66da031ece5dce96ccf888a4c87406b991ca7c7ce326"
+      },
+      {
+        "url": "https://github.com/ros2/rcl_interfaces/blob/7aa3caf43377ea6ad615bc1040832e2c7566bfbe/builtin_interfaces/msg/Time.msg",
+        "revision": "7aa3caf43377ea6ad615bc1040832e2c7566bfbe",
+        "path": "builtin_interfaces/msg/Time.msg",
+        "sha256": "dc5a01ddde3aecffee21eb24974fe77cc969f873218a2b1811aa0ac8a456b8bd"
+      }
+    ]
+  }
+}

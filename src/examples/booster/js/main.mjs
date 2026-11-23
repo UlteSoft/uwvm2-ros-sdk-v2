@@ -1,0 +1,31 @@
+import * as observation from "uwrosv2/platform/booster/observation";
+
+/* Constructed from the pinned upstream wire definition. */
+const sample = new Uint8Array([
+    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3e,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xbf,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1c, 0x41,
+    0x00, 0x00, 0x00, 0x00
+]);
+
+const bigEndian = new Uint8Array([
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3e, 0x80, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xbf, 0xc0, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x41, 0x1c, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+]);
+
+function check(data) {
+    if (observation.read_rpy(data, 1) !== 0.25) throw Error("rpy");
+    if (observation.read_rpy(data.subarray(0, data.length - 1), 1) !== undefined) throw Error("truncated rpy");
+    if (observation.read_rpy(data, -1) !== undefined) throw Error("invalid index");
+    if (observation.read_gyro(data, 1) !== -1.5) throw Error("gyro");
+    if (observation.read_gyro(data.subarray(0, data.length - 1), 1) !== undefined) throw Error("truncated gyro");
+    if (observation.read_gyro(data, -1) !== undefined) throw Error("invalid index");
+    if (observation.read_acc(data, 1) !== 9.75) throw Error("acc");
+    if (observation.read_acc(data.subarray(0, data.length - 1), 1) !== undefined) throw Error("truncated acc");
+    if (observation.read_acc(data, -1) !== undefined) throw Error("invalid index");
+}
+
+check(sample);
+check(bigEndian);

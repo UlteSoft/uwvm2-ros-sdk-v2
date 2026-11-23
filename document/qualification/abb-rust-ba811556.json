@@ -1,0 +1,1156 @@
+{
+  "public_candidate": "ba811556362cf721bda0a27b8469e6da73d436aa",
+  "platform": "abb",
+  "language": "rust",
+  "mode": "default binary",
+  "host": "linux-x86_64",
+  "bootstrap_input": "GitHub root install.py only, empty prefix, HOME and caches; no external Rust distribution",
+  "rust_compiler_version": "1.98.0",
+  "abi_contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+  "verified_source_inputs": {
+    "src/compilers/rust": "c2c2c998c1d10d4bdde27ce57e18a438ffba8652",
+    "src/compilers/package_native.py": "239545a8f22e5c404de9885943a703ebac256f6a",
+    "bin/packages/linux-x86_64/rust-stage0": "60902917100037be461a51aeb04220fe5381a89e",
+    "src/compilers/cc/policy": "1f567ea3c5df55d3ea7800d9711583a4e0123ac7",
+    "src/abi/contract.json": "77ecd1139207a2551fdf140548cf4a99707e3b43"
+  },
+  "guest_environment": {
+    "network": "offline namespace with hidden developer checkouts",
+    "common_parent_memory_max": 68719476736,
+    "leaf_memory_max": 68719476736,
+    "swap_max": 0,
+    "host_tools": "external Xmake and VM in this candidate",
+    "tools": {
+      "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+      "xmake": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+      "wrrs": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9"
+    }
+  },
+  "abi": {
+    "32": {
+      "count": 163,
+      "wasm_sha256": "e00b32c58e912a060c60f5feca94502d8b4b7351279a355c2cbb5b70ebae40f7",
+      "imports_sha256": "480cba2f0de3ad74fae18528c3440634fcb3024086921370031c9a0e854230c8",
+      "namespace": [
+        "uwvm_ros_v2"
+      ]
+    },
+    "64": {
+      "count": 163,
+      "wasm_sha256": "782eaa29c3315f52a09ffbce2692244a0aa716a659c08b86b7158a70bf50c5e3",
+      "imports_sha256": "480cba2f0de3ad74fae18528c3440634fcb3024086921370031c9a0e854230c8",
+      "namespace": [
+        "uwvm_ros_v2"
+      ]
+    }
+  },
+  "cases": {
+    "default-mte-feature-rejected-aot": {
+      "passed": true,
+      "exit": 127,
+      "seconds": 0.065
+    },
+    "default-mte-feature-rejected-int": {
+      "passed": true,
+      "exit": 127,
+      "seconds": 0.008
+    },
+    "genpy-140-xmake-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 67.915
+    },
+    "genpy-140-xmake-build": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 46.873
+    },
+    "genpy-140-xmake-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.064
+    },
+    "genpy-140-xmake-test": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 96.127
+    },
+    "pos-direct-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.264
+    },
+    "pos-direct-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 17.751
+    },
+    "pos-direct-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "pos-xmake-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.465
+    },
+    "pos-xmake-build": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 37.551
+    },
+    "pos-xmake-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "pos-xmake-test": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 35.4
+    },
+    "raw-abi32-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.065
+    },
+    "raw-abi32-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 24.624
+    },
+    "raw-abi32-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.009
+    },
+    "raw-abi64-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.065
+    },
+    "raw-abi64-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 21.419
+    },
+    "raw-abi64-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "ros1-direct-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.666
+    },
+    "ros1-direct-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 29.436
+    },
+    "ros1-direct-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "ros1-xmake-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 1.317
+    },
+    "ros1-xmake-build": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 24.721
+    },
+    "ros1-xmake-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.09
+    },
+    "ros1-xmake-test": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 25.126
+    },
+    "rustc-targets": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.016
+    },
+    "rustc-version": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.016
+    },
+    "uwvm2-ros-identity": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm32-mte-noeh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 1.368
+    },
+    "wasm32-mte-noeh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 29.956
+    },
+    "wasm32-mte-noeh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.108
+    },
+    "wasm32-mvp-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.315
+    },
+    "wasm32-mvp-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 30.038
+    },
+    "wasm32-mvp-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm32-nomte-eh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.215
+    },
+    "wasm32-nomte-eh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 25.673
+    },
+    "wasm32-nomte-eh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm32-nomte-noeh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.165
+    },
+    "wasm32-nomte-noeh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 32.041
+    },
+    "wasm32-nomte-noeh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm32-threads-mte-eh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.315
+    },
+    "wasm32-threads-mte-eh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 30.776
+    },
+    "wasm32-threads-mte-eh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm32-threads-mte-noeh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.215
+    },
+    "wasm32-threads-mte-noeh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 22.666
+    },
+    "wasm32-threads-mte-noeh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm32-threads-nomte-eh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.215
+    },
+    "wasm32-threads-nomte-eh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 28.379
+    },
+    "wasm32-threads-nomte-eh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm32-threads-nomte-noeh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.265
+    },
+    "wasm32-threads-nomte-noeh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 20.816
+    },
+    "wasm32-threads-nomte-noeh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm64-mte-eh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.867
+    },
+    "wasm64-mte-eh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 24.021
+    },
+    "wasm64-mte-eh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.731
+    },
+    "wasm64-mte-noeh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 1.068
+    },
+    "wasm64-mte-noeh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 23.416
+    },
+    "wasm64-mte-noeh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm64-no-memory64-rejected": {
+      "passed": true,
+      "exit": 1,
+      "seconds": 0.016
+    },
+    "wasm64-nomte-eh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.416
+    },
+    "wasm64-nomte-eh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 23.857
+    },
+    "wasm64-nomte-eh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm64-nomte-noeh-aot": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.465
+    },
+    "wasm64-nomte-noeh-compile": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 29.277
+    },
+    "wasm64-nomte-noeh-int": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.008
+    },
+    "wasm64-threads-rejected": {
+      "passed": true,
+      "exit": 1,
+      "seconds": 0.017
+    },
+    "wrrs-identity": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.016
+    },
+    "xmake-identity": {
+      "passed": true,
+      "exit": 0,
+      "seconds": 0.064
+    }
+  },
+  "wasm": {
+    "default-mte-feature-rejected": {
+      "bytes": 17657,
+      "defined_functions": 33,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "53c66f649651d16cfadcc8bac64eeddd109415c0e1d3b4ed4662e3d78beafead",
+      "start": 32,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "genpy-140-xmake": {
+      "bytes": 916796,
+      "defined_functions": 304,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 4,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "8e37e936fe5f9c7fdcbb7e32d27bd042040f2e8ef8d66a7791eb077380592af3",
+      "start": 303,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "pos-direct": {
+      "bytes": 9138,
+      "defined_functions": 26,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "b76c829f34124a40c772bf523bc3b61d9663a2260f9b0f14323acc18ef6d6525",
+      "start": 25,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "pos-xmake": {
+      "bytes": 9138,
+      "defined_functions": 26,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "b76c829f34124a40c772bf523bc3b61d9663a2260f9b0f14323acc18ef6d6525",
+      "start": 25,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "raw-abi32": {
+      "bytes": 14581,
+      "defined_functions": 4,
+      "defined_tags": 0,
+      "imported_functions": 163,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 1,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "e00b32c58e912a060c60f5feca94502d8b4b7351279a355c2cbb5b70ebae40f7",
+      "start": 166,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "raw-abi64": {
+      "bytes": 14591,
+      "defined_functions": 4,
+      "defined_tags": 0,
+      "imported_functions": 163,
+      "memories": [
+        {
+          "address_bits": 64,
+          "custom_page": null,
+          "flags": 4,
+          "maximum": null,
+          "minimum": 1,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "782eaa29c3315f52a09ffbce2692244a0aa716a659c08b86b7158a70bf50c5e3",
+      "start": 166,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "memory64": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "ros1-direct": {
+      "bytes": 17657,
+      "defined_functions": 33,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "53c66f649651d16cfadcc8bac64eeddd109415c0e1d3b4ed4662e3d78beafead",
+      "start": 32,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "ros1-xmake": {
+      "bytes": 17657,
+      "defined_functions": 33,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "53c66f649651d16cfadcc8bac64eeddd109415c0e1d3b4ed4662e3d78beafead",
+      "start": 32,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm32-mte-noeh": {
+      "bytes": 14902,
+      "defined_functions": 26,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "cc279881c55169a6f416a043eaffc2444c6d25b1c9d1763947d6760dd9acb89d",
+      "start": 25,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm32-mvp": {
+      "bytes": 13334,
+      "defined_functions": 29,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "7221fece76286f015208d6d380f92991c0d3ba36f6b91e696e1521a4a25257ab",
+      "start": 28,
+      "target_features": {}
+    },
+    "wasm32-nomte-eh": {
+      "bytes": 13284,
+      "defined_functions": 30,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "f7e3cadbeb63d02ebe7d615b59d59fc52ab107dd41b2923495878972bbde7d2a",
+      "start": 29,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm32-nomte-noeh": {
+      "bytes": 12686,
+      "defined_functions": 26,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 0,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "11837f2561f45419d3b191055c274ef7db62bcd7cbf3b649bdb4534121d7f85b",
+      "start": 25,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm32-threads-mte-eh": {
+      "bytes": 17803,
+      "defined_functions": 31,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 3,
+          "maximum": 256,
+          "minimum": 2,
+          "module": "env",
+          "name": "memory",
+          "shared": true
+        }
+      ],
+      "sha256": "4c222ac59afcf8cf79a7163a0d9218d8157c3a1265b1c2d1a2760be3cf8e6dae",
+      "start": 30,
+      "target_features": {
+        "atomics": "+",
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm32-threads-mte-noeh": {
+      "bytes": 15164,
+      "defined_functions": 27,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 3,
+          "maximum": 256,
+          "minimum": 2,
+          "module": "env",
+          "name": "memory",
+          "shared": true
+        }
+      ],
+      "sha256": "1861b72623cfc09442142deafc435c266893372d976c9d585d43d54690f51406",
+      "start": 26,
+      "target_features": {
+        "atomics": "+",
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm32-threads-nomte-eh": {
+      "bytes": 13478,
+      "defined_functions": 31,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 3,
+          "maximum": 256,
+          "minimum": 2,
+          "module": "env",
+          "name": "memory",
+          "shared": true
+        }
+      ],
+      "sha256": "1797dc5675af34426f8cb32f99d290513ae098cecf41980e417bf71a65731b10",
+      "start": 30,
+      "target_features": {
+        "atomics": "+",
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm32-threads-nomte-noeh": {
+      "bytes": 12884,
+      "defined_functions": 27,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 32,
+          "custom_page": null,
+          "flags": 3,
+          "maximum": 256,
+          "minimum": 2,
+          "module": "env",
+          "name": "memory",
+          "shared": true
+        }
+      ],
+      "sha256": "91f504c29a662067b8a247bba9461cfbb9c746ac2d38cc661e14eaff2c8d8e79",
+      "start": 26,
+      "target_features": {
+        "atomics": "+",
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm64-mte-eh": {
+      "bytes": 18997,
+      "defined_functions": 33,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 64,
+          "custom_page": null,
+          "flags": 4,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "048198c7dbf3f1ac41addf44de6babe2bf40094c79f2bc0906e08769c7d6ec40",
+      "start": 32,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "memory64": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm64-mte-noeh": {
+      "bytes": 16082,
+      "defined_functions": 26,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 64,
+          "custom_page": null,
+          "flags": 4,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "1e86d0410baf7050d87bbe8907df701b0f9902419e3d0f347b9020d5692a8998",
+      "start": 25,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "memory64": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm64-nomte-eh": {
+      "bytes": 14508,
+      "defined_functions": 30,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 64,
+          "custom_page": null,
+          "flags": 4,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "e3e7fa216ead73c3bcd23161c3b9b2476a8e63b98185fd84a4cc20ff02c37699",
+      "start": 29,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "exception-handling": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "memory64": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    },
+    "wasm64-nomte-noeh": {
+      "bytes": 13889,
+      "defined_functions": 26,
+      "defined_tags": 0,
+      "imported_functions": 0,
+      "memories": [
+        {
+          "address_bits": 64,
+          "custom_page": null,
+          "flags": 4,
+          "maximum": null,
+          "minimum": 2,
+          "module": null,
+          "name": null,
+          "shared": false
+        }
+      ],
+      "sha256": "356ad40f959673d1bd9897c65ab08220e743e8bedcba119ec4c0b542f2024991",
+      "start": 25,
+      "target_features": {
+        "bulk-memory": "+",
+        "bulk-memory-opt": "+",
+        "call-indirect-overlong": "+",
+        "extended-const": "+",
+        "gc": "+",
+        "memory64": "+",
+        "multimemory": "+",
+        "multivalue": "+",
+        "mutable-globals": "+",
+        "nontrapping-fptoint": "+",
+        "reference-types": "+",
+        "relaxed-simd": "+",
+        "sign-ext": "+",
+        "simd128": "+",
+        "tail-call": "+"
+      }
+    }
+  },
+  "source_rebuild": {
+    "local_frozen_revision": "45910035036859308c26680b5a027b12d492b30e",
+    "input_transport": "Frozen Git objects plus hash-verified LFS payloads. Offline throughout the build.",
+    "stage0": "Official rustc, cargo, and host rust-std 1.97.1",
+    "products": {
+      "wrrs": {
+        "elf_byte_equal": true,
+        "archive_byte_equal": true,
+        "archive": {
+          "bytes": 25504,
+          "sha256": "ed3689868ebfd06651c6497c081d90db1d3e876c8653fa96fb74dfd8bbd4db2a"
+        },
+        "elf": {
+          "bytes": 67904,
+          "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9"
+        }
+      },
+      "wrrs-librustc-driver-aff9448c053be314-so": {
+        "elf_byte_equal": true,
+        "archive_byte_equal": true,
+        "archive": {
+          "bytes": 41567080,
+          "sha256": "8a99747417c5699f26f0c3689e9d16827133dab1145e03642eae58e08527838f"
+        },
+        "elf": {
+          "bytes": 152465104,
+          "sha256": "002f2f423911cad122cc20cc6bb0672e788dfe734cbb62240d696b1db1b277db"
+        }
+      }
+    },
+    "receipt_sha256": "c06e1741cf2d983a2d23c62646361a9dada7ee52673e930c3bfdb1c463af5056"
+  },
+  "public_guest_receipt_sha256": "ef66f78c07233bcbbcb254f56fd59565f340cf9eae6f52dd1d7bb4027e3de89c"
+}

@@ -1,0 +1,60 @@
+{
+  "url": "https://github.com/ros-industrial/abb_librws",
+  "commit": "3a5914ef383a18e99c14f90831528ffda943cf97",
+  "license": "BSD-3-Clause",
+  "license_file": "LICENSE",
+  "local_changes": [],
+  "selection": "Public API and wire reference for ABB guest bindings. Driver registrations are included for mapping ROS names to native types.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "git_blob": "6c897a8db655f3366e330225d793e7521db49aac",
+      "sha256": "a55874f78a70e2269c1aa87fc5ef37427c62680e05403c6cd21e6497ef411db3"
+    },
+    {
+      "path": "include/abb_librws/rws_cfg.h",
+      "git_blob": "580e5ec454f299d72ef4c2d68ba0b0b655ff9f81",
+      "sha256": "4c024bdfe196dc1a8d44734a48701ffe41013c9b5cce58f9d647809beaa52e52"
+    },
+    {
+      "path": "include/abb_librws/rws_client.h",
+      "git_blob": "a1b3743e84754e61f351cfe51a695879b25ae5d3",
+      "sha256": "d345dc4eadf24034ef50bb3cb1ee8c3ae5e77dbaf03fa85570d8122d298d7877"
+    },
+    {
+      "path": "include/abb_librws/rws_common.h",
+      "git_blob": "52b823e4e0088f36b222501a7b173a2cb810d50d",
+      "sha256": "a792286dccee79c3f15259bb5c5feb2d17216b534d9ec603326593036d02f3d0"
+    },
+    {
+      "path": "include/abb_librws/rws_interface.h",
+      "git_blob": "26806709b3ad76da9e01d18d33494e0c62c0f9ee",
+      "sha256": "56d8faac31a717ecc467419c9cf92ba4512a964af151b618d92a26ded4262ae8"
+    },
+    {
+      "path": "include/abb_librws/rws_poco_client.h",
+      "git_blob": "cb58fa0dea65afb748916432fe17fe412cc78f3b",
+      "sha256": "8907bd6ebbb9419e858556c3172bbac3db2f9ebf4d3ee54fa3d2be95b2680bb2"
+    },
+    {
+      "path": "include/abb_librws/rws_rapid.h",
+      "git_blob": "593c205b79b615d4624c2b1e9558cf2f98cf5c40",
+      "sha256": "e64c5cee17d9717006cd9f28f89449c9d5f000886e24f3e43946c4662be94ad3"
+    },
+    {
+      "path": "include/abb_librws/rws_state_machine_interface.h",
+      "git_blob": "c8cb87030d12f2dad4ea0f648401b6377ffa3036",
+      "sha256": "d64e95fd1dbc07753986e06872a12a1b523400c3b5b0fdb4b5f3a4727ef1cd74"
+    },
+    {
+      "path": "package.xml",
+      "git_blob": "3926c64a8b5e1f3fc9733cb7a68c9c122ee413f9",
+      "sha256": "a961781e860cdb1afcf0297ae6ed9e262d22fa17262a8d26799fff2d86067256"
+    },
+    {
+      "path": "src/rws_rapid.cpp",
+      "git_blob": "60b7ccf0ead98544da8663b013e32b34e9c8d82b",
+      "sha256": "2825ce98107a86c4167be85b02100ef2cd0093a3364180b4973887d23ef6a042"
+    }
+  ]
+}

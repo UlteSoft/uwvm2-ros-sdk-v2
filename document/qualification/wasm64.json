@@ -1,0 +1,150 @@
+{
+  "frontend_commit": "374b5235d70ba0bce403d589f0678274a30eaf3a",
+  "llvm_libc_headers_commit": "7f6f3a1599c7722df5d56bdaf28eea46a1002cde",
+  "vm_sha256": "a3d05e71b254c2e0fc1739fb5e59f0264f8fd08c7c70179b7eefae3a6cc9aa6c",
+  "sysroot_sha256": "2e9f363a266e306ab0888f3c180714c52f0fd467d0c2468278472cfc7e9c3c88",
+  "memory_max": 68719476736,
+  "memory_swap_max": 0,
+  "network": "offline",
+  "toolchain_origin": "Released native Clang with independently rebuilt guest libraries",
+  "target": "wasm64-wasip1",
+  "core": "3.0",
+  "exception_handling": true,
+  "wasm_mte": true,
+  "threads": false,
+  "guests": {
+    "c": {
+      "sha256": "b80e87975428b149921e67106cfb86a041b614160f0e63c0a6c6c903e1623da2",
+      "memory": [
+        [
+          4,
+          2,
+          null
+        ]
+      ],
+      "tag_count": 0,
+      "memtag_operations": [
+        "0x20",
+        "0x40",
+        "0x44"
+      ],
+      "imports": [
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "clock_time_get_wasm64",
+          "kind": 0,
+          "params": [
+            "i32",
+            "i64",
+            "i64"
+          ],
+          "results": [
+            "i32"
+          ]
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "proc_exit_wasm64",
+          "kind": 0,
+          "params": [
+            "i32"
+          ],
+          "results": []
+        }
+      ],
+      "library_symbol_evidence": [
+        "snprintf",
+        "malloc",
+        "free"
+      ],
+      "fixture": "src/qualification/wasm64/guest.c",
+      "fixture_sha256": "6de88372fa39b984cc35011efbdb561300a927efbb0f4ec1ab074e6e6878fe3b"
+    },
+    "cpp": {
+      "sha256": "ff1fe027ddec8b853eb8365f2fcd6e2918d9dcf691190c013604f53442f42346",
+      "memory": [
+        [
+          4,
+          3,
+          null
+        ]
+      ],
+      "tag_count": 1,
+      "memtag_operations": [
+        "0x20",
+        "0x40",
+        "0x44"
+      ],
+      "imports": [
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "clock_time_get_wasm64",
+          "kind": 0,
+          "params": [
+            "i32",
+            "i64",
+            "i64"
+          ],
+          "results": [
+            "i32"
+          ]
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "proc_exit_wasm64",
+          "kind": 0,
+          "params": [
+            "i32"
+          ],
+          "results": []
+        }
+      ],
+      "library_symbol_evidence": [
+        "std::__2::to_chars(char*, char*, double, std::__2::chars_format, int)",
+        "std::__2::to_chars_result std::__2::_Floating_to_chars[abi:nqe230105]<(std::__2::_Floating_to_chars_overload)2, double>(char*, char*, double, std::__2::chars_format, int)",
+        "std::__2::to_chars_result std::__2::_Floating_to_chars_general_precision[abi:nqe230105]<double>(char*, char*, double, int)",
+        "std::__2::to_chars_result std::__2::_Floating_to_chars_hex_precision[abi:nqe230105]<double>(char*, char*, double, int)",
+        "__cxa_throw",
+        "__cxa_begin_catch",
+        "malloc",
+        "free"
+      ],
+      "fixture": "src/qualification/wasm64/guest.cpp",
+      "fixture_sha256": "929856aa5215abfe3bc3b501421d5726c0c554ce8f55eb5cfb4ae775c50857dd"
+    }
+  },
+  "cases": [
+    {
+      "language": "c",
+      "engine": "int",
+      "expected_exit": 42,
+      "exit": 42,
+      "passed": true,
+      "sha256": "b80e87975428b149921e67106cfb86a041b614160f0e63c0a6c6c903e1623da2"
+    },
+    {
+      "language": "c",
+      "engine": "aot",
+      "expected_exit": 42,
+      "exit": 42,
+      "passed": true,
+      "sha256": "b80e87975428b149921e67106cfb86a041b614160f0e63c0a6c6c903e1623da2"
+    },
+    {
+      "language": "cpp",
+      "engine": "int",
+      "expected_exit": 43,
+      "exit": 43,
+      "passed": true,
+      "sha256": "ff1fe027ddec8b853eb8365f2fcd6e2918d9dcf691190c013604f53442f42346"
+    },
+    {
+      "language": "cpp",
+      "engine": "aot",
+      "expected_exit": 43,
+      "exit": 43,
+      "passed": true,
+      "sha256": "ff1fe027ddec8b853eb8365f2fcd6e2918d9dcf691190c013604f53442f42346"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+#ifndef UWROSV2_UNIVERSAL_ROBOTS_CDR_RECORDS_HPP
+#define UWROSV2_UNIVERSAL_ROBOTS_CDR_RECORDS_HPP
+#include "ur_dashboard_msgs.hpp"
+#endif

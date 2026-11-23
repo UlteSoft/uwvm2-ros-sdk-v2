@@ -1,0 +1,57 @@
+[
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/annotations/13.0/annotations-13.0-sources.jar",
+    "size": 17566,
+    "sha256": "42a5e144b8e81d50d6913d1007b695e62e614705268d8cf9f13dbdc478c2c68e"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.8/asm-9.8-sources.jar",
+    "size": 184826,
+    "sha256": "c6294794f956f21e2b252a9bf65a96ce0489fb4c0f978447d85c8a75e485b633"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-analysis/9.8/asm-analysis-9.8-sources.jar",
+    "size": 42490,
+    "sha256": "ff731d401ea2407759ea19b4b025800d32495a51a912f2553d987cddda424773"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.8/asm-commons-9.8-sources.jar",
+    "size": 82983,
+    "sha256": "a2bd3ba563c5f2e19eea66df99437ef81d69a0dcb3def07028442a273a2da562"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.8/asm-tree-9.8-sources.jar",
+    "size": 76627,
+    "sha256": "442d32be6106a41b61c2edf05f8ae496c4c54cca6e73d9d59d38e9cb54820c44"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm-util/9.8/asm-util-9.8-sources.jar",
+    "size": 86537,
+    "sha256": "d8ee7a6bd066255e1187c3d64ead682d607c4947588e6b727c35a771a7afac93"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.20.0/commons-io-2.20.0-sources.jar",
+    "size": 566085,
+    "sha256": "7a87277538cce40da6389a7163a4d9458bc7a9c39937a329881b91d144be8e0d"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/com/carrotsearch/hppc/0.10.0/hppc-0.10.0-sources.jar",
+    "size": 856412,
+    "sha256": "2d94d71fa82abdc9b637ecb523cece1e4912c77aab2da457321549d41440c8a8"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/joda-time/joda-time/2.12.2/joda-time-2.12.2-sources.jar",
+    "size": 836012,
+    "sha256": "c1ef010a5e5ac3790f4d2d44c18f52d260ffbf810ed92e2b38d50c4c443603e2"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/com/jcraft/jzlib/1.1.3/jzlib-1.1.3-sources.jar",
+    "size": 75560,
+    "sha256": "35ebd67941ce7024e6e7d80b60a4252a9687fa0f909a7079ac904bef6c1658cf"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/mozilla/rhino/1.7.15/rhino-1.7.15-sources.jar",
+    "size": 1008329,
+    "sha256": "d3be964dc5fd505b79432a3d57659420d3ad6a8be9eea8406e1b0a4e7c6f06f2"
+  }
+]

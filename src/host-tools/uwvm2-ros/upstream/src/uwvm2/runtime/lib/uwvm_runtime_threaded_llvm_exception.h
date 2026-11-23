@@ -1,0 +1,254 @@
+// PRIVATE engine-owned immutable status-EH arena. SOURCE ONLY.
+// All allocations are cold/precharged. Execution copies into fixed actual
+// buffers and never calls an ordinary runtime/GC exception store.
+        friend struct threaded_exception_bridge_api;
+        using eh_tag=::uwvm2::uwvm::runtime::storage::local_defined_tag_storage_t;
+        using eh_reference=::uwvm2::uwvm::runtime::storage::gc_reference;
+        using eh_kind=::uwvm2::object::global::wasm_ref_kind;
+        enum class eh_failure : ::std::uint32_t
+        { uncaught=0x54454801u,resource=0x54454802u,invalid=0x54454803u };
+        struct eh_field{::std::uint8_t width{};bool reference{},nullable{},nonnull{},exception{};::uwvm2::uwvm::runtime::storage::gc_type::core_value_type type{};};
+        struct eh_schema{eh_tag const* tag{};::std::size_t first{},count{},bytes{};};
+        struct eh_record{eh_tag const* tag{};::std::size_t offset{},bytes{},module{},schema{};bool escaped{};eh_reference reference{};};
+        ::uwvm2::utils::container::std_vector<eh_schema> eh_schemas_{};
+        ::uwvm2::utils::container::std_vector<eh_field> eh_fields_{};
+        ::uwvm2::utils::container::std_vector<eh_record> eh_records_{};
+        ::uwvm2::utils::container::std_vector<::std::byte> eh_payload_{};
+        ::std::size_t eh_record_used_{},eh_payload_used_{},eh_pending_{};
+        static void exception_failure(eh_failure value) noexcept
+        {
+            // Only a validated uncaught tag or exhaustion of this actual
+            // precharged Guest arena is a classified Guest failure. Invalid
+            // tokens/schema/ownership retain the native invariant path.
+            fail(static_cast<::std::uint32_t>(value),
+                 value==eh_failure::uncaught||value==eh_failure::resource);
+        }
+        [[nodiscard]] eh_schema const* exception_schema(::std::size_t tag) const noexcept
+        {return tag<eh_schemas_.size()?::std::addressof(eh_schemas_[tag]):nullptr;}
+        [[nodiscard]] eh_record const* exception_record(::std::size_t token) const noexcept
+        {return token!=0u&&token<=graph_->eh_record_used_?::std::addressof(graph_->eh_records_[token-1u]):nullptr;}
+        [[nodiscard]] ::std::size_t reference_token(eh_reference const& ref) const noexcept
+        {
+            if(ref.kind!=eh_kind::wasm_exn||ref.storage.ptr==nullptr||graph_->eh_record_used_==0u)return 0u;
+            for(::std::size_t i{};i<graph_->eh_record_used_;++i)
+                if(graph_->eh_records_[i].escaped&&graph_->eh_records_[i].reference.storage.ptr==ref.storage.ptr)return i+1u;
+            return 0u;
+        }
+        [[nodiscard]] bool exception_tuple_valid(eh_schema const& schema,::std::byte const* input) const noexcept
+        {
+            if(schema.bytes!=0u&&input==nullptr)return false;
+            ::std::size_t at{};
+            for(::std::size_t i{};i<schema.count;++i)
+            {
+                if((i&255u)==0u&&stopped())return false;
+                auto const& field=eh_fields_[schema.first+i];
+                if(field.reference)
+                {
+                    eh_reference ref{};::std::memcpy(&ref,input+at,sizeof(ref));
+                    bool null=ref.kind==eh_kind::wasm_null||(ref.kind==eh_kind::wasm_exn&&ref.storage.ptr==nullptr);
+                    if(field.exception)
+                    { if(null?!field.nullable:(!field.nonnull||reference_token(ref)==0u))return false; }
+                    else if(!module_->gc_store->reference_type_matches(ref,field.type))return false;
+                    if(module_->gc_store->retain_gc_reference(ref)!=::uwvm2::uwvm::runtime::storage::gc_object_status::ok)return false;
+                }
+                at+=field.width;
+            }
+            return at==schema.bytes;
+        }
+        [[nodiscard]] bool prepare_exception_schemas(::std::size_t already_charged)
+        {
+            auto const& types=module_->type_section_storage;
+            auto type_count=types.type_section_count;
+            bool rich=types.owned_signature_begin!=nullptr&&types.owned_signature_end!=nullptr&&
+                types.owned_signature_end>=types.owned_signature_begin&&
+                static_cast<::std::size_t>(types.owned_signature_end-types.owned_signature_begin)==type_count;
+            auto supported=[](auto const& type) noexcept
+            {
+                using kind=::uwvm2::parser::wasm::standard::wasm3::type::value_kind;
+                return type.kind<=kind::v128||type.kind==kind::reference;
+            };
+            // Only actual tag payloads use this private EH representation.
+            // shape() below authenticates their retained rich signatures. An
+            // ordinary function may pass a GC reference using the normal full
+            // reference carrier; it is not an exception payload schema.
+            auto imported=module_->imported_tag_vec_storage.size();
+            auto count=imported+module_->local_defined_tag_vec_storage.size();
+            if(count<imported||count>65536u)return false;
+            ::std::size_t fields{},largest{};
+            auto get=[&](::std::size_t i)->eh_tag const*
+            {return i<imported?module_->imported_tag_vec_storage.index_unchecked(i).resolved_tag:
+                ::std::addressof(module_->local_defined_tag_vec_storage.index_unchecked(i-imported));};
+            auto type_index=[&](::std::size_t i)->::std::size_t
+            {
+                if(i<imported)
+                {auto p=module_->imported_tag_vec_storage.index_unchecked(i).import_type_ptr;return p==nullptr?SIZE_MAX:p->imports.storage.tag_type_index;}
+                return module_->local_defined_tag_vec_storage.index_unchecked(i-imported).type_index;
+            };
+            auto shape=[&](eh_tag const& tag,::std::size_t index,::std::size_t& bytes)->bool
+            {
+                bytes=0u;
+                if(tag.function_type_ptr==nullptr||!tag.exception_identity||
+                   tag.function_type_ptr->result.begin!=tag.function_type_ptr->result.end)return false;
+                auto const& params=tag.function_type_ptr->parameter;
+                auto n=params.begin==params.end?0u:static_cast<::std::size_t>(params.end-params.begin);
+                if(n>65536u)return false;
+                if(index>=type_count)return false;
+                if(rich&&types.owned_signature_begin[index].parameters.size()!=n)return false;
+                for(::std::size_t k{};k<n;++k)
+                {
+                    auto code=static_cast<unsigned>(params.begin[k]);::std::size_t width{};
+                    if(code==0x7fu||code==0x7du)width=4u;
+                    else if(code==0x7eu||code==0x7cu)width=8u;
+                    else if(code==0x7bu)width=16u;
+                    else if((code==0x69u||code==0x70u||code==0x6fu)&&rich&&
+                        types.owned_signature_begin[index].parameters.index_unchecked(k).kind==::uwvm2::parser::wasm::standard::wasm3::type::value_kind::reference&&
+                        supported(types.owned_signature_begin[index].parameters.index_unchecked(k)))width=sizeof(eh_reference);
+                    else return false;
+                    if(bytes>world_->admission().limits().max_value_stack_bytes||
+                       width>world_->admission().limits().max_value_stack_bytes-bytes)return false;
+                    bytes+=width;
+                }
+                return true;
+            };
+            for(::std::size_t i{};i<count;++i)
+            {
+                auto tag=get(i);::std::size_t bytes{};if(tag==nullptr||!shape(*tag,type_index(i),bytes))return false;
+                auto const& params=tag->function_type_ptr->parameter;
+                auto n=params.begin==params.end?0u:static_cast<::std::size_t>(params.end-params.begin);
+                if(fields>65536u-n)return false;fields+=n;
+                largest=(::std::max)(largest,bytes);
+            }
+            auto records=(::std::min)(world_->admission().limits().max_call_frames,::std::size_t{65536u});
+            bool any_tags{};
+            for(::std::size_t m{};m<world_->module_count();++m)
+            {auto const* module=world_->module(m);any_tags=any_tags||!module->imported_tag_vec_storage.empty()||!module->local_defined_tag_vec_storage.empty();}
+            auto payload=!any_tags?0u:world_->admission().limits().max_value_stack_bytes;
+            if(any_tags&&records==0u)return false;
+            ::std::size_t charge=already_charged;
+            auto add=[&](::std::size_t n,::std::size_t size)
+            {if(n>SIZE_MAX/size||charge>storage_limit_||n*size>storage_limit_-charge)return false;charge+=n*size;return true;};
+            if(!add(count,sizeof(eh_schema))||!add(fields,sizeof(eh_field))||
+               !add(!any_tags?0u:records,sizeof(eh_record))||!add(payload,1u)||largest>payload)return false;
+            eh_schemas_.resize(count);eh_fields_.resize(fields);
+            eh_records_.resize(!any_tags?0u:records);eh_payload_.resize(payload);
+            ::std::size_t field_at{};
+            for(::std::size_t i{};i<count;++i)
+            {
+                auto tag=get(i);auto index=type_index(i);::std::size_t bytes{};if(!shape(*tag,index,bytes))return false;
+                auto const& params=tag->function_type_ptr->parameter;
+                auto n=params.begin==params.end?0u:static_cast<::std::size_t>(params.end-params.begin);
+                eh_schemas_[i]={tag,field_at,n,bytes};
+                for(::std::size_t k{};k<n;++k)
+                {
+                    auto code=static_cast<unsigned>(params.begin[k]);bool reference=code==0x69u||code==0x70u||code==0x6fu;
+                    auto width=reference?sizeof(eh_reference):(code==0x7fu||code==0x7du?4u:code==0x7bu?16u:8u);
+                    bool nullable=reference&&types.owned_signature_begin[index].parameters.index_unchecked(k).nullable;
+                    bool nonnull=reference&&types.owned_signature_begin[index].parameters.index_unchecked(k).heap.code==
+                        static_cast<::std::int64_t>(::uwvm2::parser::wasm::standard::wasm3::type::abstract_heap_type::exn);
+                    auto const type=reference?types.owned_signature_begin[index].parameters.index_unchecked(k):
+                        ::uwvm2::uwvm::runtime::storage::gc_type::core_value_type{};
+                    using heap=::uwvm2::uwvm::runtime::storage::gc_type::abstract_heap_type;
+                    bool const exception=reference&&(type.heap.code==static_cast<::std::int64_t>(heap::exn)||type.heap.code==static_cast<::std::int64_t>(heap::noexn));
+                    eh_fields_[field_at++]={static_cast<::std::uint8_t>(width),reference,nullable,nonnull,exception,type};
+                }
+            }
+            return field_at==fields;
+        }
+        static ::std::uintptr_t exception_pending() noexcept
+        {return active_==nullptr||stopped()?0u:active_->child->graph_->eh_pending_;}
+        static void exception_publish(::std::uintptr_t module,::std::uintptr_t tag,
+            ::std::uintptr_t address,::std::size_t bytes) noexcept
+        {
+            if(active_==nullptr||stopped())return;auto& child=*active_->child;
+            auto schema=child.exception_schema(tag);
+            if(module!=child.module_index_||schema==nullptr||schema->bytes!=bytes||child.graph_->eh_pending_!=0u||
+               !child.exception_tuple_valid(*schema,reinterpret_cast<::std::byte const*>(address)))
+            {if(!stopped())exception_failure(eh_failure::invalid);return;}
+            if(child.graph_->eh_record_used_==child.graph_->eh_records_.size()||bytes>child.graph_->eh_payload_.size()-child.graph_->eh_payload_used_)
+            {exception_failure(eh_failure::resource);return;}
+            auto offset=child.graph_->eh_payload_used_;
+            if(bytes!=0u)::std::memcpy(child.graph_->eh_payload_.data()+offset,reinterpret_cast<void const*>(address),bytes);
+            child.graph_->eh_records_[child.graph_->eh_record_used_]={schema->tag,offset,bytes,child.module_index_,tag};
+            child.graph_->eh_payload_used_+=bytes;child.graph_->eh_pending_=++child.graph_->eh_record_used_;
+        }
+        static ::std::uintptr_t exception_matches(::std::uintptr_t token,::std::uintptr_t tag) noexcept
+        {
+            if(active_==nullptr||stopped())return 0u;auto& child=*active_->child;
+            auto record=child.exception_record(token);auto schema=child.exception_schema(tag);
+            if(token!=child.graph_->eh_pending_||record==nullptr||schema==nullptr)
+            {exception_failure(eh_failure::invalid);return 0u;}
+            return record->tag->exception_identity.get()==schema->tag->exception_identity.get()?1u:0u;
+        }
+        static void exception_copy(::std::uintptr_t token,::std::uintptr_t tag,
+            ::std::uintptr_t destination,::std::size_t bytes) noexcept
+        {
+            // Emitter supplies the complete private destination extent. Zero
+            // first, so even a stop/invariant edge never creates poison bits.
+            if(bytes!=0u&&destination!=0u)::std::memset(reinterpret_cast<void*>(destination),0,bytes);
+            if(active_==nullptr||stopped())return;auto& child=*active_->child;
+            auto record=child.exception_record(token);auto schema=child.exception_schema(tag);
+            if(token!=child.graph_->eh_pending_||record==nullptr||schema==nullptr||bytes!=schema->bytes||bytes!=record->bytes||
+               (bytes!=0u&&destination==0u)||record->tag->exception_identity.get()!=schema->tag->exception_identity.get()||
+               record->offset>child.graph_->eh_payload_used_||bytes>child.graph_->eh_payload_used_-record->offset)
+            {exception_failure(eh_failure::invalid);return;}
+            if(bytes!=0u)::std::memcpy(reinterpret_cast<void*>(destination),child.graph_->eh_payload_.data()+record->offset,bytes);
+        }
+        static void exception_make_reference(::std::uintptr_t token,::std::uintptr_t destination) noexcept
+        {
+            eh_reference ref{};
+            if(active_==nullptr||destination==0u)return;
+            auto& child=*active_->child;auto record=child.exception_record(token);
+            if(!stopped())
+            {
+                if(token!=child.graph_->eh_pending_||record==nullptr)exception_failure(eh_failure::invalid);
+                else
+                {
+                    auto& retained=child.graph_->eh_records_[token-1u];
+                    if(!retained.escaped)
+                    {
+                        ::std::size_t at{};
+                        auto const result=::uwvm2::uwvm::runtime::initializer::make_threaded_exception_reference(
+                            *child.world_,retained.module,*retained.tag,[&](::std::size_t,::std::size_t width) noexcept
+                            {
+                                if(at>retained.bytes||width>retained.bytes-at)return ::std::span<::std::byte const>{};
+                                auto const bits=::std::span<::std::byte const>{child.graph_->eh_payload_.data()+retained.offset+at,width};
+                                at+=width;return bits;
+                            },retained.reference);
+                        if(result!=::uwvm2::uwvm::runtime::storage::gc_object_status::ok)
+                        {exception_failure(result==::uwvm2::uwvm::runtime::storage::gc_object_status::out_of_memory?eh_failure::resource:eh_failure::invalid);return;}
+                        retained.escaped=true;
+                    }
+                    if(child.module_->gc_store->retain_gc_reference(retained.reference)!=::uwvm2::uwvm::runtime::storage::gc_object_status::ok)
+                    {exception_failure(eh_failure::resource);return;}
+                    ref=retained.reference;
+                }
+            }
+            ::std::memcpy(reinterpret_cast<void*>(destination),&ref,sizeof(ref));
+        }
+        static void exception_consume(::std::uintptr_t token) noexcept
+        {
+            if(active_==nullptr||stopped())return;auto& child=*active_->child;
+            if(token==0u||token!=child.graph_->eh_pending_||child.exception_record(token)==nullptr)
+            {exception_failure(eh_failure::invalid);return;}
+            child.graph_->eh_pending_=0u;
+            auto& owner=*child.graph_;
+            // A record exposed through catch_ref keeps its address and identity.
+            // A new nonescaping catch has no aliases: recycle only the tail,
+            // after copy() delivered the complete payload to generated code.
+            if(token==owner.eh_record_used_ && !owner.eh_records_[token-1u].escaped)
+            {
+                owner.eh_payload_used_=owner.eh_records_[token-1u].offset;
+                owner.eh_records_[--owner.eh_record_used_]={};
+            }
+        }
+        static void exception_throw_reference(::std::uintptr_t module,::std::uintptr_t source) noexcept
+        {
+            if(active_==nullptr||stopped())return;auto& child=*active_->child;
+            eh_reference ref{};if(source!=0u)::std::memcpy(&ref,reinterpret_cast<void const*>(source),sizeof(ref));
+            if(ref.kind==eh_kind::wasm_null||(ref.kind==eh_kind::wasm_exn&&ref.storage.ptr==nullptr))
+            {fail(static_cast<::std::uint32_t>(llvm_jit_trap_kind::null_reference));return;}
+            auto token=child.reference_token(ref);
+            if(module!=child.module_index_||source==0u||child.graph_->eh_pending_!=0u||token==0u)
+            {exception_failure(eh_failure::invalid);return;}
+            child.graph_->eh_pending_=token;
+        }

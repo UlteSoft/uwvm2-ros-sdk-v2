@@ -1,0 +1,42 @@
+{
+  "id": "abb",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "abb_rapid_msgs/Pos",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_x",
+        "field": "x",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_y",
+        "field": "y",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_z",
+        "field": "z",
+        "type": "f32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/ros-industrial/abb_robot_driver_interfaces/blob/da809cd0bb6f270c0814fca07d7d4a5c0385fc39/abb_rapid_msgs/msg/Pos.msg",
+        "revision": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+        "path": "abb_rapid_msgs/msg/Pos.msg",
+        "sha256": "feccb992c3b666d431efd20eb4f7cbef5fa5b921a5a95337656cff1e7735333f"
+      }
+    ]
+  },
+  "guides": [
+    "ros1.md",
+    "ros1.zh.md"
+  ]
+}

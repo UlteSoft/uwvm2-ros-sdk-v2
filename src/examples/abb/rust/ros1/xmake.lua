@@ -1,0 +1,10 @@
+set_project("abb-ros1-records")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("abb-ros1-records")
+    set_kind("binary")
+    set_language("rust")
+    set_ros_platform("abb")
+    add_files("main.rs")
+    add_wros_tests("int", "aot")
+target_end()

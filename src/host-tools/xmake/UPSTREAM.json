@@ -1,0 +1,92 @@
+{
+  "name": "Xmake",
+  "version": "3.0.5",
+  "repository": "https://github.com/xmake-io/xmake",
+  "commit": "f20295f255d967af9d91de6f1ed5eeadf17d30a7",
+  "source": {
+    "url": "https://github.com/xmake-io/xmake/releases/download/v3.0.5/xmake-v3.0.5.tar.gz",
+    "sha256": "b947666281222f79e082283b6f84e68880c499305890f6ab8b03b8bac82456dc"
+  },
+  "linux_x86_64": {
+    "xmake_arch": "x86_64",
+    "zig_target": "x86_64-linux-musl",
+    "url": "https://github.com/xmake-io/xmake/releases/download/v3.0.5/xmake-bundle-v3.0.5.linux.x86_64",
+    "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+    "linkage": "static",
+    "toolchain": "Zig targeting x86_64-linux-musl",
+    "zig_bootstrap_repository": "https://github.com/ziglang/zig-bootstrap",
+    "zig_bootstrap_elf_comment_commit": "7ef74e656cf8ddbd6bf891a8475892aa1afa6891",
+    "license_inputs": {
+      "zig/lib/libc/musl/COPYRIGHT": {
+        "git_blob": "c1628e9ac84f927fe791124ec172fb61c760bb9b",
+        "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+      },
+      "zig/LICENSE": {
+        "git_blob": "9ce01373c89082fd81e8ea0793aab0978140526b",
+        "sha256": "5c537d6853e005298a285d508cff9ac7192cea23576c840d485b2b586a7ff177"
+      }
+    },
+    "release_recipe": "https://github.com/xmake-io/xmake/blob/f20295f255d967af9d91de6f1ed5eeadf17d30a7/.github/workflows/linux.yml"
+  },
+  "script_tree": {
+    "url": "https://codeload.github.com/xmake-io/xmake/tar.gz/f20295f255d967af9d91de6f1ed5eeadf17d30a7",
+    "archive_sha256": "97c72f0ae829950d7f2bc3e1595ea77682f25ad4decba361478597a7251bfe98",
+    "path": "xmake",
+    "release_archive_supplement": "43 Visual Studio generator files and 6 template .gitignore files"
+  },
+  "cross_toolchain": {
+    "name": "Zig",
+    "version": "0.14.1",
+    "release_url": "https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz",
+    "sha256": "24aeeec8af16c381934a6cd7d95c807a8cb2cf7df9fa40d359aa884195c4716c",
+    "source_url": "https://ziglang.org/download/0.14.1/zig-0.14.1.tar.xz",
+    "source_sha256": "237f8abcc8c3fd68c70c66cdbf63dce4fb5ad4a2e6225ac925e3d5b4c388f203"
+  },
+  "linux_i686": {
+    "sha256": "c2dbe0d2f8876c1f9b39a18f6192eed2c967655cb59531d12f6c96d1db859c9d",
+    "linkage": "static",
+    "xmake_arch": "i386",
+    "zig_target": "x86-linux-musl"
+  },
+  "linux_aarch64": {
+    "sha256": "1c478ae4a3775d238e6456643158c4b68d481448237cd4f1c4403a10ba752f1f",
+    "linkage": "static",
+    "xmake_arch": "arm64",
+    "zig_target": "aarch64-linux-musl"
+  },
+  "linux_arm": {
+    "sha256": "7191d45d0029e07345826308de07a1d93a463e04b9b3d525c253f6c1e50e6518",
+    "linkage": "static",
+    "xmake_arch": "arm",
+    "zig_target": "arm-linux-musleabi",
+    "arm_attributes": {
+      "Tag_CPU_arch": "v7",
+      "Tag_FP_arch": "VFPv3"
+    },
+    "required_hwcap": [
+      "vfp",
+      "vfpv3",
+      "vfpd32"
+    ],
+    "minimum_cpu_architecture": "ARMv7-A"
+  },
+  "linux_armhf": {
+    "sha256": "30c7ba3cf842ba108f81e6c4687e9559a60c6a8872107bd1908b20b21bbcb5c6",
+    "linkage": "static",
+    "xmake_arch": "arm",
+    "zig_target": "arm-linux-musleabihf",
+    "arm_attributes": {
+      "Tag_CPU_arch": "v7",
+      "Tag_FP_arch": "VFPv3",
+      "Tag_Advanced_SIMD_arch": "NEONv1",
+      "Tag_ABI_VFP_args": "VFP registers"
+    },
+    "required_hwcap": [
+      "vfp",
+      "vfpv3",
+      "vfpd32",
+      "neon"
+    ],
+    "minimum_cpu_architecture": "ARMv7-A"
+  }
+}

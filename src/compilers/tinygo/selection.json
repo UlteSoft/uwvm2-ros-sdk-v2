@@ -1,0 +1,58 @@
+{
+  "artifacts": {},
+  "host_tools": {
+    "clang": [
+      "share/toolchains/tinygo-llvm/clang"
+    ],
+    "wasm-ld": [
+      "share/toolchains/tinygo-llvm/wasm-ld"
+    ]
+  },
+  "llvm_source_roots": [
+    "src/compilers/cc/llvm-project/llvm",
+    "src/compilers/cc/llvm-project/cmake",
+    "src/compilers/cc/llvm-project/libc",
+    "src/compilers/cc/llvm-project/third-party"
+  ],
+  "native_outputs": {
+    "tinygo-prepare-ir": [
+      "share/toolchains/tinygo-llvm/prepare-ir"
+    ],
+    "tinygo-wrtg": [
+      "bin/wrtg"
+    ]
+  },
+  "release_record": "bin/packages/linux-x86_64/wrgo/tinygo/native.json",
+  "source_roots": [
+    "src/compilers/tinygo",
+    "src/compilers/go/command",
+    "src/compilers/package_native.py"
+  ],
+  "support_roots": [
+    "src/compilers/cc/distribution/licenses",
+    "src/compilers/go/host_package.py",
+    "src/compilers/go/rebuild.py",
+    "src/compilers/go/test-fixtures.json",
+    "src/compilers/go/upstream/LICENSE",
+    "src/compilers/go/upstream/PATENTS",
+    "src/compilers/tinygo/runtime",
+    "src/compilers/tinygo/upstream.json",
+    "src/compilers/tinygo/upstream/LICENSE",
+    "src/compilers/tinygo/upstream/src/runtime/arch_tinygowasm.go",
+    "src/compilers/tinygo/upstream/src/runtime/gc_blocks.go",
+    "src/compilers/tinygo/upstream/src/runtime/gc_blocks_wros.go",
+    "src/compilers/tinygo/upstream/src/runtime/gc_wros.go",
+    "src/compilers/tinygo/upstream/src/runtime/gc_wros_default.go",
+    "src/compilers/tinygo/upstream/src/runtime/panic.go",
+    "src/compilers/tinygo/upstream/src/runtime/panic_unwind.go",
+    "src/compilers/tinygo/upstream/src/runtime/panic_wros.go",
+    "src/compilers/tinygo/upstream/src/runtime/panic_wros_default.go",
+    "src/compilers/tinygo/upstream/src/runtime/runtime_tinygowasm.go",
+    "src/compilers/tinygo/upstream/src/runtime/runtime_wasip1.go",
+    "src/compilers/tinygo/upstream/src/runtime/runtime_wros_io.go",
+    "src/compilers/tinygo/upstream/src/runtime/runtime_wros_wasip1.go",
+    "src/compilers/official_dist.py",
+    "src/compilers/go/test_fixtures.py",
+    "src/compilers/go/upstream.json"
+  ]
+}

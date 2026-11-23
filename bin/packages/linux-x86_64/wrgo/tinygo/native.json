@@ -1,0 +1,20 @@
+{
+  "tinygo-prepare-ir": {
+    "bytes": 14479616,
+    "compressed_bytes": 4286400,
+    "compressed_sha256": "1341995f412d326e13e05a45ac82d763d77e368c74c412b43905d6a5ad5d435f",
+    "format": "tar.xz",
+    "member": "prepare-ir",
+    "path": "bin/packages/linux-x86_64/wrgo/tinygo/prepare-ir-1341995f412d326e13e0.tar.xz",
+    "sha256": "612f7149a2800e09f323759c0a2fe89b98573f588bf717d6774414f9a4d79b60"
+  },
+  "tinygo-wrtg": {
+    "bytes": 3344749,
+    "compressed_bytes": 1798908,
+    "compressed_sha256": "a76d6e9b893eadc8b8243355690b2e76c0bb0eaccbf7cd213f8be4c434cf64b0",
+    "format": "tar.xz",
+    "member": "wrtg",
+    "path": "bin/packages/linux-x86_64/wrgo/tinygo/wrtg-a76d6e9b893eadc8b824.tar.xz",
+    "sha256": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66"
+  }
+}

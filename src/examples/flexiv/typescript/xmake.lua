@@ -1,0 +1,11 @@
+set_project("flexiv-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("flexiv-observation")
+    set_kind("binary")
+    set_language("typescript")
+    set_ros_platform("flexiv")
+    set_wros_test_queries("realtime-clock")
+    add_files("main.ts")
+    add_wros_tests("int", "aot")
+target_end()

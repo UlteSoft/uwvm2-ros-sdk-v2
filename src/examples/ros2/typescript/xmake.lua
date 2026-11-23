@@ -1,0 +1,11 @@
+set_project("ros2-observation")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("ros2-observation")
+    set_kind("binary")
+    set_language("typescript")
+    set_ros_platform("ros2")
+    set_wros_test_queries("realtime-clock")
+    add_files("main.ts")
+    add_wros_tests("int", "aot")
+target_end()

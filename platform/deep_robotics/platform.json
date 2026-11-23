@@ -1,0 +1,44 @@
+{
+  "id": "deep_robotics",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "drdds/ImuDataValue",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_roll",
+        "field": "roll",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_yaw",
+        "field": "yaw",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_omega_z",
+        "field": "omega_z",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_acc_z",
+        "field": "acc_z",
+        "type": "f32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/DeepRoboticsLab/sdk_deploy/blob/9ea6ee94bfe90c9a36f5799d39f8dc1d821128db/src/drdds/msg/ImuDataValue.msg",
+        "revision": "9ea6ee94bfe90c9a36f5799d39f8dc1d821128db",
+        "path": "src/drdds/msg/ImuDataValue.msg",
+        "sha256": "22bebf5075489f7bf9e717c3872a50e319c5db7101d65b276c892c6a1c8e211f"
+      }
+    ]
+  }
+}

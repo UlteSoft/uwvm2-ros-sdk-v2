@@ -1,0 +1,10 @@
+set_project("universal-robots-dashboard")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("universal-robots-dashboard")
+    set_kind("binary")
+    set_language("rust")
+    set_ros_platform("universal_robots")
+    add_files("main.rs")
+    add_wros_tests("int", "aot")
+target_end()

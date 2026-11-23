@@ -1,0 +1,862 @@
+[
+  {
+    "path": "deps/openssl/openssl/apps/ca-key.pem",
+    "sha256": "3490491a6a38d202a29ba250f717b8e3065eb1ee3e16d9e5e9171d3f8f2bf8b5"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/client.pem",
+    "sha256": "5517423efa9a5cd7ede4604399d1572f271260d2b7214ac4218f499387b18c99"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/dsa-ca.pem",
+    "sha256": "840ab42f5a6754f9ddd6df488410a689e6c10ed37059a9f3ea2f7199458aab15"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/dsa-pca.pem",
+    "sha256": "6551544012b1e3c4c58f0b64200b75f03b2a39eb69681872f41e6793b0d524be"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/pca-key.pem",
+    "sha256": "6eba0a092a01ee003a4bf101491de540e4ee03b94075578a67084292581f0430"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/privkey.pem",
+    "sha256": "64795d8b4aac68c76ba833da4cfb54e739b7a90161ab3866d441ae0205da6fa9"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/rsa8192.pem",
+    "sha256": "24f69b9f93919a7cc85159762f269b3b3a7e807dec24ebf90ccf166e1d63fe6b"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/s1024key.pem",
+    "sha256": "dd647f2b3d59c7450bd0693d215355ce93919b0462f4f57c35e4ce292e671a61"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/s512-key.pem",
+    "sha256": "eabd97ef4ae742dc493633e69d55c477561662ca63a9d914da1cce76d70f562a"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/server.pem",
+    "sha256": "ffdc8d77eb82b815de5235d93d1b733bf7a6934a8276862cd3b0d842b7dcc53d"
+  },
+  {
+    "path": "deps/openssl/openssl/apps/server2.pem",
+    "sha256": "315a1d925c484b57b5f6b154318c241f49803a627d5dd97a1add7eb5759a16fd"
+  },
+  {
+    "path": "deps/openssl/openssl/fuzz/dtlsserver.c",
+    "sha256": "111f1a3df8686bafecb0625191b85eafc9c57139420501c7897ef811b5909298"
+  },
+  {
+    "path": "deps/openssl/openssl/fuzz/server.c",
+    "sha256": "9d4eda37adab91b38462f8b5ac31e8b6f9104deab9045bfae6a3b2bc562e38e1"
+  },
+  {
+    "path": "test/fixtures/0-dns/0-dns-key.pem",
+    "sha256": "6cd871313a6d94c20b9d28aa09d8f29a628d9b89fd0f9d3265bcee4cfe8ea21f"
+  },
+  {
+    "path": "test/fixtures/keys/.gitattributes",
+    "sha256": "423aeb9b26be1e4a03d74f6eaabaa01e412574011d00d6d04a1c1406b3750bf6"
+  },
+  {
+    "path": "test/fixtures/keys/I_AM_THE_WALRUS_sha256_signature_signedby_rsa_private_b.sha256",
+    "sha256": "c29aa7ea7bc4694dee8800e8790c1ef36b93d106fda52a743c176acba447293f"
+  },
+  {
+    "path": "test/fixtures/keys/Makefile",
+    "sha256": "961e796945f8c692516f07eaf6c3e7e1f57207b21253dc04e0f6a141353c1f20"
+  },
+  {
+    "path": "test/fixtures/keys/agent1-cert.pem",
+    "sha256": "5968cc95396f7a49d0fccaee6cf2c6b8a2f66b907efa21531c4c98d20962783c"
+  },
+  {
+    "path": "test/fixtures/keys/agent1-csr.pem",
+    "sha256": "f554699fd30e4f825b78bb99da9b8a5e477564fa44129f8e39a028af9bd3d1c4"
+  },
+  {
+    "path": "test/fixtures/keys/agent1-key.pem",
+    "sha256": "2b75ca8377f0963f5ce0d47a416b9d40de09dbd6e128ffe6e00af0e52be0eda9"
+  },
+  {
+    "path": "test/fixtures/keys/agent1.cnf",
+    "sha256": "9b7e4a7526fbd466d3e554a7b8961d13c24ee89ddc9f40fbd872bb6a3bbcc70b"
+  },
+  {
+    "path": "test/fixtures/keys/agent1.pfx",
+    "sha256": "8a80f79fd850789a7b9379876f3d5d2c4a5a1341573a3db0058fc4bb03d5b269"
+  },
+  {
+    "path": "test/fixtures/keys/agent10-cert.pem",
+    "sha256": "8fde0c9fbaa5e26611e276816fc4e5a9267c40392d767da4ef022613b55b3d2c"
+  },
+  {
+    "path": "test/fixtures/keys/agent10-csr.pem",
+    "sha256": "6fceb0d4a16d9f48a5b2b75daad20f420b713a4761119ccd2d3fe69235653ef6"
+  },
+  {
+    "path": "test/fixtures/keys/agent10-key.pem",
+    "sha256": "3101123d5a272ae80cc2397490cb5ae11b3ee043f7077cf3b1506eb444663a04"
+  },
+  {
+    "path": "test/fixtures/keys/agent10.cnf",
+    "sha256": "f42c2bf03af81237401497c0d6b5de98c4e4fc23846004c1df827ee0b7c426f2"
+  },
+  {
+    "path": "test/fixtures/keys/agent10.pfx",
+    "sha256": "9da39c819058da7dc3a2eb7fe5ea06bf7c7bc96a9ee3756291b70f59d5ce4864"
+  },
+  {
+    "path": "test/fixtures/keys/agent11-cert.pem",
+    "sha256": "8171182516f75e66931eb51fcf0638ecbdbb2764a9b8fe291081bafffe46267b"
+  },
+  {
+    "path": "test/fixtures/keys/agent11-key.pem",
+    "sha256": "35c2980b8e7af4f7a15bd04471c8483b40f2e578e3b5cb66a718a04a00e75dd8"
+  },
+  {
+    "path": "test/fixtures/keys/agent2-cert.pem",
+    "sha256": "cdbac8e830331c872ad63f55b53ac6f4ac65dfd0634d53654bf824f72a146807"
+  },
+  {
+    "path": "test/fixtures/keys/agent2-csr.pem",
+    "sha256": "4d35858169543b19e050f1fac9d471467f2fd4a58ac37ddf86488900ccd001cd"
+  },
+  {
+    "path": "test/fixtures/keys/agent2-key.pem",
+    "sha256": "ae90c10ee9aec72252477fa4b21bd961eeed9d5ee01e1ed9ee1a05cfb5366447"
+  },
+  {
+    "path": "test/fixtures/keys/agent2.cnf",
+    "sha256": "cce6ed6a46f43f4b1191857802c4b72d4922481aa7905736b5ad54ae52a0fb0b"
+  },
+  {
+    "path": "test/fixtures/keys/agent3-cert.pem",
+    "sha256": "d96cfde9cc3d2cf3b419d678c79b3df108034b31a78a7dc7d8f5bc5c318e6c73"
+  },
+  {
+    "path": "test/fixtures/keys/agent3-csr.pem",
+    "sha256": "bfcd86d0816eb2027b9133e9e48dbe13ae6900a9896fc29412a8a09106f6e68e"
+  },
+  {
+    "path": "test/fixtures/keys/agent3-key.pem",
+    "sha256": "6567a15e4e0f2242e1b6f812531c6320c0bafe7d32b8e0cae0430d8ad6930091"
+  },
+  {
+    "path": "test/fixtures/keys/agent3.cnf",
+    "sha256": "45b2f7c40c1eab035239bbb955ebc6228d0ae4949decb823114685f5c356422a"
+  },
+  {
+    "path": "test/fixtures/keys/agent4-cert.pem",
+    "sha256": "37eda19c22be00b4306015d26ba77089f5ebfa94771e94b630eacadcdf259ed6"
+  },
+  {
+    "path": "test/fixtures/keys/agent4-csr.pem",
+    "sha256": "396242a9293b905dc9bd478abbf5b939420be5a67ae79c78c28bcda18c26431f"
+  },
+  {
+    "path": "test/fixtures/keys/agent4-key.pem",
+    "sha256": "7acaa4bea3de963cfcea59b9b251464b20b143a01b12039bab2b8cbac58eb326"
+  },
+  {
+    "path": "test/fixtures/keys/agent4.cnf",
+    "sha256": "fe720754655f03bf4c53e79b0203dfde0d3871905c08e6495a823603afc6bb4c"
+  },
+  {
+    "path": "test/fixtures/keys/agent5-cert.pem",
+    "sha256": "8d440f2e1775cdd6cbee3490ecb6136cc0e0961fb4fa7a9cef896623cc4522c9"
+  },
+  {
+    "path": "test/fixtures/keys/agent5-csr.pem",
+    "sha256": "0636d80f29a94b32a186ff81821bbd7ee4966f896ebb57067a152d49dab9067e"
+  },
+  {
+    "path": "test/fixtures/keys/agent5-key.pem",
+    "sha256": "9531e0d2d9cccb01068f5d7a92419d0da9a5860f93494a8e062de2726d75f169"
+  },
+  {
+    "path": "test/fixtures/keys/agent5.cnf",
+    "sha256": "bcc57769cf4f589514a8e36693ade11cd1c1d5e57338dfeb319faf7f4a00a435"
+  },
+  {
+    "path": "test/fixtures/keys/agent6-cert.pem",
+    "sha256": "f6356f5bd806abf85f56683dbf7b1bae362605bfc1b5cbf0ff0c643d8d8f5a4b"
+  },
+  {
+    "path": "test/fixtures/keys/agent6-csr.pem",
+    "sha256": "d258e2028018b9f2da9759c01b751f4a801d6e0eec30188cda9dc7447dde44e1"
+  },
+  {
+    "path": "test/fixtures/keys/agent6-key.pem",
+    "sha256": "187b3aacbd2b8df354917c2d27ef0f68103afc1c516c4bd705957b801d81d183"
+  },
+  {
+    "path": "test/fixtures/keys/agent6.cnf",
+    "sha256": "24fbedd9a3c697b5ed54f391bd3d4144aa3a8673ad658872de7c9aec10378608"
+  },
+  {
+    "path": "test/fixtures/keys/agent6.pfx",
+    "sha256": "76cf5db6b431f4efba7fc5405f90db29b2acf5a056c5e1bc3b72dde8042e4fbe"
+  },
+  {
+    "path": "test/fixtures/keys/agent7-cert.pem",
+    "sha256": "f271775cb416c1a7b1216ded1e11963b486e6bb248bc3f418162abdd4649c816"
+  },
+  {
+    "path": "test/fixtures/keys/agent7-csr.pem",
+    "sha256": "73f0291b1912ad1b859dd9a2919cad7cf5669e9eda2ec72f93ac6c6564e1615d"
+  },
+  {
+    "path": "test/fixtures/keys/agent7-key.pem",
+    "sha256": "368515011e4274a7593e8a584d1876ca5856d0b3e2f41287dd38dcddb996b7a9"
+  },
+  {
+    "path": "test/fixtures/keys/agent7.cnf",
+    "sha256": "9ae6759bc5c2df962340787953af5bdf3e6f804f13184d74e6efff38cf1f0da0"
+  },
+  {
+    "path": "test/fixtures/keys/agent8-cert.pem",
+    "sha256": "6ffbebd381742123c36c6ad4069a1297746c08a470aaf462528baee2ddc1ec2b"
+  },
+  {
+    "path": "test/fixtures/keys/agent8-csr.pem",
+    "sha256": "9e1eae71f05c35419232a2982b89c0f29b9a1bb8fa63c53903db95d926899776"
+  },
+  {
+    "path": "test/fixtures/keys/agent8-key.pem",
+    "sha256": "bc3027f267a8726ff4e0fc424cfc03ab3c09592073b2de9bd95b79b7dc48d3ff"
+  },
+  {
+    "path": "test/fixtures/keys/agent8.cnf",
+    "sha256": "dfb8664bea7e3ee2efca9a5f3ce2895ea3e9b3d1fae3cf0bf9f8e807e2429e85"
+  },
+  {
+    "path": "test/fixtures/keys/agent9-cert.pem",
+    "sha256": "6ed0d10e7687fa742326282693b6363cba5bbf7a49b51a55466e23f9422cd84d"
+  },
+  {
+    "path": "test/fixtures/keys/agent9-csr.pem",
+    "sha256": "138145d7cfebcdcb5398144c689b294c5beaa81584fb98b5ee8e9ece72caed8a"
+  },
+  {
+    "path": "test/fixtures/keys/agent9-key.pem",
+    "sha256": "8cd2e73811e8bf9c57075a956f583dd7a9e68544c682b3f69f055a0ce44961d3"
+  },
+  {
+    "path": "test/fixtures/keys/agent9.cnf",
+    "sha256": "fe9aa373819a8fff53f7b8580891d0bcd0201af025155e006577b5263313ae2e"
+  },
+  {
+    "path": "test/fixtures/keys/ca1-cert.pem",
+    "sha256": "cfc60db87bd758cd89e69973484b60a14fb2f3d9cf798bb4ce0dcc17e59643b6"
+  },
+  {
+    "path": "test/fixtures/keys/ca1-cert.srl",
+    "sha256": "cc151ffab489acbe03ad9ee80196f87dcb353014331b2719b282a5fa9ffa40e3"
+  },
+  {
+    "path": "test/fixtures/keys/ca1-key.pem",
+    "sha256": "2b848fe84eba2325a739d27b4b9e9a988f6bdd3cb308feb882b04c191e50b110"
+  },
+  {
+    "path": "test/fixtures/keys/ca1.cnf",
+    "sha256": "fe9774991830db145ed8ef047ae36aeb47301e3d1ea63916d649da5211288b4b"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-cert.pem",
+    "sha256": "5117d80e6c85e92c5707e66979cb39bc352d6d782c0719afd82eefd88328d24f"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-cert.srl",
+    "sha256": "14224d6d8593f7644c6f3bb0af7a11744d9dd10c4644489aef479dc2852026c0"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-crl.pem",
+    "sha256": "2d9301cedd67a2fa31cc8646e61074c5c49e362e7d668ae529ca3bd9b9d87d6d"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-database.txt",
+    "sha256": "98f4ee9efa1128dfb00ffea4b5587ef02e3e1deb4e730c289cb95bbab9d7a940"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-database.txt.attr",
+    "sha256": "8a5810d71338d736b81a3ee0e91aca117a2480085bc7073dc986bb8b0ca6593f"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-database.txt.attr.old",
+    "sha256": "8a5810d71338d736b81a3ee0e91aca117a2480085bc7073dc986bb8b0ca6593f"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-database.txt.old",
+    "sha256": "941e458b65bd2b0864241891ee9dc70223cb560ab19d3350d8587f9d1bfb3be8"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-key.pem",
+    "sha256": "fa9cc8e5b7a5c9d5526c8c5414901a76f44ac59476f8427a742dbc4cd65e1e1a"
+  },
+  {
+    "path": "test/fixtures/keys/ca2-serial",
+    "sha256": "43fd56f56bb9bb18bc9c33966325732b2d7e58bfe2504a2c5c164b071c1b8653"
+  },
+  {
+    "path": "test/fixtures/keys/ca2.cnf",
+    "sha256": "08a25d84a721f6aaaacce4ade3befa138d1e698902e6ab7f79594e4cb921f6a0"
+  },
+  {
+    "path": "test/fixtures/keys/ca3-cert.pem",
+    "sha256": "baaebc9daf6e1cc8e503d2ebcd0507e59549abcbdcb501bfb75918fd5e9b4513"
+  },
+  {
+    "path": "test/fixtures/keys/ca3-cert.srl",
+    "sha256": "bcedf068c3840635f695aab07b7dacd7cbf6396f35906656c5d2e4489b60fe01"
+  },
+  {
+    "path": "test/fixtures/keys/ca3-csr.pem",
+    "sha256": "0f6360a21a63ecd6eb99f68f5a3f5f76467829518688b45b1e40511dbb82075c"
+  },
+  {
+    "path": "test/fixtures/keys/ca3-key.pem",
+    "sha256": "4a8ffac0915e00a7a009c356bcd0fb99928eb55d3422adc8303b1936d7a72093"
+  },
+  {
+    "path": "test/fixtures/keys/ca3.cnf",
+    "sha256": "418cd756d1d0a1eac7f062213fa74b34fda4fc0fe8484732b504f024978dab9c"
+  },
+  {
+    "path": "test/fixtures/keys/ca4-cert.pem",
+    "sha256": "fff10e1be4bbef8f23e478e227aaed637af9c4b3da6b03bd320fdc7978ba7468"
+  },
+  {
+    "path": "test/fixtures/keys/ca4-cert.srl",
+    "sha256": "827b6dfbc866d9aad1c492ee977eb41ba5facfd5c195025d502e82fbd258959b"
+  },
+  {
+    "path": "test/fixtures/keys/ca4-csr.pem",
+    "sha256": "ee81520999ceb8ccb35f303c13e3d6a65c1c30cb95d1bc1898e65e91800ac79d"
+  },
+  {
+    "path": "test/fixtures/keys/ca4-key.pem",
+    "sha256": "d4ac48b3bd5905e0c9d4fcd554f1a71e82ab4d1da7f59895c70a0e2f2c460356"
+  },
+  {
+    "path": "test/fixtures/keys/ca4.cnf",
+    "sha256": "14802e02ea1734fe1ef0c72f764df6f181ad010cdd1d4caa074fc21dabf1afef"
+  },
+  {
+    "path": "test/fixtures/keys/ca5-cert.pem",
+    "sha256": "9dfcfd4225e9c15d540626aa0b096412d456f48556ef2b0162f2e6be7fbb375b"
+  },
+  {
+    "path": "test/fixtures/keys/ca5-cert.srl",
+    "sha256": "73ad73e337573e50b90f2de2bc33634257fae87ac66fd456d06e53a07003f424"
+  },
+  {
+    "path": "test/fixtures/keys/ca5-csr.pem",
+    "sha256": "a2d94134fec3fbf13ac26b9b8ff7e69a1ff27f397b15252a83919b0e7a4b1f34"
+  },
+  {
+    "path": "test/fixtures/keys/ca5-key.pem",
+    "sha256": "fed86266968d37478a9b265bb7455b491f7d1efd6786031f58bb81b271b09ee6"
+  },
+  {
+    "path": "test/fixtures/keys/ca5.cnf",
+    "sha256": "b00e632a128b1cd767ba992bddbfdec210fd68fdcb4b334a16cb00d46f514245"
+  },
+  {
+    "path": "test/fixtures/keys/ca6-cert.pem",
+    "sha256": "3b5ae1998e591344e2f9bd87eee7bb6e71f58271adaa431cc33eff5d758236ab"
+  },
+  {
+    "path": "test/fixtures/keys/ca6-cert.srl",
+    "sha256": "95607909605313a81bf5fa09084e2aa4e15a2c544d2a778658ec9de5dbed86c8"
+  },
+  {
+    "path": "test/fixtures/keys/ca6-csr.pem",
+    "sha256": "c183f7018e166a136595f2e63cd809409398f8e645a8d61d6e5e8ba2640f5b86"
+  },
+  {
+    "path": "test/fixtures/keys/ca6-key.pem",
+    "sha256": "718729614a296fe9f269e13d0a8172380bb44f098ab335878f1aa7c1ebaef209"
+  },
+  {
+    "path": "test/fixtures/keys/ca6.cnf",
+    "sha256": "f21bba0f1e0886d927df6722b256c9a9d0be1feb0f283d6496070fe069684127"
+  },
+  {
+    "path": "test/fixtures/keys/cert-without-key.pfx",
+    "sha256": "48c27d939c599e9827b99fafe5371caf63e2262d6509f158d093e4655eade4c8"
+  },
+  {
+    "path": "test/fixtures/keys/dh1024.pem",
+    "sha256": "da3608b44bffc7bf4148714586789745e2e53627c8c8e7307d9fb52815f7ff10"
+  },
+  {
+    "path": "test/fixtures/keys/dh2048.pem",
+    "sha256": "99218b23c1659246b5a37edf7721d82cd5bab987493b231c54812a5144bdf627"
+  },
+  {
+    "path": "test/fixtures/keys/dh3072.pem",
+    "sha256": "d81bf8f1b3ad9d8d53dd9c110b987fd476c88d6a4c6b570b7e6e34e87da70ca9"
+  },
+  {
+    "path": "test/fixtures/keys/dh512.pem",
+    "sha256": "a57e0d67514885a8fe1fda21d7cb8096fb188a204c963a061979027c448c4794"
+  },
+  {
+    "path": "test/fixtures/keys/dh_private.pem",
+    "sha256": "02e82ad2033e8f6f0d5dc570dcfd67f3f15c7d430a4f729f4329820db7958977"
+  },
+  {
+    "path": "test/fixtures/keys/dh_public.pem",
+    "sha256": "28d0f3392b25ec84396f9da126e0c384ac3083959db7b5e10f0ee20262ba1681"
+  },
+  {
+    "path": "test/fixtures/keys/dherror.pem",
+    "sha256": "c716fe3495c6373962c8b547e89ea9705d826febb9a7587356d304c3ba7b0cb3"
+  },
+  {
+    "path": "test/fixtures/keys/dns-cert1.cnf",
+    "sha256": "b5492bc4455fd04db495a10cf5d15d59ca8bf7b7e942e60391a97e73aae2f741"
+  },
+  {
+    "path": "test/fixtures/keys/dsa1025.pem",
+    "sha256": "e14caf194730e4d6a016d8a2ce57be15928aa2e151f9ab4864908a8969dcfa1c"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_params.pem",
+    "sha256": "546c2bf99bf3368c35bfcb406067247b52e063b6fd6f137e40c60a2ee85a1e6d"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_private.pem",
+    "sha256": "9539018c10779f3e6627b2d7d54795a74d37d51fbd0a9b56c5606fa137ffd096"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_private_1025.pem",
+    "sha256": "e70a92a81d9c9f2e1b87327087f27abd52384f01cb37a2c3baa4a1be0f8072bb"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_private_encrypted.pem",
+    "sha256": "97fc32f820171862dbbea7564959fae153aea3dd4c279f890b5f1358b6dfcac6"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_private_encrypted_1025.pem",
+    "sha256": "2d4110707c8e1b0d5dd75673890eb6fe24e7397b8d9e3d1b193da85da36d4681"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_private_pkcs8.pem",
+    "sha256": "7eac3dbad48cfe15ba7b91ea6d505fd63660d9f01135e31b577c7c5734d7bea6"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_public.pem",
+    "sha256": "5f5b0e87bade7e3280e4aba2261ab1729650bf0ad119aa220ac94c8d7335024e"
+  },
+  {
+    "path": "test/fixtures/keys/dsa_public_1025.pem",
+    "sha256": "45b07e8b167d2dcef3755dd82080a6f945883d740fd822b8e13260397b3dc1f9"
+  },
+  {
+    "path": "test/fixtures/keys/ec-cert.pem",
+    "sha256": "48743dc653ea3cd8ffa7bcbb3b6ccfd920e8299b0319f3e75cd57efbadbcce7f"
+  },
+  {
+    "path": "test/fixtures/keys/ec-csr.pem",
+    "sha256": "f8a5dec742321bf18593962f409fbb0c6d2d020099a59f336c3e3e420af30da2"
+  },
+  {
+    "path": "test/fixtures/keys/ec-key.pem",
+    "sha256": "684215a703060c2b443743188308c32c889d3375835c5752e39e9af0bec0cebb"
+  },
+  {
+    "path": "test/fixtures/keys/ec.cnf",
+    "sha256": "201b7db36eef955d0c5d4af06a1bd054856a7d09fc43c49359457b30c2a0e3cb"
+  },
+  {
+    "path": "test/fixtures/keys/ec.pfx",
+    "sha256": "98fde4f7b7591737e6fe73d314ee37c7b0c982775e3c84a3369aabfb37cad3e0"
+  },
+  {
+    "path": "test/fixtures/keys/ec10-cert.pem",
+    "sha256": "b19b3a7fb833379b0f86e608e919276554856d784523dee36a901d16f8160f5d"
+  },
+  {
+    "path": "test/fixtures/keys/ec10-csr.pem",
+    "sha256": "42919076e0c9551aab1469dbba598a932e2517469526911af77dff5cb5c3e165"
+  },
+  {
+    "path": "test/fixtures/keys/ec10-key.pem",
+    "sha256": "33ea31121fb4f08c27e28e8ae8c6e65fa9d9fd74895ce3f648bfa0aa4b3e1241"
+  },
+  {
+    "path": "test/fixtures/keys/ec10.pfx",
+    "sha256": "9df1f7ef25ffd11e858cb5c61b64db5a1adf471adbe325e0f0e5ac11d1a0e661"
+  },
+  {
+    "path": "test/fixtures/keys/ec_p256_private.pem",
+    "sha256": "362eb00dd9a9f7a3167d83ba6786af47d6e2049a2333fd60495be6499017bcd7"
+  },
+  {
+    "path": "test/fixtures/keys/ec_p256_public.pem",
+    "sha256": "94b1a0da95e60c1e8c889b0b2eecff4fdc32dd89050e5a4b39d80d38409247da"
+  },
+  {
+    "path": "test/fixtures/keys/ec_p384_private.pem",
+    "sha256": "ede99c0f6e83b6500e60469cda53211e4422f5d0734adeecc4fc97425c86267e"
+  },
+  {
+    "path": "test/fixtures/keys/ec_p384_public.pem",
+    "sha256": "2b7cb3ab39350b8ea29025875238711cc30156e2d4aa6fec668106fd68adcbca"
+  },
+  {
+    "path": "test/fixtures/keys/ec_p521_private.pem",
+    "sha256": "0f7d65fdb730d7f989f7f6a9e73de1d290c6dbe8145b1b50d38dc11c13fad6f3"
+  },
+  {
+    "path": "test/fixtures/keys/ec_p521_public.pem",
+    "sha256": "c98a34205d1a57ac161f781c3771ff2f8c46c4f4616292c5d54d4b7c2ba7a8c2"
+  },
+  {
+    "path": "test/fixtures/keys/ec_secp256k1_private.pem",
+    "sha256": "5046683003ea82724064996e49f758dfa10d54971a380715f5f756061676149d"
+  },
+  {
+    "path": "test/fixtures/keys/ec_secp256k1_public.pem",
+    "sha256": "771fd1c3006dc2894247d377539b0c8520e01f8d535e3550576acf365513abc4"
+  },
+  {
+    "path": "test/fixtures/keys/ed25519_private.pem",
+    "sha256": "db35f770988736454ad5deec343e064d96684db35e639b10d9f7352fe179ac52"
+  },
+  {
+    "path": "test/fixtures/keys/ed25519_public.pem",
+    "sha256": "f275ea434ff61d3707e37640c1c17532231a22d5ee8cfbcfce1c36c4a150d5ef"
+  },
+  {
+    "path": "test/fixtures/keys/ed448_private.pem",
+    "sha256": "0ef9fd691802ce8b8b176064133a4738faa61232fdec4a4361c5762758906525"
+  },
+  {
+    "path": "test/fixtures/keys/ed448_public.pem",
+    "sha256": "6a0ed0690c250673c81afdb1c7abbdfe3dd491e8f691f5c9bea8036b8b1c3022"
+  },
+  {
+    "path": "test/fixtures/keys/fake-cnnic-root-cert.pem",
+    "sha256": "841e8712a724ada3256ff425dca37b77b187c4aae96b59745c599b534a121679"
+  },
+  {
+    "path": "test/fixtures/keys/fake-cnnic-root-cert.srl",
+    "sha256": "d083f538a350e247644ffce22d9328ea6e3b918318422ab1189d8496f7110554"
+  },
+  {
+    "path": "test/fixtures/keys/fake-cnnic-root-key.pem",
+    "sha256": "0fd5cf663d69a1d059da5d7ab75ba471fb1c5f7aa1157f6f093032c34825cc57"
+  },
+  {
+    "path": "test/fixtures/keys/fake-cnnic-root.cnf",
+    "sha256": "91c5ad180f60674175265f1a26f9e4444341ac20e0ed3b0f012168482cfe94f5"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-cert.cer",
+    "sha256": "44b593970874bdc1e6464aa53fd47175e70b1d2b238dc2b19570fb325fad165c"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-cert.pem",
+    "sha256": "0e7f15e944099db0ae336c35d582ac989e5362110b20d802f877b0711fe8147e"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-database.txt",
+    "sha256": "b548da0544c28a4838b8a60b05f2f2aef91f7548103f9e842fb5a049eaa3a15c"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-database.txt.attr",
+    "sha256": "8a5810d71338d736b81a3ee0e91aca117a2480085bc7073dc986bb8b0ca6593f"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-database.txt.attr.old",
+    "sha256": "8a5810d71338d736b81a3ee0e91aca117a2480085bc7073dc986bb8b0ca6593f"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-database.txt.old",
+    "sha256": "caf0a12bcc6de128e5cc78a6296ccb9bc323d286a9dfa901910f0070a68667c6"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-issued-certs/01.pem",
+    "sha256": "8ba0804651f9928d35a6481c8b570bbb6e5d5c25cfc662c460053957bb0c05d4"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-issued-certs/02.pem",
+    "sha256": "ff962131bb759f1edc41179d159bae325e4e9f4081638e27222c58cb5e2683cb"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-issued-certs/03.pem",
+    "sha256": "6ffbebd381742123c36c6ad4069a1297746c08a470aaf462528baee2ddc1ec2b"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-issued-certs/04.pem",
+    "sha256": "6ed0d10e7687fa742326282693b6363cba5bbf7a49b51a55466e23f9422cd84d"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-key.pem",
+    "sha256": "d56cbae2032896dc72a4a9a5f14f5e51465b6bea44027234c1012e26a0528450"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-serial",
+    "sha256": "537f0e9ea9c003d696d836bd008c2331abd787850215f255534f659f35431539"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root-serial.old",
+    "sha256": "037c23a98251fd952216f9ea80cd5c1e74ce33f8f14e071f703a4fd92040eb65"
+  },
+  {
+    "path": "test/fixtures/keys/fake-startcom-root.cnf",
+    "sha256": "4937c81c42768bc2057079d4a83fa185c797b6887b22d93a1f4eae3633456111"
+  },
+  {
+    "path": "test/fixtures/keys/incorrect_san_correct_subject-cert.pem",
+    "sha256": "77bbc22936b66cf1130939d3f557bf70ffbeb417bb327cdc1e2c17793cb499e1"
+  },
+  {
+    "path": "test/fixtures/keys/incorrect_san_correct_subject-key.pem",
+    "sha256": "3e3da4a9fdb7fff3530e6b98f315d974336c3b077dac0ff6e7dcc8bd8b0f5cd4"
+  },
+  {
+    "path": "test/fixtures/keys/intermediate-ca.pem",
+    "sha256": "6f4c40db8092d3ef0fd3f8091616aa24f92178f94da8bf3488e831bbd97479f4"
+  },
+  {
+    "path": "test/fixtures/keys/intermediate.key",
+    "sha256": "32f381cb0cd2a7bcd2644c733684e96829a56584644029b4231586a49bf2e358"
+  },
+  {
+    "path": "test/fixtures/keys/irrelevant_san_correct_subject-cert.pem",
+    "sha256": "155c250df802959386dfc8a6e2360c4e67eed2d73fcc63da12b917f958966951"
+  },
+  {
+    "path": "test/fixtures/keys/irrelevant_san_correct_subject-key.pem",
+    "sha256": "cec423ced84ca0b34aad298a3497ea0e1f2c6f414171d36881c97dd8d3d08b6c"
+  },
+  {
+    "path": "test/fixtures/keys/leaf-from-intermediate-cert.pem",
+    "sha256": "667ca91bcb92b772c6ad87dbd91d2f9c0eb06934504bf2d67233a8c153aac2af"
+  },
+  {
+    "path": "test/fixtures/keys/leaf-from-intermediate-key.pem",
+    "sha256": "5250c01feb2290b37e05b79e22c0008018ef64b9afd066fb2d1582c7c02fd824"
+  },
+  {
+    "path": "test/fixtures/keys/legacy.pfx",
+    "sha256": "27443c7950be4629062dbd0e4d9d6a16bd352524174986a84862deea026e390b"
+  },
+  {
+    "path": "test/fixtures/keys/non-trusted-intermediate-ca.pem",
+    "sha256": "ab864879ee98c9d482e9f58ce128b04dc98e4b530176bf1039dd8c2a544bad59"
+  },
+  {
+    "path": "test/fixtures/keys/non-trusted-intermediate-ca.srl",
+    "sha256": "79b32194572c149d4215a7e3186659818124878c7e4efe121ebb39a2755776dc"
+  },
+  {
+    "path": "test/fixtures/keys/non-trusted-intermediate.key",
+    "sha256": "827a02d0af3d8fcebbbfdef0bc96eabfc14bab2d412069c7b028f4fabec55c23"
+  },
+  {
+    "path": "test/fixtures/keys/non-trusted-leaf-from-intermediate-cert.pem",
+    "sha256": "8d546110915185e3ae5cf0a180a959b3c511b06bff2c9a15b39b9ecb9989185d"
+  },
+  {
+    "path": "test/fixtures/keys/non-trusted-leaf-from-intermediate-key.pem",
+    "sha256": "eac0952b91dd2851be3a0c48faa269a0a0faf53d6eda95b016b9f4b9f501f01d"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_ca.crt",
+    "sha256": "bb2ffc75fcaff202f5c514124d8cd16b93e2de866e907849eccd04d701e77fcf"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_cert.cnf",
+    "sha256": "8a4214b71094ae03790e8960f31c32ab8d60092c7f5ab599e36b96b3593cac33"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_cert.crt",
+    "sha256": "bb2ffc75fcaff202f5c514124d8cd16b93e2de866e907849eccd04d701e77fcf"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_cert.pfx",
+    "sha256": "6bc075e1b23b71294dac9c82a6f7296371080e97e3b4cfd7dcdb5448c12d4f63"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_cert_foafssl_b.cnf",
+    "sha256": "ebd53a235d5f26da510049e219bfab79540d00bfcdb0f18ee16dfc99448ebb3e"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_cert_foafssl_b.crt",
+    "sha256": "b313ad78c1674da9d2de91c7e7b10f46ca6c95c44679f8e3084558744de8da8f"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_cert_foafssl_b.exponent",
+    "sha256": "70ed2a03d11c02ffd2aca4f85f50e232d0548277ee703e54ee36f39cbc6c7b8d"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_cert_foafssl_b.modulus",
+    "sha256": "cc033bc5c856a95f50739a74fb215bc0600ffa1f2e97d40daa29e6796cb9fa8b"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_private.pem",
+    "sha256": "765388550143f3e182aafa6e5aa9b61faf894edbcd98877ebd9069eaba490606"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_private_2048.pem",
+    "sha256": "4126fcb3478437f196f51d4f28eeb067dcc41e6eb9b20195a80121651f6dadce"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_private_4096.pem",
+    "sha256": "2758009d0ecaa808c94bbdf73bde1dd443f51fc630090d11cfb4dd0ccc156207"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_private_b.pem",
+    "sha256": "69d03ce43e13b0c46f12b1ad0a602dfcb355dd42d9c046585e25a2cc112866b9"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_private_encrypted.pem",
+    "sha256": "b95d42d72a728c8ec41e3dc06e0ab528a3c84fc1f9883f39cd20f3c394a8ce06"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_private_pkcs8.pem",
+    "sha256": "cf7a31e38e185eedb2cf8761bd54c048c77453bde9d82363257ad06b2fdd290c"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_private_pkcs8_bad.pem",
+    "sha256": "fc06ec5efabe9767d59b56d08a772382e63e3780dea157a32d29c6e286b58665"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_private_2048.pem",
+    "sha256": "97914b8fb87c1db95842f3f27546a4d2cef3be02a90ab692193d2ffde0e50cfd"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_private_2048_sha1_sha1_20.pem",
+    "sha256": "b687753a8581f6693821f60e67200a14dbd478d7753e2c34a56b40cd3dc5327d"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_private_2048_sha256_sha256_16.pem",
+    "sha256": "f98e4f81b5ff30c9bd8040c05bf4d3d857b9781b606c0adf60e80607053295e7"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_private_2048_sha512_sha256_20.pem",
+    "sha256": "bab8d7bbcc950b8ba74cae854ecee07b25ea131765a4ccd8db9edc276427591c"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_public_2048.pem",
+    "sha256": "b1480fbbbdcc36df5b3c11958538dd4cfb9562dc2cf35571c708eb37a3924848"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_public_2048_sha1_sha1_20.pem",
+    "sha256": "89d141d32fb0264d83ccdbd365ae4da9a070765ad6aeab74852fe3fd06ed50d5"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_public_2048_sha256_sha256_16.pem",
+    "sha256": "5fb11fd6883f4b9799184cd20bd148ee9a8fdedb6ad1c4e3a6296f9267aa23ba"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_pss_public_2048_sha512_sha256_20.pem",
+    "sha256": "a8d0d40ec73a7507d98e11a71c1cf5d3911883ce2bba54f0bf33f1df578fe7f9"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_public.pem",
+    "sha256": "45bb395ff95ae52351e17e639f24b5618c13c8ff128d31d2070a14239362f0d6"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_public_2048.pem",
+    "sha256": "40b1d69710f3cf4358b948a946e16a6893711b4e009d551a96c4b3ea19cc9cca"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_public_4096.pem",
+    "sha256": "3ecbf1cb294370b53c36c03d27c6e60008976830ec36a5d302dbb55833d6ad63"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_public_b.pem",
+    "sha256": "b920811783e2c940dd420a0bb9f21b6614ef04f9efeaf42ce90acde16b0f8d59"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_public_sha1_signature_signedby_rsa_private.sha1",
+    "sha256": "16b9e5ff3f464c651e7727a2ecfc4284d5e3b2f974e38fc87bc72a38bd807048"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_public_sha1_signature_signedby_rsa_private_pkcs8.sha1",
+    "sha256": "16b9e5ff3f464c651e7727a2ecfc4284d5e3b2f974e38fc87bc72a38bd807048"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_spkac.spkac",
+    "sha256": "b08dea85ac3776bee52178e4218535ae16a49199359bbacea16a3244c3306b90"
+  },
+  {
+    "path": "test/fixtures/keys/rsa_spkac_invalid.spkac",
+    "sha256": "52db1c59dac4a4bf569d62cde65cae14d6a8ad7e132ca2f7a864ffe3f4686423"
+  },
+  {
+    "path": "test/fixtures/keys/selfsigned-no-keycertsign/README.md",
+    "sha256": "299fd3fa9581fd703b42a7e119413abcef5f13915dfc9581fa6bad078e66d1c9"
+  },
+  {
+    "path": "test/fixtures/keys/selfsigned-no-keycertsign/cert.conf",
+    "sha256": "43bafa878e5b7c10808760cd6ffff44cbac071a6e666748fb6265835935c3151"
+  },
+  {
+    "path": "test/fixtures/keys/selfsigned-no-keycertsign/cert.pem",
+    "sha256": "73079073545c1ce5e614aa31db10b66e5017f40ee3606e01e546ccf1e826e657"
+  },
+  {
+    "path": "test/fixtures/keys/selfsigned-no-keycertsign/https_renew_cert.sh",
+    "sha256": "871c1407ef6a9a5b8ee3b6891ea34c8af90148ce3da692b54e356ba06a43ba33"
+  },
+  {
+    "path": "test/fixtures/keys/selfsigned-no-keycertsign/key.pem",
+    "sha256": "a12d0d4152cbdf054664b02550dfc51b703dfc2332577d011c44c99b2719a755"
+  },
+  {
+    "path": "test/fixtures/keys/x25519_private.pem",
+    "sha256": "a0d993e976b24934bd2945ed3c1a5bbb7d4e6c6c63d50479c10309391ec7ce2d"
+  },
+  {
+    "path": "test/fixtures/keys/x25519_public.pem",
+    "sha256": "17e670a7ee13721708f1d2d367b52575c0870232ae44e9d4253eda142a19243d"
+  },
+  {
+    "path": "test/fixtures/keys/x448_private.pem",
+    "sha256": "98787d1aaad5f888a1e14891d0b28cbcbd6da5ad221a5a334c81bbd7aa79ebb7"
+  },
+  {
+    "path": "test/fixtures/keys/x448_public.pem",
+    "sha256": "e1307bb447d8c4be21a9bf1f19789234c9cd0393a2c5b47d8145b95e43c4159f"
+  },
+  {
+    "path": "test/fixtures/x509-escaping/google/key.pem",
+    "sha256": "55547818587dab289c4a1c837dbf3b6c401a2e1dabaf5c20f9665cd6c4d99408"
+  },
+  {
+    "path": "test/fixtures/x509-escaping/server-key.pem",
+    "sha256": "b7bb092a6dbd143aa6b3f72eb84741001194c1ee9661369e4b3671751eb86e57"
+  },
+  {
+    "path": "test/parallel/test-crypto-dh-curves.js",
+    "sha256": "023e47e0c97f05a275171779b52c35069ccca09667a4b54ff39d7f6915cf50a5"
+  },
+  {
+    "path": "test/parallel/test-crypto-dh-stateless.js",
+    "sha256": "c1892d60a160e90e02736a73d7e0018c16920751dcda471f87ba325d58b9af47"
+  },
+  {
+    "path": "test/parallel/test-crypto-ecdh-convert-key.js",
+    "sha256": "062b2695a430e5d7cdc215aff4166ec2ff08408fb5d8770958b1329f9b007fd9"
+  },
+  {
+    "path": "test/parallel/test-crypto.js",
+    "sha256": "dafbfb17a1610f3b8b98e9af4a88bd952d29bf545b888f0febaaca13d6cc8c77"
+  },
+  {
+    "path": "test/parallel/test-tls-cert-ext-encoding.js",
+    "sha256": "715de8b7264d92321f5b242c6ac6d1eefa6eafe40a030019afe0442579a274c6"
+  },
+  {
+    "path": "test/parallel/test-tls-use-after-free-regression.js",
+    "sha256": "af1e4a9ac257c48cd9fbc1b8609ce50ae6650cf0cd3146c0e7dcb7ea81f941c8"
+  }
+]

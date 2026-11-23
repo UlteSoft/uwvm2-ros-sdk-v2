@@ -1,0 +1,428 @@
+{
+  "platform": "abb",
+  "remote_candidate_commit": "36c098e85098d7ccc26562972af32f47aafe7560",
+  "local_source_commit": "bc5c26be963a5b04fec4c51117121fbd6ae1c616",
+  "verified_git_tree": "9cab44f3a85cfc06f2eb3b3f35a783483a4c3207",
+  "root_bootstrap_commit": "35160a793faaca9ea7de9d6820687288b5373a78",
+  "root_bootstrap_sha256": "8d60797cace7f23ed6f77b6a1f53972b831bc13f41d98fe48179becf0313f235",
+  "isolation": {
+    "launcher": "src/qualification/isolated.py",
+    "limit_bytes_parent_and_child": 68719476736,
+    "swap_bytes_parent_and_child": 0,
+    "sdk_install_online_initialized_empty": true,
+    "build_run_offline_only_loopback": true
+  },
+  "tools": {
+    "vm_git": "2221a8c57e00de1c7f537603c86187bec3ba84a5",
+    "vm_sha256": "a3d05e71b254c2e0fc1739fb5e59f0264f8fd08c7c70179b7eefae3a6cc9aa6c",
+    "xmake_version": "3.0.5+20251230",
+    "xmake_sha256": "d24ec7daa11ab5007f33221ba0a883f9c7479afae2a47370773f209047152a1e",
+    "node_version": "22.22.3",
+    "rustc_version": "1.98.0"
+  },
+  "installed_selections": [
+    "as",
+    "c",
+    "cpp",
+    "js",
+    "rs",
+    "typescript",
+    "wat"
+  ],
+  "unknown_selections": [
+    "c_ffi_bridge",
+    "csharp",
+    "d",
+    "fortran",
+    "fsharp",
+    "go",
+    "haskell",
+    "java",
+    "kotlin",
+    "lua",
+    "moonbit",
+    "nim",
+    "objectc",
+    "odin",
+    "php",
+    "py",
+    "r",
+    "ruby",
+    "swift",
+    "tinygo",
+    "vbnet",
+    "zig"
+  ],
+  "rust_bindings_flags": [
+    "--mode",
+    "bindings",
+    "--no-mte"
+  ],
+  "default_rust_install_error": "Installation failed: Rust currently provides experimental upstream bindings; select --mode bindings --no-mte",
+  "missing_from_stock": {
+    "rs": "wrrs and its guest target libraries",
+    "as": "Node.js 22.22.3",
+    "typescript": "Node.js 22.22.3"
+  },
+  "online_first_attempt_errors": {
+    "raw_github_tls_eof": 10,
+    "unreferenced_git_object_unavailable": 19
+  },
+  "direct_readme_replays": [
+    "c",
+    "cpp"
+  ],
+  "compiler_modes": [
+    "C++98",
+    "C++03",
+    "C++11",
+    "C++14",
+    "C++17",
+    "C++20",
+    "C++23",
+    "C++26"
+  ],
+  "oracle": {
+    "genmsg": "f64190bcd7f36ef4ee401041714480473f96742b",
+    "genpy": "9e32c6a06364d271ac18625718a6349afb8ee210",
+    "fixture": "src/qualification/abb/ros1-vectors.json",
+    "fixture_sha256": "67b96f9b8ed5f0d149b1d7da16972ddda8777a71830e6540822b1b0ee57a6a4c",
+    "bodies_per_language": 70,
+    "vectors_per_language": 140,
+    "abb_datatype_md5": 47,
+    "header_md5": 1,
+    "languages": [
+      "c",
+      "cpp",
+      "rust"
+    ],
+    "malformed_checks_per_language": {
+      "truncation": 5113,
+      "trailing": 140,
+      "capacity": 132,
+      "length": 188,
+      "bool": 80
+    }
+  },
+  "module_executions": [
+    {
+      "case": "as-prerequisites",
+      "project": "observation",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "7023c18df8ed1fb7c20c63c0f36126428489e00556b84206e7d726d03e9d2aa6",
+      "bytes": 787,
+      "imports": []
+    },
+    {
+      "case": "as-stock",
+      "project": "observation",
+      "build": 255
+    },
+    {
+      "case": "c-abi",
+      "project": "abb-abi",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "d79ee5dd0ea473c02663a13fe32ad063eb55903512949cc48d084f58876590b9",
+      "bytes": 18963,
+      "imports": [
+        [
+          "uwvm_ros_v2",
+          "abi",
+          "() -> i32"
+        ]
+      ]
+    },
+    {
+      "case": "c-direct",
+      "project": "direct-records",
+      "build": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "70ca6fe2e893096d625a3631b964c4f64e598f95c6150789b2ab4a44534356ed",
+      "bytes": 56313,
+      "imports": []
+    },
+    {
+      "case": "c-oracle",
+      "project": "genpy-oracle",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "87f23d230e81e87f9e594c4fad2b8b46a417519ad4c212cb92260cc163ef4511",
+      "bytes": 724102,
+      "imports": []
+    },
+    {
+      "case": "c-stock",
+      "project": "records",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "70ca6fe2e893096d625a3631b964c4f64e598f95c6150789b2ab4a44534356ed",
+      "bytes": 56313,
+      "imports": []
+    },
+    {
+      "case": "c-stock",
+      "project": "observation",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "9c7c4de534626f54333fd9f7385087c84696cc6bb30b1f8af762a464519d9aa2",
+      "bytes": 20500,
+      "imports": []
+    },
+    {
+      "case": "cpp-abi",
+      "project": "abb-abi",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "11f3a3740bafe175ee0418adbd2da99d82afb20f81bf2077787dd842613af265",
+      "bytes": 19016,
+      "imports": [
+        [
+          "uwvm_ros_v2",
+          "abi",
+          "() -> i32"
+        ]
+      ]
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++98",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "7785f62cc558840035119d3241f3ca0264118b7e7fa21082ba8f4b9d3d68bdf5",
+      "bytes": 75901,
+      "imports": []
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++03",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "9bb3f3605ed2e581987ccaa705ebbacc8bab1a3b015a29265b639fb286d113a5",
+      "bytes": 75901,
+      "imports": []
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++11",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "8bd37520ea4c13e3c5902358f6b0edad198dcab714cb7c3fbb393fd54ec13e3c",
+      "bytes": 75904,
+      "imports": []
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++14",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "9214141028fa9291b6eb209ef9f871a32e2c0ad873cefdf6f52676584f2eeeb7",
+      "bytes": 75904,
+      "imports": []
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++17",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "12c5348d9028902fae9ea13eb0e5e3b22dd61efdb02528367e97cd6551deccef",
+      "bytes": 75904,
+      "imports": []
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++20",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "5d8b6219a8142f332f45e1980cd2d7e947ac5df49998a802e199bde99d14d6ac",
+      "bytes": 75904,
+      "imports": []
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++23",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "ba2139aca5ad29652b245a4c8734b70a2387e7e367cabf824290ee5978aaa6fd",
+      "bytes": 75904,
+      "imports": []
+    },
+    {
+      "case": "cpp-dialects",
+      "project": "dialect-c++26",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "af97ad9dcf88a14077f852e77482caba1e64fd30a5af063c3b03ed4a3ff6f845",
+      "bytes": 75904,
+      "imports": []
+    },
+    {
+      "case": "cpp-direct",
+      "project": "direct-records",
+      "build": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "7fce24ad48d13718ef00dca4f99ea501c3b0156fb26fa31d2094f33ba0cd6486",
+      "bytes": 75918,
+      "imports": []
+    },
+    {
+      "case": "cpp-oracle",
+      "project": "genpy-oracle",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "4d280fea8e1c58e32c3c71996c25ff04cc6987a306d319bf556a4f913ecb7de1",
+      "bytes": 1243684,
+      "imports": []
+    },
+    {
+      "case": "cpp-stock",
+      "project": "records",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "7fce24ad48d13718ef00dca4f99ea501c3b0156fb26fa31d2094f33ba0cd6486",
+      "bytes": 75918,
+      "imports": []
+    },
+    {
+      "case": "cpp-stock",
+      "project": "observation",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "c187fb92ce2d1cec637960e93b52f4492343b7bb6373b4e1eb30aa988fd6c8e7",
+      "bytes": 20626,
+      "imports": []
+    },
+    {
+      "case": "js-stock",
+      "project": "observation",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "96e40af924c9c444e003c3a7bf98f0895ffe4b1d3cd23aa625550674efff8838",
+      "bytes": 4718202,
+      "imports": [
+        [
+          "wasi_snapshot_preview1",
+          "clock_time_get",
+          "(i32, i64, i32) -> i32"
+        ]
+      ]
+    },
+    {
+      "case": "rust-oracle",
+      "project": "genpy-oracle",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "6fbbfa6e70f3ba770477b74a7f3d604070797673ac2ad57526aebef3edecacd4",
+      "bytes": 1128223,
+      "imports": []
+    },
+    {
+      "case": "rust-prerequisites",
+      "project": "records",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "0021b7509c30cbd00bd73f7118f458786e3e88adc538c2f7d7b4cc01aae5642d",
+      "bytes": 628648,
+      "imports": []
+    },
+    {
+      "case": "rust-prerequisites",
+      "project": "observation",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "8aa66e533d07c1ce21833a916a01a8f1188d601ebcb712dc8b9815498402236c",
+      "bytes": 622761,
+      "imports": []
+    },
+    {
+      "case": "rust-stock",
+      "project": "records",
+      "build": 255
+    },
+    {
+      "case": "rust-stock",
+      "project": "observation",
+      "build": 255
+    },
+    {
+      "case": "typescript-prerequisites",
+      "project": "observation",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "3745d2c67012acf58a03cd4a18e5931ddaf831a55c1a9f4290e42ef78603a679",
+      "bytes": 4718935,
+      "imports": [
+        [
+          "wasi_snapshot_preview1",
+          "clock_time_get",
+          "(i32, i64, i32) -> i32"
+        ]
+      ]
+    },
+    {
+      "case": "typescript-stock",
+      "project": "observation",
+      "build": 255
+    },
+    {
+      "case": "wat-stock",
+      "project": "observation",
+      "build": 0,
+      "xmake_test": 0,
+      "int": 0,
+      "aot": 0,
+      "sha256": "e7a4d530d1cf9e2f3c7ceafea36d71008a4b7b54da87c1310cd645cecca4a709",
+      "bytes": 1640,
+      "imports": []
+    }
+  ],
+  "vendor_driver_or_simulator": "untested",
+  "robot_hardware": "untested"
+}

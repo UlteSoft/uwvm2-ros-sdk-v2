@@ -1,0 +1,213 @@
+{
+  "binding_commit": "b118baff14659fb8988434f128590c72e66ce1ca",
+  "contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+  "vm_sha256": "a3d05e71b254c2e0fc1739fb5e59f0264f8fd08c7c70179b7eefae3a6cc9aa6c",
+  "compiler": {
+    "c": "Ubuntu Clang 21.1.8",
+    "cpp": "Ubuntu Clang 21.1.8",
+    "rust": "rustc 1.98.0 (88d9e12ae178fab0fb5cc050a94da85685d449ea)"
+  },
+  "linkage": {
+    "c": "LLVM LLD 21.1.8",
+    "cpp": "LLVM LLD 21.1.8",
+    "rust": "rustc wasm32-unknown-unknown"
+  },
+  "memory_max": 68719476736,
+  "memory_swap_max": 0,
+  "modules": {
+    "c": {
+      "all": {
+        "import_count": 163,
+        "sha256": "b9afeeeb0e97a3f42f654d7cb510797f74b0068ca303e5393eaaa8251e39fde0"
+      },
+      "abi": {
+        "import_count": 1,
+        "sha256": "7f396d65b742d2a9b319c942e80b58e66a1165e5a7e981baac54985fed8adb60"
+      },
+      "guard": {
+        "import_count": 7,
+        "sha256": "1e12f37bf8abc2f5664309f8850400a98c22f3a25e6ba23814952d3d30a6f95c"
+      }
+    },
+    "cpp": {
+      "all": {
+        "import_count": 163,
+        "sha256": "b9afeeeb0e97a3f42f654d7cb510797f74b0068ca303e5393eaaa8251e39fde0"
+      },
+      "abi": {
+        "import_count": 1,
+        "sha256": "7f396d65b742d2a9b319c942e80b58e66a1165e5a7e981baac54985fed8adb60"
+      },
+      "guard": {
+        "import_count": 7,
+        "sha256": "024a55ce422623e22b99460ca94858b76f74e90a9d786a5a6dbceefb08a7d713"
+      }
+    },
+    "rust": {
+      "all": {
+        "import_count": 163,
+        "sha256": "3ff380754e118e9b220cfc53dd9a6721d6080f4dcbaaf4cf3e9a5937c95b3d63"
+      },
+      "abi": {
+        "import_count": 1,
+        "sha256": "851fe429c14f436f497e111a883a5d0944d673d9becbcd402cbabaca43f21741"
+      },
+      "guard": {
+        "import_count": 7,
+        "sha256": "00afaaf762cd6e49ccf5425f3721bf0a840779eaf9cf5deb4670324b15b08606"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "c-int-abi-allow-returns-2",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "c-int-abi-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "c-int-abi-default-hidden",
+      "passed": true,
+      "returncode": 127
+    },
+    {
+      "name": "c-int-typed-guard-and-capability",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "c-int-all-163-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "c-aot-abi-allow-returns-2",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "c-aot-abi-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "c-aot-abi-default-hidden",
+      "passed": true,
+      "returncode": 127
+    },
+    {
+      "name": "c-aot-typed-guard-and-capability",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "c-aot-all-163-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-int-abi-allow-returns-2",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-int-abi-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-int-abi-default-hidden",
+      "passed": true,
+      "returncode": 127
+    },
+    {
+      "name": "cpp-int-typed-guard-and-capability",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-int-all-163-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-aot-abi-allow-returns-2",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-aot-abi-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-aot-abi-default-hidden",
+      "passed": true,
+      "returncode": 127
+    },
+    {
+      "name": "cpp-aot-typed-guard-and-capability",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "cpp-aot-all-163-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-int-abi-allow-returns-2",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-int-abi-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-int-abi-default-hidden",
+      "passed": true,
+      "returncode": 127
+    },
+    {
+      "name": "rust-int-typed-guard-and-capability",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-int-all-163-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-aot-abi-allow-returns-2",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-aot-abi-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-aot-abi-default-hidden",
+      "passed": true,
+      "returncode": 127
+    },
+    {
+      "name": "rust-aot-typed-guard-and-capability",
+      "passed": true,
+      "returncode": 0
+    },
+    {
+      "name": "rust-aot-all-163-deny-returns-13",
+      "passed": true,
+      "returncode": 0
+    }
+  ]
+}

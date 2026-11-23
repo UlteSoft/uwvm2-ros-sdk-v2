@@ -1,0 +1,44 @@
+{
+  "id": "kuka",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "kuka_driver_interfaces/KssStatus",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_cycle_time",
+        "field": "cycle_time",
+        "type": "u8",
+        "indexed": false
+      },
+      {
+        "name": "read_drives_powered",
+        "field": "drives_powered",
+        "type": "bool",
+        "indexed": false
+      },
+      {
+        "name": "read_guard_stop",
+        "field": "guard_stop",
+        "type": "bool",
+        "indexed": false
+      },
+      {
+        "name": "read_operation_mode",
+        "field": "operation_mode",
+        "type": "u8",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/kuka-ros/kuka_drivers/blob/15fbb6941356390c38bbd135a0676dfd96a050c0/kuka_driver_interfaces/msg/KssStatus.msg",
+        "revision": "15fbb6941356390c38bbd135a0676dfd96a050c0",
+        "path": "kuka_driver_interfaces/msg/KssStatus.msg",
+        "sha256": "6bb238b937abab031f855506796d1a4b6412d65a0d3d3ab24bd5d420714cc388"
+      }
+    ]
+  }
+}

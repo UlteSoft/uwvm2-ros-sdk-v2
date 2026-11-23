@@ -1,0 +1,32 @@
+{
+  "id": "flexiv",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "flexiv_msgs/Digital",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_pin",
+        "field": "pin",
+        "type": "u8",
+        "indexed": false
+      },
+      {
+        "name": "read_state",
+        "field": "state",
+        "type": "bool",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/flexivrobotics/flexiv_ros2/blob/5188d2a4473e556a88ee0cfbe858e84ddd6979b8/flexiv_msgs/msg/Digital.msg",
+        "revision": "5188d2a4473e556a88ee0cfbe858e84ddd6979b8",
+        "path": "flexiv_msgs/msg/Digital.msg",
+        "sha256": "d0497cd504a632e323f13952188672a59396e70ed0e4fb5ddb35db51a70d1b5b"
+      }
+    ]
+  }
+}

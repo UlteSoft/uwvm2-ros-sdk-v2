@@ -1,0 +1,38 @@
+{
+  "id": "limx",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "limxsdk::msg::perception_msgs::HeightEstimateResult",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_estimate_height",
+        "field": "estimate_height",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_header_seq",
+        "field": "header_seq",
+        "type": "u32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/limxdynamics/limxsdk-lowlevel/blob/61624b58663b47928717069ff0eab2f1c85ec733/include/limxsdk/msg/perception_msgs/HeightEstimateResult.h",
+        "revision": "61624b58663b47928717069ff0eab2f1c85ec733",
+        "path": "include/limxsdk/msg/perception_msgs/HeightEstimateResult.h",
+        "sha256": "432fe763728abcf2d0a3f4f8dd0f2e3e6f09cc7128c6f117379cbdb32437142c"
+      },
+      {
+        "url": "https://github.com/limxdynamics/limxsdk-lowlevel/blob/61624b58663b47928717069ff0eab2f1c85ec733/include/limxsdk/codec/codec.h",
+        "revision": "61624b58663b47928717069ff0eab2f1c85ec733",
+        "path": "include/limxsdk/codec/codec.h",
+        "sha256": "8762c752bab0227f2027e0dc60141117e5f3814c9d722c8485febc74d53668bf"
+      }
+    ]
+  }
+}

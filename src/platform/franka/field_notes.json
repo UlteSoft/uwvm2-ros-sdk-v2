@@ -1,0 +1,320 @@
+{
+  "*": {
+    "header": "Acquisition timestamp and reference frame.",
+    "success": "Whether the requested operation succeeded.",
+    "error": "Error description returned by the server.",
+    "stamp": "Timestamp.",
+    "frame_id": "Reference coordinate frame identifier.",
+    "x": "X component.",
+    "y": "Y component.",
+    "z": "Z component.",
+    "w": "Scalar component of the quaternion.",
+    "force": "Force vector.",
+    "torque": "Torque vector.",
+    "position": "Position.",
+    "orientation": "Orientation as a quaternion.",
+    "linear": "Linear component.",
+    "angular": "Angular component.",
+    "vector": "Three-component vector in the named frame.",
+    "wrench": "Force and torque in the named frame.",
+    "twist": "Linear and angular velocity in the named frame.",
+    "accel": "Linear and angular acceleration in the named frame.",
+    "pose": "Position and orientation in the named frame.",
+    "inertia": "Mass, center of mass and inertia tensor in the named frame.",
+    "uuid": "The 16 octets of the goal identifier.",
+    "feedback": "Feedback for this action."
+  },
+  "franka_msgs/msg/Elbow": {
+    "position": "Measured elbow configuration from libfranka elbow. Element 0 is joint 3 position in radians. Element 1 is the joint 4 flip direction (−1, 0, or +1).",
+    "desired_position": "Desired elbow configuration from elbow_d, with joint 3 position in radians followed by the joint 4 flip direction.",
+    "commanded_position": "Commanded elbow configuration from elbow_c, with joint 3 position in radians followed by the joint 4 flip direction.",
+    "commanded_velocity": "Commanded joint 3 velocity in rad/s from delbow_c[0]. The second component is zero.",
+    "commanded_acceleration": "Commanded joint 3 acceleration in rad/s² from ddelbow_c[0]. The second component is zero.",
+    "$type": "Measured, desired and commanded elbow state."
+  },
+  "franka_msgs/msg/CollisionIndicators": {
+    "is_cartesian_linear_collision": "Collision levels along the three translational Cartesian axes. A collision indication persists until reset.",
+    "is_cartesian_linear_contact": "Contact levels along the three translational Cartesian axes. The levels return to zero when contact disappears.",
+    "is_cartesian_angular_collision": "Collision levels for the three rotational Cartesian components. A collision indication persists until reset.",
+    "is_cartesian_angular_contact": "Contact levels for the three rotational Cartesian components. The levels return to zero when contact disappears.",
+    "is_joint_collision": "Collision levels in joint order, retained until reset.",
+    "is_joint_contact": "Contact levels in joint order, returning to zero when contact disappears.",
+    "$type": "Cartesian and joint contact and collision levels."
+  },
+  "franka_msgs/msg/FrankaRobotState": {
+    "header": "Timestamp of the robot state and reference frame.",
+    "time": "Strictly increasing time since robot start, converted to seconds with libfranka time.toSec().",
+    "control_command_success_rate": "Fraction of the last 100 control commands received successfully. Range 0–1. Zero when no control or motion generator loop is running.",
+    "robot_mode": "Reported robot operating mode. See the ROBOT_MODE_* constants.",
+    "current_errors": "Flags currently raised by the robot.",
+    "last_motion_errors": "Flags reported for the last motion.",
+    "accelerometer_top": "Six top-side translational acceleration samples in m/s² for joints 1–6. Each header identifies its accelerometer frame.",
+    "accelerometer_bottom": "Six bottom-side translational acceleration samples in m/s² for joints 1–6. Each header identifies its accelerometer frame.",
+    "k_f_ext_hat_k": "Estimated external wrench acting on the stiffness frame, expressed in stiffness-frame coordinates. Force in N, torque in N·m.",
+    "o_f_ext_hat_k": "Estimated external wrench acting on the stiffness frame, expressed in base coordinates. Force in N, torque in N·m.",
+    "measured_joint_state": "Measured joint position q in rad, velocity dq in rad/s and link-side torque tau_J in N·m.",
+    "desired_joint_state": "Desired joint position q_d in rad, velocity dq_d in rad/s and desired link-side torque tau_J_d in N·m.",
+    "measured_joint_motor_state": "Measured motor position theta in rad and velocity dtheta in rad/s.",
+    "ddq_d": "Desired angular acceleration of each of the seven arm joints in rad/s².",
+    "dtau_j": "Derivative of measured link-side torque in N·m/s for each arm joint.",
+    "tau_ext_hat_filtered": "Low-pass filtered external joint torques in N·m, stored in the effort sequence.",
+    "o_dp_ee_d": "Desired end-effector twist in the base frame. Linear velocity in m/s, angular velocity in rad/s.",
+    "o_dp_ee_c": "Last commanded end-effector twist in the base frame. Linear velocity in m/s, angular velocity in rad/s.",
+    "o_ddp_ee_c": "Last commanded end-effector acceleration in the base frame. Linear acceleration in m/s², angular acceleration in rad/s².",
+    "ROBOT_MODE_OTHER": "Reported libfranka RobotMode for other modes.",
+    "ROBOT_MODE_IDLE": "Reported libfranka RobotMode for idle.",
+    "ROBOT_MODE_MOVE": "Reported libfranka RobotMode for motion.",
+    "ROBOT_MODE_GUIDING": "Reported libfranka RobotMode for guiding.",
+    "ROBOT_MODE_REFLEX": "Reported libfranka RobotMode for reflex.",
+    "ROBOT_MODE_USER_STOPPED": "Reported libfranka RobotMode for user stop.",
+    "ROBOT_MODE_AUTOMATIC_ERROR_RECOVERY": "Reported libfranka RobotMode for automatic error recovery.",
+    "$type": "Timestamped arm state, errors, inertias, poses, joint samples and accelerometer measurements."
+  },
+  "sensor_msgs/msg/JointState": {
+    "header": "Acquisition time shared by all joints and the reference frame.",
+    "name": "Joint names in sample order. Each populated joint-state sequence has the same length. An empty sequence marks an unavailable field.",
+    "position": "Joint positions in radians or metres, depending on joint type.",
+    "velocity": "Joint velocities in rad/s or m/s, depending on joint type.",
+    "effort": "Joint efforts in N·m or N, depending on joint type.",
+    "$type": "Time-coherent joint states. Each populated array has the same number of elements."
+  },
+  "geometry_msgs/msg/Inertia": {
+    "ixx": "XX component of the inertia tensor about the center of mass in kg·m².",
+    "ixy": "XY component of the inertia tensor about the center of mass in kg·m².",
+    "ixz": "XZ component of the inertia tensor about the center of mass in kg·m².",
+    "iyy": "YY component of the inertia tensor about the center of mass in kg·m².",
+    "iyz": "YZ component of the inertia tensor about the center of mass in kg·m².",
+    "izz": "ZZ component of the inertia tensor about the center of mass in kg·m².",
+    "$type": "Mass, center of mass and symmetric inertia tensor."
+  },
+  "geometry_msgs/msg/Quaternion": {
+    "x": "X component of the orientation quaternion.",
+    "y": "Y component of the orientation quaternion.",
+    "z": "Z component of the orientation quaternion.",
+    "w": "W component of the orientation quaternion.",
+    "$type": "Orientation expressed as a quaternion."
+  },
+  "franka_msgs/msg/TargetStatus": {
+    "status": "Motion status value from the IDLE, EXECUTING, TARGET_REACHED and ABORTED constants.",
+    "$type": "Reported status of a point-to-point motion."
+  },
+  "service_msgs/msg/ServiceEventInfo": {
+    "client_gid": "16 octets identifying the requesting client within this middleware session.",
+    "REQUEST_SENT": "Service event emitted when the client sends a request.",
+    "REQUEST_RECEIVED": "Service event emitted when the server receives a request.",
+    "RESPONSE_SENT": "Service event emitted when the server sends a response.",
+    "RESPONSE_RECEIVED": "Service event emitted when the client receives a response.",
+    "$type": "Service transaction and introspection metadata."
+  },
+  "franka_msgs/srv/SetFullCollisionBehavior_Request": {
+    "lower_torque_thresholds_acceleration": "Lower torque thresholds for the acceleration phase, in N·m for seven arm joints.",
+    "lower_torque_thresholds_nominal": "Lower torque thresholds for the nominal phase, in N·m for seven arm joints.",
+    "lower_force_thresholds_acceleration": "Lower force thresholds for the acceleration phase, in N for three forces followed by N·m for three torques.",
+    "lower_force_thresholds_nominal": "Lower force thresholds for the nominal phase, in N for three forces followed by N·m for three torques.",
+    "upper_torque_thresholds_acceleration": "Upper torque thresholds for the acceleration phase, in N·m for seven arm joints.",
+    "upper_torque_thresholds_nominal": "Upper torque thresholds for the nominal phase, in N·m for seven arm joints.",
+    "upper_force_thresholds_acceleration": "Upper force thresholds for the acceleration phase, in N for three forces followed by N·m for three torques.",
+    "upper_force_thresholds_nominal": "Upper force thresholds for the nominal phase, in N for three forces followed by N·m for three torques."
+  },
+  "franka_msgs/srv/SetForceTorqueCollisionBehavior_Request": {
+    "lower_torque_thresholds_nominal": "Lower torque thresholds for the nominal phase, in N·m for seven arm joints.",
+    "lower_force_thresholds_nominal": "Lower force thresholds for the nominal phase, in N for three forces followed by N·m for three torques.",
+    "upper_torque_thresholds_nominal": "Upper torque thresholds for the nominal phase, in N·m for seven arm joints.",
+    "upper_force_thresholds_nominal": "Upper force thresholds for the nominal phase, in N for three forces followed by N·m for three torques."
+  },
+  "franka_msgs/action/Grasp_Goal": {
+    "width": "Requested gripper opening in metres.",
+    "speed": "Requested gripper speed in m/s.",
+    "epsilon": "Tolerated inward and outward deviations from the requested width.",
+    "force": "Requested grasp force in newtons."
+  },
+  "franka_msgs/action/Move_Goal": {
+    "width": "Requested gripper opening in metres.",
+    "speed": "Requested gripper speed in m/s."
+  },
+  "franka_msgs/action/Grasp_Feedback": {
+    "current_width": "Current gripper opening in metres."
+  },
+  "franka_msgs/action/Move_Feedback": {
+    "current_width": "Current gripper opening in metres."
+  },
+  "franka_msgs/action/Homing_Feedback": {
+    "current_width": "Current gripper opening in metres."
+  },
+  "franka_msgs/msg/GraspEpsilon": {
+    "inner": "Inward tolerance in metres when the measured grasp width is smaller than the commanded width.",
+    "outer": "Outward tolerance in metres when the measured grasp width is larger than the commanded width.",
+    "$type": "Inward and outward grasp-width tolerances."
+  },
+  "franka_msgs/srv/SetLoad_Request": {
+    "mass": "Mass of the load in kg.",
+    "center_of_mass": "Load center-of-mass position in metres.",
+    "load_inertia": "Rotational inertia in kg·m² about the center of mass, as a column-major 3×3 matrix."
+  },
+  "franka_msgs/action/PTPMotion_Goal": {
+    "goal_joint_configuration": "Desired joint angles in rad, in joint order. The upstream motion handler requires the number of entries to match its joint position target.",
+    "maximum_joint_velocities": "Maximum allowed angular velocities for the motion in rad/s.",
+    "goal_tolerance": "Joint position tolerance in rad. Target reached also requires joint velocities below the upstream small-velocity threshold."
+  },
+  "franka_spine_msgs/msg/SpineState": {
+    "state": "Reported spine state, one of NotReadyToSwitchOn, SwitchedOff, ReadyToSwitchOn, MotorOff, SwitchedOn, QuickStopActive, FaultReactionActive, Fault or Unknown.",
+    "$type": "Periodic spine state sample on ~/state. The valid flag reports freshness.",
+    "header": "Acquisition time and reference frame for this spine sample."
+  },
+  "franka_spine_msgs/srv/GetSpineState_Response": {
+    "state": "Reported spine state, one of NotReadyToSwitchOn, SwitchedOff, ReadyToSwitchOn, MotorOff, SwitchedOn, QuickStopActive, FaultReactionActive, Fault or Unknown."
+  },
+  "builtin_interfaces/msg/Time": {
+    "sec": "Signed seconds of ROS time.",
+    "nanosec": "Nanoseconds added to sec, in [0, 1000000000). Negative times use a negative seconds component and nonnegative nanoseconds.",
+    "$type": "ROS time in seconds and nanoseconds."
+  },
+  "geometry_msgs/msg/Wrench": {
+    "force": "Linear force in N.",
+    "torque": "Torque in N·m.",
+    "$type": "Force and torque."
+  },
+  "geometry_msgs/msg/Twist": {
+    "linear": "Linear velocity in m/s.",
+    "angular": "Angular velocity in rad/s.",
+    "$type": "Linear and angular velocity."
+  },
+  "geometry_msgs/msg/Accel": {
+    "linear": "Linear acceleration in m/s².",
+    "angular": "Angular acceleration in rad/s².",
+    "$type": "Linear and angular acceleration."
+  },
+  "geometry_msgs/msg/Point": {
+    "x": "Position on the X axis in metres.",
+    "y": "Position on the Y axis in metres.",
+    "z": "Position on the Z axis in metres.",
+    "$type": "Three-dimensional position."
+  },
+  "geometry_msgs/msg/Vector3": {
+    "x": "X component of a vector, in units determined by the enclosing message.",
+    "y": "Y component of a vector, in units determined by the enclosing message.",
+    "z": "Z component of a vector, in units determined by the enclosing message.",
+    "$type": "Three-dimensional vector anchored at the origin."
+  },
+  "franka_msgs/msg/Errors": {
+    "$type": "Libfranka error flags exposed by the ROS 2 state translation."
+  },
+  "franka_msgs/srv/SetJointStiffness": {
+    "$type": "Joint impedance configuration."
+  },
+  "franka_msgs/srv/SetCartesianStiffness": {
+    "$type": "Cartesian impedance in the stiffness frame."
+  },
+  "franka_msgs/srv/SetForceTorqueCollisionBehavior": {
+    "$type": "Nominal joint torque and Cartesian force/torque collision thresholds."
+  },
+  "franka_msgs/srv/SetFullCollisionBehavior": {
+    "$type": "Joint and Cartesian collision thresholds for acceleration and nominal motion phases."
+  },
+  "franka_msgs/srv/SetLoad": {
+    "$type": "Payload mass, center of mass and inertia."
+  },
+  "franka_msgs/srv/SetStiffnessFrame": {
+    "$type": "Transform for the stiffness frame relative to the TCP frame."
+  },
+  "franka_msgs/srv/SetTCPFrame": {
+    "$type": "Transform describing the TCP frame relative to the end effector."
+  },
+  "franka_msgs/action/ErrorRecovery": {
+    "$type": "Automatic arm error recovery."
+  },
+  "franka_msgs/action/Grasp": {
+    "$type": "Gripper grasp with width, tolerances, speed and force."
+  },
+  "franka_msgs/action/Homing": {
+    "$type": "Gripper homing."
+  },
+  "franka_msgs/action/Move": {
+    "$type": "Movement to a specified gripper width."
+  },
+  "franka_msgs/action/PTPMotion": {
+    "$type": "Point-to-point arm motion in joint space."
+  },
+  "franka_spine_msgs/msg/SpinePosition": {
+    "$type": "Periodic spine position sample on ~/position. The valid flag reports freshness.",
+    "header": "Acquisition time and reference frame for this spine sample."
+  },
+  "franka_spine_msgs/msg/SpineParameters": {
+    "$type": "Aggregated spine parameters reported by GetParameters.",
+    "user_limits": "User-defined upper and lower spine travel limits in metres."
+  },
+  "franka_spine_msgs/msg/UserLimits": {
+    "$type": "User-defined soft motion limits of the spine.",
+    "lower_limit": "User-defined lower spine travel limit in metres.",
+    "upper_limit": "User-defined upper spine travel limit in metres."
+  },
+  "franka_spine_msgs/srv/SwitchOn": {
+    "$type": "Transition the spine to SwitchedOn."
+  },
+  "franka_spine_msgs/srv/SwitchOff": {
+    "$type": "Transition the spine to SwitchedOff."
+  },
+  "franka_spine_msgs/srv/FaultReset": {
+    "$type": "Reset the spine from Fault to SwitchedOff."
+  },
+  "franka_spine_msgs/srv/GetParameters": {
+    "$type": "Read spine parameters, including the configured user limits."
+  },
+  "franka_spine_msgs/srv/GetPosition": {
+    "$type": "Read the current spine position."
+  },
+  "franka_spine_msgs/srv/GetSpineState": {
+    "$type": "Read the current spine state and reported errors."
+  },
+  "franka_spine_msgs/srv/Halt": {
+    "$type": "Immediately halt spine motion."
+  },
+  "franka_spine_msgs/action/MoveAbsolute": {
+    "$type": "Absolute spine motion with a target in metres and positive velocity, acceleration and deceleration."
+  },
+  "action_msgs/msg/GoalInfo": {
+    "$type": "Goal identifier and acceptance time."
+  },
+  "action_msgs/msg/GoalStatus": {
+    "$type": "Action protocol state associated with a goal."
+  },
+  "action_msgs/msg/GoalStatusArray": {
+    "$type": "Statuses of the goals reported by an action server."
+  },
+  "action_msgs/srv/CancelGoal": {
+    "$type": "Select goals by UUID and acceptance time. A zero UUID selects all goals at or before the timestamp, or every goal if the timestamp is zero. A nonzero UUID selects that goal and, when the timestamp is nonzero, all goals accepted at or before it."
+  },
+  "geometry_msgs/msg/AccelStamped": {
+    "$type": "Acceleration in a named frame at a specified time."
+  },
+  "geometry_msgs/msg/InertiaStamped": {
+    "$type": "Inertia in a named frame at a specified time."
+  },
+  "geometry_msgs/msg/Pose": {
+    "$type": "Position and orientation."
+  },
+  "geometry_msgs/msg/PoseStamped": {
+    "$type": "Pose in a named frame at a specified time."
+  },
+  "geometry_msgs/msg/TwistStamped": {
+    "$type": "Twist in a named frame at a specified time."
+  },
+  "geometry_msgs/msg/Vector3Stamped": {
+    "$type": "Vector in a named frame at a specified time."
+  },
+  "geometry_msgs/msg/WrenchStamped": {
+    "$type": "Wrench in a named frame at a specified time."
+  },
+  "std_msgs/msg/Header": {
+    "$type": "Timestamp and coordinate frame attached to a sample."
+  },
+  "unique_identifier_msgs/msg/UUID": {
+    "$type": "Sixteen octets of a universally unique identifier."
+  },
+  "franka_spine_msgs/action/MoveAbsolute_Goal": {
+    "position": "Target absolute spine position in metres.",
+    "velocity": "Motion velocity in m/s, strictly greater than zero.",
+    "acceleration": "Motion acceleration in m/s², strictly greater than zero.",
+    "deceleration": "Motion deceleration in m/s², strictly greater than zero."
+  }
+}

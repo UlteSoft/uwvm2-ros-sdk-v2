@@ -1,0 +1,55 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2026-03-26
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+module;
+#include <uwvm2/utils/thread/stop_token.h>
+
+export module uwvm2.utils.thread;
+export import :native_thread;
+export import :native_thread_join;
+export import :keyed_wait_set;
+export import :execution_lifetime;
+export import :execution_domain;
+export import :process_exit;
+export import :monotonic_clock;
+export import :checkpoint_host_admission;
+export import :cooperative_pause_domain;
+export import :collection_pause_domain;
+export import :immutable_snapshot;
+export import :deferred_owner;
+
+export namespace uwvm2::utils::thread
+{
+    using ::uwvm2::utils::thread::stop_source;
+    using ::uwvm2::utils::thread::stop_token;
+    using ::uwvm2::utils::thread::stop_callback;
+}
+
+
+#ifndef UWVM_MODULE
+# define UWVM_MODULE
+#endif
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT export
+#endif
+
+#include "impl.h"

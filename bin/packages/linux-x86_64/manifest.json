@@ -1,0 +1,689 @@
+{
+  "schema": 1,
+  "host": "linux-x86_64",
+  "packages": {
+    "clang": {
+      "bytes": 94090544,
+      "compressed_bytes": 25399596,
+      "compressed_sha256": "812ca15fb401b0f0e75556d20615463e3e46ce5bdefc9a95dc8b5356664dd685",
+      "format": "tar.xz",
+      "host": "linux-x86_64",
+      "member": "clang",
+      "path": "bin/packages/linux-x86_64/wrcc/clang.tar.xz",
+      "sha256": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04"
+    },
+    "llvm-ar": {
+      "bytes": 6037032,
+      "compressed_bytes": 1601048,
+      "compressed_sha256": "ee9dddbe82253663d02b82ea087283cadcdca8a0d98c98f228f33e5fc497df50",
+      "format": "tar.xz",
+      "host": "linux-x86_64",
+      "member": "llvm-ar",
+      "path": "bin/packages/linux-x86_64/wrcc/llvm-ar.tar.xz",
+      "sha256": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0"
+    },
+    "wasm-ld": {
+      "bytes": 49858040,
+      "compressed_bytes": 14194960,
+      "compressed_sha256": "b29daa15c45b83bde3a7768d65ecc3392d46925716e6890c6d7bad1bd86206d3",
+      "format": "tar.xz",
+      "host": "linux-x86_64",
+      "member": "wasm-ld",
+      "path": "bin/packages/linux-x86_64/wrcc/wasm-ld.tar.xz",
+      "sha256": "3c65e1fbb9d285ec198287f47d9d5a68b23d1ca053bb95c861b2422a06c04124"
+    },
+    "wrwat": {
+      "format": "tar.xz",
+      "member": "wrwat",
+      "compressed_bytes": 724380,
+      "compressed_sha256": "1cb9692aaf96f7c0fd6ff99f1b2b8b372e52b5d2e199c7d5127978191d7ba35d",
+      "bytes": 3379368,
+      "sha256": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+      "path": "bin/packages/linux-x86_64/wrwat/wrwat.tar.xz"
+    },
+    "wrrs": {
+      "bytes": 67904,
+      "compressed_bytes": 25504,
+      "compressed_sha256": "ed3689868ebfd06651c6497c081d90db1d3e876c8653fa96fb74dfd8bbd4db2a",
+      "format": "tar.xz",
+      "member": "wrrs",
+      "path": "bin/packages/linux-x86_64/wrrs/wrrs-ed3689868ebfd06651c6.tar.xz",
+      "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9"
+    },
+    "wrrs-librustc-driver-aff9448c053be314-so": {
+      "bytes": 152465104,
+      "compressed_bytes": 41567080,
+      "compressed_sha256": "8a99747417c5699f26f0c3689e9d16827133dab1145e03642eae58e08527838f",
+      "format": "tar.xz",
+      "member": "wrrs-librustc-driver-aff9448c053be314-so",
+      "path": "bin/packages/linux-x86_64/wrrs/wrrs-librustc-driver-aff9448c053be314-so-8a99747417c5699f26f0.tar.xz",
+      "sha256": "002f2f423911cad122cc20cc6bb0672e788dfe734cbb62240d696b1db1b277db"
+    }
+  },
+  "selections": {
+    "c": {
+      "artifacts": {
+        "clang": [
+          "bin/wrc",
+          "share/toolchains/portable/bin/clang"
+        ],
+        "llvm-ar": [
+          "share/toolchains/portable/bin/llvm-ar"
+        ],
+        "wasm-ld": [
+          "share/toolchains/portable/bin/wasm-ld"
+        ]
+      },
+      "support_roots": [
+        "src/abi/contract.json",
+        "src/compilers/cc/policy",
+        "src/compilers/cc/distribution/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json",
+        "src/compilers/cc/distribution/licenses",
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte"
+      ],
+      "source_roots": [
+        "src/compilers/cc",
+        "src/compilers/package_native.py"
+      ],
+      "support_map": {
+        "src/abi/contract.json": "share/abi/ros.json",
+        "src/compilers/cc/policy": "install",
+        "src/compilers/cc/distribution/memory-neighbors.json": "share/qualification/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json": "share/toolchains/portable/distribution.json",
+        "src/compilers/cc/distribution/licenses": "share/toolchains/portable/licenses"
+      },
+      "binary_support_roots": [
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte"
+      ]
+    },
+    "cpp": {
+      "artifacts": {
+        "clang": [
+          "bin/wrcc",
+          "share/toolchains/portable/bin/clang",
+          "share/toolchains/portable/bin/clang++"
+        ],
+        "llvm-ar": [
+          "share/toolchains/portable/bin/llvm-ar"
+        ],
+        "wasm-ld": [
+          "share/toolchains/portable/bin/wasm-ld"
+        ]
+      },
+      "support_roots": [
+        "src/abi/contract.json",
+        "src/compilers/cc/policy",
+        "src/compilers/cc/distribution/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json",
+        "src/compilers/cc/distribution/licenses",
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte"
+      ],
+      "source_roots": [
+        "src/compilers/cc",
+        "src/compilers/package_native.py"
+      ],
+      "support_map": {
+        "src/abi/contract.json": "share/abi/ros.json",
+        "src/compilers/cc/policy": "install",
+        "src/compilers/cc/distribution/memory-neighbors.json": "share/qualification/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json": "share/toolchains/portable/distribution.json",
+        "src/compilers/cc/distribution/licenses": "share/toolchains/portable/licenses"
+      },
+      "binary_support_roots": [
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte"
+      ]
+    },
+    "wat": {
+      "artifacts": {
+        "wrwat": [
+          "bin/wrwat"
+        ]
+      },
+      "support_roots": [
+        "src/abi/contract.json",
+        "src/compilers/wrwat/LICENSE-APACHE",
+        "src/compilers/wrwat/LICENSE-MIT",
+        "src/compilers/wrwat/LICENSE-Apache-2.0_WITH_LLVM-exception",
+        "src/compilers/wrwat/release/linux-x86_64.json",
+        "src/compilers/wrwat/THIRD-PARTY-NOTICES.txt"
+      ],
+      "source_roots": [
+        "src/compilers/wrwat",
+        "src/compilers/package_native.py",
+        "src/compilers/official_dist.py",
+        "install/install.py"
+      ],
+      "support_map": {
+        "src/abi/contract.json": "share/abi/ros.json",
+        "src/compilers/wrwat/release/linux-x86_64.json": "third-parties/wat-mte/release.json"
+      }
+    },
+    "as": {
+      "artifacts": {},
+      "support_roots": [
+        "src/compilers/sdk_layout.py",
+        "src/compilers/script_command.py",
+        "src/compilers/as/compile.mjs",
+        "src/compilers/as/driver.py",
+        "src/compilers/as/driver_lowering.mjs",
+        "src/compilers/as/staging.ts",
+        "src/compilers/as/compiler",
+        "src/compilers/as/compiler.json",
+        "src/compilers/as/licenses",
+        "src/compilers/as/UPSTREAM.json",
+        "src/compilers/cc/policy/imports.py",
+        "src/compilers/cc/policy/artifacts.py",
+        "src/compilers/node/UPSTREAM.json",
+        "src/compilers/node/upstream/LICENSE",
+        "src/compilers/official_dist.py"
+      ],
+      "source_roots": [
+        "src/compilers/as/upstream",
+        "src/compilers/as/fixtures",
+        "src/compilers/as/prove_imports.py",
+        "src/compilers/as/README.md",
+        "src/compilers/node"
+      ],
+      "support_map": {
+        "src/compilers/script_command.py": "bin/wras"
+      },
+      "host_tools": {}
+    },
+    "js": {
+      "artifacts": {},
+      "support_roots": [
+        "src/compilers/sdk_layout.py",
+        "src/compilers/script_command.py",
+        "src/compilers/js/driver.py",
+        "src/compilers/js/entry.c",
+        "src/compilers/js/quickjs"
+      ],
+      "source_roots": [
+        "src/compilers/js/prove_imports.py",
+        "src/compilers/js/README.md"
+      ],
+      "support_map": {
+        "src/compilers/script_command.py": "bin/wrjs"
+      },
+      "native_backend": "c"
+    },
+    "typescript": {
+      "artifacts": {},
+      "support_roots": [
+        "src/compilers/sdk_layout.py",
+        "src/compilers/script_command.py",
+        "src/compilers/typescript/driver.py",
+        "src/compilers/typescript/compile.cjs",
+        "src/compilers/typescript/compiler",
+        "src/compilers/typescript/release.json",
+        "src/compilers/typescript/LICENSE.txt",
+        "src/compilers/typescript/ThirdPartyNoticeText.txt",
+        "src/compilers/typescript/UPSTREAM.json",
+        "src/compilers/js/driver.py",
+        "src/compilers/js/entry.c",
+        "src/compilers/js/quickjs",
+        "src/compilers/node/UPSTREAM.json",
+        "src/compilers/node/upstream/LICENSE",
+        "src/compilers/official_dist.py"
+      ],
+      "source_roots": [
+        "src/compilers/typescript/upstream",
+        "src/compilers/typescript/README.md",
+        "src/compilers/js/README.md",
+        "src/compilers/js/prove_imports.py",
+        "src/compilers/node"
+      ],
+      "support_map": {
+        "src/compilers/script_command.py": "bin/wrts"
+      },
+      "native_backend": "c",
+      "host_tools": {}
+    },
+    "rust": {
+      "artifacts": {
+        "wrrs": [
+          "bin/wrrs",
+          "bin/rustc"
+        ],
+        "wrrs-librustc-driver-aff9448c053be314-so": [
+          "lib/librustc_driver-aff9448c053be314.so"
+        ]
+      },
+      "host_tools": {
+        "clang": [
+          "share/toolchains/portable/bin/clang"
+        ],
+        "wasm-ld": [
+          "share/toolchains/portable/bin/wasm-ld",
+          "lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+        ]
+      },
+      "support_roots": [
+        "src/abi/contract.json",
+        "src/compilers/cc/policy",
+        "src/compilers/rust/lower.py",
+        "src/compilers/rust/runtime.rs",
+        "src/compilers/rust/UPSTREAM.json",
+        "src/compilers/rust/upstream/LICENSE-MIT",
+        "src/compilers/rust/upstream/LICENSE-APACHE",
+        "src/compilers/rust/upstream/LICENSES",
+        "src/compilers/rust/upstream/COPYRIGHT",
+        "src/compilers/rust/upstream/license-metadata.json",
+        "src/compilers/rust/upstream/library/core",
+        "src/compilers/rust/upstream/library/compiler-builtins/compiler-builtins",
+        "src/compilers/rust/upstream/library/stdarch/crates/core_arch",
+        "src/compilers/rust/upstream/library/portable-simd/crates/core_simd",
+        "src/compilers/rust/upstream/library/compiler-builtins/libm",
+        "lib/wasm32-wasip1/core3.0-eh-mte/libc++abi.a",
+        "lib/wasm32-wasip1/core3.0-eh-mte/libunwind.a",
+        "lib/wasm32-wasip1/core3.0-eh-mte/libc.a",
+        "lib/wasm32-wasip1/core3.0-eh-mte/libclang_rt.builtins.a",
+        "lib/wasm64-wasip1/core3.0-eh-mte/libc++abi.a",
+        "lib/wasm64-wasip1/core3.0-eh-mte/libunwind.a",
+        "lib/wasm64-wasip1/core3.0-eh-mte/libc.a",
+        "lib/wasm64-wasip1/core3.0-eh-mte/libclang_rt.builtins.a",
+        "src/compilers/cc/distribution/licenses",
+        "src/compilers/rust/upstream/library/compiler-builtins/LICENSE.txt",
+        "src/compilers/rust/upstream/library/portable-simd/LICENSE-APACHE",
+        "src/compilers/rust/upstream/library/portable-simd/LICENSE-MIT",
+        "src/compilers/rust/upstream/library/stdarch/LICENSE-APACHE",
+        "src/compilers/rust/upstream/library/stdarch/LICENSE-MIT"
+      ],
+      "source_roots": [
+        "src/compilers/rust",
+        "src/compilers/package_native.py",
+        "src/compilers/official_dist.py",
+        "install/install.py"
+      ],
+      "support_map": {
+        "src/abi/contract.json": "share/abi/ros.json",
+        "src/compilers/cc/policy": "install",
+        "src/compilers/cc/distribution/licenses": "share/toolchains/portable/licenses"
+      },
+      "system_libraries": [
+        "ld-linux-x86-64.so.2",
+        "libc.so.6",
+        "libgcc_s.so.1",
+        "libm.so.6",
+        "libstdc++.so.6",
+        "libz.so.1"
+      ]
+    },
+    "go": {
+      "artifacts": {},
+      "native_outputs": {
+        "go-asm": [
+          "share/toolchains/go/asm"
+        ],
+        "go-compile": [
+          "share/toolchains/go/compile"
+        ],
+        "go-link": [
+          "share/toolchains/go/link"
+        ],
+        "go-wrgo": [
+          "bin/wrgo"
+        ]
+      },
+      "release_record": "bin/packages/linux-x86_64/wrgo/go/native.json",
+      "source_roots": [
+        "src/compilers/go",
+        "src/compilers/package_native.py"
+      ],
+      "support_roots": [
+        "src/compilers/go/host_package.py",
+        "src/compilers/go/rebuild.py",
+        "src/compilers/go/test-fixtures.json",
+        "src/compilers/go/upstream.json",
+        "src/compilers/go/upstream/LICENSE",
+        "src/compilers/go/upstream/PATENTS",
+        "src/compilers/go/upstream/src/cmd/internal/obj/wasm/a.out.go",
+        "src/compilers/go/upstream/src/cmd/internal/obj/wasm/anames.go",
+        "src/compilers/go/upstream/src/cmd/internal/obj/wasm/wasmobj.go",
+        "src/compilers/go/upstream/src/cmd/link/internal/wasm/asm.go",
+        "src/compilers/go/upstream/src/runtime/panic.go",
+        "src/compilers/go/upstream/src/runtime/panic_wros_default.go",
+        "src/compilers/go/upstream/src/runtime/panic_wros_wasm.go",
+        "src/compilers/go/upstream/src/runtime/panic_wros_wasm.s",
+        "src/compilers/go/upstream/src/runtime/stack.go",
+        "src/compilers/go/upstream/src/runtime/stack_wros_default.go",
+        "src/compilers/go/upstream/src/runtime/stack_wros_wasm.go",
+        "src/compilers/go/upstream/src/runtime/stack_wros_wasm.s",
+        "src/compilers/official_dist.py",
+        "src/compilers/go/test_fixtures.py"
+      ]
+    },
+    "tinygo": {
+      "artifacts": {},
+      "host_tools": {
+        "clang": [
+          "share/toolchains/tinygo-llvm/clang"
+        ],
+        "wasm-ld": [
+          "share/toolchains/tinygo-llvm/wasm-ld"
+        ]
+      },
+      "llvm_source_roots": [
+        "src/compilers/cc/llvm-project/llvm",
+        "src/compilers/cc/llvm-project/cmake",
+        "src/compilers/cc/llvm-project/libc",
+        "src/compilers/cc/llvm-project/third-party"
+      ],
+      "native_outputs": {
+        "tinygo-prepare-ir": [
+          "share/toolchains/tinygo-llvm/prepare-ir"
+        ],
+        "tinygo-wrtg": [
+          "bin/wrtg"
+        ]
+      },
+      "release_record": "bin/packages/linux-x86_64/wrgo/tinygo/native.json",
+      "source_roots": [
+        "src/compilers/tinygo",
+        "src/compilers/go/command",
+        "src/compilers/package_native.py"
+      ],
+      "support_roots": [
+        "src/compilers/cc/distribution/licenses",
+        "src/compilers/go/host_package.py",
+        "src/compilers/go/rebuild.py",
+        "src/compilers/go/test-fixtures.json",
+        "src/compilers/go/upstream/LICENSE",
+        "src/compilers/go/upstream/PATENTS",
+        "src/compilers/tinygo/runtime",
+        "src/compilers/tinygo/upstream.json",
+        "src/compilers/tinygo/upstream/LICENSE",
+        "src/compilers/tinygo/upstream/src/runtime/arch_tinygowasm.go",
+        "src/compilers/tinygo/upstream/src/runtime/gc_blocks.go",
+        "src/compilers/tinygo/upstream/src/runtime/gc_blocks_wros.go",
+        "src/compilers/tinygo/upstream/src/runtime/gc_wros.go",
+        "src/compilers/tinygo/upstream/src/runtime/gc_wros_default.go",
+        "src/compilers/tinygo/upstream/src/runtime/panic.go",
+        "src/compilers/tinygo/upstream/src/runtime/panic_unwind.go",
+        "src/compilers/tinygo/upstream/src/runtime/panic_wros.go",
+        "src/compilers/tinygo/upstream/src/runtime/panic_wros_default.go",
+        "src/compilers/tinygo/upstream/src/runtime/runtime_tinygowasm.go",
+        "src/compilers/tinygo/upstream/src/runtime/runtime_wasip1.go",
+        "src/compilers/tinygo/upstream/src/runtime/runtime_wros_io.go",
+        "src/compilers/tinygo/upstream/src/runtime/runtime_wros_wasip1.go",
+        "src/compilers/official_dist.py",
+        "src/compilers/go/test_fixtures.py",
+        "src/compilers/go/upstream.json"
+      ]
+    },
+    "py": {
+      "artifacts": {},
+      "native_backend": "c",
+      "binary_support_roots": [
+        "lib/wasm32-wasip1/cpython3.14",
+        "bin/packages/wasm32-wasip1/wrpy/core3.0-eh-mte",
+        "src/runtimes/cpython/config/wasm32-wasip1",
+        "share/uwros/cpython/wasm32-wasip1/producer.json"
+      ],
+      "source_roots": [
+        "src/runtimes/cpython/upstream",
+        "src/runtimes/cpython/upstream.sha256",
+        "src/runtimes/cpython/freeze_encodings.py",
+        "src/runtimes/cpython/runtime_paths.mk"
+      ],
+      "support_map": {
+        "src/compilers/py/wrpy.py": "bin/wrpy.py",
+        "bin/packages/wasm32-wasip1/wrpy/core3.0-eh-mte": "shared/wasm32-wasip1/core3.0-eh-mte"
+      },
+      "support_roots": [
+        "src/compilers/py/wrpy.py",
+        "src/compilers/cc/wasi-libc/libc-bottom-half/sources/preopens.c",
+        "src/compilers/cc/wasi-libc/libc-top-half/musl/src/internal/lock.h",
+        "src/runtimes/cpython/build_runtime.py",
+        "src/runtimes/cpython/upstream.json",
+        "src/runtimes/cpython/upstream/LICENSE",
+        "src/runtimes/cpython/upstream/Include",
+        "src/runtimes/cpython/upstream/Lib",
+        "src/runtimes/cpython/link.py",
+        "src/runtimes/cpython/entry.c",
+        "src/runtimes/cpython/bundle.py",
+        "src/runtimes/cpython/bootstrap.py",
+        "src/runtimes/cpython/wasip1.py",
+        "lib/wasm32-wasip1/cpython3.14",
+        "bin/packages/wasm32-wasip1/wrpy/core3.0-eh-mte",
+        "src/runtimes/cpython/config/wasm32-wasip1",
+        "share/uwros/cpython/wasm32-wasip1/producer.json"
+      ]
+    },
+    "objc": {
+      "artifacts": {
+        "clang": [
+          "bin/wroc",
+          "share/toolchains/portable/bin/clang",
+          "share/toolchains/portable/bin/clang++"
+        ],
+        "llvm-ar": [
+          "share/toolchains/portable/bin/llvm-ar"
+        ],
+        "wasm-ld": [
+          "share/toolchains/portable/bin/wasm-ld"
+        ]
+      },
+      "support_roots": [
+        "src/abi/contract.json",
+        "src/compilers/cc/policy",
+        "src/compilers/cc/distribution/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json",
+        "src/compilers/cc/distribution/licenses",
+        "src/compilers/objc/driver",
+        "src/compilers/objc/upstream.json",
+        "src/runtimes/objc/upstream.json",
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte",
+        "include/sysroot/objc",
+        "share/uwros/objc"
+      ],
+      "source_roots": [
+        "src/compilers/cc",
+        "src/compilers/objc",
+        "src/runtimes/objc"
+      ],
+      "support_map": {
+        "src/abi/contract.json": "share/abi/ros.json",
+        "src/compilers/cc/policy": "install",
+        "src/compilers/cc/distribution/memory-neighbors.json": "share/qualification/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json": "share/toolchains/portable/distribution.json",
+        "src/compilers/cc/distribution/licenses": "share/toolchains/portable/licenses"
+      },
+      "binary_support_roots": [
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte",
+        "include/sysroot/objc",
+        "share/uwros/objc"
+      ]
+    },
+    "objcpp": {
+      "artifacts": {
+        "clang": [
+          "bin/wrocxx",
+          "share/toolchains/portable/bin/clang",
+          "share/toolchains/portable/bin/clang++"
+        ],
+        "llvm-ar": [
+          "share/toolchains/portable/bin/llvm-ar"
+        ],
+        "wasm-ld": [
+          "share/toolchains/portable/bin/wasm-ld"
+        ]
+      },
+      "support_roots": [
+        "src/abi/contract.json",
+        "src/compilers/cc/policy",
+        "src/compilers/cc/distribution/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json",
+        "src/compilers/cc/distribution/licenses",
+        "src/compilers/objc/driver",
+        "src/compilers/objc/upstream.json",
+        "src/runtimes/objc/upstream.json",
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte",
+        "include/sysroot/objc",
+        "share/uwros/objc"
+      ],
+      "source_roots": [
+        "src/compilers/cc",
+        "src/compilers/objc",
+        "src/runtimes/objc"
+      ],
+      "support_map": {
+        "src/abi/contract.json": "share/abi/ros.json",
+        "src/compilers/cc/policy": "install",
+        "src/compilers/cc/distribution/memory-neighbors.json": "share/qualification/memory-neighbors.json",
+        "src/compilers/cc/distribution/distribution.json": "share/toolchains/portable/distribution.json",
+        "src/compilers/cc/distribution/licenses": "share/toolchains/portable/licenses"
+      },
+      "binary_support_roots": [
+        "include/sysroot/c",
+        "include/sysroot/c++",
+        "share/toolchains/portable/sysroots",
+        "lib/wasm32-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm32-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm32-wasip1/core3.0-eh-mte",
+        "lib/wasm32-wasip1/core3.0-eh-nomte",
+        "lib/wasm32-wasip1/core3.0-noeh-mte",
+        "lib/wasm32-wasip1/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-eh-nomte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-mte",
+        "lib/wasm64-wasip1-threads/core3.0-noeh-nomte",
+        "lib/wasm64-wasip1/core3.0-eh-mte",
+        "lib/wasm64-wasip1/core3.0-eh-nomte",
+        "lib/wasm64-wasip1/core3.0-noeh-mte",
+        "lib/wasm64-wasip1/core3.0-noeh-nomte",
+        "include/sysroot/objc",
+        "share/uwros/objc"
+      ]
+    }
+  }
+}

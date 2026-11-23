@@ -1,0 +1,33 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-04-05
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+# include <uwvm2/uwvm/wasm/base/impl.h>
+# include <uwvm2/uwvm/wasm/feature/impl.h>
+# include <uwvm2/uwvm/wasm/type/impl.h>
+# include <uwvm2/uwvm/wasm/section_detail/impl.h>
+# include <uwvm2/uwvm/wasm/storage/impl.h>
+# include <uwvm2/uwvm/wasm/custom/impl.h>
+# include <uwvm2/uwvm/wasm/loader/impl.h>
+#endif

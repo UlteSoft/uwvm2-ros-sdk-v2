@@ -1,0 +1,27 @@
+{
+  "artifacts": {"wrjava": ["bin/wrjava"]},
+  "native_backend": "c",
+  "support_roots": [
+    "install/install.py",
+    "src/compilers/official_dist.py",
+    "src/compilers/jvm/selection.json",
+    "src/compilers/jvm/prepare.py",
+    "src/compilers/jvm/package_inputs.py",
+    "src/compilers/jvm/java-jars.json",
+    "src/compilers/jvm/driver",
+    "src/compilers/jvm/upstream.json",
+    "src/compilers/jvm/upstream/LICENSE",
+    "src/compilers/jvm/upstream/NOTICE",
+    "src/compilers/jvm/upstream/core/src/main/java/org/teavm/backend/c/CTarget.java",
+    "src/compilers/jvm/upstream/core/src/main/java/org/teavm/backend/c/generate/ClassGenerator.java",
+    "src/compilers/jvm/upstream/core/src/main/java/org/teavm/runtime/GC.java",
+    "src/compilers/jvm/upstream/core/src/main/java/org/teavm/runtime/Allocator.java",
+    "src/compilers/jvm/upstream/core/src/main/resources"
+  ],
+  "source_roots": [
+    "src/compilers/jvm",
+    "src/compilers/cc",
+    "src/compilers/package_native.py",
+    "src/platform/abb"
+  ]
+}

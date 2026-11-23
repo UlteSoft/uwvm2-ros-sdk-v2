@@ -1,0 +1,164 @@
+{
+  "upstreams": {
+    "llvm": {
+      "url": "https://github.com/llvm/llvm-project.git",
+      "commit": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
+      "tag": "llvmorg-23.1.5",
+      "tag_repository": "https://github.com/llvm/llvm-project.git",
+      "tag_commit": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
+      "tree": "llvm-project",
+      "license": "llvm-project/LICENSE.TXT"
+    },
+    "wasi-libc": {
+      "url": "https://github.com/WebAssembly/wasi-libc.git",
+      "commit": "2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13",
+      "tag": "wasi-sdk-34",
+      "tag_repository": "https://github.com/WebAssembly/wasi-sdk.git",
+      "tag_commit": "5a0bf653a1a06e1c18867567c5937006d3394a69",
+      "tree": "wasi-libc",
+      "license": "wasi-libc/LICENSE-APACHE-LLVM"
+    },
+    "herbceptions": {
+      "url": "https://github.com/trcrsired/llvm-project",
+      "commit": "218014296779772a4edbe63eff3fe6fe0ba92390",
+      "base": "llvmorg-23.1.5",
+      "license": "llvm-project/LICENSE.TXT"
+    }
+  },
+  "sdk_integration": {
+    "url": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2",
+    "commit": "d1b61f2825787a1f51ec00208e69e88ed8a9c125",
+    "native_entry": "llvm-project/wros/clang_driver.cpp"
+  },
+  "local_changes": [
+    "The native Clang driver and cc1 share one executable. Its wrc, wrcc, wroc and wrocxx entry points select the C, C++, Objective-C and Objective-C++ policies. The WebAssembly driver and GNUstep code generator changes are identified in ../objc/upstream.json.",
+    "LLVM InstCombine checks for a legal insertion point before inverting Boolean operands. Nested exception handlers can place a PHI in a catchswitch block. The source digest is recorded in ../objc/upstream.json.",
+    "The WebAssembly-only Clang and LLD include packed WasmMTE stack, global, TLS and allocator support. WASIp1 guest libraries use matching allocation lifetimes.",
+    "Clang emits memory-width memtag.sub for ordinary linear-memory data pointer differences with WasmMTE enabled and scales the byte difference by the element size. The memtag_sub_raw and memtag_sub_uintptr builtins override the operation explicitly. The translation unit must enable WasmMTE for the WasmMTE builtin family.",
+    "The sdk-34 wasi-libc pthread stack-size discovery subtracts linker boundary symbols without tag bits. Bounded shared-memory command links export the wasi_thread_start entry. The MTE TLS copy and retire hooks retain internal linkage visibility for the guest linker.",
+    "The UWVM WASIp1 wasm64 ABI adapter in wasi-libc widens Preview 1 pointers and sizes and uses the _wasm64 import suffix.",
+    "The static wasm64 libc ports SDK34's wasi-threads pthread startup to UWVM's i32 thread-spawn argument and (i32, i32) child entry. It preserves full-width stack and TLS pointers. With WasmMTE it carries the original pointer tag in the aligned startup record's low offset bits. The CLI bounds shared memory at 4 GiB. Runtime qualification is tracked separately.",
+    "Herbceptions extends the Clang parser, semantic analysis, code generator, LLVM ABI, libc++abi bridge and portable libherbceptions error domains.",
+    "For 32-bit Linux hosts, Clang stores the uncommon CFI unchecked-callee attribute in FunctionProtoType's trailing flags. The five-bit Herbceptions exception specification and the full 16-bit parameter count then fit in the two words available to the base Type layout.",
+    "The integrated libc and LLVM runtimes include guest-side diagnostic changes. This distribution retains the compiler and runtime projects used by the Wasm toolchain and its Wasm and Herbceptions regression fixtures. Unrelated test corpora, documentation and projects outside the build are omitted."
+  ],
+  "bootstrap": {
+    "compiler": "LLVM Clang 21",
+    "compiler_sha256": "412bbe8c60571a1eb06f48fde89635033621caeb01a9b4ee76d46711bae8e932"
+  },
+  "imported_changes": [
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-23.1.5-memtag.patch",
+      "sha256": "cc4bac62f879db904500ff38a7682dff76f9197766d76b22b35f808426c0d0f4"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-untag-symbol.patch",
+      "sha256": "422b0c9f3e6ddc78e9983aed1da44f9ad7ec1e89512c3fb4bf9b6f9dc398a272"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-stack-generations.patch",
+      "sha256": "c9ceb02d7d5a6142456222a0b29e3e48d7b924c8822935304f1437e5f61f3c83"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-owner-instructions.patch",
+      "sha256": "9d82fb7cd6e1ef856a2ed3e04b0ecd909ca13f7ce445a45e6912526de1b060d6"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-memtag-mc-address-width.patch",
+      "sha256": "72146b5fb216e7e35123456818b815aed0159abd9a991bbd2d1cf12bb1e451d1"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-owner-target-immediates.patch",
+      "sha256": "e2b39bffc73b0a2787e9b635d24aec891419316d9058c9870106e3ba949111fb"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-owner-stack.patch",
+      "sha256": "613497881f3be42011ee1b8e2041d63ebc41202bfe7d2a600dc28fb649be142c"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-readonly-objects.patch",
+      "sha256": "ce7e22270ee7b45279ef16e4ff4cadbab56e0655f198aa9fa674026410d537c9"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/lld-wasm-only-drivers.patch",
+      "sha256": "6bc09b65e970d01aae0631ab5d88882ca4b18ec7d8f083042739b212c54a1bad"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/lld-managed-tls-admission.patch",
+      "sha256": "f2c54cf7cd6cc9bc79afd85d1927452877685b0af42897867c6bc959eb661b25"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/lld-managed-tls-lit.patch",
+      "sha256": "4e7f20fbe978df3b79a0fe210927d85e41fa1d0362e8339d3e97d4a53c619947"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-23.1.5-wasm-core-wasi-targets.patch",
+      "sha256": "9b6aabce6a335a00d2a032cd9f8be778205a6c3819e56997861b61dd5609a115"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-owner-scoped-unwind.patch",
+      "sha256": "1368d772f81a54113a87ee4e56c3873cb7afb7ab6c2531d7b005a6ee74e6fefa"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-aggregate-global-pointers.patch",
+      "sha256": "10a729b468f7d67fb4d6ec4f0ea89843901795ae8c8bc988dda9900141403ac3"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-phi-repeated-incoming.patch",
+      "sha256": "ae051f88975bdd7e75ef069b0c477521fc2b2738e61ab7c722ed2ce5cd002c0a"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-stack-diagnostic-location.patch",
+      "sha256": "dc276810df38441194f29ce35b889fbc7276c2b070f01316745e293dbae24710"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wasm-lifetime-address-casts.patch",
+      "sha256": "75b7ac06ecd73a699e3472768f122e4f52b934d88ac219bf4d261e50df6572d5"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/wasi-libc-sdk34-memtag.patch",
+      "sha256": "e05b3405fa9f068a579fa41e53274d8beb7667e8d274dac1d9034e06c375fc6a"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/wasi-libc-sdk34-memory64.patch",
+      "sha256": "c440d4f750d532fd2999e7305de3072be397d40c205bc194a62c430f03cdce3e",
+      "integration": "Width-selecting SDK34 source shared by the standard wasm32 ABI and the UWVM wasm64 extension."
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/wasi-libc-absolute-page-size.patch",
+      "sha256": "5114c15bef19b2fe8c75b52af2209f2f6c69204de7d69a88c285d1f103674f76"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/wasi-libc-allocation-claims.patch",
+      "sha256": "bff29d71196566d4bed2ca1c4334177ae45fa52f85c9896c7787149d5a2b372c"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/wasi-libc-bounded-scratch.patch",
+      "sha256": "20e05b4e91ac78b9cdc93dfc1b9e4723747c830bde8e7eae1538abc7bcf6b943"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/herbceptions/llvm-errors-abi.patch",
+      "sha256": "0031a3a33edb8d49f7ef3393be2304d3556c51dc45704a37db3693598b577b6e"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/herbceptions/clang-syntax-abi.patch",
+      "sha256": "688207b65a4527f0b44097ea1e59653be82ea0644f7d200650ea1b31fcb9a894"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/herbceptions/libherbceptions-target.patch",
+      "sha256": "cf24e79b98de5417bfb75d054f47a1478bda1585238cd12159a91d46fb1fbf5c"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/herbceptions/libcxxabi-herb-error-domain.patch",
+      "sha256": "0e9abc68f6b1c403c1439f14f4a6236eeab0cf98e5cc3bee67b5c612b8b27f77"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/llvm-wros-runtime-diagnostics.patch",
+      "sha256": "12afd461df8823a2b8048af9efcab0411bb7d33c1578e55db4ab366bb93088bd"
+    },
+    {
+      "original_path": "tools/wasm/memtag/patches/libc-wros-runtime-diagnostics.patch",
+      "sha256": "130b6a43b9e70bb9c1e1e0aa84b7c058a689c08f21460d9a8fc4b4fb05e7118e"
+    }
+  ]
+}

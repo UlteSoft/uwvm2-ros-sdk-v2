@@ -1,0 +1,77 @@
+{
+  "project": "LDC",
+  "url": "https://github.com/ldc-developers/ldc",
+  "tag": "v1.41.0",
+  "tag_object": "63d51231a5a9468384b9182a424e9b3679f2f5ba",
+  "commit": "90e39b6a6e61d36ef5f5d0ab6ae0667130fd8549",
+  "license": "BSD-3-Clause with upstream component-specific exceptions",
+  "license_path": "upstream/LICENSE",
+  "paths": [
+    "CMakeLists.txt",
+    "CMakeCPack.cmake",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "cmake",
+    "driver",
+    "gen",
+    "ir",
+    "dmd",
+    "docs",
+    "utils",
+    "tools",
+    "packaging",
+    "ldc2.conf.in",
+    "ldc2_install.conf.in",
+    "ldc2_phobos.conf.in",
+    "runtime",
+    "tests/CMakeLists.txt",
+    "tests/dmd/CMakeLists.txt",
+    "tests/dmd/run.d",
+    "tests/dmd/tools/paths.d",
+    "tests/lit.site.cfg.in",
+    "tests/runlit.py"
+  ],
+  "excluded_paths": [
+    "runtime/druntime/test/"
+  ],
+  "verified_upstream_blobs": 1182,
+  "phobos": {
+    "url": "https://github.com/ldc-developers/phobos",
+    "owner_tag": "LDC v1.41.0",
+    "commit": "983294523d02c9b48130902c805bce7af085de70",
+    "source_gitlink": "runtime/phobos",
+    "license": "BSL-1.0",
+    "license_path": "upstream/runtime/phobos/LICENSE_1_0.txt",
+    "paths": [
+      "std",
+      "phobos",
+      "etc",
+      "LICENSE_1_0.txt",
+      "Makefile",
+      "posix.mak",
+      "README.md",
+      "index.dd",
+      "project.ddoc",
+      "build_v3.d",
+      "unittest.d"
+    ],
+    "verified_upstream_blobs": 226
+  },
+  "upstream_modifications": [],
+  "wros_sources": {
+    "sdk_commit": "476799fc80b1ebeea82721a82d658dee75fce9a6",
+    "files": [
+      {
+        "source": "language/d/entry.c",
+        "path": "betterc/entry.c",
+        "sha256": "b91a77daeea55272e823e51fd7062db6b02af52b78fc0b1570610f9f86a435ae"
+      },
+      {
+        "source": "language/d/frontend.conf",
+        "path": "betterc/frontend.conf",
+        "sha256": "4b1c3b7ec3b86efc0e0f30bd8835df4336522a07cad0de905c90580b112d68ca"
+      }
+    ]
+  }
+}

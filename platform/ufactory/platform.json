@@ -1,0 +1,44 @@
+{
+  "id": "ufactory",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "xarm_msgs/IOState",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_digital_1",
+        "field": "digital_1",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_digital_2",
+        "field": "digital_2",
+        "type": "i32",
+        "indexed": false
+      },
+      {
+        "name": "read_analog_1",
+        "field": "analog_1",
+        "type": "f32",
+        "indexed": false
+      },
+      {
+        "name": "read_analog_2",
+        "field": "analog_2",
+        "type": "f32",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/xArm-Developer/xarm_ros/blob/3bc6c4da51769d90ce2a6d1419a0b65446d177e3/xarm_msgs/msg/IOState.msg",
+        "revision": "3bc6c4da51769d90ce2a6d1419a0b65446d177e3",
+        "path": "xarm_msgs/msg/IOState.msg",
+        "sha256": "c3d02e687885003c4a9bbab24d5a256f1eb6ee05bd0ff777230cdb90dd568106"
+      }
+    ]
+  }
+}

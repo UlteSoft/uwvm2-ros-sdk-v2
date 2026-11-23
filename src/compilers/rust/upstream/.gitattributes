@@ -1,0 +1,2 @@
+# Preserve source-release bytes, including the Cargo vendor checksum inputs.
+* -text -filter

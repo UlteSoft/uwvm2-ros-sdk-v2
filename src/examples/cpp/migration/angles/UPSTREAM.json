@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/ros/angles",
+  "ref": "galactic-devel",
+  "commit": "02a82cb7066405f842081156960162e3e5950334",
+  "source_file": "angles/include/angles/angles.h",
+  "license": "BSD-3-Clause (see header)",
+  "modifications": []
+}

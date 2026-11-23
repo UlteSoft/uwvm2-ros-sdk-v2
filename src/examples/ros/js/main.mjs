@@ -1,0 +1,29 @@
+import * as observation from "uwrosv2/platform/ros/observation";
+
+/* Constructed from the pinned upstream wire definition. */
+const sample = new Uint8Array([
+    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x3f,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xbf, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xe0, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x3f
+]);
+
+const bigEndian = new Uint8Array([
+    0x00, 0x00, 0x00, 0x00, 0x3f, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xbf, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xe0, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x3f, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+]);
+
+function check(data) {
+    if (observation.read_x(data) !== 0.5) throw Error("x");
+    if (observation.read_x(data.subarray(0, data.length - 1)) !== undefined) throw Error("truncated x");
+    if (observation.read_y(data) !== -0.5) throw Error("y");
+    if (observation.read_y(data.subarray(0, data.length - 1)) !== undefined) throw Error("truncated y");
+    if (observation.read_z(data) !== 0.5) throw Error("z");
+    if (observation.read_z(data.subarray(0, data.length - 1)) !== undefined) throw Error("truncated z");
+    if (observation.read_w(data) !== 0.5) throw Error("w");
+    if (observation.read_w(data.subarray(0, data.length - 1)) !== undefined) throw Error("truncated w");
+}
+
+check(sample);
+check(bigEndian);
+check(sample.subarray(4));

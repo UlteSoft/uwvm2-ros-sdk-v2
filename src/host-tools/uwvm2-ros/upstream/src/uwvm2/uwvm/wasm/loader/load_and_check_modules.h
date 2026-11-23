@@ -1,0 +1,1183 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-03-27
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+#if !defined(UWVM_MODULE) && defined(UWVM_IMPORT_ROSV2)
+#include <uwvm2/uwvm/imported/scene/storage.h>
+#include <uwvm2/utils/thread/monotonic_clock.h>
+#endif
+#include <uwvm2/uwvm/io/host_diagnostics.h>
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+# include <cstdint>
+# include <climits>
+# include <type_traits>
+# include <memory>
+# include <utility>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+# ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+#  include <uwvm2/imported/wasi/wasip1/feature/feature_push_macro.h>  // wasip1
+# endif
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/ansies/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/utils/madvise/impl.h>
+# include <uwvm2/utils/utf/impl.h>
+# include <uwvm2/parser/wasm/base/impl.h>
+# include <uwvm2/parser/wasm/concepts/impl.h>
+# include <uwvm2/parser/wasm/standard/impl.h>
+# include <uwvm2/parser/wasm/binfmt/base/impl.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/utils/control/wasithread_diagnostics.h>
+# include <uwvm2/uwvm/utils/depend/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# include <uwvm2/uwvm/utils/memory/impl.h>
+# include <uwvm2/uwvm/imported/wasi/wasip1/storage/impl.h>
+# include <uwvm2/uwvm/wasm/base/impl.h>
+# include <uwvm2/uwvm/wasm/type/impl.h>
+# include <uwvm2/uwvm/wasm/storage/impl.h>
+# include <uwvm2/uwvm/wasm/feature/impl.h>
+# include <uwvm2/uwvm/wasm/custom/impl.h>
+# include <uwvm2/uwvm/wasm/warning/impl.h>
+# if defined(UWVM_IMPORT_ROS1) || defined(UWVM_IMPORT_ROS2)
+#  include <uwvm2/uwvm/imported/ros/storage.h>
+# endif
+# include "wasm_file.h"
+# include "dl.h"
+# include "detect_cycle.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::wasm::loader
+{
+    enum class load_and_check_modules_rtl
+    {
+        ok,
+        module_dependency_error,
+        duplicate_module_name,
+        local_imported_module_init_error
+    };
+
+    inline constexpr load_and_check_modules_rtl construct_all_module_and_check_duplicate_module(bool initialize_local_imports = true) noexcept
+    {
+#ifdef UWVM_TIMER
+        ::uwvm2::utils::debug::timer parsing_timer{u8"construct all module and check duplicate module"};
+#endif
+
+        // preloaded wasm
+        for(auto const& lwc: ::uwvm2::uwvm::wasm::storage::active_preloaded_wasm())
+        {
+            if(!::uwvm2::uwvm::wasm::storage::all_module
+                    .try_emplace(lwc.module_name,
+                                 ::uwvm2::uwvm::wasm::type::all_module_t{.module_storage_ptr = {.wf = ::std::addressof(lwc)},
+                                                                         .type = ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_wasm})
+                    .second) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Duplicate WASM module names: \"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    lwc.module_name,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\".\n\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                return load_and_check_modules_rtl::duplicate_module_name;
+            }
+        }
+
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+
+        // preloaded dl
+        for(auto const& ldc: ::uwvm2::uwvm::wasm::storage::preloaded_dl)
+        {
+            if(!::uwvm2::uwvm::wasm::storage::all_module
+                    .try_emplace(ldc.module_name,
+                                 ::uwvm2::uwvm::wasm::type::all_module_t{.module_storage_ptr = {.wd = ::std::addressof(ldc)},
+                                                                         .type = ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_dl})
+                    .second) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Duplicate WASM module names: \"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    ldc.module_name,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\".\n\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                return load_and_check_modules_rtl::duplicate_module_name;
+            }
+        }
+#endif
+
+
+        // local modules
+        {
+            for(auto& lim: ::uwvm2::uwvm::wasm::storage::preload_local_imported)
+            {
+                auto const module_name{lim.get_module_name()};
+
+                // initialize local imported module
+                if(initialize_local_imports && !lim.init_local_imported_module()) [[unlikely]]
+                {
+                    ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                        u8"[error] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"Initialize local imported module \"",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                        module_name,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"\" failed.\n\n",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                    return load_and_check_modules_rtl::local_imported_module_init_error;
+                }
+
+                if(!::uwvm2::uwvm::wasm::storage::all_module
+                        .try_emplace(module_name,
+                                     ::uwvm2::uwvm::wasm::type::all_module_t{.module_storage_ptr = {.li = ::std::addressof(lim)},
+                                                                             .type = ::uwvm2::uwvm::wasm::type::module_type_t::local_import})
+                        .second) [[unlikely]]
+                {
+                    ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                        u8"[error] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"Duplicate WASM module names: \"",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                        module_name,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"\".\n\n",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                    return load_and_check_modules_rtl::duplicate_module_name;
+                }
+            }
+        }
+
+        // exec wasm
+        {
+            if(!::uwvm2::uwvm::wasm::storage::all_module
+                    .try_emplace(
+                        ::uwvm2::uwvm::wasm::storage::active_execute_wasm().module_name,
+                        ::uwvm2::uwvm::wasm::type::all_module_t{.module_storage_ptr = {.wf = ::std::addressof(::uwvm2::uwvm::wasm::storage::active_execute_wasm())},
+                                                                .type = ::uwvm2::uwvm::wasm::type::module_type_t::exec_wasm})
+                    .second) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Duplicate WASM module names: \"",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    ::uwvm2::uwvm::wasm::storage::active_execute_wasm().module_name,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\".\n\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                return load_and_check_modules_rtl::duplicate_module_name;
+            }
+        }
+
+        // All modules loaded
+        if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"All modules have been loaded. ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                u8"[",
+                                ::uwvm2::uwvm::io::get_local_realtime(),
+                                u8"] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8"(verbose)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+        }
+
+        return load_and_check_modules_rtl::ok;
+    }
+
+    // this struct is utilized for temporary variables on the stack and doesnt store the global variables
+    struct build_dependency_graph_and_check_import_exist_ret_t
+    {
+        using module_name_t = ::uwvm2::utils::container::u8string_view;
+        using import_export_name_t = ::uwvm2::utils::container::u8string_view;
+        using adjacency_list_t = ::uwvm2::utils::container::unordered_flat_map<module_name_t, ::uwvm2::utils::container::vector<module_name_t>>;
+
+        load_and_check_modules_rtl ok;
+        adjacency_list_t adj;
+    };
+
+    /// @brief      Build a *module-level* dependency graph from import declarations
+    /// @details    This graph models *declared module dependencies* only (edges are derived from `import.module_name`).
+    ///             It is used for early diagnostics such as:
+    ///             - missing imported modules,
+    ///             - duplicate/invalid export records for linking,
+    ///             - module-level dependency cycle discovery (warning-level).
+    ///
+    ///             Important: this is NOT an instantiation/initialization dependency analysis.
+    ///             A cycle in the module dependency graph does not necessarily imply an instantiation-time deadlock,
+    ///             because instantiation constraints depend on runtime semantics (import resolution, const-expr evaluation,
+    ///             start function execution, etc.).
+    ///
+    ///             Definitive instantiation-cycle detection and errors must therefore be handled by the initializer
+    ///             (instantiation stage), where the runtime can track `instantiating`/`instantiated` states and report
+    ///             semantic cycles precisely.
+    ///
+    ///             In the WASM standard, importing module A name B type C and importing module A name B type D simultaneously
+    ///             satisfies syntactic validity (binary format validity) but fails validation.
+    /// @return     Adjacency list representation of the dependency graph
+    template<typename GraphContext>
+    inline constexpr build_dependency_graph_and_check_import_exist_ret_t
+        build_dependency_graph_and_check_import_exist_and_construct_all_module_export_in_context(GraphContext& world) noexcept
+    {
+#ifdef UWVM_TIMER
+        ::uwvm2::utils::debug::timer build_dependency_graph_and_check_import_exist_timer{u8"build dependency graph and check import exist"};
+#endif
+
+        using module_name_t = ::uwvm2::utils::container::u8string_view;
+        using adjacency_list_t = ::uwvm2::utils::container::unordered_flat_map<module_name_t, ::uwvm2::utils::container::vector<module_name_t>>;
+
+        auto const all_module_size{world.declarations().size()};
+
+        adjacency_list_t adjacency_list{};
+        adjacency_list.reserve(all_module_size);  // Reserve space for all modules
+
+        // Initialize all module nodes
+        for(auto const& module: world.declarations())
+        {
+            adjacency_list.emplace(module.first, ::uwvm2::utils::container::vector<module_name_t>{});
+        }
+
+        // Used to record the contents exported by each module. Persist globally.
+        // Rebuild every run to avoid stale `u8string_view` keys and mismatched module sets.
+        world.exports().clear();
+        world.exports().reserve(all_module_size);  // Reserve space for all modules to avoid reallocations
+
+#ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+# if defined(UWVM_IMPORT_WASI_WASIP1)
+        // WASI Preview 1 can be enabled or disabled per executable/preloaded
+        // Wasm module. Dependency checking must honor that target-local
+        // visibility before the generic module lookup below sees the built-in
+        // `wasi_snapshot_preview1` local-import module. Otherwise a module with
+        // `--wasip1-single-disable` or `--wasip1-group-disable` could still link
+        // against the globally loaded local import and fail later at runtime.
+        auto const wasip1_import_visible_for_module{
+            [](auto curr_module_type, ::uwvm2::utils::container::u8string_view curr_module_name, [[maybe_unused]] ::uwvm2::utils::container::u8string_view function_name) constexpr noexcept -> bool
+            {
+                switch(curr_module_type)
+                {
+                    case ::uwvm2::uwvm::wasm::type::module_type_t::exec_wasm:
+                    {
+                        if(auto const override_state{::uwvm2::uwvm::imported::wasi::wasip1::storage::find_wasip1_module_override_const(
+                               ::uwvm2::uwvm::imported::wasi::wasip1::storage::wasip1_module_target_kind_t::main_wasm,
+                               curr_module_name)};
+                           override_state != nullptr && override_state->enabled_is_set) [[unlikely]]
+                        {
+                            #if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                            return override_state->enabled && override_state->interfaces.exposed(::uwvm2::utils::control::host_interfaces::find(::uwvm2::utils::control::host_interfaces::family::wasip1,function_name));
+#else
+                            return override_state->enabled;
+#endif
+                        }
+                        #if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                        return false;
+#else
+                        return ::uwvm2::uwvm::wasm::storage::local_preload_wasip1;
+#endif
+                    }
+                    case ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_wasm:
+                    {
+                        if(auto const override_state{::uwvm2::uwvm::imported::wasi::wasip1::storage::find_wasip1_module_override_const(
+                               ::uwvm2::uwvm::imported::wasi::wasip1::storage::wasip1_module_target_kind_t::preload_wasm,
+                               curr_module_name)};
+                           override_state != nullptr && override_state->enabled_is_set) [[unlikely]]
+                        {
+                            #if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                            return override_state->enabled && override_state->interfaces.exposed(::uwvm2::utils::control::host_interfaces::find(::uwvm2::utils::control::host_interfaces::family::wasip1,function_name));
+#else
+                            return override_state->enabled;
+#endif
+                        }
+                        #if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                        return false;
+#else
+                        return ::uwvm2::uwvm::wasm::storage::local_preload_wasip1;
+#endif
+                    }
+                    default:
+                    {
+                        return true;
+                    }
+                }
+            }};
+# endif
+#endif
+
+        // Build dependency relationships
+        for(auto const& curr_module: world.declarations())
+        {
+            auto const curr_module_name{curr_module.first};
+
+            switch(curr_module.second.type)
+            {
+                case ::uwvm2::uwvm::wasm::type::module_type_t::exec_wasm: [[fallthrough]];
+                case ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_wasm:
+                {
+                    auto const exec_wasm_ptr{curr_module.second.module_storage_ptr.wf};
+                    auto const exec_wasm_binfmt_ver{exec_wasm_ptr->binfmt_ver};
+
+                    switch(exec_wasm_binfmt_ver)
+                    {
+                        case 1u:
+                        {
+                            auto const& exec_wasm_module_storage{exec_wasm_ptr->wasm_module_storage.wasm_binfmt_ver1_storage};
+                            // Build export map for the current module itself.
+                            // Note: entrypoint resolution in `run.h` depends on this even if the module has no imports.
+                            {
+                                auto get_exec_wasm_module_storage_exportsec_from_feature_tuple{
+                                    [&exec_wasm_module_storage]<::uwvm2::parser::wasm::concepts::wasm_feature... Fs> UWVM_ALWAYS_INLINE(
+                                        ::uwvm2::utils::container::tuple<Fs...>) constexpr noexcept -> decltype(auto)
+                                    {
+                                        return ::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<
+                                            ::uwvm2::parser::wasm::standard::wasm1::features::export_section_storage_t<Fs...>>(
+                                            exec_wasm_module_storage.sections);
+                                    }};
+                                auto const& exec_wasm_module_storage_exportsec{
+                                    get_exec_wasm_module_storage_exportsec_from_feature_tuple(::uwvm2::uwvm::wasm::feature::all_features)};
+
+                                auto [curr_exported_module, inserted]{world.exports().try_emplace(curr_module_name)};
+                                if(inserted) [[unlikely]]
+                                {
+                                    curr_exported_module->second.reserve(exec_wasm_module_storage_exportsec.exports.size());  // Reserve space for exports
+                                    for(auto const& exports: exec_wasm_module_storage_exportsec.exports)
+                                    {
+                                        ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                        export_record.type = curr_module.second.type;
+                                        auto& file_export{export_record.storage.wasm_file_export_storage_ptr};
+                                        file_export.binfmt_ver = exec_wasm_binfmt_ver;
+                                        file_export.storage.wasm_binfmt_ver1_export_storage_ptr = ::std::addressof(exports.exports);
+                                        static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                        // No duplication, because a check was performed during loading.
+                                        curr_exported_module->second.emplace(exports.export_name, export_record);
+                                    }
+                                }
+                            }
+
+                            auto get_exec_wasm_module_storage_importsec_from_feature_tuple{
+                                [&exec_wasm_module_storage]<::uwvm2::parser::wasm::concepts::wasm_feature... Fs> UWVM_ALWAYS_INLINE(
+                                    ::uwvm2::utils::container::tuple<Fs...>) constexpr noexcept -> decltype(auto)
+                                {
+                                    return ::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<
+                                        ::uwvm2::parser::wasm::standard::wasm1::features::import_section_storage_t<Fs...>>(exec_wasm_module_storage.sections);
+                                }};
+                            auto const& exec_wasm_module_storage_importsec{
+                                get_exec_wasm_module_storage_importsec_from_feature_tuple(::uwvm2::uwvm::wasm::feature::all_features)};
+
+                            // Deduplicate dependency edges per current module to avoid repeated edges to the same import module
+                            ::uwvm2::utils::container::unordered_flat_set<module_name_t> seen_import_modules{};
+                            seen_import_modules.reserve(exec_wasm_module_storage_importsec.imports.size());
+
+                            for(auto const& imports: exec_wasm_module_storage_importsec.imports)
+                            {
+                                auto import_module_name{imports.module_name};
+                                auto import_extern_name{imports.extern_name};
+
+                                // Keep parser storage untouched. Early dependency diagnostics still need to observe
+                                // the same import binding view that runtime initialization will apply later.
+                                if(auto const import_reset{world.find_import_rewrite(curr_module_name,
+                                                                                                                            import_module_name,
+                                                                                                                            import_extern_name)};
+                                   import_reset != nullptr) [[unlikely]]
+                                {
+                                    import_module_name = ::uwvm2::utils::container::u8string_view{import_reset->new_import_module_name.data(),
+                                                                                                  import_reset->new_import_module_name.size()};
+                                    import_extern_name = ::uwvm2::utils::container::u8string_view{import_reset->new_import_extern_name.data(),
+                                                                                                  import_reset->new_import_extern_name.size()};
+                                }
+
+                                // Add dependency edge
+                                if(adjacency_list.contains(import_module_name))
+                                {
+                                    // Only insert one edge per unique import module for the current module
+                                    if(seen_import_modules.insert(import_module_name).second)
+                                    {
+                                        auto& deps{adjacency_list[curr_module_name]};
+                                        if(deps.empty())
+                                        {
+                                            deps.reserve(exec_wasm_module_storage_importsec.imports.size());  // Reserve space for all imports
+                                        }
+                                        // Safe: we just reserved space for all imports
+                                        deps.push_back_unchecked(import_module_name);
+                                    }
+                                }
+
+                                // The scene namespace has independent exposure and bindings.
+#if defined(UWVM_IMPORT_ROSV2)
+                                if(import_module_name==u8"uwvm_ros_v2" &&
+                                   ::uwvm2::uwvm::imported::scene::configuration.visible(
+                                       {reinterpret_cast<char const*>(curr_module_name.data()),curr_module_name.size()},
+                                       {reinterpret_cast<char const*>(import_extern_name.data()),import_extern_name.size()})==
+                                       ::uwvm2::imported::ros::scene::exposure::hidden)
+                                {
+                                    auto& policy{::uwvm2::uwvm::imported::scene::configuration};
+                                    if(policy.auditing_calls())
+                                    {
+                                        // Linking precedes runtime activation, so there is no generation or guest result.
+                                        auto const now{::uwvm2::utils::host_clock::now()};
+                                        auto const ns{::uwvm2::utils::host_clock::available() ?
+                                            ::std::chrono::duration_cast<::std::chrono::nanoseconds>(now.time_since_epoch()).count() : 0};
+                                        policy.observe_call({reinterpret_cast<char const*>(curr_module_name.data()),curr_module_name.size()}, 0,
+                                            {reinterpret_cast<char const*>(import_extern_name.data()),import_extern_name.size()}, 0,
+                                            ns > 0 ? static_cast<::std::uint64_t>(ns) : 0,
+                                            [](auto record) noexcept { return ::uwvm2::imported::ros::audit_io::write_record(record); },
+                                            ::uwvm2::imported::ros::scene::call_audit::phase::hidden_import);
+                                    }
+                                    ::uwvm2::uwvm::io::host_diagnostic_write("uwvm: [error] ROS scene interface is hidden; configure an exact --ros-scene-interface and --ros-scene-bind.");
+                                    return {load_and_check_modules_rtl::module_dependency_error, ::std::move(adjacency_list)};
+                                }
+#endif
+                                // Check dependencies
+#if defined(UWVM_IMPORT_ROS1) || defined(UWVM_IMPORT_ROS2)
+                                if(!::uwvm2::uwvm::imported::ros::host_import_visible(curr_module_name, import_module_name, import_extern_name))
+                                {
+                                    namespace diagnostic=::uwvm2::utils::control::host_diagnostics;
+                                    namespace api=::uwvm2::utils::control::host_interfaces;
+                                    auto family=diagnostic::view(import_module_name).starts_with("uwvm_ros1_")?api::family::ros1:api::family::ros2;
+                                    auto version=family==api::family::ros1?::uwvm2::imported::ros::version::ros1 : ::uwvm2::imported::ros::version::ros2;
+                                    auto target=::uwvm2::uwvm::imported::ros::runtime_policy.effective(version,diagnostic::view(curr_module_name));
+                                    diagnostic::missing(api::find(import_module_name,import_extern_name),family,
+                                        target?::uwvm2::imported::ros::to_string(target->target_scope):"single",
+                                        target?::std::string_view{target->name}:diagnostic::view(curr_module_name),
+                                        target!=nullptr,target && target->enabled,diagnostic::view(import_module_name),diagnostic::view(import_extern_name));
+                                    return {load_and_check_modules_rtl::module_dependency_error, ::std::move(adjacency_list)};
+                                }
+#endif
+#ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+# if defined(UWVM_IMPORT_WASI_WASIP1)
+                                if(import_module_name == u8"wasi_snapshot_preview1" &&
+                                   !wasip1_import_visible_for_module(curr_module.second.type, curr_module_name, import_extern_name)) [[unlikely]]
+                                {
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                                    // Import names are untrusted bytes. One constant diagnostic per
+                                    // refused load prevents control sequences and output amplification.
+                                    namespace diagnostic=::uwvm2::utils::control::host_diagnostics;
+                                    namespace api=::uwvm2::utils::control::host_interfaces;
+                                    namespace storage=::uwvm2::uwvm::imported::wasi::wasip1::storage;
+                                    auto state=storage::find_wasip1_module_override_const(
+                                        curr_module.second.type==::uwvm2::uwvm::wasm::type::module_type_t::exec_wasm?
+                                        storage::wasip1_module_target_kind_t::main_wasm:storage::wasip1_module_target_kind_t::preload_wasm,curr_module_name);
+                                    auto scope=state && state->trace_wasip1_group_kind==::uwvm2::imported::wasi::wasip1::environment::trace_wasip1_group_kind_t::global?"global":
+                                        state && state->trace_wasip1_group_kind==::uwvm2::imported::wasi::wasip1::environment::trace_wasip1_group_kind_t::custom_group?"group":"single";
+                                    auto target=state?diagnostic::view(state->trace_wasip1_group_name_storage):diagnostic::view(curr_module_name);
+                                    diagnostic::missing(api::find(import_module_name,import_extern_name),api::family::wasip1,scope,target,
+                                        state!=nullptr,state && state->enabled,diagnostic::view(import_module_name),diagnostic::view(import_extern_name));
+#else
+                                    ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                                        u8"uwvm: ",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                                        u8"[error] ",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"Missing module dependency: \"",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                                        import_module_name,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"\" required by \"",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                                        curr_module_name,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"\". The module-specific WASI Preview 1 setting disables this import.\n\n",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+#endif
+
+                                    return {load_and_check_modules_rtl::module_dependency_error, ::std::move(adjacency_list)};
+                                }
+# endif
+#endif
+                                if(import_module_name==u8"wasi"&&import_extern_name==u8"thread-spawn")
+                                {
+                                    namespace i1t=::uwvm2::utils::control::wasithread;
+                                    ::std::u8string_view identity{curr_module_name.data(),curr_module_name.size()};
+                                    if(!i1t::runtime_policy().visible(identity))
+                                    {
+                                        namespace diagnostic=::uwvm2::utils::control::host_diagnostics;
+                                        namespace api=::uwvm2::utils::control::host_interfaces;
+                                        auto state=i1t::runtime_policy().effective(identity);
+                                        diagnostic::missing(api::find(import_module_name,import_extern_name),api::family::wasithread,
+                                            state.exists?i1t::name(state.kind):"single",diagnostic::view(state.exists?state.target:identity),
+                                            state.exists,state.enabled,"wasi","thread-spawn");
+                                        return {load_and_check_modules_rtl::module_dependency_error, ::std::move(adjacency_list)};
+                                    }
+                                }
+                                auto const import_module{world.declarations().find(import_module_name)};
+                                if(import_module == world.declarations().end()) [[unlikely]]
+                                {
+                                    // Output missing module dependency error
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                                    // Import names are untrusted bytes. One constant diagnostic per
+                                    // refused load prevents control sequences and output amplification.
+                                    if(import_module_name == u8"wasi" && import_extern_name == u8"thread-spawn")
+                                    {
+                                        ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                                            u8"uwvm: [error] wasi.thread-spawn is exposed but the WASI Threads execution profile is disabled. Configure: --wasm-feature-enable-threads --wasi-threads <max-active> <max-spawns> <native-stack-bytes> <per-child-storage> <per-child-code> <shared-memory-bytes>; see --help runtime.");
+                                    }
+                                    else
+                                    {
+                                        ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                                            u8"uwvm: [error] Missing module dependency: an import has no approved provider");
+                                    }
+#else
+                                    ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                                        u8"uwvm: ",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                                        u8"[error] ",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"Missing module dependency: \"",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                                        import_module_name,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"\" required by \"",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                                        curr_module_name,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"\".\n\n",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+#endif
+
+                                    return {load_and_check_modules_rtl::module_dependency_error, ::std::move(adjacency_list)};
+                                }
+
+                                // export -> import
+                                auto const& imported_module{*import_module};
+
+                                using exported_iterator = typename ::std::remove_reference_t<decltype(world.exports())>::iterator;
+
+                                exported_iterator curr_exported;  // No init
+
+                                switch(imported_module.second.type)
+                                {
+                                    case ::uwvm2::uwvm::wasm::type::module_type_t::exec_wasm: [[fallthrough]];
+                                    case ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_wasm:
+                                    {
+                                        auto const imported_wasm_ptr{imported_module.second.module_storage_ptr.wf};
+                                        auto const imported_wasm_binfmt_ver{imported_wasm_ptr->binfmt_ver};
+
+                                        switch(imported_wasm_binfmt_ver)
+                                        {
+                                            case 1u:
+                                            {
+                                                auto const& imported_wasm_module_storage{imported_wasm_ptr->wasm_module_storage.wasm_binfmt_ver1_storage};
+                                                auto get_imported_wasm_module_storage_exportsec_from_feature_tuple{
+                                                    [&imported_wasm_module_storage]<::uwvm2::parser::wasm::concepts::wasm_feature... Fs> UWVM_ALWAYS_INLINE(
+                                                        ::uwvm2::utils::container::tuple<Fs...>) constexpr noexcept -> decltype(auto)
+                                                    {
+                                                        return ::uwvm2::parser::wasm::concepts::operation::get_first_type_in_tuple<
+                                                            ::uwvm2::parser::wasm::standard::wasm1::features::export_section_storage_t<Fs...>>(
+                                                            imported_wasm_module_storage.sections);
+                                                    }};
+                                                auto const& imported_wasm_module_storage_exportsec{
+                                                    get_imported_wasm_module_storage_exportsec_from_feature_tuple(::uwvm2::uwvm::wasm::feature::all_features)};
+
+                                                // Check if there is an exported map. If not, build one.
+                                                auto [curr_exported_module,
+                                                      inserted]{world.exports().try_emplace(import_module_name)};
+                                                if(inserted) [[unlikely]]
+                                                {
+                                                    curr_exported_module->second.reserve(
+                                                        imported_wasm_module_storage_exportsec.exports.size());  // Reserve space for exports
+                                                    for(auto const& exports: imported_wasm_module_storage_exportsec.exports)
+                                                    {
+                                                        ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                                        export_record.type = imported_module.second.type;
+                                                        auto& file_export{export_record.storage.wasm_file_export_storage_ptr};
+                                                        file_export.binfmt_ver = imported_wasm_binfmt_ver;
+                                                        file_export.storage.wasm_binfmt_ver1_export_storage_ptr = ::std::addressof(exports.exports);
+                                                        static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                                        // No duplication, because a check was performed during loading.
+                                                        curr_exported_module->second.emplace(exports.export_name, export_record);
+                                                    }
+                                                }
+
+                                                curr_exported = curr_exported_module;
+
+                                                break;
+                                            }
+                                            [[unlikely]] default:
+                                            {
+                                                static_assert(::uwvm2::uwvm::wasm::feature::max_binfmt_version == 1u,
+                                                              "missing implementation of other binfmt version");
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                                                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                                                ::std::unreachable();
+                                            }
+                                        }
+
+                                        break;
+                                    }
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+                                    case ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_dl:
+                                    {
+                                        auto const imported_dl_ptr{imported_module.second.module_storage_ptr.wd};
+
+                                        // Check if there is an exported map. If not, build one.
+                                        auto [curr_exported_module, inserted]{world.exports().try_emplace(import_module_name)};
+                                        if(inserted) [[unlikely]]
+                                        {
+                                            auto const dl_func{imported_dl_ptr->wasm_dl_storage.capi_function_vec};
+                                            auto const dl_func_ptr{dl_func.function_begin};
+                                            auto const dl_func_sz{dl_func.function_size};
+                                            curr_exported_module->second.reserve(dl_func_sz);  // Reserve space for dl functions
+                                            for(auto dl_func_curr{dl_func_ptr}; dl_func_curr != dl_func_ptr + dl_func_sz; ++dl_func_curr)
+                                            {
+                                                using char8_t_const_may_alias_ptr UWVM_GNU_MAY_ALIAS = char8_t const*;
+                                                auto const dl_func_curr_name{
+                                                    ::uwvm2::utils::container::u8string_view{
+                                                                                             reinterpret_cast<char8_t_const_may_alias_ptr>(dl_func_curr->func_name_ptr),
+                                                                                             dl_func_curr->func_name_length}
+                                                };
+                                                ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                                export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_dl;
+                                                export_record.storage.wasm_dl_export_storage_ptr.storage = dl_func_curr;
+                                                static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                                // No duplication, because a check was performed during loading.
+                                                curr_exported_module->second.emplace(dl_func_curr_name, export_record);
+                                            }
+                                        }
+
+                                        curr_exported = curr_exported_module;
+
+                                        break;
+                                    }
+#endif
+
+
+                                    case ::uwvm2::uwvm::wasm::type::module_type_t::local_import:
+                                    {
+                                        auto const imported_local_ptr{imported_module.second.module_storage_ptr.li};
+
+                                        auto [curr_exported_module, inserted]{world.exports().try_emplace(import_module_name)};
+
+                                        if(inserted) [[unlikely]]
+                                        {
+                                            auto const fn_all{imported_local_ptr->get_all_function_information()};
+                                            auto const gl_all{imported_local_ptr->get_all_global_information()};
+                                            auto const mem_all{imported_local_ptr->get_all_memory_information()};
+
+                                            // Total export count is known at compile-time for local imported modules
+                                            // (sum of function/global/memory tuples), so no runtime overflow checks are needed here.
+                                            curr_exported_module->second.reserve(imported_local_ptr->get_total_export_count());
+
+                                            for(auto it{fn_all.begin}; it != fn_all.end; ++it)
+                                            {
+                                                ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                                export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::local_import;
+                                                auto& li_export{export_record.storage.local_imported_export_storage_ptr};
+                                                li_export.storage = imported_local_ptr;
+                                                li_export.index = it->index;
+                                                li_export.type = ::uwvm2::uwvm::wasm::type::local_imported_export_type_t::func;
+                                                static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                                curr_exported_module->second.emplace(it->function_name, export_record);
+                                            }
+
+                                            for(auto it{gl_all.begin}; it != gl_all.end; ++it)
+                                            {
+                                                ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                                export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::local_import;
+                                                auto& li_export{export_record.storage.local_imported_export_storage_ptr};
+                                                li_export.storage = imported_local_ptr;
+                                                li_export.index = it->index;
+                                                li_export.type = ::uwvm2::uwvm::wasm::type::local_imported_export_type_t::global;
+                                                static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                                curr_exported_module->second.emplace(it->global_name, export_record);
+                                            }
+
+                                            for(auto it{mem_all.begin}; it != mem_all.end; ++it)
+                                            {
+                                                ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                                export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::local_import;
+                                                auto& li_export{export_record.storage.local_imported_export_storage_ptr};
+                                                li_export.storage = imported_local_ptr;
+                                                li_export.index = it->index;
+                                                li_export.type = ::uwvm2::uwvm::wasm::type::local_imported_export_type_t::memory;
+                                                static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                                curr_exported_module->second.emplace(it->memory_name, export_record);
+                                            }
+                                        }
+
+                                        curr_exported = curr_exported_module;
+
+                                        break;
+                                    }
+
+                                    [[unlikely]] default:
+                                    {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                                        ::std::unreachable();
+                                    }
+                                }
+
+// curr_exported should never be end() here
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                                if(curr_exported == world.exports().end()) [[unlikely]]
+                                {
+                                    ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+                                }
+#endif
+
+                                auto const curr_exported_module_exported{curr_exported->second.find(import_extern_name)};
+                                if(curr_exported_module_exported == curr_exported->second.end()) [[unlikely]]
+                                {
+                                    // Output missing export error in module a, dependency from module b
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                                    // Import names are untrusted bytes. One constant diagnostic per
+                                    // refused load prevents control sequences and output amplification.
+                                    ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                                        u8"uwvm: [error] Missing export: an import has no approved function binding");
+#else
+                                    ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                                        u8"uwvm: ",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                                        u8"[error] ",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"Missing export \"",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                                        import_extern_name,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"\" in module \"",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                                        import_module_name,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"\" required by \"",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                                        curr_module_name,
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                        u8"\".\n\n",
+                                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+#endif
+
+                                    return {load_and_check_modules_rtl::module_dependency_error, ::std::move(adjacency_list)};
+                                }
+
+#if defined(UWVM_ROS_ZERO_HOST_DEFAULTS)
+                                // Product validation resolves actual builtin signatures without
+                                // instantiating Guest memories, invoking providers or opening IPC.
+                                auto const& resolved{curr_exported_module_exported->second};
+                                if(resolved.type == ::uwvm2::uwvm::wasm::type::module_type_t::local_import &&
+                                   (import_module_name == u8"wasi_snapshot_preview1" || import_module_name == u8"wasi" ||
+                                    import_module_name.starts_with(u8"uwvm_ros1_") || import_module_name.starts_with(u8"uwvm_ros2_") ||
+                                    import_module_name == u8"uwvm_portable_robot_v1"))
+                                {
+                                    auto const& bound{resolved.storage.local_imported_export_storage_ptr};
+                                    bool matches{imports.imports.type == ::uwvm2::parser::wasm::standard::wasm1::type::external_types::func &&
+                                        bound.type == ::uwvm2::uwvm::wasm::type::local_imported_export_type_t::func && bound.storage};
+                                    if(matches)
+                                    {
+                                        auto const expected{imports.imports.storage.function};
+                                        auto const actual{bound.storage->get_function_information_from_index(bound.index)};
+                                        auto same_range=[](auto const& left,auto const& right) noexcept
+                                        {
+                                            auto const left_size{left.begin==left.end?0uz:static_cast<::std::size_t>(left.end-left.begin)};
+                                            auto const right_size{right.begin==right.end?0uz:static_cast<::std::size_t>(right.end-right.begin)};
+                                            if(left_size!=right_size)return false;
+                                            for(::std::size_t i{};i!=left_size;++i)if(left.begin[i]!=right.begin[i])return false;
+                                            return true;
+                                        };
+                                        matches=expected && actual.successed && same_range(expected->parameter,actual.function_type.parameter) &&
+                                            same_range(expected->result,actual.function_type.result);
+                                    }
+                                    if(!matches)
+                                    {
+                                        ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                                            u8"uwvm: [error] Host import does not match its registered function signature");
+                                        return {load_and_check_modules_rtl::module_dependency_error, ::std::move(adjacency_list)};
+                                    }
+                                }
+#endif
+                                // Other internal state checks are left to the initializer.
+                            }
+
+                            break;
+                        }
+                        [[unlikely]] default:
+                        {
+                            static_assert(::uwvm2::uwvm::wasm::feature::max_binfmt_version == 1u, "missing implementation of other binfmt version");
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                            ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                            ::std::unreachable();
+                        }
+                    }
+                    break;
+                }
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+                case ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_dl:
+                {
+                    // Build export map for preloaded dl modules.
+                    {
+                        auto const dl_ptr{curr_module.second.module_storage_ptr.wd};
+                        if(dl_ptr != nullptr)
+                        {
+                            auto [curr_exported_module, inserted]{world.exports().try_emplace(curr_module_name)};
+                            if(inserted) [[unlikely]]
+                            {
+                                auto const dl_func_vec{dl_ptr->wasm_dl_storage.capi_function_vec};
+                                auto const dl_func_ptr{dl_func_vec.function_begin};
+                                auto const dl_func_sz{dl_func_vec.function_size};
+                                curr_exported_module->second.reserve(dl_func_sz);
+                                for(auto dl_func_curr{dl_func_ptr}; dl_func_curr != dl_func_ptr + dl_func_sz; ++dl_func_curr)
+                                {
+                                    using char8_t_const_may_alias_ptr UWVM_GNU_MAY_ALIAS = char8_t const*;
+                                    auto const dl_func_curr_name{
+                                        ::uwvm2::utils::container::u8string_view{reinterpret_cast<char8_t_const_may_alias_ptr>(dl_func_curr->func_name_ptr),
+                                                                                 dl_func_curr->func_name_length}
+                                    };
+
+                                    ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                    export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::preloaded_dl;
+                                    export_record.storage.wasm_dl_export_storage_ptr.storage = dl_func_curr;
+                                    static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                    curr_exported_module->second.emplace(dl_func_curr_name, export_record);
+                                }
+                            }
+                        }
+                    }
+                    // Since dl only allows importing functions, there is no possibility of cyclic dependencies or similar issues, so no check is needed
+                    break;
+                }
+#endif
+                case ::uwvm2::uwvm::wasm::type::module_type_t::local_import:
+                {
+                    // Local imported modules (host-side) currently don't import other modules, so no dependency edges are added.
+                    // Export map is constructed in this pass for consistent lookup behavior.
+                    {
+                        auto const imported_local_ptr{curr_module.second.module_storage_ptr.li};
+                        if(imported_local_ptr != nullptr)
+                        {
+                            auto [curr_exported_module, inserted]{world.exports().try_emplace(curr_module_name)};
+                            if(inserted) [[unlikely]]
+                            {
+                                auto const fn_all{imported_local_ptr->get_all_function_information()};
+                                auto const gl_all{imported_local_ptr->get_all_global_information()};
+                                auto const mem_all{imported_local_ptr->get_all_memory_information()};
+
+                                curr_exported_module->second.reserve(imported_local_ptr->get_total_export_count());
+
+                                for(auto it{fn_all.begin}; it != fn_all.end; ++it)
+                                {
+                                    ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                    export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::local_import;
+                                    auto& li_export{export_record.storage.local_imported_export_storage_ptr};
+                                    li_export.storage = imported_local_ptr;
+                                    li_export.index = it->index;
+                                    li_export.type = ::uwvm2::uwvm::wasm::type::local_imported_export_type_t::func;
+                                    static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                    curr_exported_module->second.emplace(it->function_name, export_record);
+                                }
+
+                                for(auto it{gl_all.begin}; it != gl_all.end; ++it)
+                                {
+                                    ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                    export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::local_import;
+                                    auto& li_export{export_record.storage.local_imported_export_storage_ptr};
+                                    li_export.storage = imported_local_ptr;
+                                    li_export.index = it->index;
+                                    li_export.type = ::uwvm2::uwvm::wasm::type::local_imported_export_type_t::global;
+                                    static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                    curr_exported_module->second.emplace(it->global_name, export_record);
+                                }
+
+                                for(auto it{mem_all.begin}; it != mem_all.end; ++it)
+                                {
+                                    ::uwvm2::uwvm::wasm::type::all_module_export_t export_record{};
+                                    export_record.type = ::uwvm2::uwvm::wasm::type::module_type_t::local_import;
+                                    auto& li_export{export_record.storage.local_imported_export_storage_ptr};
+                                    li_export.storage = imported_local_ptr;
+                                    li_export.index = it->index;
+                                    li_export.type = ::uwvm2::uwvm::wasm::type::local_imported_export_type_t::memory;
+                                    static_assert(::std::is_trivially_copy_constructible_v<decltype(export_record)>);
+                                    curr_exported_module->second.emplace(it->memory_name, export_record);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+                [[unlikely]] default:
+                {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                    ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                    ::std::unreachable();
+                }
+            }
+        }
+
+        return {load_and_check_modules_rtl::ok, ::std::move(adjacency_list)};
+    }
+
+    namespace details
+    {
+        // Ordinary loader view: borrow the existing globals, never a source seal.
+        struct ordinary_module_graph_context
+        {
+            [[nodiscard]] static constexpr auto& declarations() noexcept
+            { return ::uwvm2::uwvm::wasm::storage::all_module; }
+            [[nodiscard]] static constexpr auto& exports() noexcept
+            { return ::uwvm2::uwvm::wasm::storage::all_module_export; }
+            [[nodiscard]] static constexpr auto const* find_import_rewrite(
+                ::uwvm2::utils::container::u8string_view name,
+                ::uwvm2::utils::container::u8string_view imported_module,
+                ::uwvm2::utils::container::u8string_view imported_name) noexcept
+            { return ::uwvm2::uwvm::wasm::storage::find_configured_import_reset_const(name, imported_module, imported_name); }
+        };
+    }
+
+    inline constexpr build_dependency_graph_and_check_import_exist_ret_t
+        build_dependency_graph_and_check_import_exist_and_construct_all_module_export() noexcept
+    {
+        details::ordinary_module_graph_context world{};
+        return build_dependency_graph_and_check_import_exist_and_construct_all_module_export_in_context(world);
+    }
+
+    inline constexpr load_and_check_modules_rtl check_import_exist_and_detect_cycles() noexcept
+    {
+        // Build dependency graph and detect cyclic dependencies
+        // verbose
+        if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Start checking whether the import exists. ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                u8"[",
+                                ::uwvm2::uwvm::io::get_local_realtime(),
+                                u8"] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                u8"(verbose)\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+        }
+
+        auto const [ok, dependency_graph]{build_dependency_graph_and_check_import_exist_and_construct_all_module_export()};
+
+        if(ok != load_and_check_modules_rtl::ok) [[unlikely]] { return ok; }
+
+        // Detecting *module dependency* cycles (warning-level).
+        // Note: instantiation-cycle errors are handled in the instantiation/initializer stage.
+        if(::uwvm2::uwvm::io::show_depend_warning)
+        {
+            // verbose
+            if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+            {
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Start Detecting Cycles. ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                    u8"[",
+                                    ::uwvm2::uwvm::io::get_local_realtime(),
+                                    u8"] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                    u8"(verbose)\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }
+
+            // timer
+            ::fast_io::unix_timestamp start_time{};
+            if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+            {
+#ifdef UWVM_CPP_EXCEPTIONS
+                try
+#endif
+                {
+                    start_time = ::fast_io::posix_clock_gettime(::fast_io::posix_clock_id::monotonic_raw);
+                }
+#ifdef UWVM_CPP_EXCEPTIONS
+                catch(::fast_io::error)
+                {
+                    // do nothing
+                }
+#endif
+            }
+
+            // detect
+            auto const cycles{::uwvm2::uwvm::wasm::loader::detect_cycles(dependency_graph)};
+
+            // finished
+            ::fast_io::unix_timestamp end_time{};
+            if(::uwvm2::uwvm::io::show_verbose) [[unlikely]]
+            {
+#ifdef UWVM_CPP_EXCEPTIONS
+                try
+#endif
+                {
+                    end_time = ::fast_io::posix_clock_gettime(::fast_io::posix_clock_id::monotonic_raw);
+                }
+#ifdef UWVM_CPP_EXCEPTIONS
+                catch(::fast_io::error)
+                {
+                    // do nothing
+                }
+#endif
+
+                // verbose
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Detecting Cycles done. (time=",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                    end_time - start_time,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"s). ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                    u8"(verbose)\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }
+
+            // Output cyclic dependency warnings
+            if(!cycles.empty()) [[unlikely]]
+            {
+                {
+                    // Here, as an entire output, the mutex needs to be controlled uniformly.
+                    // There are no unspecified external calls that make the mutex deadlock.
+
+                    // No copies will be made here.
+                    auto u8log_output_osr{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+                    // Add raii locks while unlocking operations
+                    ::fast_io::operations::decay::stream_ref_decay_lock_guard u8log_output_lg{
+                        ::fast_io::operations::decay::output_stream_mutex_ref_decay(u8log_output_osr)};
+                    // No copies will be made here.
+                    auto u8log_output_ul{::fast_io::operations::decay::output_stream_unlocked_ref_decay(u8log_output_osr)};
+
+                    // output warning
+                    ::fast_io::io::perr(u8log_output_ul,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_YELLOW),
+                                        u8"[warn]  ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"Detected ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                        cycles.size(),
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8" cyclic dependencies: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                        u8"(depend)\n");
+
+                    ::std::size_t counter{};
+
+                    for(auto const& cycle: cycles)
+                    {
+                        ::fast_io::io::perr(u8log_output_ul,
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                            u8"              ",
+                                            ++counter,
+                                            u8": ");
+
+                        bool is_not_first{};
+                        for(auto const cycle_curr: cycle)
+                        {
+                            if(is_not_first) [[likely]]
+                            {
+                                ::fast_io::io::perr(u8log_output_ul,
+                                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                                    u8" -> ");
+                            }
+                            is_not_first = true;
+
+                            ::fast_io::io::perr(u8log_output_ul, ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN), cycle_curr);
+                        }
+
+                        ::fast_io::io::perrln(u8log_output_ul, ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                    }
+
+                    // Here, guard will perform destructors.
+                }
+
+                if(::uwvm2::uwvm::io::depend_warning_fatal) [[unlikely]]
+                {
+                    ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_RED),
+                                        u8"[fatal] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"Convert warnings to fatal errors. ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_ORANGE),
+                                        u8"(depend)\n\n",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+                    ::uwvm2::uwvm::io::fast_exit(::uwvm2::uwvm::io::diagnostic_exit_status::invalid_option);
+                }
+            }
+        }
+
+        return load_and_check_modules_rtl::ok;
+    }
+}  // namespace uwvm2::uwvm::wasm::loader
+
+#ifndef UWVM_MODULE
+// macro
+# ifndef UWVM_DISABLE_LOCAL_IMPORTED_WASIP1
+#  include <uwvm2/imported/wasi/wasip1/feature/feature_pop_macro.h>  // wasip1
+# endif
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

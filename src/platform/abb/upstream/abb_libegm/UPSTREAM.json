@@ -1,0 +1,80 @@
+{
+  "url": "https://github.com/ros-industrial/abb_libegm",
+  "commit": "e0b8c3b0a906a50a7ad8d1d1b465a4343369c4e8",
+  "license": "BSD-3-Clause",
+  "license_file": "LICENSE",
+  "local_changes": [],
+  "selection": "Public API and wire reference for ABB guest bindings. Driver registrations are included for mapping ROS names to native types.",
+  "files": [
+    {
+      "path": "LICENSE",
+      "git_blob": "6c897a8db655f3366e330225d793e7521db49aac",
+      "sha256": "a55874f78a70e2269c1aa87fc5ef37427c62680e05403c6cd21e6497ef411db3"
+    },
+    {
+      "path": "include/abb_libegm/egm_base_interface.h",
+      "git_blob": "d4c18ee38ff9b4e6ba5ad13cbe6526ce960830ec",
+      "sha256": "f47c87e53e0d860ac7bcbf9063b62a1ecf4f578ae7a40272c32b3a9d54e8a116"
+    },
+    {
+      "path": "include/abb_libegm/egm_common.h",
+      "git_blob": "ea160a6fefbd3de666925ef09f6116cc99a1bf7e",
+      "sha256": "c6a1e57f8fa74140564f2ff50e99de0fa2c32cf7b7f5a07fd519a97c6d838e1b"
+    },
+    {
+      "path": "include/abb_libegm/egm_common_auxiliary.h",
+      "git_blob": "7cfe193ffc985687f0306dcb6f659352062aab03",
+      "sha256": "7cf74a3becb970a601c8f3e25b3b9a30fc62181bc4751ffeffd158fd05734be1"
+    },
+    {
+      "path": "include/abb_libegm/egm_controller_interface.h",
+      "git_blob": "b1933e79b6ac7cac350870bc7dbb8098bbd04ab0",
+      "sha256": "2d3d6c6f971a9230b49421a55e8649d469a6f0e17560ae19714520e239378d18"
+    },
+    {
+      "path": "include/abb_libegm/egm_interpolator.h",
+      "git_blob": "46588a3baa773ad334d1702e29557a0ca488a99d",
+      "sha256": "1bcde934ab167365ea96d300ffbf87ce1ea2b8b1eb1afaff52635c75ef678036"
+    },
+    {
+      "path": "include/abb_libegm/egm_logger.h",
+      "git_blob": "11708a1e7b844517f0ebda53db3b7d25c4bf4ff1",
+      "sha256": "78b05deca415856dd91120e3e74cd248a615f774336ea79402b95084605f1207"
+    },
+    {
+      "path": "include/abb_libegm/egm_trajectory_interface.h",
+      "git_blob": "6d3c6b47a5a2df5c413df22fd4a4fd3369cdb8a6",
+      "sha256": "c5853a9ab34a2a05f2d602170d51497a2311c1df79359cb39e55293cf47765f5"
+    },
+    {
+      "path": "include/abb_libegm/egm_udp_server.h",
+      "git_blob": "329aacd9de8be95fb44ba53b4524463e7a43f91d",
+      "sha256": "2e53e09b456ea2c911ba50df4e8f0508680517fbaec0f5702360edc0dbf1637a"
+    },
+    {
+      "path": "package.xml",
+      "git_blob": "62d1aac05219f71bc1dd4b16f0d09530b1c0c79d",
+      "sha256": "acea4a05634e3396450137f247f0609a4ec1931d7b6273173681fce0cd265d12"
+    },
+    {
+      "path": "proto/README.md",
+      "git_blob": "7882cedfd79cd2b4df9fa831d73edab063dddad5",
+      "sha256": "73eaafe2726d9af8a0dd448327e76990a0c82141c18cc561781e2a6869debc4e"
+    },
+    {
+      "path": "proto/egm.proto",
+      "git_blob": "cb5a5f8446ef2846c780feabf462a1cdd0dc7e2d",
+      "sha256": "4072831e4538c66169fefa803dc74581dfc725b1228de84791ac858ccec425ef"
+    },
+    {
+      "path": "proto/egm_wrapper.proto",
+      "git_blob": "be31f008a5317f28538b9979065fddc5ee788bf0",
+      "sha256": "99a1329e3894efec304787cc41d6f7ef463d98f1780fdac4bebe21d8ff9fdcae"
+    },
+    {
+      "path": "proto/egm_wrapper_trajectory.proto",
+      "git_blob": "899ea9ef52d0e6c72d85c8c03c36e30dc8019091",
+      "sha256": "70cae2850dc6a176326e1c67ce611f4b0f245427073bc2fed609219127c38c94"
+    }
+  ]
+}

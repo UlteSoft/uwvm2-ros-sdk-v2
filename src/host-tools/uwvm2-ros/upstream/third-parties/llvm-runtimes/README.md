@@ -1,0 +1,64 @@
+# LLVM 23.1.1 runtime source subset
+
+This directory contains a selectively imported official release source tree with recorded local libunwind patches. Standalone CMake entry: `upstream/runtimes/CMakeLists.txt`. The LLVM compiler source and its separate inventory live in `../llvm`. `upstream-manifest.json` lists each retained monorepo-relative path, byte length, upstream mode and SHA-256; `sources.sha256` verifies current working files under `upstream/`; `local-patches.json` distinguishes local changes from the immutable upstream import receipt. `import_upstream.py` refuses to overwrite an existing subset and imports data only.
+
+Source: [LLVM 23.1.1 release](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.1), commit `6dfe1677ab8dffbc6ec13d53a1e0215d75147689`. The official `llvm-project-23.1.1.src.tar.xz` is 179168672 bytes, SHA-256 `ebe9be46fe8756d58c5b198ffad0fa2a766257add81a4dc52179bfacc7888ee6`. This import independently verified archive SHA and all retained file bytes; it did not perform a new GPG verification. The archive matches the provenance recorded for the existing ROS LLVM release.
+
+The subset retains libc++, libc++abi, libunwind source/headers, C++ modules, shared/runtime/LLVM CMake helpers and licenses. libc++ uses `FindLibcCommonUtils.cmake`; therefore libc `shared`, `hdr`, `include` and `src/__support` headers are present. This does not build or replace OS libc. The `libcxx.imp` generator and its `header_information.py` dependency are required by `generate-cxx-headers`; `Components.cmake.in`, `merge-json.py` and symbol-export helpers are retained. Pre-generated production headers/modules avoid the optional development regeneration targets. Upstream tests, ABI-list tests, fuzzers, benchmarks, documentation and Git metadata are omitted. Do not request `check-*`, documentation or `libcxx-generate-files` targets from this subset.
+
+The intended Linux paired-static profile is `paired-static.cmake`. Build the actual `cxx_static`, `cxxabi_static`, `unwind_static` and `generate-cxx-headers` targets and read CMake File API for their actual archive paths and dependency order. Bootstrap Clang/CMake/Ninja/Python, target libc/sysroot and compiler builtins are external build inputs. Passing `-C paired-static.cmake` provides defaults; the consumer must record and reject conflicting actual cache/compile options. This file is not a claim that any target has been compiled.
+
+All bundled LLVM and app/runtime translation units must use the same generated `__config_site`, assertion handler, libc++ headers, ABI version/namespace, exceptions, RTTI and thread options. Linking only a new libunwind archive while external libc++/libc++abi load another unwinder is forbidden. The final Linux ELF and the actual loader must have one paired C++ EH provider; require no external `libc++.so`, `libc++abi.so` or `libunwind.so` dependency. Inspect compiler-driver defaults and the final symbol providers so libgcc unwinding is not silently selected. Keep necessary libc/compiler-builtins separate from EH-provider identity.
+
+Release does not imply `LIBUNWIND_ENABLE_ASSERTIONS=OFF`: upstream defaults it ON. This profile explicitly disables ABI/unwinder assertions and libc++ hardening while retaining all VM checks, exceptions, CFI registration and lifetime synchronization. Existing installed libunwind has unknown source/build provenance; a difference against this release is a version/configuration comparison. Only separately built assertion-ON/OFF variants from this identical pinned source can isolate that setting.
+
+Windows MSVC EH, Darwin system-provider constraints, BSD and cross-target ABI/sysroot closure must be qualified individually. The import itself establishes source provenance. The separately recorded Linux native qualification below covers its tested paired build; it does not qualify other platforms.
+
+Source subset revision 2 restores the required `libcxx/vendor/llvm/default_assertion_handler.in` (2399 original upstream bytes), identified by the first actual Linux configure failure at `libcxx/include/CMakeLists.txt`. The template comes unchanged from the same pinned 23.1.1 archive. The v1 freeze and configure failure remain historical evidence. Revision 2 was subsequently used for the Linux paired-static build described below. Upstream source count is 4284.
+
+The original upstream import manifest is unchanged. See `local-patches.json` and `../../tools/ci/llvm-runtimes-23.1.1/eh-fixed-encoding.json` for the original fixed-stride lookup patch.
+
+The local `EHHeaderParser.hpp` patch specializes the usual ELF `datarel|sdata4` FDE table. It bounds the complete fixed-stride extent before binary search, preserves signed offsets and the final FDE PC-range check, and retains upstream fallback for every other encoding. Exact original/patched hashes and patch identity are in `eh-fixed-encoding.json`. Apply it to a fresh private source tree with `python3 apply-eh-fixed-encoding.py "$task_runtime_source"`; `--check` verifies identity without writing. Build all three paired archives and matching headers together. Actual installation targets are `install-cxx-headers`, `install-cxx`, `install-cxxabi`, `install-unwind`, and `install-unwind-headers`.
+
+On Linux x86-64, a fresh paired-static build in the 64 GiB cgroup passed actual JIT landing-pad tests (18,313 checks, 1,152 executions) and four-reader concurrent CFI publication/retirement tests (48 registrations and eight failed-publication rollbacks). Its ELF had no dynamic libc++/libc++abi/libunwind/libgcc EH provider. These results qualify the tested Linux build; other targets need separate tests. The patch changes table lookup, not cursor ABI, frame registration or CFI interpretation.
+
+The additional `arm-jit-exidx.patch` connects Linux ARM EHABI lookup to the
+product's owned JIT exidx registry and exports an exact paired-provider ABI
+marker. A missing weak hook retains the normal static-image lookup. The VM
+separately checks registered extents, the live provider and generated native
+frames; the marker alone grants no admission. `local-patches.json` records the
+original and patched source hashes and the complete patch digest. Vendored
+working sources contain these patches and the bounded ELF scan correction below.
+
+The immutable `elf-unwind-bounds.patch` adds finite ELF frame-scan arithmetic
+and a readable-segment program-header fallback. Its historical `_dl_find_object`
+optimization used an object envelope, which may contain inaccessible holes and
+therefore does not prove a readable scan extent. The
+[glibc loader implementation](https://raw.githubusercontent.com/bminor/glibc/glibc-2.39/elf/dl-map-segments.h)
+reserves such holes with `PROT_NONE`. Keep that patch and its receipt
+unchanged. The additive `elf-unwind-readable-extents.patch` is chained from its
+AddressSpace postimage; the DwarfParser finite guards remain byte-identical.
+
+The additive correction uses the loader-synchronized `dl_iterate_phdr` route for
+ELF DWARF discovery. It proves the complete EH header and the frame scan upper
+bound separately against readable `PT_LOAD` segments of the same object, permits
+the two regions to occupy different segments, checks address arithmetic and
+header fields before their reads, and preserves registered JIT CFI ownership.
+The former object-envelope optimization is removed. Native startup timing must
+be measured on the newly built paired product; no check is skipped or timed out
+to meet a budget. A readable segment bound is not an exact `.eh_frame` section
+length or comprehensive validation of all CIE/FDE payloads.
+
+`local-patches.json` retains the full ordered chain; `sources.sha256` identifies
+the complete candidate subset. Rebuild matching generated headers and all three
+paired archives before qualifying a product with this additive correction.
+Candidate extent/parser contracts use synthetic metadata and recorded reads;
+they do not run an unsafe baseline. The correction is source-only and UNTESTED
+until the new paired native and architecture products execute their acceptance.
+
+The [runtime qualification report](../../documents/toolchain/ros-runtime-qualification.md)
+records an earlier revision-14 campaign. Those historical native/QEMU results do
+not qualify the current mandatory-unwind native14, a newly built AArch64 ELF, or
+this additive candidate. The current AArch64 header-driver failure and zero new
+VM cases remain separate evidence. QEMU establishes correctness and architecture
+behavior; native performance requires actual native measurements.

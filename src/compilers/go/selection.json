@@ -1,0 +1,44 @@
+{
+  "artifacts": {},
+  "native_outputs": {
+    "go-asm": [
+      "share/toolchains/go/asm"
+    ],
+    "go-compile": [
+      "share/toolchains/go/compile"
+    ],
+    "go-link": [
+      "share/toolchains/go/link"
+    ],
+    "go-wrgo": [
+      "bin/wrgo"
+    ]
+  },
+  "release_record": "bin/packages/linux-x86_64/wrgo/go/native.json",
+  "source_roots": [
+    "src/compilers/go",
+    "src/compilers/package_native.py"
+  ],
+  "support_roots": [
+    "src/compilers/go/host_package.py",
+    "src/compilers/go/rebuild.py",
+    "src/compilers/go/test-fixtures.json",
+    "src/compilers/go/upstream.json",
+    "src/compilers/go/upstream/LICENSE",
+    "src/compilers/go/upstream/PATENTS",
+    "src/compilers/go/upstream/src/cmd/internal/obj/wasm/a.out.go",
+    "src/compilers/go/upstream/src/cmd/internal/obj/wasm/anames.go",
+    "src/compilers/go/upstream/src/cmd/internal/obj/wasm/wasmobj.go",
+    "src/compilers/go/upstream/src/cmd/link/internal/wasm/asm.go",
+    "src/compilers/go/upstream/src/runtime/panic.go",
+    "src/compilers/go/upstream/src/runtime/panic_wros_default.go",
+    "src/compilers/go/upstream/src/runtime/panic_wros_wasm.go",
+    "src/compilers/go/upstream/src/runtime/panic_wros_wasm.s",
+    "src/compilers/go/upstream/src/runtime/stack.go",
+    "src/compilers/go/upstream/src/runtime/stack_wros_default.go",
+    "src/compilers/go/upstream/src/runtime/stack_wros_wasm.go",
+    "src/compilers/go/upstream/src/runtime/stack_wros_wasm.s",
+    "src/compilers/official_dist.py",
+    "src/compilers/go/test_fixtures.py"
+  ]
+}

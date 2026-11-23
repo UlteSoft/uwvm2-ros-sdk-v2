@@ -1,0 +1,76 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author MacroModel
+ * @version 2.0.0
+ * @date 2025-03-23
+ * @copyright APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+/// @brief The following are the macros used by uwvm.
+/// @details Use `push_macro` to avoid side effects on existing macros. Please use `pop_macro` in conjunction.
+
+// #pragma once
+
+// macro checkers
+#pragma push_macro("UWVM_INTERPRETER_OPFUNC_TYPE_MACRO")
+#undef UWVM_INTERPRETER_OPFUNC_TYPE_MACRO
+#if defined(_WIN32) && ((defined(__x86_64__) || defined(_M_AMD64) || defined(_M_X64)) && !(defined(__arm64ec__) || defined(_M_ARM64EC))) &&                    \
+    (defined(__GNUC__) || defined(__clang__))
+# define UWVM_INTERPRETER_OPFUNC_TYPE_MACRO __attribute__((__sysv_abi__))
+#elif defined(__i386__) || defined(_M_IX86)
+# define UWVM_INTERPRETER_OPFUNC_TYPE_MACRO UWVM_FASTCALL
+#else
+# define UWVM_INTERPRETER_OPFUNC_TYPE_MACRO
+#endif
+
+#pragma push_macro("UWVM_INTERPRETER_OPFUNC_COLD_MACRO")
+#undef UWVM_INTERPRETER_OPFUNC_COLD_MACRO
+#if defined(_WIN32) && ((defined(__x86_64__) || defined(_M_AMD64) || defined(_M_X64)) && !(defined(__arm64ec__) || defined(_M_ARM64EC))) &&                    \
+    (defined(__GNUC__) || defined(__clang__))
+# define UWVM_INTERPRETER_OPFUNC_COLD_MACRO [[__gnu__::__sysv_abi__]] UWVM_GNU_COLD
+#elif defined(__i386__) || defined(_M_IX86)
+# define UWVM_INTERPRETER_OPFUNC_COLD_MACRO UWVM_FASTCALL UWVM_GNU_COLD
+#elif defined(__clang__) && defined(__mips__)
+// LLVM MIPS rejects direct musttail calls to interposable symbols, even with
+// -mllvm -mips-tail-calls. These opfuncs are private dispatch implementation,
+// not the public runtime API. Keep hot/cold targets equally non-interposable;
+// removing musttail would turn a Wasm instruction chain into host recursion.
+# define UWVM_INTERPRETER_OPFUNC_COLD_MACRO [[__gnu__::__visibility__("hidden")]] UWVM_GNU_COLD
+#else
+# define UWVM_INTERPRETER_OPFUNC_COLD_MACRO UWVM_GNU_COLD
+#endif
+
+#pragma push_macro("UWVM_INTERPRETER_OPFUNC_HOT_MACRO")
+#undef UWVM_INTERPRETER_OPFUNC_HOT_MACRO
+#if defined(_WIN32) && ((defined(__x86_64__) || defined(_M_AMD64) || defined(_M_X64)) && !(defined(__arm64ec__) || defined(_M_ARM64EC))) &&                    \
+    (defined(__GNUC__) || defined(__clang__))
+# define UWVM_INTERPRETER_OPFUNC_HOT_MACRO [[__gnu__::__sysv_abi__]] UWVM_GNU_HOT
+#elif defined(__i386__) || defined(_M_IX86)
+# define UWVM_INTERPRETER_OPFUNC_HOT_MACRO UWVM_FASTCALL UWVM_GNU_HOT
+#elif defined(__clang__) && defined(__mips__)
+// See the cold counterpart: visibility is part of MIPS tail-call eligibility,
+// including at -O0, and must not be applied globally to exported runtime APIs.
+# define UWVM_INTERPRETER_OPFUNC_HOT_MACRO [[__gnu__::__visibility__("hidden")]] UWVM_GNU_HOT
+#elif defined(__x86_64__)
+// Native PMU/paired execution identified opcode placement sensitivity after
+// adding cold MTE diagnostics. Align hot dispatch entries to 32 bytes without
+// adding instructions or changing the opfunc ABI. Other targets retain their
+// existing layout until native measurements justify a target-specific choice.
+# define UWVM_INTERPRETER_OPFUNC_HOT_MACRO UWVM_GNU_HOT [[__gnu__::__aligned__(32)]]
+#else
+# define UWVM_INTERPRETER_OPFUNC_HOT_MACRO UWVM_GNU_HOT
+#endif

@@ -1,0 +1,363 @@
+"""Raw module_call imports from uwvm_ros_v2."""
+from _uwros_runtime import raw
+
+
+def wr_module_call_acknowledge(cap, memory, request, size, output, capacity, length_output):
+    """Require delivered result and empty payload. Overwrite every retained region and host
+    capacity before reusing slot. Exact retry with unchanged retained token carries no new data.
+    Cleanup bypasses traffic quotas but requires authority. Trusted startup route fixes exact
+    endpoint names, semantic operation, opaque schema identities, finite
+    byte/slot/reservation/deadline ceilings. No arbitrary export invocation. Inputs and
+    registered delivery regions must use owned, unexported shared memory; imported memory,
+    exported memory, nonshared heaps, active threaded host calls and resumable/replay
+    compilation profiles are refused. A live debugger value-observation profile is allowed; it
+    does not grant recording, restoration or message authority. Detached scene queries never
+    copy payloads; separately authorized debugger memory reads remain subject to debugger
+    disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by
+    default. Trusted startup bool clear_after_copy defaults to true; false retains sender input
+    bytes, including failure cleanup, without weakening authorization, bounds, tags or
+    broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained
+    spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on
+    consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed
+    erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are
+    outside this erasure contract.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    module.call.acknowledge and the grant must authorize module.call.acknowledge. Applicable
+    grant purposes include module.call.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. The request, full reply
+    range and length slot must be pairwise disjoint in linear memory. The VM compares normalized
+    addresses and returns INVALID (22) for any overlap. Use caller-defined shared memory in a
+    module with no memory exports. Give the VM writable access to the entire input when the
+    route erases it after copying (the default). A span that intersects an outstanding delivery
+    returns CONFLICT (17). Coordinate concurrent access to all exchange storage.
+
+    cap (i64, unsigned bit pattern). Capability handle for the module.call.acknowledge action in
+    the caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's owned shared exchange memory.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `token` (`u64`), `payload` (`bytes`). The frame starts with the little-endian u64 token and
+    payload byte count.
+
+    size (i64, unsigned bit pattern). Exactly 16 bytes for the token and zero payload length.
+
+    output (i64, unsigned bit pattern). Guest address of the checked reply range. This operation
+    has an empty reply body.
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194320. Zero capacity is allowed for this empty reply.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply. This carrier
+    does not publish a required size on TOO_LARGE (90).
+
+    Returns an i32 as a Python int. Zero writes zero to the length slot after releasing the
+    registered delivery. The same token can be acknowledged again while its freed slot still
+    carries that token. UNSUPPORTED (95) can indicate failure to capture an eligible tagged
+    exchange span."""
+    return raw('module.call.acknowledge', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_module_call_cancel(cap, memory, request, size, output, capacity, length_output):
+    """Either registered endpoint may cancel its exact token with empty payload. Overwrite both
+    delivery regions and host capacity. No foreign policy mutation; cleanup bypasses traffic
+    quotas but requires authority. Trusted startup route fixes exact endpoint names, semantic
+    operation, opaque schema identities, finite byte/slot/reservation/deadline ceilings. No
+    arbitrary export invocation. Inputs and registered delivery regions must use owned,
+    unexported shared memory; imported memory, exported memory, nonshared heaps, active threaded
+    host calls and resumable/replay compilation profiles are refused. A live debugger
+    value-observation profile is allowed; it does not grant recording, restoration or message
+    authority. Detached scene queries never copy payloads; separately authorized debugger memory
+    reads remain subject to debugger disclosure policy. Input carrier is copied with byte
+    atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy
+    defaults to true; false retains sender input bytes, including failure cleanup, without
+    weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot
+    change this frozen per-route policy. Retained spans cannot overlap across outstanding
+    calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel,
+    observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy,
+    not a hard timer; independent guest copies are outside this erasure contract.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    module.call.cancel and the grant must authorize module.call.cancel. Applicable grant
+    purposes include module.call.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. The request, full reply
+    range and length slot must be pairwise disjoint in linear memory. The VM compares normalized
+    addresses and returns INVALID (22) for any overlap. Use caller-defined shared memory in a
+    module with no memory exports. Give the VM writable access to the entire input when the
+    route erases it after copying (the default). A span that intersects an outstanding delivery
+    returns CONFLICT (17). Coordinate concurrent access to all exchange storage.
+
+    cap (i64, unsigned bit pattern). Capability handle for the module.call.cancel action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's owned shared exchange memory.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `token` (`u64`), `payload` (`bytes`). The frame starts with the little-endian u64 token and
+    payload byte count.
+
+    size (i64, unsigned bit pattern). Exactly 16 bytes for the token and zero payload length.
+
+    output (i64, unsigned bit pattern). Guest address of the checked reply range. This operation
+    has an empty reply body.
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194320. Zero capacity is allowed for this empty reply.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply. This carrier
+    does not publish a required size on TOO_LARGE (90).
+
+    Returns an i32 as a Python int. Zero writes zero to the length slot after erasing the
+    exchange for this token. Failed erasure returns IO (5) and quarantines the slot. UNSUPPORTED
+    (95) can indicate failure to capture an eligible tagged exchange span."""
+    return raw('module.call.cancel', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_module_call_respond(cap, memory, request, size, output, capacity, length_output):
+    """Require received request token and exact server incarnation. Copy bounded response and
+    overwrite server delivery region before committing responded state. Lost output does not
+    resend or discard the committed response. Trusted startup route fixes exact endpoint names,
+    semantic operation, opaque schema identities, finite byte/slot/reservation/deadline
+    ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use
+    owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active
+    threaded host calls and resumable/replay compilation profiles are refused. A live debugger
+    value-observation profile is allowed; it does not grant recording, restoration or message
+    authority. Detached scene queries never copy payloads; separately authorized debugger memory
+    reads remain subject to debugger disclosure policy. Input carrier is copied with byte
+    atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy
+    defaults to true; false retains sender input bytes, including failure cleanup, without
+    weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot
+    change this frozen per-route policy. Retained spans cannot overlap across outstanding
+    calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel,
+    observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy,
+    not a hard timer; independent guest copies are outside this erasure contract.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    module.call.respond and the grant must authorize module.call.respond. Applicable grant
+    purposes include module.call.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. The request, full reply
+    range and length slot must be pairwise disjoint in linear memory. The VM compares normalized
+    addresses and returns INVALID (22) for any overlap. Use caller-defined shared memory in a
+    module with no memory exports. Give the VM writable access to the entire input when the
+    route erases it after copying (the default). A span that intersects an outstanding delivery
+    returns CONFLICT (17). Coordinate concurrent access to all exchange storage.
+
+    cap (i64, unsigned bit pattern). Capability handle for the module.call.respond action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's owned shared exchange memory.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `token` (`u64`), `payload` (`bytes`). The frame starts with the little-endian u64 token and
+    payload byte count.
+
+    size (i64, unsigned bit pattern). 16 bytes of token and payload length plus payload bytes,
+    at most 4194320 bytes. The route also bounds the payload.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `token` (`u64`), `payload` (`bytes`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194320. At least 16 bytes are required for the frame header.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply. This carrier
+    does not publish a required size on TOO_LARGE (90).
+
+    Returns an i32 as a Python int. Zero delivers a 16-byte receipt with the request token and
+    an empty payload. Exceeding the route's response limit returns TOO_LARGE (90) without a
+    required length. A failed receipt copy after commit leaves the response available to the
+    client. UNSUPPORTED (95) can indicate failure to capture an eligible tagged exchange span."""
+    return raw('module.call.respond', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_module_call_result(cap, memory, request, size, output, capacity, length_output):
+    """Require exact original client token and empty payload. Copy committed response once and
+    retain client erasure region until acknowledge. Pending returns again; duplicate consumption
+    conflicts. Trusted startup route fixes exact endpoint names, semantic operation, opaque
+    schema identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export
+    invocation. Inputs and registered delivery regions must use owned, unexported shared memory;
+    imported memory, exported memory, nonshared heaps, active threaded host calls and
+    resumable/replay compilation profiles are refused. A live debugger value-observation profile
+    is allowed; it does not grant recording, restoration or message authority. Detached scene
+    queries never copy payloads; separately authorized debugger memory reads remain subject to
+    debugger disclosure policy. Input carrier is copied with byte atomics and zeroed before
+    dispatch by default. Trusted startup bool clear_after_copy defaults to true; false retains
+    sender input bytes, including failure cleanup, without weakening authorization, bounds, tags
+    or broker/delivery erasure. Guest requests cannot change this frozen per-route policy.
+    Retained spans cannot overlap across outstanding calls/routes. Full buffer capacity is
+    overwritten on consume, response, acknowledge, cancel, observed expiry, revoke and
+    retirement. Failed erasure quarantines the slot. Expiry is lazy, not a hard timer;
+    independent guest copies are outside this erasure contract.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    module.call.result and the grant must authorize module.call.result. Applicable grant
+    purposes include module.call.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. The request, full reply
+    range and length slot must be pairwise disjoint in linear memory. The VM compares normalized
+    addresses and returns INVALID (22) for any overlap. Use caller-defined shared memory in a
+    module with no memory exports. Give the VM writable access to the entire input when the
+    route erases it after copying (the default). A span that intersects an outstanding delivery
+    returns CONFLICT (17). Coordinate concurrent access to all exchange storage. On successful
+    delivery reserve the full reply capacity and length slot until the client acknowledges or
+    confirmed cleanup erases the registered region. Cancellation, observed expiry, revocation
+    and retirement can erase it.
+
+    cap (i64, unsigned bit pattern). Capability handle for the module.call.result action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's owned shared exchange memory.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `token` (`u64`), `payload` (`bytes`). The frame starts with the little-endian u64 token and
+    payload byte count.
+
+    size (i64, unsigned bit pattern). Exactly 16 bytes for the token and zero payload length.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `token` (`u64`), `payload` (`bytes`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194320. At least 16 bytes are required for the frame header.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply. This carrier
+    does not publish a required size on TOO_LARGE (90).
+
+    Returns an i32 as a Python int. Zero delivers the token and committed response. A pending
+    response returns AGAIN (11). If the frame exceeds capacity, TOO_LARGE (90) preserves the
+    response and supplies no required length. Repeating a completed delivery returns CONFLICT
+    (17). UNSUPPORTED (95) can indicate failure to capture an eligible tagged exchange span."""
+    return raw('module.call.result', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_module_call_submit(cap, memory, request, size, output, capacity, length_output):
+    """Require registered server incarnation, fixed caller role and token=0. Reserve a free slot,
+    copy bounded request, return nonzero token. Failed delivery discards the unpublished
+    request. Trusted startup route fixes exact endpoint names, semantic operation, opaque schema
+    identities, finite byte/slot/reservation/deadline ceilings. No arbitrary export invocation.
+    Inputs and registered delivery regions must use owned, unexported shared memory; imported
+    memory, exported memory, nonshared heaps, active threaded host calls and resumable/replay
+    compilation profiles are refused. A live debugger value-observation profile is allowed; it
+    does not grant recording, restoration or message authority. Detached scene queries never
+    copy payloads; separately authorized debugger memory reads remain subject to debugger
+    disclosure policy. Input carrier is copied with byte atomics and zeroed before dispatch by
+    default. Trusted startup bool clear_after_copy defaults to true; false retains sender input
+    bytes, including failure cleanup, without weakening authorization, bounds, tags or
+    broker/delivery erasure. Guest requests cannot change this frozen per-route policy. Retained
+    spans cannot overlap across outstanding calls/routes. Full buffer capacity is overwritten on
+    consume, response, acknowledge, cancel, observed expiry, revoke and retirement. Failed
+    erasure quarantines the slot. Expiry is lazy, not a hard timer; independent guest copies are
+    outside this erasure contract.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    module.call.submit and the grant must authorize module.call.submit. Applicable grant
+    purposes include module.call.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. The request, full reply
+    range and length slot must be pairwise disjoint in linear memory. The VM compares normalized
+    addresses and returns INVALID (22) for any overlap. Use caller-defined shared memory in a
+    module with no memory exports. Give the VM writable access to the entire input when the
+    route erases it after copying (the default). A span that intersects an outstanding delivery
+    returns CONFLICT (17). Coordinate concurrent access to all exchange storage.
+
+    cap (i64, unsigned bit pattern). Capability handle for the module.call.submit action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's owned shared exchange memory.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `token` (`u64`), `payload` (`bytes`). The frame starts with the little-endian u64 token and
+    payload byte count.
+
+    size (i64, unsigned bit pattern). 16 bytes of token and payload length plus payload bytes,
+    at most 4194320 bytes. The route also bounds the payload.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `token` (`u64`), `payload` (`bytes`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194320. At least 16 bytes are required for the frame header.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply. This carrier
+    does not publish a required size on TOO_LARGE (90).
+
+    Returns an i32 as a Python int. Zero delivers a 16-byte receipt with a new nonzero token and
+    an empty payload. AGAIN (11) can mean the server has not registered or the route has no free
+    slot. UNSUPPORTED (95) can indicate failure to capture an eligible tagged exchange span."""
+    return raw('module.call.submit', cap, memory, request, size, output, capacity, length_output)
+
+
+def wr_module_call_take(cap, memory, request, size, output, capacity, length_output):
+    """Require exact server role, token=0 and empty payload. First authorized take pins server
+    incarnation even when returning again. Copy queued request once into a registered erasure
+    region; preserve request on failed delivery. Trusted startup route fixes exact endpoint
+    names, semantic operation, opaque schema identities, finite byte/slot/reservation/deadline
+    ceilings. No arbitrary export invocation. Inputs and registered delivery regions must use
+    owned, unexported shared memory; imported memory, exported memory, nonshared heaps, active
+    threaded host calls and resumable/replay compilation profiles are refused. A live debugger
+    value-observation profile is allowed; it does not grant recording, restoration or message
+    authority. Detached scene queries never copy payloads; separately authorized debugger memory
+    reads remain subject to debugger disclosure policy. Input carrier is copied with byte
+    atomics and zeroed before dispatch by default. Trusted startup bool clear_after_copy
+    defaults to true; false retains sender input bytes, including failure cleanup, without
+    weakening authorization, bounds, tags or broker/delivery erasure. Guest requests cannot
+    change this frozen per-route policy. Retained spans cannot overlap across outstanding
+    calls/routes. Full buffer capacity is overwritten on consume, response, acknowledge, cancel,
+    observed expiry, revoke and retirement. Failed erasure quarantines the slot. Expiry is lazy,
+    not a hard timer; independent guest copies are outside this erasure contract.
+
+    The caller must belong to the capability's environment. The deployment must expose
+    module.call.take and the grant must authorize module.call.take. Applicable grant purposes
+    include module.call.
+
+    Keep the request readable, the full reply capacity writable and the eight-byte length slot
+    writable through the call. Preserve WasmMTE tags on all addresses. The request, full reply
+    range and length slot must be pairwise disjoint in linear memory. The VM compares normalized
+    addresses and returns INVALID (22) for any overlap. Use caller-defined shared memory in a
+    module with no memory exports. Give the VM writable access to the entire input when the
+    route erases it after copying (the default). A span that intersects an outstanding delivery
+    returns CONFLICT (17). Coordinate concurrent access to all exchange storage. On successful
+    delivery reserve the full reply capacity and length slot until the server responds or
+    confirmed cleanup erases the registered region. Cancellation, observed expiry, revocation
+    and retirement can erase it.
+
+    cap (i64, unsigned bit pattern). Capability handle for the module.call.take action in the
+    caller's environment.
+
+    memory (i32, unsigned bit pattern). Index of the caller's owned shared exchange memory.
+
+    request (i64, unsigned bit pattern). Guest address of the encoded request. Wire order is
+    `token` (`u64`), `payload` (`bytes`). The frame starts with the little-endian u64 token and
+    payload byte count.
+
+    size (i64, unsigned bit pattern). Exactly 16 bytes for the token and zero payload length.
+
+    output (i64, unsigned bit pattern). Guest address of the writable result. Wire order is
+    `token` (`u64`), `payload` (`bytes`).
+
+    capacity (i64, unsigned bit pattern). Byte capacity of the full writable reply range, at
+    most 4194320. At least 16 bytes are required for the frame header.
+
+    length_output (i64, unsigned bit pattern). Guest address of the writable little-endian u64
+    byte count. On delivery it records the number of bytes written to the reply. This carrier
+    does not publish a required size on TOO_LARGE (90).
+
+    Returns an i32 as a Python int. Zero delivers the token and queued request. An empty queue
+    returns AGAIN (11). If the frame exceeds capacity, TOO_LARGE (90) leaves the request queued
+    and supplies no required length. UNSUPPORTED (95) can indicate failure to capture an
+    eligible tagged exchange span."""
+    return raw('module.call.take', cap, memory, request, size, output, capacity, length_output)

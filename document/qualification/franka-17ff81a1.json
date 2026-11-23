@@ -1,0 +1,251 @@
+{
+  "public_commit": "17ff81a1662824a25f81cd056c02232dfbe23541",
+  "git_tree": "aab3478a1c7453b94f8dbc2a74d0a121dd97475b",
+  "host": "linux-x86_64",
+  "platform": "franka",
+  "bootstrap_sha256": "e5d0e51c2f0e747413f66ec2c38afeeb1837725ec035d8b8972a19d9792b6628",
+  "external_projects": {
+    "run-go-default": {
+      "language": "go",
+      "mode": "binary",
+      "step_exit": {
+        "direct-build": 0,
+        "direct-run-int": 0,
+        "direct-run-aot": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "tools_sha256": {
+        "wrgo": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "327f19f761208b44a1741bf50180a69fd1ca3476061218dcb72e9e5ef39ae3fa",
+      "same_xmake_wasm": true
+    },
+    "run-tinygo-default": {
+      "language": "tinygo",
+      "mode": "binary",
+      "step_exit": {
+        "direct-build": 0,
+        "direct-run-int": 0,
+        "direct-run-aot": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "tools_sha256": {
+        "wrtg": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "10c2c84f3cbb70f8d00a2e6f0b46b919de557f1f6fceb4debf53687b0565a9f4",
+      "same_xmake_wasm": true
+    },
+    "run-tinygo-explicit": {
+      "language": "tinygo",
+      "mode": "binary",
+      "step_exit": {
+        "direct-build": 0,
+        "direct-run-int": 0,
+        "direct-run-aot": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "tools_sha256": {
+        "wrtg": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "10c2c84f3cbb70f8d00a2e6f0b46b919de557f1f6fceb4debf53687b0565a9f4",
+      "same_xmake_wasm": true
+    },
+    "run-wat-binary": {
+      "language": "wat",
+      "mode": "binary",
+      "step_exit": {
+        "direct-build": 0,
+        "direct-run-int": 0,
+        "direct-run-aot": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "tools_sha256": {
+        "wrwat": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1",
+      "same_xmake_wasm": true
+    },
+    "run-wat-source": {
+      "language": "wat",
+      "mode": "source",
+      "step_exit": {
+        "direct-build": 0,
+        "direct-run-int": 0,
+        "direct-run-aot": 0,
+        "xmake-build": 0,
+        "xmake-test": 0
+      },
+      "tools_sha256": {
+        "wrwat": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283"
+      },
+      "direct_wasm_sha256": "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1",
+      "same_xmake_wasm": true
+    }
+  },
+  "wat_source": {
+    "requires_rust_bin_option": false,
+    "host_cargo": null,
+    "rust_bootstrap": {
+      "identity": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+      "commit": "88d9e12ae178fab0fb5cc050a94da85685d449ea",
+      "host": "x86_64-unknown-linux-gnu",
+      "components": {
+        "rustc": {
+          "archive": "bin/packages/linux-x86_64/wrwat-rust/rustc-1.98.0-x86_64-unknown-linux-gnu.tar.xz",
+          "sha256": "0e37cb339f447fc44d6d781073bacacebfdc5612f2600e4c7e84c266f5f3aced",
+          "bytes": 79745456
+        },
+        "cargo": {
+          "archive": "bin/packages/linux-x86_64/wrwat-rust/cargo-1.98.0-x86_64-unknown-linux-gnu.tar.xz",
+          "sha256": "2f512d170d3dd23e16ababcda32ee2e6d5172d861a7af1f504e0b1e270cafab9",
+          "bytes": 11669560
+        },
+        "rust-std": {
+          "archive": "bin/packages/linux-x86_64/wrwat-rust/rust-std-1.98.0-x86_64-unknown-linux-gnu.tar.xz",
+          "sha256": "f5022e6c95a5ad23cca2513dc8281200f585fa188de6370aa37b128a43f876a3",
+          "bytes": 30715556
+        }
+      }
+    },
+    "offline_rebuild_script_sha256": "78f4b20c6f796784d4d1c9c7808c55a2330fd9cf1386af5706c33408f715741e",
+    "source_equals_binary_elf": true,
+    "installer_stage_split": "Test dispatcher handed the unchanged rebuild script and its arguments to the offline namespace after download.",
+    "version_option_exit": 1,
+    "isolation": {
+      "parent": {
+        "memory.max": "68719476736",
+        "memory.swap.max": "0",
+        "memory.oom.group": "0"
+      },
+      "leaf": {
+        "memory.max": "68719476736",
+        "memory.swap.max": "0",
+        "memory.oom.group": "1"
+      }
+    }
+  },
+  "independent_public_projects": {
+    "receipt_sha256": "f5ae147ad832ddbd497f74a0ca21b6f1e996dc01db29a0f7ce0b6d79a4c147fe",
+    "isolation": {
+      "parent_memory_oom_group": 0,
+      "leaf_memory_oom_group": 1,
+      "memory_max_bytes": 68719476736,
+      "memory_swap_max_bytes": 0,
+      "cold_home_and_cache": true,
+      "development_checkout_visible": false,
+      "tmp_and_dev_shm_readonly": true,
+      "run_network": "offline"
+    },
+    "go_tinygo_samples": {
+      "record_count": 8,
+      "fastcdr_cases": 16,
+      "fastcdr_frames": 32,
+      "byte_orders": [
+        "little",
+        "big"
+      ],
+      "application_round_trips_per_engine": 8,
+      "records": [
+        "franka_msgs/action/Grasp_FeedbackMessage",
+        "franka_msgs/action/Grasp_SendGoal_Request",
+        "franka_msgs/msg/Elbow",
+        "franka_msgs/msg/FrankaRobotState",
+        "franka_spine_msgs/msg/SpineState",
+        "franka_spine_msgs/srv/GetPosition_Event",
+        "franka_spine_msgs/srv/GetPosition_Request",
+        "franka_spine_msgs/srv/GetPosition_Response"
+      ],
+      "source": "eProsima Fast-CDR 2.2.5",
+      "public_fixture_sha256": "6d671985489f2c1f51dd9cbbbe8a35c3ed048a9753ade3fcaea6dc571f303f51",
+      "recomputed_manifest_sha256": "907ffbecc41e08145ced1ec30c86d142f02ab8465c1f06dd65495ac39bdd4c1c"
+    },
+    "selections": {
+      "go-default": {
+        "selection": "binary",
+        "compiler_sha256": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0",
+        "wasm_bytes": 2020437,
+        "direct_and_xmake_wasm_sha256": "57ef55b3ae3652aca0d9a160640041e326d283d9e624516d0ae544829b3149ac",
+        "engines": [
+          "int",
+          "aot"
+        ],
+        "inventory_sha256": "299dc20e64a2e346f07a2609125fcb57cf1e70b669a02c5cc768928bd28bc00e",
+        "result_sha256": "420d24ef1d4ca35094903ee36d611d877031e699328eb45a9a8ac70f1356ca93"
+      },
+      "go-explicit": {
+        "selection": "binary",
+        "compiler_sha256": "191ff76fb4ce2de8cf3888c04126fe219e2a74d5867939c48d26c735c10ff2a0",
+        "wasm_bytes": 2020437,
+        "direct_and_xmake_wasm_sha256": "57ef55b3ae3652aca0d9a160640041e326d283d9e624516d0ae544829b3149ac",
+        "engines": [
+          "int",
+          "aot"
+        ],
+        "inventory_sha256": "299dc20e64a2e346f07a2609125fcb57cf1e70b669a02c5cc768928bd28bc00e",
+        "result_sha256": "f19bd3b04634c35d5c979c72bc7c3179796d2733b8b6b54950cb21f1f44848d2"
+      },
+      "tinygo-default": {
+        "selection": "binary",
+        "compiler_sha256": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66",
+        "wasm_bytes": 161723,
+        "direct_and_xmake_wasm_sha256": "bebff5d6f3b01fb5feac18432a8bd84f46aa853cf15fb286cadaeefad5aa68a7",
+        "engines": [
+          "int",
+          "aot"
+        ],
+        "inventory_sha256": "f30319730b514907ec884ff9e418685a6b1df99f47b98d0678ec18a6efdaa90d",
+        "result_sha256": "dfe5609d648494884832795b1eb0c0dfd1523164fc6afcfdb658c17b11fd29f9"
+      },
+      "tinygo-explicit": {
+        "selection": "binary",
+        "compiler_sha256": "a7f0091b5596a166ba6877ad301db544492c50a0d01f8da337029f66b73e2e66",
+        "wasm_bytes": 161723,
+        "direct_and_xmake_wasm_sha256": "bebff5d6f3b01fb5feac18432a8bd84f46aa853cf15fb286cadaeefad5aa68a7",
+        "engines": [
+          "int",
+          "aot"
+        ],
+        "inventory_sha256": "f30319730b514907ec884ff9e418685a6b1df99f47b98d0678ec18a6efdaa90d",
+        "result_sha256": "cbf32e00fca8edf9caee4b9c43f49ea5fc840fe445613eb27d5c7e756ef30d2c"
+      },
+      "wat-binary": {
+        "selection": "binary",
+        "compiler_sha256": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+        "wasm_bytes": 2976,
+        "direct_and_xmake_wasm_sha256": "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1",
+        "engines": [
+          "int",
+          "aot"
+        ],
+        "inventory_sha256": "65bcf488e64187bc8e1ae2fdefea10531020623dcd599adf99bcba6bc76e9149",
+        "result_sha256": "74177069fadd9b0bfb391fe97060d89a83b0605ea0566603434887b5992456a1"
+      },
+      "wat-source": {
+        "selection": "source",
+        "compiler_sha256": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+        "wasm_bytes": 2976,
+        "direct_and_xmake_wasm_sha256": "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1",
+        "engines": [
+          "int",
+          "aot"
+        ],
+        "inventory_sha256": "b857c73ace3f33bf0c0dcd1d31e5dc5fbebdab70901be29c95ad57ffd2f4e804",
+        "result_sha256": "8363fb2e3d26e541ff531ce553b72b42f779b1fcf0e318fe0a3b9bcc4206f8a3"
+      }
+    }
+  }
+}

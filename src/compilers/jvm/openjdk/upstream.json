@@ -1,0 +1,89 @@
+{
+  "project": "Eclipse Temurin OpenJDK",
+  "release": "21.0.10+7",
+  "variant": "Linux x86-64 HotSpot JDK",
+  "jdk": {
+    "url": "https://github.com/adoptium/jdk21u.git",
+    "tag": "jdk-21.0.10+7_adopt",
+    "tag_object": "5e3f6aa36dab2bb75d1f48ae3e41245dfd084031",
+    "commit": "a633eafe0fccb1902f3f787a382c2df6e81fc335",
+    "upstream_git_tree": "30ae978e5aa47ed970a27e7e81950a3cd24a58a6",
+    "directory": "upstream",
+    "retained_git_tree": "b11421bd15000f1623bdb52e2d5a1ada11c9d7d0",
+    "retained_blobs": 25333,
+    "upstream_root_entries_omitted": [
+      ".github",
+      ".jcheck",
+      "test"
+    ],
+    "local_changes_to_retained_files": [],
+    "license": "GPL-2.0 with the Classpath exception where designated, the assembly exception and per-component licenses",
+    "license_files": [
+      "upstream/LICENSE",
+      "upstream/ADDITIONAL_LICENSE_INFO",
+      "upstream/ASSEMBLY_EXCEPTION"
+    ]
+  },
+  "distribution_build": {
+    "url": "https://github.com/adoptium/temurin-build.git",
+    "revision_source": "BUILD_SOURCE in the official JDK release file",
+    "commit": "458965074606f027bd5afce2cfd5c1055dea0438",
+    "git_tree": "619797c751c172820ce13fa6d3019c1bff400cfa",
+    "directory": "temurin-build",
+    "retained_blobs": 146,
+    "local_changes": [],
+    "license": "Apache-2.0",
+    "license_files": [
+      "temurin-build/LICENSE",
+      "temurin-build/NOTICE"
+    ]
+  },
+  "official_downloads": {
+    "jdk": {
+      "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.10_7.tar.gz",
+      "sha256": "ea3b9bd464d6dd253e9a7accf59f7ccd2a36e4aa69640b7251e3370caef896a4",
+      "size": 207216881,
+      "root": "jdk-21.0.10+7",
+      "tar_bytes": 360908800,
+      "tar_sha256": "38c2907f379d170b00f725271478f6a74b7d955db7b9004c0094389dd944b48c",
+      "members": {
+        "jdk-21.0.10+7/release": {
+          "bytes": 1616,
+          "sha256": "98372b2e3152736a5557243c1da7affa6cad304dbfb24c457a43377d48660c23",
+          "mode": "0o644"
+        },
+        "jdk-21.0.10+7/lib/modules": {
+          "bytes": 142166917,
+          "sha256": "52639f31b6138359f05b626031c1e5e063e29ab16f46790c911b971d35eaffef",
+          "mode": "0o644"
+        },
+        "jdk-21.0.10+7/lib/server/libjvm.so": {
+          "bytes": 26843656,
+          "sha256": "8217e9872cd15eea78ba9a190eb78e90cf1b9e17f688a4e9b2238cafc7633a46",
+          "mode": "0o644"
+        },
+        "jdk-21.0.10+7/bin/javac": {
+          "bytes": 12424,
+          "sha256": "765bebf8848e220a90c6a608186cc66ff37f97589065dfc021ec854fe6f4901a",
+          "mode": "0o755"
+        },
+        "jdk-21.0.10+7/bin/java": {
+          "bytes": 12328,
+          "sha256": "cb255f2795b07ec5db97aa7694753c37342851f0867a5979b20e74ff2151ccb3",
+          "mode": "0o755"
+        }
+      }
+    },
+    "source": {
+      "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jdk-sources_21.0.10_7.tar.gz",
+      "sha256": "a286b69953cdb56ab2dc74287e6ebaca8fad7d397a4b5f975b73d23eedeec252"
+    }
+  },
+  "qualification": {
+    "host_archive": "Official Temurin release and uncompressed tar verified by SHA-256.",
+    "jdk_source_build": "pending",
+    "wros_java_install": "pending",
+    "java_guest_vm": "pending",
+    "java_guest_deployer": "pending"
+  }
+}

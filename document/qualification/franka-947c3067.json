@@ -1,0 +1,721 @@
+{
+  "public_commit": "947c3067ff00cd48f3a58de9abbecec4710df69a",
+  "git_tree": "d7344c057264f551af57be6730bf2fe2f9070ef0",
+  "frozen_franka_source": "856953e9f21b432b12b321fc66b75509d13733b9",
+  "platform": "franka",
+  "host": "linux-x86_64",
+  "vm_commit": "576aa42918eaa3baca12ca030e3c55482cb524ca",
+  "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+  "online_install": "Exact public install.py and commit, fresh HOME and cache for every selection",
+  "offline_execution": "Mount and network namespaces, shared parent and child cgroups with 68719476736 byte limits and zero swap. External Xmake and VM provided as test tools.",
+  "legacy_default_installation": {
+    "as": {
+      "exit": 0,
+      "diagnostic": null
+    },
+    "c": {
+      "exit": 0,
+      "diagnostic": null
+    },
+    "c_ffi_bridge": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "cpp": {
+      "exit": 0,
+      "diagnostic": null
+    },
+    "csharp": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "d": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "fortran": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "fsharp": {
+      "exit": 1,
+      "diagnostic": "fatal: remote error: upload-pack: not our ref 947c3067ff00cd48f3a58de9abbecec4710df69a"
+    },
+    "go": {
+      "exit": 1,
+      "diagnostic": "Installation failed: this revision has no go bindings for platform franka"
+    },
+    "haskell": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "java": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "js": {
+      "exit": 0,
+      "diagnostic": null
+    },
+    "kotlin": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "lua": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "moonbit": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "nim": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "objectc": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "odin": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "php": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "py": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "r": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "rs": {
+      "exit": 1,
+      "diagnostic": "wrrs rebuild failed: expected official x86_64-unknown-linux-gnu rustc 1.97.1 and its host standard library"
+    },
+    "rs-bindings": {
+      "exit": 0,
+      "diagnostic": null
+    },
+    "ruby": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "swift": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "tinygo": {
+      "exit": 1,
+      "diagnostic": "Installation failed: this revision has no tinygo bindings for platform franka"
+    },
+    "typescript": {
+      "exit": 0,
+      "diagnostic": null
+    },
+    "vbnet": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    },
+    "wat": {
+      "exit": 0,
+      "diagnostic": null
+    },
+    "zig": {
+      "exit": 1,
+      "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+    }
+  },
+  "default_languages": [
+    "c",
+    "cpp",
+    "as",
+    "js",
+    "typescript",
+    "wat"
+  ],
+  "default_installed_example_projects": 8,
+  "example_projects_with_external_rust": 10,
+  "wasm": {
+    "as": {
+      "mode": "binary",
+      "direct_and_xmake": {
+        "independent-elbow": {
+          "direct": {
+            "aot": 0,
+            "bytes": 1935,
+            "exports": [
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "0d35c2ed7979a11150ddb21049f8b8cc69a96e622f338ca347626d3e9defe7a7"
+          },
+          "direct_build": 0
+        },
+        "stock": {
+          "direct": {
+            "aot": 0,
+            "bytes": 1537,
+            "exports": [
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "c8422cb66522bfe541839d2ce5085cbe146aaed91c7b386ed4369c07a4c0692f"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 1537,
+            "exports": [
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "c8422cb66522bfe541839d2ce5085cbe146aaed91c7b386ed4369c07a4c0692f"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        }
+      },
+      "elbow_fixture_sha256": {
+        "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+      },
+      "receipt_verified": true
+    },
+    "c": {
+      "mode": "binary",
+      "direct_and_xmake": {
+        "independent-elbow": {
+          "direct": {
+            "aot": 0,
+            "bytes": 32933,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "a87457f81fc245a287103249fdfba9c0a465b8486ef98fa3f1c0e330712ca63f"
+          },
+          "direct_build": 0
+        },
+        "stock": {
+          "direct": {
+            "aot": 0,
+            "bytes": 27425,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "916502c84a1f248325958eaa3c647800062eb44b6d35d46c5323bcce9ef475c7"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 27425,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "916502c84a1f248325958eaa3c647800062eb44b6d35d46c5323bcce9ef475c7"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        },
+        "typed-cdr": {
+          "direct": {
+            "aot": 0,
+            "bytes": 66292,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "b2f1af88857616062f96858e0126fcfe735dc9016dd7906f844f5d68374ef581"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 66292,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "b2f1af88857616062f96858e0126fcfe735dc9016dd7906f844f5d68374ef581"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        }
+      },
+      "elbow_fixture_sha256": {
+        "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+      },
+      "receipt_verified": true
+    },
+    "cpp": {
+      "mode": "binary",
+      "direct_and_xmake": {
+        "independent-elbow": {
+          "direct": {
+            "aot": 0,
+            "bytes": 34005,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "d3d887c737c935a2c621bb133dcb2f8835ab557d93ae29bd75cf934d4ff39f68"
+          },
+          "direct_build": 0
+        },
+        "stock": {
+          "direct": {
+            "aot": 0,
+            "bytes": 27950,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "85396f476dc7fce873a969efc85a406b0d402d6ea83c9484c505b642976146e5"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 27950,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "85396f476dc7fce873a969efc85a406b0d402d6ea83c9484c505b642976146e5"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        },
+        "typed-cdr": {
+          "direct": {
+            "aot": 0,
+            "bytes": 104239,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "b120dcb69b090f4eef534d00351d1a4e37b977b3c9f2af4d2cbd1fb908942ef8"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 104239,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "b120dcb69b090f4eef534d00351d1a4e37b977b3c9f2af4d2cbd1fb908942ef8"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        }
+      },
+      "elbow_fixture_sha256": {
+        "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+      },
+      "receipt_verified": true
+    },
+    "js": {
+      "mode": "binary",
+      "direct_and_xmake": {
+        "independent-elbow": {
+          "direct": {
+            "aot": 0,
+            "bytes": 4720242,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [
+              "wasi_snapshot_preview1.clock_time_get"
+            ],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "9019e80261ff322fec30651234863b9a754a47b248f168818b4e94c4cd8d43e1"
+          },
+          "direct_build": 0
+        },
+        "stock": {
+          "direct": {
+            "aot": 0,
+            "bytes": 4720870,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [
+              "wasi_snapshot_preview1.clock_time_get"
+            ],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "411b3fa5bf85632c8dac3beefba621842267f279441d05f3b5d8a1b100832634"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 4720984,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [
+              "wasi_snapshot_preview1.clock_time_get"
+            ],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "5924355f695d9b0d27bcd182ec2a5b9a86139faea1939bd552f9b891c23c55d1"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        }
+      },
+      "elbow_fixture_sha256": {
+        "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+      },
+      "receipt_verified": true
+    },
+    "rs-bindings": {
+      "mode": "bindings",
+      "direct_and_xmake": {
+        "independent-elbow": {
+          "direct_build": 1
+        },
+        "stock": {
+          "direct_build": 1,
+          "xmake_build": 255,
+          "xmake_test": 255
+        },
+        "typed-cdr": {
+          "direct_build": 1,
+          "xmake_build": 255,
+          "xmake_test": 255
+        }
+      },
+      "elbow_fixture_sha256": {
+        "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+      },
+      "receipt_verified": true
+    },
+    "typescript": {
+      "mode": "binary",
+      "direct_and_xmake": {
+        "independent-elbow": {
+          "direct": {
+            "aot": 0,
+            "bytes": 4721187,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [
+              "wasi_snapshot_preview1.clock_time_get"
+            ],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "b9db5849b40a27909affaaf7037598edab5bc4831cabb9a62c42d887380dea96"
+          },
+          "direct_build": 0
+        },
+        "stock": {
+          "direct": {
+            "aot": 0,
+            "bytes": 4721895,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [
+              "wasi_snapshot_preview1.clock_time_get"
+            ],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "b48f7a17a5d7023794806499c69ffcd40afc89696152edb04db53bf47ddf0987"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 4721805,
+            "exports": [
+              "memory",
+              "_start"
+            ],
+            "imports": [
+              "wasi_snapshot_preview1.clock_time_get"
+            ],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "c1269752d9449bb735cd51534a454d893906ed5357f067086e850c04faa2e0de"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        }
+      },
+      "elbow_fixture_sha256": {
+        "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+      },
+      "receipt_verified": true
+    },
+    "wat": {
+      "mode": "binary",
+      "direct_and_xmake": {
+        "independent-elbow": {
+          "direct": {
+            "aot": 0,
+            "bytes": 3191,
+            "exports": [
+              "memory",
+              "read_position",
+              "read_desired_position",
+              "read_commanded_position",
+              "read_commanded_velocity",
+              "read_commanded_acceleration",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "9dd47f1863c1679face1cd0643efebbb2ad8439ae20ea1af9312d665c5c57b97"
+          },
+          "direct_build": 0
+        },
+        "stock": {
+          "direct": {
+            "aot": 0,
+            "bytes": 2976,
+            "exports": [
+              "memory",
+              "read_position",
+              "read_desired_position",
+              "read_commanded_position",
+              "read_commanded_velocity",
+              "read_commanded_acceleration",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1"
+          },
+          "direct_build": 0,
+          "xmake": {
+            "aot": 0,
+            "bytes": 2976,
+            "exports": [
+              "memory",
+              "read_position",
+              "read_desired_position",
+              "read_commanded_position",
+              "read_commanded_velocity",
+              "read_commanded_acceleration",
+              "_start"
+            ],
+            "imports": [],
+            "imports_verified": true,
+            "int": 0,
+            "objdump_exit": 0,
+            "sha256": "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1"
+          },
+          "xmake_build": 0,
+          "xmake_test": 0
+        }
+      },
+      "elbow_fixture_sha256": {
+        "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+        "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+      },
+      "receipt_verified": true
+    }
+  },
+  "supplemental_rust": {
+    "mode": "bindings",
+    "prerequisite": "Rust 1.98.0 with wasm32-unknown-unknown rust-std",
+    "direct_and_xmake": {
+      "independent-elbow": {
+        "direct": {
+          "aot": 0,
+          "bytes": 625943,
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "imports": [],
+          "imports_verified": true,
+          "int": 0,
+          "objdump_exit": 0,
+          "sha256": "73a54674ff40851d0984f90df2fe54217f1d71b159e067f40816e0d632dd7319"
+        },
+        "direct_build": 0
+      },
+      "stock": {
+        "direct": {
+          "aot": 0,
+          "bytes": 623864,
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "imports": [],
+          "imports_verified": true,
+          "int": 0,
+          "objdump_exit": 0,
+          "sha256": "00ea9d7ce5a63cc3dbd985dd0d207cb171a52ea7c808537eed4a9351d40acf08"
+        },
+        "direct_build": 0,
+        "xmake": {
+          "aot": 0,
+          "bytes": 623864,
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "imports": [],
+          "imports_verified": true,
+          "int": 0,
+          "objdump_exit": 0,
+          "sha256": "ef54fb62b9309337f33c952221ad7665d47e1a2d3a64c61508bee9a41af58b5f"
+        },
+        "xmake_build": 0,
+        "xmake_test": 0
+      },
+      "typed-cdr": {
+        "direct": {
+          "aot": 0,
+          "bytes": 636537,
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "imports": [],
+          "imports_verified": true,
+          "int": 0,
+          "objdump_exit": 0,
+          "sha256": "98f1368d1ab75bc9779679d3bca4c030bcb8bb9a5c33d6f08e5b6395f68225ee"
+        },
+        "direct_build": 0,
+        "xmake": {
+          "aot": 0,
+          "bytes": 636533,
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "imports": [],
+          "imports_verified": true,
+          "int": 0,
+          "objdump_exit": 0,
+          "sha256": "a95d602c5439d08efdd6bcc908b0efc07adfb62878a51064fa6efa59c9be7432"
+        },
+        "xmake_build": 0,
+        "xmake_test": 0
+      }
+    },
+    "elbow_fixture_sha256": {
+      "be": "eda948428dc0988f2fe3c88424f83bb994dc7e6a0f28b4755422f6a8ae83fa46",
+      "le": "dddf3d6e0c63e395884c2c890c4ae4e87dbe6bc6b514de894fa3ae990979cc22"
+    },
+    "receipt_verified": true
+  },
+  "native_cdr_profiles": [
+    "C11",
+    "C++98",
+    "C++03",
+    "C++11",
+    "C++14",
+    "C++17",
+    "C++20",
+    "C++23",
+    "C++26",
+    "Rust no_std"
+  ],
+  "native_reference_checks": {
+    "alignment_checks_per_profile": 436,
+    "bounded_service_event_records": 27,
+    "event_bound_rejections_per_profile": 108,
+    "explicit_iterable_sequence_instances_per_profile": 556,
+    "mutation_checks_per_profile": 3774,
+    "original_declarations": 53,
+    "pinned_source_files": 79,
+    "reference_frames": 818,
+    "truncated_frames_per_profile": 47612,
+    "typed_records": 137,
+    "valid_frame_passes_per_language_profile": 710,
+    "valid_transport_padding_cases_per_profile": 242
+  },
+  "native_codec_scope": "All 137 records from the installed public C/C++/Rust bindings were checked on the host. Wasm guest executions are listed separately.",
+  "cdr_fixture": "src/qualification/franka/xcdr1-vectors.json",
+  "cdr_fixture_sha256": "6d671985489f2c1f51dd9cbbbe8a35c3ed048a9753ade3fcaea6dc571f303f51",
+  "public_native_check_log_sha256": "27f2f347c445533261380cf59b31384508547f7adbac8b6d650bb49171d43225",
+  "independent_rosidl_reference_log_sha256": "8527dc9bb3e3fb4b8c10efd2850f88b96960b6a70303a42f1235767001154af3",
+  "limits": [
+    "Rust compatibility mode needs an external compiler and target core. Native Rust source and binary packages did not pass this public clean install.",
+    "Go and TinyGo do not select Franka in this revision.",
+    "No simulator, live DDS worker or physical controller was used."
+  ]
+}

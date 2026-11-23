@@ -1,0 +1,612 @@
+{
+  "repositories": [
+    {
+      "id": "abb_interfaces_ros1",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "tree": "b70de607e587d949810d0258dee6d580499b3a27",
+      "url": "https://github.com/ros-industrial/abb_robot_driver_interfaces"
+    },
+    {
+      "id": "control_ros1_kinetic",
+      "repository": "ros-controls/control_msgs",
+      "commit": "36e2e30551e3f2bfd9e55fca553f1ef019f4e4b1",
+      "tree": "6c99a727518cae7f7283b96e15e03c2a72b5572f",
+      "url": "https://github.com/ros-controls/control_msgs"
+    },
+    {
+      "id": "common_ros1",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "tree": "dd72cef60b6f589b398d37934be2971382d4340f",
+      "url": "https://github.com/ros/common_msgs"
+    },
+    {
+      "id": "std_ros1",
+      "repository": "ros/std_msgs",
+      "commit": "34198520757d1aab358118a0ef294fe2609fde33",
+      "tree": "c6ce9f1fbbbe6a4310f237726df491359c874519",
+      "url": "https://github.com/ros/std_msgs"
+    }
+  ],
+  "local_changes": [],
+  "files": [
+    {
+      "file": "abb_egm_msgs/msg/EGMChannelState.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_egm_msgs/msg/EGMChannelState.msg",
+      "git_blob": "081e7e32050375369049cde51ff4dbd9020aee82",
+      "sha256": "a4e4dc5ca5225e05dd8616726a51fd954581a129d301c8d7b7bc190ae34f68f7"
+    },
+    {
+      "file": "abb_egm_msgs/msg/EGMState.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_egm_msgs/msg/EGMState.msg",
+      "git_blob": "990bd83e1993d538d421a119669661da48bf0338",
+      "sha256": "eba698f711272725a884b5d2d2c6f53243fd7fa673f721aac047f7e96371372a"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/ConfData.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/ConfData.msg",
+      "git_blob": "e50d73e17f388c33af582dd674a022cc286f1e4c",
+      "sha256": "fc346fbf7f5e76ca40c6cfde4e513db7aeface67c5efa3547060e8fa43795b02"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/ExtJoint.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/ExtJoint.msg",
+      "git_blob": "cfe5090a3f71de5d5af443b90223848972f2b8f1",
+      "sha256": "925a51e4b90682b9e2108374dd37ce8de800d3055204517703d2c406d64ce043"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/JointTarget.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/JointTarget.msg",
+      "git_blob": "98a205081cf860759e9bc7e819e4646f02ff6bf1",
+      "sha256": "d11667386bec4576fa56658eca20f57de9a94061118e31a8dc669242c9e358a4"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/LoadData.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/LoadData.msg",
+      "git_blob": "4985b100a9754d6aa2f1ded8e697f1338e68be2c",
+      "sha256": "b5f69f89a6d6fd02515feb3529778c35515b2ff434bff90a4d63ce8203c9dcd5"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/Orient.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/Orient.msg",
+      "git_blob": "30b484842754c2204bf5e43a041c43e1cd57de58",
+      "sha256": "8edb4f6f2ec775ab54f0798b86b212a8339900f33979a082329e43ab22a41ede"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/Pos.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/Pos.msg",
+      "git_blob": "9a9cf3c4f48af3ce63d7400c8618428d330ccfc1",
+      "sha256": "feccb992c3b666d431efd20eb4f7cbef5fa5b921a5a95337656cff1e7735333f"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/Pose.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/Pose.msg",
+      "git_blob": "78add9d649ec8f300234d6a8341543c5080e27b5",
+      "sha256": "fa2bf480b88bd23b8f133f8521bfc2298578c34ec4ebcba3cab9fc0c6b36503d"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/RobJoint.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/RobJoint.msg",
+      "git_blob": "858d9607c76dfca66c4dfa7e766c62a938adea66",
+      "sha256": "c89c1f4e8ff4995aa87b7bba5fe05b2bfe8b58ff667a460232e9281b8d8df928"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/RobTarget.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/RobTarget.msg",
+      "git_blob": "fb6255f76bacc376753eb16696b3d877cd9ac249",
+      "sha256": "5e7b8ad797f69f5e9e173eaaef3a077e1de1a487384e1136fe33af742db8bcea"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/ToolData.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/ToolData.msg",
+      "git_blob": "1e9776790d23d712eb839e5f069a1e587e60e989",
+      "sha256": "fdec1107fdc8e332618d920fbed140aa45a67119288f2fa4d59d7cef426d23c8"
+    },
+    {
+      "file": "abb_rapid_msgs/msg/WObjData.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/msg/WObjData.msg",
+      "git_blob": "d00f1001974df01b5023fdf0fb2e87618fc60861",
+      "sha256": "a70f77f7b3372e9a6e0b8aed08e3dc0094e7d6208e1a3138eeb84207fd1df1bc"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/msg/EGMActivateSettings.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/msg/EGMActivateSettings.msg",
+      "git_blob": "c7714260e33e1d36adb789613d0a7005a9b62299",
+      "sha256": "f9f9fae8eac679dd6d22d36798a33c7e2104508d237aea91f2a4d2ac5e8f0acd"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/msg/EGMRunSettings.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/msg/EGMRunSettings.msg",
+      "git_blob": "b7cc3d28d4bd13a57efe5d20d6b1ef386c20f952",
+      "sha256": "d9fcdba07f147d41de07bdca455f812105dea2eaede3416fafc6bb99102aee98"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/msg/EGMSettings.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/msg/EGMSettings.msg",
+      "git_blob": "71f8ca90aa5d131010f23ff879b84875e0dbbcf4",
+      "sha256": "b4956826b9ca603db6004cfb5a124fa55db2afe9d1326cf2ebdc1a3a4e44ff5a"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/msg/EGMSetupSettings.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/msg/EGMSetupSettings.msg",
+      "git_blob": "15bb3f76e47b6032d1c71fd2f8cb2577d1b5a9b2",
+      "sha256": "1d5cb84d330f60ea25d3d77407b8307ac7129f5bc379fc403f198cfccb70f4c5"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/msg/EGMStopSettings.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/msg/EGMStopSettings.msg",
+      "git_blob": "9fc424dd4f0e617680918230a280e6c8da84e3f1",
+      "sha256": "b16dbec655d9a35c063f77fede4acf17de6c15fbda90eca5deb5cdfe1c8b1261"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/srv/GetEGMSettings.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/srv/GetEGMSettings.srv",
+      "git_blob": "0f46c6a36376528cdea6d1a56b576b3a5e173450",
+      "sha256": "fa9f88e9d2b68daab582abd820cab11c9c056a10186af922df97459e2a76acb3"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/msg/RuntimeState.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/msg/RuntimeState.msg",
+      "git_blob": "072237d0a1165e7978060d2d4679858e72fa8b72",
+      "sha256": "0b20438e20d5d645057590ad816b5fe639c43a1c1d294bd0cfecb67dc62c9533"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/srv/SetEGMSettings.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/srv/SetEGMSettings.srv",
+      "git_blob": "7c566f9cee7ed1d9ba5304f3d24ff85a2d169d5a",
+      "sha256": "639427a18aab44b7e599443765dd5d551806942c1b2f3a8096f00fcec9d766da"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/srv/SetRAPIDRoutine.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/srv/SetRAPIDRoutine.srv",
+      "git_blob": "56f790f6135465a68641c1eb26789ad106043893",
+      "sha256": "9fd84ed30d22d80bb10b246f39ef96f7fa987ebdc7ed5368a3d56af88b84f752"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/srv/SetSGCommand.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/srv/SetSGCommand.srv",
+      "git_blob": "8623f44488166e386beb9faaaed5b30c1d022c99",
+      "sha256": "5434b962c5284096632035be876af208ca87b3dda4ebd1b984e28ada101afb4c"
+    },
+    {
+      "file": "abb_rapid_sm_addin_msgs/msg/StateMachineState.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/msg/StateMachineState.msg",
+      "git_blob": "a7839423527540923e9f7047f55e0add93f392f3",
+      "sha256": "e97dd2b665cde842791aa94a1ca53c95ddb3f6c99d2e9572175f2fc30246ff46"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetFileContents.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetFileContents.srv",
+      "git_blob": "37fac189206206c1c81af43766ad2363a8d76106",
+      "sha256": "f01602123f34c0a833f824c3f441280a69c497617476f4bb5963c17368bbae41"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetIOSignal.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetIOSignal.srv",
+      "git_blob": "3339ce9b639fb672dc7f8367e6111242d646b12b",
+      "sha256": "b53c95133264cb3a128ae7cbd0011fd83bb59c62398f4331f6b7c4c69a258c1e"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetRAPIDBool.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetRAPIDBool.srv",
+      "git_blob": "1565bb695e202ab0d856dfc0d75cb472ed5ce2d3",
+      "sha256": "bad692958089524f9289c15b31b6d7e7195729f7698e0e08e2ee2ccefa9d6c16"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetRAPIDDnum.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetRAPIDDnum.srv",
+      "git_blob": "588420673acaa6955f56f25655d377c29891e73c",
+      "sha256": "6e8994fe441af1d1b86ca8a8338ead917b5bef99b49b0bedcfd846d83b4df320"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetRAPIDNum.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetRAPIDNum.srv",
+      "git_blob": "2c157129a85834e80e2211dea89f03d19da6b168",
+      "sha256": "07df911c3a068dd7d569b238966a3d52f3381e5eb12a4c5692c4bfac37267b60"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetRAPIDString.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetRAPIDString.srv",
+      "git_blob": "d2edd92e49f2d9228e1a46c77e53153c3e7b6fff",
+      "sha256": "bb8cd434520cb3455c4e9f78cb408bbc456a70c6bba7751d65e4bde979ab43e2"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetRAPIDSymbol.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetRAPIDSymbol.srv",
+      "git_blob": "a7a5bb59da445ff6afcd4f23026a319d4d15b824",
+      "sha256": "7ef8c6573b7eb42175341842a6938e54e0111c19666bab5e8484ce970f3c1c36"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetRobotControllerDescription.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetRobotControllerDescription.srv",
+      "git_blob": "9b11b2207e566f690d6e6ffe750ad9798916f550",
+      "sha256": "021bc83dcec746d8fde806a1d75a9e80f32eb61d138ad5236173d546bac8b58b"
+    },
+    {
+      "file": "abb_robot_msgs/srv/GetSpeedRatio.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/GetSpeedRatio.srv",
+      "git_blob": "ff432f4e68a0ae889aae2be703f21d21bcdd478b",
+      "sha256": "b241e9021d40c8bb091f56c9f2075ec8ccf80c9d63c78b10dd3ce4d74fcf19c5"
+    },
+    {
+      "file": "abb_robot_msgs/msg/MechanicalUnitState.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/msg/MechanicalUnitState.msg",
+      "git_blob": "09b8ec75ad0701c9f17171b5c9146f0c27cd25d0",
+      "sha256": "957f6ac053b1b5daa70eba43575dd054d509d41040aa278ceb1fd3436d347dd4"
+    },
+    {
+      "file": "abb_robot_msgs/msg/RAPIDSymbolPath.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/msg/RAPIDSymbolPath.msg",
+      "git_blob": "b61cb54a2b6c3963a2368b6a53c9f561350b271a",
+      "sha256": "c4c8135a38fb24bdf613bc129fde55b9882037fd044b7344a517d06d6c6d43c3"
+    },
+    {
+      "file": "abb_robot_msgs/msg/RAPIDTaskState.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/msg/RAPIDTaskState.msg",
+      "git_blob": "717d124147d659e6edb4e4869cbc6086d3c3f0dc",
+      "sha256": "9440c505af1744657a7023f28a37e6bdcd2569439024bc37c06ae88bb9c39fcf"
+    },
+    {
+      "file": "abb_robot_msgs/msg/ServiceResponses.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/msg/ServiceResponses.msg",
+      "git_blob": "d51b44af0e00a79bcb23762f68fcb8435487efed",
+      "sha256": "fb40ccf4939758ae6952d62731ddd9c46edf65ce65577339a66735760a7cd819"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetFileContents.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetFileContents.srv",
+      "git_blob": "2a2f604126ce1246437d3904311ef1fd05c625f6",
+      "sha256": "df87425dc04ff5934dd2e71c6b594a288b6399e81a0c379025883127245d53ce"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetIOSignal.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetIOSignal.srv",
+      "git_blob": "849cfc926c608e5e77138e63fa6d1b753c7c4a24",
+      "sha256": "bd362e7a7af1c0f7980600aa753cb460c1d2514aca175078b51605361743da7c"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetRAPIDBool.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetRAPIDBool.srv",
+      "git_blob": "6a7a11f76eedd2e39ec4855338dea306092fc581",
+      "sha256": "51fc56ce33de7ec94ee14017fd27358eba76f023484fbbf5e88a83d56ced3974"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetRAPIDDnum.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetRAPIDDnum.srv",
+      "git_blob": "90a46c4019a743d4f820ad9597db7c1968f2d53a",
+      "sha256": "b3accf702a96532b643d8003f41f23f03b249edb158bbcfdd49daca8a07ab365"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetRAPIDNum.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetRAPIDNum.srv",
+      "git_blob": "c4a7af926b7dffc142d39c5c1105ea8579ca98b3",
+      "sha256": "f9339480d047b6f6e6d681d67279f316a0ecbe48b315b60432943bbbfd8d78da"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetRAPIDString.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetRAPIDString.srv",
+      "git_blob": "7268c1ddc16f6557914c2f9a4b0e9360965267a6",
+      "sha256": "d63b288abbcb38eb282d9af60485143112500639f69a179b871cc4cc649f1ba1"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetRAPIDSymbol.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetRAPIDSymbol.srv",
+      "git_blob": "f673e2e72ec49eaf142f9ea848ebf924a3bdf02f",
+      "sha256": "18f06e544f2512e39d4efbae145edf95b5a5df004ce178975442c228252f809d"
+    },
+    {
+      "file": "abb_robot_msgs/srv/SetSpeedRatio.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/SetSpeedRatio.srv",
+      "git_blob": "ddedab8495d977cdc8bb5b131902841925144ce4",
+      "sha256": "cc238b657aac741bafe3a2896ff4a876ff3556e27820aa456fffd99b524c25b4"
+    },
+    {
+      "file": "abb_robot_msgs/msg/SystemState.msg",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/msg/SystemState.msg",
+      "git_blob": "2e5c21d3fccd720471897be80de4db961e4d8f83",
+      "sha256": "f7a4608a15582ccff2542fb2fd645ed63c11be0ec1b0c12b78e21239fd0cf1e3"
+    },
+    {
+      "file": "abb_robot_msgs/srv/TriggerWithResultCode.srv",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/srv/TriggerWithResultCode.srv",
+      "git_blob": "304e3c21c80965021f81787c0cbc540c803f49bd",
+      "sha256": "ab0ecb47e304a920b779b21e46ebd36cd9145a369423b5a505d1dd75b81f1b30"
+    },
+    {
+      "file": "control_msgs/action/FollowJointTrajectory.action",
+      "repository": "ros-controls/control_msgs",
+      "commit": "36e2e30551e3f2bfd9e55fca553f1ef019f4e4b1",
+      "original_path": "control_msgs/action/FollowJointTrajectory.action",
+      "git_blob": "74b10d0e6b42f468834afb179f1931f8adbc1027",
+      "sha256": "e234e67e1127a79860e5c0ecefccd8685d52c23ddefa0cef7345fb89b83be6bb"
+    },
+    {
+      "file": "control_msgs/msg/JointTolerance.msg",
+      "repository": "ros-controls/control_msgs",
+      "commit": "36e2e30551e3f2bfd9e55fca553f1ef019f4e4b1",
+      "original_path": "control_msgs/msg/JointTolerance.msg",
+      "git_blob": "cd99abe66f1443569985baedd264e26e257457c0",
+      "sha256": "d98f1d95d8cb81a6882b1a767c806acc6bd5d9c2489330818401c548dd46d7bb"
+    },
+    {
+      "file": "sensor_msgs/msg/JointState.msg",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "sensor_msgs/msg/JointState.msg",
+      "git_blob": "f67f4bcf214cbf187cf5ba557f34fcbfb6966cf2",
+      "sha256": "31e0c7daefc83de1da036d7c346394d65efe0239591ac718ad0b8f5caa97187a"
+    },
+    {
+      "file": "std_msgs/msg/Header.msg",
+      "repository": "ros/std_msgs",
+      "commit": "34198520757d1aab358118a0ef294fe2609fde33",
+      "original_path": "msg/Header.msg",
+      "git_blob": "2b3866d2cbcaa7c84d8341e541986da1d5a485a1",
+      "sha256": "5e64e71bb8d9d47019367f6a621934aab7e6ffedc6cfdcc912486aa5576ed693"
+    },
+    {
+      "file": "trajectory_msgs/msg/JointTrajectory.msg",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "trajectory_msgs/msg/JointTrajectory.msg",
+      "git_blob": "4982de85cfe414b64595ce062d76c6c2f359eb4b",
+      "sha256": "c3fd593dfc91e9084316bd8ea8c9c11be65c93dad98609e135ec491574a8f05c"
+    },
+    {
+      "file": "trajectory_msgs/msg/JointTrajectoryPoint.msg",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "trajectory_msgs/msg/JointTrajectoryPoint.msg",
+      "git_blob": "55fd3c0ab1bc9c188a707aa2ebd38f6cb2347d6e",
+      "sha256": "d6bdced3460bf402a86274ccccf7fd7876cae1d70c8610fb6ca684da6057b9a2"
+    },
+    {
+      "file": "licenses/abb_interfaces_ros1/LICENSE",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "LICENSE",
+      "git_blob": "1aa59051f42af33595fe079046ff05c0242a98a9",
+      "sha256": "1b33168f61edcb96c6291078e922d1bd24afc553cb9c826c48105f02a2a6ea76"
+    },
+    {
+      "file": "licenses/abb_interfaces_ros1/abb_egm_msgs/LICENSE",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_egm_msgs/LICENSE",
+      "git_blob": "1aa59051f42af33595fe079046ff05c0242a98a9",
+      "sha256": "1b33168f61edcb96c6291078e922d1bd24afc553cb9c826c48105f02a2a6ea76"
+    },
+    {
+      "file": "licenses/abb_interfaces_ros1/abb_rapid_msgs/LICENSE",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_msgs/LICENSE",
+      "git_blob": "1aa59051f42af33595fe079046ff05c0242a98a9",
+      "sha256": "1b33168f61edcb96c6291078e922d1bd24afc553cb9c826c48105f02a2a6ea76"
+    },
+    {
+      "file": "licenses/abb_interfaces_ros1/abb_rapid_sm_addin_msgs/LICENSE",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_rapid_sm_addin_msgs/LICENSE",
+      "git_blob": "1aa59051f42af33595fe079046ff05c0242a98a9",
+      "sha256": "1b33168f61edcb96c6291078e922d1bd24afc553cb9c826c48105f02a2a6ea76"
+    },
+    {
+      "file": "licenses/abb_interfaces_ros1/abb_robot_msgs/LICENSE",
+      "repository": "ros-industrial/abb_robot_driver_interfaces",
+      "commit": "da809cd0bb6f270c0814fca07d7d4a5c0385fc39",
+      "original_path": "abb_robot_msgs/LICENSE",
+      "git_blob": "1aa59051f42af33595fe079046ff05c0242a98a9",
+      "sha256": "1b33168f61edcb96c6291078e922d1bd24afc553cb9c826c48105f02a2a6ea76"
+    },
+    {
+      "file": "licenses/common_ros1/actionlib_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "actionlib_msgs/package.xml",
+      "git_blob": "a91f30db142b2ef90ae81df7cc69684f9bea9347",
+      "sha256": "6f83e83ad27cc7fbb96077e90b3e249cd91e13fcd7651742f3214fb3a4d290c9"
+    },
+    {
+      "file": "licenses/common_ros1/common_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "common_msgs/package.xml",
+      "git_blob": "70febe2859ea9c63451d4f51cf1ee7f1cf04c804",
+      "sha256": "18595d8e01503d98e7d94f74c1d72e4269ea32dcbaa40dc0460b0805fd6fc9cf"
+    },
+    {
+      "file": "licenses/common_ros1/diagnostic_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "diagnostic_msgs/package.xml",
+      "git_blob": "3c06036a5632b419832497a62631005610a60e8f",
+      "sha256": "d8cbc61f5b2abf105325d7a84cc1b81c126c57b56d3523af336261ef9bc5175d"
+    },
+    {
+      "file": "licenses/common_ros1/geometry_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "geometry_msgs/package.xml",
+      "git_blob": "b030707f6b0d1bbb9f10c0025ec33ff23cff404b",
+      "sha256": "91310657dccd74e274840987118c889eebbd02a8f79c26ca442a1d539e347a59"
+    },
+    {
+      "file": "licenses/common_ros1/nav_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "nav_msgs/package.xml",
+      "git_blob": "fd987d04a38ccef099c89c206efcef2c30b76a22",
+      "sha256": "e911b500ef64ad3e423152dca9d6639b23954d278023f036a07621f83e49fe26"
+    },
+    {
+      "file": "licenses/common_ros1/sensor_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "sensor_msgs/package.xml",
+      "git_blob": "88e69903d7a0097c389149bd93370c146b582023",
+      "sha256": "664448319686cf0acea6065b2e7778b0fde43a0bebb1dd9e61ce68a29d00d228"
+    },
+    {
+      "file": "licenses/common_ros1/shape_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "shape_msgs/package.xml",
+      "git_blob": "78d5c50cb3f11e8c2d2427139d51fdce103f401b",
+      "sha256": "bad052a3b253adcfe2575a3be233ab5c964ceeac3a284f55774b2f16432864dc"
+    },
+    {
+      "file": "licenses/common_ros1/stereo_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "stereo_msgs/package.xml",
+      "git_blob": "16487a8e21fd12166873f2b2476525b84594de60",
+      "sha256": "c592429151c4e512a80c2cb7d1dfbe03123a74161367025c8a0f43bd9918dfe7"
+    },
+    {
+      "file": "licenses/common_ros1/trajectory_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "trajectory_msgs/package.xml",
+      "git_blob": "ff9ab1b94d71c82f619694d2e64f7e74d7ede26c",
+      "sha256": "e1a8c4e785aba647495edd8de5fca61694c8a334751e29eca6aaf89ebf60f079"
+    },
+    {
+      "file": "licenses/common_ros1/visualization_msgs/package.xml",
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "original_path": "visualization_msgs/package.xml",
+      "git_blob": "fe2c25442bbadad0647b90a5d600455e94dfb644",
+      "sha256": "9dca7c6926a962ca0b9c45b728df7d0b6b60fd331906a52eca7f2cc2692bfbdf"
+    },
+    {
+      "file": "licenses/control_ros1_kinetic/control_msgs/package.xml",
+      "repository": "ros-controls/control_msgs",
+      "commit": "36e2e30551e3f2bfd9e55fca553f1ef019f4e4b1",
+      "original_path": "control_msgs/package.xml",
+      "git_blob": "48ee2d407a8edfebc28e0af62c008be84f35b58c",
+      "sha256": "75cf5d4b3832829733dd861eeb4d717229877a32fc436b60cf6d513ee1350405"
+    },
+    {
+      "file": "licenses/std_ros1/package.xml",
+      "repository": "ros/std_msgs",
+      "commit": "34198520757d1aab358118a0ef294fe2609fde33",
+      "original_path": "package.xml",
+      "git_blob": "a201932d2cf5ec23c887c1d7d73252854d2c05a4",
+      "sha256": "5a70b16597bec543f74be5d663d4549089de2cd08b1b9b9b07834afb1282c990"
+    }
+  ],
+  "license_notes": [
+    {
+      "repository": "ros/common_msgs",
+      "commit": "092bc230c8153dd4cfee0c84c9796cc7e6b09fdb",
+      "fact": "No standalone license body in selected original repository tree; preserve each original package.xml declaration and file notices; no invented license text."
+    },
+    {
+      "repository": "ros-controls/control_msgs",
+      "commit": "36e2e30551e3f2bfd9e55fca553f1ef019f4e4b1",
+      "fact": "No standalone license body in selected original repository tree; preserve each original package.xml declaration and file notices; no invented license text."
+    },
+    {
+      "repository": "ros/std_msgs",
+      "commit": "34198520757d1aab358118a0ef294fe2609fde33",
+      "fact": "No standalone license body in selected original repository tree; preserve each original package.xml declaration and file notices; no invented license text."
+    }
+  ]
+}

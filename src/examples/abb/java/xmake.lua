@@ -1,0 +1,12 @@
+set_project("abb-java-state")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("abb-java-state")
+    set_kind("binary")
+    set_language("java")
+    set_ros_platform("abb")
+    set_wros_main_class("example.Guest")
+    add_files("src/**.java")
+    set_wros_test_queries("abi", "realtime-clock")
+    add_wros_tests("int", "aot")
+target_end()

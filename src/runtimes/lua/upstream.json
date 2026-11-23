@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/lua/lua",
+  "tag": "v5.4.9",
+  "commit": "312b9efaa1061c2c4cad08554dbc1351c3270eef",
+  "archive_url": "https://www.lua.org/ftp/lua-5.4.9.tar.gz",
+  "archive_sha256": "2335b6c582a52654f94612bf10d2f4672805d05329aa6568b1d8cd9e5c6fb8e6",
+  "license": "MIT",
+  "license_file": "upstream/src/lua.h",
+  "upstream_directory": "upstream",
+  "local_source_modifications": [],
+  "selected_files": 75,
+  "file_hash_format": "SHA-256 of archive bytes, relative to upstream/",
+  "source_index": "upstream.sha256",
+  "sdk_guest_qualification": "pending"
+}

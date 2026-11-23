@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/php/php-src",
+  "tag": "php-8.4.13",
+  "commit": "8bcf8ae1b31de9b8d832115d5a24fe1e5f0b500a",
+  "archive_url": "https://www.php.net/distributions/php-8.4.13.tar.xz",
+  "archive_sha256": "b4f27adf30bcf262eacf93c78250dd811980f20f3b90d79a3dc11248681842df",
+  "license": "PHP License 3.01, Zend Engine License, and included third-party licenses",
+  "license_files": [
+    "upstream/LICENSE",
+    "upstream/Zend/LICENSE",
+    "upstream/TSRM/LICENSE"
+  ],
+  "selected_files": 805,
+  "local_source_modifications": {
+    "Zend/zend_fibers.h": {
+      "upstream_sha256": "bbb59432efe483d740085f8417ece5a83eb0c2e5f6ce1340ad332f7217ab5474",
+      "modified_sha256": "e3594240ef2e593118425d8e029b673f806135b4aaaebf46b1815811f9d5d044"
+    },
+    "Zend/zend_alloc.c": {
+      "upstream_sha256": "91d7b9bf136fa0f0d437655e32a8bbad849f35402c2229da04e11278efa0b6cd",
+      "modified_sha256": "7023a60cd1241f55f0c1f1d15e4e7391b42f15aa34a86fcea2b0bcd72c00948f"
+    },
+    "ext/random/random.c": {
+      "upstream_sha256": "eca0363c1739011d7023336a86d3db98fcbecf7378ed4e79d540ba174afefe4d",
+      "modified_sha256": "497363828b4af9d8aec1e4f9d5f7896f5dfdd3edd35a474a23c752eeb2918a28"
+    }
+  },
+  "legacy_source_commit": "466ec1647ae8577bc2c16bd4f8df8162636817f4",
+  "installed_guest_qualification": "pending"
+}

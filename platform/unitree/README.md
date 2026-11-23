@@ -1,0 +1,11 @@
+# Unitree Go2 low-state observations
+
+The `unitree` selection supports the `go2-state` read-only attachment contract. Its provider reads the DDS `rt/lowstate` topic and reports the sample tick and the first joint's binary32 position. The local examples decode the recorded tick 41347 and position 0.125 inside the VM. Live acquisition requires an operator-provisioned driver and matching scene capabilities. [Pinned provider contract](https://github.com/UlteSoft/wasmros-deployer/blob/69e5e1be8fe3d669af962e5f63c147959ec45ad7/tests/support/unitree_low_state_contract.txt)
+
+The guest submits six little-endian u64 words. They hold the sequence, monotonic deadline in nanoseconds, payload length 24, buffer handle 1, offset 0, and requested length 16. A successful 40-byte `driver.result` holds five little-endian u64 words containing status 0, body length 24, returned buffer length 16, sample tick and position bits. Each reader validates both lengths, the 32-bit tick and the finite binary32 joint position. [Pinned WAT guest](https://github.com/UlteSoft/wasmros-deployer/blob/69e5e1be8fe3d669af962e5f63c147959ec45ad7/tests/support/unitree_low_state.wat)
+
+JavaScript and TypeScript import `encode_read` and `decode_result` from `uwrosv2/platform/unitree/go2_low_state`. Pass a `Uint8Array` to `decode_result` and check for `undefined` before reading the returned fields. AssemblyScript imports the same functions from `./uwrosv2/platform/unitree/go2_low_state` in bounded-driver mode. A successful decode updates `tick` and `first_joint_position`. The WAT library at `include/u2rosv2/platform/unitree/wat/go2_low_state.wat` exports its memory and both functions. Supply a readable input span and a writable eight-byte output when decoding.
+
+Copy `examples/unitree/<language>` from the installed selection to your own working directory. Set `UWVM_ROS_SDK_ROOT` and `WROS_VM`, then run `xmake build` and `xmake test -j1`.
+
+The Python selection also exposes Unitree ROS 2 v0.3.0 message classes for `unitree_api`, `unitree_go` and `unitree_hg`. The example decodes complete binary Go2 and HG LowState frames from Fast-CDR. The ROS 2 Go2 message uses signed eight-bit values for `temperature_ntc1` and `temperature_ntc2`, while the SDK2 C++ declaration uses unsigned bytes for those fields. [Python project, install and proof](../../document/en/languages/py.md)

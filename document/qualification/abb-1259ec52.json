@@ -1,0 +1,423 @@
+{
+  "revision": "1259ec5215d7296118c1d4bdd4f1e739839adc2e",
+  "tree": "f11786c12e4eced2cf02165bc0d3e4fd76b6ec19",
+  "vm_revision": "576aa42918eaa3baca12ca030e3c55482cb524ca",
+  "platform": "abb",
+  "host": "linux-x86_64",
+  "isolation": {
+    "parent_memory_max": 68719476736,
+    "child_memory_max": 68719476736,
+    "swap_max": 0,
+    "build_network": "offline",
+    "developer_checkout": "hidden",
+    "tools": "installed Xmake, compiler and uwvm2-ros"
+  },
+  "genpy_vectors": {
+    "count": 140,
+    "sha256": "67b96f9b8ed5f0d149b1d7da16972ddda8777a71830e6540822b1b0ee57a6a4c"
+  },
+  "default_installs": {
+    "c": {
+      "pass_count": 24,
+      "raw_abi": {
+        "32": {
+          "aot": 0,
+          "count": 163,
+          "int": 0,
+          "own_start": 166,
+          "sha256": "918723557b73b69a7823794a05a103d99a0d886ea88ccdc69530ff6646e8cec5"
+        },
+        "64": {
+          "count": 163,
+          "own_start": 166,
+          "sha256": "7eacd907be3044330171ec72d6864e6ab50b9df9feada7563135c3b6cc02d32b",
+          "int": 0,
+          "aot": 0,
+          "receipt_sha256": "cf8d9d73fee68083bdc669261e8eeb1a5d980b3b2fd9910dcfd15e1eb1386c2a"
+        }
+      },
+      "inventory_files": 4648,
+      "projects": {
+        "genpy-140": {
+          "genpy-140-xmake-aot": 0,
+          "genpy-140-xmake-build": 0,
+          "genpy-140-xmake-int": 0,
+          "genpy-140-xmake-test": 0
+        },
+        "pos": {
+          "pos-direct-aot": 0,
+          "pos-direct-compile": 0,
+          "pos-direct-int": 0,
+          "pos-xmake-aot": 0,
+          "pos-xmake-build": 0,
+          "pos-xmake-int": 0,
+          "pos-xmake-test": 0
+        },
+        "ros1": {
+          "ros1-direct-aot": 0,
+          "ros1-direct-compile": 0,
+          "ros1-direct-int": 0,
+          "ros1-xmake-aot": 0,
+          "ros1-xmake-build": 0,
+          "ros1-xmake-int": 0,
+          "ros1-xmake-test": 0
+        }
+      },
+      "contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+      "tool_sha256": {
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+        "wrc": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+      },
+      "receipt_sha256": "3138f9f36627ff7b03960c03b2ccaf1b8681654d86fa5d694892f99ceb280e98"
+    },
+    "cpp": {
+      "pass_count": 48,
+      "raw_abi": {
+        "32": {
+          "aot": 0,
+          "count": 163,
+          "int": 0,
+          "own_start": 166,
+          "sha256": "aae547d8062186a38d02cf667b510b11c359f3d672fa2be5a94b9968158357de"
+        },
+        "64": {
+          "count": 163,
+          "own_start": 166,
+          "sha256": "f69140ed974ce5f2d3a220728b1f4b9936de72df130f72bd74fc1ccd1fe2fa9c",
+          "int": 0,
+          "aot": 0,
+          "receipt_sha256": "dfcccbc96a5baac773eaf69dc8fd7188de808d4d6185aa7601936472cbf76323"
+        }
+      },
+      "inventory_files": 4649,
+      "projects": {
+        "genpy-140": {
+          "genpy-140-xmake-aot": 0,
+          "genpy-140-xmake-build": 0,
+          "genpy-140-xmake-int": 0,
+          "genpy-140-xmake-test": 0
+        },
+        "pos": {
+          "pos-direct-aot": 0,
+          "pos-direct-compile": 0,
+          "pos-direct-int": 0,
+          "pos-xmake-aot": 0,
+          "pos-xmake-build": 0,
+          "pos-xmake-int": 0,
+          "pos-xmake-test": 0
+        },
+        "ros1": {
+          "ros1-direct-aot": 0,
+          "ros1-direct-compile": 0,
+          "ros1-direct-int": 0,
+          "ros1-xmake-aot": 0,
+          "ros1-xmake-build": 0,
+          "ros1-xmake-int": 0,
+          "ros1-xmake-test": 0
+        }
+      },
+      "contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+      "cpp_standards": {
+        "03": {
+          "cxx03-ros1-aot": 0,
+          "cxx03-ros1-compile": 0,
+          "cxx03-ros1-int": 0
+        },
+        "11": {
+          "cxx11-ros1-aot": 0,
+          "cxx11-ros1-compile": 0,
+          "cxx11-ros1-int": 0
+        },
+        "14": {
+          "cxx14-ros1-aot": 0,
+          "cxx14-ros1-compile": 0,
+          "cxx14-ros1-int": 0
+        },
+        "17": {
+          "cxx17-ros1-aot": 0,
+          "cxx17-ros1-compile": 0,
+          "cxx17-ros1-int": 0
+        },
+        "20": {
+          "cxx20-ros1-aot": 0,
+          "cxx20-ros1-compile": 0,
+          "cxx20-ros1-int": 0
+        },
+        "23": {
+          "cxx23-ros1-aot": 0,
+          "cxx23-ros1-compile": 0,
+          "cxx23-ros1-int": 0
+        },
+        "26": {
+          "cxx26-ros1-aot": 0,
+          "cxx26-ros1-compile": 0,
+          "cxx26-ros1-int": 0
+        },
+        "98": {
+          "cxx98-ros1-aot": 0,
+          "cxx98-ros1-compile": 0,
+          "cxx98-ros1-int": 0
+        }
+      },
+      "tool_sha256": {
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+        "wrcc": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+      },
+      "receipt_sha256": "86fd8624ac5af39bbd929d0555fdf7cf969876a9f270ec6296915ee18bc9bf03"
+    },
+    "rust": {
+      "pass_count": 32,
+      "raw_abi": {
+        "32": {
+          "aot": 0,
+          "count": 163,
+          "int": 0,
+          "own_start": 166,
+          "sha256": "e00b32c58e912a060c60f5feca94502d8b4b7351279a355c2cbb5b70ebae40f7"
+        },
+        "64": {
+          "aot": 0,
+          "count": 163,
+          "int": 0,
+          "own_start": 166,
+          "sha256": "782eaa29c3315f52a09ffbce2692244a0aa716a659c08b86b7158a70bf50c5e3"
+        }
+      },
+      "inventory_files": 946,
+      "projects": {
+        "genpy-140": {
+          "genpy-140-xmake-aot": 0,
+          "genpy-140-xmake-build": 0,
+          "genpy-140-xmake-int": 0,
+          "genpy-140-xmake-test": 0
+        },
+        "pos": {
+          "pos-direct-aot": 0,
+          "pos-direct-compile": 0,
+          "pos-direct-int": 0,
+          "pos-xmake-aot": 0,
+          "pos-xmake-build": 0,
+          "pos-xmake-int": 0,
+          "pos-xmake-test": 0
+        },
+        "ros1": {
+          "ros1-direct-aot": 0,
+          "ros1-direct-compile": 0,
+          "ros1-direct-int": 0,
+          "ros1-xmake-aot": 0,
+          "ros1-xmake-build": 0,
+          "ros1-xmake-int": 0,
+          "ros1-xmake-test": 0
+        }
+      },
+      "contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+      "profiles": {
+        "ros1-wasm64-direct-aot": 0,
+        "ros1-wasm64-direct-compile": 0,
+        "ros1-wasm64-direct-int": 0
+      },
+      "tool_sha256": {
+        "uwvm2-ros": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+        "wrrs": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9",
+        "xmake": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0"
+      },
+      "receipt_sha256": "19a13aec748eb5d9b4f8c8be384ae35740d7e731768101818611917f57d4004c"
+    }
+  },
+  "cold_attempts": {
+    "public-c-binary-install.log": {
+      "exit": 0,
+      "first_error": null
+    },
+    "public-cpp-binary-install.log": {
+      "exit": 0,
+      "first_error": null
+    },
+    "public-rust-binary-install-first.log": {
+      "exit": 1,
+      "first_error": "fatal: remote error: upload-pack: not our ref 1259ec5215d7296118c1d4bdd4f1e739839adc2e"
+    },
+    "public-rust-binary-install-second.log": {
+      "exit": 1,
+      "first_error": "fatal: remote error: upload-pack: not our ref 1259ec5215d7296118c1d4bdd4f1e739839adc2e"
+    },
+    "public-rust-binary-install.log": {
+      "exit": 0,
+      "first_error": null
+    }
+  },
+  "live_controller_service": "not demonstrated",
+  "rust_compiler_rebuilds": {
+    "source_tree": "c2c2c998c1d10d4bdde27ce57e18a438ffba8652",
+    "public_source_install": {
+      "sdk_commit": "1259ec5215d7296118c1d4bdd4f1e739839adc2e",
+      "build_network": "Online GitHub namespace with Cargo offline",
+      "install_exit": 0,
+      "wall_seconds": 1635.8,
+      "jobs": 10,
+      "comparison": {
+        "wrrs": {
+          "archive_byte_equal": true,
+          "elf_byte_equal": true,
+          "rebuilt_archive": {
+            "bytes": 25504,
+            "sha256": "ed3689868ebfd06651c6497c081d90db1d3e876c8653fa96fb74dfd8bbd4db2a"
+          },
+          "rebuilt_elf": {
+            "bytes": 67904,
+            "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9"
+          },
+          "registered_archive": {
+            "bytes": 25504,
+            "sha256": "ed3689868ebfd06651c6497c081d90db1d3e876c8653fa96fb74dfd8bbd4db2a"
+          },
+          "registered_elf": {
+            "bytes": 67904,
+            "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9"
+          },
+          "registered_path": "bin/wrrs",
+          "repacked_path": "repackages/rebuilt-public/wrrs-ed3689868ebfd06651c6.tar.xz",
+          "source_path": "rebuilt-public/bin/wrrs"
+        },
+        "wrrs-librustc-driver-aff9448c053be314-so": {
+          "archive_byte_equal": true,
+          "elf_byte_equal": true,
+          "rebuilt_archive": {
+            "bytes": 41567080,
+            "sha256": "8a99747417c5699f26f0c3689e9d16827133dab1145e03642eae58e08527838f"
+          },
+          "rebuilt_elf": {
+            "bytes": 152465104,
+            "sha256": "002f2f423911cad122cc20cc6bb0672e788dfe734cbb62240d696b1db1b277db"
+          },
+          "registered_archive": {
+            "bytes": 41567080,
+            "sha256": "8a99747417c5699f26f0c3689e9d16827133dab1145e03642eae58e08527838f"
+          },
+          "registered_elf": {
+            "bytes": 152465104,
+            "sha256": "002f2f423911cad122cc20cc6bb0672e788dfe734cbb62240d696b1db1b277db"
+          },
+          "registered_path": "lib/librustc_driver-aff9448c053be314.so",
+          "repacked_path": "repackages/rebuilt-public/wrrs-librustc-driver-aff9448c053be314-so-8a99747417c5699f26f0.tar.xz",
+          "source_path": "rebuilt-public/lib/librustc_driver-aff9448c053be314.so"
+        }
+      }
+    },
+    "separate_frozen_offline_rebuild": {
+      "sdk_commit": "45910035036859308c26680b5a027b12d492b30e",
+      "build_network": "network namespace with loopback only",
+      "comparison": {
+        "wrrs": {
+          "archive_byte_equal": true,
+          "elf_byte_equal": true,
+          "rebuilt_archive": {
+            "bytes": 25504,
+            "sha256": "ed3689868ebfd06651c6497c081d90db1d3e876c8653fa96fb74dfd8bbd4db2a"
+          },
+          "rebuilt_elf": {
+            "bytes": 67904,
+            "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9"
+          },
+          "registered_archive": {
+            "bytes": 25504,
+            "sha256": "ed3689868ebfd06651c6497c081d90db1d3e876c8653fa96fb74dfd8bbd4db2a"
+          },
+          "registered_elf": {
+            "bytes": 67904,
+            "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9"
+          },
+          "registered_path": "bin/wrrs",
+          "repacked_path": "repackages/rebuilt-frozen/wrrs-ed3689868ebfd06651c6.tar.xz",
+          "source_path": "rebuilt-frozen/bin/wrrs"
+        },
+        "wrrs-librustc-driver-aff9448c053be314-so": {
+          "archive_byte_equal": true,
+          "elf_byte_equal": true,
+          "rebuilt_archive": {
+            "bytes": 41567080,
+            "sha256": "8a99747417c5699f26f0c3689e9d16827133dab1145e03642eae58e08527838f"
+          },
+          "rebuilt_elf": {
+            "bytes": 152465104,
+            "sha256": "002f2f423911cad122cc20cc6bb0672e788dfe734cbb62240d696b1db1b277db"
+          },
+          "registered_archive": {
+            "bytes": 41567080,
+            "sha256": "8a99747417c5699f26f0c3689e9d16827133dab1145e03642eae58e08527838f"
+          },
+          "registered_elf": {
+            "bytes": 152465104,
+            "sha256": "002f2f423911cad122cc20cc6bb0672e788dfe734cbb62240d696b1db1b277db"
+          },
+          "registered_path": "lib/librustc_driver-aff9448c053be314.so",
+          "repacked_path": "repackages/rebuilt-frozen/wrrs-librustc-driver-aff9448c053be314-so-8a99747417c5699f26f0.tar.xz",
+          "source_path": "rebuilt-frozen/lib/librustc_driver-aff9448c053be314.so"
+        }
+      }
+    },
+    "public_source_guest_network": "network namespace with loopback only",
+    "installed_input_comparison": {
+      "bin/packages/linux-x86_64/rust-stage0/": {
+        "files": 3,
+        "identical": true,
+        "inventory_sha256": "556e28e959f9d6cfa3520692f5408a7b18c1b26617a6d831440fb420e74181c7"
+      },
+      "src/compilers/rust/": {
+        "files": 64402,
+        "identical": true,
+        "inventory_sha256": "7740f26f2e4f51defc8e24068d4ad509e68854df1909a96c454ceb6b645a14a1"
+      }
+    },
+    "public_source_guest": {
+      "pass_count": 32,
+      "raw_abi": {
+        "32": {
+          "aot": 0,
+          "count": 163,
+          "int": 0,
+          "own_start": 166,
+          "sha256": "e00b32c58e912a060c60f5feca94502d8b4b7351279a355c2cbb5b70ebae40f7"
+        },
+        "64": {
+          "aot": 0,
+          "count": 163,
+          "int": 0,
+          "own_start": 166,
+          "sha256": "782eaa29c3315f52a09ffbce2692244a0aa716a659c08b86b7158a70bf50c5e3"
+        }
+      },
+      "projects": {
+        "genpy-140": {
+          "genpy-140-xmake-aot": 0,
+          "genpy-140-xmake-build": 0,
+          "genpy-140-xmake-int": 0,
+          "genpy-140-xmake-test": 0
+        },
+        "pos": {
+          "pos-direct-aot": 0,
+          "pos-direct-compile": 0,
+          "pos-direct-int": 0,
+          "pos-xmake-aot": 0,
+          "pos-xmake-build": 0,
+          "pos-xmake-int": 0,
+          "pos-xmake-test": 0
+        },
+        "ros1": {
+          "ros1-direct-aot": 0,
+          "ros1-direct-compile": 0,
+          "ros1-direct-int": 0,
+          "ros1-xmake-aot": 0,
+          "ros1-xmake-build": 0,
+          "ros1-xmake-int": 0,
+          "ros1-xmake-test": 0
+        }
+      },
+      "contract_sha256": "13433e778c0f0f78f0dd6448dbf8ff4094d28745946224749322e9fd1963c834",
+      "inventory_files": 91254,
+      "receipt_sha256": "9b20c8087b33db9e453e3d4e6f171e1cc4576625406cc89204791af965edafaa"
+    }
+  }
+}

@@ -1,0 +1,1501 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+#ifndef UWVM_MODULE
+# include <uwvm2/utils/allocator/fast_io_strict/object.h>
+#endif
+#include <uwvm2/utils/allocator/resource_limit.h>
+#include <uwvm2/utils/allocator/sanitizer_mapping.h>
+
+#ifndef UWVM_MODULE
+// std
+# include <cstddef>
+# include <cstdint>
+# include <climits>
+# include <limits>
+# include <memory>
+# include <new>
+# include <atomic>
+# include <bit>
+# include <utility>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+// platform
+# if defined(UWVM_SUPPORT_MMAP) && !(defined(_WIN32) || defined(__CYGWIN__))  // posix mmap
+#  include <sys/mman.h>
+# endif
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/utils/mutex/impl.h>
+# include <uwvm2/object/memory/wasm_page/impl.h>
+# include <uwvm2/extension/memtag/storage.h>
+# include <uwvm2/object/memory/platform_page/impl.h>
+# include <uwvm2/object/memory/signal/impl.h>
+# include "threaded_grow_types.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+#if defined(UWVM_SUPPORT_MMAP)
+# if CHAR_BIT != 8
+#  error "mmap unsupported platform (The POSIX standard requires CHAR_BIT == 8)"
+# endif
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::object::memory::linear
+{
+#if defined(UWVM_SUPPORT_MMAP)
+
+    enum class mmap_memory_status_t : unsigned
+    {
+        wasm32,
+        wasm64
+    };
+
+# if defined(UWVM_TEST) && defined(UWVM_CPP_EXCEPTIONS) && !(defined(_WIN32) || defined(__CYGWIN__))
+    namespace details
+    {
+        using strict_grow_mprotect_test_hook_t = void (*)(void*, ::std::size_t, int);
+
+        // Test-only interception point for deterministic partial-mprotect failure injection. Real kernels differ in
+        // whether a particular invalid range fails before or after changing a prefix, so munmap-based tests are not
+        // portable enough to exercise both strict-growth recovery branches.
+        inline strict_grow_mprotect_test_hook_t strict_grow_mprotect_test_hook{};
+
+        inline void strict_grow_mprotect(void* address, ::std::size_t length, int protection)
+        {
+            if(strict_grow_mprotect_test_hook != nullptr) [[unlikely]]
+            {
+                strict_grow_mprotect_test_hook(address, length, protection);
+                return;
+            }
+            ::fast_io::details::sys_mprotect(address, length, protection);
+        }
+    }
+# endif
+
+    // max_full_protection_wasm64_length not supported
+
+    inline constexpr unsigned max_partial_protection_wasm64_index{40u};
+    inline constexpr unsigned max_full_protection_wasm32_index{33u};
+    inline constexpr unsigned max_partial_protection_wasm32_index{28u};
+
+    inline constexpr ::std::uint_least64_t max_partial_protection_wasm64_length{static_cast<::std::uint_least64_t>(1u)
+                                                                                << max_partial_protection_wasm64_index};  // 1 TB
+    inline constexpr ::std::uint_least64_t max_full_protection_wasm32_length{static_cast<::std::uint_least64_t>(1u)
+                                                                             << max_full_protection_wasm32_index};  // 8 GB
+    inline constexpr ::std::uint_least32_t max_partial_protection_wasm32_length{static_cast<::std::uint_least32_t>(1u)
+                                                                                << max_partial_protection_wasm32_index};  // 256 MB
+
+    // wasm32 full-protection layout (64-bit host only):
+    //   | 4GiB usable window (u32 address space) | 4GiB back guard |
+    //   + trailing guard (platform-page aligned) to cover custom-page alignment + max foreseeable type size (64 bytes).
+    //
+    // Both address operands are unsigned u32, so their widened sum is at most 2^33-2. With an access width of at most
+    // 64 bytes, the last byte is at most 2^33+61, inside the trailing reservation. Only the first 4 GiB can be committed.
+    // Thus even an overflowing effective address faults inside this memory's reservation without a software u32 check.
+    // No front guard is needed for unsigned addresses. Keeping the total reservation unchanged also makes the signal
+    // registry base equal to the Wasm base, so fault offsets are not incorrectly increased by a front-guard displacement.
+    inline constexpr ::std::uint_least64_t wasm32_full_protection_front_guard_u64{0ull};
+    inline constexpr ::std::uint_least64_t wasm32_full_protection_usable_u64{1ull << 32u};       // 4 GiB
+    inline constexpr ::std::uint_least64_t wasm32_full_protection_back_guard_u64{1ull << 32u};   // 4 GiB
+    inline constexpr ::std::size_t mmap_guard_max_access_size{64uz};
+    inline constexpr ::std::uint_least64_t wasm32_max_effective_offset{0x1fffffffeull};
+    static_assert(wasm32_full_protection_front_guard_u64 + wasm32_full_protection_usable_u64 + wasm32_full_protection_back_guard_u64 ==
+                  max_full_protection_wasm32_length);
+
+    // This is a reservation-domain proof, not a logical-bounds test. Callers may use it only for the full-protection
+    // wasm32 layout with custom_page >= platform_page; partial mappings and byte-granular custom pages remain checked.
+    [[nodiscard]] inline constexpr bool wasm32_full_protection_covers_access(::std::uint_least64_t effective_offset,
+                                                                            ::std::size_t access_size) noexcept
+    {
+        return sizeof(::std::size_t) >= sizeof(::std::uint_least64_t) && sizeof(::std::uintptr_t) >= sizeof(::std::uint_least64_t) &&
+               effective_offset <= wasm32_max_effective_offset && access_size <= mmap_guard_max_access_size;
+    }
+    static_assert(wasm32_max_effective_offset + mmap_guard_max_access_size <= max_full_protection_wasm32_length + mmap_guard_max_access_size);
+
+    /// @note      Memory safety model for the mmap-backed linear memory:
+    ///            - The base pointer `memory_begin` is stable for the lifetime of the instance; growth commits additional virtual address space instead of
+    ///              reallocating or moving the buffer.
+    ///            - In “full protection” configurations (typically when the custom page size is greater than or equal to the platform page size), most
+    ///              out-of-bounds accesses are rejected by guard pages, so hot paths can omit explicit software bounds checks and only validate extreme
+    ///              offsets that might escape the protected region against `memory_length_p`.
+    ///            - When the custom page size is smaller than the platform page size, the base address is still stable, but page protection alone cannot
+    ///              distinguish all intra-page overflows. In this mode, the `check_memory_bounds_*` helpers perform explicit `(offset, size)` range checks
+    ///              using the atomically updated `memory_length_p`.
+    ///            - Because growth never relocates `memory_begin`, this backend does not require per-operation locks; concurrency is handled by the mutex used
+    ///              in `grow()` together with acquire/release operations on `memory_length_p`, unlike allocator-backed memories where multi-threaded `realloc`
+    ///              would otherwise require a double-atom guard.
+    ///            - WebAssembly linear memory is grow-only: once a given `(offset, size)` range has been validated against some length, that range remains
+    ///              valid after subsequent grows, so callers do not need to re-run bounds checks for the same range after a successful grow.
+
+    // Keep immutable access metadata together even in a vector of memory
+    // instances. An additional memory must not split another instance's base
+    // and page-policy fields across cache lines on common 64-byte-line hosts.
+    struct alignas(64) mmap_memory_t
+    {
+        inline static constexpr ::uwvm2::utils::container::u8string_view name{u8"mmap"};
+
+        using allocator_t = ::fast_io::native_global_allocator;
+        using atomic_size_allcator_t = ::fast_io::typed_generic_allocator_adapter<allocator_t, ::std::atomic_size_t>;
+        using mutex_allcator_t = ::fast_io::typed_generic_allocator_adapter<allocator_t, ::uwvm2::utils::mutex::mutex_t>;
+
+        // `reserved_begin` is the base address of the entire reserved VMA (including guard windows).
+        // `memory_begin` is the base address of the *usable* window visible to wasm memory accesses.
+        ::std::byte* reserved_begin{};
+        ::std::byte* memory_begin{};
+        ::std::atomic_size_t* memory_length_p{};
+        // This memory_size is not used in the program unless custom_page is smaller than platform_page.
+        // The number of platform pages can be obtained by rounding up the memory size to the nearest integer multiple of the platform page size.
+
+        unsigned custom_page_size_log2{};
+
+        // Cached answer for `require_dynamic_determination_memory_size()`.
+        // Hot paths (load/store) call this through bounds checks, so it must not query platform page size per access.
+        bool require_dynamic_determination_memory_size_cached{};
+
+        // Uses existing alignment padding; following hot-field offsets are unchanged.
+        // Immutable during execution. Only size/grow use this policy; ordinary
+        // memory access and mmap hardware protection keep their existing paths.
+        bool sequentially_consistent_size{};
+
+        mmap_memory_status_t status{};
+
+        // This lock is used to prevent multithreaded growth.
+        ::uwvm2::utils::mutex::mutex_t* growing_mutex_p{};
+
+        // A 32-bit host cannot reserve a fixed 256 MiB for every small memory instance.
+        // A declared maximum may bound the reservation instead. Such instances ALWAYS use
+        // software bounds checks: the old fixed partial-guard escape threshold is invalid.
+        // SIZE_MAX retains the original full/partial guard layout. This is immutable during execution.
+        // Keep this instantiation/growth field after the access metadata so it
+        // does not displace the original scalar load/store policy operands.
+        ::std::size_t reservation_limit_bytes{::std::numeric_limits<::std::size_t>::max()};
+
+        // Immutable owner index for cold software-fault diagnostics, matching
+        // the hardware-fault registry. Imported aliases retain their owner's
+        // identity. This trailing field does not displace hot access metadata.
+        ::std::size_t diagnostic_owner_memory_index{};
+
+        // Optional owner-bound shadow; all pre-existing hot-field offsets stay unchanged.
+        ::uwvm2::extension::memtag::shadow_storage memtag_shadow{};
+        ::uwvm2::utils::allocator::resource::reservation<::uwvm2::utils::allocator::resource::pool::memory> allocation_charge{};
+
+
+        /// @brief This macro is used to control the behavior of the non-img compiler.
+        inline static constexpr bool can_mmap{true};
+
+        [[nodiscard]] static constexpr ::std::size_t charged_memory_bytes(::std::size_t length) noexcept
+        {
+            auto const [page,success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+            if(!success || page==0uz) { return SIZE_MAX; }
+            auto const tail{length%page};
+            if(tail==0uz) { return length; }
+            auto const padding{page-tail};
+            return length > SIZE_MAX-padding ? SIZE_MAX : length+padding;
+        }
+
+        /// @brief When handling multithreaded growth, only the atomic variable `memory_length_p` is required. When `custom_page_size >= platform_page_size`,
+        ///        dynamic determination of `memory_size` is unnecessary.
+        inline static constexpr bool support_multi_thread{true};
+
+        struct fallible_construction_t { explicit fallible_construction_t() = default; };
+        inline mmap_memory_t(fallible_construction_t) noexcept
+        {
+            using atomic_alloc=::uwvm2::utils::allocator::fast_io_strict::native_strict_typed_global_allocator<::std::atomic_size_t>;
+            using mutex_alloc=::uwvm2::utils::allocator::fast_io_strict::native_strict_typed_global_allocator<::uwvm2::utils::mutex::mutex_t>;
+            this->memory_length_p=atomic_alloc::allocate(1u);
+            if(this->memory_length_p)::new(this->memory_length_p)::std::atomic_size_t{};
+            this->growing_mutex_p=mutex_alloc::allocate(1u);
+            if(this->growing_mutex_p)::new(this->growing_mutex_p)::uwvm2::utils::mutex::mutex_t{};
+            this->custom_page_size_log2=16u;this->status=mmap_memory_status_t::wasm32;
+            auto const [page,okay]=::uwvm2::object::memory::platform_page::get_platform_page_size();
+            this->require_dynamic_determination_memory_size_cached=!okay||page==0u||page>65536u;
+        }
+
+        /// @brief      Default constructor.
+        /// @note       The default page size is 65536 bytes.
+        inline constexpr mmap_memory_t() noexcept
+        {
+            this->memory_length_p = atomic_size_allcator_t::allocate(1uz);
+            ::new(this->memory_length_p)::std::atomic_size_t{};
+
+            this->growing_mutex_p = mutex_allcator_t::allocate(1uz);
+            ::new(this->growing_mutex_p)::uwvm2::utils::mutex::mutex_t{};
+
+            constexpr ::std::size_t default_wasm_page_size{static_cast<::std::size_t>(::uwvm2::object::memory::wasm_page::default_wasm32_page_size)};
+            constexpr unsigned default_wasm_page_size_log2{static_cast<unsigned>(::std::countr_zero(default_wasm_page_size))};
+            this->custom_page_size_log2 = default_wasm_page_size_log2;
+
+            this->status = mmap_memory_status_t::wasm32;
+
+            // storage page size
+            if UWVM_IF_NOT_CONSTEVAL
+            {
+                auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                if(!success) [[unlikely]] { ::fast_io::fast_terminate(); }
+                if(page_size == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                auto const custom_page_size{1uz << this->custom_page_size_log2};
+                this->require_dynamic_determination_memory_size_cached = custom_page_size < page_size;
+            }
+        }
+
+        inline constexpr mmap_memory_t(::std::size_t custom_page_size, mmap_memory_status_t memory_status) noexcept
+        {
+            this->memory_length_p = atomic_size_allcator_t::allocate(1uz);
+            ::new(this->memory_length_p)::std::atomic_size_t{};
+
+            this->growing_mutex_p = mutex_allcator_t::allocate(1uz);
+            ::new(this->growing_mutex_p)::uwvm2::utils::mutex::mutex_t{};
+
+            // The same method as set_custom_page_size, but without adding a lock.
+
+            // Check if it is a power of 2
+            if(!::std::has_single_bit(custom_page_size)) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+            // Since there is only one pop, directly counting the number of zeros suffices to calculate log2
+            this->custom_page_size_log2 = ::std::countr_zero(custom_page_size);
+
+            this->status = memory_status;
+
+            if UWVM_IF_NOT_CONSTEVAL
+            {
+                auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                if(!success) [[unlikely]] { ::fast_io::fast_terminate(); }
+                if(page_size == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                this->require_dynamic_determination_memory_size_cached = custom_page_size < page_size;
+            }
+        }
+
+        // Configure only after native initialization and before guest publication.
+        [[nodiscard]] inline ::uwvm2::extension::memtag::storage_error enable_memtag(
+            ::uwvm2::extension::memtag::address_width width, bool shared) noexcept
+        {
+            namespace mt = ::uwvm2::extension::memtag;
+            if(this->memory_begin == nullptr) { return mt::storage_error::invalid_configuration; }
+            if(this->memory_length_p == nullptr ||
+               (width == mt::address_width::i32) != (this->status == mmap_memory_status_t::wasm32))
+            { return mt::storage_error::invalid_configuration; }
+            ::std::uint64_t maximum_bytes;
+            if constexpr(sizeof(::std::size_t) >= 8u)
+            { maximum_bytes = this->status == mmap_memory_status_t::wasm32 ? (::std::uint64_t{1u} << 32u) : (::std::uint64_t{1u} << 40u); }
+            else { maximum_bytes = ::std::uint64_t{1u} << 28u; }
+            if(maximum_bytes > this->reservation_limit_bytes) { maximum_bytes = this->reservation_limit_bytes; }
+            return this->memtag_shadow.enable(width, shared, mt::storage_backend::reserved,
+                this->memory_length_p->load(::std::memory_order_acquire), maximum_bytes);
+        }
+
+        inline constexpr bool require_dynamic_determination_memory_size() const noexcept
+        {
+            // When `custom_page_size` is less than one platform page, `mmap` can only guarantee the stability of the starting address and cannot provide
+            // page-protection checks at the custom-page granularity. Additional dynamic verification is required.
+            if UWVM_IF_NOT_CONSTEVAL { return this->require_dynamic_determination_memory_size_cached; }
+            return false;
+        }
+
+        inline constexpr bool is_full_page_protection() const noexcept
+        {
+            if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+            {
+                // 64bit platform
+                switch(this->status)
+                {
+                    case mmap_memory_status_t::wasm32:
+                    {
+                        // full protection
+                        return true;
+                    }
+                    case mmap_memory_status_t::wasm64:
+                    {
+                        // partial protection
+                        return false;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+            else if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t))
+            {
+                // 32bit platform
+                // both wasm64 and wasm32 are partial protection.
+                return false;
+            }
+            else
+            {
+                static_assert(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t), "mmap unsupported platform");
+            }
+        }
+
+        // Query the exact backend ceiling without reserving, committing or
+        // shifting a user-supplied page count. Startup configuration validates
+        // against this same bound before entering the low-level invariant guard.
+        [[nodiscard]] inline constexpr ::std::size_t maximum_initial_page_count() const noexcept
+        {
+            if(this->custom_page_size_log2 >= ::std::numeric_limits<::std::size_t>::digits) { return 0uz; }
+            ::std::uint_least64_t bytes{max_partial_protection_wasm32_length};
+            if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+            {
+                switch(this->status)
+                {
+                    case mmap_memory_status_t::wasm32: bytes = wasm32_full_protection_usable_u64; break;
+                    case mmap_memory_status_t::wasm64: bytes = max_partial_protection_wasm64_length; break;
+                    default: ::fast_io::fast_terminate(); // Internal owner-state corruption.
+                }
+            }
+            auto const pages{static_cast<::std::size_t>(bytes >> this->custom_page_size_log2)};
+            return ::std::min(pages, this->reservation_limit_bytes >> this->custom_page_size_log2);
+        }
+
+        /// @brief      Initialize the memory.
+        /// @note       Maximum value checks are not provided; maximum value checks should be performed outside of memory management.
+        /// @note       You can use it after clear().
+        template<bool Fallible>
+        [[nodiscard]] inline constexpr bool initialize_pages(::std::size_t init_page_count,
+                                                 ::std::size_t declared_max_pages = ::std::numeric_limits<::std::size_t>::max(),
+                                                 ::std::size_t memory_index = 0uz) noexcept
+        {
+            if constexpr(Fallible)
+            {
+                if(memory_begin||reserved_begin||!memory_length_p||!growing_mutex_p||init_page_count>declared_max_pages)return false;
+            }
+            if constexpr(sizeof(::std::size_t) == sizeof(::std::uint_least32_t))
+            {
+                if(this->memory_begin == nullptr)
+                {
+                    auto const platform_max_pages{static_cast<::std::size_t>(max_partial_protection_wasm32_length >> this->custom_page_size_log2)};
+                    // The minimum is bounded by the existing partial-reservation ceiling before shifting.
+                    this->reservation_limit_bytes = ::std::min(declared_max_pages, platform_max_pages) << this->custom_page_size_log2;
+                    auto const [platform_page, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                    if(!success || platform_page == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+                    this->require_dynamic_determination_memory_size_cached =
+                        (1uz << this->custom_page_size_log2) < platform_page ||
+                        this->reservation_limit_bytes < max_partial_protection_wasm32_length;
+                }
+            }
+            else if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+            {
+                if(this->memory_begin == nullptr && this->status == mmap_memory_status_t::wasm64)
+                {
+                    // A smaller declared maximum cannot use the fixed 1 TiB
+                    // partial-guard escape threshold. Select software bounds
+                    // before translation; clamp before shifting to avoid overflow.
+                    auto const platform_max_pages{static_cast<::std::size_t>(max_partial_protection_wasm64_length >> this->custom_page_size_log2)};
+                    this->reservation_limit_bytes = ::std::min(declared_max_pages, platform_max_pages) << this->custom_page_size_log2;
+                    this->require_dynamic_determination_memory_size_cached =
+                        this->require_dynamic_determination_memory_size_cached ||
+                        this->reservation_limit_bytes < max_partial_protection_wasm64_length;
+                }
+            }
+            // Memory32 on 64-bit hosts retains its full unsigned guard domain.
+
+            auto const max_init_page_count{this->maximum_initial_page_count()};
+
+            // Page Protection
+            if(init_page_count > max_init_page_count) [[unlikely]]
+            { if constexpr(Fallible)return false;else ::fast_io::fast_terminate(); }
+
+            if(this->memory_begin == nullptr) [[likely]]
+            {
+                this->diagnostic_owner_memory_index = memory_index;
+                // UB will never appear; it has been preemptively checked.
+                auto const custom_page_size{1uz << this->custom_page_size_log2};
+
+                auto const memory_length{init_page_count << this->custom_page_size_log2};
+                if(memory_length > ::uwvm2::utils::allocator::resource::initializer_allocation_bytes ||
+                    !this->allocation_charge.resize(charged_memory_bytes(memory_length)))
+                {
+                    if constexpr(Fallible)return false;
+                    else ::uwvm2::utils::allocator::resource::initializer_memory_limit();
+                }
+
+                if(this->memory_length_p == nullptr) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                // Reserve max space
+
+                ::std::size_t max_protection_space;
+
+                if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+                {
+                    // 64bit platform
+                    switch(this->status)
+                    {
+                        case mmap_memory_status_t::wasm32:
+                        {
+                            // full protection
+                            max_protection_space = max_full_protection_wasm32_length;
+                            break;
+                        }
+                        case mmap_memory_status_t::wasm64:
+                        {
+                            // partial protection
+                            max_protection_space = max_partial_protection_wasm64_length;
+                            break;
+                        }
+                        [[unlikely]] default:
+                        {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                            ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                            ::std::unreachable();
+                        }
+                    }
+                }
+                else if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t))
+                {
+                    // 32bit platform
+                    // On 32-bit platforms, both wasm64 and wasm32 use 32-bit versions.
+                    // partial protection
+                    max_protection_space = max_partial_protection_wasm32_length;
+                }
+                else
+                {
+                    static_assert(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t), "mmap unsupported platform");
+                }
+
+                max_protection_space = ::std::min(max_protection_space, this->reservation_limit_bytes);
+
+                if(custom_page_size > ::std::numeric_limits<::std::size_t>::max() - max_protection_space) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                // Provides a 64-byte type protection mechanism (no foreseeable future type will exceed this size) to prevent custom page sizes (arbitrary
+                // sizes) from being smaller than the type size.
+                constexpr ::std::size_t max_type_size{mmap_guard_max_access_size};
+
+                // Does checking the size of custom_page cause subsequent calculations to overflow
+                // max_protection_space + max_type_size never overflow
+                auto const max_protection_space_plus_max_type_size{max_protection_space + max_type_size};
+                if(custom_page_size > ::std::numeric_limits<::std::size_t>::max() - max_protection_space_plus_max_type_size) [[unlikely]]
+                {
+                    ::fast_io::fast_terminate();
+                }
+
+                // Reserve the full guard domain first. Only ISA32 may fall back
+                // to a smaller stable reservation: translating that owner must
+                // then use explicit bounds rather than the fixed 256 MiB escape
+                // threshold. A small/zero memory must not consume a fixed large
+                // window when many instances share a 32-bit address space.
+                auto reserve_native{[](::std::size_t bytes) noexcept -> ::std::byte*
+                {
+# if defined(_WIN32) || defined(__CYGWIN__)
+#  if !defined(__CYGWIN__) && !defined(__WINE__) && !defined(__BIONIC__) && defined(_WIN32_WINDOWS)
+                    return reinterpret_cast<::std::byte*>(::fast_io::win32::VirtualAlloc(
+                        nullptr, bytes, 0x00002000u /*MEM_RESERVE*/, 0x01u /*PAGE_NOACCESS*/));
+#  else
+                    ::std::byte* address{};
+                    auto length{bytes};
+                    auto const result{::fast_io::win32::nt::nt_allocate_virtual_memory<false>(
+                        reinterpret_cast<void*>(-1), reinterpret_cast<void**>(::std::addressof(address)),
+                        0u, ::std::addressof(length), 0x00002000u, 0x01u)};
+                    return result ? nullptr : address;
+#  endif
+# else
+                    // Use the nonthrowing OS API, including exception-disabled
+                    // builds. Address-space exhaustion is a resource refusal,
+                    // not a broken VM invariant.
+                    constexpr auto flags{MAP_PRIVATE | MAP_ANONYMOUS
+#  if defined(MAP_NORESERVE)
+                        | MAP_NORESERVE
+#  endif
+                    };
+# if defined(__linux__)
+                    auto* address{::uwvm2::utils::allocator::sanitizer_mapping::reserve(bytes,flags)};
+# else
+                    auto* address{::mmap(nullptr, bytes, PROT_NONE, flags, -1, 0)};
+# endif
+                    return address == MAP_FAILED ? nullptr : static_cast<::std::byte*>(address);
+# endif
+                }};
+                for(;;)
+                {
+                    auto const max_space{max_protection_space + max_type_size + custom_page_size};
+                    this->reserved_begin = reserve_native(max_space);
+                    if(this->reserved_begin != nullptr) { break; }
+                    if constexpr(sizeof(::std::size_t) == sizeof(::std::uint_least32_t))
+                    {
+                        if(max_protection_space > memory_length)
+                        {
+                            auto const smaller{(max_protection_space / 2uz) & ~(custom_page_size - 1uz)};
+                            max_protection_space = ::std::max(smaller, memory_length);
+                            this->reservation_limit_bytes = max_protection_space;
+                            this->require_dynamic_determination_memory_size_cached = true;
+                            continue;
+                        }
+                    }
+                    if constexpr(Fallible){this->clear();return false;}
+                    else ::uwvm2::utils::allocator::resource::initializer_memory_mapping_failure();
+                }
+
+                // The Wasm base starts at the reservation base for every layout. In full wasm32 mode, the unsigned
+                // widened address domain occupies the usable window plus the back guard, not a signed front window.
+                if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+                {
+                    if(this->status == mmap_memory_status_t::wasm32 && !this->require_dynamic_determination_memory_size())
+                    {
+                        this->memory_begin = this->reserved_begin + static_cast<::std::size_t>(wasm32_full_protection_front_guard_u64);
+                    }
+                    else
+                    {
+                        this->memory_begin = this->reserved_begin;
+                    }
+                }
+                else
+                {
+                    this->memory_begin = this->reserved_begin;
+                }
+
+                // Register the reserved range so SIGSEGV/SIGBUS (or VEH) can be translated to a wasm memory fault report.
+                // init/clear/destroy are only called outside guest execution, so structural updates are safe here.
+                if UWVM_IF_NOT_CONSTEVAL
+                {
+                    auto const reserved_space_for_signal{get_acquire_reserved_space_ceil()};
+                    // [reserved_begin, reserved_begin + reserved_space_for_signal) is this instance's
+                    // complete page-rounded reservation. The end is one-past and is never dereferenced.
+                    // Report the owner's module memory index, including the import prefix. Imported
+                    // aliases retain their provider instance's ownership, just like the allocation.
+                    ::uwvm2::object::memory::signal::register_protected_segment(this->reserved_begin,
+                                                                                this->reserved_begin + reserved_space_for_signal,
+                                                                                this->memory_length_p,
+                                                                                memory_index);
+                }
+
+                // Set pages according to the initialized size. A zero-page Wasm memory is valid and already has its
+                // inaccessible reservation; Windows commit APIs reject a zero region size, and POSIX does not require
+                // mprotect(addr, 0, ...) to succeed, so there is deliberately no OS commit call in that case.
+                // The minimum allocation unit for mmap is a page. Even if you request a size smaller than a page, the kernel will ultimately manage and
+                // map the memory in page-sized units.
+                if(memory_length != 0uz)
+                {
+
+# if defined(_WIN32) || defined(__CYGWIN__)                                                          // Windows
+#  if !defined(__CYGWIN__) && !defined(__WINE__) && !defined(__BIONIC__) && defined(_WIN32_WINDOWS)  // WIN32
+                {
+                    auto const vamemory2{reinterpret_cast<::std::byte*>(
+                        ::fast_io::win32::VirtualAlloc(this->memory_begin, memory_length, 0x00001000u /*MEM_COMMIT*/, 0x04u /*PAGE_READWRITE*/))};
+                    if(vamemory2 == nullptr) [[unlikely]] { if constexpr(Fallible){this->clear();return false;}
+                    else ::uwvm2::utils::allocator::resource::initializer_memory_mapping_failure(); }
+                    if(vamemory2 != this->memory_begin) [[unlikely]] { ::fast_io::fast_terminate(); }
+                }
+#  else  // NT
+                {
+                    ::std::byte* vamemory2{this->memory_begin};
+                    ::std::size_t memory_length_tmp{memory_length};
+                    constexpr bool zw{false};
+                    auto const status{::fast_io::win32::nt::nt_allocate_virtual_memory<zw>(reinterpret_cast<void*>(-1),
+                                                                                           reinterpret_cast<void**>(::std::addressof(vamemory2)),
+                                                                                           0,
+                                                                                           ::std::addressof(memory_length_tmp),
+                                                                                           0x00001000u /*MEM_COMMIT*/,
+                                                                                           0x04u /*PAGE_READWRITE*/)};
+
+                    if(status) [[unlikely]] { if constexpr(Fallible){this->clear();return false;}
+                    else ::uwvm2::utils::allocator::resource::initializer_memory_mapping_failure(); }
+                    if(vamemory2 != this->memory_begin) [[unlikely]] { ::fast_io::fast_terminate(); }
+                }
+#  endif
+
+# elif !defined(__NEWLIB__) && !(defined(__MSDOS__) || defined(__DJGPP__)) && (!defined(__wasm__) || (defined(__wasi__) && defined(_WASI_EMULATED_MMAN))) &&   \
+     __has_include(<sys/mman.h>)  // POSIX
+                {
+
+                    // sys_mprotect may throw ::fast_io::error
+
+                    {
+                        // The length argument must be a multiple of the page size as returned by sysconf(_SC_PAGE_SIZE).
+                        // Since custom_page may appear, it must be aligned to the top here.
+
+                        auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                        if(!success) [[unlikely]] { ::fast_io::fast_terminate(); }
+                        if(page_size == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                        auto const page_size_minus_1{(page_size - 1uz)};
+                        if(memory_length > ::std::numeric_limits<::std::size_t>::max() - page_size_minus_1) [[unlikely]] { ::fast_io::fast_terminate(); }
+                        auto const memory_length_ceil{(memory_length + page_size_minus_1) & ~page_size_minus_1};
+
+                        if(::mprotect(this->memory_begin, memory_length_ceil, PROT_READ | PROT_WRITE) != 0) [[unlikely]]
+                        { if constexpr(Fallible){this->clear();return false;}
+                    else ::uwvm2::utils::allocator::resource::initializer_memory_mapping_failure(); }
+                    }
+                }
+# endif
+                }
+
+                // Publish initialized length only after pages are successfully committed
+# if defined(__linux__)
+                ::uwvm2::utils::allocator::sanitizer_mapping::accessible(this->memory_begin,memory_length);
+# endif
+                this->memory_length_p->store(memory_length, this->sequentially_consistent_size ? ::std::memory_order_seq_cst : ::std::memory_order_release);
+            }
+            return true;
+        }
+
+        inline constexpr void init_by_page_count(::std::size_t pages,
+            ::std::size_t maximum=::std::numeric_limits<::std::size_t>::max(),::std::size_t index=0u) noexcept
+        { static_cast<void>(initialize_pages<false>(pages,maximum,index)); }
+        [[nodiscard]] inline constexpr bool try_init_by_page_count(::std::size_t pages,
+            ::std::size_t maximum,::std::size_t index) noexcept
+        { return initialize_pages<true>(pages,maximum,index); }
+
+        /// @brief      Grow the memory.
+        /// @param      max_limit_memory_length     This maximum value is derived from the maximum memory limit.
+        inline constexpr bool try_grow_silently(::std::size_t page_grow_size,
+                                                ::std::size_t max_limit_memory_length = ::std::numeric_limits<::std::size_t>::max(),
+                                                ::std::size_t* old_page_size_out = nullptr) noexcept
+        {
+            if(page_grow_size == 0uz) [[unlikely]]
+            {
+                if(old_page_size_out != nullptr) [[likely]] { *old_page_size_out = this->get_page_size(); }
+                return true;
+            }
+
+            if(this->memory_begin == nullptr) [[unlikely]]
+            {
+                // this is a bug
+                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+            }
+
+            if(page_grow_size > ::std::numeric_limits<::std::size_t>::max() >> this->custom_page_size_log2) [[unlikely]]
+            {
+                // This situation cannot occur; it is due to user input error.
+                return false;
+            }
+
+            // Once initialized, the custom_page_size_log2 will not change.
+            auto const memory_grow_size{page_grow_size << this->custom_page_size_log2};
+
+            // Acquiring internal data requires locking.
+            if(this->growing_mutex_p == nullptr || this->memory_length_p == nullptr) [[unlikely]]
+            {
+                // this is a bug
+                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+            }
+
+            ::uwvm2::utils::mutex::mutex_guard_t growing_mutex_guard_1{*this->growing_mutex_p};
+
+            // This atomic operation prevents the dynamic check from retrieving an erroneous value when reading the length.
+            // Here, with the lock's support, memory access is already guaranteed to be relaxed. However, during dynamic checks, an acquire is still required.
+            auto const current_length{this->memory_length_p->load(this->sequentially_consistent_size ? ::std::memory_order_seq_cst : ::std::memory_order_relaxed)};
+            if(old_page_size_out != nullptr) [[likely]] { *old_page_size_out = current_length >> this->custom_page_size_log2; }
+
+            // Select the smaller value between the manually set maximum and the maximum already mmapped by the platform.
+            // Beyond the boundaries of the VMA (adjacent virtual address space), protection is not automatically enforced; these regions are simply “unmapped.”
+            // These unmapped areas remain as potentially available address space. Subsequent mmap operations may automatically allocate memory within these
+            // spaces. Failing to impose such restrictions during memory expansion risks corrupting memory allocated to other parts of the program.
+            ::std::size_t max_page_memory_length;  // No initlization is required
+
+            if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+            {
+                // 64bit platform
+                switch(this->status)
+                {
+                    case mmap_memory_status_t::wasm32:
+                    {
+                        // In full protection mode, the maximum memory allocation permitted is half of the full protection size.
+                        // max_full_protection_wasm32_length_half == (u64)u32max + 1ui64
+                        constexpr auto max_full_protection_wasm32_length_half{max_full_protection_wasm32_length / 2u};
+
+                        max_page_memory_length = static_cast<::std::size_t>(max_full_protection_wasm32_length_half);
+                        break;
+                    }
+                    case mmap_memory_status_t::wasm64:
+                    {
+                        // partial protection. No need to provide double protection, as static checks are in place.
+                        max_page_memory_length = static_cast<::std::size_t>(max_partial_protection_wasm64_length);
+                        break;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+            else if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t))
+            {
+                // 32bit platform
+                // On 32-bit platforms, both wasm64 and wasm32 use 32-bit versions.
+                // partial protection. No need to provide double protection, as static checks are in place.
+                max_page_memory_length = static_cast<::std::size_t>(max_partial_protection_wasm32_length);
+            }
+            else
+            {
+                static_assert(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t), "mmap unsupported platform");
+            }
+
+            // Never commit beyond this instance's actual reserved usable prefix. This also covers
+            // callers supplying a larger grow limit than the maximum used at instantiation.
+            max_page_memory_length = ::std::min(max_page_memory_length, this->reservation_limit_bytes);
+            max_limit_memory_length = ::std::min(max_limit_memory_length, max_page_memory_length);
+
+            // start checking
+            if(max_limit_memory_length < current_length) [[unlikely]] { return false; }
+
+            auto const left_memory_size{max_limit_memory_length - current_length};
+            if(memory_grow_size > left_memory_size) [[unlikely]] { return false; }
+
+            // grown region [current_length, grow_final_memory_length)
+            auto const grow_final_memory_length{current_length + memory_grow_size};
+            ::uwvm2::utils::allocator::resource::resize_transaction<::uwvm2::utils::allocator::resource::pool::memory>
+                allocation_change{this->allocation_charge, charged_memory_bytes(grow_final_memory_length)};
+            if(!allocation_change) { return false; }
+
+            if(this->memtag_shadow.enabled() && this->memtag_shadow.prepare_growth(grow_final_memory_length) !=
+               ::uwvm2::extension::memtag::storage_error::none) [[unlikely]] { return false; }
+
+            // Set pages according to the initialized size
+            // The minimum allocation unit for mmap is a page. Even if you request a size smaller than a page, the kernel will ultimately manage and
+            // map the memory in page-sized units.
+
+# if defined(_WIN32) || defined(__CYGWIN__)                                                          // windows
+#  if !defined(__CYGWIN__) && !defined(__WINE__) && !defined(__BIONIC__) && defined(_WIN32_WINDOWS)  // win32
+            {
+                auto const vamemory{reinterpret_cast<::std::byte*>(
+                    ::fast_io::win32::VirtualAlloc(this->memory_begin, grow_final_memory_length, 0x00001000u /*MEM_COMMIT*/, 0x04u /*PAGE_READWRITE*/))};
+                if(vamemory != this->memory_begin) [[unlikely]] { ::fast_io::fast_terminate(); }
+            }
+#  else  // nt
+            {
+                ::std::byte* vamemory{this->memory_begin};
+
+                // Since const values cannot be used, a copy must be made.
+                ::std::size_t grow_final_memory_length_tmp{grow_final_memory_length};
+
+                constexpr bool zw{false};
+                auto const status{::fast_io::win32::nt::nt_allocate_virtual_memory<zw>(reinterpret_cast<void*>(-1),
+                                                                                       reinterpret_cast<void**>(::std::addressof(vamemory)),
+                                                                                       0u,
+                                                                                       ::std::addressof(grow_final_memory_length_tmp),
+                                                                                       0x00001000u /*MEM_COMMIT*/,
+                                                                                       0x04u /*PAGE_READWRITE*/)};
+
+                if(status || vamemory != this->memory_begin) [[unlikely]] { ::fast_io::fast_terminate(); }
+            }
+#  endif
+# elif !defined(__NEWLIB__) && !(defined(__MSDOS__) || defined(__DJGPP__)) && (!defined(__wasm__) || (defined(__wasi__) && defined(_WASI_EMULATED_MMAN))) &&   \
+     __has_include(<sys/mman.h>)  // posix
+            {
+
+                // sys_mprotect may throw ::fast_io::error
+
+#  ifdef UWVM_CPP_EXCEPTIONS
+                try
+#  endif
+                {
+                    // The length argument must be a multiple of the page size as returned by sysconf(_SC_PAGE_SIZE).
+                    // Since custom_page may appear, it must be aligned to the top here.
+
+                    auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                    if(!success) [[unlikely]] { ::fast_io::fast_terminate(); }
+                    if(page_size == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                    auto const page_size_minus_1{(page_size - 1uz)};
+                    if(grow_final_memory_length > ::std::numeric_limits<::std::size_t>::max() - page_size_minus_1) [[unlikely]] { ::fast_io::fast_terminate(); }
+                    auto const grow_final_memory_length_ceil{(grow_final_memory_length + page_size_minus_1) & ~page_size_minus_1};
+
+                    ::fast_io::details::sys_mprotect(this->memory_begin, grow_final_memory_length_ceil, (PROT_READ | PROT_WRITE | ::uwvm2::extension::memtag::hardware_mte::protection_for(this->memtag_shadow.hardware_active())));
+                }
+#  ifdef UWVM_CPP_EXCEPTIONS
+                catch(::fast_io::error)
+                {
+                    ::fast_io::fast_terminate();
+                }
+#  endif
+            }
+# endif
+
+            // Only after the memory has been successfully "committed" is the new length released to other threads.
+            allocation_change.commit();
+# if defined(__linux__)
+            ::uwvm2::utils::allocator::sanitizer_mapping::accessible(this->memory_begin+current_length,memory_grow_size);
+# endif
+            this->memory_length_p->store(grow_final_memory_length, this->sequentially_consistent_size ? ::std::memory_order_seq_cst : ::std::memory_order_release);
+
+            // growing_mutex_guard_1 destruct here
+            return true;
+        }
+
+        /// @brief      Grow memory in the default fail-fast/silent policy.
+        /// @details    "Silent" means silent with respect to the host allocation result. A request that exceeds the configured Wasm limit must be rejected by
+        ///             the caller as a Wasm `-1` result before this function is entered. Once this function is used, a host allocation/commit/protection
+        ///             failure is handled by immediate `fast_terminate()`, not by returning an error to the Wasm program.
+        /// @note       On overcommit systems, especially common Linux configurations, virtual memory admission can keep succeeding up to the architecture or
+        ///             user-VA limit (for example, about 128 TiB on common x86-64 layouts). The real OOM may occur only when guest code later writes to the
+        ///             admitted pages, at which point the kernel can kill the process without giving the runtime a recoverable error. This is why the default
+        ///             policy is silent/fail-fast. Do not replace this path with `grow_strictly()` merely to make host allocation failure observable.
+        inline constexpr void grow_silently(::std::size_t page_grow_size,
+                                            ::std::size_t max_limit_memory_length = ::std::numeric_limits<::std::size_t>::max()) noexcept
+        {
+            if(!this->try_grow_silently(page_grow_size, max_limit_memory_length)) [[unlikely]] { ::fast_io::fast_terminate(); }
+        }
+
+        /// @brief      Grow the memory (non-silent).
+        /// @return     true if the grow succeeds; false if the grow exceeds the limit or the platform refuses to commit/protect more pages.
+        /// @details    Strict growth is selected only when the strict flag is enabled. In this policy, host allocation/commit/protection failure is converted
+        ///             into the Wasm `memory.grow` failure result (`-1`) and execution may continue. This is mainly meaningful on systems without overcommit,
+        ///             where the host can report allocation failure at grow time. On overcommit systems, a successful strict grow still cannot protect the
+        ///             process from a later kernel OOM kill on actual guest writes.
+        /// @param      max_limit_memory_length     This maximum value is derived from the maximum memory limit.
+        inline constexpr bool grow_strictly(::std::size_t page_grow_size,
+                                            ::std::size_t max_limit_memory_length = ::std::numeric_limits<::std::size_t>::max(),
+                                            ::std::size_t* old_page_size_out = nullptr) noexcept
+        {
+            if(page_grow_size == 0uz) [[unlikely]]
+            {
+                if(old_page_size_out != nullptr) [[likely]] { *old_page_size_out = this->get_page_size(); }
+                return true;
+            }
+
+            if(this->memory_begin == nullptr) [[unlikely]]
+            {
+                // this is a bug
+                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+            }
+
+            if(page_grow_size > ::std::numeric_limits<::std::size_t>::max() >> this->custom_page_size_log2) [[unlikely]]
+            {
+                // This situation cannot occur; it is due to user input error.
+                return false;
+            }
+
+            // Once initialized, the custom_page_size_log2 will not change.
+            auto const memory_grow_size{page_grow_size << this->custom_page_size_log2};
+
+            // Acquiring internal data requires locking.
+            if(this->growing_mutex_p == nullptr || this->memory_length_p == nullptr) [[unlikely]]
+            {
+                // this is a bug
+                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+            }
+
+            ::uwvm2::utils::mutex::mutex_guard_t growing_mutex_guard_1{*this->growing_mutex_p};
+
+            auto const current_length{this->memory_length_p->load(this->sequentially_consistent_size ? ::std::memory_order_seq_cst : ::std::memory_order_relaxed)};
+            if(old_page_size_out != nullptr) [[likely]] { *old_page_size_out = current_length >> this->custom_page_size_log2; }
+
+            ::std::size_t max_page_memory_length;  // No initlization is required
+
+            if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+            {
+                // 64bit platform
+                switch(this->status)
+                {
+                    case mmap_memory_status_t::wasm32:
+                    {
+                        constexpr auto max_full_protection_wasm32_length_half{max_full_protection_wasm32_length / 2u};
+                        max_page_memory_length = static_cast<::std::size_t>(max_full_protection_wasm32_length_half);
+                        break;
+                    }
+                    case mmap_memory_status_t::wasm64:
+                    {
+                        max_page_memory_length = static_cast<::std::size_t>(max_partial_protection_wasm64_length);
+                        break;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+            else if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t))
+            {
+                // 32bit platform
+                max_page_memory_length = static_cast<::std::size_t>(max_partial_protection_wasm32_length);
+            }
+            else
+            {
+                static_assert(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t), "mmap unsupported platform");
+            }
+
+            // Never commit beyond this instance's actual reserved usable prefix. This also covers
+            // callers supplying a larger grow limit than the maximum used at instantiation.
+            max_page_memory_length = ::std::min(max_page_memory_length, this->reservation_limit_bytes);
+            max_limit_memory_length = ::std::min(max_limit_memory_length, max_page_memory_length);
+
+            if(max_limit_memory_length < current_length) [[unlikely]]
+            {
+                // This situation cannot occur; it is due to user input error.
+                // this is a bug
+                ::fast_io::fast_terminate();
+            }
+
+            auto const left_memory_size{max_limit_memory_length - current_length};
+            if(memory_grow_size > left_memory_size) [[unlikely]] { return false; }
+
+            auto const grow_final_memory_length{current_length + memory_grow_size};
+            ::uwvm2::utils::allocator::resource::resize_transaction<::uwvm2::utils::allocator::resource::pool::memory>
+                allocation_change{this->allocation_charge, charged_memory_bytes(grow_final_memory_length)};
+            if(!allocation_change) { return false; }
+
+            if(this->memtag_shadow.enabled() && this->memtag_shadow.prepare_growth(grow_final_memory_length) !=
+               ::uwvm2::extension::memtag::storage_error::none) [[unlikely]] { return false; }
+
+# if defined(_WIN32) || defined(__CYGWIN__)  // windows
+            {
+                auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                if(!success) [[unlikely]]
+                {
+                    // this never occurs; it is due to user input error.
+                    ::fast_io::fast_terminate();
+                }
+                if(page_size == 0uz) [[unlikely]]
+                {
+                    // this never occurs; it is due to user input error.
+                    ::fast_io::fast_terminate();
+                }
+
+                auto const page_size_minus_1{(page_size - 1uz)};
+
+                if(current_length > ::std::numeric_limits<::std::size_t>::max() - page_size_minus_1) [[unlikely]] { return false; }
+                auto const current_length_ceil{(current_length + page_size_minus_1) & ~page_size_minus_1};
+
+                if(grow_final_memory_length > ::std::numeric_limits<::std::size_t>::max() - page_size_minus_1) [[unlikely]] { return false; }
+                auto const grow_final_memory_length_ceil{(grow_final_memory_length + page_size_minus_1) & ~page_size_minus_1};
+
+                if(grow_final_memory_length_ceil > current_length_ceil)
+                {
+                    auto const commit_delta{grow_final_memory_length_ceil - current_length_ceil};
+                    auto const commit_begin{this->memory_begin + current_length_ceil};
+
+#  if !defined(__CYGWIN__) && !defined(__WINE__) && !defined(__BIONIC__) && defined(_WIN32_WINDOWS)  // win32
+                    auto const vamemory{reinterpret_cast<::std::byte*>(
+                        ::fast_io::win32::VirtualAlloc(commit_begin, commit_delta, 0x00001000u /*MEM_COMMIT*/, 0x04u /*PAGE_READWRITE*/))};
+                    if(vamemory != commit_begin) [[unlikely]] { return false; }
+#  else  // nt
+                    ::std::byte* vamemory{commit_begin};
+                    ::std::size_t commit_delta_tmp{commit_delta};
+                    constexpr bool zw{false};
+                    auto const status{::fast_io::win32::nt::nt_allocate_virtual_memory<zw>(reinterpret_cast<void*>(-1),
+                                                                                           reinterpret_cast<void**>(::std::addressof(vamemory)),
+                                                                                           0u,
+                                                                                           ::std::addressof(commit_delta_tmp),
+                                                                                           0x00001000u /*MEM_COMMIT*/,
+                                                                                           0x04u /*PAGE_READWRITE*/)};
+                    if(status || vamemory != commit_begin) [[unlikely]] { return false; }
+#  endif
+                }
+            }
+# elif !defined(__NEWLIB__) && !(defined(__MSDOS__) || defined(__DJGPP__)) && (!defined(__wasm__) || (defined(__wasi__) && defined(_WASI_EMULATED_MMAN))) &&   \
+     __has_include(<sys/mman.h>)  // posix
+            {
+                auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                if(!success) [[unlikely]]
+                {
+                    // this never occurs; it is due to user input error.
+                    ::fast_io::fast_terminate();
+                }
+                if(page_size == 0uz) [[unlikely]]
+                {
+                    // this never occurs; it is due to user input error.
+                    ::fast_io::fast_terminate();
+                }
+
+                auto const page_size_minus_1{(page_size - 1uz)};
+
+                if(current_length > ::std::numeric_limits<::std::size_t>::max() - page_size_minus_1) [[unlikely]] { return false; }
+                auto const current_length_ceil{(current_length + page_size_minus_1) & ~page_size_minus_1};
+
+                if(grow_final_memory_length > ::std::numeric_limits<::std::size_t>::max() - page_size_minus_1) [[unlikely]] { return false; }
+                auto const grow_final_memory_length_ceil{(grow_final_memory_length + page_size_minus_1) & ~page_size_minus_1};
+
+                if(grow_final_memory_length_ceil > current_length_ceil)
+                {
+                    auto const protect_delta{grow_final_memory_length_ceil - current_length_ceil};
+                    auto const protect_begin{this->memory_begin + current_length_ceil};
+
+                    // sys_mprotect may throw ::fast_io::error
+#  ifdef UWVM_CPP_EXCEPTIONS
+                    try
+#  endif
+                    {
+#  if defined(UWVM_TEST) && defined(UWVM_CPP_EXCEPTIONS)
+                        ::uwvm2::object::memory::linear::details::strict_grow_mprotect(reinterpret_cast<void*>(protect_begin),
+                                                                                       protect_delta,
+                                                                                       (PROT_READ | PROT_WRITE | ::uwvm2::extension::memtag::hardware_mte::protection_for(this->memtag_shadow.hardware_active())));
+#  else
+                        ::fast_io::details::sys_mprotect(reinterpret_cast<void*>(protect_begin), protect_delta, (PROT_READ | PROT_WRITE | ::uwvm2::extension::memtag::hardware_mte::protection_for(this->memtag_shadow.hardware_active())));
+#  endif
+                    }
+#  ifdef UWVM_CPP_EXCEPTIONS
+                    catch(::fast_io::error)
+                    {
+                        // Full and partial guard paths omit the live-length check on at least part of their access
+                        // domain. POSIX does not guarantee that a failed range mprotect left every page unchanged, so
+                        // another guest thread could already have observed or modified a newly writable prefix. That
+                        // state cannot be made transactionally recoverable; only the per-access dynamically checked
+                        // layout may roll back and report memory.grow failure.
+                        if(!this->require_dynamic_determination_memory_size()) [[likely]] { ::fast_io::fast_terminate(); }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                        try
+#   endif
+                        {
+                            // Ensure failure is not partially committed; otherwise, OOB may stop faulting in full-protection mode.
+#   if defined(UWVM_TEST) && defined(UWVM_CPP_EXCEPTIONS)
+                            ::uwvm2::object::memory::linear::details::strict_grow_mprotect(reinterpret_cast<void*>(protect_begin),
+                                                                                           protect_delta,
+                                                                                           PROT_NONE);
+#   else
+                            ::fast_io::details::sys_mprotect(reinterpret_cast<void*>(protect_begin), protect_delta, PROT_NONE);
+#   endif
+                        }
+#   ifdef UWVM_CPP_EXCEPTIONS
+                        catch(::fast_io::error)
+                        {
+                            // A failed rollback can leave pages beyond the published logical length accessible.
+                            // Continuing would violate the fault-based bounds invariant; fail closed instead.
+                            ::fast_io::fast_terminate();
+                        }
+#   endif
+                        return false;
+                    }
+#  endif
+                }
+            }
+# endif
+
+            allocation_change.commit();
+# if defined(__linux__)
+            ::uwvm2::utils::allocator::sanitizer_mapping::accessible(this->memory_begin+current_length,memory_grow_size);
+# endif
+            this->memory_length_p->store(grow_final_memory_length, this->sequentially_consistent_size ? ::std::memory_order_seq_cst : ::std::memory_order_release);
+            return true;
+        }
+
+# include "threaded_grow_member.h"
+
+        inline constexpr ::std::size_t get_page_size() const noexcept
+        {
+            if(this->memory_length_p == nullptr) [[unlikely]]
+            {
+                // this is a bug
+                ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+            }
+
+            // This can be used in the WASM runtime.
+# if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
+            // x86 acquire and SC loads both lower to MOV. Select SC statically:
+            // a runtime ordering choice leaves an otherwise dead policy-byte CMP
+            // in Clang's machine code, penalizing every unshared memory.size too.
+            auto const all_memory_length{this->memory_length_p->load(::std::memory_order_seq_cst)};
+# else
+            auto const all_memory_length{this->memory_length_p->load(this->sequentially_consistent_size ? ::std::memory_order_seq_cst : ::std::memory_order_acquire)};
+# endif
+
+            return all_memory_length >> this->custom_page_size_log2;
+        }
+
+        inline constexpr mmap_memory_t(mmap_memory_t const& other) noexcept = delete;
+
+        inline constexpr mmap_memory_t& operator= (mmap_memory_t const& other) noexcept = delete;
+
+        /// @note       This function is designed to be lock-free and cannot be executed during WASM execution (multi-threaded). It can only be done before the
+        ///             WASM execution.
+        inline constexpr mmap_memory_t(mmap_memory_t&& other) noexcept
+        {
+            this->reserved_begin = other.reserved_begin;
+            this->memory_begin = other.memory_begin;
+            this->memory_length_p = other.memory_length_p;
+            this->custom_page_size_log2 = other.custom_page_size_log2;
+            this->require_dynamic_determination_memory_size_cached = other.require_dynamic_determination_memory_size_cached;
+            this->reservation_limit_bytes = other.reservation_limit_bytes;
+            this->diagnostic_owner_memory_index = other.diagnostic_owner_memory_index;
+            this->memtag_shadow = ::std::move(other.memtag_shadow);
+            this->allocation_charge = ::std::move(other.allocation_charge);
+            this->sequentially_consistent_size = other.sequentially_consistent_size;
+            this->status = other.status;
+            this->growing_mutex_p = other.growing_mutex_p;
+
+            // clear destory other
+            other.reserved_begin = nullptr;
+            other.memory_begin = nullptr;
+            other.memory_length_p = nullptr;
+            other.custom_page_size_log2 = 0u;
+            other.require_dynamic_determination_memory_size_cached = false;
+            other.reservation_limit_bytes = ::std::numeric_limits<::std::size_t>::max();
+            other.diagnostic_owner_memory_index = 0uz;
+            other.sequentially_consistent_size = false;
+            other.status = mmap_memory_status_t{};
+            other.growing_mutex_p = nullptr;
+        }
+
+        /// @note      This function is designed to be lock-free and cannot be executed during WASM execution (multi-threaded). It can only be done before the
+        ///             WASM execution.
+        inline constexpr mmap_memory_t& operator= (mmap_memory_t&& other) noexcept
+        {
+            if(::std::addressof(other) == this) [[unlikely]] { return *this; }
+
+            clear_destroy();
+
+            this->reserved_begin = other.reserved_begin;
+            this->memory_begin = other.memory_begin;
+            this->memory_length_p = other.memory_length_p;
+            this->custom_page_size_log2 = other.custom_page_size_log2;
+            this->require_dynamic_determination_memory_size_cached = other.require_dynamic_determination_memory_size_cached;
+            this->reservation_limit_bytes = other.reservation_limit_bytes;
+            this->diagnostic_owner_memory_index = other.diagnostic_owner_memory_index;
+            this->memtag_shadow = ::std::move(other.memtag_shadow);
+            this->allocation_charge = ::std::move(other.allocation_charge);
+            this->sequentially_consistent_size = other.sequentially_consistent_size;
+            this->status = other.status;
+            this->growing_mutex_p = other.growing_mutex_p;
+
+            // clear destory other
+            other.reserved_begin = nullptr;
+            other.memory_begin = nullptr;
+            other.memory_length_p = nullptr;
+            other.custom_page_size_log2 = 0u;
+            other.require_dynamic_determination_memory_size_cached = false;
+            other.reservation_limit_bytes = ::std::numeric_limits<::std::size_t>::max();
+            other.diagnostic_owner_memory_index = 0uz;
+            other.sequentially_consistent_size = false;
+            other.status = mmap_memory_status_t{};
+            other.growing_mutex_p = nullptr;
+
+            return *this;
+        }
+
+        inline constexpr ::std::size_t get_acquire_reserved_space() const noexcept
+        {
+            // UB will never appear; it has been preemptively checked.
+            auto const custom_page_size{1uz << this->custom_page_size_log2};
+
+            // Reserve max space
+            ::std::size_t max_protection_space;
+
+            if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least64_t))
+            {
+                // 64bit platform
+                switch(this->status)
+                {
+                    case mmap_memory_status_t::wasm32:
+                    {
+                        // full protection
+                        max_protection_space = max_full_protection_wasm32_length;
+                        break;
+                    }
+                    case mmap_memory_status_t::wasm64:
+                    {
+                        // partial protection
+                        max_protection_space = max_partial_protection_wasm64_length;
+                        break;
+                    }
+                    [[unlikely]] default:
+                    {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                        ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+# endif
+                        ::std::unreachable();
+                    }
+                }
+            }
+            else if constexpr(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t))
+            {
+                // 32bit platform
+                // On 32-bit platforms, both wasm64 and wasm32 use 32-bit versions.
+                // partial protection
+                max_protection_space = max_partial_protection_wasm32_length;
+            }
+            else
+            {
+                static_assert(sizeof(::std::size_t) >= sizeof(::std::uint_least32_t), "mmap unsupported platform");
+            }
+
+            max_protection_space = ::std::min(max_protection_space, this->reservation_limit_bytes);
+
+            // Provides a 64-byte type protection mechanism (no foreseeable future type will exceed this size) to prevent custom page sizes (arbitrary
+            // sizes) from being smaller than the type size.
+            constexpr ::std::size_t max_type_size{mmap_guard_max_access_size};
+
+            // | max_protection_space | custom_page_size | max_type_size | ... align to platform page size ... |
+            // This section does not check for overflow because it was already checked during initialization.
+            auto const max_space{max_protection_space + custom_page_size + max_type_size};
+
+            // The content retrieved here is not aligned with the platform page. To obtain the reserved space, simply align the platform page upward.
+            return max_space;
+        }
+
+        inline constexpr ::std::size_t get_acquire_reserved_space_ceil() const noexcept
+        {
+            ::std::size_t reserved_space{get_acquire_reserved_space()};
+            if UWVM_IF_NOT_CONSTEVAL
+            {
+                auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                if(!success || page_size == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+                else
+                {
+                    auto const page_size_minus_1{page_size - 1uz};
+                    if(reserved_space <= ::std::numeric_limits<::std::size_t>::max() - page_size_minus_1) [[likely]]
+                    {
+                        reserved_space = (reserved_space + page_size_minus_1) & ~page_size_minus_1;
+                    }
+                }
+            }
+            return reserved_space;
+        }
+
+        /// @brief      Clear the memory.
+        /// @note       Simply clearing the memory without altering the page size.
+        /// @note       This function is designed to be lock-free and cannot be executed during WASM execution (multi-threaded). It can only be done after the
+        ///             WASM execution.
+        inline constexpr void clear() noexcept
+        {
+            this->memtag_shadow.reset();
+            this->diagnostic_owner_memory_index = 0uz;
+            if(this->reserved_begin == nullptr) [[unlikely]]
+            {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                if(this->memory_begin != nullptr) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+# endif
+                this->reserved_begin = nullptr;
+                this->memory_begin = nullptr;
+                if(this->memory_length_p == nullptr) [[unlikely]] { return; }
+                this->memory_length_p->store(0uz, ::std::memory_order_relaxed);
+                this->allocation_charge.reset();
+                return;
+            }
+
+            auto const acquire_reserved_space_ceil{get_acquire_reserved_space_ceil()};
+            ::uwvm2::object::memory::signal::unregister_protected_segment(this->reserved_begin, this->reserved_begin + acquire_reserved_space_ceil);
+
+# if defined(_WIN32) || defined(__CYGWIN__)                                                          // windows
+#  if !defined(__CYGWIN__) && !defined(__WINE__) && !defined(__BIONIC__) && defined(_WIN32_WINDOWS)  // win32
+            {
+                if(!::fast_io::win32::VirtualFree(this->reserved_begin, 0u, 0x00008000u /*MEM_RELEASE*/)) [[unlikely]] { ::fast_io::fast_terminate(); }
+            }
+#  else  // nt
+            {
+                ::std::byte* vfmemory{this->reserved_begin};
+                ::std::size_t free_type{0uz};
+
+                constexpr bool zw{false};
+                if(::fast_io::win32::nt::nt_free_virtual_memory<zw>(reinterpret_cast<void*>(-1),
+                                                                    reinterpret_cast<void**>(::std::addressof(vfmemory)),
+                                                                    ::std::addressof(free_type),
+                                                                    0x00008000u /*MEM_RELEASE*/)) [[unlikely]]
+                {
+                    ::fast_io::fast_terminate();
+                }
+            }
+#  endif
+# elif !defined(__NEWLIB__) && !(defined(__MSDOS__) || defined(__DJGPP__)) && (!defined(__wasm__) || (defined(__wasi__) && defined(_WASI_EMULATED_MMAN))) &&   \
+     __has_include(<sys/mman.h>)  // posix
+            {
+                // The length argument must be a multiple of the page size as returned by sysconf(_SC_PAGE_SIZE).
+                // Since custom_page may appear, it must be aligned to the top here.
+
+                auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                if(!success) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                // fast_io::details::sys_munmap_nothrow is noexcept, manually throws exceptions.
+                if(::fast_io::details::sys_munmap_nothrow(this->reserved_begin, acquire_reserved_space_ceil)) [[unlikely]] { ::fast_io::fast_terminate(); }
+            }
+# endif
+
+            this->reserved_begin = nullptr;
+            this->memory_begin = nullptr;
+
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+            // The clear operation completes before the object is destroyed, so nullptr causes a crash.
+            if(this->memory_length_p == nullptr) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+# endif
+
+            // This can only be used after the WASM execution has completed, so use relaxed instead of acquired.
+            this->memory_length_p->store(0uz, ::std::memory_order_relaxed);
+                this->allocation_charge.reset();
+        }
+
+        /// @brief      Clear the memory and destroy all flag.
+        /// @note       After calling this, you must reinitialize it according to the initialization process.
+        /// @note       This function is designed to be lock-free and cannot be executed during WASM execution (multi-threaded). It can only be done after the
+        ///             WASM execution.
+        inline constexpr void clear_destroy() noexcept
+        {
+            this->memtag_shadow.reset();
+            // clear_destroy can be called at any time, so nullptr is not prohibited.
+
+            // Only discuss the recovery of already allocated funds.
+
+            // This can only be used after the WASM execution has completed, so use relaxed instead of acquired.
+            // UB will never appear; it has been preemptively checked.
+
+            if(this->reserved_begin != nullptr) [[likely]]
+            {
+                auto const acquire_reserved_space_ceil{get_acquire_reserved_space_ceil()};
+                ::uwvm2::object::memory::signal::unregister_protected_segment(this->reserved_begin, this->reserved_begin + acquire_reserved_space_ceil);
+
+# if defined(_WIN32) || defined(__CYGWIN__)                                                          // windows
+#  if !defined(__CYGWIN__) && !defined(__WINE__) && !defined(__BIONIC__) && defined(_WIN32_WINDOWS)  // win32
+                {
+                    if(!::fast_io::win32::VirtualFree(this->reserved_begin, 0u, 0x00008000u /*MEM_RELEASE*/)) [[unlikely]] { ::fast_io::fast_terminate(); }
+                }
+#  else  // nt
+                {
+                    ::std::byte* vfmemory{this->reserved_begin};
+                    ::std::size_t free_type{0uz};
+
+                    constexpr bool zw{false};
+                    if(::fast_io::win32::nt::nt_free_virtual_memory<zw>(reinterpret_cast<void*>(-1),
+                                                                        reinterpret_cast<void**>(::std::addressof(vfmemory)),
+                                                                        ::std::addressof(free_type),
+                                                                        0x00008000u /*MEM_RELEASE*/)) [[unlikely]]
+                    {
+                        ::fast_io::fast_terminate();
+                    }
+                }
+#  endif
+# elif !defined(__NEWLIB__) && !(defined(__MSDOS__) || defined(__DJGPP__)) && (!defined(__wasm__) || (defined(__wasi__) && defined(_WASI_EMULATED_MMAN))) &&   \
+     __has_include(<sys/mman.h>)  // posix
+                {
+                    // The length argument must be a multiple of the page size as returned by sysconf(_SC_PAGE_SIZE).
+                    // Since custom_page may appear, it must be aligned to the top here.
+
+                    auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                    if(!success) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                    // fast_io::details::sys_munmap_nothrow is noexcept, manually throws exceptions.
+                    if(::fast_io::details::sys_munmap_nothrow(this->reserved_begin, acquire_reserved_space_ceil)) [[unlikely]] { ::fast_io::fast_terminate(); }
+                }
+# endif
+            }
+            else
+            {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                if(this->memory_begin != nullptr) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+# endif
+            }
+
+            if(this->memory_length_p != nullptr) [[likely]] { ::std::destroy_at(this->memory_length_p); }
+            atomic_size_allcator_t::deallocate_n(this->memory_length_p, 1uz);  // dealloc includes built-in nullptr checking
+
+            if(this->growing_mutex_p != nullptr) [[likely]] { ::std::destroy_at(this->growing_mutex_p); }
+            mutex_allcator_t::deallocate_n(this->growing_mutex_p, 1uz);  // dealloc includes built-in nullptr checking
+
+            this->reserved_begin = nullptr;
+            this->memory_begin = nullptr;
+            this->memory_length_p = nullptr;
+            this->custom_page_size_log2 = 0u;
+            this->require_dynamic_determination_memory_size_cached = false;
+            this->reservation_limit_bytes = ::std::numeric_limits<::std::size_t>::max();
+            this->diagnostic_owner_memory_index = 0uz;
+            this->status = mmap_memory_status_t{};
+            this->growing_mutex_p = nullptr;
+        }
+
+        /// @note       This function is designed to be lock-free and cannot be executed during WASM execution (multi-threaded). It can only be done after the
+        ///             WASM execution.
+        inline constexpr ~mmap_memory_t()
+        {
+            // clear_destroy can be called at any time, so nullptr is not prohibited.
+            // UB will never appear; it has been preemptively checked.
+
+            // Only discuss the recovery of already allocated funds.
+
+            if(this->reserved_begin != nullptr) [[likely]]
+            {
+                auto const acquire_reserved_space_ceil{get_acquire_reserved_space_ceil()};
+                ::uwvm2::object::memory::signal::unregister_protected_segment(this->reserved_begin, this->reserved_begin + acquire_reserved_space_ceil);
+
+# if defined(_WIN32) || defined(__CYGWIN__)                                                          // windows
+#  if !defined(__CYGWIN__) && !defined(__WINE__) && !defined(__BIONIC__) && defined(_WIN32_WINDOWS)  // win32
+                {
+                    if(!::fast_io::win32::VirtualFree(this->reserved_begin, 0u, 0x00008000u /*MEM_RELEASE*/)) [[unlikely]] { ::fast_io::fast_terminate(); }
+                }
+#  else  // nt
+                {
+                    ::std::byte* vfmemory{this->reserved_begin};
+                    ::std::size_t free_type{0uz};
+
+                    constexpr bool zw{false};
+                    if(::fast_io::win32::nt::nt_free_virtual_memory<zw>(reinterpret_cast<void*>(-1),
+                                                                        reinterpret_cast<void**>(::std::addressof(vfmemory)),
+                                                                        ::std::addressof(free_type),
+                                                                        0x00008000u /*MEM_RELEASE*/)) [[unlikely]]
+                    {
+                        ::fast_io::fast_terminate();
+                    }
+                }
+#  endif
+# elif !defined(__NEWLIB__) && !(defined(__MSDOS__) || defined(__DJGPP__)) && (!defined(__wasm__) || (defined(__wasi__) && defined(_WASI_EMULATED_MMAN))) &&   \
+     __has_include(<sys/mman.h>)  // posix
+                {
+                    // The length argument must be a multiple of the page size as returned by sysconf(_SC_PAGE_SIZE).
+                    // Since custom_page may appear, it must be aligned to the top here.
+
+                    auto const [page_size, success]{::uwvm2::object::memory::platform_page::get_platform_page_size()};
+                    if(!success) [[unlikely]] { ::fast_io::fast_terminate(); }
+                    if(page_size == 0uz) [[unlikely]] { ::fast_io::fast_terminate(); }
+
+                    // fast_io::details::sys_munmap_nothrow is noexcept, manually throws exceptions.
+                    if(::fast_io::details::sys_munmap_nothrow(this->reserved_begin, acquire_reserved_space_ceil)) [[unlikely]] { ::fast_io::fast_terminate(); }
+                }
+# endif
+            }
+            else
+            {
+# if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                if(this->memory_begin != nullptr) [[unlikely]] { ::uwvm2::utils::debug::trap_and_inform_bug_pos(); }
+# endif
+            }
+
+            if(this->memory_length_p != nullptr) [[likely]] { ::std::destroy_at(this->memory_length_p); }
+            atomic_size_allcator_t::deallocate_n(this->memory_length_p, 1uz);  // dealloc includes built-in nullptr checking
+
+            if(this->growing_mutex_p != nullptr) [[likely]] { ::std::destroy_at(this->growing_mutex_p); }
+            mutex_allcator_t::deallocate_n(this->growing_mutex_p, 1uz);  // dealloc includes built-in nullptr checking
+
+            // multiple call to destructor is undefined behavior, so never set to default value
+        }
+    };
+
+#endif
+
+}  // namespace uwvm2::object::memory::linear
+
+/// @brief Define container optimization operations for use with fast_io
+UWVM_MODULE_EXPORT namespace fast_io::freestanding
+{
+#if defined(UWVM_SUPPORT_MMAP)
+    template <>
+    struct is_trivially_copyable_or_relocatable<::uwvm2::object::memory::linear::mmap_memory_t>
+    {
+        inline static constexpr bool value = true;
+    };
+#endif
+}
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

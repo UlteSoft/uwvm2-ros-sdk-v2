@@ -1,0 +1,680 @@
+﻿/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2025-03-27
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+#include <uwvm2/utils/security/trusted_driver.h>
+
+#ifndef UWVM_MODULE
+// std
+# include <cstdint>
+# include <cstddef>
+# include <memory>
+# include <bit>
+# include <utility>
+# include <string_view>
+# include <uwvm2/utils/security/wsea.h>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/ansies/impl.h>
+# include <uwvm2/utils/cmdline/impl.h>
+# include <uwvm2/utils/debug/impl.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# include <uwvm2/uwvm/cmdline/params/impl.h>
+# include <uwvm2/uwvm/wasm/loader/dl.h>
+# include "params.h"
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+#include "parser_state.h"
+#if defined(UWVM_IMPORT_ROS1) || defined(UWVM_IMPORT_ROS2)
+# include <uwvm2/uwvm/imported/ros/validation.h>
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::cmdline
+{
+    enum class parsing_return_val : unsigned
+    {
+        def,      // Continue with the main program
+        return0,  // Instructs the main function to return 0
+        returnm1  // Instructs the main function to return -1
+    };
+
+    /// @brief parsing cmdline
+    inline constexpr parsing_return_val parsing(::std::size_t argc, char8_t const* const* argv) noexcept
+    {
+#ifdef UWVM_TIMER
+        ::uwvm2::utils::debug::timer parsing_timer{u8"parsing parameters"};
+#endif
+
+        auto& pr{parsing_result};
+        auto const& ht{::uwvm2::uwvm::cmdline::hash_table};
+
+        // It is assumed that they are all initialized by default and no checks will be made
+#if 0 
+        pr.clear();
+#endif
+
+        pr.reserve(argc);
+
+        // If argc is 0uz, prohibit running
+        if(!argc) [[unlikely]]
+        {
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                u8"[error] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"No Parameters.",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                u8"\n\n");
+            return parsing_return_val::returnm1;
+        }
+
+        // argv_end > argv_begin
+
+        auto curr_argv{argv};
+
+        // Use argv0 as the program runtime path
+        if(*curr_argv != nullptr) [[likely]]
+        {
+            pr.emplace_back_unchecked(::uwvm2::utils::container::u8cstring_view{::fast_io::mnp::os_c_str(*curr_argv)},
+                                      nullptr,
+                                      ::uwvm2::utils::cmdline::parameter_parsing_results_type::dir);
+            // storage argv0
+            argv0_dir = *curr_argv;
+        }
+
+        // preprocessing
+        auto const argv_end{argv + argc};
+        for(++curr_argv; curr_argv != argv_end;)
+        {
+            if(*curr_argv == nullptr) [[unlikely]]
+            {
+                // This doesn't happen, but just in case
+
+                // Next parameter
+                ++curr_argv;
+            }
+            else if(::uwvm2::utils::container::u8cstring_view const argv_str{::fast_io::mnp::os_c_str(*curr_argv)}; argv_str.empty()) [[unlikely]]
+            {
+                // Preserve an explicit empty argv token. Option callbacks that
+                // accept a following value must see the empty string and reject
+                // it themselves; skipping it here would shift later arguments
+                // into the wrong positions.
+                pr.emplace_back_unchecked(argv_str, nullptr, ::uwvm2::utils::cmdline::parameter_parsing_results_type::arg);
+
+                // Next parameter
+                ++curr_argv;
+            }
+            else if(argv_str.front_unchecked() == u8'-')
+            {
+                // this is a parameter
+                // Special treatment for run
+                constexpr auto run_para{::std::addressof(::uwvm2::uwvm::cmdline::params::run)};
+
+                // find hash table
+                auto const para{::uwvm2::utils::cmdline::find_from_hash_table(ht, argv_str)};
+
+                if(para == nullptr) [[unlikely]]
+                {
+                    // invalid parameter
+                    pr.emplace_back_unchecked(argv_str, nullptr, ::uwvm2::utils::cmdline::parameter_parsing_results_type::invalid_parameter);
+
+                    // Next parameter
+                    ++curr_argv;
+                }
+                else if(para == run_para)
+                {
+                    // All subsequent parameters are runtime parameters and need not be parsed further, jumping directly out of the
+                    pr.emplace_back_unchecked(argv_str, run_para, ::uwvm2::utils::cmdline::parameter_parsing_results_type::parameter);  // -- run
+
+                    // grammatical error
+                    if(++curr_argv == argv_end) [[unlikely]]
+                    {
+                        ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                            u8"uwvm: ",
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                            u8"[error] ",
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                            u8"Usage: ",
+                                            ::uwvm2::utils::cmdline::print_usage(*run_para),
+                                            // print_usage comes with UWVM_COLOR_U8_RST_ALL
+                                            u8"\n\n");
+
+                        return parsing_return_val::returnm1;
+                    }
+
+                    wasm_file_ppos =
+                        ::std::addressof(pr.emplace_back_unchecked(fast_io::u8cstring_view{::fast_io::mnp::os_c_str(*curr_argv)},
+                                                                   nullptr,
+                                                                   ::uwvm2::utils::cmdline::parameter_parsing_results_type::occupied_arg));  // wasm file
+
+                    for(++curr_argv; curr_argv != argv_end; ++curr_argv)
+                    {
+                        pr.emplace_back_unchecked(::uwvm2::utils::container::u8cstring_view{::fast_io::mnp::os_c_str(*curr_argv)},
+                                                  nullptr,
+                                                  ::uwvm2::utils::cmdline::parameter_parsing_results_type::occupied_arg);  // wasm parameters
+                    }
+
+                    break;  // End preprocessing
+                }
+                else [[likely]]
+                {
+                    if(para->is_exist)  // Check for null pointer
+                    {
+                        // not nullptr
+                        if(auto& para_is_exist{*para->is_exist}; para_is_exist)
+                        {
+                            pr.emplace_back_unchecked(argv_str, para, ::uwvm2::utils::cmdline::parameter_parsing_results_type::duplicate_parameter);
+                        }
+                        else
+                        {
+                            para_is_exist = true;  // Marker already exists
+                            pr.emplace_back_unchecked(argv_str, para, ::uwvm2::utils::cmdline::parameter_parsing_results_type::parameter);
+                        }
+                    }
+                    else
+                    {
+                        pr.emplace_back_unchecked(argv_str, para, ::uwvm2::utils::cmdline::parameter_parsing_results_type::parameter);
+                    }
+
+                    // The preprocessor that calls this function
+                    // Preprocessing is used to jump directly to the backmarked section.
+
+                    // If a signed integer is required for a subsequent argument,
+                    // marking one bit back as occupied_arg prevents the negative sign from being misidentified as an argument prefix.
+
+                    if(para->pretreatment)
+                    {
+                        para->pretreatment(curr_argv, argv_end, pr);
+                        // For pretreat, the result of pretreat is the next parameter.
+                    }
+                    else
+                    {
+                        // Next parameter
+                        ++curr_argv;
+                    }
+                }
+            }
+            else
+            {
+                pr.emplace_back_unchecked(argv_str, nullptr, ::uwvm2::utils::cmdline::parameter_parsing_results_type::arg);
+
+                // Next parameter
+                ++curr_argv;
+            }
+        }
+
+        // wasm_file_ppos - 1u is always valid and not memory safe
+        // ...   "--run" (end)         "wasm file name" ...
+        // ... wasm_file_ppos - 1u      wasm_file_ppos  ...
+        auto const end_pos{wasm_file_ppos ? wasm_file_ppos - 1u : pr.end()};
+
+        // Checking for wrong parameters vs. duplicates
+        {
+            // Here, as an entire output, the mutex needs to be controlled uniformly.
+            // There are no unspecified external calls that make the mutex deadlock.
+
+            // No copies will be made here.
+            auto u8log_output_osr{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+            // Add raii locks while unlocking operations
+            ::fast_io::operations::decay::stream_ref_decay_lock_guard u8log_output_lg{
+                ::fast_io::operations::decay::output_stream_mutex_ref_decay(u8log_output_osr)};
+            // No copies will be made here.
+            auto u8log_output_ul{::fast_io::operations::decay::output_stream_unlocked_ref_decay(u8log_output_osr)};
+
+            bool shouldreturn{};
+
+            for(auto curr_pr{pr.begin() + 1u}; curr_pr != end_pos; ++curr_pr)
+            {
+                if(curr_pr->type == ::uwvm2::utils::cmdline::parameter_parsing_results_type::invalid_parameter) [[unlikely]]
+                {
+                    shouldreturn = true;
+                    ::fast_io::io::perr(u8log_output_ul,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                        u8"[error] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"invalid parameter: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                        curr_pr->str);
+
+                    // Finding the most similar parameters
+                    ::uwvm2::utils::container::u8string_view f_test_str{};
+
+                    ::std::size_t const str_size{curr_pr->str.size()};
+
+                    // Assumed size facilitates multiplicative optimization
+                    constexpr ::std::size_t smax{::std::numeric_limits<::std::size_t>::max() / 4uz};
+                    [[assume(str_size < smax)]];
+
+                    // First time variance requirement within 40%
+                    ::std::size_t const test_size{str_size * 4uz / 10uz};
+                    ::std::size_t f_test_size{test_size};
+
+                    for(auto const& j: ::uwvm2::uwvm::cmdline::parameter_lookup_table)
+                    {
+                        if(j.str.size() < str_size - f_test_size || j.str.size() > str_size + f_test_size)
+                        {
+                            // When the string size difference is already greater than the editable distance difference, just skip the
+                            continue;
+                        }
+
+                        // Maximum stack size that will hit
+                        constexpr ::std::size_t shortest_path_stack_size{parameter_max_name_size + parameter_max_name_size * 4uz / 10uz + 1uz};
+
+                        // shortest_path_stack_size is larger than the maximum test size to ensure that there is no stack overflow.
+
+                        // Addition may overflow, need to check size
+                        static_assert(shortest_path_stack_size > parameter_max_name_size, "addition overflow");
+
+                        // Calculate the shortest path distance
+                        if(auto const dp_res{::uwvm2::utils::cmdline::shortest_path<shortest_path_stack_size>(curr_pr->str.data(),
+                                                                                                              curr_pr->str.size(),
+                                                                                                              j.str.data(),
+                                                                                                              j.str.size())};
+                           dp_res <= test_size)
+                        {
+                            f_test_str = j.str;
+                            f_test_size = dp_res;
+                        }
+                    }
+
+                    if(f_test_str.empty())
+                    {
+                        // The most similar parameters were not found
+                        ::fast_io::io::perr(u8log_output_ul, ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL), u8"\n");
+                    }
+                    else
+                    {
+                        // Output the most similar parameter
+                        ::fast_io::io::perr(u8log_output_ul,
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                            u8" (did you mean: ",
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_GREEN),
+                                            f_test_str,
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                            u8")",
+                                            ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                            u8"\n");
+                    }
+                }
+                else if(curr_pr->type == ::uwvm2::utils::cmdline::parameter_parsing_results_type::duplicate_parameter) [[unlikely]]
+                {
+                    shouldreturn = true;
+                    ::fast_io::io::perr(u8log_output_ul,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                        u8"[error] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"duplicate parameter: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                        curr_pr->str,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                        u8"\n");
+                }
+            }
+
+            if(shouldreturn) [[unlikely]]
+            {
+                ::fast_io::io::perrln(u8log_output_ul);
+                return parsing_return_val::returnm1;
+            }
+
+            // Here, guard will perform destructors.
+        }
+
+#if defined(UWVM_IMPORT_ROSV2)
+        // Offline review must be classified before options that can load native
+        // code, start an effectful sink or return early. Tokens following --run
+        // are guest arguments and never select this host operation.
+        bool offline_scene_review{};
+        for(auto item=pr.begin()+1u;item!=end_pos;++item)
+            offline_scene_review|=item->para==::std::addressof(params::ros_scene_dump_effective_policy);
+        if(offline_scene_review)
+        {
+            bool invalid=wasm_file_ppos!=nullptr||end_pos[-1].para!=::std::addressof(params::ros_scene_dump_effective_policy);
+            for(auto item=pr.begin()+1u;item!=end_pos;++item)
+                if(auto p=item->para;p!=nullptr)
+                    invalid|=p->cate!=::uwvm2::utils::cmdline::categorization::ros_scene||
+                        p==::std::addressof(params::ros_scene_check);
+            if(invalid)
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                    u8"uwvm: [error] --ros-scene-dump-effective-policy requires a final, scene-only offline command; execution and other early exits are unavailable.");
+                return parsing_return_val::returnm1;
+            }
+        }
+#endif
+#if defined(UWVM_IMPORT_ROSV2) && defined(UWVM_SUPPORT_PRELOAD_DL)
+        // ROSv2 owns a fixed VM process boundary. Detect both option orders and
+        // aliases before any native constructor, signature check or callback.
+        // A signature, warning override or platform selection cannot make an
+        // in-process native driver compatible with that boundary.
+        bool scene_requested{}, native_library_requested{};
+        for(auto current{pr.begin()+1u};current!=end_pos;++current)
+        {
+            scene_requested|=current->para==::std::addressof(::uwvm2::uwvm::cmdline::params::ros_scene_create);
+            native_library_requested|=current->para==::std::addressof(::uwvm2::uwvm::cmdline::params::wasm_register_dl);
+        }
+        if(scene_requested&&native_library_requested)
+        {
+            ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                u8"uwvm: [error] ROSv2 requires process-isolated native drivers; --wasm-register-dl cannot be combined with --ros-scene-create. "
+                u8"Use an explicitly confined external provider. (rosv2-native-isolation)");
+            return parsing_return_val::returnm1;
+        }
+#endif
+
+        // Resolve the complete feature policy before ANY Wasm preload parses
+        // declarations. Baselines and explicit overrides compose in either order;
+        // a late disable must not leave an earlier preload admitted more broadly.
+        for(auto current{pr.begin() + 1u}; current != end_pos; ++current)
+        {
+            if(!::uwvm2::uwvm::cmdline::params::is_wasm_feature_parameter(current->para)) { continue; }
+            if(current->para->handle(pr.begin(), current, pr.end()) != ::uwvm2::utils::cmdline::parameter_return_type::def)
+            { return parsing_return_val::returnm1; }
+        }
+
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+        // Select driver verification before ANY preload constructor, regardless
+        // of CLI option order. This never authorizes a Guest-controlled dlopen.
+        for(auto current{pr.begin()+1u};current!=end_pos;++current)
+        {
+            if(current->para!=::std::addressof(::uwvm2::uwvm::cmdline::params::driver_verify))continue;
+            auto certificate=current+1u;
+            using kind=::uwvm2::utils::cmdline::parameter_parsing_results_type;
+            if(certificate==end_pos || certificate->type!=kind::arg || certificate->str.empty())
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,u8"uwvm: [error] --wasm-driver-verify requires a trusted PEM signer certificate");
+                return parsing_return_val::returnm1;
+            }
+            if(auto error=::uwvm2::utils::security::trusted_driver::process_verifier.select(
+                reinterpret_cast<char const*>(certificate->str.data())))
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,u8"uwvm: [error] driver verification: ",
+                    ::fast_io::mnp::code_cvt(::fast_io::mnp::os_c_str(error)));
+                return parsing_return_val::returnm1;
+            }
+            certificate->type=kind::occupied_arg;
+        }
+#endif
+        // Register all explicitly selected secure modules before ANY preload
+        // callback. Unselected modules retain their ordinary loading behavior.
+        bool secure_status_requested{};
+        bool secure_help_requested{};
+        for(auto current{pr.begin() + 1u}; current != end_pos; ++current)
+        {
+            if(current->para != ::std::addressof(::uwvm2::uwvm::cmdline::params::secure)) { continue; }
+            auto subcommand{current + 1u};
+            using kind = ::uwvm2::utils::cmdline::parameter_parsing_results_type;
+            if(subcommand == end_pos || subcommand->type != kind::arg)
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                    u8"uwvm: --secure requires a subcommand; use --secure help.");
+                return parsing_return_val::returnm1;
+            }
+            subcommand->type = kind::occupied_arg;
+            if(subcommand->str == u8"help") { secure_help_requested = true; continue; }
+            if(subcommand->str == u8"status") { secure_status_requested = true; continue; }
+            bool const named_module{subcommand->str == u8"named-module"};
+            if(subcommand->str != u8"module" && !named_module)
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                    u8"uwvm: unknown --secure subcommand; use --secure help.");
+                return parsing_return_val::returnm1;
+            }
+            auto module{subcommand + 1u};
+            if(module == end_pos || module->type != kind::arg || module->str.empty())
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                    u8"uwvm: --secure module requires <wasm-path> <protected-policy-path>.");
+                return parsing_return_val::returnm1;
+            }
+            auto policy{module + 1u};
+            if(policy == end_pos || policy->type != kind::arg || policy->str.empty())
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                    u8"uwvm: --secure module requires <wasm-path> <protected-policy-path>.");
+                return parsing_return_val::returnm1;
+            }
+            ::std::string_view expected_identity{};
+            if(named_module)
+            {
+                auto identity{policy + 1u};
+                if(identity == end_pos || identity->type != kind::arg || identity->str.empty())
+                {
+                    ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                        u8"uwvm: --secure named-module requires <wasm-path> <protected-policy-path> <expected-id>.");
+                    return parsing_return_val::returnm1;
+                }
+                identity->type = kind::occupied_arg;
+                expected_identity = ::std::string_view{reinterpret_cast<char const*>(identity->str.cbegin()), identity->str.size()};
+            }
+            module->type = kind::occupied_arg;
+            policy->type = kind::occupied_arg;
+            auto selected{::uwvm2::utils::security::wsea::select_module(
+                ::std::string_view{reinterpret_cast<char const*>(module->str.cbegin()), module->str.size()},
+                ::std::string_view{reinterpret_cast<char const*>(policy->str.cbegin()), policy->str.size()}, expected_identity)};
+            if(!selected)
+            {
+                ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                    u8"uwvm: [", ::fast_io::mnp::code_cvt(::fast_io::mnp::os_c_str(selected.code)), u8"] DENIED: ",
+                    ::fast_io::mnp::code_cvt(::fast_io::mnp::os_c_str(selected.message)));
+                return parsing_return_val::returnm1;
+            }
+        }
+        if(secure_help_requested)
+        {
+            ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                u8"--secure module <wasm-path> <protected-policy-path>\n"
+                u8"  Bind this path to the only module identity authorized by a single-rule policy. Repeat for more modules.\n"
+                u8"--secure named-module <wasm-path> <protected-policy-path> <expected-id>\n"
+                u8"  Bind this path to an explicit module identity when sharing a policy between publishers/modules.\n"
+                u8"  Relative paths are normalized against the current directory. Selected modules fail closed.\n"
+                u8"--secure status\n  Print the configured secure-module status and exit.\n"
+                u8"--secure help\n  Print this help and exit.\n"
+                u8"Unselected WASM modules retain ordinary loading behavior.");
+            return parsing_return_val::return0;
+        }
+        if(secure_status_requested)
+        {
+            ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                ::fast_io::mnp::code_cvt(::fast_io::mnp::os_c_str(::uwvm2::utils::security::wsea::status_message())));
+            auto const details{::uwvm2::utils::security::wsea::status_details()};
+            ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                ::fast_io::mnp::code_cvt(::fast_io::mnp::os_c_str(details.c_str())));
+            return parsing_return_val::return0;
+        }
+
+        // Call the function corresponding to each parameter
+        {
+            bool needexit{};
+            bool needterminal{};
+
+            for(auto curr_pr{pr.begin() + 1u}; curr_pr != end_pos; ++curr_pr)
+            {
+                auto const cp{curr_pr->para};
+
+                if(cp == nullptr || ::uwvm2::uwvm::cmdline::params::is_wasm_feature_parameter(cp))
+                {
+                    // nonparametric
+                    continue;
+                }
+
+                if(auto const cb{cp->handle}; cb != nullptr)
+                {
+                    ::uwvm2::utils::cmdline::parameter_return_type res;  // No initialization necessary
+
+                    res = cb(pr.begin(), curr_pr, pr.end());
+
+                    switch(res)
+                    {
+                        case ::uwvm2::utils::cmdline::parameter_return_type::def:
+                        {
+                            break;
+                        }
+                        case ::uwvm2::utils::cmdline::parameter_return_type::return_m1_imme:
+                        {
+                            return parsing_return_val::returnm1;
+                        }
+                        case ::uwvm2::utils::cmdline::parameter_return_type::return_imme:
+                        {
+                            return parsing_return_val::return0;
+                        }
+                        case ::uwvm2::utils::cmdline::parameter_return_type::return_soon:
+                        {
+                            needexit = true;
+                            break;
+                        }
+                        case ::uwvm2::utils::cmdline::parameter_return_type::err_imme:
+                        {
+                            ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                                u8"uwvm: [error] command-line callback rejected ", curr_pr->str);
+                            ::uwvm2::uwvm::io::fast_exit(::uwvm2::uwvm::io::diagnostic_exit_status::invalid_option);
+                        }
+                        case ::uwvm2::utils::cmdline::parameter_return_type::err_soon:
+                        {
+                            ::fast_io::io::perrln(::uwvm2::uwvm::io::u8log_output,
+                                u8"uwvm: [error] command-line callback rejected ", curr_pr->str);
+                            needterminal = true;
+                            break;
+                        }
+                        [[unlikely]] default:
+                        {
+#if (defined(_DEBUG) || defined(DEBUG)) && defined(UWVM_ENABLE_DETAILED_DEBUG_CHECK)
+                            ::uwvm2::utils::debug::trap_and_inform_bug_pos();
+#endif
+                            ::std::unreachable();  // A correct implementation will not show any other results, and if it does, the behavior is undefined.
+                        }
+                    }
+                }
+            }
+
+            if(needterminal) [[unlikely]] { ::uwvm2::uwvm::io::fast_exit(::uwvm2::uwvm::io::diagnostic_exit_status::invalid_option); }
+
+            if(needexit) [[unlikely]] { return parsing_return_val::returnm1; }
+        }
+
+        // Infer an implicit run tail when --run/-- is absent, so trailing free arguments become the wasm path and argv.
+        if(wasm_file_ppos == nullptr)
+        {
+            using parameter_type = ::uwvm2::utils::cmdline::parameter_parsing_results_type;
+
+            auto const pr_begin{pr.begin()};
+            auto const pr_end{pr.end()};
+
+            auto implicit_run_begin{pr_end};
+            for(auto curr_pr{pr_end}; static_cast<::std::size_t>(curr_pr - pr_begin) > 1uz;)
+            {
+                --curr_pr;
+                if(curr_pr->type != parameter_type::arg) { break; }
+                implicit_run_begin = curr_pr;
+            }
+
+            if(implicit_run_begin != pr_end)
+            {
+                wasm_file_ppos = implicit_run_begin;
+                for(auto curr_pr{implicit_run_begin}; curr_pr != pr_end; ++curr_pr) { curr_pr->type = parameter_type::occupied_arg; }
+            }
+        }
+
+        // Check for unmarked arg
+        {
+            // Here, as an entire output, the mutex needs to be controlled uniformly.
+            // There are no unspecified external calls that make the mutex deadlock.
+
+            // No copies will be made here.
+            auto u8log_output_osr{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+            // Add raii locks while unlocking operations
+            ::fast_io::operations::decay::stream_ref_decay_lock_guard u8log_output_lg{
+                ::fast_io::operations::decay::output_stream_mutex_ref_decay(u8log_output_osr)};
+            // No copies will be made here.
+            auto u8log_output_ul{::fast_io::operations::decay::output_stream_unlocked_ref_decay(u8log_output_osr)};
+
+            bool shouldreturn{};
+
+            for(auto curr_pr{pr.begin() + 1u}; curr_pr != end_pos; ++curr_pr)
+            {
+                if(curr_pr->type == ::uwvm2::utils::cmdline::parameter_parsing_results_type::arg) [[unlikely]]
+                {
+                    shouldreturn = true;
+
+                    ::fast_io::io::perr(u8log_output_ul,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                        u8"[error] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"invalid option: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                        curr_pr->str,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL),
+                                        u8"\n");
+                }
+            }
+
+            if(shouldreturn) [[unlikely]]
+            {
+                ::fast_io::io::perrln(u8log_output_ul);
+                return parsing_return_val::returnm1;
+            }
+        }
+
+#if defined(UWVM_IMPORT_ROS1) || defined(UWVM_IMPORT_ROS2)
+        if(::uwvm2::uwvm::imported::ros::policy_configured && wasm_file_ppos == nullptr)
+        {
+            if(auto result{::uwvm2::uwvm::imported::ros::validate_loaded_policy(false)}; !result)
+            { ::uwvm2::uwvm::imported::ros::print_policy_error(result); return parsing_return_val::returnm1; }
+            if(::uwvm2::uwvm::imported::ros::diagnostic_only())
+            {
+                return ::uwvm2::uwvm::imported::ros::dump_effective_policy() ? parsing_return_val::return0 : parsing_return_val::returnm1;
+            }
+        }
+#endif
+#if defined(UWVM_SUPPORT_PRELOAD_DL)
+        // Single driver exposure may be configured after registration. Apply
+        // the final explicit policy before execution, including shared native
+        // setters used by differently authorized aliases. Calls still recheck
+        // the immediate driver's policy; this grants no API or resource right.
+        ::uwvm2::uwvm::wasm::loader::refresh_preloaded_dl_wasip1_host_api();
+#endif
+        return parsing_return_val::def;
+    }
+}
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

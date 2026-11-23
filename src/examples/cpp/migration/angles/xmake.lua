@@ -1,0 +1,11 @@
+set_project("angles")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("angles")
+    set_kind("binary")
+    set_language("cpp")
+    set_wros_profile({std = "c++20"})
+    add_files("main.cpp")
+    set_wros_test_queries("abi")
+    add_wros_tests("int", "aot")
+target_end()

@@ -1,0 +1,262 @@
+/*************************************************************
+ * UlteSoft WebAssembly Virtual Machine (Version 2)          *
+ * Copyright (c) 2025-present UlteSoft. All rights reserved. *
+ * Licensed under the APL-2.0 License (see LICENSE file).    *
+ *************************************************************/
+
+/**
+ * @author      MacroModel
+ * @version     2.0.0
+ * @date        2026-06-03
+ * @copyright   APL-2.0 License
+ */
+
+/****************************************
+ *  _   _ __        ____     __ __  __  *
+ * | | | |\ \      / /\ \   / /|  \/  | *
+ * | | | | \ \ /\ / /  \ \ / / | |\/| | *
+ * | |_| |  \ V  V /    \ V /  | |  | | *
+ *  \___/    \_/\_/      \_/   |_|  |_| *
+ *                                      *
+ ****************************************/
+
+#pragma once
+
+#ifndef UWVM_MODULE
+// std
+# include <memory>
+// macro
+# include <uwvm2/utils/macro/push_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_push_macro.h>
+# include <uwvm2/uwvm/runtime/macro/push_macros.h>
+// import
+# include <fast_io.h>
+# include <uwvm2/utils/container/impl.h>
+# include <uwvm2/utils/ansies/impl.h>
+# include <uwvm2/utils/cmdline/impl.h>
+# include <uwvm2/uwvm/io/impl.h>
+# include <uwvm2/uwvm/utils/ansies/impl.h>
+# include <uwvm2/uwvm/cmdline/impl.h>
+# include <uwvm2/uwvm/cmdline/params/impl.h>
+# include <uwvm2/uwvm/runtime/runtime_mode/impl.h>
+#endif
+
+#ifndef UWVM_MODULE_EXPORT
+# define UWVM_MODULE_EXPORT
+#endif
+
+UWVM_MODULE_EXPORT namespace uwvm2::uwvm::cmdline::params::details
+{
+#if defined(UWVM_RUNTIME_LLVM_JIT)
+# if defined(UWVM_MODULE)
+    extern "C++" UWVM_GNU_COLD
+# else
+    UWVM_GNU_COLD inline constexpr
+# endif
+        ::uwvm2::utils::cmdline::parameter_return_type runtime_llvm_jit_policy_callback([[maybe_unused]] ::uwvm2::utils::cmdline::parameter_parsing_results *
+                                                                                            para_begin,
+                                                                                        ::uwvm2::utils::cmdline::parameter_parsing_results * para_curr,
+                                                                                        ::uwvm2::utils::cmdline::parameter_parsing_results * para_end) noexcept
+    {
+        constexpr auto print_usage_error{
+            []() constexpr noexcept
+            {
+#if defined(UWVM2_USE_HUGE_FAST_IO_CPO_OUTPUT)
+                ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Usage: ",
+                                    ::uwvm2::utils::cmdline::print_usage(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_policy),
+                                    u8"\n\n");
+#else
+                {
+                    // Keep one diagnostic lock, but bound each CPO's argument pack in the default build.
+                    auto output_ref{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+                    ::fast_io::operations::decay::stream_ref_decay_lock_guard output_lock{
+                        ::fast_io::operations::decay::output_stream_mutex_ref_decay(output_ref)};
+                    auto output_unlocked{::fast_io::operations::decay::output_stream_unlocked_ref_decay(output_ref)};
+                    ::fast_io::io::perr(output_unlocked,
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                        u8"uwvm: ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                        u8"[error] ",
+                                        ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                        u8"Usage: ");
+                    ::fast_io::io::perr(output_unlocked,
+                                        ::uwvm2::utils::cmdline::print_usage(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_policy),
+                                        u8"\n\n");
+                }
+#endif
+            }};
+
+        if(::uwvm2::uwvm::runtime::runtime_mode::runtime_llvm_jit_full_policy_existed) [[unlikely]]
+        {
+#if defined(UWVM2_USE_HUGE_FAST_IO_CPO_OUTPUT)
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                u8"[error] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Conflicting LLVM AOT policy parameters: \"",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                u8"--runtime-llvm-jit-policy",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"\" conflicts with --runtime-llvm-jit-full-policy.\n"
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                u8"[info]  ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Use the high-level policy preset or the full-module policy, not both.\n\n",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+#else
+            {
+                // Keep one diagnostic lock, but bound each CPO's argument pack in the default build.
+                auto output_ref{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+                ::fast_io::operations::decay::stream_ref_decay_lock_guard output_lock{
+                    ::fast_io::operations::decay::output_stream_mutex_ref_decay(output_ref)};
+                auto output_unlocked{::fast_io::operations::decay::output_stream_unlocked_ref_decay(output_ref)};
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Conflicting LLVM AOT policy parameters: \"");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    u8"--runtime-llvm-jit-policy",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\" conflicts with --runtime-llvm-jit-full-policy.\n"
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_LT_GREEN),
+                                    u8"[info]  ");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Use the high-level policy preset or the full-module policy, not both.\n\n",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL));
+            }
+#endif
+            return ::uwvm2::utils::cmdline::parameter_return_type::return_m1_imme;
+        }
+
+        auto currp1{para_curr + 1u};
+        if(currp1 == para_end || currp1->type != ::uwvm2::utils::cmdline::parameter_parsing_results_type::arg) [[unlikely]]
+        {
+            print_usage_error();
+            return ::uwvm2::utils::cmdline::parameter_return_type::return_m1_imme;
+        }
+
+        currp1->type = ::uwvm2::utils::cmdline::parameter_parsing_results_type::occupied_arg;
+        auto const currp1_str{currp1->str};
+
+        using runtime_llvm_jit_policy_t = ::uwvm2::uwvm::runtime::runtime_mode::runtime_llvm_jit_policy_t;
+        if(currp1_str == u8"debug") { ::uwvm2::uwvm::runtime::runtime_mode::global_runtime_llvm_jit_policy = runtime_llvm_jit_policy_t::debug; }
+        else if(currp1_str == u8"default") { ::uwvm2::uwvm::runtime::runtime_mode::global_runtime_llvm_jit_policy = runtime_llvm_jit_policy_t::default_policy; }
+        else if(currp1_str == u8"fast-compile")
+        {
+            ::uwvm2::uwvm::runtime::runtime_mode::global_runtime_llvm_jit_policy = runtime_llvm_jit_policy_t::fast_compile;
+        }
+        else if(currp1_str == u8"balanced") { ::uwvm2::uwvm::runtime::runtime_mode::global_runtime_llvm_jit_policy = runtime_llvm_jit_policy_t::balanced; }
+        else if(currp1_str == u8"max") { ::uwvm2::uwvm::runtime::runtime_mode::global_runtime_llvm_jit_policy = runtime_llvm_jit_policy_t::max; }
+        else [[unlikely]]
+        {
+#if defined(UWVM2_USE_HUGE_FAST_IO_CPO_OUTPUT)
+            ::fast_io::io::perr(::uwvm2::uwvm::io::u8log_output,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                u8"uwvm: ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                u8"[error] ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"Invalid LLVM AOT policy: \"",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                currp1_str,
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8"\". Expected ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                u8"debug",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8", ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                u8"default",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8", ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                u8"fast-compile",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8", ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                u8"balanced",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8", or ",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                u8"max",
+                                ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                u8". Usage: ",
+                                ::uwvm2::utils::cmdline::print_usage(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_policy),
+                                u8"\n\n");
+#else
+            {
+                // Bound each CPO argument pack while holding one lock for the complete diagnostic.
+                // The opt-in branch above retains the original single-call output verbatim.
+                auto output_ref{::fast_io::operations::output_stream_ref(::uwvm2::uwvm::io::u8log_output)};
+                ::fast_io::operations::decay::stream_ref_decay_lock_guard output_lock{
+                    ::fast_io::operations::decay::output_stream_mutex_ref_decay(output_ref)};
+                auto output_unlocked{::fast_io::operations::decay::output_stream_unlocked_ref_decay(output_ref)};
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RST_ALL_AND_SET_WHITE),
+                                    u8"uwvm: ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_RED),
+                                    u8"[error] ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"Invalid LLVM AOT policy: \"");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    currp1_str,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8"\". Expected ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    u8"debug");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8", ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    u8"default",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8", ");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    u8"fast-compile",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8", ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    u8"balanced");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8", or ",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_CYAN),
+                                    u8"max",
+                                    ::uwvm2::uwvm::utils::ansies::diagnostic_color(UWVM_COLOR_U8_WHITE),
+                                    u8". Usage: ");
+                ::fast_io::io::perr(output_unlocked,
+                                    ::uwvm2::utils::cmdline::print_usage(::uwvm2::uwvm::cmdline::params::runtime_llvm_jit_policy),
+                                    u8"\n\n");
+            }
+#endif
+            return ::uwvm2::utils::cmdline::parameter_return_type::return_m1_imme;
+        }
+
+        return ::uwvm2::utils::cmdline::parameter_return_type::def;
+    }
+#endif
+}  // namespace uwvm2::uwvm::cmdline::params::details
+
+#ifndef UWVM_MODULE
+// macro
+# include <uwvm2/uwvm/runtime/macro/pop_macros.h>
+# include <uwvm2/uwvm/utils/ansies/uwvm_color_pop_macro.h>
+# include <uwvm2/utils/macro/pop_macros.h>
+#endif

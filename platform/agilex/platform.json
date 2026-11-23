@@ -1,0 +1,44 @@
+{
+  "id": "agilex",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "scout_msgs/ScoutBmsStatus",
+    "format": "ros1",
+    "fields": [
+      {
+        "name": "read_soc",
+        "field": "soc",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_battery_voltage",
+        "field": "battery_voltage",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_battery_current",
+        "field": "battery_current",
+        "type": "f64",
+        "indexed": false
+      },
+      {
+        "name": "read_alarm_status_1",
+        "field": "alarm_status_1",
+        "type": "u8",
+        "indexed": false
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/agilexrobotics/scout_ros/blob/01e07881cdc566c3a657e288c59a75577992d13e/scout_msgs/msg/ScoutBmsStatus.msg",
+        "revision": "01e07881cdc566c3a657e288c59a75577992d13e",
+        "path": "scout_msgs/msg/ScoutBmsStatus.msg",
+        "sha256": "a6c5a324919b3d94502164c70c1be34304ca7c6f2107c9b0d29459bb8f77909d"
+      }
+    ]
+  }
+}

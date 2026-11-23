@@ -1,0 +1,19 @@
+{
+  "ros2": {
+    "url": "https://github.com/unitreerobotics/unitree_ros2",
+    "version": "v0.3.0",
+    "commit": "66ae09858245ac3d2231c0cc209e36a88f8d7d03",
+    "source_root": "cyclonedds_ws/src/unitree",
+    "packages": ["unitree_api", "unitree_go", "unitree_hg"],
+    "license": "upstream/ros2/LICENSE",
+    "changes": "The .msg, package.xml and CMakeLists.txt inputs are unmodified."
+  },
+  "sdk2": {
+    "url": "https://github.com/unitreerobotics/unitree_sdk2",
+    "version": "2.0.2",
+    "commit": "811bc77cdcffb4691d4b40172f9a57857bf6cffb",
+    "source_root": "include/unitree/idl",
+    "license": "upstream/sdk2/LICENSE",
+    "changes": "Unmodified public Go2/HG LowState C++ headers and their nested message headers. Go bindings are generated from the ROS 2 .msg corpus."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "id": "franka",
+  "module": "uwvm_ros_v2",
+  "abi_major": 2,
+  "capabilities": [],
+  "observation": {
+    "type": "franka_msgs/Elbow",
+    "format": "cdr",
+    "fields": [
+      {
+        "name": "read_position",
+        "field": "position",
+        "type": "f64",
+        "indexed": true
+      },
+      {
+        "name": "read_desired_position",
+        "field": "desired_position",
+        "type": "f64",
+        "indexed": true
+      },
+      {
+        "name": "read_commanded_position",
+        "field": "commanded_position",
+        "type": "f64",
+        "indexed": true
+      },
+      {
+        "name": "read_commanded_velocity",
+        "field": "commanded_velocity",
+        "type": "f64",
+        "indexed": true
+      },
+      {
+        "name": "read_commanded_acceleration",
+        "field": "commanded_acceleration",
+        "type": "f64",
+        "indexed": true
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/frankarobotics/franka_ros2/blob/4acc05c01ebfcdf916ee6b3df966df0ad7b2f9ec/franka_msgs/msg/Elbow.msg",
+        "revision": "4acc05c01ebfcdf916ee6b3df966df0ad7b2f9ec",
+        "path": "franka_msgs/msg/Elbow.msg",
+        "sha256": "3bdb18227176ab8f368f00b47ee06aa843bd2df4cd60e40034bf6b69d42f496e"
+      }
+    ]
+  },
+  "guides": [
+    "cdr.md",
+    "cdr.zh.md"
+  ]
+}

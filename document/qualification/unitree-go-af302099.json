@@ -1,0 +1,91 @@
+{
+  "source_commit": "af3020996179781215e3f76add6c5adb6482c7c0",
+  "platform": "unitree",
+  "language": "Go",
+  "compiler": "wrgo",
+  "host": "linux-x86_64",
+  "upstream_git": "49860cf92a9a3ba434d2bc393faaefabe48d181e",
+  "vm_git": "576aa42918eaa3baca12ca030e3c55482cb524ca",
+  "vm_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+  "isolation": {
+    "offline": true,
+    "parent_and_child_memory_max": 68719476736,
+    "parent_and_child_swap_max": 0
+  },
+  "archives": {
+    "go-asm": {
+      "bytes": 6288457,
+      "compressed_bytes": 3047420,
+      "compressed_sha256": "893de23e8a6e28072a0c985120296b0cd80e35432ce9ee75b3999e2e42e910b3",
+      "format": "tar.xz",
+      "member": "asm",
+      "path": "bin/packages/linux-x86_64/go/asm-893de23e8a6e28072a0c.tar.xz",
+      "sha256": "7e3c7a0ceca56852b77b7bc0467998c6d5cb7f67b00de6fc9a516b7f8c654936"
+    },
+    "go-compile": {
+      "bytes": 28139575,
+      "compressed_bytes": 12833368,
+      "compressed_sha256": "c2176c3d5512b7e60a6d96f35770cb7ceb619b3e69370df5e72ab7ee872d38ef",
+      "format": "tar.xz",
+      "member": "compile",
+      "path": "bin/packages/linux-x86_64/go/compile-c2176c3d5512b7e60a6d.tar.xz",
+      "sha256": "f87bf970700c71a5f251a7adf4912a1c391c10aba84158109bb17a6ad0668416"
+    },
+    "go-link": {
+      "bytes": 8660113,
+      "compressed_bytes": 4438772,
+      "compressed_sha256": "61ceebb5e13d4851b043ec779be48b7273783f5b9f360776127ea66489901091",
+      "format": "tar.xz",
+      "member": "link",
+      "path": "bin/packages/linux-x86_64/go/link-61ceebb5e13d4851b043.tar.xz",
+      "sha256": "22632f3e008b5e279c37a4e300e997b0955efbf0db484487c52f9082de7646dc"
+    },
+    "go-wrgo": {
+      "bytes": 3339591,
+      "compressed_bytes": 1796732,
+      "compressed_sha256": "42eefef7f260d2f49c81d4d2f5a82876902fb63c91b7956e45de2ff53a1caa03",
+      "format": "tar.xz",
+      "member": "wrgo",
+      "path": "bin/packages/linux-x86_64/go/wrgo-42eefef7f260d2f49c81.tar.xz",
+      "sha256": "70119cf8037aae3b8ad368ebc50b4e98897836075ab34788faf70a0520a33458"
+    }
+  },
+  "external_guest_sha256": {
+    "go-runtime": {
+      "direct": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+      "xmake": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d"
+    },
+    "go-binary-fixture": {
+      "direct": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d",
+      "xmake": "1fd80d8484257439aa99fbba00a56f1eccc46422f23fda3853d844d0911e644d"
+    }
+  },
+  "executions": {
+    "go-runtime": {
+      "status": {
+        "direct-build": 0,
+        "xmake-test": 0,
+        "xmake-build": 0,
+        "direct-int": 0,
+        "direct-aot": 0
+      },
+      "log_sha256": "e25e4a32fcb601b3d67eaee9bd9d1bf5d3449b2332d6501f5bb0474f819bc781"
+    },
+    "go-binary-fixture": {
+      "status": {
+        "direct-build": 0,
+        "xmake-test": 0,
+        "xmake-build": 0,
+        "direct-int": 0,
+        "direct-aot": 0
+      },
+      "log_sha256": "eefc140814025c7f1757f5e99b366baab13243e2e7904068d8ae8aa93bcb1eb2"
+    }
+  },
+  "scope": "Local frozen source install and separate replay using the packages produced from that source. Direct Go2 LowState project and Xmake build/test passed INT and LLVM AOT.",
+  "public_install": "Pending clean installation from GitHub with the new package registry.",
+  "limitations": [
+    "Current Go target uses 64-bit language pointers and 32-bit memory indices.",
+    "Stack segment tagging is implemented. Full memory instrumentation, wasm64, EH and thread combinations need distinct qualifications."
+  ]
+}

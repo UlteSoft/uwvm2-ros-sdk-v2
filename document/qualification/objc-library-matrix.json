@@ -1,0 +1,33 @@
+{
+  "schema": 2,
+  "language": "Objective-C/Objective-C++",
+  "status": "requalification-in-progress",
+  "vm_commit": "cdabcbf23df3391d6778176385a7bcdaa506b749",
+  "vm_tree": "29a3049f074a079531ab776fa3bebb3b8c43af6a",
+  "acceptance_rule": "Credit requires a fresh run on the recorded VM tree and host executable, matched by guest and memory-owner SHA-256.",
+  "previous_runtime_results": "withdrawn",
+  "github_install_acceptance": "pending",
+  "source_manifest": "src/qualification/objc/upstreams.json",
+  "isolation": {
+    "parent_and_child_memory_bytes": 68719476736,
+    "parent_and_child_swap_bytes": 0,
+    "offline_guest_execution": true
+  },
+  "hosts": {
+    "x86_64": {
+      "status": "pending"
+    },
+    "i686": {
+      "status": "pending"
+    },
+    "aarch64": {
+      "status": "pending"
+    },
+    "arm": {
+      "status": "pending"
+    },
+    "armhf": {
+      "status": "pending"
+    }
+  }
+}

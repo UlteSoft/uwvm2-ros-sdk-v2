@@ -1,0 +1,11 @@
+set_project("franka-gripper-spine")
+includes(path.join(os.getenv("UWVM_ROS_SDK_ROOT"), "tools/xmake/ros.lua"))
+
+target("franka-gripper-spine")
+    set_kind("binary")
+    set_language("tinygo")
+    set_ros_platform("franka")
+    add_files("go.mod")
+    set_wros_test_queries("abi", "go-runtime")
+    add_wros_tests("int", "aot")
+target_end()

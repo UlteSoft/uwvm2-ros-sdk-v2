@@ -1,0 +1,860 @@
+{
+  "sdk_commit": "1259ec5215d7296118c1d4bdd4f1e739839adc2e",
+  "tree": "f11786c12e4eced2cf02165bc0d3e4fd76b6ec19",
+  "platform": "franka",
+  "host": "linux-x86_64",
+  "scope": "Offline external consumers of official GitHub binary selections. The Elbow wire cases cover the five two-element fields and malformed inputs.",
+  "isolation": {
+    "parent_memory_max": 68719476736,
+    "leaf_memory_max": 68719476736,
+    "parent_swap_max": 0,
+    "leaf_swap_max": 0,
+    "parent_oom_group": 0,
+    "leaf_oom_group": 1,
+    "build_network": "loopback only",
+    "temporary_storage": "project disk",
+    "wros_vm_override": false,
+    "external_xmake_or_vm": false
+  },
+  "upstream_reference": {
+    "schema_records": 137,
+    "declarations": 53,
+    "little_endian": 409,
+    "big_endian": 409,
+    "receipt_sha256": "f120cd6054fab1857ad2cf8c4ca7cf1803d8817bddfb865f05403134d8072ed6"
+  },
+  "languages": {
+    "wat": {
+      "install_mode": "binary",
+      "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+      "install_seconds": 42.561,
+      "selection_sha256": "fc6f22945bd881172e841c573c813ebbb9e06945820e6334906e6d9e8a0c8d5c",
+      "selection_files": 102,
+      "binaries": {
+        "xmake": {
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+          "bytes": 2823008
+        },
+        "uwvm2-ros": {
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "bytes": 190202464
+        },
+        "wrwat": {
+          "sha256": "f39cb97af211322990c0fcfbdb42a01b7113d3c7928fa45e9f9d0516f7b4986c",
+          "bytes": 3379368
+        }
+      },
+      "projects": {
+        "independent-elbow": {
+          "direct_wasm_sha256": "9dd47f1863c1679face1cd0643efebbb2ad8439ae20ea1af9312d665c5c57b97",
+          "bytes": 3191,
+          "imports": [],
+          "exports": [
+            "memory",
+            "read_position",
+            "read_desired_position",
+            "read_commanded_position",
+            "read_commanded_velocity",
+            "read_commanded_acceleration",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "9dd47f1863c1679face1cd0643efebbb2ad8439ae20ea1af9312d665c5c57b97"
+          ]
+        },
+        "stock": {
+          "direct_wasm_sha256": "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1",
+          "bytes": 2976,
+          "imports": [],
+          "exports": [
+            "memory",
+            "read_position",
+            "read_desired_position",
+            "read_commanded_position",
+            "read_commanded_velocity",
+            "read_commanded_acceleration",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "4bc0fa94c3f7a5a13ae74cd80fd034874cd1061ef0bd12b52a354cde2c0690b1"
+          ]
+        }
+      },
+      "source_receipt_sha256": "76aed02fd2a83f5409d489d77782506e11b19eb4fea6ef7d7f88e94432c693b1",
+      "public_default_cli": {
+        "argv": [
+          "wrwat",
+          "main.wat",
+          "-o",
+          "direct.wasm"
+        ],
+        "user_include_options": [],
+        "user_sysroot_options": [],
+        "int": true,
+        "aot": true,
+        "receipt_sha256": "1887a45b990dfb61ef90b5c62660baa3a83ea9c09788677cda56b00e35d8de4a"
+      }
+    },
+    "c": {
+      "install_mode": "binary",
+      "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+      "install_seconds": 99.34,
+      "selection_sha256": "97f3e8e5e1af5a1f814d972b4feea7a038ed8bd2e011e350522a713abfba455f",
+      "selection_files": 4660,
+      "binaries": {
+        "xmake": {
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+          "bytes": 2823008
+        },
+        "uwvm2-ros": {
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "bytes": 190202464
+        },
+        "wrc": {
+          "sha256": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+          "bytes": 94085088
+        }
+      },
+      "projects": {
+        "independent-elbow": {
+          "direct_wasm_sha256": "e75a585e51d44ed02d03a9a7206d431acbbb21bc48507a98657f707305d86676",
+          "bytes": 33104,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "e75a585e51d44ed02d03a9a7206d431acbbb21bc48507a98657f707305d86676"
+          ]
+        },
+        "stock": {
+          "direct_wasm_sha256": "72a60f0bc6ac2df9d49f219fa60cd9479ab812848c1f36e5ce638a6ed35c6910",
+          "bytes": 27596,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "72a60f0bc6ac2df9d49f219fa60cd9479ab812848c1f36e5ce638a6ed35c6910"
+          ]
+        },
+        "typed-c11": {
+          "direct_wasm_sha256": "06da10f3111f5aa5bc49795bc5b59fa200bdbed402a508fe8b747926010d23af",
+          "bytes": 66748,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "06da10f3111f5aa5bc49795bc5b59fa200bdbed402a508fe8b747926010d23af"
+          ]
+        },
+        "typed-c17": {
+          "direct_wasm_sha256": "ad824319126ac52d5b7c5285480068b1ee1ced17d7760660b73977b5371b823e",
+          "bytes": 66748,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "ad824319126ac52d5b7c5285480068b1ee1ced17d7760660b73977b5371b823e"
+          ]
+        },
+        "typed-c23": {
+          "direct_wasm_sha256": "5a02e8662544e2f851ca20210c25c4566b3c1f19772c9d460922ba09f149d65e",
+          "bytes": 66748,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "5a02e8662544e2f851ca20210c25c4566b3c1f19772c9d460922ba09f149d65e"
+          ]
+        },
+        "typed-cdr": {
+          "direct_wasm_sha256": "b099d388a0b7e897354d7eb281cf56e2d091d8fe8d146f666dde0e56d6478f27",
+          "bytes": 66748,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "b099d388a0b7e897354d7eb281cf56e2d091d8fe8d146f666dde0e56d6478f27"
+          ]
+        }
+      },
+      "source_receipt_sha256": "510ace14694696af63668346bdc8da02767a38747282da4f9bd53820d4c05428",
+      "public_default_cli": {
+        "argv": [
+          "wrc",
+          "main.c",
+          "--reactor",
+          "--export",
+          "_start",
+          "-g",
+          "-o",
+          "direct.wasm"
+        ],
+        "user_include_options": [],
+        "user_sysroot_options": [],
+        "int": true,
+        "aot": true,
+        "receipt_sha256": "1cb6af4b7d295b61ead46d7d833adc4b502ba954e799c0320eb7a50163f078b0"
+      }
+    },
+    "cpp": {
+      "install_mode": "binary",
+      "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+      "install_seconds": 95.993,
+      "selection_sha256": "421987775eb6107d5ff62e3ee019efa9ed1e04dbb24d8958f08f54d5f2729279",
+      "selection_files": 4661,
+      "binaries": {
+        "xmake": {
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+          "bytes": 2823008
+        },
+        "uwvm2-ros": {
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "bytes": 190202464
+        },
+        "wrcc": {
+          "sha256": "047cf4c51445fa967344bb16509e6646bfc2b2d1361f25dca034fb366196430d",
+          "bytes": 94085088
+        }
+      },
+      "projects": {
+        "independent-elbow": {
+          "direct_wasm_sha256": "babd05929d267461e270373e28eb67484addc6e96265762dab0f9fb1b3c21334",
+          "bytes": 34182,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "babd05929d267461e270373e28eb67484addc6e96265762dab0f9fb1b3c21334"
+          ]
+        },
+        "stock": {
+          "direct_wasm_sha256": "07b7e391c02311ea0dec801e0fda49d9efbc3bcfbbe959a6312d76690943ca63",
+          "bytes": 28127,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "07b7e391c02311ea0dec801e0fda49d9efbc3bcfbbe959a6312d76690943ca63"
+          ]
+        },
+        "typed-c++03": {
+          "direct_wasm_sha256": "c8a81cd22eb1687f58f4d5678f9205f0ae1846b9dbcd687376cbfef8827536a3",
+          "bytes": 104717,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "c8a81cd22eb1687f58f4d5678f9205f0ae1846b9dbcd687376cbfef8827536a3"
+          ]
+        },
+        "typed-c++11": {
+          "direct_wasm_sha256": "e871e5e7f8ee31685db888ebeb39dfbf0cca550d1af14abe361b0e681d1fc94b",
+          "bytes": 104720,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "e871e5e7f8ee31685db888ebeb39dfbf0cca550d1af14abe361b0e681d1fc94b"
+          ]
+        },
+        "typed-c++14": {
+          "direct_wasm_sha256": "a0b81fce9eef1ab12da9ff0be2ceaff113143d9a07823b14a82b220773bc00ac",
+          "bytes": 104720,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "a0b81fce9eef1ab12da9ff0be2ceaff113143d9a07823b14a82b220773bc00ac"
+          ]
+        },
+        "typed-c++17": {
+          "direct_wasm_sha256": "3838c29f2cbe5a6f1acecc4d07c9abfec7a6560b85f77eab7db5c9e023aec0bc",
+          "bytes": 104720,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "3838c29f2cbe5a6f1acecc4d07c9abfec7a6560b85f77eab7db5c9e023aec0bc"
+          ]
+        },
+        "typed-c++20": {
+          "direct_wasm_sha256": "13ffad20c190d6b1259b3e17dabc1602dd874381e5a9d2a48d069bbd534206ab",
+          "bytes": 104720,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "13ffad20c190d6b1259b3e17dabc1602dd874381e5a9d2a48d069bbd534206ab"
+          ]
+        },
+        "typed-c++23": {
+          "direct_wasm_sha256": "21bd021cb246555597e3e12a98deb206e80d0bc6f444c69fdee13b7eb5ccf234",
+          "bytes": 104720,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "21bd021cb246555597e3e12a98deb206e80d0bc6f444c69fdee13b7eb5ccf234"
+          ]
+        },
+        "typed-c++26": {
+          "direct_wasm_sha256": "c440d81baeccc7f618c644888d54010f6ca8f288fb77f8c4540d81701cf17717",
+          "bytes": 104720,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "c440d81baeccc7f618c644888d54010f6ca8f288fb77f8c4540d81701cf17717"
+          ]
+        },
+        "typed-c++98": {
+          "direct_wasm_sha256": "a4ba292542819b44c4493ed199531c834f4e97c7fff785273dbdc87e809c028f",
+          "bytes": 104717,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "a4ba292542819b44c4493ed199531c834f4e97c7fff785273dbdc87e809c028f"
+          ]
+        },
+        "typed-cdr": {
+          "direct_wasm_sha256": "6a33a0ee007b154f24d5f1160fd4413376ae678ad6ed65cff573f250a1519271",
+          "bytes": 104712,
+          "imports": [],
+          "exports": [
+            "memory",
+            "_start"
+          ],
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "6a33a0ee007b154f24d5f1160fd4413376ae678ad6ed65cff573f250a1519271"
+          ]
+        }
+      },
+      "source_receipt_sha256": "5c428801b6ec255970ae158d61750957a14d78106f7221f3f56256a4621a5977",
+      "public_default_cli": {
+        "argv": [
+          "wrcc",
+          "main.cpp",
+          "--reactor",
+          "--export",
+          "_start",
+          "-g",
+          "-o",
+          "direct.wasm"
+        ],
+        "user_include_options": [],
+        "user_sysroot_options": [],
+        "int": true,
+        "aot": true,
+        "receipt_sha256": "5fed58f5d28963a4db2c9f302636ff390ce26c515f3fa813d6c0ea8100910ddd",
+        "c_sdk_headers_present": false,
+        "standards": [
+          "98",
+          "03",
+          "11",
+          "14",
+          "17",
+          "20",
+          "23",
+          "26"
+        ]
+      }
+    },
+    "as": {
+      "install_mode": "binary",
+      "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+      "install_seconds": 56.951,
+      "selection_sha256": "997890e7728f36b74608118102f8e0d9b77cff098f2edc3bdeaf5626a6eeeabf",
+      "selection_files": 229,
+      "binaries": {
+        "xmake": {
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+          "bytes": 2823008
+        },
+        "uwvm2-ros": {
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "bytes": 190202464
+        },
+        "wras": {
+          "sha256": "acff8a64879c1af8f834e7e256a649ed8d9055da407b56f2484703726d0cffe5",
+          "bytes": 389
+        }
+      },
+      "projects": {
+        "independent-elbow": {
+          "direct_wasm_sha256": "0d35c2ed7979a11150ddb21049f8b8cc69a96e622f338ca347626d3e9defe7a7",
+          "bytes": 1935,
+          "imports": [],
+          "exports": {
+            "_start": 0
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "0d35c2ed7979a11150ddb21049f8b8cc69a96e622f338ca347626d3e9defe7a7"
+          ]
+        },
+        "stock": {
+          "direct_wasm_sha256": "c8422cb66522bfe541839d2ce5085cbe146aaed91c7b386ed4369c07a4c0692f",
+          "bytes": 1537,
+          "imports": [],
+          "exports": {
+            "_start": 0
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "c8422cb66522bfe541839d2ce5085cbe146aaed91c7b386ed4369c07a4c0692f"
+          ]
+        }
+      },
+      "source_receipt_sha256": "d9d552d458cca22e620768409ede67f9ac6a2ce5ed294087a69e8b0eb6579213"
+    },
+    "js": {
+      "install_mode": "binary",
+      "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+      "install_seconds": 88.184,
+      "selection_sha256": "1ded6434023a7df41627481be1fe24073456c83909b9fd7387997f0e19b36893",
+      "selection_files": 2443,
+      "binaries": {
+        "xmake": {
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+          "bytes": 2823008
+        },
+        "uwvm2-ros": {
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "bytes": 190202464
+        },
+        "wrjs": {
+          "sha256": "acff8a64879c1af8f834e7e256a649ed8d9055da407b56f2484703726d0cffe5",
+          "bytes": 389
+        }
+      },
+      "projects": {
+        "independent-elbow": {
+          "direct_wasm_sha256": "75c1756efa52b6117dd4594a9f58e4e4eaddb58058496effdda88ff5ac2b8b95",
+          "bytes": 4722330,
+          "imports": [
+            "wasi_snapshot_preview1.clock_time_get"
+          ],
+          "exports": {
+            "_start": 0,
+            "memory": 2
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "0efd3e1cf130db428c9572dc40c034c86f422e260fa8e15893721dec32169785"
+          ]
+        },
+        "stock": {
+          "direct_wasm_sha256": "722fa7f30fe5cffdbaa10e0f3e096784362b443983f716e3c63d1fd0db13a199",
+          "bytes": 4722958,
+          "imports": [
+            "wasi_snapshot_preview1.clock_time_get"
+          ],
+          "exports": {
+            "_start": 0,
+            "memory": 2
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "202f73e0cc35a1311acc94ce168c37dc21fb3478044800990d9dbbe49d6715ac"
+          ]
+        }
+      },
+      "source_receipt_sha256": "a692340c02289302b05e72ff4fe745893869715d9c14164f166be11f99661f69",
+      "retry_receipt_sha256": "7002fa561aac6b8195e81b56ea4e4fa78132a897f1f07ab5285387e6b3ac10bb"
+    },
+    "rust": {
+      "install_mode": "binary",
+      "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+      "install_seconds": 76.48,
+      "selection_sha256": "ffff261755e5e889569b3d3210fa20800d902cbb9e6a3582293852ab8cb84b72",
+      "selection_files": 956,
+      "binaries": {
+        "xmake": {
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+          "bytes": 2823008
+        },
+        "uwvm2-ros": {
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "bytes": 190202464
+        },
+        "wrrs": {
+          "sha256": "ee0e171194012efc4beb9ac4b6b29a28ce7bdd6e67d105da559b33759df049b9",
+          "bytes": 67904
+        }
+      },
+      "projects": {
+        "independent-elbow": {
+          "direct_wasm_sha256": "eba4ae316f18a201d6fff48abd61ec5ac1f10b1995001e1be522d9076446dfb5",
+          "bytes": 16914,
+          "imports": [],
+          "exports": {
+            "_start": 0,
+            "memory": 2
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "eba4ae316f18a201d6fff48abd61ec5ac1f10b1995001e1be522d9076446dfb5"
+          ]
+        },
+        "stock": {
+          "direct_wasm_sha256": "efcfb0aec17329ff422ce6ccaa4916b6289141e7d4def6ab6434fe95f47b2c93",
+          "bytes": 12356,
+          "imports": [],
+          "exports": {
+            "_start": 0,
+            "memory": 2
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "efcfb0aec17329ff422ce6ccaa4916b6289141e7d4def6ab6434fe95f47b2c93"
+          ]
+        },
+        "typed-cdr": {
+          "direct_wasm_sha256": "a59fbd869aec7a5051f473414fe1b2b52272acc9d473521a0767dbad86be9e99",
+          "bytes": 29965,
+          "imports": [],
+          "exports": {
+            "_start": 0,
+            "memory": 2
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "a59fbd869aec7a5051f473414fe1b2b52272acc9d473521a0767dbad86be9e99"
+          ]
+        }
+      },
+      "source_receipt_sha256": "6b4d8b0a816943e98985756bad370105391ed22182d3f306c90b9f2b330c67df"
+    },
+    "typescript": {
+      "install_mode": "binary",
+      "bootstrap_sha256": "d2528a986ea5018c71fd473e7b6a0a927b3890863c660d3ae63137fa5d236c4f",
+      "install_seconds": 117.327,
+      "selection_sha256": "a1a6869a1f34fa40d8b19841a88e7d4fe5769df803b8aec61c5c78f867158fa2",
+      "selection_files": 2551,
+      "binaries": {
+        "xmake": {
+          "sha256": "4075ef1b4cba7f5eb5c55a4451761ef081086bb3142e7d4b130cf9c7484e68f0",
+          "bytes": 2823008
+        },
+        "uwvm2-ros": {
+          "sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+          "bytes": 190202464
+        },
+        "wrts": {
+          "sha256": "acff8a64879c1af8f834e7e256a649ed8d9055da407b56f2484703726d0cffe5",
+          "bytes": 389
+        }
+      },
+      "projects": {
+        "independent-elbow": {
+          "direct_wasm_sha256": "a6d7de90b09f4fe41055acdf0d699ac978636017c770847c225400c2b7028b8c",
+          "bytes": 4723563,
+          "imports": [
+            "wasi_snapshot_preview1.clock_time_get"
+          ],
+          "exports": {
+            "_start": 0,
+            "memory": 2
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "372b13a783443a277c6d5d87d590e7c7a73410cd77e573682df7e895092824d0"
+          ]
+        },
+        "stock": {
+          "direct_wasm_sha256": "f9583ec3d1f0549b22de92e05ea7d4b2bc444a37b25b964e117e6a0e35442f9f",
+          "bytes": 4724271,
+          "imports": [
+            "wasi_snapshot_preview1.clock_time_get"
+          ],
+          "exports": {
+            "_start": 0,
+            "memory": 2
+          },
+          "int": true,
+          "aot": true,
+          "xmake_build": true,
+          "xmake_test": true,
+          "xmake_wasm_sha256": [
+            "5a90a405c4d3d6a0705e697fceb2b9e33eab75673ca4a89d95ab1fb40f0bba27"
+          ]
+        }
+      },
+      "source_receipt_sha256": "78e34a7570d1105c57b09253c4c2bc104a2a4916d18fcd4ba798bd8851182278"
+    }
+  },
+  "legacy_selections": {
+    "passed": [
+      "as",
+      "c",
+      "cpp",
+      "js",
+      "rust",
+      "typescript",
+      "wat"
+    ],
+    "failed": {
+      "c_ffi_bridge": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "csharp": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "d": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "fortran": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "fsharp": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "go": {
+        "status": "franka_bindings_absent",
+        "diagnostic": "Installation failed: this revision has no go bindings for platform franka"
+      },
+      "haskell": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "java": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "kotlin": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "lua": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "moonbit": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "nim": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "objectc": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "odin": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "php": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "py": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "r": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "ruby": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "swift": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "tinygo": {
+        "status": "franka_bindings_absent",
+        "diagnostic": "Installation failed: this revision has no tinygo bindings for platform franka"
+      },
+      "vbnet": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      },
+      "zig": {
+        "status": "language_not_exposed",
+        "diagnostic": "Installation failed: unknown language or platform; use 'list' for available selections"
+      }
+    }
+  },
+  "additional_profiles": {
+    "c99": {
+      "accepted": false,
+      "diagnostic": "wrc --std c99: invalid choice (available: c11, c17, c23)"
+    }
+  },
+  "wat_source_github_fetch_failures": [
+    "fatal: remote error: upload-pack: not our ref 1745b3a2791be8921be666050216788145bef32b",
+    "fatal: remote error: upload-pack: not our ref 7079e5ec448c82fde5afb382b7da7172a546fd4c"
+  ],
+  "xmake_source_rebuild": {
+    "bit_identical": false,
+    "build_exit": 0,
+    "elapsed_seconds": 275.29,
+    "rebuilt_sha256": "27fbebbd587cac53b26c2d71ead201d0e3047f59570b9735015e42b5691cb2e5"
+  },
+  "vm_source_rebuild": {
+    "build_exit": 0,
+    "bit_identical": false,
+    "elapsed_seconds": 2917.731,
+    "published_sha256": "cdfc3cc76bd953d362aca5a96cef88b972a05a7487fc92599a17741529b34283",
+    "offline_smoke": {
+      "build": 0,
+      "test": 0
+    },
+    "version_exit": 0,
+    "rebuilt_sha256": "8abcfc34a747aa1eb511b52d387a7762bc4778308f45a8c9d64426f36fe27193",
+    "rebuilt_bytes": 129726488,
+    "receipt_sha256": "e908ee3c2ae7d9437aec19326adb4afcb77c81edf605fd4a3c40a7743a0792f7"
+  },
+  "rebuilt_host_pair": {
+    "scope": "Rebuilt Xmake and rebuilt VM from the frozen SDK sources, separate offline external Franka WAT project",
+    "exit": 0,
+    "direct_and_xmake_engines": [
+      "int",
+      "llvm-aot"
+    ],
+    "receipt_sha256": "1246c132f9c95b273a4df973ac44dab39980bc43ed1a42a3fe72e1aadb73e50b"
+  },
+  "independent_final_receipt_sha256": "dd91b5ddc25c35c84236ff6735c8575a152ce60f99cbdfa16d2da924d4ab96d6"
+}
