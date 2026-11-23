@@ -14,57 +14,57 @@
       }
     },
     "uwvm2-ros": {
-      "commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
+      "commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
       "hosts": {
         "linux-x86_64": {
-          "tag": "wros-vm-6de97ade53a7",
+          "tag": "wros-vm-b27df7428f9f",
           "asset": "uwvm2-ros-linux-x86_64.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 27343368,
-          "compressed_sha256": "0097440870d1b1e1b98f66688a64804216bb590b9e72ea1ca5c7f500889cd61e",
-          "bytes": 130875992,
-          "sha256": "64c6e62cc1d8d6d447fe58b563384594c5da33159d6f5cdce3822a239b8a40e8"
+          "compressed_bytes": 30457176,
+          "compressed_sha256": "1937df00a1650f69141c592b333e15a1ecc47ce44ea84ec0dcd41917de179626",
+          "bytes": 130896944,
+          "sha256": "ba81164f43300060e5efee04777313d895afe70bb8e6a85a49c5bf4a42ac632d"
         },
         "linux-i686": {
-          "tag": "wros-vm-6de97ade53a7",
+          "tag": "wros-vm-b27df7428f9f",
           "asset": "uwvm2-ros-linux-i686.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 30655828,
-          "compressed_sha256": "55bc12fdb182cc85a9344ec4d6c8c4087c6354c9f021203c8064c83de033b0e6",
-          "bytes": 141180336,
-          "sha256": "1310b66db36d944396b582d96d0bfdcee1b94f0bc51fd03182f5aaa96e394993"
+          "compressed_bytes": 34404564,
+          "compressed_sha256": "30e0824377e3bf3c931f38650791f8668e59cc331d192d69906a235349f403c0",
+          "bytes": 141188256,
+          "sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f"
         },
         "linux-aarch64": {
-          "tag": "wros-vm-6de97ade53a7",
+          "tag": "wros-vm-b27df7428f9f",
           "asset": "uwvm2-ros-linux-aarch64.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 25575484,
-          "compressed_sha256": "a853093821b15e98978b215d80c282aeee414bcd0024c6e0d6112213b1c5be53",
-          "bytes": 132061232,
-          "sha256": "31b87349fe0a7b55a39f113706cb827d01a694e53ef2380d23290eb37922594f"
+          "compressed_bytes": 28454832,
+          "compressed_sha256": "962dc895f959718a85d81120d71cd737744c205f9e5541eb27a29376a5755743",
+          "bytes": 132078152,
+          "sha256": "4b83122555a6159440a9dc32443ce8f63bc083208ef3369335308dccf6606ed2"
         },
         "linux-arm": {
-          "tag": "wros-vm-6de97ade53a7",
+          "tag": "wros-vm-b27df7428f9f",
           "asset": "uwvm2-ros-linux-arm.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 24250436,
-          "compressed_sha256": "6603c26a0dfea5676f845445ffb471ef180ca04b46f0530b99ae5254e072c3d1",
-          "bytes": 111705204,
-          "sha256": "fbdd58dddffffe3b3fe8f4d73f4baa20037d6d089af70686df9f2d433a8b3b6a"
+          "compressed_bytes": 27366664,
+          "compressed_sha256": "9a03776347849514446e18df12291a16d3e1067701acaabed6572d4b18af92c3",
+          "bytes": 111726868,
+          "sha256": "edf23c41e8a100e2e98917f02eada38338026e0eaec8a25d907702ce4c6f9c53"
         },
         "linux-armhf": {
-          "tag": "wros-vm-6de97ade53a7",
+          "tag": "wros-vm-b27df7428f9f",
           "asset": "uwvm2-ros-linux-armhf.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 24482768,
-          "compressed_sha256": "3c1cb27ac3b873a873daa1549337e27041637693638e25fead73d403cf3d4c87",
-          "bytes": 111572088,
-          "sha256": "5528d6baecf923fe723cdb28776e2d54ad74fd13a3ec08ca57bbbd0bbc0c7019"
+          "compressed_bytes": 27605052,
+          "compressed_sha256": "65d50e584d9421ca696c65c4fc24560de2801bb952181f264d91b1e3106e809a",
+          "bytes": 111593340,
+          "sha256": "d466a514deb79d585c7d3fc49655c35ec6ec82263ff7d95b175930f191c59f8b"
         }
       }
     }
