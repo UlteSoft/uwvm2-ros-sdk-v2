@@ -162,5 +162,57 @@
         "status": "pending"
       }
     }
+  },
+  "fixed_vm_5203": {
+    "vm_commit": "5203ed5f63b6bb9764252f95e6b1ef7dd42e35b7",
+    "vm_tree": "de9902c0e37d1e113352d86b00c49c59dd9dee4f",
+    "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "harness_commit": "0b931bbd0cca4fcbcc14c152c738e727450d2f87",
+    "scope": "Replay of publicly built Wasm using the relocated VM. Scalar builds run with both VM SIMD settings disabled. Bulk copy/fill is checked on the final Wasm; other bulk-memory features remain available for shared-memory initialization.",
+    "hosts": {
+      "x86_64": {
+        "status": "pass",
+        "summary_sha256": "d9db5998dd85c42136cede63b4dae0e806c54f099a8b8169e59a92e15c573993",
+        "aot_passed": 256,
+        "aot_scalar_passed": 128,
+        "aot_vector_passed": 128,
+        "aot_wasmtime_passed": 128,
+        "cells": 256,
+        "cells_passed": 256,
+        "decoder_passed": 256,
+        "decoder_sha256": "cedaa2c12f45b026e93fba2dcebdd151cb7cd767fdc93571361c24b1a2003964",
+        "executions": 512,
+        "harness_sha256": {
+          "imports.py": "454ad620152a4065e48ddf99ceea1f77f4313872d0c6408ee2220221f5b42ffa",
+          "optional_isa_suite.py": "38eb6a91ac8d07aa50f0ce39d7af7966306d88c38f7773b794ac59829be3b0ba",
+          "sysroot_suite.py": "3925bb034354f29ecccb29b13e78d133ff83753a0d7ddf77e36b74fb173b583b"
+        },
+        "int_passed": 256,
+        "int_scalar_passed": 128,
+        "int_vector_passed": 128,
+        "int_wasmtime_passed": 128,
+        "isolation_sha256": "c49969910a3a70818294b30c7416d7764f3b6833c3d008ef1e732f086a67f7d3",
+        "reference_qualification_sha256": "f1af8207395d22b530ea4cf9185148414374b0353ac5b3240b107b452f31fa2d",
+        "results_sha256": "d54436d254efefd0127a97b2ef0a12e2edfde59e741c2f53ec841978882ae084",
+        "runner_sha256": "3f69a605a1e482839aae78af936e83b316a93b2a4c60e979e73931dfd55acd84",
+        "vm_archive_receipt_sha256": "da003ba8880f188c018c96ebfad6e494a1ce9c1f8ee79c77d88ca76ef8cf74d1",
+        "vm_sha256": "6b6d203cf065ff8679fdfd38b1f4345d52d033a4dcd23ea1e684ae5f1f87c3b2",
+        "wasmtime_reference_cells": 128,
+        "wasmtime_reference_results_sha256": "8d94d9ee6cc8ee47840eaef601f676d29548fba310dfad438c563023b640e6e6",
+        "wasmtime_reference_summary_sha256": "5544a95c86fd6b12b0f21870cc635fc488dfbe59a237b48d2b1da9e75647b041"
+      },
+      "i686": {
+        "status": "pending"
+      },
+      "aarch64": {
+        "status": "pending"
+      },
+      "arm": {
+        "status": "pending"
+      },
+      "armhf": {
+        "status": "pending"
+      }
+    }
   }
 }
