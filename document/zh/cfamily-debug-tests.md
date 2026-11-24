@@ -26,7 +26,7 @@ x86-64 首轮可追加 `--profile wasm32-wasip1-noeh-nomte`。可用 `--language
 每个已安装前端使用 `-O0 -g` 和选定字宽、线程、MTE、EH 组合将本语言的源码编译两次。C 和 C++ 核对两代前端构建收据。Objective-C 和 Objective-C++ 核对每个目标文件的构建注记、前端摘要、GNUstep 运行库收据和 guest 配置，再用同一前端链接通过核验的目标文件。入口记录编译、链接实参及最终模块摘要。四种语言都要从最终 Wasm 读取 DWARF 段、导出索引及函数实现索引。线程配置使用安装所得 WAT 前端生成带上限的共享内存提供模块。
 
 - **源码调试**在执行加法的真实源码行停住，读取 `local == 40`，源码单步到同一文件的下一条标记语句，读取 `local == 42`，再续跑到正常退出。两个 Objective-C 前端的断点都设在消息派发实际调用的类方法内，Objective-C++ 方法还通过 C++ 模板读取初值。结果记录退出证据来自调试器终止回复，还是已确认续跑后通过原进程取得的退出状态。
-- **完整还原**停在实际 Wasm 入口，改写四个 guest 内存字节，保存完整快照并验证其中的原始 guest 模块，再用另一个值覆盖内存。还原后须在新的停止标识下回到原先的 Wasm 位置、读回保存的四字节并正常续跑退出。快照保存在隔离结果目录中。[VM 快照契约](https://github.com/UlteSoft/uwvm2-ros/blob/454a19a3c8c1ea388472d44589a126554067ef8b/documents/runtime/unified-snapshot.md)
+- **完整还原**停在实际 Wasm 入口，改写四个 guest 内存字节，保存完整快照并验证其中的原始 guest 模块，再用另一个值覆盖内存。还原后须在新的停止标识下回到原先的 Wasm 位置、读回保存的四字节并正常续跑退出。结果记录 Wasm 状态的大小和完整性。没有导入 Preview1 函数的 guest 在还原测试中关闭其未使用的 Preview1 环境。`--restore-timeout` 以秒为单位设置首次还原请求及后续 pending 应答共享的总时限，默认 900 秒，以便 VM 重新编译可续跑的本机代码。快照保存在隔离结果目录中。[VM 快照契约](https://github.com/UlteSoft/uwvm2-ros/blob/454a19a3c8c1ea388472d44589a126554067ef8b/documents/runtime/unified-snapshot.md)
 - **签名热更新**独立启动调试权限为 `none` 的 VM，使用认证更新流和宿主内存中的一次性 Ed25519 密钥签署启动、准备及提交。要求同一进程、同一通道、同一 nonce 上两次调用 `value()`，在世代 1 得到 17，在世代 2 得到 29。收据包含实际安装的代码摘要以及准备和 READY 阶段的测量值。[VM 生产更新契约](https://github.com/UlteSoft/uwvm2-ros/blob/454a19a3c8c1ea388472d44589a126554067ef8b/documents/runtime/production-update.md)
 
 `inputs.json` 记录安装选择、工具摘要、测试轮次、VM 收据和命名空间标识。`build.json` 将两代 Wasm 绑定到源码、编译器及 sysroot。在每个配置、语言及引擎目录下，每项能力有独立的 `result.json`。`results.jsonl` 汇集各项观测，`summary.json` 分别统计正向能力和预期拒绝。VM 日志、原始会话和快照保存在隔离输出卷中。

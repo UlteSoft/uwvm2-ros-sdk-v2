@@ -266,6 +266,10 @@ def run_cell(args, target, language, engine, capability, build, out, support):
     try:
         base = list(map(str, runtime_args(args.vm, engine, target, build["imports"], build["owner"],
                                           build["generations"][0]["wasm"])))
+        if capability == "full-dump-restore" and not any(i["module"] == "wasi_snapshot_preview1" for i in build["imports"]):
+            # A visible WASIp1 environment needs a source-bound builtin import
+            # to be captured. This guest and its optional memory-only owner have none.
+            base[base.index("--wasip1-single-enable")] = "--wasip1-single-disable"
         if engine == "aot" and capability != "signed-hot-update":
             # Use the VM's diagnostic defaults, as the upstream restore and stepping runners do.
             i = base.index("--runtime-llvm-jit-policy")
@@ -289,7 +293,8 @@ def run_cell(args, target, language, engine, capability, build, out, support):
             if capability == "source-debug":
                 live.debug_probe(vm, row, build, target, args.run_timeout)
             else:
-                live.dump_probe(vm, row, build, target, args.run_timeout, folder, snapshot)
+                live.dump_probe(vm, row, build, target, args.run_timeout, folder, snapshot,
+                                restore_timeout=args.restore_timeout)
             row["process_exit"] = vm.process.wait(timeout=args.run_timeout)
             live.need(row["process_exit"] == 0, f"debugged VM exit {row['process_exit']}")
         row.update(status="pass", positive=True)
@@ -361,6 +366,8 @@ def main():
     p.add_argument("--round-id", default=uuid.uuid4().hex, help="shared label for the five hosts in one acceptance run")
     p.add_argument("--jobs", type=int, default=1)
     p.add_argument("--run-timeout", type=int, default=60)
+    p.add_argument("--restore-timeout", type=int, default=900,
+                   help="total seconds for synchronous snapshot preparation and all pending restore replies")
     p.add_argument("--compile-timeout", type=int, default=180)
     args = p.parse_args()
     targets = [t for t in PROFILES if not args.profile or t.name in args.profile]
@@ -376,7 +383,7 @@ def main():
             p.error(f"--{LANGUAGES[lang].sdk_option}-sdk is required for {lang}")
     if any(t.threads for t in targets) and not args.wrwat:
         p.error("thread profiles require --wrwat")
-    if min(args.jobs, args.run_timeout, args.compile_timeout) < 1:
+    if min(args.jobs, args.run_timeout, args.restore_timeout, args.compile_timeout) < 1:
         p.error("jobs and timeouts must be positive")
     if not re.fullmatch("[a-zA-Z0-9][a-zA-Z0-9._-]{0,79}", args.round_id):
         p.error("choose a 1–80 character round ID using letters, numbers, dots, dashes or underscores")

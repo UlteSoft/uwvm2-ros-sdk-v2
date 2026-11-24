@@ -13,7 +13,7 @@ class Limitation(Exception):
 
 
 class RestoreRefusal(Exception):
-    """A complete archive reached the live restore command and was declined."""
+    """The VM declined a full archive and retained its original stopped world."""
 
 
 def need(condition, message):
@@ -140,7 +140,7 @@ def write_word(vm, at, word, timeout):
     return current
 
 
-def dump_probe(vm, row, build, target, timeout, folder, snapshot):
+def dump_probe(vm, row, build, target, timeout, folder, snapshot, *, restore_timeout):
     initial = vm.request("status")
     policy = vm.request("dump policy")
     need(policy == "dump-policy max=full effective=full\n", policy)
@@ -177,16 +177,38 @@ def dump_probe(vm, row, build, target, timeout, folder, snapshot):
     source_bytes = Path(build["generations"][0]["wasm"]).read_bytes()
     need(image.disclosure == "full" and any(r.kind == 3 and r.payload == source_bytes for r in image.records),
          "full archive lacks this exact installed-compiler image")
+    states = [record for record in image.records if record.kind == 2]
+    need(len(states) == 1, "full archive must describe the captured Wasm state")
+    state = states[0]
     row["archive"] = {"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw),
                       "disclosure": image.disclosure, "platform": image.platform,
+                      "wasm_state": {"capture": snapshot.CAPTURE[state.capture], "schema": state.schema,
+                                     "bytes": len(state.payload)},
                       "record_kinds": [r.kind for r in image.records]}
     row["changed_word"] = "7193b6ee"
     changed = write_word(vm, at, row["changed_word"], timeout)
     row["changed_at"] = changed.copy()
-    reply = vm.request(f"dump restore current {changed['stop']} {archive}")
-    deadline = time.monotonic() + timeout
-    while reply.startswith("snapshot-restore pending ") and time.monotonic() < deadline:
-        reply = vm.request("dump restore continue")
+    # Preparing the resumable LLVM image is synchronous and can take longer
+    # than an ordinary debugger command. All pending replies share one deadline.
+    started = time.monotonic()
+    row["restore_timeout_seconds"] = restore_timeout
+    deadline = started + restore_timeout
+    command = f"dump restore current {changed['stop']} {archive}"
+    try:
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("snapshot restore deadline exceeded")
+            vm.channel.settimeout(remaining)
+            reply = vm.request(command)
+            if not reply.startswith("snapshot-restore pending "):
+                break
+            command = "dump restore continue"
+    except TimeoutError as exc:
+        raise TimeoutError(f"snapshot restore exceeded its {restore_timeout}s deadline") from exc
+    finally:
+        row["restore_elapsed_seconds"] = round(time.monotonic() - started, 3)
+        vm.channel.settimeout(timeout)
     if reply.startswith("error: snapshot-restore rejected ") and "applied=0 retained=1" in reply:
         retained = stopped(vm, timeout)
         need(retained == changed and memory_word(vm, module) == row["changed_word"],
@@ -196,6 +218,8 @@ def dump_probe(vm, row, build, target, timeout, folder, snapshot):
     restored = re.fullmatch(r"snapshot-restored stop=([1-9][0-9]*) epoch=([1-9][0-9]*) source=(ready|unavailable); "
                             r"guest paused; external effects are not rewound\n", reply)
     need(restored is not None, reply)
+    need(row["archive"]["wasm_state"]["capture"] == "complete" and state.payload,
+         "VM acknowledged restoration from an incomplete Wasm state")
     fresh = stopped(vm, timeout, newer=changed["stop"])
     need(fresh["stop"] == int(restored[1]) and fresh["generation"] == int(restored[2])
          and (fresh["module"], fresh["function"], fresh["offset"]) == (module, build["entry_index"], 0), fresh)
