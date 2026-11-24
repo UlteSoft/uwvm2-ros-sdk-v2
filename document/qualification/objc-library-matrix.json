@@ -1,24 +1,97 @@
 {
-  "schema": 2,
-  "language": "Objective-C/Objective-C++",
+  "schema": 3,
   "status": "requalification-in-progress",
-  "vm_commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
-  "vm_tree": "5b21dae0134c9a69a0c50780c7f398a099040711",
-  "acceptance_rule": "Credit requires a fresh run on the recorded VM tree and host executable, matched by guest and memory-owner SHA-256.",
-  "previous_runtime_results": "withdrawn",
-  "github_install_acceptance": "pending",
-  "source_manifest": "src/qualification/objc/upstreams.json",
+  "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+  "sdk_tree": "8e68a5f85cd05489f6b71d92a10e7823d841e165",
+  "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
+  "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
+  "vm_release_tag": "wros-vm-b27df7428f9f",
   "isolation": {
     "parent_and_child_memory_bytes": 68719476736,
     "parent_and_child_swap_bytes": 0,
     "offline_guest_execution": true
   },
+  "language": "Objective-C/Objective-C++",
+  "source_manifest": "src/qualification/objc/upstreams.json",
+  "source_manifest_sha256": "6cf513c7894ef5376c5eb1b8c6187e6e840fe53827d6bef54908804109f96608",
   "hosts": {
     "x86_64": {
-      "status": "pending"
+      "status": "completed-with-unavailable-dependency",
+      "build_cases": {
+        "objc": {
+          "eh-disabled-rejected": 8,
+          "executed": 72
+        },
+        "objcpp": {
+          "dependency-unavailable": 16,
+          "eh-disabled-rejected": 24,
+          "executed": 40
+        }
+      },
+      "executed": {
+        "objc": {
+          "aot/pass": 72,
+          "int/pass": 72
+        },
+        "objcpp": {
+          "aot/pass": 40,
+          "int/pass": 40
+        }
+      },
+      "vm_executable_sha256": "ba81164f43300060e5efee04777313d895afe70bb8e6a85a49c5bf4a42ac632d",
+      "results_sha256": "b1cfcada30710280b2d9c768298e736b24f635fac1f78d66674646b2a5cab187",
+      "isolation_sha256": "658bccf552aafec2d179c4d190f9f9cd5ec377b3fe60e20f84e8383043cc444e",
+      "verified_installation_sha256": "a631ac043ea9248abcd05699bbf28877a64d3b845610a3fe4b12c7ecc7f3ec3a",
+      "missing_dependency": "Foundation/Foundation.h",
+      "wasmtime": {
+        "reference_host": "x86_64",
+        "guest_and_stdout": {
+          "exact-guest-and-stdout": 56,
+          "objc/exact-guest-and-stdout": 36,
+          "objcpp/exact-guest-and-stdout": 20
+        },
+        "checked_by": "native reference execution",
+        "summary_sha256": "a0b1eebf64acab5d34900deeb7ae37d6814a85c0f8672c4b49893c997fe8a0e9"
+      }
     },
     "i686": {
-      "status": "pending"
+      "status": "completed-with-unavailable-dependency",
+      "build_cases": {
+        "objc": {
+          "eh-disabled-rejected": 8,
+          "executed": 72
+        },
+        "objcpp": {
+          "dependency-unavailable": 16,
+          "eh-disabled-rejected": 24,
+          "executed": 40
+        }
+      },
+      "executed": {
+        "objc": {
+          "aot/pass": 72,
+          "int/pass": 72
+        },
+        "objcpp": {
+          "aot/pass": 40,
+          "int/pass": 40
+        }
+      },
+      "vm_executable_sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f",
+      "results_sha256": "7ff538cf298a2f0fca6cec6edce367e22d15674cdbb29ef3e9887f4e58ea91e9",
+      "isolation_sha256": "8282e0788227e1318e2a997355308b0f610f3dbf33a908c80468ad6bacbe9d20",
+      "verified_installation_sha256": "27654c9bddac76d599d7f72dc9b1823cbad5198ea901dacf600572a38507f6bf",
+      "missing_dependency": "Foundation/Foundation.h",
+      "wasmtime": {
+        "reference_host": "x86_64",
+        "guest_and_stdout": {
+          "exact-guest-and-stdout": 56,
+          "objc/exact-guest-and-stdout": 36,
+          "objcpp/exact-guest-and-stdout": 20
+        },
+        "checked_by": "match exact guest, shared memory owner and both engine outputs to x86_64 reference",
+        "summary_sha256": "a0b1eebf64acab5d34900deeb7ae37d6814a85c0f8672c4b49893c997fe8a0e9"
+      }
     },
     "aarch64": {
       "status": "pending"

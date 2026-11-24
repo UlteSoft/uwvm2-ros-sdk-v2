@@ -3,13 +3,18 @@
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros",
   "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
   "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
-  "candidate_release_status": "pending-five-host-release-and-sdk-binding",
+  "candidate_release_status": "five-host-binaries-published",
   "candidate_sysroot_plan": "cfamily-sysroot-matrix.json",
-  "current_runtime_records": [],
+  "current_runtime_records": [
+    "cfamily-open-library-matrix.json",
+    "cfamily-sysroot-matrix.json",
+    "objc-library-matrix.json"
+  ],
   "published_environment": {
-    "vm_commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
-    "vm_tree": "5b21dae0134c9a69a0c50780c7f398a099040711",
-    "vm_release_tag": "wros-vm-6de97ade53a7",
+    "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
+    "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
+    "vm_release_tag": "wros-vm-b27df7428f9f",
+    "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
     "sdk_host_tool_lock": "src/host-tools/releases.json",
     "runtime_records": [
       "cfamily-open-library-matrix.json",
@@ -22,12 +27,13 @@
     "runner": "src/qualification/cfamily/debug_suite.py",
     "languages": [
       "c",
-      "cpp"
+      "cpp",
+      "objc",
+      "objcpp"
     ],
     "guest_profiles": 16,
     "hosts": 5,
     "engines": [
-      "int",
       "aot"
     ],
     "capabilities": [
@@ -35,20 +41,6 @@
       "full-dump-restore",
       "signed-hot-update"
     ],
-    "int_dbg": "Expected rejection with an explicit unsupported-mode diagnostic before guest execution.",
-    "previous_candidate_int_dbg_x86_64": {
-      "host": "linux-x86_64",
-      "vm_commit": "454a19a3c8c1ea388472d44589a126554067ef8b",
-      "vm_tree": "5c9e930f33bc3f7df758bc3f9667e6cd13227a1c",
-      "vm_sha256": "aefe827c18540bd54d261f2e544aa79e18c630c62bf62336afecdb9d2738f8b3",
-      "actual_launches": 80,
-      "observed": {
-        "debug-control-status-available": 8,
-        "explicit-int-rejection": 16,
-        "ordinary-exit-zero": 16,
-        "other-launch-rejection": 40
-      },
-      "raw_results_sha256": "4cf1af50ea613c77b6f3f2b58b4aa551db53e8d5f4de0507f481ce9a198d349b"
-    }
+    "int_dbg": "Expected rejection with an explicit unsupported-mode diagnostic before guest execution."
   }
 }

@@ -2,7 +2,7 @@
   "schema": 3,
   "language": "C/C++",
   "suite": "sysroot",
-  "status": "pending-full-candidate-run",
+  "status": "requalification-in-progress",
   "sdk_repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros.git",
   "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
@@ -28,13 +28,51 @@
   },
   "hosts": {
     "x86_64": {
-      "status": "pending"
+      "rows": 2464,
+      "profiles": 16,
+      "builds": {
+        "linked": 2456,
+        "compile-failed": 8
+      },
+      "engines": {
+        "int": {
+          "pass": 2425,
+          "upstream-skip": 16,
+          "upstream-unresolved": 7,
+          "failed": 8
+        },
+        "aot": {
+          "pass": 2431,
+          "upstream-skip": 16,
+          "upstream-unresolved": 1,
+          "failed": 8
+        }
+      },
+      "vm_executable_sha256": "ba81164f43300060e5efee04777313d895afe70bb8e6a85a49c5bf4a42ac632d",
+      "vm_receipt_sha256": "a37638b092576dec86c3ca79bea1e45f225d7539dd867833e97174244cc2baf1",
+      "inputs_sha256": "babd4bb4a2d4ef4a3bd0275094c01fd8f429122e2df56b9cbd1fd643e8494f7e",
+      "results_sha256": "9b11963d65ba518675189df26f67dcd6207b9f12121e0346263d4bdd76989105",
+      "status": "completed-with-failures",
+      "link_failures": {
+        "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c": 8
+      },
+      "execution_failures": [
+        {
+          "source": "upstream/libc-test/src/functional/search_lsearch.c",
+          "exit": 122,
+          "runs": 16
+        }
+      ]
     },
     "i686": {
       "status": "pending"
     },
     "aarch64": {
-      "status": "pending"
+      "status": "installation-failed",
+      "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+      "stage": "binary C installation",
+      "diagnostic": "installed native executable differs: clang",
+      "console_sha256": "89efa9043cac165463656330ebd70bd1125768a498dd51e542abed677cb76a16"
     },
     "arm": {
       "status": "pending"
@@ -165,7 +203,7 @@
       "libc-test": 36
     },
     "distinct_sources": 167,
-    "profile_dimensions": "wasm32/wasm64 \u00d7 threads off/on \u00d7 EH off/on \u00d7 MTE off/on. Open POSIX uses the eight threaded profiles.",
+    "profile_dimensions": "wasm32/wasm64 × threads off/on × EH off/on × MTE off/on. Open POSIX uses the eight threaded profiles.",
     "planned_builds_per_host": 2432
   },
   "original_hosts": {
@@ -366,5 +404,12 @@
         "interruption_receipt_sha256": "be4f639ed86faa811688cf56432f8f6c4b2fd2e31b95aa3ac0129c56034e3403"
       }
     }
-  }
+  },
+  "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+  "sdk_tree": "8e68a5f85cd05489f6b71d92a10e7823d841e165",
+  "observations": [
+    "The upstream Open POSIX sem_getvalue/1-1.c calls sem_open and sem_unlink. The threaded WASIp1 libc omits sem_unlink. The unnamed semaphore test has a separate result.",
+    "In upstream libc-test search_lsearch.c, lsearch copies the declared 80 bytes from its key. The original program passes shorter string literals. Both engines report a memory tag mismatch with MTE enabled. The full-width record port has its own row.",
+    "Every upstream skip and unresolved exit remains in its own engine count."
+  ]
 }
