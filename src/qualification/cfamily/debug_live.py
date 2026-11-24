@@ -246,6 +246,8 @@ def update_probe(args, row, build, command, folder, protocol):
     export = struct.pack("<III", build["value_index"], 0, 4)
     row.update(export="value", export_index=build["value_index"], scope_local_index=build["value_local_index"],
                protocol="UUP1", operations=[], test_key_fingerprint=sha(public).hex())
+    if "start_section" in g1:
+        row["launch_start_section"] = g1["start_section"]
     base = ["--debug-permissions", "none", "--update-public-key", public.hex(), "--update-contract",
             sha(b"SDK qualification: value() -> i32").hex(), "--update-scope",
             sha(b"SDK qualification: isolated host only").hex(), "--update-call-export", "value"]
@@ -267,6 +269,8 @@ def update_probe(args, row, build, command, folder, protocol):
 
         try:
             facts = request("status", 0)
+            need(row.get("launch_start_section") is None and "--wasm-preload-library" not in command,
+                 "production update manager answered for a module with a start section or a preloaded module")
             need(facts["status"] == 0 and facts["state"] == 8 and not facts["active"] and facts["epoch"] == 0
                  and facts["installed"] == installed.hex(), facts)
             launch = protocol.permit(key, facts, 4, installed, sha(b"qualification launch"))

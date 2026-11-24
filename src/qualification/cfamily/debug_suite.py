@@ -90,6 +90,7 @@ def inspect_wasm(path, api, profile, source_function):
     metadata = {}
     exports = {}
     function_names = {}
+    start_index = None
     structure = []
     bodies = []
     for start, end, name, body in sections(data):
@@ -117,6 +118,10 @@ def inspect_wasm(path, api, profile, source_function):
                 export_name = body.name()
                 exports[export_name] = (body.byte(), body.uint())
             body.end()
+        if section == 8:
+            live.need(start_index is None, f"duplicate Wasm start section: {path}")
+            start_index = body.uint()
+            body.end()
     for name in (".debug_info", ".debug_abbrev", ".debug_line", ".debug_str"):
         live.need(name in metadata and metadata[name]["bytes"] > 0, f"absent or empty DWARF section {name}: {path}")
     required_exports = ["value", "_start"]
@@ -133,7 +138,9 @@ def inspect_wasm(path, api, profile, source_function):
     local_index = source_value - imported_functions
     live.need(0 <= local_index < len(bodies) and exports["value"][1] >= imported_functions,
               "expected local business implementation and approved export")
-    return ({"wasm": str(path), "sha256": digest(path), "dwarf": metadata, "imports": imports,
+    start_section = None if start_index is None else {"function_index": start_index, "name": function_names.get(start_index)}
+    return ({"wasm": str(path), "sha256": hashlib.sha256(data).hexdigest(), "dwarf": metadata, "imports": imports,
+             "start_section": start_section,
              "profile": profile.to_dict(), "entry_index": exports["_start"][1], "source_entry_index": source_entry,
              "source_function": source_function, "source_function_index": source_index,
              "value_index": exports["value"][1], "value_implementation_index": source_value,
@@ -248,8 +255,17 @@ def classify_launch_failure(row, target, log):
         patterns.append(("interpreter-debug-unsupported", "debug-jit is unsupported in the current mode: uwvm-int/full."))
     if row["engine"] == "int" and row["capability"] == "signed-hot-update":
         patterns.append(("interpreter-signed-update-unsupported", "update requires LLVM full, key/contract/scope and an independent direct-parent Unix stream"))
-    if target.threads and row["capability"] == "signed-hot-update":
-        patterns.append(("production-update-requires-single-owned-module", "production update profile requires a single owned module without a start section"))
+    if row["engine"] == "aot" and row["capability"] == "signed-hot-update" and row.get("operations") == []:
+        diagnostic = "uwvm: [error] production update profile requires a single owned module without a start section"
+        if diagnostic in clean.splitlines():
+            if target.threads and "--wasm-preload-library" in row.get("argv", ()):
+                limitation = "production-update-requires-single-owned-module"
+            elif row.get("launch_start_section") is not None:
+                limitation = "production-update-requires-no-start-section"
+            else:
+                return None
+            row["vm_diagnostic"] = diagnostic
+            return limitation
     for code, expected in patterns:
         for line in clean.splitlines():
             if expected in line:

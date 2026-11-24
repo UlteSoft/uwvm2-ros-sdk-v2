@@ -34,3 +34,9 @@ x86-64 首轮可追加 `--profile wasm32-wasip1-noeh-nomte`。可用 `--language
 `inputs.json` 记录安装选择、工具摘要、测试轮次、VM 收据和命名空间标识。`build.json` 将两代 Wasm 绑定到源码、编译器及 sysroot。在每个配置、语言及引擎目录下，每项能力有独立的 `result.json`。`results.jsonl` 汇集各项观测，`summary.json` 分别统计正向能力和预期拒绝。VM 日志、原始会话和快照保存在隔离输出卷中。
 
 `pass` 表示正向能力通过。单独点选的 INT DBG 负向断言同时要求有效认证描述符、VM 的解释器拒绝诊断以及退出码 126，满足条件时记为 `expected-rejection`。调试器若应答请求，负向断言失败。`unsupported` 记录 VM 明确返回且能识别的限制。`restore-declined` 记录已明确拒绝还原，且原停止标识和改写后的内存值均已核实。`failed` 表示出现意外结果。`build-blocked` 表示构建未能产出可运行输入。后四种结果均使入口返回非零状态。只有 `pass` 计入正向能力。
+
+### x86-64 上 Objective-C MTE 的签名热更新拒绝记录
+
+在 `wasm32-wasip1-noeh-mte/objc` 配置下，已安装的 `wroc` 使用 `--reactor --export _start --export value` 链接了两代模块。两份 Wasm 在文件偏移 553 处都有字节 `08 01 02`，即编号为 8 的 Core start 节，其指定的启动函数是索引 2 的 `__wasm_memtag_init_globals`。导出的 `_start` 函数索引为 218。第一代的 SHA-256 为 `89fca1523d9c5c6aa61bd571a4f169448f26799b74bdebbc216915a0e8cce90b`，第二代为 `e22c0c8affe2c69e13059b6bbbd01256d28581e932837ab0fc07ed21b2b261cb`。[Objective-C 前端](languages/objc.md) · [SDK 链接器](../../src/compilers/cc/llvm-project/lld/wasm/Writer.cpp)
+
+x86-64 候选 VM `d5524f35c565` 报告 `production update profile requires a single owned module without a start section`，在应答首个 UUP1 状态请求前以 126 退出。原始运行记录了 EOF。启动模块和 VM 诊断共同确认此项签名热更新为 `unsupported`。测试入口在 `build.json` 中记录每一代的 start 节。若 VM 对该受限启动返回状态应答，测试判定为失败。[受测版本的 VM 契约](https://github.com/UlteSoft/uwvm2-ros/blob/d5524f35c565c60e4c2d92d9328afc8314c5803f/documents/runtime/production-update.md#supported-changes-and-execution-boundary)
