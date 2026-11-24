@@ -1,12 +1,185 @@
 {
-  "schema": 3,
-  "language": "C/C++",
-  "suite": "sysroot",
-  "status": "requalification-in-progress",
-  "sdk_repository": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2.git",
-  "vm_repository": "https://github.com/UlteSoft/uwvm2-ros.git",
+  "schema": 4,
+  "sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+  "sdk_tree": "352221288b627c9f3f7fdc98114578da48e5f617",
   "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
   "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
+  "suite": "src/qualification/cfamily/cases.json",
+  "suite_sha256": "d9d95d97490c88acd590af9c092f5703f70eb5528b8b4db9da8dd12951b9d7ab",
+  "status": "closed-superseded",
+  "previous_report": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2/blob/905d8de78c64b5ca325e30c7c23d1d2605c9708a/document/qualification/cfamily-sysroot-matrix.json",
+  "hosts": {
+    "x86_64": {
+      "status": "completed-with-failures",
+      "profiles": 16,
+      "rows": 2464,
+      "builds": {
+        "linked": 2456,
+        "compile-failed": 8
+      },
+      "engines": {
+        "int": {
+          "pass": 2424,
+          "upstream-skip": 16,
+          "upstream-unresolved": 8,
+          "failed": 8
+        },
+        "aot": {
+          "pass": 2428,
+          "upstream-skip": 16,
+          "runtime-budget-rejected": 4,
+          "failed": 8
+        }
+      },
+      "build_diagnostics": [
+        {
+          "source": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c",
+          "status": "compile-failed",
+          "count": 8
+        }
+      ],
+      "execution_failures": [
+        {
+          "source": "upstream/libc-test/src/functional/search_lsearch.c",
+          "engine": "aot",
+          "exit": 122,
+          "count": 8
+        },
+        {
+          "source": "upstream/libc-test/src/functional/search_lsearch.c",
+          "engine": "int",
+          "exit": 122,
+          "count": 8
+        }
+      ],
+      "inputs_sha256": "e299d8f8b7f3580e6c8eaf208b160825429395c47d7b55d29a81131fa13a33e1",
+      "results_sha256": "8dea77a70bc9d2fbc82d8f9334487aa7295dd0058c6d3fab3986ec76bb91e9c0",
+      "runner_sha256": "c6220d89114e934833156572a903640688924f10544d0418474a698814425c50",
+      "installation_sha256": "268a9cb9e011c4b6578f83a0d8c25350ef5b7c0dee434fa013fefe7f87b3c0e6",
+      "isolation_sha256": "d81231f3c1f8d57f0a5ff66e8e6f5852f926f108c4907cca19658bf09d827ad9",
+      "suite_exit": 1,
+      "case_outcomes": {
+        "upstream/libc-test/src/functional/search_lsearch.c": {
+          "builds": {
+            "linked": 16
+          },
+          "engines": {
+            "int": {
+              "pass": 8,
+              "failed": 8
+            },
+            "aot": {
+              "pass": 8,
+              "failed": 8
+            }
+          }
+        },
+        "sysroot/search_lsearch_full_width.c": {
+          "builds": {
+            "linked": 16
+          },
+          "engines": {
+            "int": {
+              "pass": 16
+            },
+            "aot": {
+              "pass": 16
+            }
+          }
+        },
+        "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c": {
+          "builds": {
+            "compile-failed": 8
+          },
+          "engines": {
+            "int": {},
+            "aot": {}
+          }
+        },
+        "sysroot/sem_getvalue_unnamed.c": {
+          "builds": {
+            "linked": 8
+          },
+          "engines": {
+            "int": {
+              "pass": 8
+            },
+            "aot": {
+              "pass": 8
+            }
+          }
+        },
+        "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c": {
+          "builds": {
+            "linked": 8
+          },
+          "engines": {
+            "int": {
+              "upstream-unresolved": 8
+            },
+            "aot": {
+              "pass": 8
+            }
+          }
+        },
+        "sysroot/pthread_rwlock_init_join.c": {
+          "builds": {
+            "linked": 8
+          },
+          "engines": {
+            "int": {
+              "pass": 8
+            },
+            "aot": {
+              "pass": 8
+            }
+          }
+        },
+        "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c": {
+          "builds": {
+            "linked": 16
+          },
+          "engines": {
+            "int": {
+              "upstream-skip": 16
+            },
+            "aot": {
+              "upstream-skip": 16
+            }
+          }
+        },
+        "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp": {
+          "builds": {
+            "linked": 16
+          },
+          "engines": {
+            "int": {
+              "pass": 16
+            },
+            "aot": {
+              "pass": 12,
+              "runtime-budget-rejected": 4
+            }
+          }
+        }
+      }
+    },
+    "i686": {
+      "status": "stopped-for-vm-replacement",
+      "recorded_rows": 1148,
+      "planned_rows": 2464,
+      "results_sha256": "41c4c7bb193027921b96f42b49b24ceed65de855ad0dc525ba45332abd11e08f"
+    },
+    "aarch64": {
+      "status": "superseded-before-execution"
+    },
+    "arm": {
+      "status": "superseded-before-execution"
+    },
+    "armhf": {
+      "status": "superseded-before-execution"
+    }
+  },
   "candidate_corpus": {
     "case_manifest": "src/qualification/cfamily/cases.json",
     "case_manifest_sha256": "d9d95d97490c88acd590af9c092f5703f70eb5528b8b4db9da8dd12951b9d7ab",
@@ -26,457 +199,12 @@
       "aot_stack": "The 15 original native-stack refusals determine the per-profile AOT stack sizes in the manifest. Round the required bytes of proven native frames plus 8192 bytes of observed guard pages up to the next whole MiB. The original interpreter runs passed these rows with 1 MiB."
     }
   },
-  "hosts": {
-    "x86_64": {
-      "rows": 2464,
-      "profiles": 16,
-      "builds": {
-        "linked": 2456,
-        "compile-failed": 8
-      },
-      "engines": {
-        "int": {
-          "pass": 2425,
-          "upstream-skip": 16,
-          "upstream-unresolved": 7,
-          "failed": 8
-        },
-        "aot": {
-          "pass": 2431,
-          "upstream-skip": 16,
-          "upstream-unresolved": 1,
-          "failed": 8
-        }
-      },
-      "vm_executable_sha256": "ba81164f43300060e5efee04777313d895afe70bb8e6a85a49c5bf4a42ac632d",
-      "vm_receipt_sha256": "a37638b092576dec86c3ca79bea1e45f225d7539dd867833e97174244cc2baf1",
-      "inputs_sha256": "babd4bb4a2d4ef4a3bd0275094c01fd8f429122e2df56b9cbd1fd643e8494f7e",
-      "results_sha256": "9b11963d65ba518675189df26f67dcd6207b9f12121e0346263d4bdd76989105",
-      "status": "completed-with-failures",
-      "link_failures": {
-        "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c": 8
-      },
-      "execution_failures": [
-        {
-          "source": "upstream/libc-test/src/functional/search_lsearch.c",
-          "exit": 122,
-          "runs": 16
-        }
-      ],
-      "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699"
-    },
-    "i686": {
-      "rows": 2464,
-      "profiles": 16,
-      "builds": {
-        "linked": 2456,
-        "compile-failed": 8
-      },
-      "engines": {
-        "int": {
-          "pass": 2424,
-          "upstream-skip": 16,
-          "upstream-unresolved": 8,
-          "failed": 8
-        },
-        "aot": {
-          "pass": 2428,
-          "upstream-skip": 16,
-          "runtime-budget-rejected": 4,
-          "failed": 8
-        }
-      },
-      "vm_executable_sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f",
-      "vm_receipt_sha256": "a47cc33cc8cdfad7d98760177c3f8138a46d2d27878d975a2e22393f55b011b5",
-      "inputs_sha256": "0bec9c0767041c6cd4432ee7d1f1decef21bcd1610849f4f98e6f63e33e0e8ae",
-      "results_sha256": "68d5b9119dddd9aaf68f28d2401e2270ea2d1779408a8646f177ff4f732391ff",
-      "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699",
-      "status": "completed-with-failures"
-    },
-    "aarch64": {
-      "status": "installation-failed",
-      "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
-      "stage": "binary C installation",
-      "diagnostic": "installed native executable differs: clang",
-      "console_sha256": "89efa9043cac165463656330ebd70bd1125768a498dd51e542abed677cb76a16"
-    },
-    "arm": {
-      "status": "pending"
-    },
-    "armhf": {
-      "status": "pending"
-    }
-  },
-  "previous_find_elf_x86_64": {
-    "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
-    "source_sha256": "dc3fb84be843d0272dfec154d8be959d0136b4bb5580490ee51c7d6ef362b240",
-    "sdk_qualification_commit": "d6d85b9a26454812ceca89455292d960dd063e68",
-    "sdk_qualification_tree": "2e823649cc7b2c832095ea9b09ef88280b2539f5",
-    "sdk_install_commit": "1a88ebbf29a0dedba6385a6079e92b0aaf860070",
-    "sdk_install_tree": "1dfc5c6146857fc7458a30924b6905be81477516",
-    "vm_commit": "348f5716c0089fc6508ae6cc681b7ced4e8b0bf9",
-    "vm_tree": "8abb2368f0e6404ae63e38d22f345a7726b5e77d",
-    "vm_sha256": "c0ff89d785c890ddf9d62463ec41a6b2af858a3b15df2969ac6ad6617278ee02",
-    "vm_receipt_sha256": "e03fd38187c84ac772d1193004a48be651085ae0bdef18e42176780f161d6a74",
-    "case_manifest_sha256": "e6479ca37e01d7b26f5c7fbdab0da6107de6b446ed0cb63242c1aa48855e71a7",
-    "runner_sha256": "5cd800c7a7b912860c4454762631c0bd6f7af5cd718274953890daa5f72b06e9",
-    "capture": "The Linux x86_64 fast-compile run captured the completed object passed by ThreadedLlvmChild::build to LLVM MemoryBuffer::getMemBufferCopy. Count every ELF relocation table, all section headers, and static symbols excluding entry zero.",
-    "evidence": {
-      "sdk_run_path_in_vm_checkout": ".tmp/cfamily-candidate-348f5716-sol/find-r1",
-      "objects_path_in_vm_checkout": ".tmp/vm-candidate-348f5716c008/object-evidence",
-      "audit_json_sha256": "15a24b52ab5f17ff67df05e8e31854c829ab07de5315f4d1b805c7a30f05ce6e",
-      "prior_vm_comparison_json_sha256": "fa8639db1d62392d57ea6c4b9e931143efb776554c190812eaa0526858902195",
-      "inputs_json_sha256": "03675f04c4b316d7ab9bd573c6a31e9af6e7ac1695f248a853fc45e3877c6dd8",
-      "results_jsonl_sha256": "b089e3f3a6d6e61d29328dbfa236a05f9e87f7a6d744c6cd94bf743ed27ff997",
-      "verified_object_summary_sha256": "1c0856e4b7ec293f84ca04232cebe5202abe0f5e7fe1ea014d4cc41bfefe1806"
-    },
-    "thread_code_argument": "536870912:4194304:1048576",
-    "guest_native_stack_argument_bytes": 1048576,
-    "per_child_storage_argument_bytes": 16777216,
-    "int_exit_each": 0,
-    "aot_exit_each": 126,
-    "old_refusal": "All four stopped on relocation 65537 while processing the fifth section. Native stack admission had not yet run. Rounded arena bytes below are the loader charges computed from the captured objects.",
-    "profiles": {
-      "wasm32-wasip1-threads-eh-mte": {
-        "wasm_sha256": "49a14501b2e5f19fb2c64594b114813ba2c026d62723bd6c378900749be7b405",
-        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
-        "elf_sha256": "c388ce7c1fb418628564681a573fdddcbf3c77a705ebea022404469b35ad6d28",
-        "sections": 14,
-        "symbols": 1653,
-        "relocations": 117849,
-        "charged_bytes": 77099137,
-        "rounded_arena_bytes": 77135872,
-        "stack_size_records": 1604,
-        "largest_recorded_frame_bytes": 2216
-      },
-      "wasm32-wasip1-threads-noeh-mte": {
-        "wasm_sha256": "a85a404cf920b5fb241aee84f9e1b4f8083af8fbbd41a76eac00824202259d97",
-        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
-        "elf_sha256": "6c506ab32cd09ee54c91e478c247004b12a6e5a0c5544b9827b249140423d50e",
-        "sections": 14,
-        "symbols": 1520,
-        "relocations": 104113,
-        "charged_bytes": 67634524,
-        "rounded_arena_bytes": 67698688,
-        "stack_size_records": 1478,
-        "largest_recorded_frame_bytes": 1944
-      },
-      "wasm64-wasip1-threads-eh-mte": {
-        "wasm_sha256": "a3137af44f9c5cb0ac565415db45daeea17f16a168e942717295803ecd3c8d41",
-        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
-        "elf_sha256": "6bc4e98b566fc88ac9da5b9ed8bc56f455968850c77c4f1dd777e622cba58383",
-        "sections": 14,
-        "symbols": 1663,
-        "relocations": 120802,
-        "charged_bytes": 79436612,
-        "rounded_arena_bytes": 79495168,
-        "stack_size_records": 1608,
-        "largest_recorded_frame_bytes": 2920
-      },
-      "wasm64-wasip1-threads-noeh-mte": {
-        "wasm_sha256": "c6b51c4ed63fcfcf01a2308ca7e34cfadd9f9574ad9fd7240b90a18e6c09333a",
-        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
-        "elf_sha256": "c49cf71b3e2d5cff6dba98bf6be351dd9c8f0aa9f77b989605b4e905a6a8c266",
-        "sections": 14,
-        "symbols": 1526,
-        "relocations": 106628,
-        "charged_bytes": 69510404,
-        "rounded_arena_bytes": 69533696,
-        "stack_size_records": 1480,
-        "largest_recorded_frame_bytes": 1736
-      }
-    }
-  },
-  "previous_find_replay_x86_64": {
-    "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
-    "vm_commit": "70c799347e7b88d8f16c493ae046e7450c88e2b8",
-    "vm_tree": "e280e780a3e2e9f057eb3bd104088d4926e8bba6",
-    "vm_sha256": "49ba0a51eba6fc81e94a2d32157d44584b2f9eb0559e6dc737d828d6f446efb8",
-    "case_manifest_sha256": "11b259c60a6f210318ff14cb8a404e73a77fc8cecbf46447ab2dadb0fc2c3d2c",
-    "runner_sha256": "5b11214dddd8e6d5660321b280595d629850abc9c0ef9fc8d4c04dd1a1c20d19",
-    "sysroot_inputs_sha256": "b832e3d647c0973f22b1e6bff83f022504b63cee65e6347ca614c1f9c5946800",
-    "relocation_json_sha256": "8f529b165636360bec8e73f81a627d633074a0b5f07e63ba3bedbe87b1ae8ca4",
-    "int": "All four INT replays returned 0 with 512 MiB code and 16 MiB storage per child.",
-    "aot": "All four AOT replays returned 126 with 536870912:4194304. Each stopped after control insertion at block 262145 against the limit of 262144. The instruction counts include blocks up to and including that first excess block.",
-    "instructions_at_refusal": {
-      "wasm32-wasip1-threads-noeh-mte": 960683,
-      "wasm32-wasip1-threads-eh-mte": 967136,
-      "wasm64-wasip1-threads-noeh-mte": 891753,
-      "wasm64-wasip1-threads-eh-mte": 894108
-    }
-  },
-  "original_environment": {
-    "status": "closed-interrupted",
-    "sdk_commit": "1a88ebbf29a0dedba6385a6079e92b0aaf860070",
-    "sdk_tree": "1dfc5c6146857fc7458a30924b6905be81477516",
-    "vm_commit": "6de97ade53a78f5eaa4ad7e9dc00b28d2272d556",
-    "vm_tree": "5b21dae0134c9a69a0c50780c7f398a099040711"
-  },
-  "original_corpus": {
-    "case_manifest": "src/qualification/cfamily/cases.json",
-    "case_manifest_sha256": "d3131b2e259fe3e9a608d0c5e9e2a766cc7cd13c078a1123b4ae9c4f1fe3ca05",
-    "runner_sha256": "8c335def6aeb62fba8acf79dc7a511601203f155740d29b8746c865b2f5e3539",
-    "source_archive_sha256": "a8580a3e40ed1286c919772e78b92e8ecd18edf622bb5bdd99e0c0cfed7889a3",
-    "upstreams": {
-      "llvm": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
-      "wasi-libc": "2e6fb9d8ee0cdf9e431fbcabe8af3115de000a13",
-      "libc-test": "18e28496adee3d84fefdda6efcb9c5b8996a2398"
-    },
-    "sources": {
-      "compiler-rt": 71,
-      "libc++": 30,
-      "Open POSIX": 30,
-      "libc-test": 36
-    },
-    "distinct_sources": 167,
-    "profile_dimensions": "wasm32/wasm64 \u00d7 threads off/on \u00d7 EH off/on \u00d7 MTE off/on. Open POSIX uses the eight threaded profiles.",
-    "planned_builds_per_host": 2432
-  },
-  "original_hosts": {
-    "x86_64": {
-      "status": "interrupted",
-      "execution": "native Linux x86_64, INT and LLVM AOT",
-      "interrupted_at": "2026-11-24T00:45:58+08:00",
-      "inputs_sha256": "85a704084ebe97584939c086e7f61593115cb40fd129840be4450d31ec990df2",
-      "results_jsonl_sha256": "272954f1bdf51598e6f3cb432b0e1f2b46ccb71fa5219807f0d90f77ea3259c9",
-      "vm_sha256": "64c6e62cc1d8d6d447fe58b563384594c5da33159d6f5cdce3822a239b8a40e8",
-      "vm_receipt_sha256": "c6e8d39b348c1418af081bf3f360761c49526ba1e650f74f5d5451d27e8f6dc9",
-      "recorded_rows": 2414,
-      "missing_rows": 18,
-      "summary_json_produced": false,
-      "recorded_builds": {
-        "linked": 2406,
-        "compile-failed": 8
-      },
-      "recorded_runs": {
-        "int": {
-          "pass": 2370,
-          "failed": 12,
-          "upstream-skip": 16,
-          "upstream-unresolved": 8
-        },
-        "aot": {
-          "pass": 2362,
-          "failed": 27,
-          "upstream-skip": 16,
-          "upstream-unresolved": 1
-        }
-      },
-      "recorded_rows_passing_both_engines": 2355,
-      "unrecorded_original_rows": [
-        {
-          "source": "upstream/libc-test/src/functional/wcstol.c",
-          "profiles": [
-            "wasm64-wasip1-threads-noeh-nomte",
-            "wasm64-wasip1-threads-eh-nomte",
-            "wasm64-wasip1-threads-noeh-mte",
-            "wasm64-wasip1-threads-eh-mte"
-          ]
-        },
-        {
-          "source": "upstream/libc-test/src/regression/malloc-0.c",
-          "profiles": [
-            "wasm32-wasip1-noeh-mte",
-            "wasm32-wasip1-eh-mte",
-            "wasm32-wasip1-threads-noeh-nomte",
-            "wasm32-wasip1-threads-eh-nomte",
-            "wasm32-wasip1-threads-noeh-mte",
-            "wasm32-wasip1-threads-eh-mte",
-            "wasm64-wasip1-noeh-nomte",
-            "wasm64-wasip1-eh-nomte",
-            "wasm64-wasip1-noeh-mte",
-            "wasm64-wasip1-eh-mte",
-            "wasm64-wasip1-threads-noeh-nomte",
-            "wasm64-wasip1-threads-eh-nomte",
-            "wasm64-wasip1-threads-noeh-mte",
-            "wasm64-wasip1-threads-eh-mte"
-          ]
-        }
-      ],
-      "disposition": "The original run closed at 2414 of 2432 rows. The 18 missing rows remain unrecorded. Each candidate host starts a full 2464-row run under its own VM and suite receipts."
-    },
-    "i686": {
-      "status": "unrecorded"
-    },
-    "aarch64": {
-      "status": "unrecorded"
-    },
-    "arm": {
-      "status": "unrecorded"
-    },
-    "armhf": {
-      "status": "unrecorded"
-    }
-  },
-  "original_case_diagnostics_x86_64": [
-    {
-      "source": "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c",
-      "result": "Both engines returned 0 and printed 'skipped' in all 16 profiles. The guarded upstream test requires CRT_HAS_128BIT and HAS_80_BIT_LONG_DOUBLE. The runner recorded 32 upstream-skip verdicts."
-    },
-    {
-      "source": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c",
-      "result": "All eight threaded builds returned 1. wasm-ld reported an undefined symbol for sem_unlink in the named-semaphore test. The builds produced no engine verdicts."
-    },
-    {
-      "source": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c",
-      "result": "The test polls an unsynchronized thread_state flag and calls sleep. The runner denied poll_oneoff. All eight INT runs and the wasm32-wasip1-threads-noeh-nomte AOT run returned PTS_UNRESOLVED (2) with 'Unexpected thread state'. The other seven AOT runs returned 0."
-    },
-    {
-      "source": "upstream/libc-test/src/functional/search_lsearch.c",
-      "result": "Both engines returned 122 with 'memory tag mismatch' in all eight MTE profiles. The upstream test supplies short string literal objects to an 80-byte lsearch insertion. musl copies the full width. Both engines returned 0 in the eight non-MTE profiles."
-    },
-    {
-      "source": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
-      "profiles": "All four threaded MTE profiles",
-      "process_returncode": -4,
-      "signal": "SIGILL",
-      "vm_reported_exit_status": 123,
-      "int": "Interpreter preparation rejected with code 4 using the original 64 MiB code budget.",
-      "aot": "LLVM preparation rejected with code 3. The four instruction counts reached 1048579 to 1048621 against a 1048576 limit.",
-      "diagnostic_replays": {
-        "results_sha256": {
-          "find-storage-code": "59eb5adb198c1c9603ba4de1059affb52a8a2ea3a504b582c24149c753180162",
-          "find-high-code": "e5c66c16c30a2a7f62604784aefa1bc6e603df849841c3a0791a14748f85560b"
-        },
-        "result": "The 32 separate INT/AOT runs crossing 16/64 MiB storage and 64/128 MiB code all reproduced SIGILL. All four INT guests returned 0 at 512 MiB and 1024 MiB code with 16 MiB storage, and at 1024 MiB code with 64 MiB storage. Original matrix counts use the original budgets."
-      }
-    },
-    {
-      "issue": "WASI Threads LLVM native stack quota",
-      "engine": "aot",
-      "process_returncode": -4,
-      "signal": "SIGILL",
-      "vm_reported_exit_status": 123,
-      "sources": {
-        "upstream/llvm/libcxx/test/std/algorithms/alg.modifying.operations/alg.rotate/rotate.pass.cpp": 4,
-        "upstream/llvm/libcxx/test/std/algorithms/alg.sorting/alg.heap.operations/is.heap/is_heap.pass.cpp": 8,
-        "upstream/llvm/libcxx/test/std/utilities/template.bitset/bitset.members/count.pass.cpp": 3
-      },
-      "required_native_frame_bytes": {
-        "rotate": {
-          "wasm32-wasip1-threads-eh-nomte": 1052672,
-          "wasm32-wasip1-threads-eh-mte": 1455648,
-          "wasm64-wasip1-threads-eh-nomte": 1089680,
-          "wasm64-wasip1-threads-eh-mte": 1496768
-        },
-        "is_heap": {
-          "wasm32-wasip1-threads-noeh-nomte": 1377520,
-          "wasm32-wasip1-threads-eh-nomte": 1377520,
-          "wasm32-wasip1-threads-noeh-mte": 2380848,
-          "wasm32-wasip1-threads-eh-mte": 3491088,
-          "wasm64-wasip1-threads-noeh-nomte": 1636576,
-          "wasm64-wasip1-threads-eh-nomte": 1636576,
-          "wasm64-wasip1-threads-noeh-mte": 2401408,
-          "wasm64-wasip1-threads-eh-mte": 3470528
-        },
-        "bitset_count": {
-          "wasm32-wasip1-threads-eh-mte": 1217152,
-          "wasm64-wasip1-threads-eh-nomte": 1245936,
-          "wasm64-wasip1-threads-eh-mte": 1439200
-        }
-      },
-      "result": "Fifteen original AOT runs reported a native stack witness of 1052672 to 3491088 bytes against 1040384 usable bytes. The corresponding INT runs passed."
-    }
-  ],
-  "additional_sdk_cases": {
-    "status": "pending-independent-execution",
-    "scope": "The revised manifest adds 32 case/profile rows to the 2432 original rows. Its three SDK-authored cases require independent INT and AOT results.",
-    "cases": [
-      {
-        "source": "sysroot/search_lsearch_full_width.c",
-        "kind": "port",
-        "profiles": 16,
-        "source_sha256": "6ee21c85b0ede2bc82679638651e4475f8cab87107e0448560f7362ab88fcef5"
-      },
-      {
-        "source": "sysroot/sem_getvalue_unnamed.c",
-        "kind": "companion",
-        "profiles": 8,
-        "source_sha256": "f8dd080fbb23e6c5e499232e65b818b7dcc88571c77effe11f2ba6412fb6411b"
-      },
-      {
-        "source": "sysroot/pthread_rwlock_init_join.c",
-        "kind": "companion",
-        "profiles": 8,
-        "source_sha256": "1036ec6ad13ec0e3d1fd658eceb867e72983f624f6223669a58000d5942dc76c"
-      }
-    ]
-  },
-  "previous_exact_relocation_replay_x86_64": {
-    "vm_commit": "454a19a3c8c1ea388472d44589a126554067ef8b",
-    "vm_tree": "5c9e930f33bc3f7df758bc3f9667e6cd13227a1c",
-    "vm_sha256": "aefe827c18540bd54d261f2e544aa79e18c630c62bf62336afecdb9d2738f8b3",
-    "sdk_qualification_commit": "5af72d70e772c1a55c82b53a26de82a68bc5ab29",
-    "paired_pass": 4,
-    "guest_and_owner_hash_pairs_verified": 4,
-    "int_exit_codes": {
-      "0": 4
-    },
-    "aot_exit_codes": {
-      "0": 4
-    },
-    "results_sha256": "deeda534afdff676d93a8ce3f15f33f3067b5cd22211a3b2029ee51d7aec6aee",
-    "audit_sha256": "00872f5b9994aa2341265eeea007b1a7ea404ec48b9781fbfe8587c8714ae2c0",
-    "prior_vm_comparison_sha256": "e4c7a625e4b66d4b6428c21f7a312238f9a064f20403135e5660b385009bf25d",
-    "partial_matrices": {
-      "sysroot": {
-        "completed_rows_at_interruption": 375,
-        "raw_results_sha256": "b544be596593c10a13aed297d5d6eac8f4c5f15359b0c92ccba94ef558d46eca",
-        "interruption_receipt_sha256": "02350e7644699ab6f1ceeef9f7888cf517c17e4f3476af5a56061d1b83ead387"
-      },
-      "external": {
-        "completed_rows_at_interruption": 112,
-        "raw_results_sha256": "af36451f9973d25b9f8dee8c40ccf31452e1f1515d7fc35f2c12e65e040b54f2",
-        "interruption_receipt_sha256": "be4f639ed86faa811688cf56432f8f6c4b2fd2e31b95aa3ac0129c56034e3403"
-      }
-    }
-  },
-  "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
-  "sdk_tree": "8e68a5f85cd05489f6b71d92a10e7823d841e165",
+  "successor_vm_commit": "08990a38a116cf09e79378e091b54551fa2ab763",
   "observations": [
-    "The upstream Open POSIX sem_getvalue/1-1.c calls sem_open and sem_unlink. The threaded WASIp1 libc omits sem_unlink. The unnamed semaphore test has a separate result.",
-    "In upstream libc-test search_lsearch.c, lsearch copies the declared 80 bytes from its key. The original program passes shorter string literals. Both engines report a memory tag mismatch with MTE enabled. The full-width record port has its own row.",
-    "Every upstream skip and unresolved exit remains in its own engine count."
-  ],
-  "find_replay_i686": {
-    "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
-    "vm": {
-      "commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
-      "tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
-      "sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f",
-      "receipt_sha256": "a47cc33cc8cdfad7d98760177c3f8138a46d2d27878d975a2e22393f55b011b5"
-    },
-    "baseline_case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699",
-    "summary_sha256": "da467664034e3736353f31ff2ae63002e95dd0b61dcb4cd5f22925e438ed1e50",
-    "cases": [
-      {
-        "profile": "wasm32-wasip1-threads-noeh-mte",
-        "guest_sha256": "ade474ae4f9d58bdb9ba40b717ddf574436ca68c6a3eaaa73f91904f37f1b63b",
-        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
-        "relocations": 148030,
-        "status": "pass"
-      },
-      {
-        "profile": "wasm32-wasip1-threads-eh-mte",
-        "guest_sha256": "65a157dac30684133cd29b33a419d65e7f37e84941f34348ee643177052d3f9a",
-        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
-        "relocations": 171193,
-        "status": "pass"
-      },
-      {
-        "profile": "wasm64-wasip1-threads-noeh-mte",
-        "guest_sha256": "dddaa123f373a2dfe72cbea30510af952dc18095b4a463995e568c5f74190097",
-        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
-        "relocations": 160323,
-        "status": "pass"
-      },
-      {
-        "profile": "wasm64-wasip1-threads-eh-mte",
-        "guest_sha256": "3a00798902ba7de8ff9a53276d35977385c33857b0678e68a11df16f2f6dfc50",
-        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
-        "relocations": 184218,
-        "status": "pass"
-      }
-    ]
-  }
+    "The original lsearch program declares an 80-byte record and supplies shorter strings. The SDK port supplies full-width records.",
+    "The upstream named semaphore fixture requires sem_unlink at link time. The unnamed semaphore companion ran on the eight threaded profiles.",
+    "The original rwlock test imports poll_oneoff for sleep. The 03a3 harness denied this interface. The joined companion exercises completion independently.",
+    "The threaded MTE libc++ find program exceeded the recorded per-child LLVM AOT relocation allowance in four x86_64 profiles.",
+    "The upstream floatuntisf source printed its skip diagnostic on both engines."
+  ]
 }
