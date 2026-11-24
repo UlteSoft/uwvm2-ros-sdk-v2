@@ -66,7 +66,32 @@
       "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699"
     },
     "i686": {
-      "status": "pending"
+      "rows": 2464,
+      "profiles": 16,
+      "builds": {
+        "linked": 2456,
+        "compile-failed": 8
+      },
+      "engines": {
+        "int": {
+          "pass": 2424,
+          "upstream-skip": 16,
+          "upstream-unresolved": 8,
+          "failed": 8
+        },
+        "aot": {
+          "pass": 2428,
+          "upstream-skip": 16,
+          "runtime-budget-rejected": 4,
+          "failed": 8
+        }
+      },
+      "vm_executable_sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f",
+      "vm_receipt_sha256": "a47cc33cc8cdfad7d98760177c3f8138a46d2d27878d975a2e22393f55b011b5",
+      "inputs_sha256": "0bec9c0767041c6cd4432ee7d1f1decef21bcd1610849f4f98e6f63e33e0e8ae",
+      "results_sha256": "68d5b9119dddd9aaf68f28d2401e2270ea2d1779408a8646f177ff4f732391ff",
+      "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699",
+      "status": "completed-with-failures"
     },
     "aarch64": {
       "status": "installation-failed",

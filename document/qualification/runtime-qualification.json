@@ -96,6 +96,39 @@
           "results_sha256": "ccd65d635475035af45b92f9a2f85d150b700e2ba8d61890a61252278f99de48"
         }
       }
+    },
+    "restore_replay": {
+      "sdk_verifier_commit": "f84f8d39cb37ca7967dd0eab2e9c43ba693427ab",
+      "guest_sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+      "host": "linux-x86_64",
+      "profile": "wasm32-wasip1-noeh-nomte",
+      "engine": "aot",
+      "results_sha256": "128417ac076ccb67f6a60d92fb571c29949b0a56891521991b0f275160b8059b",
+      "receipt_sha256": "138ed772005b5cc7031ef88ce949188a73dc4f18df346d2c4d906d6a4c0f1f16",
+      "outcomes": {
+        "c": {
+          "status": "pass",
+          "guest_sha256": "980b1dc7e071d19c175ab0eddc66a85411cdb14cdaf49fd47ed190b6adfded46",
+          "restored_word": "c84f613a",
+          "guest_exit": 0
+        },
+        "cpp": {
+          "status": "pass",
+          "guest_sha256": "e5658a8433462a40c1bbfdcfb94ae8e54c49f2f767005fa13bce56322ff12abc",
+          "restored_word": "c84f613a",
+          "guest_exit": 0
+        },
+        "objc": {
+          "status": "restore-declined",
+          "guest_sha256": "41d162c1ec5cb0d6957841d9dc3412df290ae059d8256881c9b5ffa714a87867",
+          "restore_refusal": "error: snapshot-restore rejected phase=6 detail=11 preparation=6 state-error=12 applied=0 retained=1; original stopped world retained; inspect status before further management"
+        },
+        "objcpp": {
+          "status": "restore-declined",
+          "guest_sha256": "6dc3c54ba29cea6ec6940e320da23e86a79ed0d712a22bb7e5b58877645cc500",
+          "restore_refusal": "error: snapshot-restore rejected phase=6 detail=11 preparation=6 state-error=12 applied=0 retained=1; original stopped world retained; inspect status before further management"
+        }
+      }
     }
   }
 }
