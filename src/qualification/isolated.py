@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import socket
 import subprocess
 import sys
 import uuid
@@ -37,7 +38,36 @@ def cgroup_info():
             "child_memory_oom_group": int(child["memory.oom.group"])}
 
 
-def sandbox(args, work):
+def namespace_ids():
+    return {name: os.readlink("/proc/self/ns/" + name) for name in ("mnt", "net", "pid", "ipc", "uts", "user")}
+
+
+def verify_offline_namespace():
+    """Check the launcher's strict offline environment before spawning a workload."""
+    info = cgroup_info()
+    group = Path("/sys/fs/cgroup") / info["cgroup"].lstrip("/")
+    if any((p / "memory.swap.current").read_text().strip() != "0" for p in (group, group.parent)):
+        raise RuntimeError("parent and leaf must have zero current swap")
+    before = json.loads(os.environ.get("WROS_QUAL_PARENT_NAMESPACES", "{}"))
+    current = namespace_ids()
+    if before.keys() != current.keys() or any(before[k] == current[k] for k in current):
+        raise RuntimeError("expected private mount, network, PID, IPC, UTS and user namespaces")
+    mounts = {}
+    for line in Path("/proc/self/mountinfo").read_text().splitlines():
+        mount, fs = line.split(" - ", 1)
+        fields = mount.split()
+        mounts[fields[4]] = (fields[5].split(","), fs.split()[0])
+    if (any("ro" not in mounts[p][0] for p in ("/", "/tmp", "/dev/shm"))
+            or any(any(Path(p).iterdir()) for p in ("/tmp", "/dev/shm"))
+            or "rw" not in mounts["/work"][0] or mounts["/work"][1] in ("tmpfs", "ramfs")
+            or any(os.environ.get(k) != "/work/.tmp" for k in ("TMP", "TEMP", "TMPDIR"))
+            or resource.getrlimit(resource.RLIMIT_CORE) != (0, 0)
+            or socket.if_nameindex() != [(1, "lo")]):
+        raise RuntimeError("expected offline namespace with disk-backed /work, read-only root, /tmp and /dev/shm")
+    return {**info, "namespaces": current, "work_filesystem": mounts["/work"][1]}
+
+
+def sandbox(args, work, *, readonly=(), strict_offline=False):
     cgroup = cgroup_info()
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     empty = work.parent / (".empty-" + uuid.uuid4().hex)
@@ -49,6 +79,11 @@ def sandbox(args, work):
                    "--ro-bind", str(empty), "/dev/shm", "--ro-bind", "/usr", "/usr"]
         if args.network == "offline":
             command.append("--unshare-net")
+        if strict_offline:
+            if args.network != "offline":
+                raise ValueError("strict offline namespace requires --network offline")
+            parent = (Path("/sys/fs/cgroup") / cgroup["cgroup"].lstrip("/")).parent
+            command.extend(["--unshare-user", "--disable-userns", "--ro-bind", str(parent), str(parent)])
         for name in ("bin", "sbin", "lib", "lib64"):
             path = Path("/") / name
             if path.is_symlink():
@@ -63,6 +98,8 @@ def sandbox(args, work):
         for name in ("home", "cache", "config", "data", "state", ".tmp"):
             (work / name).mkdir(mode=0o700, exist_ok=True)
         command.extend(["--bind", str(work), "/work", "--chdir", "/work"])
+        for source, dest in readonly:
+            command.extend(["--ro-bind", str(source.resolve(strict=True)), str(dest)])
         environment = {
             "HOME": "/work/home", "TMPDIR": "/work/.tmp", "TMP": "/work/.tmp",
             "TEMP": "/work/.tmp", "XDG_CACHE_HOME": "/work/cache",
@@ -85,6 +122,9 @@ def sandbox(args, work):
             environment["XMAKE_PROGRAM_DIR"] = "/opt/tools/share/xmake"
         if args.rust:
             environment["PATH"] = "/opt/rust/bin:" + environment["PATH"]
+        if strict_offline:
+            environment["WROS_QUAL_PARENT_NAMESPACES"] = json.dumps(namespace_ids())
+            command.extend(["--remount-ro", "/proc", "--remount-ro", "/dev"])
         for key, value in environment.items():
             command.extend(["--setenv", key, value])
         print(json.dumps({**cgroup, "network": args.network,
@@ -94,6 +134,12 @@ def sandbox(args, work):
         return subprocess.run([*command, "--remount-ro", "/", "--", *args.command]).returncode
     finally:
         empty.rmdir()
+
+
+def scope(command):
+    return subprocess.run(["systemd-run", "--user", "--scope", "--collect",
+                           "--slice=" + SLICE, "-p", "MemoryMax=" + LIMIT,
+                           "-p", "MemorySwapMax=0", "-p", "OOMPolicy=kill", *command]).returncode
 
 
 def main():
@@ -118,11 +164,8 @@ def main():
     if args.inside_scope:
         return sandbox(args, work)
     # The caller and the Codex process stay outside the job's OOM domain.
-    return subprocess.run(["systemd-run", "--user", "--scope", "--collect",
-                           "--slice=" + SLICE, "-p", "MemoryMax=" + LIMIT,
-                           "-p", "MemorySwapMax=0", "-p", "OOMPolicy=kill",
-                           sys.executable, "-I", "-B", str(Path(__file__).resolve()),
-                           "--inside-scope", *sys.argv[1:]]).returncode
+    return scope([sys.executable, "-I", "-B", str(Path(__file__).resolve()),
+                  "--inside-scope", *sys.argv[1:]])
 
 
 if __name__ == "__main__":

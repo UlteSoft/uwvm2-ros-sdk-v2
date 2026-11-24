@@ -9,6 +9,8 @@ This suite checks a four-byte read and write inside a live, aligned buffer. Each
 
 ## Run from an SDK source checkout
 
+For timing the linear-access kernel under software and hardware tag checking, see the five-host performance guide. [Kernel measurements and replay](cfamily-mte-performance.md)
+
 Supply installed language prefixes, a VM matching the reviewed commit/tree and receipt, the qualification decoder, and an empty output directory on the project volume. The runner creates a bounded shared memory owner for threaded profiles. The decoder uses the vendored WasmMTE instruction definitions. [Decoder sources](../../src/qualification/cfamily/decoder)
 
 ```sh
