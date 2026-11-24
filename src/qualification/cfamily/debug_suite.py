@@ -119,7 +119,10 @@ def inspect_wasm(path, api, profile, source_function):
             body.end()
     for name in (".debug_info", ".debug_abbrev", ".debug_line", ".debug_str"):
         live.need(name in metadata and metadata[name]["bytes"] > 0, f"absent or empty DWARF section {name}: {path}")
-    for name in ("value", "_start"):
+    required_exports = ["value", "_start"]
+    if profile.threads:
+        required_exports.append("wasi_thread_start")
+    for name in required_exports:
         live.need(name in exports and exports[name][0] == 0, f"absent function export {name}: {path}")
     imported_functions = sum(i["kind"] == 0 for i in imports)
     # wasm-ld may export a .command_export wrapper. Its business-call index
@@ -144,20 +147,24 @@ def build_pair(args, target, language, out, api):
     config = LANGUAGES[language]
     src = HERE / "debug_fixtures" / ("probe." + config.extension)
     frontend = sdk / "bin" / config.driver
+    objc = language in ("objc", "objcpp")
+    hosted_threads = objc and target.threads
     profile = Profile(target.bits, "3.0", target.threads, target.mte, "eh" if target.eh else "noeh")
     base = [frontend, "--target", f"wasm{target.bits}", "--core", "3.0", "--std", config.standard, "-O0", "-g",
             "--mte" if target.mte else "--no-mte", "--eh" if target.eh else "--no-eh",
             "--threads" if target.threads else "--no-threads"]
-    link = ["--reactor", "--export", "_start", "--export", "value"]
+    link = [] if hosted_threads else ["--reactor", "--export", "_start"]
+    link += ["--export", "value"]
     if target.threads:
         base += ["-D", "SDK_SHARED=1"]
-        link += ["--shared-memory-pages", str(SHARED_MEMORY_PAGES), "--export", "wasi_thread_start"]
+        link += ["--shared-memory-pages", str(SHARED_MEMORY_PAGES)]
+        if not hosted_threads:
+            link += ["--export", "wasi_thread_start"]
     build = {"profile": target.name, "language": language, "source": str(src), "source_sha256": digest(src),
              "frontend_sha256": digest(frontend), "generations": [], "compile": [], "module": 1 if target.threads else 0}
     structure = []
     bodies = []
     try:
-        objc = language in ("objc", "objcpp")
         if objc:
             # wroc/wrocxx authenticate each sealed input object against the
             # active compiler and GNUstep closure before linking it.
@@ -184,6 +191,9 @@ def build_pair(args, target, language, out, api):
                 build.setdefault("link", []).append(result)
                 live.need(result.get("returncode") == 0, f"generation {n} link failed: {result}")
             image, layout, functions = inspect_wasm(path, api, profile, config.source_function)
+            if hosted_threads:
+                live.need(any(i["module"] == "wasi" and i["name"] == "thread-spawn" for i in image["imports"]),
+                          "threaded Objective-C fixture lacks wasi.thread-spawn")
             structure.append(layout)
             bodies.append(functions)
             if objc:
