@@ -341,5 +341,31 @@
         "harness_commit": "ae64a9236cb181b27eb7a46ba13c9be66c6242d1"
       }
     }
+  },
+  "aarch64_public_sdk_native_c": {
+    "scope": "C compiler from the public binary installer, run inside system QEMU. The offline project used the installed compiler and sysroot. Execution used the separately built native candidate VM.",
+    "sdk_commit": "3106b92222c7a6fa3a1d18d133db5f94962c6237",
+    "sdk_tree": "3da5a5c78a02bdfddbfcbefbd342ae79991304af",
+    "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+    "vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+    "vm_sha256": "2cbe6a26e172ced6aa072f9b18ae189fca1fe3d28d5f15617a0b54210037d692",
+    "host": "aarch64",
+    "profile": "wasm32-wasip1-noeh-nomte",
+    "simd": false,
+    "bulk_copy_fill": false,
+    "cells_passed": 1,
+    "int_passed": 1,
+    "aot_passed": 1,
+    "decoder_passed": 1,
+    "wasm_sha256": "6166638c04087df0ea9e786ae6c6983ed05cd4c14c22ae05232da68568ef3d8d",
+    "stdout_bytes": 4160,
+    "stdout_sha256": "6ed1017e0074af828566653a41c43c480649649c083c3cc78c887387e562619b",
+    "compiler_sha256": "9f87efea85760ee2d3dfecc7fcd56f04d216b3fcdc7ec9dc29d2329fc2c75892",
+    "sysroot_sha256": "dbb1f7d1958d54785dfbbf8c10068f797511c37b016c82ed91e825149373c495",
+    "build_receipt_sha256": "1a8bc06f1ef13f628ff26a07233cc4f23fc527df4233a487d341d475d971de30",
+    "installation_sha256": "1e4e0983a71bf1c6458fea677bef48dadf24371dae35a7230634b20758555054",
+    "isolation_sha256": "891436584123c2fd9ed98c0a0672872ad2ebc8d68de8d45c708034126ae48fab",
+    "execution_summary_sha256": "31707e2d819d1fe56b03970c98d85020b3713ca9ecad910da577ab96c5155273",
+    "results_sha256": "e9dd51602161edbce59c95556e69fa7de463cea90ca2e2b90813d7a1884ec376"
   }
 }
