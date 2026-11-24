@@ -25,7 +25,7 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
   --cc-sdk /sdk/c --cxx-sdk /sdk/cpp --objc-sdk /sdk/objc --objcpp-sdk /sdk/objcpp \
   --vm /opt/tools/bin/uwvm2-ros \
   --decoder src/qualification/cfamily/decoder/target/release/decode-memtag \
-  --work /work/isa-matrix --seed 0x12345678 --jobs 4
+  --work /work/isa-matrix --seed 0x64100807 --jobs 4
 ```
 
 增加 `--language objc --profile wasm32-wasip1-threads-noeh-mte --simd off --bulk on` 只跑一格，此时只需指定 Objective-C 的 SDK 根目录。每次运行使用独立空目录。测试其他版本的 VM 时，用 `--vm-target` 指向含已选定 `vm_commit` 和 `vm_tree` 的 JSON，用 `--vm-receipt` 指向对应可执行文件的构建收据。
@@ -43,7 +43,7 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
 在验收 namespace 内的空项目目录执行以下命令。每个安装回执的 directory 字段给出该语言实际安装的位置。此次验收使用空 HOME，父、子 cgroup 各设 64 GiB 和零 swap，临时文件写入项目盘。安装结束后，测试在仅有回环接口的网络 namespace 中运行。
 
 ```sh
-SDK_COMMIT=38023bff47eb545815bdc7e272fc24c44901686d
+SDK_COMMIT=03a3904ff4d7354d7458bcff7338639a37d9292f
 mkdir -p .tmp/sdk-install
 export TMPDIR="$PWD/.tmp/sdk-install"
 curl -fL --retry 3 "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$SDK_COMMIT/install.py" -o install.py
@@ -52,5 +52,7 @@ do
   python3 -I -B install.py install --commit "$SDK_COMMIT" --language "$language" --platform generic --mode binary --prefix "$PWD/sdk" > "$language.install.json" || exit 1
 done
 ```
+
+x86_64 的 C 安装从空前缀直接执行公开根安装器，选择二进制模式。四语言矩阵复用了按同一公开提交校验的 Git 对象和预编译压缩包，其余选择在断网环境中执行该提交的第二阶段安装器。全部 256 个最终模块通过指令检查，两种 VM 引擎的输出都与参考字节一致。关闭 MTE 的 128 个模块也与 Wasmtime 42.0.1 C API 的结果一致。[各宿主验收记录](../qualification/cfamily-optional-instructions.json)。
 
 本轮验收目标是使用 WASIp1 的 Core Wasm 模块。语言运行时必需的特性作为前置条件。例如，依赖 WasmGC 的 Java 或 C# 后端只在开启 WasmGC 时验收。Component Model、WASIp2、WASIp3 和 ROS 集成属于本轮范围之外。

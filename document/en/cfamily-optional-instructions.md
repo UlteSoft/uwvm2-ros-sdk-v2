@@ -25,7 +25,7 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
   --cc-sdk /sdk/c --cxx-sdk /sdk/cpp --objc-sdk /sdk/objc --objcpp-sdk /sdk/objcpp \
   --vm /opt/tools/bin/uwvm2-ros \
   --decoder src/qualification/cfamily/decoder/target/release/decode-memtag \
-  --work /work/isa-matrix --seed 0x12345678 --jobs 4
+  --work /work/isa-matrix --seed 0x64100807 --jobs 4
 ```
 
 Run a single cell by adding `--language objc --profile wasm32-wasip1-threads-noeh-mte --simd off --bulk on`. Only the selected language's SDK path is required. Use an empty output directory for each run. A VM built from a different revision can be selected with `--vm-target` pointing to a JSON file containing the reviewed `vm_commit` and `vm_tree`, and `--vm-receipt` pointing to that binary's build receipt.
@@ -43,7 +43,7 @@ Each cell retains the executable, build receipt, decoder listing, exact command 
 Run the following in an empty project directory inside the qualification namespace. The installer reports the installed directory for each selection. The public run used the 64 GiB parent and child cgroups, zero swap, an empty home, and a project-disk scratch directory. After installation the tests ran in a network namespace with only the loopback interface.
 
 ```sh
-SDK_COMMIT=38023bff47eb545815bdc7e272fc24c44901686d
+SDK_COMMIT=03a3904ff4d7354d7458bcff7338639a37d9292f
 mkdir -p .tmp/sdk-install
 export TMPDIR="$PWD/.tmp/sdk-install"
 curl -fL --retry 3 "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$SDK_COMMIT/install.py" -o install.py
@@ -52,5 +52,7 @@ do
   python3 -I -B install.py install --commit "$SDK_COMMIT" --language "$language" --platform generic --mode binary --prefix "$PWD/sdk" > "$language.install.json" || exit 1
 done
 ```
+
+The public x86_64 C run invoked the root installer in binary mode from an empty prefix. The full four-language comparison reused the Git objects and prebuilt archives verified against the same public commit. Each additional selection executed the published second-stage installer offline. All 256 linked modules passed the instruction checks and both VM engines matched the reference bytes. The 128 modules built with MTE disabled also matched in Wasmtime 42.0.1 through its C API. [Per-host receipts](../qualification/cfamily-optional-instructions.json).
 
 The qualification target is a Core Wasm module using WASIp1. A feature required by a language runtime is a prerequisite. For example, keep WasmGC enabled when a Java or C# backend requires it. Component Model, WASIp2, WASIp3 and ROS integration are outside this suite.

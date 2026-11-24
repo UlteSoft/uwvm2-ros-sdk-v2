@@ -140,11 +140,29 @@
       }
     },
     "aarch64": {
-      "status": "installation-failed",
+      "status": "superseded-after-installation",
       "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
-      "stage": "binary C installation",
-      "diagnostic": "installed native executable differs: clang",
-      "console_sha256": "89efa9043cac165463656330ebd70bd1125768a498dd51e542abed677cb76a16"
+      "first_attempt": {
+        "status": "installation-failed",
+        "stage": "binary C installation",
+        "diagnostic": "installed native executable differs: clang",
+        "console_sha256": "89efa9043cac165463656330ebd70bd1125768a498dd51e542abed677cb76a16"
+      },
+      "second_attempt": {
+        "qualified_selections": [
+          "c",
+          "cpp",
+          "wat"
+        ],
+        "mode": "public second-stage binary installation",
+        "installation_sha256": "7a8b0377f8948d02682b79f5248997c7285f9bc998ebf658a4b8312746a4c5b5",
+        "selection_sha256": {
+          "c": "0e7848a7e99d9c417d8da9de87c66cf44f16b57b77640e7c206621e17922ca04",
+          "cpp": "592dd7666b347d4e04b458d19f9e55008ece06d25e32024b6fa74324972337e6",
+          "wat": "63aae44d06c0a57927239854270f36d1893702a594a23bc828e70e64de99e0a9"
+        }
+      },
+      "external_matrix": "Interrupted for a fresh run on 03a3904ff4d7354d7458bcff7338639a37d9292f"
     },
     "arm": {
       "status": "pending"
