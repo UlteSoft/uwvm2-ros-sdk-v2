@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <ctype.h>
 #ifdef __wasilibc_unmodified_upstream // Changes to optimize printf/scanf when long double isn't needed
 #else
 #include "printscan.h"
@@ -33,9 +34,39 @@ float strtof(const char *restrict s, char **restrict p)
 	return strtox(s, p, 0);
 }
 
-double strtod(const char *restrict s, char **restrict p)
+/* Only the general scanner needs an addressable FILE on the Wasm stack. */
+static __attribute__((__noinline__)) double strtod_slow(const char *s, char **p)
 {
 	return strtox(s, p, 1);
+}
+
+double strtod(const char *restrict s, char **restrict p)
+{
+	const unsigned char *q = (const unsigned char *)s;
+	int neg = *q == '-';
+	if (neg || *q == '+') q++;
+
+	/* At most nine digits keep the significand and decimal divisor exact
+	 * in both uint32_t and binary64. Division rounds the signed result once. */
+	unsigned digits = 0, significand = 0, divisor = 1;
+	while (isdigit(*q) && digits < 9) {
+		significand = significand * 10 + (*q++ - '0');
+		digits++;
+	}
+	if (*q == '.') {
+		q++;
+		while (isdigit(*q) && digits < 9) {
+			significand = significand * 10 + (*q++ - '0');
+			divisor *= 10;
+			digits++;
+		}
+	}
+	if (!digits || isdigit(*q) || (*q|32) == 'e' || (*q|32) == 'x')
+		return strtod_slow(s, p);
+
+	if (p) *p = (char *)q;
+	double value = neg ? -(double)significand : (double)significand;
+	return value / divisor;
 }
 
 long double strtold(const char *restrict s, char **restrict p)

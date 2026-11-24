@@ -40,6 +40,7 @@
 #include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/InstVisitor.h"
 #include "llvm/IR/IntrinsicInst.h"
+#include "llvm/IR/Module.h"
 #include "llvm/IR/Operator.h"
 #include "llvm/IR/PatternMatch.h"
 #include "llvm/Support/CommandLine.h"
@@ -600,6 +601,33 @@ int64_t getExpectedNumberOfCompare(int NumCaseCluster) {
   return 3 * static_cast<int64_t>(NumCaseCluster) / 2 - 1;
 }
 
+// The Wasm stack tagger reserves a physical slot at function entry when its
+// lifetime markers span blocks. Passing its address to a surviving external
+// call keeps the slot in linear memory.
+static bool hasCrossBlockWasmMemTagLifetime(const Value *Arg) {
+  if (!Arg->getType()->isPointerTy())
+    return false;
+  const auto *AI = dyn_cast<AllocaInst>(getUnderlyingObject(Arg));
+  if (!AI || !AI->isStaticAlloca() || AI->isSwiftError() ||
+      AI->isUsedWithInAlloca() ||
+      AI->getAddressSpace() != AI->getDataLayout().getAllocaAddrSpace())
+    return false;
+  auto Size = AI->getAllocationSize(AI->getDataLayout());
+  if (!Size || Size->isScalable() || Size->isZero())
+    return false;
+
+  const BasicBlock *MarkerBB = nullptr;
+  for (const User *U : AI->users()) {
+    const auto *Marker = dyn_cast<LifetimeIntrinsic>(U);
+    if (!Marker)
+      continue;
+    if (MarkerBB && MarkerBB != Marker->getParent())
+      return true;
+    MarkerBB = Marker->getParent();
+  }
+  return false;
+}
+
 /// FIXME: if it is necessary to derive from InlineCostCallAnalyzer, note
 /// the FIXME in onLoweredCall, when instantiating an InlineCostCallAnalyzer
 class InlineCostCallAnalyzer final : public CallAnalyzer {
@@ -660,6 +688,7 @@ class InlineCostCallAnalyzer final : public CallAnalyzer {
   std::optional<CostBenefitPair> CostBenefit;
 
   bool SingleBB = true;
+  bool HasCrossBlockWasmMemTagSlot = false;
 
   unsigned SROACostSavings = 0;
   unsigned SROACostSavingsLost = 0;
@@ -732,6 +761,12 @@ class InlineCostCallAnalyzer final : public CallAnalyzer {
   }
   void onLoweredCall(Function *F, CallBase &Call,
                      bool IsIndirectCall) override {
+    if (AllocatedSize && !HasCrossBlockWasmMemTagSlot && F->isDeclaration() &&
+        this->F.hasFnAttribute(Attribute::SanitizeMemTag) &&
+        Call.getModule()->getTargetTriple().isWasm() &&
+        llvm::any_of(Call.args(), hasCrossBlockWasmMemTagLifetime))
+      HasCrossBlockWasmMemTagSlot = true;
+
     // We account for the average 1 instruction per call argument setup here.
     addCost(Call.arg_size() * InstrCost);
 
@@ -1105,6 +1140,22 @@ class InlineCostCallAnalyzer final : public CallAnalyzer {
       Threshold -= VectorBonus;
     else if (NumVectorInstructions <= NumInstructions / 2)
       Threshold -= VectorBonus / 2;
+
+    if (HasCrossBlockWasmMemTagSlot && !SingleBB && GetBFI &&
+        Params.ColdCallSiteThreshold && !Caller->hasOptSize() &&
+        Caller->hasFnAttribute(Attribute::SanitizeMemTag)) {
+      BlockFrequencyInfo &BFI = GetBFI(*Caller);
+      // When the caller is expected to bypass the call at least as often as
+      // it executes it, moving a reservation into its entry is expensive.
+      // Use the ordinary cold-call budget, including for a sole static call.
+      if (BFI.getBlockFreq(CandidateCall.getParent()) <=
+              BFI.getEntryFreq() * BranchProbability(1, 2) &&
+          !getHotCallSiteThreshold(CandidateCall, &BFI)) {
+        Threshold = std::min(Threshold, *Params.ColdCallSiteThreshold);
+        addCost(StaticBonusApplied);
+        StaticBonusApplied = 0;
+      }
+    }
 
     if (std::optional<int> AttrCost =
             getStringFnAttrAsInt(CandidateCall, "function-inline-cost"))
