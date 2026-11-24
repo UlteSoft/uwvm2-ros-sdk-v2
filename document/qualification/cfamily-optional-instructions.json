@@ -566,5 +566,57 @@
     },
     "isolation_sha256": "432796d4c3ce391f97b35af2c54f1295cd764ad349c29aae1e1494ff065cc4f8",
     "summary_sha256": "1072838657bd9cffac809b6e270b4c429eecb2b23d9b575cf163da1d340bfce0"
+  },
+  "candidate_vm_d461": {
+    "scope": "Execution of archived public compiler outputs in the frozen UWVM interpreter and LLVM AOT. Each pair holds the source, inputs and other feature setting fixed.",
+    "vm_commit": "d46186fca2dc60eebc71fdf4bf1c78ab32b9cb91",
+    "vm_tree": "a93794ed351e9b1d860cdcd6a34e0511dc0eda49",
+    "hosts": {
+      "x86_64": {
+        "passed": true,
+        "summary_sha256": "5fbb4d9f9aa4e983c3f3c3ce5bb632c49d5b9d547d8e66bdcfce76d5bf8c68da",
+        "sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+        "sdk_tree": "352221288b627c9f3f7fdc98114578da48e5f617",
+        "compiler_host": "x86_64",
+        "execution_host": "native Linux",
+        "corpus_sha256": "1ca017142c0f334f8a46f8f7a0b9618e8727194b34597fe27f1c4315f2da75fc",
+        "int_passed": 256,
+        "aot_passed": 256,
+        "decoder_passed": 256,
+        "bulk_off_cells_passed": 64,
+        "thread_init_control_cells_passed": 64,
+        "copy_fill_cells_passed": 128,
+        "vm_sha256": "1bb7a97f0937af4ffefaa845d3ac8b6549c9e5c6d7606d75fbf9d6eaadaadb7c",
+        "results_sha256": "5a9d7be00b18f4654c17caffc41075311c4fb37f7e7d2589d53e36ad75ca94d1",
+        "isolation_sha256": "fa88f0c8a5f923553d52201152ed3e228475f538ebb59ab804e4a186172fc4d7",
+        "decoder_sha256": "57cc30a82bbe34ad7313d85524bb37212d8e556da96a8c6f6f150c5a16bd7aea",
+        "wasmtime_reference_summary_sha256": "5544a95c86fd6b12b0f21870cc635fc488dfbe59a237b48d2b1da9e75647b041",
+        "wasmtime_reference_results_sha256": "8d94d9ee6cc8ee47840eaef601f676d29548fba310dfad438c563023b640e6e6",
+        "wasmtime_reference_cells": 128,
+        "paired_feature_comparisons": {
+          "int": {
+            "simd": {
+              "compared": 128,
+              "equivalent": 128
+            },
+            "copy_fill": {
+              "compared": 128,
+              "equivalent": 128
+            }
+          },
+          "aot": {
+            "simd": {
+              "compared": 128,
+              "equivalent": 128
+            },
+            "copy_fill": {
+              "compared": 128,
+              "equivalent": 128
+            }
+          }
+        },
+        "mte_enabled_positive_cells": 128
+      }
+    }
   }
 }

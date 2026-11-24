@@ -1,0 +1,122 @@
+{
+  "software_c_tag_domain": {
+    "scope": "Original SDK C tag-domain conformance on bounded live guest storage, synchronous software backend, non-threaded EH profiles.",
+    "fixture": {
+      "commit": "476799fc80b1ebeea82721a82d658dee75fce9a6",
+      "tree": "df649901b3779441ac2dd8e031b15f0f2d847f5d",
+      "files": {
+        "tag_access.c": {
+          "git_path": "tests/memtag/tag_access.c",
+          "blob": "f029d00d035a2fc40075276e65eb0b7321cb62ca",
+          "sha256": "08acd9b4521d432c48982da96a64f23b4405364b639519f042a74f0f0bea65c4"
+        },
+        "tag_access_word.c": {
+          "git_path": "tests/memtag/tag_access_word.c",
+          "blob": "1ca2ac2d3db4c6932dc8812df7b1c2a21c39ffca",
+          "sha256": "f63503b6c2cf46506c9d806e0bcbf7b2b0aa9b15499e6e368a4665be140b4391"
+        },
+        "memtag_tag_domain.py": {
+          "git_path": "tests/memtag_tag_domain.py",
+          "blob": "6dba0bcbd801c01851aabaa3130b3353bdbd27d0",
+          "sha256": "5b9b8800a90f4e8248745a5b2bccf1ab1bcb10cee724bc9db2bc7add7e738117"
+        }
+      }
+    },
+    "vm_commit": "d46186fca2dc60eebc71fdf4bf1c78ab32b9cb91",
+    "compiler_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "hosts": {
+      "x86_64": {
+        "vm_sha256": "1bb7a97f0937af4ffefaa845d3ac8b6549c9e5c6d7606d75fbf9d6eaadaadb7c",
+        "origin_sha256": "8f880fd170ae7b1c1dac60ab5a093a23c2e7c3380126ff514f0040c8c108b577",
+        "isolation_sha256": "08f9f6b7b94546aa8641b13d9b6b0737345da9898e1fdd61bfe921bff0c7301d",
+        "summary_sha256": "dd91306bfcf65599a5c73e7b8f871cf0abe515d8a599d2e6f02581a27a581740",
+        "profiles": {
+          "wasm32-wasip1-eh-mte": {
+            "wasm_sha256": "5f0f2836986f1d53cdeb515f2cb1724329947c6fcc586de82126b304018295bc",
+            "compiler_sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+            "sysroot_sha256": "f903a3c027277e78e777ea2f16aada7d6a7a34393bc908b79ee25bc1488e38a7",
+            "build_receipt_sha256": "37271b7a80be84ee0504f41ef43f7195e0204f0da76ec5a5264ad305ec5b2001",
+            "execution_sha256": "5ffa739941cbde7e865bbdb7ee3b541726c4e452e127abfc43f49379cdbe01c1",
+            "engines": {
+              "int": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 40,
+                "cross_granule_store_log_sha256": "23b67488e227338508d68aad252434ef83b0d329a15cfdb7abe5909df1f2cc0a"
+              },
+              "aot": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 40,
+                "cross_granule_store_log_sha256": "3e939396810ecc9b9c0526adfa371c7f5a22fae6e7513436261c2b1b022ea59c"
+              }
+            }
+          },
+          "wasm64-wasip1-eh-mte": {
+            "wasm_sha256": "95f3c66fd3a62d76808ee424fdd695b6eff0743d8b95586d31f980ec3be42506",
+            "compiler_sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+            "sysroot_sha256": "fa6e53bb5d121ccfd5fe2469042f78f58b7a4130d3ef831a18f0ba7681946dd6",
+            "build_receipt_sha256": "378db88a06bead74fd8c175a6181f537aeac58a7a37e29f71be47fc01daaec70",
+            "execution_sha256": "eab27423a3e42e09dd4424fa1b88e3bfe203506584bd017adec765419da93af7",
+            "engines": {
+              "int": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 528,
+                "cross_granule_store_log_sha256": "0ae39dacd89e0e7e2c3b834fff0ef762c009b1112a0b41807eb965f47169c5e3"
+              },
+              "aot": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 528,
+                "cross_granule_store_log_sha256": "d6a1e3615fced9d91d113a5a9015367a774b9612aab76cc7bbdb4fac9f5690c4"
+              }
+            }
+          }
+        }
+      },
+      "i686": {
+        "vm_sha256": "9a8e95faf488e8e597a588634edbe820a5a0384bfd0df71cf6d487899501b45e",
+        "origin_sha256": "e449fc883323c077e452f9abb35f2ad884bd6da792dfe0f625d618ad132bff40",
+        "isolation_sha256": "4b7f119dbac7a9395cb303dcad2fd09b512fb352d13582f5992673a0bb64353d",
+        "summary_sha256": "82952bb9471fffb8bbcc7ecb10afd94c1a3d410645bb73e8eb624ab6ff46014a",
+        "profiles": {
+          "wasm32-wasip1-eh-mte": {
+            "wasm_sha256": "5f0f2836986f1d53cdeb515f2cb1724329947c6fcc586de82126b304018295bc",
+            "compiler_sha256": "2b4899c4846a073ee82d488bb047af8d9dede17b0cc5cc070fe126d082420c37",
+            "sysroot_sha256": "f903a3c027277e78e777ea2f16aada7d6a7a34393bc908b79ee25bc1488e38a7",
+            "build_receipt_sha256": "8e9cc1b5dfa73a03cd2409a4d9ad990e35e2e5b3c0a303036328c010be72fddb",
+            "execution_sha256": "5ffa739941cbde7e865bbdb7ee3b541726c4e452e127abfc43f49379cdbe01c1",
+            "engines": {
+              "int": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 40,
+                "cross_granule_store_log_sha256": "d679eb72f1dd416c76bc92a0083690b7845bcce3fc18209a37bdcc7723b25240"
+              },
+              "aot": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 40,
+                "cross_granule_store_log_sha256": "cd881ab86e658886947fcfba50590cc29b6ff1d5e51cd2b2f14f404f4484c8a3"
+              }
+            }
+          },
+          "wasm64-wasip1-eh-mte": {
+            "wasm_sha256": "95f3c66fd3a62d76808ee424fdd695b6eff0743d8b95586d31f980ec3be42506",
+            "compiler_sha256": "2b4899c4846a073ee82d488bb047af8d9dede17b0cc5cc070fe126d082420c37",
+            "sysroot_sha256": "fa6e53bb5d121ccfd5fe2469042f78f58b7a4130d3ef831a18f0ba7681946dd6",
+            "build_receipt_sha256": "ef625944816ea4e8ef12cf04d51a6778f7d9dd75cda7f4b50abec939b82a2aa2",
+            "execution_sha256": "eab27423a3e42e09dd4424fa1b88e3bfe203506584bd017adec765419da93af7",
+            "engines": {
+              "int": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 528,
+                "cross_granule_store_log_sha256": "a1fc4ef13b489d185905182312363c4f7000887accad8f3b8e11864e493383c8"
+              },
+              "aot": {
+                "matching_tags_completed": 4,
+                "mismatched_tags_rejected": 528,
+                "cross_granule_store_log_sha256": "36480e98212ac82ec81eefb4f5fbe73b81e235953f080b7ad03bebffafd122aa"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
