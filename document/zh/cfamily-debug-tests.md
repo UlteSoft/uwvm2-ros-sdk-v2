@@ -33,6 +33,8 @@ x86-64 首轮可追加 `--profile wasm32-wasip1-noeh-nomte`。可用 `--language
 
 `inputs.json` 记录安装选择、工具摘要、测试轮次、VM 收据和命名空间标识。`build.json` 将两代 Wasm 绑定到源码、编译器及 sysroot。在每个配置、语言及引擎目录下，每项能力有独立的 `result.json`。`results.jsonl` 汇集各项观测，`summary.json` 分别统计正向能力和预期拒绝。VM 日志、原始会话和快照保存在隔离输出卷中。
 
+私有线程会话的源码调试和完整还原探针将首条 Wasm 指令处的停止状态记入 `thread_entry_stop`。经认证的 VM 须先返回正数停止标识、线程标识及其 Wasm 位置，后续明确的能力拒绝才记为 `unsupported`。私有线程 VM 若在启动时报告终止状态，结果记为 `failed`。
+
 `pass` 表示正向能力通过。单独点选的 INT DBG 负向断言同时要求有效认证描述符、VM 的解释器拒绝诊断以及退出码 126，满足条件时记为 `expected-rejection`。调试器若应答请求，负向断言失败。`unsupported` 记录 VM 明确返回且能识别的限制。`restore-declined` 记录已明确拒绝还原，且原停止标识和改写后的内存值均已核实。`failed` 表示出现意外结果。`build-blocked` 表示构建未能产出可运行输入。后四种结果均使入口返回非零状态。只有 `pass` 计入正向能力。
 
 ### x86-64 上 Objective-C MTE 的签名热更新拒绝记录

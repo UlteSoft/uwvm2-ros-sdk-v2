@@ -21,17 +21,24 @@ def need(condition, message):
         raise ValueError(message)
 
 
+def parse_stop(reply):
+    stop = re.search(r"^stop-id ([1-9][0-9]*)$", reply, re.M)
+    thread = re.search(r"^thread ([1-9][0-9]*) module=(\d+) function=(\d+) byte-offset=(\d+) generation=(\d+)$",
+                       reply, re.M)
+    if stop and thread:
+        return {"stop": int(stop[1]), "thread": int(thread[1]), "module": int(thread[2]),
+                "function": int(thread[3]), "offset": int(thread[4]), "generation": int(thread[5])}
+    return None
+
+
 def stopped(vm, timeout, *, reason=None, newer=0):
     deadline = time.monotonic() + timeout
     while True:
         reply = vm.request("status")
-        stop = re.search(r"^stop-id ([1-9][0-9]*)$", reply, re.M)
-        thread = re.search(r"^thread ([1-9][0-9]*) module=(\d+) function=(\d+) byte-offset=(\d+) generation=(\d+)$",
-                           reply, re.M)
-        if stop and thread and int(stop[1]) > newer:
+        at = parse_stop(reply)
+        if at is not None and at["stop"] > newer:
             need(reason is None or reason in reply, reply)
-            return {"stop": int(stop[1]), "thread": int(thread[1]), "module": int(thread[2]),
-                    "function": int(thread[3]), "offset": int(thread[4]), "generation": int(thread[5])}
+            return at
         need("guest exited:" not in reply and time.monotonic() < deadline, f"expected fresh stop: {reply}")
         time.sleep(.02)
 
@@ -83,15 +90,27 @@ def normal_exit(vm, row, timeout):
 THREAD_REFUSAL = "error: operation unavailable on the private thread execution driver\n"
 
 
+def private_thread_entry(reply, target, row):
+    if not target.threads or not re.search(r"^threaded-profile ", reply, re.M):
+        return None
+    # Fresh launches hold the first instruction. A terminal reply also includes
+    # the private profile and can be followed by an operation refusal.
+    at = parse_stop(reply)
+    need(reply.startswith("stopped: first Wasm instruction\n") and at is not None,
+         f"expected a private thread at its first Wasm instruction: {reply}")
+    row["thread_entry_stop"] = at
+    return at
+
+
 def debug_probe(vm, row, build, target, timeout):
     source = Path(build["source"])
     lines = source.read_text().splitlines()
     first, last = [next(i for i, text in enumerate(lines, 1) if marker in text)
                    for marker in ("SOURCE_BREAK", "SOURCE_STEP")]
-    initial = vm.request("status")
+    entry = private_thread_entry(vm.request("status"), target, row)
     module = build["module"]
     point = vm.request(f"breaksource {module} {source}:{first}")
-    if target.threads and "threaded-profile " in initial and point == THREAD_REFUSAL:
+    if entry is not None and point == THREAD_REFUSAL:
         raise Limitation("private-thread-source-debug-unavailable")
     bp = re.search(r"\bbreakpoint ([1-9][0-9]*)\b", point)
     need(bp, f"source breakpoint refused: {point}")
@@ -141,17 +160,15 @@ def write_word(vm, at, word, timeout):
 
 
 def dump_probe(vm, row, build, target, timeout, folder, snapshot, *, restore_timeout):
-    initial = vm.request("status")
+    entry = private_thread_entry(vm.request("status"), target, row)
     policy = vm.request("dump policy")
     need(policy == "dump-policy max=full effective=full\n", policy)
     archive = folder / "full.uwsnap"
     module = build["module"]
     breakpoint = None
-    if target.threads and "threaded-profile " in initial:
-        match = re.search(r"^stop-id ([1-9][0-9]*)$", initial, re.M)
-        need(match, f"private thread stop was unavailable: {initial}")
+    if entry is not None:
         probe = folder / "thread-profile.uwsnap"
-        reply = vm.request(f"dump wasm full {match[1]} {probe}")
+        reply = vm.request(f"dump wasm full {entry['stop']} {probe}")
         if reply == THREAD_REFUSAL and not probe.exists():
             raise Limitation("private-thread-full-dump-unavailable")
         need(reply.startswith("wasm-dump saved"), reply)

@@ -33,6 +33,8 @@ Threaded Objective-C and Objective-C++ fixtures link with the installed WASIp1 c
 
 `inputs.json` records the installed SDK selections, tool digests, round, VM receipt and namespace identities. `build.json` binds both generations to the compiler, source and sysroot. Each capability has its own `result.json` under the profile, language and engine. `results.jsonl` collects the rows. `summary.json` counts positive results and expected negative assertions independently. Retain VM logs, live command records and dumps within the isolated output volume.
 
+For private thread sessions, the source-debug and full-restore probes record the first-instruction stop in `thread_entry_stop`. A capability refusal counts as `unsupported` only after the authenticated VM reports that stop with a positive stop ID, a thread ID and its Wasm location. A private VM that reports a terminal state at startup yields `failed`.
+
 `pass` records a positive capability. A separately selected INT DBG check earns `expected-rejection` only with exit 126 and the explicit interpreter diagnostic on the authenticated launch. A debugger that answers a request fails that check. `unsupported` records a recognized refusal from the VM. `restore-declined` requires an explicit restore rejection and verification of the retained original stop and changed memory. `failed` records an unexpected outcome. `build-blocked` records a build failure. Any of these last four outcomes makes the runner exit nonzero. Only `pass` contributes to the positive count.
 
 ### Objective-C MTE signed-update refusal on x86-64
