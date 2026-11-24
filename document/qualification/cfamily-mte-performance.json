@@ -1,0 +1,770 @@
+{
+  "schema": 1,
+  "date": "2026-11-24",
+  "vm_commit": "d46186fca2dc60eebc71fdf4bf1c78ab32b9cb91",
+  "vm_tree": "a93794ed351e9b1d860cdcd6a34e0511dc0eda49",
+  "compiler_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+  "installer_receipt_sha256": "268a9cb9e011c4b6578f83a0d8c25350ef5b7c0dee434fa013fefe7f87b3c0e6",
+  "compiler_sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+  "build_receipt_sha256": "bb3904781ddac6c69fa883fad618d94ea96d93c82180b67f2b3c795e58799ac4",
+  "kernel_source_sha256": "86d9e37dcf4a8bf4d90ea6e8c33214572675543e46964ecad9877c0c9afcafd3",
+  "modules": {
+    "linear-32-ordinary.wasm": {
+      "sha256": "f5fcd56979cc5a72cf0a5269d444d963e9e45920b0f63b0d366d1d0443a8a8ec",
+      "receipt_sha256": "ae4bb9284c888d2b4a97705a835ef59e995ebec70ff0eb2bcdeceb507be77c19"
+    },
+    "linear-32-tagged.wasm": {
+      "sha256": "649e0be66f4e0d7a6ff6b16ba27da7c4d0bbb350f62771d2843fc1b46f1cd6c8",
+      "receipt_sha256": "3a37bd0fa0e7e87819cb0f086ecc0ab59a4fd90605e005aeb752a63ddc9adacb"
+    },
+    "linear-64-ordinary.wasm": {
+      "sha256": "197fce19d78dd6a4a57ce810ac750452934c4a5156a37570187707e2a4c20664",
+      "receipt_sha256": "3e5ec078578d6747606fdb98260279d51785f38f23671efcd09eb4660630be70"
+    },
+    "linear-64-tagged.wasm": {
+      "sha256": "a707e6cded985d2c4c14d0ae083bfc9dcb844129f4b5c62a41fc76412ac684dd",
+      "receipt_sha256": "460035df0d4a25c13259fba4c2444ec56e7b92b0f84283e5b266dac2a652b88b"
+    }
+  },
+  "workload": "Core 3.0 WASIp1 C reactor, -O3, no EH or threads. Volatile 4 KiB aligned buffer. One indexed word read and write per loop iteration. Matching nonzero static allocation tags checked outside the timed kernel.",
+  "clock": "Guest CLOCK_MONOTONIC around the kernel, including initialization. Five order-rotated repetitions with long, quarter-length and zero-loop controls. Ratios are calculated per matching repetition. Triples are inclusive Q1, median and Q3.",
+  "ordinary": "A separately compiled module with Clang MTE disabled and VM parser and runtime MTE disabled.",
+  "disabled": "The same tagged Wasm as the software and hardware samples, with runtime MTE disabled.",
+  "scope": "The five VM executables replay the same four guest modules built by an installed x86_64 compiler. ARM timings measure QEMU TCG throughput. Physical ARM execution and a five-host compiler installation matrix are separate qualifications.",
+  "aot_policy": "balanced, on-disk cache disabled",
+  "host_cpu_model": "Intel Core i9-14900HX",
+  "hosts": {
+    "x86_64": {
+      "system_qemu": false,
+      "host_cpu": 2,
+      "guest_kernel": "6.17.0-29-generic",
+      "program_sha256": "1bb7a97f0937af4ffefaa845d3ac8b6549c9e5c6d7606d75fbf9d6eaadaadb7c",
+      "samples_by_kind": {
+        "calibrate": 4,
+        "long": 60,
+        "short": 60,
+        "startup": 60
+      },
+      "samples_sha256": "9015e47ac275e3cd7c9a0d183dbf6671f23185b02502b7e2efec053108c2876a",
+      "summary_sha256": "f25edc0e5262da447959e8703e7f66c10a6d6a25de51ded52813ad59323f5d8f",
+      "environment_sha256": "57e8a5a2e5731e992bc8de68589372e7bc1e1d623e4ddd18723ed58e259e9030",
+      "host_cpu_busy_percent": {
+        "cpu2": 96.9,
+        "cpu3": 74.4
+      }
+    },
+    "i686": {
+      "system_qemu": false,
+      "host_cpu": 4,
+      "guest_kernel": "6.17.0-29-generic",
+      "program_sha256": "9a8e95faf488e8e597a588634edbe820a5a0384bfd0df71cf6d487899501b45e",
+      "samples_by_kind": {
+        "calibrate": 4,
+        "long": 60,
+        "short": 60,
+        "startup": 60
+      },
+      "samples_sha256": "211456b2943e24ff7f303b15de6ac930f99b1bb8539b1773d7e5e7b7d6f73f0a",
+      "summary_sha256": "ab3e7448a6727b0e4ee6fb92e784ea5e1b318f018652de976a66dd2bc959bdc3",
+      "environment_sha256": "00fe58d86850e850148fb9139f7565ca92897ae2507f9ce7f220b431c69c7e34",
+      "host_cpu_busy_percent": {
+        "cpu4": 93.3,
+        "cpu5": 96.4
+      }
+    },
+    "aarch64": {
+      "system_qemu": true,
+      "host_cpu": 6,
+      "guest_kernel": "6.1.0-50-arm64",
+      "program_sha256": "af39afac7508aac8a9c215b8029a962a13ca3f268a17122246c8c69590945d0c",
+      "samples_by_kind": {
+        "trace": 4,
+        "calibrate": 4,
+        "long": 80,
+        "short": 80,
+        "startup": 80
+      },
+      "samples_sha256": "a5e370b936f4f036147010042a9594aedbebbf3a3c9530575f4b980289a0b79a",
+      "summary_sha256": "44bf96cecde750244c5d14145ee95b9c047186e72502ca79701c9740d3629215",
+      "environment_sha256": "a5adbbdf5f5ef1b1b040d99d20bc4aedf2e4ee6ff42ed879f819946c39649445",
+      "host_cpu_busy_percent": {
+        "cpu6": 99.6,
+        "cpu7": 40.5
+      },
+      "qemu_argv_sha256": "159b83dd19ba86c172bd4abae614c837a3a44a5c8395677c69faa43e63da9b0b"
+    },
+    "arm": {
+      "system_qemu": true,
+      "host_cpu": 8,
+      "guest_kernel": "6.1.0-50-armmp",
+      "program_sha256": "8f2dfaa576baed60b64146fffd230323378ec836ba3d0c154164a17e0aade644",
+      "samples_by_kind": {
+        "calibrate": 4,
+        "long": 60,
+        "short": 60,
+        "startup": 60
+      },
+      "samples_sha256": "1d44cf719d90899439a0b6aa4d8902c45eafeec87a69a0b2536e1c28331ea081",
+      "summary_sha256": "6c023d5d65e92803dca80b6e6755d0470bec2937a62912b9b648c0bc63f26c3f",
+      "environment_sha256": "2ccd87755e093a3d020899e146940695221bb96ba9ddd9a679b1942558f805c3",
+      "host_cpu_busy_percent": {
+        "cpu8": 96.3,
+        "cpu9": 24.3
+      },
+      "qemu_argv_sha256": "ea4ed8ca7dcaf67b92c1c34ae965dc0d601989350f101341fde1fd2ba83a1c30"
+    },
+    "armhf": {
+      "system_qemu": true,
+      "host_cpu": 10,
+      "guest_kernel": "6.1.0-50-armmp",
+      "program_sha256": "8ed8f51105bddc20054f163401abb6e0c6e6674d6a02dbb3a0454044681111eb",
+      "samples_by_kind": {
+        "calibrate": 4,
+        "long": 60,
+        "short": 60,
+        "startup": 60
+      },
+      "samples_sha256": "2d541bddb6a0c490497ecf6120fff3a546f654c812b0a031d7559fda50d46f61",
+      "summary_sha256": "449fa6f1cffa8af7ac6922e42936c31029ed720ac526ca2242ff797fcf003132",
+      "environment_sha256": "d6d43dcd04f13aaad525fc1349c9a79a222172d2e2919d339a0e4ab89fbd7f3c",
+      "host_cpu_busy_percent": {
+        "cpu10": 96.4,
+        "cpu11": 20.2
+      },
+      "qemu_argv_sha256": "d2de880c5e8dae89541bee1f16a14d8f858da34f9fc2efbd494a55ff74dd3ccd"
+    }
+  },
+  "measurements": [
+    {
+      "host": "x86_64",
+      "engine": "int",
+      "wasm_bits": 32,
+      "iterations": 8388608,
+      "checksum": 3556586836,
+      "guest_ns_per_iteration": {
+        "ordinary": 10.8376,
+        "disabled": 11.4687,
+        "software": 21.9182
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.95269,
+          1.9919,
+          2.03405
+        ],
+        "software_over_disabled": [
+          1.76939,
+          1.84365,
+          1.95254
+        ]
+      }
+    },
+    {
+      "host": "x86_64",
+      "engine": "int",
+      "wasm_bits": 64,
+      "iterations": 8388608,
+      "checksum": 3556586836,
+      "guest_ns_per_iteration": {
+        "ordinary": 11.904,
+        "disabled": 12.7233,
+        "software": 22.5871
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.87321,
+          1.90029,
+          1.90939
+        ],
+        "software_over_disabled": [
+          1.75271,
+          1.77805,
+          1.80756
+        ]
+      }
+    },
+    {
+      "host": "x86_64",
+      "engine": "aot",
+      "wasm_bits": 32,
+      "iterations": 134217728,
+      "checksum": 3033707387,
+      "guest_ns_per_iteration": {
+        "ordinary": 0.7687,
+        "disabled": 0.7437,
+        "software": 1.09
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.34386,
+          1.40105,
+          1.41795
+        ],
+        "software_over_disabled": [
+          1.37541,
+          1.42231,
+          1.43304
+        ]
+      }
+    },
+    {
+      "host": "x86_64",
+      "engine": "aot",
+      "wasm_bits": 64,
+      "iterations": 134217728,
+      "checksum": 3033707387,
+      "guest_ns_per_iteration": {
+        "ordinary": 0.5244,
+        "disabled": 0.5222,
+        "software": 0.7881
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.47962,
+          1.51008,
+          1.53676
+        ],
+        "software_over_disabled": [
+          1.49351,
+          1.51832,
+          1.54335
+        ]
+      }
+    },
+    {
+      "host": "i686",
+      "engine": "int",
+      "wasm_bits": 32,
+      "iterations": 2097152,
+      "checksum": 2658310999,
+      "guest_ns_per_iteration": {
+        "ordinary": 22.8176,
+        "disabled": 24.5017,
+        "software": 86.9191
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          3.81662,
+          3.85168,
+          3.85561
+        ],
+        "software_over_disabled": [
+          3.53134,
+          3.56103,
+          3.5906
+        ]
+      }
+    },
+    {
+      "host": "i686",
+      "engine": "int",
+      "wasm_bits": 64,
+      "iterations": 2097152,
+      "checksum": 2658310999,
+      "guest_ns_per_iteration": {
+        "ordinary": 26.9795,
+        "disabled": 30.6286,
+        "software": 94.4846
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          3.38773,
+          3.50209,
+          3.51482
+        ],
+        "software_over_disabled": [
+          3.07532,
+          3.14352,
+          3.16541
+        ]
+      }
+    },
+    {
+      "host": "i686",
+      "engine": "aot",
+      "wasm_bits": 32,
+      "iterations": 67108864,
+      "checksum": 3768494458,
+      "guest_ns_per_iteration": {
+        "ordinary": 1.3047,
+        "disabled": 1.3195,
+        "software": 2.5143
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.86406,
+          1.92941,
+          1.95755
+        ],
+        "software_over_disabled": [
+          1.86098,
+          1.91457,
+          1.9363
+        ]
+      }
+    },
+    {
+      "host": "i686",
+      "engine": "aot",
+      "wasm_bits": 64,
+      "iterations": 67108864,
+      "checksum": 3768494458,
+      "guest_ns_per_iteration": {
+        "ordinary": 1.339,
+        "disabled": 1.3124,
+        "software": 2.5345
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.83525,
+          1.88726,
+          1.96951
+        ],
+        "software_over_disabled": [
+          1.93119,
+          1.95946,
+          1.96979
+        ]
+      }
+    },
+    {
+      "host": "aarch64",
+      "engine": "int",
+      "wasm_bits": 32,
+      "iterations": 262144,
+      "checksum": 2594912826,
+      "guest_ns_per_iteration": {
+        "ordinary": 359.7141,
+        "disabled": 410.4334,
+        "software": 979.5828,
+        "hardware": 3625.321
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          2.68118,
+          2.69615,
+          2.78546
+        ],
+        "software_over_disabled": [
+          2.3867,
+          2.45377,
+          2.50122
+        ],
+        "hardware_over_ordinary": [
+          9.75916,
+          10.07834,
+          10.16366
+        ],
+        "hardware_over_disabled": [
+          8.63905,
+          9.07688,
+          9.08847
+        ]
+      }
+    },
+    {
+      "host": "aarch64",
+      "engine": "int",
+      "wasm_bits": 64,
+      "iterations": 131072,
+      "checksum": 3107665936,
+      "guest_ns_per_iteration": {
+        "ordinary": 792.884,
+        "disabled": 852.4625,
+        "software": 2185.1864,
+        "hardware": 7006.4291
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          2.65299,
+          2.86358,
+          2.93851
+        ],
+        "software_over_disabled": [
+          2.51309,
+          2.57781,
+          2.65112
+        ],
+        "hardware_over_ordinary": [
+          8.77785,
+          9.20696,
+          9.33319
+        ],
+        "hardware_over_disabled": [
+          8.30651,
+          8.40177,
+          8.56625
+        ]
+      }
+    },
+    {
+      "host": "aarch64",
+      "engine": "aot",
+      "wasm_bits": 32,
+      "iterations": 8388608,
+      "checksum": 3556586836,
+      "guest_ns_per_iteration": {
+        "ordinary": 5.2564,
+        "disabled": 6.1026,
+        "software": 19.0534,
+        "hardware": 220.7424
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          2.73513,
+          2.73577,
+          2.94151
+        ],
+        "software_over_disabled": [
+          2.53498,
+          2.82889,
+          2.96032
+        ],
+        "hardware_over_ordinary": [
+          33.89503,
+          35.83742,
+          36.35078
+        ],
+        "hardware_over_disabled": [
+          33.49342,
+          33.69078,
+          35.66708
+        ]
+      }
+    },
+    {
+      "host": "aarch64",
+      "engine": "aot",
+      "wasm_bits": 64,
+      "iterations": 16777216,
+      "checksum": 1756442653,
+      "guest_ns_per_iteration": {
+        "ordinary": 3.603,
+        "disabled": 3.6308,
+        "software": 9.7919,
+        "hardware": 152.9841
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          2.64877,
+          2.76936,
+          2.80625
+        ],
+        "software_over_disabled": [
+          2.66735,
+          2.69083,
+          2.70371
+        ],
+        "hardware_over_ordinary": [
+          42.61808,
+          42.68557,
+          45.31858
+        ],
+        "hardware_over_disabled": [
+          40.38142,
+          40.56563,
+          45.80322
+        ]
+      }
+    },
+    {
+      "host": "arm",
+      "engine": "int",
+      "wasm_bits": 32,
+      "iterations": 262144,
+      "checksum": 2594912826,
+      "guest_ns_per_iteration": {
+        "ordinary": 198.2478,
+        "disabled": 213.4199,
+        "software": 665.0987
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          3.3123,
+          3.35489,
+          3.38941
+        ],
+        "software_over_disabled": [
+          2.94701,
+          3.00704,
+          3.13575
+        ]
+      }
+    },
+    {
+      "host": "arm",
+      "engine": "int",
+      "wasm_bits": 64,
+      "iterations": 262144,
+      "checksum": 2594912826,
+      "guest_ns_per_iteration": {
+        "ordinary": 218.9361,
+        "disabled": 255.2748,
+        "software": 643.6829
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          2.8743,
+          2.87928,
+          2.97046
+        ],
+        "software_over_disabled": [
+          2.4846,
+          2.50064,
+          2.60299
+        ]
+      }
+    },
+    {
+      "host": "arm",
+      "engine": "aot",
+      "wasm_bits": 32,
+      "iterations": 33554432,
+      "checksum": 726778011,
+      "guest_ns_per_iteration": {
+        "ordinary": 2.1655,
+        "disabled": 2.1867,
+        "software": 3.8851
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.73485,
+          1.80217,
+          1.81909
+        ],
+        "software_over_disabled": [
+          1.77671,
+          1.81462,
+          1.85238
+        ]
+      }
+    },
+    {
+      "host": "arm",
+      "engine": "aot",
+      "wasm_bits": 64,
+      "iterations": 33554432,
+      "checksum": 726778011,
+      "guest_ns_per_iteration": {
+        "ordinary": 2.2961,
+        "disabled": 2.2363,
+        "software": 3.9916
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.66921,
+          1.73188,
+          1.83345
+        ],
+        "software_over_disabled": [
+          1.75865,
+          1.77819,
+          1.85295
+        ]
+      }
+    },
+    {
+      "host": "armhf",
+      "engine": "int",
+      "wasm_bits": 32,
+      "iterations": 262144,
+      "checksum": 2594912826,
+      "guest_ns_per_iteration": {
+        "ordinary": 199.84,
+        "disabled": 219.6396,
+        "software": 648.6765
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          3.17997,
+          3.26285,
+          3.27755
+        ],
+        "software_over_disabled": [
+          2.93702,
+          2.94216,
+          2.96491
+        ]
+      }
+    },
+    {
+      "host": "armhf",
+      "engine": "int",
+      "wasm_bits": 64,
+      "iterations": 262144,
+      "checksum": 2594912826,
+      "guest_ns_per_iteration": {
+        "ordinary": 225.344,
+        "disabled": 249.0557,
+        "software": 663.6555
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          2.92174,
+          2.94508,
+          3.03468
+        ],
+        "software_over_disabled": [
+          2.66678,
+          2.67458,
+          2.70821
+        ]
+      }
+    },
+    {
+      "host": "armhf",
+      "engine": "aot",
+      "wasm_bits": 32,
+      "iterations": 33554432,
+      "checksum": 726778011,
+      "guest_ns_per_iteration": {
+        "ordinary": 2.3166,
+        "disabled": 2.2158,
+        "software": 4.0181
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.69604,
+          1.7345,
+          1.84793
+        ],
+        "software_over_disabled": [
+          1.77363,
+          1.83465,
+          1.85411
+        ]
+      }
+    },
+    {
+      "host": "armhf",
+      "engine": "aot",
+      "wasm_bits": 64,
+      "iterations": 16777216,
+      "checksum": 1756442653,
+      "guest_ns_per_iteration": {
+        "ordinary": 2.3393,
+        "disabled": 2.36,
+        "software": 4.3015
+      },
+      "paired_ratios": {
+        "software_over_ordinary": [
+          1.81504,
+          1.88244,
+          1.90943
+        ],
+        "software_over_disabled": [
+          1.70056,
+          1.82403,
+          1.89014
+        ]
+      }
+    }
+  ],
+  "native_x86_64_int_profile": {
+    "iterations": 67108864,
+    "scope": "Whole-process user PMU counts divided by kernel iterations, medians of three passes. Hotspot samples are separate runs.",
+    "widths": {
+      "32": {
+        "per_iteration": {
+          "ordinary": {
+            "instructions": 149.057,
+            "cycles": 47.678
+          },
+          "disabled": {
+            "instructions": 159.064,
+            "cycles": 50.588
+          },
+          "software": {
+            "instructions": 315.067,
+            "cycles": 99.368
+          }
+        },
+        "top_two_tagged_scalar_handlers_percent": [
+          26.84,
+          25.89
+        ],
+        "samples_report_sha256": "4f425fa3b1bf1796b2998e01c1b2935e3d270d8d28269c102d1f24c3ac46afda"
+      },
+      "64": {
+        "per_iteration": {
+          "ordinary": {
+            "instructions": 161.058,
+            "cycles": 52.477
+          },
+          "disabled": {
+            "instructions": 171.064,
+            "cycles": 55.977
+          },
+          "software": {
+            "instructions": 323.068,
+            "cycles": 102.039
+          }
+        },
+        "top_two_tagged_scalar_handlers_percent": [
+          29.66,
+          23.98
+        ],
+        "samples_report_sha256": "399fb2eddd04cfc1cfd844653ef2790cc8f4288fd3fa393d7eda78ed6807c3be"
+      }
+    }
+  },
+  "aarch64_hardware_access": {
+    "qemu": {
+      "binary_sha256": "15d18809121fe6237c9170a5d820cc44196942d1df2df0dad0c5d8cd6154b35e",
+      "kernel_sha256": "84b9c190bb4589c4a9527e3191fec051f9f115e88f0a3e8afae96ba0dfb4dfef",
+      "initramfs_sha256": "7d5e16b0934aa24d206ad993b9accaef06364bbe5b2c62ad0811b9cb3af8669b",
+      "host_cpu_affinity": [
+        14
+      ],
+      "version": "QEMU emulator version 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3.1)\nCopyright (c) 2003-2025 Fabrice Bellard and the QEMU Project developers"
+    },
+    "machine": "virt,accel=tcg,mte=on",
+    "cpu": "max",
+    "guest_kernel": "6.1.0-50-arm64",
+    "program_sha256": "af39afac7508aac8a9c215b8029a962a13ca3f268a17122246c8c69590945d0c",
+    "linux_roundtrip": {
+      "AT_HWCAP2": "0x3807fffff",
+      "HWCAP2_MTE": true,
+      "initial_tagged_address_control": "0x0",
+      "requested_control": "0x7fff3",
+      "synchronous_control": "0x7fff3",
+      "restored_control": "0x0",
+      "page_size": 4096,
+      "logical_tag": 5,
+      "allocation_tag": 5,
+      "written": "0x123456789abcdef0",
+      "read_back": "0x123456789abcdef0"
+    },
+    "matched_tag_controls": [
+      {
+        "bits": 32,
+        "engine": "int",
+        "exit": 0,
+        "trace_sha256": "fd9d4f7ab30b56d1d53b7497c599eae27d8ef89deef5e760ebe3f1f892c7d3d4"
+      },
+      {
+        "bits": 32,
+        "engine": "aot",
+        "exit": 0,
+        "trace_sha256": "d1a14622aa4054d7b3559eacb1f488b263c59dd65d40cfd02b3eaf0c06481bf5"
+      },
+      {
+        "bits": 64,
+        "engine": "int",
+        "exit": 0,
+        "trace_sha256": "636e84b76309370ab6c3a86b35f6c88a4af7e32590464184991a04e4423cb4e8"
+      },
+      {
+        "bits": 64,
+        "engine": "aot",
+        "exit": 0,
+        "trace_sha256": "cb46ccf7da63968ad8a08e81890717ced7bd4a902da7889fa83a7c1fcc85e573"
+      }
+    ],
+    "tagged_linear_bytes": 131072,
+    "raw_receipt_sha256": "0a5324185a0fbe2066b8cac1606240758c9d95a50de9b8ab251860a12a7cfbf7",
+    "synchronous_fault_delivery": "unverified in this run"
+  },
+  "measurement_receipt_sha256": "b4ac5ae6be348d711358312e4eb466e9f2ae3aec25628efd3aa7f9388b175a21",
+  "verified_executions": 984
+}
