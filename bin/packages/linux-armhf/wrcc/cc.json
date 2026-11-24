@@ -2,14 +2,18 @@
   "host": "linux-armhf",
   "packages": {
     "clang": {
-      "bytes": 84526576,
-      "compressed_bytes": 23042296,
-      "compressed_sha256": "0049bdef67655102110e30499b298fe73bf114328b6f5b7a404ccbc6daaac020",
+      "bytes": 84527600,
+      "compressed_bytes": 23043096,
+      "compressed_sha256": "001e596aeb24a93cdc94d500c5cbdee476dd56d9fd057f66bc7e32f7ab45935b",
       "format": "tar.xz",
       "host": "linux-armhf",
       "member": "clang",
-      "path": "bin/packages/linux-armhf/wrcc/clang-0049bdef67655102110e.tar.xz",
-      "sha256": "add244cd74097af495bfa5d0fde57b9dd6a53c228be7e3bff5d18b3bc9f9a544"
+      "path": "bin/packages/linux-armhf/wrcc/clang-001e596aeb24a93cdc94.tar.xz",
+      "required_hwcap": [
+        "vfp",
+        "vfpv3"
+      ],
+      "sha256": "9746e30576212ccae70fa19d5212b86505631ff4e8fce0a3e091e1207a013a7d"
     },
     "llvm-ar": {
       "bytes": 6464120,
@@ -26,14 +30,18 @@
       "sha256": "24dafb93ed643d6d65202f985d3acba409ee1c1db95008776197f868d134a211"
     },
     "wasm-ld": {
-      "bytes": 47478976,
-      "compressed_bytes": 13399544,
-      "compressed_sha256": "3efe1a53d92de522d061c61d1c5456063f6ed0b54b5128c90d4c5c719d580d8a",
+      "bytes": 47478720,
+      "compressed_bytes": 13400148,
+      "compressed_sha256": "304befbeedd3557a31a416004c5e979f2198689a76e04db2ed8c604cc0d0f7ba",
       "format": "tar.xz",
       "host": "linux-armhf",
       "member": "wasm-ld",
-      "path": "bin/packages/linux-armhf/wrcc/wasm-ld-3efe1a53d92de522d061.tar.xz",
-      "sha256": "b58ebc4b09e18dea3cd50f4279e84d852c4184bbfc7aab728f1f6f0dc6c58924"
+      "path": "bin/packages/linux-armhf/wrcc/wasm-ld-304befbeedd3557a31a4.tar.xz",
+      "required_hwcap": [
+        "vfp",
+        "vfpv3"
+      ],
+      "sha256": "848d3df3bb8c38cdea57aa4e3942de5896af65fbbea966619bf415e52ab98182"
     }
   },
   "schema": 1

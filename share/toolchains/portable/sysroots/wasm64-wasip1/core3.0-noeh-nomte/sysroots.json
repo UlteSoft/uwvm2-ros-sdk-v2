@@ -1,6 +1,6 @@
 {
-  "build_identity": "35cd359f67b0d4d702bec9964764ccd8a65b51429114968f463f2c9e83aa4363",
-  "compiler_sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+  "build_identity": "3ae0ae41747527140a3d5a3795f7f62cde82cf857d5953722b7ce38cbc059610",
+  "compiler_sha256": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
   "compiler_version": "clang version 23.1.5\nTarget: wasm32-unknown-wasip1\nThread model: posix\nInstalledDir: /out/producer/bin\nBuild config: +assertions",
   "herbceptions_runtime": true,
   "mte": false,
@@ -11,7 +11,7 @@
   },
   "qualified": false,
   "recipes_sha256": {
-    "build_sysroot.py": "a77ace7c9d0f7584865d15f4c142db671a04d050e8b4e83577b8f0bf72de01b6",
+    "build_sysroot.py": "5deb5212490263001e0ec59ff7a5a386ff22ccc1fd77f898cbd36c63fad2e783",
     "herbceptions_sysroot.py": "8ec785213ea6e685350f8f4c08f86d25788186450ae361ec0fdb96a9f37d4736",
     "policy/guest_profile.py": "ba86c2fb1926b35ef4a7289cae9953fae7fa51249661a8cc534604423d6706ca",
     "policy/scalar_memory.c": "130152051343a9808ee9bda6aa02cf85f3b5fb61908eac60204b192d45f4d44f"
@@ -43,7 +43,7 @@
       "url": "https://github.com/WebAssembly/wasi-libc.git"
     }
   },
-  "sources_sha256": "b706711dd7bc1f3e179d87fdd588a601d092ffe1ae648d20fced4b9231f5c2e9",
+  "sources_sha256": "c145907400869181db6e540a8f5bac23aa68d6dc728b83ecf4acc9a21a67a3b6",
   "status": "built-awaiting-qualification",
   "targets": [
     {
@@ -2276,7 +2276,7 @@
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc++experimental.a": "74b3876ea0f7399bafd2c674932e1b41fe9da33890e4c11e60b71b616a170d77",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-long-double.a": "8cfd1f5cf535460a05e7e74906d2b95bbb63caa6845e6d76da5346b9f0c52d0c",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-no-floating-point.a": "855ec0eea00acc1ac8de0711f3faebe5e62f2a5c1e0b5c6b2639c3f1e3588e86",
-        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc.a": "5790d3854e6577a4fcc84fabde7f8f8e17ce59e9e47e3c70e614bc88c2f71e2f",
+        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc.a": "c0b425beec656583151ca267f96b94e8865d1e51c8f86818c2ccd68b87697d39",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libcrypt.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libdl.a": "823674848411d9181bddcfa5bdea9c5f3b1f8d5dc4c6417794a6525cd495cc1f",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libherbceptions.a": "95d6173baf839f206ceb55ae733379169279f12edb7bece19341338496ae2108",
@@ -2336,6 +2336,7 @@
           "wine.cpp.obj"
         ]
       },
+      "private_memtag_stack": false,
       "profile": "noeh",
       "qualified": false,
       "resource": "output/clang/23",
@@ -2351,13 +2352,13 @@
     }
   ],
   "tool_sha256": {
-    "clang": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
-    "clang++": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+    "clang": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
+    "clang++": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
     "llvm-ar": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
     "llvm-config": "45f80e0dbd4c858b49585caae9c546f1e1447cc1231946459761bfc0c2022223",
     "llvm-nm": "2cda42e5ea480601d60944c18ec0175e48b43a72ff8a35c6e77f0a11ae7c0115",
     "llvm-ranlib": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
-    "wasm-ld": "f09d059d08c524dde7219bfd1cefa646586895974dcc4336c5a47375fca6215b"
+    "wasm-ld": "51299b4068033e9785caa170acc1f065b7ef974900536cbc412fcb01f9569d1c"
   },
   "wasm_version": "3.0"
 }

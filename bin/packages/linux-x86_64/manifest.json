@@ -3,14 +3,14 @@
   "host": "linux-x86_64",
   "packages": {
     "clang": {
+      "bytes": 94091760,
+      "compressed_bytes": 25400056,
+      "compressed_sha256": "4b6a7ac13009a23ba71d3dd96e454216b9b1707135790a31d92ad47bc6bb3f99",
       "format": "tar.xz",
-      "member": "clang",
-      "compressed_bytes": 25405556,
-      "compressed_sha256": "b368d8ea6fc7708c6459997a9aa7607392b4777cf800bd0cce6ca95bf119a471",
-      "bytes": 94090864,
-      "sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
       "host": "linux-x86_64",
-      "path": "bin/packages/linux-x86_64/wrcc/clang.tar.xz"
+      "member": "clang",
+      "path": "bin/packages/linux-x86_64/wrcc/clang.tar.xz",
+      "sha256": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249"
     },
     "llvm-ar": {
       "bytes": 6037032,
@@ -23,14 +23,14 @@
       "sha256": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0"
     },
     "wasm-ld": {
+      "bytes": 49859032,
+      "compressed_bytes": 14196880,
+      "compressed_sha256": "4881ba27a4a30f1b0035838b72a471774c4cec881ce4a145931b583ec0fbb40c",
       "format": "tar.xz",
-      "member": "wasm-ld",
-      "compressed_bytes": 14196292,
-      "compressed_sha256": "d932e57c13aac4b347465cfc5e8b32dd308aaf93ed1f4382d5a8145e97d9ce59",
-      "bytes": 49859512,
-      "sha256": "f09d059d08c524dde7219bfd1cefa646586895974dcc4336c5a47375fca6215b",
       "host": "linux-x86_64",
-      "path": "bin/packages/linux-x86_64/wrcc/wasm-ld.tar.xz"
+      "member": "wasm-ld",
+      "path": "bin/packages/linux-x86_64/wrcc/wasm-ld.tar.xz",
+      "sha256": "51299b4068033e9785caa170acc1f065b7ef974900536cbc412fcb01f9569d1c"
     },
     "wrwat": {
       "format": "tar.xz",
