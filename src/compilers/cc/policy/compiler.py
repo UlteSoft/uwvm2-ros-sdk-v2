@@ -173,6 +173,8 @@ def make_command(toolchain, receipts, profile, language, arguments, verify=False
              "-resource-dir=" + str(resource), "-fuse-ld=" + str(linker),
              *profile.llvm_feature_flags()]
     flags += ["-fsanitize=memtag" if profile.mte else "-fno-sanitize=memtag"]
+    if profile.mte and not profile.threads and target.get("private_memtag_stack") is True:
+        flags += ["-mllvm", "-wasm-memtag-private-memory"]
     if herbceptions is not None:
         flags.append("-fherbceptions" if herbceptions else "-fno-herbceptions")
     if profile.exceptions == "eh":

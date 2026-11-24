@@ -109,6 +109,9 @@ def build(args, toolchain, work, source_sha256, provenance, prof):
     flags += " -ffile-prefix-map=" + str(HERE / "policy") + "=/usr/src/wros-runtime"
     flags += " -D__WROS_NO_HOST_DIAGNOSTICS"
     flags += " -fsanitize=memtag" if prof.mte else " -fno-sanitize=memtag"
+    private_memtag_stack = prof.mte and not prof.threads
+    if private_memtag_stack:
+        flags += " -mllvm -wasm-memtag-private-memory"
     common_target = {"CMAKE_SYSTEM_NAME": "WASI", "CMAKE_SYSTEM_PROCESSOR": f"wasm{prof.address_bits}",
                      "CMAKE_C_COMPILER_TARGET": target, "CMAKE_CXX_COMPILER_TARGET": target,
                      "CMAKE_ASM_COMPILER_TARGET": target}
@@ -193,6 +196,7 @@ def build(args, toolchain, work, source_sha256, provenance, prof):
              for base in (prefix, resource) for p in base.rglob("*") if p.is_file()}
     record["targets"].append({"triple": target, "profile": profile, "threads": threads,
                               "guest_profile": prof.to_dict(),
+                              "private_memtag_stack": private_memtag_stack,
                               "feature_flags": feature_flags, "runtime_isa_flags": list(RUNTIME_ISA_FLAGS),
                               "sysroot": str(prefix.relative_to(work)), "resource": str(resource.relative_to(work)),
                               "builtins_sha256": digest(lookup), "files": files, "qualified": False, **domain})

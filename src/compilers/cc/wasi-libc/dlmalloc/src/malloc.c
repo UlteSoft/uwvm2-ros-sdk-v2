@@ -3117,6 +3117,11 @@ static void post_fork_child(void)  { INITIAL_LOCK(&(gm)->mutex); }
 #endif /* LOCK_AT_FORK */
 
 /* Initialize mparams */
+#if defined(__wasilibc_dlmalloc_enable_memtag)
+/* The address-derived magic seed has a stack lifetime. Keep that frame in
+   initialization so ordinary allocations do not reserve its stack slot. */
+NOINLINE
+#endif
 static int init_mparams(void) {
 #ifdef NEED_GLOBAL_LOCK_INIT
   if (malloc_global_mutex_status <= 0)

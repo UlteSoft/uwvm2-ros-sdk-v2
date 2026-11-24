@@ -417,7 +417,7 @@ private:
     // to tell the linker that it would be unsafe to allow this code to be used
     // in a module with shared memory.
     if (Stripped) {
-      M.addModuleFlag(Module::ModFlagBehavior::Error, "wasm-feature-shared-mem",
+      M.setModuleFlag(Module::ModFlagBehavior::Error, "wasm-feature-shared-mem",
                       wasm::WASM_FEATURE_PREFIX_DISALLOWED);
     }
   }

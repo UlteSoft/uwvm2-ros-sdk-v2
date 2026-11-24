@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 #include "WebAssemblyStackTagging.h"
 #include "Utils/WasmAddressSpaces.h"
+#include "llvm/BinaryFormat/Wasm.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/IR/DiagnosticInfo.h"
@@ -44,6 +45,10 @@ namespace {
 static cl::opt<bool> FuseZeroInitialization(
     "wasm-memtag-fuse-zero-init", cl::Hidden, cl::init(true),
     cl::desc("Combine complete adjacent zero initialization with stack tagging"));
+
+static cl::opt<bool> PrivateMemory(
+    "wasm-memtag-private-memory", cl::Hidden, cl::init(false),
+    cl::desc("Allow private-memory stack owner fusion and disallow shared linking"));
 
 struct WebAssemblyStackTagging : public FunctionPass {
   static char ID;
@@ -98,7 +103,8 @@ static const inline Align kTagGranuleSize = Align(16);
 // non-preparatory use. A loop-invariant address or integer representation
 // must observe the active generation when passed to the guest ABI.
 static void manageOwnerLifetimes(memtag::AllocaInfo &Info, DominatorTree &DT,
-                         Type *IntPtrTy, uint64_t Size, ArrayRef<Instruction *> Exits) {
+                         Type *IntPtrTy, uint64_t Size, ArrayRef<Instruction *> Exits,
+                         SmallVectorImpl<CallInst *> &Activations) {
   AllocaInst *AI = Info.AI;
   Function *F = AI->getFunction();
   Module *M = F->getParent();
@@ -213,8 +219,10 @@ static void manageOwnerLifetimes(memtag::AllocaInfo &Info, DominatorTree &DT,
                            Current);
     };
     auto Activate = [&](IRBuilder<> &DeadPath) {
-      DeadPath.CreateStore(Op(Intrinsic::wasm_memtag_activate, DeadPath, Token),
-                           Current);
+      auto *Activated = Op(Intrinsic::wasm_memtag_activate, DeadPath, Token);
+      if (!FuncletLocals)
+        Activations.push_back(Activated);
+      DeadPath.CreateStore(Activated, Current);
     };
     unsigned State = States.lookup(Start);
     if (State == Live) {
@@ -479,6 +487,7 @@ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
   LLVMContext &Ctx = Fn.getContext();
   Type *Int32Type = Type::getInt32Ty(Ctx);
   Type *IntPtrType = iswasm32 ? Int32Type : Type::getInt64Ty(Ctx);
+  SmallVector<CallInst *, 4> Activations;
 
   for (auto &I : AllocasToInstrument) {
     memtag::AllocaInfo &Info = I.second;
@@ -534,7 +543,7 @@ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
       Start->eraseFromParent();
       End->eraseFromParent();
     } else {
-      manageOwnerLifetimes(Info, DT, IntPtrType, Size, SInfo.RetVec);
+      manageOwnerLifetimes(Info, DT, IntPtrType, Size, SInfo.RetVec, Activations);
     }
   }
 
@@ -547,6 +556,31 @@ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
         Remaining.push_back(Marker);
     for (auto *Marker : Remaining)
       Marker->eraseFromParent();
+  }
+
+  Module &M = *Fn.getParent();
+  auto *Sharing = mdconst::dyn_extract_or_null<ConstantInt>(
+      M.getModuleFlag("wasm-feature-shared-mem"));
+  if (PrivateMemory ||
+      (Sharing && Sharing->equalsInt(wasm::WASM_FEATURE_PREFIX_DISALLOWED))) {
+    for (CallInst *Activate : Activations) {
+      // No instruction can observe the pending state, and the reserved pointer
+      // has exactly one use. A claim checks and publishes the same extent.
+      auto *Reserve = dyn_cast_or_null<IntrinsicInst>(Activate->getPrevNode());
+      if (!Reserve ||
+          Reserve->getIntrinsicID() != Intrinsic::wasm_memtag_reserve ||
+          Activate->getArgOperand(1) != Reserve || !Reserve->hasOneUse() ||
+          Activate->getArgOperand(0) != Reserve->getArgOperand(0) ||
+          Activate->getArgOperand(2) != Reserve->getArgOperand(2))
+        continue;
+      Reserve->setCalledFunction(Intrinsic::getOrInsertDeclaration(
+          &M, Intrinsic::wasm_memtag_claim, {IntPtrType}));
+      Activate->replaceAllUsesWith(Reserve);
+      Activate->eraseFromParent();
+      // Even another linker invocation must honor the private-memory proof.
+      M.setModuleFlag(Module::Error, "wasm-feature-shared-mem",
+                      wasm::WASM_FEATURE_PREFIX_DISALLOWED);
+    }
   }
   return true;
 }
