@@ -233,13 +233,28 @@
         "wasmtime_reference_summary_sha256": "85bccbcfb05f3f1da937553632e1a5dd4c18e9b699158164e92ce8676ca283fc"
       },
       "aarch64": {
-        "status": "pending"
+        "status": "stopped-before-completion",
+        "planned": 256,
+        "completed": 53,
+        "compiler_host": "x86_64",
+        "vm_execution_host": "aarch64",
+        "execution_environment": "system QEMU",
+        "int_passed": 53,
+        "aot_passed": 53,
+        "completed_groups": {
+          "bulk_off": 14,
+          "copy_fill": 27,
+          "thread_init_control": 12
+        },
+        "results_sha256": "189cb7bfe2554c31ff939537bcc4277f7890c8bc28a8f59e93ea801617dd63d7",
+        "isolation_sha256": "124d053a42a089a6169bd5e3028f2788ff94afce591e48c019d53c60c15d46e1",
+        "retirement_receipt_sha256": "5a24bb633f1e74f95d65928809d7fbb007a7b5269cfad15dcbcdda8e24ea44f8"
       },
       "arm": {
-        "status": "pending"
+        "status": "stopped-before-start"
       },
       "armhf": {
-        "status": "pending"
+        "status": "stopped-before-start"
       }
     }
   },

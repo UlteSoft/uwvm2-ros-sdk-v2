@@ -689,9 +689,17 @@
             "process_exit": 0
           },
           "objcpp": {
-            "status": "pending"
+            "status": "failed",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+            "receipt_sha256": "7f6ffe41b49a24b73700718afadd71166e771af432419ffc70deb5b9ded6ce1f",
+            "snapshot_sha256": "31f363780fcab3a9f987a94ed4818f88b099a4eadde94d12de504df9e8bfb853",
+            "restore_elapsed_seconds": 1473.016,
+            "process_exit": -6,
+            "stderr_sha256": "94daf203951b23a8019df1fb95205a86ec979f33f4abe51856cfbb8dcd12d462",
+            "diagnostic": "LLVM allocation failure during full snapshot restoration."
           },
-          "status": "in-progress"
+          "status": "blocked-restore"
         },
         "armhf": {
           "archive_receipt_sha256": "0fc1841184129cad2fb4fff98377b4b06602ec523883fe4cace271a964ec7902",
@@ -727,12 +735,14 @@
             "stderr_sha256": "94daf203951b23a8019df1fb95205a86ec979f33f4abe51856cfbb8dcd12d462"
           },
           "objcpp": {
-            "status": "pending"
+            "status": "stopped-before-completion"
           },
           "status": "blocked-restore"
         }
       },
-      "status": "blocked-qualification-failed"
+      "status": "retired-after-arm32-restore-failures",
+      "successor_vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+      "successor_vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90"
     }
   }
 }
