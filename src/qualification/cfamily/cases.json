@@ -280,7 +280,8 @@
     },
     {
       "family": "compiler-rt",
-      "path": "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c"
+      "path": "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c",
+      "upstream_skip_stdout": "skipped\n"
     },
     {
       "family": "compiler-rt",
@@ -294,10 +295,10 @@
       "family": "libc++",
       "path": "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp",
       "threaded_profiles": {
-        "wasm32-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 148030, "linux-x86_64": 104113}},
-        "wasm32-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 171193, "linux-x86_64": 117849}},
-        "wasm64-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 160323, "linux-x86_64": 106628}},
-        "wasm64-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 184218, "linux-x86_64": 120802}}
+        "wasm32-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 150528, "linux-x86_64": 105472}},
+        "wasm32-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 173056, "linux-x86_64": 119808}},
+        "wasm64-wasip1-threads-noeh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 162816, "linux-x86_64": 108544}},
+        "wasm64-wasip1-threads-eh-mte": {"code_budget": "536870912:4194304:1048576", "aot_relocations_by_host": {"linux-i686": 186368, "linux-x86_64": 122880}}
       }
     },
     {
@@ -520,7 +521,9 @@
     },
     {
       "family": "Open POSIX",
-      "path": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c"
+      "path": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c",
+      "realtime_sleep": true,
+      "pass_stdout_line": "Test PASSED"
     },
     {
       "family": "Open POSIX",
@@ -566,7 +569,8 @@
     },
     {
       "family": "Open POSIX",
-      "path": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c"
+      "path": "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c",
+      "unavailable_link_symbol": "sem_unlink"
     },
     {
       "family": "Open POSIX",

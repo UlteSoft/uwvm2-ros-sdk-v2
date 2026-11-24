@@ -140,6 +140,7 @@ def capture(command, directory, name, timeout):
 
 
 def runtime_args(vm, engine, target, imports, owner, wasm, *, case=None, thread_stack_mib=1, thread_storage_mib=16):
+    case = case or {}
     cmd = [vm, "--runtime-" + engine, "--runtime-compile-threads", "0",
            "--debug-fault-action", "exit", "--wasm-feature-wasm3",
            "--wasm-feature-" + ("enable" if target.threads else "disable") + "-threads",
@@ -156,7 +157,6 @@ def runtime_args(vm, engine, target, imports, owner, wasm, *, case=None, thread_
             "--wasip1-single-enable", "main", "--wasip1-single-hide-host-api", "main",
             "--wasip1-single-noinherit-system-environment", "main"]
     if target.threads:
-        case = case or {}
         profile = case.get("threaded_profiles", {}).get(target.name, {})
         code_budget = profile.get("code_budget", "67108864")
         thread_stack_mib = case.get("thread_stack_mib", thread_stack_mib)
@@ -181,12 +181,26 @@ def runtime_args(vm, engine, target, imports, owner, wasm, *, case=None, thread_
             continue
         if key[0] != "wasi_snapshot_preview1":
             raise ValueError(f"unexpected host import {key}")
-        permissions = PERMISSIONS[key[1].removesuffix("_wasm64")]
+        name = key[1].removesuffix("_wasm64")
+        permissions = PERMISSIONS[name]
+        if name == "poll_oneoff" and case.get("realtime_sleep"):
+            # wasi-libc sleep(1) submits one relative CLOCK_REALTIME timer per call.
+            permissions = ["realtime-timer"]
+            cmd += ["--wasip1-single-limit", "main", "poll-subscriptions", "1",
+                    "--wasip1-single-limit", "main", "poll.total-calls", "4",
+                    "--enable-warning", "host_limited_wasip1." + key[1]]
         cmd += ["--wasip1-single-interface", "main", key[1], "allow" if permissions else "deny"]
         grants.update(permissions)
     for grant in sorted(grants):
         cmd += ["--wasip1-single-grant", "main", grant]
     return cmd + ["--run", wasm]
+
+
+def missing_link_symbol(stderr, symbol):
+    diagnostics = [line for line in stderr.splitlines() if re.search(r"\berror:", line, re.I)]
+    return (len(diagnostics) == 2
+            and re.fullmatch(r"wasm-ld: error: .+\.o: undefined symbol: " + re.escape(symbol), diagnostics[0]) is not None
+            and diagnostics[1] == "clang: error: linker command failed with exit code 1 (use -v to see invocation)")
 
 
 def check_case(args, case, target, inspect):
@@ -237,6 +251,10 @@ def check_case(args, case, target, inspect):
     row["compile"] = capture(cmd + [*sources, "-o", wasm], out, "compile", args.compile_timeout)
     if row["compile"].get("returncode") != 0:
         row["status"] = "compile-timeout" if "timeout_seconds" in row["compile"] else "compile-failed"
+        symbol = case.get("unavailable_link_symbol")
+        if (symbol and row["compile"].get("returncode") == 1
+                and missing_link_symbol((out / "compile.err").read_text(errors="replace"), symbol)):
+            row["missing_link_symbol"] = symbol
         return row
     receipt = json.loads((out / "guest.wasm.wros-build.json").read_bytes())
     row["wasm_sha256"] = digest(wasm)
@@ -253,6 +271,11 @@ def check_case(args, case, target, inspect):
     widths = []
     imports = list(inspect(wasm.read_bytes(), memory_limits=target.threads, memory_types=widths))
     row["imports"] = imports
+    if case.get("realtime_sleep"):
+        poll_name = "poll_oneoff_wasm64" if target.bits == 64 else "poll_oneoff"
+        if not any(i["module"] == "wasi_snapshot_preview1" and i["name"] == poll_name for i in imports):
+            row["status"] = "missing-required-import"
+            return row
     if (len(counts) != 6 or widths != [target.bits] or (not target.mte and counts["memtag_total"])
             or (not target.eh and (counts["eh_total"] or counts["tags"]))
             or (not target.threads and (counts["threads_total"] or counts["shared_memories"] or counts["thread_spawn_imports"]))
@@ -284,16 +307,28 @@ def check_case(args, case, target, inspect):
         argv = runtime_args(args.vm, engine, target, imports, owner, wasm, case=case)
         run = capture(argv, out, engine, args.run_timeout)
         status = run.get("returncode")
-        output = (out / (engine + ".out")).read_text(errors="replace")
+        stdout = (out / (engine + ".out")).read_bytes()
+        output = stdout.decode(errors="replace")
+        if case.get("realtime_sleep"):
+            stderr = (out / (engine + ".err")).read_text(errors="replace")
+            diagnostic = re.search(r"\[(host_(?:denied|limited)_wasip1\.poll_oneoff(?:_wasm64)?)\]", stderr)
+            if diagnostic:
+                run["poll_policy_diagnostic"] = diagnostic[1]
         if "timeout_seconds" in run:
             verdict = "timeout"
         elif (target.threads and status == 126 and re.search(
                 r"^uwvm: \[error\] WASI Threads [^\n]* exceeded a preparation resource limit \(per-child-storage=",
                 (out / (engine + ".err")).read_text(errors="replace"), re.M)):
             verdict = "runtime-budget-rejected"
+        elif status == 0 and "poll_policy_diagnostic" in run:
+            verdict = "poll-policy-rejected"
+        elif status == 0 and "pass_stdout_line" in case and case["pass_stdout_line"] not in output.splitlines():
+            verdict = "output-mismatch"
         elif status == 0 and "expected_stdout" in case:
             expected = HERE / "upstream" / case["family"] / case["expected_stdout"]
-            verdict = "pass" if (out / (engine + ".out")).read_bytes() == expected.read_bytes() else "output-mismatch"
+            verdict = "pass" if stdout == expected.read_bytes() else "output-mismatch"
+        elif status == 0 and "upstream_skip_stdout" in case:
+            verdict = "upstream-skip" if stdout == case["upstream_skip_stdout"].encode() else "output-mismatch"
         elif "units" not in case and ((status == 0 and re.search(r"\bskipped\b", output, re.I))
                                       or (posix and status in (4, 5))):
             verdict = "upstream-skip"
@@ -305,22 +340,48 @@ def check_case(args, case, target, inspect):
     return row
 
 
+def qualification_outcome(case, row):
+    if row["status"] == "compile-failed" and "missing_link_symbol" in row:
+        return "dependency-unavailable"
+    if row["status"] != "linked" or row["runs"].keys() != {"int", "aot"}:
+        return "failed"
+    if "upstream_skip_stdout" in case and all(run["status"] == "upstream-skip" and run.get("returncode") == 0
+                                              for run in row["runs"].values()):
+        return "upstream-skip"
+    if all(run["status"] == "pass" for run in row["runs"].values()):
+        return "pass"
+    return "failed"
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("cc-sdk", "cxx-sdk", "compiler-sources", "vm", "wrwat", "decoder", "work"):
         p.add_argument("--" + name, required=True, type=lambda s: Path(s).resolve())
     p.add_argument("--suite", choices=("sysroot", "external"), default="sysroot")
+    profiles = [Target(*v) for v in itertools.product((32, 64), (False, True), (False, True), (False, True))]
+    p.add_argument("--case", action="append", metavar="SOURCE", help="select an exact manifest path (repeatable)")
+    p.add_argument("--profile", action="append", choices=[t.name for t in profiles], help="select a profile (repeatable)")
     p.add_argument("--jobs", type=int, default=4)
     p.add_argument("--compile-timeout", type=int, default=180)
     p.add_argument("--run-timeout", type=int, default=180)
     add_vm_identity_options(p)
     args = p.parse_args()
+    if min(args.jobs, args.compile_timeout, args.run_timeout) < 1:
+        p.error("jobs and timeouts must be positive")
     vm = verified_vm(args)
     if args.work.exists() and any(args.work.iterdir()):
         p.error("choose an empty results directory to preserve previous evidence")
-    args.work.mkdir(parents=True, exist_ok=True)
     manifest_file = HERE / ("external-libraries.json" if args.suite == "external" else "cases.json")
     manifest = json.loads(manifest_file.read_bytes())
+    unknown = set(args.case or ()) - {c["path"] for c in manifest["cases"]}
+    if unknown:
+        p.error("unknown manifest path: " + ", ".join(sorted(unknown)))
+    cases = [c for c in manifest["cases"] if not args.case or c["path"] in args.case]
+    targets = [t for t in profiles if not args.profile or t.name in args.profile]
+    entries = [(c, t) for c in cases for t in targets if t.threads or c["family"] != "Open POSIX"]
+    if not entries:
+        p.error("no selected case applies to the selected profiles")
+    args.work.mkdir(parents=True, exist_ok=True)
     validate_thread_budgets(manifest["cases"])
     if args.suite == "external":
         upstream_hashes = {name: repo["git_blobs"] for name, repo in manifest["upstreams"].items()}
@@ -333,14 +394,14 @@ def main():
                 raise ValueError(f"upstream source digest mismatch: {rel}")
     sys.path.insert(0, str(args.cc_sdk / "install"))
     from imports import inspect
-    profiles = [Target(*v) for v in itertools.product((32, 64), (False, True), (False, True), (False, True))]
-    entries = [(case, t) for case in manifest["cases"] for t in profiles if t.threads or case["family"] != "Open POSIX"]
     meta = {"vm": vm, "vm_sha256": vm["sha256"], "decoder_sha256": digest(args.decoder), "wrwat_sha256": digest(args.wrwat),
             "cc_sha256": digest(args.cc_sdk / "bin/wrc"), "cxx_sha256": digest(args.cxx_sdk / "bin/wrcc"),
             "runner_sha256": digest(Path(__file__)), "manifest_sha256": digest(manifest_file),
-            "upstreams": manifest["upstreams"], "planned_builds": len(entries), "distinct_sources": len(manifest["cases"])}
+            "upstreams": manifest["upstreams"], "planned_builds": len(entries), "distinct_sources": len({c["path"] for c, t in entries})}
+    if args.case or args.profile:
+        meta["selection"] = {"sources": sorted({c["path"] for c, t in entries}), "profiles": sorted({t.name for c, t in entries})}
     (args.work / "inputs.json").write_text(json.dumps(meta, indent=2) + "\n")
-    builds, runs = Counter(), Counter()
+    builds, runs, outcomes = Counter(), Counter(), Counter()
     with (args.work / "results.jsonl").open("x") as log, ThreadPoolExecutor(max_workers=args.jobs) as pool:
         tasks = {pool.submit(check_case, args, c, t, inspect): (c, t) for c, t in entries}
         for index, task in enumerate(as_completed(tasks), 1):
@@ -353,15 +414,23 @@ def main():
             if "sdk_case" in case:
                 row["sdk_case"] = case["sdk_case"]
             row["vm"] = vm
+            row["qualification"] = qualification_outcome(case, row)
+            outcomes[row["qualification"]] += 1
             print(json.dumps(row, separators=(",", ":")), file=log, flush=True)
             builds[row["status"]] += 1
             runs.update(r["status"] for r in row["runs"].values())
             if index % 100 == 0:
                 print(index, len(entries), dict(builds), dict(runs), flush=True)
-    summary = {**meta, "builds": dict(builds), "executions": dict(runs)}
+    exit_code = 0
+    if outcomes["failed"]:
+        exit_code = 1
+    elif outcomes["pass"] != len(entries):
+        exit_code = 77
+    summary = {**meta, "builds": dict(builds), "executions": dict(runs),
+               "qualification": dict(outcomes), "exit_code": exit_code}
     (args.work / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary), flush=True)
-    return 0 if builds == {"linked": len(entries)} and runs == {"pass": 2 * len(entries)} else 1
+    return exit_code
 
 
 if __name__ == "__main__":
