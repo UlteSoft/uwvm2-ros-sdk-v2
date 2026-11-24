@@ -9,6 +9,7 @@ from compiler import make_command
 from imports import inspect
 import artifacts
 import qualification
+import optional_isa
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -141,6 +142,7 @@ def main(language, compile_native):
         parser.add_argument("--herbceptions", action=argparse.BooleanOptionalAction, default=True,
                             help="enable typed error returns (default), independently of traditional C++ EH")
     qualification.arguments(parser)
+    optional_isa.arguments(parser)
     parser.add_argument("-pthread", "--threads", action="store_true", default=None)
     parser.add_argument("--no-threads", dest="threads", action="store_false", default=None)
     parser.add_argument("--shared-memory-pages", type=int, metavar="MAX",
@@ -170,7 +172,11 @@ def main(language, compile_native):
             raise ValueError("--shared-memory-pages is a final-link option")
         shared_flags = shared_memory_link_flags(profile, a.shared_memory_pages, wasi_crt=not a.reactor)
         library_flags = sysroot_link_flags(a.libraries, a.compile_only)
+        disabled = optional_isa.restrictions(a, profile)
+        if disabled and (a.require_qualified or selected is not None):
+            raise ValueError("the selected strict release has no qualification for the reduced instruction set")
         admission = qualification.admit(language, a, profile, selected_release=selected)
+        admission["optional_isa"] = optional_isa.receipt(a, profile)
         admission["memory64"] = a.memory64
         if any(not re.fullmatch(r"[a-zA-Z_]\w*", n,re.ASCII) for n in a.export):
             raise ValueError("invalid Wasm export name")
@@ -191,6 +197,7 @@ def main(language, compile_native):
         with tempfile.TemporaryDirectory(dir=a.output.parent) as td:
             staged=Path(td)/("unit.o" if a.compile_only else "module.wasm")
             args = ["-O" + a.O, *("-I" + str(p) for p in public_include_dirs(language)), *(["-g"] if a.g else [])]
+            args += optional_isa.flags(a, profile)
             args += ["-I" + str(p) for p in includes] + ["-D" + n for n in a.define]
             if a.std: args += ["-std=" + a.std]
             if language == "cpp" and a.constexpr_steps is not None:
@@ -210,7 +217,10 @@ def main(language, compile_native):
             admission.update(compiler_sha256=record["compiler_sha256"], sysroot_sha256=record["closure_sha256"])
             if record["compiler_sha256"] != record["sysroot_producer_sha256"]:
                 admission["sysroot_producer_sha256"] = record["sysroot_producer_sha256"]
-            inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], a.toolchain, qualification.object_releases(admission))
+            inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], a.toolchain, qualification.object_releases(admission), disabled=disabled)
+            if "bulk_memory_opt" in disabled and not a.compile_only:
+                job = lambda argv: compile_native(list(map(str, argv)), record["compiler_sha256"])
+                inputs.append(optional_isa.scalar_runtime(command[0], job, profile, Path(td)))
             command += [*map(str, inputs), "-o",str(staged)]
             if not a.compile_only:
                 if "herbceptions_archive" in record:
@@ -226,7 +236,7 @@ def main(language, compile_native):
             compile_native(command, record["compiler_sha256"])
             data = artifacts.read_bounded(staged)
             if a.compile_only:
-                data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], admission.get("release_sha256"))
+                data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], admission.get("release_sha256"), disabled=disabled)
             else:
                 data = artifacts.strip_notes(data)
                 audit(data, profile, a.shared_memory_pages, memory64=a.memory64)

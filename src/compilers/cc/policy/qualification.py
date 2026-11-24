@@ -26,6 +26,7 @@ LANGUAGES = {"c", "cpp"}
 COMMON = (
     "install/qualification.py", "install/local_release.py", "install/artifacts.py", "install/compiler.py",
     "install/guest_profile.py", "install/imports.py", "install/frontend.py", "install/cc_policy.py",
+    "install/optional_isa.py", "install/scalar_memory.c",
     "install/portable_cc.py", "install/sysroot_layout.py", "share/abi/ros.json",
 )
 SDK_INPUTS = {"c": ("bin/wrc", "include/u2rosv2/universal/c"), "cpp": ("bin/wrcc", "include/u2rosv2/universal/c++")}

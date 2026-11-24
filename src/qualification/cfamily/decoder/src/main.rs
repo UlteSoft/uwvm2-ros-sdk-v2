@@ -20,12 +20,38 @@ fn classify<'a>(operator: &Operator<'a>) -> (&'static str, &'static str) {
 }
 
 #[derive(Default)]
+struct InstructionSet {
+    counts: BTreeMap<&'static str, u64>,
+}
+
+const FAMILIES: [&str; 9] = [
+    "simd_total", "simd_arithmetic", "relaxed_simd_total", "memory_copy", "memory_fill",
+    "other_bulk", "scalar_loads", "scalar_stores", "calls",
+];
+
+impl InstructionSet {
+    fn record(&mut self, family: &'static str) {
+        *self.counts.entry(family).or_default() += 1;
+    }
+
+    fn fields(&self) -> String {
+        FAMILIES.iter().map(|key| format!("{key}={}", self.counts.get(*key).unwrap_or(&0)))
+            .collect::<Vec<_>>().join(" ")
+    }
+}
+
+#[derive(Default)]
 struct Counts {
     bodies: u64,
     operators: u64,
     shared_memories: u64,
     thread_spawn: u64,
     tags: u64,
+    isa: InstructionSet,
+    function_isa: BTreeMap<u32, InstructionSet>,
+    exports: BTreeMap<u32, String>,
+    callees: BTreeMap<u32, BTreeSet<u32>>,
+    other_bulk: BTreeMap<&'static str, u64>,
     memtag: BTreeMap<&'static str, u64>,
     threads: BTreeMap<&'static str, u64>,
     eh: BTreeMap<&'static str, u64>,
@@ -47,6 +73,40 @@ impl Counts {
                 *self.global_accesses.entry((index, *global_index)).or_default() += 1;
             }
             let (proposal, name) = classify(&operator);
+            let family = match (proposal, name) {
+                ("simd", _) => Some("simd_total"),
+                ("relaxed_simd", _) => Some("relaxed_simd_total"),
+                ("bulk_memory", "MemoryCopy") => Some("memory_copy"),
+                ("bulk_memory", "MemoryFill") => Some("memory_fill"),
+                ("bulk_memory", _) => {
+                    *self.other_bulk.entry(name).or_default() += 1;
+                    Some("other_bulk")
+                }
+                ("mvp", n) if n.contains("Load") => Some("scalar_loads"),
+                ("mvp", n) if n.contains("Store") => Some("scalar_stores"),
+                (_, "Call" | "ReturnCall") => Some("calls"),
+                _ => None,
+            };
+            if let Some(family) = family {
+                self.isa.record(family);
+                if let Some(index) = function {
+                    self.function_isa.entry(index).or_default().record(family);
+                }
+            }
+            if matches!(name, "I32x4Add" | "I32x4Mul" | "I32x4Sub" | "V128Xor") {
+                self.isa.record("simd_arithmetic");
+                if let Some(index) = function {
+                    self.function_isa.entry(index).or_default().record("simd_arithmetic");
+                }
+            }
+            if let Some(index) = function {
+                match &operator {
+                    Operator::Call { function_index } | Operator::ReturnCall { function_index } => {
+                        self.callees.entry(index).or_default().insert(*function_index);
+                    }
+                    _ => {}
+                }
+            }
             match proposal {
                 "memtag_extension" => {
                     *self.memtag.entry(name).or_default() += 1;
@@ -79,7 +139,9 @@ impl Counts {
         self.tags += member.tags;
         for (total, counts) in [(&mut self.memtag, &member.memtag),
                                 (&mut self.threads, &member.threads),
-                                (&mut self.eh, &member.eh)] {
+                                (&mut self.eh, &member.eh),
+                                (&mut self.isa.counts, &member.isa.counts),
+                                (&mut self.other_bulk, &member.other_bulk)] {
             for (family, count) in counts {
                 *total.entry(family).or_default() += count;
             }
@@ -88,11 +150,22 @@ impl Counts {
 
     fn show(&self, label: &str) {
         println!(
-            "{label} bodies={} operators={} memtag_total={} threads_total={} shared_memories={} thread_spawn_imports={} eh_total={} tags={} memtag={:?} threads={:?} eh={:?}",
+            "{label} bodies={} operators={} memtag_total={} threads_total={} shared_memories={} thread_spawn_imports={} eh_total={} tags={} {} memtag={:?} threads={:?} eh={:?} other_bulk_ops={:?}",
             self.bodies, self.operators, self.memtag.values().sum::<u64>(), self.threads.values().sum::<u64>(),
             self.shared_memories, self.thread_spawn, self.eh.values().sum::<u64>(), self.tags,
-            self.memtag, self.threads, self.eh,
+            self.isa.fields(), self.memtag, self.threads, self.eh, self.other_bulk,
         );
+    }
+
+    fn functions(&self) {
+        for (index, isa) in &self.function_isa {
+            // The export stays identifiable even when LLVM omits debug names.
+            let name = self.exports.get(index).or_else(|| self.names.get(index))
+                .map(String::as_str).unwrap_or("?");
+            let calls = self.callees.get(index).into_iter().flatten()
+                .map(u32::to_string).collect::<Vec<_>>().join(",");
+            println!("FUNCTION {index} {} direct_calls={calls} name={name:?}", isa.fields());
+        }
     }
 
     fn samples(&self) {
@@ -170,6 +243,9 @@ fn decode_module(bytes: &[u8]) -> Result<Counts> {
             Payload::ExportSection(exports) => {
                 for export in exports {
                     let export = export?;
+                    if export.kind == wasmparser::ExternalKind::Func {
+                        counts.exports.entry(export.index).or_insert_with(|| export.name.to_owned());
+                    }
                     if export.name == "wasi_thread_start" {
                         counts.thread_entries.insert(format!("export {} index={}", export.name, export.index));
                     }
@@ -289,13 +365,18 @@ fn decode_archive(label: &str, bytes: &[u8]) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    for input in std::env::args().skip(1) {
+    let mut args = std::env::args().skip(1).peekable();
+    let functions = args.next_if(|arg| arg == "--functions").is_some();
+    for input in args {
         let bytes = std::fs::read(&input)?;
         if bytes.starts_with(b"!<arch>\n") {
             decode_archive(&input, &bytes)?;
         } else {
             let counts = decode_module(&bytes).map_err(|error| format!("{input}: {error}"))?;
             counts.show(&format!("MODULE {input}"));
+            if functions {
+                counts.functions();
+            }
             if input.ends_with(".wasm") || input.starts_with("/work/thread-stack-output") {
                 counts.samples();
             }

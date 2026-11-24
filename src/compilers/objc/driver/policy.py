@@ -14,6 +14,8 @@ HERE = Path(__file__).resolve().parent
 SDK = HERE.parents[3]
 sys.path[:0] = [str(SDK / "install"), str(HERE)]
 import artifacts
+import optional_isa
+import qualification
 from compiler import digest, make_command
 from frontend import audit, shared_memory_link_flags, sysroot_link_flags
 from guest_profile import Profile
@@ -46,6 +48,8 @@ def main(language, descriptor, arguments):
     parser.add_argument("--core", choices=["3.0"], default="3.0")
     for key, default in [("eh", True), ("mte", True), ("memory64", True), ("threads", False)]:
         parser.add_argument("--" + key, action=argparse.BooleanOptionalAction, default=default)
+    optional_isa.arguments(parser)
+    parser.add_argument("--build-receipt", action="store_true", help="write OUTPUT.wros-build.json")
     parser.add_argument("--shared-memory-pages", type=int, metavar="MAX")
     model = parser.add_mutually_exclusive_group()
     model.add_argument("--reactor", action="store_true")
@@ -69,6 +73,7 @@ def main(language, descriptor, arguments):
         parser.error("--shared-memory-pages requires a final link")
     profile = Profile(int(args.target[4:]), args.core, args.threads, args.mte, "eh" if args.eh else "noeh")
     profile.memory64_enabled(args.memory64)
+    disabled = optional_isa.restrictions(args, profile)
     library_flags = sysroot_link_flags(args.libraries, args.compile_only)
     dialects = {".m": "objective-c"}
     if cpp:
@@ -97,6 +102,7 @@ def main(language, descriptor, arguments):
     if digest(Path("/proc") / str(os.getppid()) / "exe") != record["compiler_sha256"]:
         raise ValueError("the running Objective-C compiler differs from its installed receipt")
     common = [flag for flag in base if flag != "-lunwind"]
+    common.extend(optional_isa.flags(args, profile))
     compile_flags = ["-O" + args.O]
     if args.g:
         compile_flags.append("-g")
@@ -115,7 +121,7 @@ def main(language, descriptor, arguments):
         runtime, language_closure = verified_runtime(SDK, profile, record)
         work = Path(temporary)
         inputs = artifacts.stage_inputs(sources, work, profile.to_dict(), record["compiler_sha256"],
-                                        language_closure, tools)
+                                        language_closure, tools, disabled=disabled)
         result = work / ("guest.o" if args.compile_only else "guest.wasm")
         for index, source in enumerate(inputs):
             dialect = dialects.get(source.suffix)
@@ -130,6 +136,8 @@ def main(language, descriptor, arguments):
             compile_native(channel, [*command, "-x", dialect, "-c", source, "-o", obj])
             inputs[index] = obj
         if not args.compile_only:
+            if "bulk_memory_opt" in disabled:
+                inputs.append(optional_isa.scalar_runtime(common[0], lambda argv: compile_native(channel, argv), profile, work))
             command = [*common, *link_flags, *inputs, runtime / "libuwrosobjc.a",
                        runtime / "libobjc.a", *library_flags]
             if profile.exceptions == "eh":
@@ -137,12 +145,20 @@ def main(language, descriptor, arguments):
             compile_native(channel, [*command, "-o", result])
         data = artifacts.read_bounded(result)
         if args.compile_only:
-            data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], language_closure)
+            data = artifacts.seal_object(data, profile.to_dict(), record["compiler_sha256"], language_closure, disabled=disabled)
         else:
             data = artifacts.strip_notes(data)
             audit(data, profile, args.shared_memory_pages, memory64=args.memory64)
         result.write_bytes(data)
-        os.replace(result, args.output)
+        build = {"format": "wros-build-receipt", "language": language, "profile": profile.to_dict(),
+                 "settings": {"optimization": args.O, "debug": args.g}, "memory64": args.memory64,
+                 "mode": "instrumented" if profile.mte else "off", "vm_qualified": False,
+                 "source_suppressions": {"status": "not-enumerated"},
+                 "optional_isa": optional_isa.receipt(args, profile), "compiler_sha256": record["compiler_sha256"],
+                 "sysroot_sha256": record["closure_sha256"], "objc_runtime_sha256": language_closure}
+        if args.shared_memory_pages is not None:
+            build["shared_memory_pages"] = args.shared_memory_pages
+        qualification.finish(build, args, result, args.output)
 
 
 if __name__ == "__main__":

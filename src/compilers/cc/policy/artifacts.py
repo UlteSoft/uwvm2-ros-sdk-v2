@@ -77,7 +77,7 @@ def validate_profile(value):
     return value
 
 
-def seal_object(data, profile, compiler_sha256, closure_sha256, release=None):
+def seal_object(data, profile, compiler_sha256, closure_sha256, release=None, *, disabled=()):
     """Append one digest-bound note to a compiler-produced relocatable object."""
     validate_profile(profile)
     if not re.fullmatch(r"[0-9a-f]{64}", compiler_sha256):
@@ -101,6 +101,8 @@ def seal_object(data, profile, compiler_sha256, closure_sha256, release=None):
         if not isinstance(release, str) or not re.fullmatch(r"[0-9a-f]{64}", release):
             raise ValueError("invalid strict release identity")
         note["neighbor_release"] = release
+    if disabled:
+        note["disabled_codegen"] = sorted(disabled)
     payload = NOTE.encode()
     payload = uleb(len(payload)) + payload + json.dumps(note, sort_keys=True, separators=(",", ":")).encode()
     result = data + b"\0" + uleb(len(payload)) + payload
@@ -118,7 +120,7 @@ def unique_object(pairs):
     return result
 
 
-def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None, releases=None):
+def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None, releases=None, *, disabled=()):
     """Check the entire object against its final note and optional expected ABI."""
     inspect(data)
     notes, linking = [], 0
@@ -136,8 +138,14 @@ def check_object(data, profile=None, compiler_sha256=None, closure_sha256=None, 
             except (UnicodeError, RecursionError, json.JSONDecodeError) as error:
                 raise ValueError("invalid object build note") from error
             fields = {"schema", "profile", "compiler_sha256", "closure_sha256", "object_sha256"}
-            if not isinstance(note, dict) or set(note) not in (fields, fields | {"neighbor_release"}):
+            if not isinstance(note, dict) or not fields <= note.keys() <= (fields | {"neighbor_release", "disabled_codegen"}):
                 raise ValueError("invalid build note fields")
+            restrictions = note.get("disabled_codegen", [])
+            if (not isinstance(restrictions, list) or any(key not in ("simd128", "bulk_memory_opt") for key in restrictions)
+                    or restrictions != sorted(set(restrictions))):
+                raise ValueError("invalid object code generation restrictions")
+            if not set(disabled).issubset(restrictions):
+                raise ValueError("recompile this object with the disabled instruction families requested at link")
             if "neighbor_release" in note and (not isinstance(note["neighbor_release"], str)
                     or not re.fullmatch(r"[0-9a-f]{64}", note["neighbor_release"])):
                 raise ValueError("invalid object neighbor release")
@@ -221,7 +229,7 @@ def archive(toolchain, output, members, work):
     subprocess.run([str(archiver), "--format=gnu", "rcsD", str(output), *map(str, paths)], check=True)
 
 
-def stage_inputs(sources, work, profile, compiler_sha256, closure_sha256, toolchain, releases=None):
+def stage_inputs(sources, work, profile, compiler_sha256, closure_sha256, toolchain, releases=None, *, disabled=()):
     """Snapshot every object/archive; refuse ABI mixtures before linking."""
     result, total, count = [], 0, 0
     for index, source in enumerate(sources):
@@ -237,7 +245,7 @@ def stage_inputs(sources, work, profile, compiler_sha256, closure_sha256, toolch
         if count > MAX_MEMBERS:
             raise ValueError("too many input object members")
         for member in members:
-            check_object(member, profile, compiler_sha256, closure_sha256, releases)
+            check_object(member, profile, compiler_sha256, closure_sha256, releases, disabled=disabled)
         path = work / (f"input{index}" + source.suffix)
         if source.suffix == ".a":
             archive(toolchain, path, members, work / f"archive{index}")

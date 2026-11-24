@@ -843,6 +843,8 @@ def package_plan(tree, platform_name, language, mode, *, tinygo_llvm=None, rust_
         roots.append(f"platform/{platform_name}/{guide}")
     for locale in ("en", "zh"):
         roots.extend((f"document/{locale}/install-xmake.md", f"document/{locale}/languages/{language}.md"))
+        if mode != "bindings" and language in ("c", "cpp", "objc", "objcpp"):
+            roots.append(f"document/{locale}/cfamily-optional-instructions.md")
     mappings = {ABI: ABI_INSTALLED, "src/xmake": "tools/xmake", "src/examples": "examples"}
     if platform_name != "generic":
         roots.append(f"src/examples/{platform_name}/{language}")
