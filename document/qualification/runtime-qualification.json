@@ -742,7 +742,23 @@
       },
       "status": "retired-after-arm32-restore-failures",
       "successor_vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
-      "successor_vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90"
+      "successor_vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+      "armhf_objc_diagnostic_repeat": {
+        "status": "pass",
+        "scope": "Supplemental run with passive process mapping and memory sampling. The original release run failed on the same VM and Wasm binaries.",
+        "vm_sha256": "e2768f2b6b4fe5edbd73ff15c65c36709d581211603bc9b1da2617485b4026b6",
+        "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+        "restore_elapsed_seconds": 1564.777,
+        "guest_exit": 0,
+        "process_exit": 0,
+        "restored_word": "c84f613a",
+        "vm_peak_kib": 3029328,
+        "rss_peak_kib": 2400136,
+        "samples": 402,
+        "samples_sha256": "feb7cb8108d83b1eeea347758b6069ba0146e1ccb75b0db86bab8564dc149718",
+        "maps_sha256": "aa7bbc4e9bf10b7375e6b086bc6764f9447ed5a5e43da4a84f42cf3e7bfdd242",
+        "receipt_sha256": "ac273244f2724e094d68566d52a504612f7d1a8117a450cfd1a55da92773e13d"
+      }
     }
   }
 }
