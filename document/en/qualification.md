@@ -12,6 +12,8 @@ For each case, build outside a GitHub-installed binary SDK. Record the selected 
 
 Use the same inputs and check observable results before accepting execution timings. Warm each engine, alternate sample order on the same CPU, and measure the workload with a monotonic clock inside the guest. Report the median of paired ratios and sample spread. Compilation, instantiation, startup and output formatting fall outside the timed interval. For software MTE, also compare checking enabled and disabled on the identical tagged binary. The target for this last ratio is at most 1.5. Track optional bulk-memory and SIMD fallback checks and other instruction combinations alongside the release profiles.
 
+On x86_64, VM candidate `d1a44a22` and Wasmtime 42.0.1 executed identical untagged C++20 modules with EH and threads disabled. Across ten paired measurements per workload, the median WROS AOT / Wasmtime time ratio for libc++ sort was 0.979 on wasm32 and 1.026 on wasm64. For fast_float v8.0.2 the ratios were 0.967 and 0.943. Wasmtime used its stock CLI for wasm32 and its C API with the SDK WASIp1 imports for wasm64. The receipt includes the raw paired execution times, native ELF comparison and checksums. [C++ execution measurements](../qualification/cfamily-cpp-wasmtime-execution.json)
+
 ## Language debugging, dump restore and live update
 
 The C, C++, Objective-C and Objective-C++ debugging matrix covers the five Linux host ABIs and the sixteen base ABI, EH, threads and MTE profiles. Each language uses its installed SDK frontend to build a program with `-O0 -g` and a second version with an observable change. The receipt identifies the SDK commit, VM commit and tree, host executable, guest hashes, profile and requested engine.

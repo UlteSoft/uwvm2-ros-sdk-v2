@@ -12,6 +12,8 @@
 
 执行性能验收使用相同输入，先校验程序可观测结果。每个引擎先预热，在同一 CPU 上交替采样，使用客体单调时钟测量工作负载，报告配对耗时比的中位数及离散程度。编译、实例化、启动与结果打印均在计时区间之外。软件 MTE 另对同一带标签 Wasm 比较运行时开启与关闭检查的耗时，目标为 1.5 倍以内。可选批量内存指令及 SIMD 标量回退等价性和其他指令组合另行记录。
 
+在 x86_64 上，VM 候选 `d1a44a22` 与 Wasmtime 42.0.1 运行相同的无 MTE C++20 模块，EH 和 threads 均关闭。每项交替取得十对样本。以 WROS AOT 耗时除以 Wasmtime 耗时，libc++ 排序在 wasm32 和 wasm64 上的中位数分别为 0.979、1.026，fast_float v8.0.2 分别为 0.967、0.943。wasm32 使用 Wasmtime 官方 CLI，wasm64 用其 C API 适配 SDK 的 WASIp1 导入。记录含原始配对耗时、同源码原生 ELF 对照和校验和。[C++ 执行耗时](../qualification/cfamily-cpp-wasmtime-execution.json)
+
 ## 语言调试、dump 还原和热更新
 
 C、C++、Objective-C、Objective-C++ 的调试验收覆盖五种 Linux 宿主 ABI 和按 ABI、EH、threads、MTE 划分的十六档基础配置。每种语言都用安装所得的 SDK 编译器用 `-O0 -g` 生成带调试信息的程序，再编译一个能观察到行为变化的版本。收据记录 SDK 提交、VM 提交及源码树、宿主可执行文件摘要、guest 摘要、配置和请求的引擎。

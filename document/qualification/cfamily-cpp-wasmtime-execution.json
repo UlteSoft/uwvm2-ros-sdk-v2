@@ -1,0 +1,1223 @@
+{
+  "qualification": "C++ execution on x86_64 with guest MTE, EH and threads disabled",
+  "cpu": "Intel Core i9-14900HX",
+  "logical_cpu": 12,
+  "host": "linux-x86_64",
+  "scope": "Two workloads, two guest ABIs, optimized host-native baseline. Local frozen VM candidate and previously installed public wrcc.",
+  "vm": {
+    "elf_class": 2,
+    "elf_machine": 62,
+    "sha256": "81c01e162299916da78d108260eb7201ea563586c6e8048af58bcdf1e806f460",
+    "elf_build_id": "9d1796547646b41df46c603e760c14838236138d",
+    "commit": "d1a44a22c0b054df6c9df0c6898a719330f48978",
+    "tree": "160a5fcb1d533aa4909afe615248c36eaa41c24d"
+  },
+  "sdk": {
+    "sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "sdk_tree": "352221288b627c9f3f7fdc98114578da48e5f617",
+    "installation_receipt_sha256": "268a9cb9e011c4b6578f83a0d8c25350ef5b7c0dee434fa013fefe7f87b3c0e6",
+    "wrcc": {
+      "elf_class": 2,
+      "elf_machine": 62,
+      "sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+      "elf_build_id": "3c40848940524d13bddd4c00b9a49236f9c8c369",
+      "version": "clang version 23.1.5\nTarget: wasm32-unknown-wasip1\nThread model: posix\nInstalledDir: /sdk/bin\nBuild config: +assertions"
+    },
+    "fast_float": {
+      "repository": "https://github.com/fastfloat/fast_float",
+      "tag": "v8.0.2",
+      "commit": "50a80a73ab2ab256ba1c3bf86923ddd8b4202bc7",
+      "headers": {
+        "include/fast_float/ascii_number.h": "a034d44ff5b945a51c4797ecf4be7ef50c3a9730d50f5a26a6dc75a2c02d5b11",
+        "include/fast_float/bigint.h": "1ed0b598da0b522613399897ddc748792dee6f804debf9fee131359252f80763",
+        "include/fast_float/constexpr_feature_detect.h": "2dd2dc5f98a8f1a78813e62d47e82a19ebe42af726356723d60f6eb387c6dd38",
+        "include/fast_float/decimal_to_binary.h": "82fad8134c272a3f1bc545b3ef367a2e9e3c7464b9dcef75640c37e325dfb973",
+        "include/fast_float/digit_comparison.h": "941d18ff89a9164f6ad447542a7b369252cdd5d63d289f1064a71641bd9c99b6",
+        "include/fast_float/fast_float.h": "2427cd297f5b4d524e696ab9c69f957ffb9f851e59262f5d0b07930ba7dae016",
+        "include/fast_float/fast_table.h": "c18e0a0a2513215730557cc1dd53541cacd72855ddc0287934e78b364f989edb",
+        "include/fast_float/float_common.h": "c09daa98e482d9a068c4174f208227741a64f82c7cd1b9cf0db0e8b96fee5562",
+        "include/fast_float/parse_number.h": "8bb35524d9b52107ac28215e932307a5a1765de8cb099599a7412f429cfb7e33"
+      }
+    },
+    "clang_version": "Ubuntu clang version 22.1.8 (++20260613092143+e80beda6e255-1~exp1~20260613092201.82)",
+    "native_libcxx": "200100"
+  },
+  "source": "src/qualification/cfamily/execution_performance/workloads.cpp",
+  "source_sha256": "72b7862df401c7a40850a68a2cba55978b4dbe74c654e43e424deba7bcf1f3cd",
+  "timing": "CLOCK_MONOTONIC inside C++ workload after input preparation and warmup, before checksum and stdout",
+  "wasmtime_cli": {
+    "elf_class": 2,
+    "elf_machine": 62,
+    "sha256": "21f8e8f994a96d2267afe4a4c06a6302e78aca20e9438afbf01dd443fe32108b",
+    "elf_build_id": "7b67acc90259ce856be4cdef390bc335799903db",
+    "version": "wasmtime 42.0.1 (6844a83b5 2026-02-25)"
+  },
+  "wasmtime_adapter": {
+    "elf_class": 2,
+    "elf_machine": 62,
+    "sha256": "bc2bf09adb4ed875e3f887c9be63e1033440b35153f54169472d19cbe2257dd5",
+    "elf_build_id": "ccd7106ca7c37496e21849e1451ac9713848f756",
+    "build": {
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++17",
+        "-O2",
+        "-I",
+        "/work/wasmtime-v42.0.1-x86_64-linux-c-api/include",
+        "/source/src/qualification/cfamily/wasmtime_reference/host.cpp",
+        "/work/wasmtime-v42.0.1-x86_64-linux-c-api/lib/libwasmtime.a",
+        "-ldl",
+        "-lpthread",
+        "-lm",
+        "-o",
+        "/work/qualification-host"
+      ],
+      "host_sha256": "bc2bf09adb4ed875e3f887c9be63e1033440b35153f54169472d19cbe2257dd5",
+      "source_sha256": "a40ae4568e9b101ffd31538d15136aed9ef9ba5273d96cadb1ef6ea85c302c1b",
+      "wasmtime_c_api_sha256": "2097a47351918a446b26c7e65f487278f63bc947591b71897db547cd90c05082"
+    }
+  },
+  "stock_wasm64": "The stock CLI declined wasi_snapshot_preview1::clock_time_get_wasm64 in both workloads. The C API host implements this import.",
+  "receipts": {
+    "build": "c823dbe911721ee27de6258d5eb61a696610868e46386d43d9a61b463cca0154",
+    "isolation": "cf62f662d024379717fe4f40e803108194f7d59e8dc647d885c1175f87b0d735",
+    "samples": "0adf91a4eeb91a732ee204723621f45b6674f6612d263774c1e5419e9398ae4d",
+    "summary": "a85787879c6378389de8fe1e112ae4158b85afd26bc403642bf65b766f6d551f"
+  },
+  "cases": [
+    {
+      "workload": "sort",
+      "width": 32,
+      "wasi_imports": [
+        "clock_time_get",
+        "fd_close",
+        "fd_fdstat_get",
+        "fd_seek",
+        "fd_write"
+      ],
+      "wasm_sha256": "2195dd06be8eafcf0d17f7678b05182fe0095aa54c6ef15886b45cb7a7805535",
+      "items": 3276800,
+      "checksum": "bbc22dd930911b28",
+      "nanoseconds": {
+        "aot": {
+          "median": 53026082.5,
+          "q1": 52750569.75,
+          "q3": 53774448.25,
+          "min": 52470321,
+          "max": 54800344,
+          "n": 10
+        },
+        "wasmtime-cli": {
+          "median": 53952893.0,
+          "q1": 53610082.5,
+          "q3": 54457875.0,
+          "min": 53199493,
+          "max": 56074530,
+          "n": 10
+        },
+        "native": {
+          "median": 51620188.0,
+          "q1": 50900137.5,
+          "q3": 52208204.25,
+          "min": 50536875,
+          "max": 52839866,
+          "n": 10
+        }
+      },
+      "ratios": {
+        "aot/wasmtime-cli": {
+          "median": 0.9793923393714281,
+          "q1": 0.9739522890406344,
+          "q3": 0.9955353577702489,
+          "min": 0.9665224122253009,
+          "max": 1.0080898526429845,
+          "n": 10
+        },
+        "aot/native": {
+          "median": 1.0357626279546777,
+          "q1": 1.0214473701883628,
+          "q3": 1.0454157352994362,
+          "min": 0.9978703958106176,
+          "max": 1.0546712474801816,
+          "n": 10
+        },
+        "wasmtime-cli/native": {
+          "median": 1.0450139959153697,
+          "q1": 1.039150712305357,
+          "q3": 1.0568862293861698,
+          "min": 1.0234399339640419,
+          "max": 1.0894675956980717,
+          "n": 10
+        }
+      },
+      "build": {
+        "argv": [
+          "/sdk/bin/wrcc",
+          "--target",
+          "wasm32",
+          "--core",
+          "3.0",
+          "--std",
+          "c++20",
+          "--no-mte",
+          "--no-threads",
+          "--no-eh",
+          "--reactor",
+          "--export",
+          "_start",
+          "--build-receipt",
+          "-O3",
+          "-DBENCH_SORT",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/sort-wasm32.wasm"
+        ],
+        "sha256": "2195dd06be8eafcf0d17f7678b05182fe0095aa54c6ef15886b45cb7a7805535",
+        "sdk_build_receipt_sha256": "441b3bab647e0d88793f50d694724e17fcb343ebc1aa97192c150fa9b6405d24",
+        "profile": {
+          "address_bits": 32,
+          "wasm_version": "3.0",
+          "threads": false,
+          "mte": false,
+          "exceptions": "noeh",
+          "triple": "wasm32-wasip1",
+          "abi": "wasi_snapshot_preview1",
+          "memtag_wire": null,
+          "extensions": []
+        },
+        "sysroot_sha256": "dbb1f7d1958d54785dfbbf8c10068f797511c37b016c82ed91e825149373c495",
+        "decoder_sha256": "f637da752fee9f7f1fc881c01a626c092395a3290923f6ad18f1511c1e877b2b",
+        "module_sections_sha256": "ce9f3c38f9afce47af6236ff14e5672a9b5d30315dd416bf0789211dac1f2976",
+        "wasi_imports": [
+          "clock_time_get",
+          "fd_close",
+          "fd_fdstat_get",
+          "fd_seek",
+          "fd_write"
+        ]
+      },
+      "native_build": {
+        "elf_class": 2,
+        "elf_machine": 62,
+        "sha256": "d791a7d601e07af563f1cb3bf9a0905a887288a5c576c71dd1feaddbebc8d621",
+        "elf_build_id": "80942f93685055c44ffea4a17d4fb46230c6923e",
+        "argv": [
+          "/usr/bin/clang++-22",
+          "-std=c++20",
+          "-stdlib=libc++",
+          "-march=native",
+          "-fno-exceptions",
+          "-fno-rtti",
+          "-O3",
+          "-DBENCH_SORT",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/sort-native"
+        ]
+      },
+      "example_runtime_argv": {
+        "aot": [
+          "/vm/d1a44a2/uwvm2-ros",
+          "--runtime-aot",
+          "--runtime-compile-threads",
+          "0",
+          "--runtime-llvm-jit-cache-path",
+          "disable",
+          "--runtime-llvm-jit-policy",
+          "balanced",
+          "--debug-fault-action",
+          "exit",
+          "--log-color",
+          "disable",
+          "--wasm-feature-wasm3",
+          "--wasm-feature-disable-memtag-extension",
+          "--runtime-disable-memtag",
+          "--wasm-feature-disable-threads",
+          "--wasm-feature-disable-exceptions",
+          "--wasm-set-main-module-name",
+          "main",
+          "--wasip1-single-create",
+          "main",
+          "--wasip1-single-enable",
+          "main",
+          "--wasip1-single-hide-host-api",
+          "main",
+          "--wasip1-single-noinherit-system-environment",
+          "main",
+          "--wasip1-single-interface",
+          "main",
+          "clock_time_get",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_close",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_fdstat_get",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_seek",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_write",
+          "allow",
+          "--wasip1-single-grant",
+          "main",
+          "args",
+          "--wasip1-single-grant",
+          "main",
+          "monotonic-clock",
+          "--wasip1-single-grant",
+          "main",
+          "proc-exit",
+          "--wasip1-single-grant",
+          "main",
+          "stdio.metadata",
+          "--wasip1-single-grant",
+          "main",
+          "stdout.write",
+          "--wasip1-single-grant",
+          "main",
+          "stderr.write",
+          "--wasip1-single-grant",
+          "main",
+          "environ",
+          "--wasip1-single-grant",
+          "main",
+          "sched-yield",
+          "--run",
+          "/cpp/sort-wasm32.wasm"
+        ],
+        "wasmtime-cli": [
+          "/reference/wasmtime",
+          "run",
+          "-C",
+          "compiler=cranelift",
+          "-C",
+          "parallel-compilation=n",
+          "-O",
+          "opt-level=2",
+          "-W",
+          "memory64=n",
+          "/cpp/sort-wasm32.wasm"
+        ],
+        "native": [
+          "/cpp/sort-native"
+        ]
+      },
+      "pairs_ns": [
+        {
+          "aot": 53108072,
+          "wasmtime-cli": 53199493,
+          "native": 50797151
+        },
+        {
+          "native": 52009167,
+          "wasmtime-cli": 54237489,
+          "aot": 52820265
+        },
+        {
+          "wasmtime-cli": 53625306,
+          "native": 51209097,
+          "aot": 52944093
+        },
+        {
+          "wasmtime-cli": 54123782,
+          "aot": 52727338,
+          "native": 52839866
+        },
+        {
+          "native": 50536875,
+          "aot": 53299789,
+          "wasmtime-cli": 54741439
+        },
+        {
+          "aot": 54197290,
+          "native": 51469663,
+          "wasmtime-cli": 56074530
+        },
+        {
+          "aot": 54800344,
+          "wasmtime-cli": 54531337,
+          "native": 52431310
+        },
+        {
+          "native": 50566754,
+          "wasmtime-cli": 53605008,
+          "aot": 52470321
+        },
+        {
+          "wasmtime-cli": 53782004,
+          "native": 51770713,
+          "aot": 52703795
+        },
+        {
+          "wasmtime-cli": 53499862,
+          "aot": 53932668,
+          "native": 52274550
+        }
+      ]
+    },
+    {
+      "workload": "sort",
+      "width": 64,
+      "wasi_imports": [
+        "clock_time_get_wasm64",
+        "fd_close_wasm64",
+        "fd_fdstat_get_wasm64",
+        "fd_seek_wasm64",
+        "fd_write_wasm64"
+      ],
+      "wasm_sha256": "bf4c892f2c268c7931f6605751f044e28aedde1032a959e80bffa795591f05bb",
+      "items": 3276800,
+      "checksum": "bbc22dd930911b28",
+      "nanoseconds": {
+        "aot": {
+          "median": 71674455.0,
+          "q1": 71545958.75,
+          "q3": 72097210.75,
+          "min": 71524624,
+          "max": 73852933,
+          "n": 10
+        },
+        "wasmtime-adapter": {
+          "median": 69939696.5,
+          "q1": 69406816.0,
+          "q3": 70344237.5,
+          "min": 68734503,
+          "max": 71943935,
+          "n": 10
+        },
+        "native": {
+          "median": 51076982.0,
+          "q1": 50557128.25,
+          "q3": 51621116.75,
+          "min": 50247589,
+          "max": 52086400,
+          "n": 10
+        }
+      },
+      "ratios": {
+        "aot/wasmtime-adapter": {
+          "median": 1.026172326285364,
+          "q1": 1.0198088802919563,
+          "q3": 1.0386329324457273,
+          "min": 0.996178010001816,
+          "max": 1.0653458489549603,
+          "n": 10
+        },
+        "aot/native": {
+          "median": 1.4042355866044036,
+          "q1": 1.386400496076635,
+          "q3": 1.4225688027796135,
+          "min": 1.374967153923754,
+          "max": 1.4626673878112815,
+          "n": 10
+        },
+        "wasmtime-adapter/native": {
+          "median": 1.3704335969400463,
+          "q1": 1.3521249599098906,
+          "q3": 1.379493226473218,
+          "min": 1.3471021855008745,
+          "max": 1.404738413231653,
+          "n": 10
+        }
+      },
+      "build": {
+        "argv": [
+          "/sdk/bin/wrcc",
+          "--target",
+          "wasm64",
+          "--core",
+          "3.0",
+          "--std",
+          "c++20",
+          "--no-mte",
+          "--no-threads",
+          "--no-eh",
+          "--reactor",
+          "--export",
+          "_start",
+          "--build-receipt",
+          "-O3",
+          "-DBENCH_SORT",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/sort-wasm64.wasm"
+        ],
+        "sha256": "bf4c892f2c268c7931f6605751f044e28aedde1032a959e80bffa795591f05bb",
+        "sdk_build_receipt_sha256": "aebc5497861e63b7d0ddd63be7bdbb8c67561fcba4213fbfe45965dc2ce6e61d",
+        "profile": {
+          "address_bits": 64,
+          "wasm_version": "3.0",
+          "threads": false,
+          "mte": false,
+          "exceptions": "noeh",
+          "triple": "wasm64-wasip1",
+          "abi": "uwvm-preview1-memory64-extension",
+          "memtag_wire": null,
+          "extensions": []
+        },
+        "sysroot_sha256": "6341bf08a8e742dc90901c4553bc15d327338e5e0b78b215d325cdf1fe4c26d1",
+        "decoder_sha256": "c3eebd5b3a62e59dc6bdaf3b08583774b6b46aa73b1ebff0418741f51dbb57de",
+        "module_sections_sha256": "6369845962c860fd832ed5d812722e912f75f12fee18b72c8a63e3ab28369591",
+        "wasi_imports": [
+          "clock_time_get_wasm64",
+          "fd_close_wasm64",
+          "fd_fdstat_get_wasm64",
+          "fd_seek_wasm64",
+          "fd_write_wasm64"
+        ]
+      },
+      "native_build": {
+        "elf_class": 2,
+        "elf_machine": 62,
+        "sha256": "d791a7d601e07af563f1cb3bf9a0905a887288a5c576c71dd1feaddbebc8d621",
+        "elf_build_id": "80942f93685055c44ffea4a17d4fb46230c6923e",
+        "argv": [
+          "/usr/bin/clang++-22",
+          "-std=c++20",
+          "-stdlib=libc++",
+          "-march=native",
+          "-fno-exceptions",
+          "-fno-rtti",
+          "-O3",
+          "-DBENCH_SORT",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/sort-native"
+        ]
+      },
+      "example_runtime_argv": {
+        "aot": [
+          "/vm/d1a44a2/uwvm2-ros",
+          "--runtime-aot",
+          "--runtime-compile-threads",
+          "0",
+          "--runtime-llvm-jit-cache-path",
+          "disable",
+          "--runtime-llvm-jit-policy",
+          "balanced",
+          "--debug-fault-action",
+          "exit",
+          "--log-color",
+          "disable",
+          "--wasm-feature-wasm3",
+          "--wasm-feature-disable-memtag-extension",
+          "--runtime-disable-memtag",
+          "--wasm-feature-disable-threads",
+          "--wasm-feature-disable-exceptions",
+          "--wasm-feature-enable-memory64",
+          "--wasm-feature-enable-table64",
+          "--wasm-set-main-module-name",
+          "main",
+          "--wasip1-single-create",
+          "main",
+          "--wasip1-single-enable",
+          "main",
+          "--wasip1-single-hide-host-api",
+          "main",
+          "--wasip1-single-noinherit-system-environment",
+          "main",
+          "--wasip1-single-interface",
+          "main",
+          "clock_time_get_wasm64",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_close_wasm64",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_fdstat_get_wasm64",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_seek_wasm64",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_write_wasm64",
+          "allow",
+          "--wasip1-single-grant",
+          "main",
+          "args",
+          "--wasip1-single-grant",
+          "main",
+          "monotonic-clock",
+          "--wasip1-single-grant",
+          "main",
+          "proc-exit",
+          "--wasip1-single-grant",
+          "main",
+          "stdio.metadata",
+          "--wasip1-single-grant",
+          "main",
+          "stdout.write",
+          "--wasip1-single-grant",
+          "main",
+          "stderr.write",
+          "--wasip1-single-grant",
+          "main",
+          "environ",
+          "--wasip1-single-grant",
+          "main",
+          "sched-yield",
+          "--run",
+          "/cpp/sort-wasm64.wasm"
+        ],
+        "wasmtime-adapter": [
+          "/reference/host",
+          "64",
+          "noeh",
+          "/cpp/sort-wasm64.wasm",
+          "-",
+          "/work/adapter-sort-64-0.log",
+          "allow=clock_time_get_wasm64",
+          "deny=fd_close_wasm64",
+          "allow=fd_fdstat_get_wasm64",
+          "deny=fd_seek_wasm64",
+          "allow=fd_write_wasm64",
+          "grant=args",
+          "grant=monotonic-clock",
+          "grant=proc-exit",
+          "grant=stdio.metadata",
+          "grant=stdout.write",
+          "grant=stderr.write",
+          "grant=environ",
+          "grant=sched-yield",
+          "guest-argv0=/cpp/sort-wasm64.wasm"
+        ],
+        "native": [
+          "/cpp/sort-native"
+        ]
+      },
+      "pairs_ns": [
+        {
+          "aot": 71534950,
+          "wasmtime-adapter": 69658369,
+          "native": 51358094
+        },
+        {
+          "native": 50491953,
+          "wasmtime-adapter": 69322965,
+          "aot": 73852933
+        },
+        {
+          "wasmtime-adapter": 70393504,
+          "native": 51223356,
+          "aot": 71767360
+        },
+        {
+          "wasmtime-adapter": 71943935,
+          "aot": 71668966,
+          "native": 52086400
+        },
+        {
+          "native": 52019151,
+          "aot": 71524624,
+          "wasmtime-adapter": 70075112
+        },
+        {
+          "aot": 71577650,
+          "native": 51708791,
+          "wasmtime-adapter": 69804281
+        },
+        {
+          "aot": 71535395,
+          "wasmtime-adapter": 70662319,
+          "native": 50302831
+        },
+        {
+          "native": 50930608,
+          "wasmtime-adapter": 68793209,
+          "aot": 71679944
+        },
+        {
+          "wasmtime-adapter": 68734503,
+          "native": 50247589,
+          "aot": 72803053
+        },
+        {
+          "wasmtime-adapter": 70196438,
+          "aot": 72207161,
+          "native": 50752654
+        }
+      ]
+    },
+    {
+      "workload": "parse",
+      "width": 32,
+      "wasi_imports": [
+        "clock_time_get",
+        "fd_close",
+        "fd_fdstat_get",
+        "fd_seek",
+        "fd_write"
+      ],
+      "wasm_sha256": "dc3196f07e41d5d5dc756cb2a9072ac1f04600518826000e36b19787548440e1",
+      "items": 4194304,
+      "checksum": "6b1b3e7d31fd2d25",
+      "nanoseconds": {
+        "aot": {
+          "median": 106148687.5,
+          "q1": 104841126.25,
+          "q3": 107715984.0,
+          "min": 102622732,
+          "max": 111660283,
+          "n": 10
+        },
+        "wasmtime-cli": {
+          "median": 110267005.5,
+          "q1": 109208298.75,
+          "q3": 112059291.75,
+          "min": 105792852,
+          "max": 113494385,
+          "n": 10
+        },
+        "native": {
+          "median": 78627080.0,
+          "q1": 77230665.75,
+          "q3": 79173021.25,
+          "min": 76762215,
+          "max": 80151230,
+          "n": 10
+        }
+      },
+      "ratios": {
+        "aot/wasmtime-cli": {
+          "median": 0.9669609301913298,
+          "q1": 0.9549025387777079,
+          "q3": 0.9710593920747709,
+          "min": 0.9352503370691968,
+          "max": 1.0185246877863967,
+          "n": 10
+        },
+        "aot/native": {
+          "median": 1.3587397313882312,
+          "q1": 1.3463617862689445,
+          "q3": 1.370425767117605,
+          "min": 1.3210671840359045,
+          "max": 1.4057659748354057,
+          "n": 10
+        },
+        "wasmtime-cli/native": {
+          "median": 1.4124149051511592,
+          "q1": 1.3796598914135245,
+          "q3": 1.4214339878132443,
+          "min": 1.369637603582282,
+          "max": 1.4665353520609066,
+          "n": 10
+        }
+      },
+      "build": {
+        "argv": [
+          "/sdk/bin/wrcc",
+          "--target",
+          "wasm32",
+          "--core",
+          "3.0",
+          "--std",
+          "c++20",
+          "--no-mte",
+          "--no-threads",
+          "--no-eh",
+          "--reactor",
+          "--export",
+          "_start",
+          "--build-receipt",
+          "-O3",
+          "-DBENCH_PARSE",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/parse-wasm32.wasm"
+        ],
+        "sha256": "dc3196f07e41d5d5dc756cb2a9072ac1f04600518826000e36b19787548440e1",
+        "sdk_build_receipt_sha256": "23d6d24d98a58f2aa0bb117a691b459a634bd3c161312caa0c953df7f8a27ed4",
+        "profile": {
+          "address_bits": 32,
+          "wasm_version": "3.0",
+          "threads": false,
+          "mte": false,
+          "exceptions": "noeh",
+          "triple": "wasm32-wasip1",
+          "abi": "wasi_snapshot_preview1",
+          "memtag_wire": null,
+          "extensions": []
+        },
+        "sysroot_sha256": "dbb1f7d1958d54785dfbbf8c10068f797511c37b016c82ed91e825149373c495",
+        "decoder_sha256": "d124c7a6ca20f64df41d53579fdd95be381498107ce6679084fc74b1a4bc48a3",
+        "module_sections_sha256": "9c4d93f7a768d85dfbe39da67ee010412e81c4d85a2604a73117fe30980d7264",
+        "wasi_imports": [
+          "clock_time_get",
+          "fd_close",
+          "fd_fdstat_get",
+          "fd_seek",
+          "fd_write"
+        ]
+      },
+      "native_build": {
+        "elf_class": 2,
+        "elf_machine": 62,
+        "sha256": "72852ec8ebed002e0cf790fc87e3718cd783c147e9eef010e8f05f8bad2237e0",
+        "elf_build_id": "57a82f4cc70104900081fabc1fe10b614536bd97",
+        "argv": [
+          "/usr/bin/clang++-22",
+          "-std=c++20",
+          "-stdlib=libc++",
+          "-march=native",
+          "-fno-exceptions",
+          "-fno-rtti",
+          "-O3",
+          "-DBENCH_PARSE",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/parse-native"
+        ]
+      },
+      "example_runtime_argv": {
+        "aot": [
+          "/vm/d1a44a2/uwvm2-ros",
+          "--runtime-aot",
+          "--runtime-compile-threads",
+          "0",
+          "--runtime-llvm-jit-cache-path",
+          "disable",
+          "--runtime-llvm-jit-policy",
+          "balanced",
+          "--debug-fault-action",
+          "exit",
+          "--log-color",
+          "disable",
+          "--wasm-feature-wasm3",
+          "--wasm-feature-disable-memtag-extension",
+          "--runtime-disable-memtag",
+          "--wasm-feature-disable-threads",
+          "--wasm-feature-disable-exceptions",
+          "--wasm-set-main-module-name",
+          "main",
+          "--wasip1-single-create",
+          "main",
+          "--wasip1-single-enable",
+          "main",
+          "--wasip1-single-hide-host-api",
+          "main",
+          "--wasip1-single-noinherit-system-environment",
+          "main",
+          "--wasip1-single-interface",
+          "main",
+          "clock_time_get",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_close",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_fdstat_get",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_seek",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_write",
+          "allow",
+          "--wasip1-single-grant",
+          "main",
+          "args",
+          "--wasip1-single-grant",
+          "main",
+          "monotonic-clock",
+          "--wasip1-single-grant",
+          "main",
+          "proc-exit",
+          "--wasip1-single-grant",
+          "main",
+          "stdio.metadata",
+          "--wasip1-single-grant",
+          "main",
+          "stdout.write",
+          "--wasip1-single-grant",
+          "main",
+          "stderr.write",
+          "--wasip1-single-grant",
+          "main",
+          "environ",
+          "--wasip1-single-grant",
+          "main",
+          "sched-yield",
+          "--run",
+          "/cpp/parse-wasm32.wasm"
+        ],
+        "wasmtime-cli": [
+          "/reference/wasmtime",
+          "run",
+          "-C",
+          "compiler=cranelift",
+          "-C",
+          "parallel-compilation=n",
+          "-O",
+          "opt-level=2",
+          "-W",
+          "memory64=n",
+          "/cpp/parse-wasm32.wasm"
+        ],
+        "native": [
+          "/cpp/parse-native"
+        ]
+      },
+      "pairs_ns": [
+        {
+          "aot": 102622732,
+          "wasmtime-cli": 105792852,
+          "native": 77241492
+        },
+        {
+          "native": 77227057,
+          "wasmtime-cli": 109067921,
+          "aot": 105141202
+        },
+        {
+          "wasmtime-cli": 107742978,
+          "native": 78503430,
+          "aot": 105407182
+        },
+        {
+          "wasmtime-cli": 110245048,
+          "aot": 104699822,
+          "native": 77068526
+        },
+        {
+          "native": 78836428,
+          "aot": 107134806,
+          "wasmtime-cli": 110288963
+        },
+        {
+          "aot": 106890193,
+          "native": 78750730,
+          "wasmtime-cli": 112081528
+        },
+        {
+          "aot": 107909710,
+          "wasmtime-cli": 112574502,
+          "native": 76762215
+        },
+        {
+          "native": 79285219,
+          "wasmtime-cli": 111992583,
+          "aot": 104741101
+        },
+        {
+          "wasmtime-cli": 109629432,
+          "native": 79833454,
+          "aot": 111660283
+        },
+        {
+          "wasmtime-cli": 113494385,
+          "aot": 110080970,
+          "native": 80151230
+        }
+      ]
+    },
+    {
+      "workload": "parse",
+      "width": 64,
+      "wasi_imports": [
+        "clock_time_get_wasm64",
+        "fd_close_wasm64",
+        "fd_fdstat_get_wasm64",
+        "fd_seek_wasm64",
+        "fd_write_wasm64"
+      ],
+      "wasm_sha256": "37e0459156ea286d8ab5734d1b31769740ced0328e7e52657c5f06b13f89d106",
+      "items": 4194304,
+      "checksum": "6b1b3e7d31fd2d25",
+      "nanoseconds": {
+        "aot": {
+          "median": 137506293.0,
+          "q1": 134568145.0,
+          "q3": 141104988.0,
+          "min": 132702343,
+          "max": 142032003,
+          "n": 10
+        },
+        "wasmtime-adapter": {
+          "median": 146246045.0,
+          "q1": 142027101.25,
+          "q3": 148648860.5,
+          "min": 139876475,
+          "max": 151284970,
+          "n": 10
+        },
+        "native": {
+          "median": 77486147.0,
+          "q1": 75450908.75,
+          "q3": 78322090.0,
+          "min": 73619633,
+          "max": 80202808,
+          "n": 10
+        }
+      },
+      "ratios": {
+        "aot/wasmtime-adapter": {
+          "median": 0.9428799158180521,
+          "q1": 0.9347672880411136,
+          "q3": 0.9527531952756552,
+          "min": 0.9303331709637334,
+          "max": 0.9670886401734101,
+          "n": 10
+        },
+        "aot/native": {
+          "median": 1.7963323408279956,
+          "q1": 1.7643480605703308,
+          "q3": 1.807569062646797,
+          "min": 1.7165384237625467,
+          "max": 1.8374575434245917,
+          "n": 10
+        },
+        "wasmtime-adapter/native": {
+          "median": 1.893826569701766,
+          "q1": 1.8781498420288814,
+          "q3": 1.910391630003105,
+          "min": 1.8450792440136068,
+          "max": 1.9203811115346046,
+          "n": 10
+        }
+      },
+      "build": {
+        "argv": [
+          "/sdk/bin/wrcc",
+          "--target",
+          "wasm64",
+          "--core",
+          "3.0",
+          "--std",
+          "c++20",
+          "--no-mte",
+          "--no-threads",
+          "--no-eh",
+          "--reactor",
+          "--export",
+          "_start",
+          "--build-receipt",
+          "-O3",
+          "-DBENCH_PARSE",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/parse-wasm64.wasm"
+        ],
+        "sha256": "37e0459156ea286d8ab5734d1b31769740ced0328e7e52657c5f06b13f89d106",
+        "sdk_build_receipt_sha256": "d4366a1e0c19edbbcb39f64a476e28f0a32133afe4cd8bc4a9cd7774a9519987",
+        "profile": {
+          "address_bits": 64,
+          "wasm_version": "3.0",
+          "threads": false,
+          "mte": false,
+          "exceptions": "noeh",
+          "triple": "wasm64-wasip1",
+          "abi": "uwvm-preview1-memory64-extension",
+          "memtag_wire": null,
+          "extensions": []
+        },
+        "sysroot_sha256": "6341bf08a8e742dc90901c4553bc15d327338e5e0b78b215d325cdf1fe4c26d1",
+        "decoder_sha256": "1a7540a623e593d2ea1ecfe95aa0402330274502104a041b0ad631357ef6d55d",
+        "module_sections_sha256": "49d42b3b2c8eca391bddc0f4bf9984cfe9fabcd9494cf728a873cec7cf0a30da",
+        "wasi_imports": [
+          "clock_time_get_wasm64",
+          "fd_close_wasm64",
+          "fd_fdstat_get_wasm64",
+          "fd_seek_wasm64",
+          "fd_write_wasm64"
+        ]
+      },
+      "native_build": {
+        "elf_class": 2,
+        "elf_machine": 62,
+        "sha256": "72852ec8ebed002e0cf790fc87e3718cd783c147e9eef010e8f05f8bad2237e0",
+        "elf_build_id": "57a82f4cc70104900081fabc1fe10b614536bd97",
+        "argv": [
+          "/usr/bin/clang++-22",
+          "-std=c++20",
+          "-stdlib=libc++",
+          "-march=native",
+          "-fno-exceptions",
+          "-fno-rtti",
+          "-O3",
+          "-DBENCH_PARSE",
+          "-I/fast-float/include",
+          "/inputs/workloads.cpp",
+          "-o",
+          "/work/artifacts/parse-native"
+        ]
+      },
+      "example_runtime_argv": {
+        "aot": [
+          "/vm/d1a44a2/uwvm2-ros",
+          "--runtime-aot",
+          "--runtime-compile-threads",
+          "0",
+          "--runtime-llvm-jit-cache-path",
+          "disable",
+          "--runtime-llvm-jit-policy",
+          "balanced",
+          "--debug-fault-action",
+          "exit",
+          "--log-color",
+          "disable",
+          "--wasm-feature-wasm3",
+          "--wasm-feature-disable-memtag-extension",
+          "--runtime-disable-memtag",
+          "--wasm-feature-disable-threads",
+          "--wasm-feature-disable-exceptions",
+          "--wasm-feature-enable-memory64",
+          "--wasm-feature-enable-table64",
+          "--wasm-set-main-module-name",
+          "main",
+          "--wasip1-single-create",
+          "main",
+          "--wasip1-single-enable",
+          "main",
+          "--wasip1-single-hide-host-api",
+          "main",
+          "--wasip1-single-noinherit-system-environment",
+          "main",
+          "--wasip1-single-interface",
+          "main",
+          "clock_time_get_wasm64",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_close_wasm64",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_fdstat_get_wasm64",
+          "allow",
+          "--wasip1-single-interface",
+          "main",
+          "fd_seek_wasm64",
+          "deny",
+          "--wasip1-single-interface",
+          "main",
+          "fd_write_wasm64",
+          "allow",
+          "--wasip1-single-grant",
+          "main",
+          "args",
+          "--wasip1-single-grant",
+          "main",
+          "monotonic-clock",
+          "--wasip1-single-grant",
+          "main",
+          "proc-exit",
+          "--wasip1-single-grant",
+          "main",
+          "stdio.metadata",
+          "--wasip1-single-grant",
+          "main",
+          "stdout.write",
+          "--wasip1-single-grant",
+          "main",
+          "stderr.write",
+          "--wasip1-single-grant",
+          "main",
+          "environ",
+          "--wasip1-single-grant",
+          "main",
+          "sched-yield",
+          "--run",
+          "/cpp/parse-wasm64.wasm"
+        ],
+        "wasmtime-adapter": [
+          "/reference/host",
+          "64",
+          "noeh",
+          "/cpp/parse-wasm64.wasm",
+          "-",
+          "/work/adapter-parse-64-0.log",
+          "allow=clock_time_get_wasm64",
+          "deny=fd_close_wasm64",
+          "allow=fd_fdstat_get_wasm64",
+          "deny=fd_seek_wasm64",
+          "allow=fd_write_wasm64",
+          "grant=args",
+          "grant=monotonic-clock",
+          "grant=proc-exit",
+          "grant=stdio.metadata",
+          "grant=stdout.write",
+          "grant=stderr.write",
+          "grant=environ",
+          "grant=sched-yield",
+          "guest-argv0=/cpp/parse-wasm64.wasm"
+        ],
+        "native": [
+          "/cpp/parse-native"
+        ]
+      },
+      "pairs_ns": [
+        {
+          "aot": 142032003,
+          "wasmtime-adapter": 148380050,
+          "native": 78456330
+        },
+        {
+          "native": 80202808,
+          "wasmtime-adapter": 150989996,
+          "aot": 141199102
+        },
+        {
+          "wasmtime-adapter": 147560826,
+          "native": 77101190,
+          "aot": 140822646
+        },
+        {
+          "wasmtime-adapter": 148738464,
+          "aot": 139739636,
+          "native": 77664183
+        },
+        {
+          "native": 78778618,
+          "aot": 141396672,
+          "wasmtime-adapter": 151284970
+        },
+        {
+          "aot": 134926435,
+          "native": 77919370,
+          "wasmtime-adapter": 144931264
+        },
+        {
+          "aot": 135272950,
+          "wasmtime-adapter": 139876475,
+          "native": 73619633
+        },
+        {
+          "native": 74784983,
+          "wasmtime-adapter": 141822938,
+          "aot": 134448715
+        },
+        {
+          "wasmtime-adapter": 142639591,
+          "native": 77308111,
+          "aot": 132702343
+        },
+        {
+          "wasmtime-adapter": 140563788,
+          "aot": 133010009,
+          "native": 74900815
+        }
+      ]
+    }
+  ]
+}
