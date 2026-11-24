@@ -17,7 +17,6 @@
 
 #include "OutputSections.h"
 
-#include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/BinaryFormat/WasmTraits.h"
 #include <optional>
@@ -401,11 +400,14 @@ public:
   bool isNeeded() const override {
     if (ctx.arg.stripAll && !ctx.arg.keepSections.contains(name))
       return false;
-    return features.size() > 0;
+    return !features.empty();
   }
   void writeBody() override;
 
-  llvm::SmallSet<std::string, 8> features;
+  bool isUsed(StringRef feature) const {
+    return features.lookup(feature) == llvm::wasm::WASM_FEATURE_PREFIX_USED;
+  }
+  llvm::StringMap<uint8_t> features;
 };
 
 class RelocSection : public SyntheticSection {

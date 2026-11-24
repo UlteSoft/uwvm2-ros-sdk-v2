@@ -630,7 +630,7 @@ void Writer::finalizeSections() {
 void Writer::populateTargetFeatures() {
   StringMap<std::string> used;
   StringMap<std::string> disallowed;
-  SmallSet<std::string, 8> &allowed = out.targetFeaturesSec->features;
+  SmallSet<std::string, 8> allowed;
   bool tlsUsed = false;
 
   if (ctx.isPic) {
@@ -651,7 +651,7 @@ void Writer::populateTargetFeatures() {
   if (!inferFeatures) {
     auto &explicitFeatures = *ctx.arg.features;
     allowed.insert_range(explicitFeatures);
-    if (!ctx.arg.checkFeatures)
+    if (!ctx.arg.checkFeatures && !ctx.arg.relocatable)
       goto done;
   }
 
@@ -671,6 +671,11 @@ void Writer::populateTargetFeatures() {
               std::to_string(feature.Prefix));
       }
     }
+
+    // With an explicit unchecked feature list, a partial link only needs the
+    // input feature policies for the next link.
+    if (!inferFeatures && !ctx.arg.checkFeatures)
+      continue;
 
     // Find TLS data segments
     auto isTLS = [](InputChunk *segment) {
@@ -755,15 +760,23 @@ done:
   if (allowed.contains("extended-const"))
     ctx.arg.extendedConst = true;
 
-  for (auto &feature : allowed)
+  for (const auto &feature : allowed) {
     log("Allowed feature: " + feature);
+    out.targetFeaturesSec->features[feature] = WASM_FEATURE_PREFIX_USED;
+  }
+
+  // A partial link has yet to choose the memory type. Even when the output
+  // feature list is explicit, a private input still constrains the next link.
+  if (ctx.arg.relocatable && disallowed.contains("shared-mem"))
+    out.targetFeaturesSec->features["shared-mem"] =
+        WASM_FEATURE_PREFIX_DISALLOWED;
 }
 
 void Writer::checkImportExportTargetFeatures() {
   if (ctx.arg.relocatable || !ctx.arg.checkFeatures)
     return;
 
-  if (!out.targetFeaturesSec->features.contains("mutable-globals")) {
+  if (!out.targetFeaturesSec->isUsed("mutable-globals")) {
     for (const Symbol *sym : out.importSec->importedSymbols) {
       if (auto *global = dyn_cast<GlobalSymbol>(sym)) {
         if (global->getGlobalType()->Mutable) {
@@ -855,8 +868,7 @@ void Writer::calculateExports() {
   unsigned globalIndex =
       out.importSec->getNumImportedGlobals() + out.globalSec->numGlobals();
 
-  bool hasMutableGlobals =
-      out.targetFeaturesSec->features.contains("mutable-globals");
+  bool hasMutableGlobals = out.targetFeaturesSec->isUsed("mutable-globals");
 
   for (Symbol *sym : symtab->symbols()) {
     if (!sym->isExported())

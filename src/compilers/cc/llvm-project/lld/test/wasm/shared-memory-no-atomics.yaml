@@ -4,6 +4,22 @@
 
 # RUN: not wasm-ld --no-entry --shared-memory --max-memory=131072 %t1.o -o - 2>&1 | FileCheck %s --check-prefix SHARED
 
+## A relocatable object must retain the memory constraint even when it is
+## the only target feature.
+# RUN: wasm-ld -r %t1.o -o %t.partial.o
+# RUN: obj2yaml %t.partial.o | FileCheck %s --check-prefix MARKER
+# RUN: wasm-ld -r --no-check-features --features=shared-mem %t1.o -o - | obj2yaml | FileCheck %s --check-prefix MARKER
+# RUN: wasm-ld -r --strip-all %t1.o -o - | obj2yaml | FileCheck %s --check-prefix STRIPPED
+# RUN: wasm-ld -r --strip-all --keep-section=target_features %t1.o -o - | obj2yaml | FileCheck %s --check-prefix MARKER
+
+## Relink the partial object with another input and the features needed for
+## shared memory. The next link must still see the constraint.
+# RUN: yaml2obj %S/Inputs/use-feature-foo.yaml -o %t.foo.o
+# RUN: wasm-ld -r --extra-features=simd128,bulk-memory,atomics %t.foo.o %t.partial.o -o %t.mixed.o
+# RUN: obj2yaml %t.mixed.o | FileCheck %s --check-prefix MIXED
+# RUN: wasm-ld --no-entry %t.mixed.o -o - | obj2yaml | FileCheck %s --check-prefix PRIVATE
+# RUN: not wasm-ld --no-entry --shared-memory --max-memory=131072 %t.mixed.o -o %t.wasm 2>&1 | FileCheck %s --check-prefix PARTIAL-ERROR
+
 --- !WASM
 FileHeader:
   Version:         0x00000001
@@ -57,5 +73,32 @@ Sections:
 # NO-SHARED-NEXT:   Memories:
 # NO-SHARED-NEXT:     - Minimum:         0x1
 # NO-SHARED-NOT:        Maximum:
+# NO-SHARED-NOT:        target_features
 
 # SHARED: --shared-memory is disallowed by {{.*}}shared-memory-no-atomics.yaml.tmp1.o because it was not compiled with 'atomics' or 'bulk-memory' features.
+
+# MARKER:      Name: target_features
+# MARKER-NEXT: Features:
+# MARKER-NEXT:   - Prefix: DISALLOWED
+# MARKER-NEXT:     Name: shared-mem
+# MARKER-NEXT: ...
+
+# STRIPPED-NOT: target_features
+
+# MIXED:      Name: target_features
+# MIXED-NEXT: Features:
+# MIXED-NEXT:   - Prefix: USED
+# MIXED-NEXT:     Name: atomics
+# MIXED-NEXT:   - Prefix: USED
+# MIXED-NEXT:     Name: bulk-memory
+# MIXED-NEXT:   - Prefix: USED
+# MIXED-NEXT:     Name: foo
+# MIXED-NEXT:   - Prefix: DISALLOWED
+# MIXED-NEXT:     Name: shared-mem
+# MIXED-NEXT:   - Prefix: USED
+# MIXED-NEXT:     Name: simd128
+# MIXED-NEXT: ...
+
+# PRIVATE:     Name: target_features
+# PRIVATE-NOT: DISALLOWED
+# PARTIAL-ERROR: --shared-memory is disallowed by {{.*}}.mixed.o

@@ -315,8 +315,7 @@ void ImportSection::writeBody() {
     imports.push_back(import);
   }
 
-  bool hasCompactImports =
-      out.targetFeaturesSec->features.contains("compact-imports");
+  bool hasCompactImports = out.targetFeaturesSec->isUsed("compact-imports");
   uint32_t i = 0;
   while (i < numImports) {
     const WasmImport &import = imports[i];
@@ -957,12 +956,12 @@ void ProducersSection::writeBody() {
 }
 
 void TargetFeaturesSection::writeBody() {
-  SmallVector<std::string, 8> emitted(features.begin(), features.end());
+  auto emitted = llvm::to_vector<8>(features.keys());
   llvm::sort(emitted);
   auto &os = bodyOutputStream;
   writeUleb128(os, emitted.size(), "feature count");
-  for (auto &feature : emitted) {
-    writeU8(os, WASM_FEATURE_PREFIX_USED, "feature used prefix");
+  for (StringRef feature : emitted) {
+    writeU8(os, features.lookup(feature), "feature prefix");
     writeStr(os, feature, "feature name");
   }
 }
