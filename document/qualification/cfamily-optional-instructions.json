@@ -338,7 +338,74 @@
         "isolation_sha256": "eefc25c2ddcb8683b6be5bdb34708c866a56851baec5fae1327996b69163f89b",
         "fresh_wasmtime_summary_sha256": "ca175f2a4053281e2fc87af9a134ccec3622d2d393fe26f8ac6ae36426ede201",
         "decoder_sha256": "57cc30a82bbe34ad7313d85524bb37212d8e556da96a8c6f6f150c5a16bd7aea",
-        "harness_commit": "ae64a9236cb181b27eb7a46ba13c9be66c6242d1"
+        "harness_commit": "ae64a9236cb181b27eb7a46ba13c9be66c6242d1",
+        "paired_feature_comparisons": {
+          "int": {
+            "simd": {
+              "compared": 128,
+              "equivalent": 128
+            },
+            "copy_fill": {
+              "compared": 128,
+              "equivalent": 128
+            }
+          },
+          "aot": {
+            "simd": {
+              "compared": 128,
+              "equivalent": 128
+            },
+            "copy_fill": {
+              "compared": 128,
+              "equivalent": 128
+            }
+          }
+        }
+      },
+      "i686": {
+        "status": "pass",
+        "summary_sha256": "d10fb854c056be458a0df577eea7c390eef1eecc958243e9605090dfdba6027d",
+        "compiler_host": "i686",
+        "execution_host": "native Linux",
+        "wasmtime": "wasmtime 42.0.1 (6844a83b5 2026-02-25)",
+        "cells_seen": 256,
+        "cells_passed": 256,
+        "decoder_passed": 256,
+        "int_passed": 256,
+        "aot_passed": 256,
+        "wasmtime_aot_passed": 128,
+        "wasmtime_int_passed": 128,
+        "bulk_off_cells_passed": 64,
+        "thread_init_control_cells_passed": 64,
+        "copy_fill_cells_passed": 128,
+        "vm_sha256": "ffe28677d641695740709ed5b4db213029f937a41733098421bc2ee05d5c013e",
+        "results_sha256": "0c127218c4e00159cdad60819cb124f9635c98651fc3508e41e44ef73f157a97",
+        "isolation_sha256": "a341969e31c3a0860496b2da8503dfedecd69f124442c1e5778393ccbbf1fa3a",
+        "fresh_wasmtime_summary_sha256": "6ea049f6349dc98457513882347ae822596e038dc0337e3599714cbf320bbf27",
+        "decoder_sha256": "94307633fbe892638d5a65bd5c8b5451082e33900159d3e55c1d5a9c207c9b11",
+        "harness_commit": "ae64a9236cb181b27eb7a46ba13c9be66c6242d1",
+        "paired_feature_comparisons": {
+          "int": {
+            "simd": {
+              "compared": 128,
+              "equivalent": 128
+            },
+            "copy_fill": {
+              "compared": 128,
+              "equivalent": 128
+            }
+          },
+          "aot": {
+            "simd": {
+              "compared": 128,
+              "equivalent": 128
+            },
+            "copy_fill": {
+              "compared": 128,
+              "equivalent": 128
+            }
+          }
+        }
       }
     }
   },
