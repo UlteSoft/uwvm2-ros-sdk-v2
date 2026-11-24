@@ -118,5 +118,49 @@
       "status": "pending"
     }
   },
-  "status": "partial"
+  "status": "partial",
+  "candidate_vm_replay": {
+    "vm_commit": "08990a38a116cf09e79378e091b54551fa2ab763",
+    "vm_tree": "4e9119e2f17de8390b5043ab66b839938952c43f",
+    "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "guest_sdk_tree": "352221288b627c9f3f7fdc98114578da48e5f617",
+    "scope": "Re-execution of original public SDK-built modules on the relocated VM binary with independent instruction decoding. Full public installation with this VM is tracked separately.",
+    "status": "partial",
+    "hosts": {
+      "x86_64": {
+        "status": "pass",
+        "linked_modules_replayed": 256,
+        "decoder_pass": 256,
+        "int_pass": 256,
+        "aot_pass": 256,
+        "reference": {
+          "version": "wasmtime 42.0.1 (6844a83b5 2026-02-25)",
+          "engine": "C API",
+          "execution_host": "x86_64",
+          "matching_no_mte_modules": 128,
+          "matching_threaded_owner_hashes": 64,
+          "bytes_per_stdout": 4160,
+          "outputs": "stdout, stderr, exit",
+          "results_sha256": "8d94d9ee6cc8ee47840eaef601f676d29548fba310dfad438c563023b640e6e6"
+        },
+        "vm_sha256": "62186efd066469f64bd19980349180595b8851ebc649e1bad55a721006f44cb8",
+        "vm_archive_receipt_sha256": "5d6f986da6f2110bd7852a05ab414e7b89917bcf63f91631e2302213f33d5e7b",
+        "isolation_sha256": "acdcc94fb59b0c9e80f860b998bdecedc4b3f5033c3e561d06b7e45469dee632",
+        "results_sha256": "f6f529529024439e6e38243cd672ac203a94b376ef68029799bc4af69c63b80a",
+        "summary_sha256": "a6cebc563a36eeaf552c2b2101a1c405e0e95965f663b10f40c03b760cb7a9bf"
+      },
+      "i686": {
+        "status": "pending"
+      },
+      "aarch64": {
+        "status": "pending"
+      },
+      "arm": {
+        "status": "pending"
+      },
+      "armhf": {
+        "status": "pending"
+      }
+    }
+  }
 }

@@ -307,6 +307,152 @@
           "status": "pending"
         }
       }
+    },
+    "candidate_restore_08990a38": {
+      "vm_commit": "08990a38a116cf09e79378e091b54551fa2ab763",
+      "vm_tree": "4e9119e2f17de8390b5043ab66b839938952c43f",
+      "status": "blocked-by-aarch64-full-restore",
+      "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+      "hosts": {
+        "x86_64": {
+          "relocation": {
+            "passed": 6,
+            "archive_receipt_sha256": "5d6f986da6f2110bd7852a05ab414e7b89917bcf63f91631e2302213f33d5e7b",
+            "elf_sha256": "62186efd066469f64bd19980349180595b8851ebc649e1bad55a721006f44cb8"
+          },
+          "restore": {
+            "c": {
+              "status": "pass",
+              "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+              "guest_profile": "wasm32-wasip1-noeh-mte",
+              "guest_build_host": "linux-x86_64",
+              "result_sha256": "1a2ed3dd3b4b20c43bcc21228e839a800689cfe3ea2c68541c91031a20499ad3"
+            },
+            "cpp": {
+              "status": "pass",
+              "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+              "guest_profile": "wasm32-wasip1-noeh-mte",
+              "guest_build_host": "linux-x86_64",
+              "result_sha256": "ec8b2a66bba69f9a4c8636d9ac5b00740282a9266e9b802d3d12e583dffcb0a5"
+            },
+            "objc": {
+              "status": "pass",
+              "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+              "guest_profile": "wasm32-wasip1-noeh-nomte",
+              "guest_build_host": "linux-x86_64",
+              "result_sha256": "924932fc2f3d9475f7d84789c78f41c196fc525a90100bc66a15a887102e4d4c"
+            },
+            "objcpp": {
+              "status": "pass",
+              "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+              "guest_profile": "wasm32-wasip1-noeh-nomte",
+              "guest_build_host": "linux-x86_64",
+              "result_sha256": "e934b3e80b290cdae23cc28eefa8bd6e3276631df9a1a9cfc76a79c39968ff35"
+            }
+          }
+        },
+        "i686": {
+          "relocation": {
+            "passed": 6,
+            "archive_receipt_sha256": "49c3436d66cde9c796bf5b2e85e74fc2805d2ebaade3f2beeba2314001363759",
+            "elf_sha256": "baa554f46f0ca7a8b21fa159228280b7b42705d11c40435320942f0f97ccfe45"
+          },
+          "restore": {
+            "c": {
+              "status": "pass",
+              "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+              "guest_profile": "wasm32-wasip1-noeh-mte",
+              "guest_build_host": "linux-i686",
+              "result_sha256": "9f973cd06e53890bd21c72ce3609625ac21104affe9f4592bcfad343cba3fdae"
+            },
+            "cpp": {
+              "status": "pass",
+              "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+              "guest_profile": "wasm32-wasip1-noeh-mte",
+              "guest_build_host": "linux-i686",
+              "result_sha256": "55f04deca92eee70899a35c21fbc57964e9a23c4b6f95f43e2b3518c25ea039f"
+            },
+            "objc": {
+              "status": "pass",
+              "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+              "guest_profile": "wasm32-wasip1-noeh-nomte",
+              "guest_build_host": "linux-i686",
+              "result_sha256": "12965bad2b4817a14d797acd8989861a90bcbe00355d7e69d6be897d92ab74c4"
+            },
+            "objcpp": {
+              "status": "pass",
+              "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+              "guest_profile": "wasm32-wasip1-noeh-nomte",
+              "guest_build_host": "linux-i686",
+              "result_sha256": "86f23906041551b9c42a352316dc67911ee73d0ee88815b099bd4e45e52c0c63"
+            }
+          }
+        },
+        "aarch64": {
+          "relocation": {
+            "passed": 6,
+            "archive_receipt_sha256": "e46b246c89a57d72fb937953eb1ceb1d80edda8b4be00953b1f9647eb66eb1ec",
+            "elf_sha256": "c0f28c40341e52384608c5fad64288685b15958e78ac0ba2c8055d31f04dc10c"
+          },
+          "restore": {
+            "c": {
+              "status": "pending"
+            },
+            "cpp": {
+              "status": "pending"
+            },
+            "objc": {
+              "status": "failed",
+              "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+              "guest_profile": "wasm32-wasip1-noeh-nomte",
+              "guest_build_host": "linux-x86_64",
+              "result_sha256": "f4f729fe1942f6b0d28b9ceebdb2f932ed6edd4c2c4129a3ee76c882e17d7157",
+              "diagnostic": "ValueError: error: snapshot-restore rejected phase=6 detail=5 preparation=2 state-error=12 applied=0 retained=0; restore outcome requires host inspection; execution access remains closed"
+            },
+            "objcpp": {
+              "status": "pending"
+            }
+          }
+        },
+        "arm": {
+          "relocation": {
+            "status": "pending"
+          },
+          "restore": {
+            "c": {
+              "status": "pending"
+            },
+            "cpp": {
+              "status": "pending"
+            },
+            "objc": {
+              "status": "pending"
+            },
+            "objcpp": {
+              "status": "pending"
+            }
+          }
+        },
+        "armhf": {
+          "relocation": {
+            "status": "pending"
+          },
+          "restore": {
+            "c": {
+              "status": "pending"
+            },
+            "cpp": {
+              "status": "pending"
+            },
+            "objc": {
+              "status": "pending"
+            },
+            "objcpp": {
+              "status": "pending"
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -206,5 +206,115 @@
     "The original rwlock test imports poll_oneoff for sleep. The 03a3 harness denied this interface. The joined companion exercises completion independently.",
     "The threaded MTE libc++ find program exceeded the recorded per-child LLVM AOT relocation allowance in four x86_64 profiles.",
     "The upstream floatuntisf source printed its skip diagnostic on both engines."
-  ]
+  ],
+  "focused_wasi_recheck": {
+    "runner_commit": "bff617373a03d8adf467c2f62ffd74eb563ddd0e",
+    "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "vm_commit": "08990a38a116cf09e79378e091b54551fa2ab763",
+    "vm_tree": "4e9119e2f17de8390b5043ab66b839938952c43f",
+    "hosts": {
+      "x86_64": {
+        "rwlock": {
+          "sources": [
+            "sysroot/pthread_rwlock_init_join.c",
+            "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c"
+          ],
+          "suite_exit": 0,
+          "builds": {
+            "linked": 4
+          },
+          "executions": {
+            "pass": 8
+          },
+          "planned_builds": 4,
+          "receipt_sha256": "75283116312ae0e509235da9295a062d9991a861b9c1432e38edf042c6239509",
+          "results_sha256": "683ee5fdede16c8e3c7895ddde8406169954b203ca6d69667b2607914870d045"
+        },
+        "find": {
+          "sources": [
+            "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp"
+          ],
+          "suite_exit": 0,
+          "builds": {
+            "linked": 1
+          },
+          "executions": {
+            "pass": 2
+          },
+          "planned_builds": 1,
+          "receipt_sha256": "5f12b646bf7759fb8ee0abae5f2c4284fff2635172316c3dad81d25c26260a3d",
+          "results_sha256": "b5f4034d5ccfebcc1bbab243905daa523d855ce49ad13b666083cd249c6b5454"
+        },
+        "limitations": {
+          "sources": [
+            "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c",
+            "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c"
+          ],
+          "suite_exit": 77,
+          "builds": {
+            "linked": 1,
+            "compile-failed": 1
+          },
+          "executions": {
+            "upstream-skip": 2
+          },
+          "planned_builds": 2,
+          "receipt_sha256": "51f514bab93dff53b305cc53e5b0b13d36570812efe8c5243ba3bc64a94a9d34",
+          "results_sha256": "94f1461947248aeb7ae7b3ea57d280c9c650e5817aec05483bc75e6702785aa2"
+        },
+        "isolation_sha256": "6a4065f7692201b10ab254521b3f8ba7d915bcdb508e2cfd731864fb6250893e"
+      },
+      "i686": {
+        "rwlock": {
+          "sources": [
+            "sysroot/pthread_rwlock_init_join.c",
+            "wasi-libc/test/open-posix-test-suite/conformance/interfaces/pthread_rwlock_init/1-1.c"
+          ],
+          "suite_exit": 0,
+          "builds": {
+            "linked": 4
+          },
+          "executions": {
+            "pass": 8
+          },
+          "planned_builds": 4,
+          "receipt_sha256": "ca579512f84dcb1231d52fd995056bb4e632ff1ca3eed2577c98f060490e9321",
+          "results_sha256": "60c418c564bf2e2fd75235ee5a0d1f7a7682e54f79049b0d530cd8a8d0d3828c"
+        },
+        "find": {
+          "sources": [
+            "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp"
+          ],
+          "suite_exit": 0,
+          "builds": {
+            "linked": 1
+          },
+          "executions": {
+            "pass": 2
+          },
+          "planned_builds": 1,
+          "receipt_sha256": "64b6df50c9ec4bf600740cc0538c62c50e761f2460123f3924fbb7a2eb60cd7e",
+          "results_sha256": "a6f733ddc6ea532931b3f3f8b04e46a412b209344632bbc0beda9e26325a9201"
+        },
+        "limitations": {
+          "sources": [
+            "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c",
+            "wasi-libc/test/open-posix-test-suite/conformance/interfaces/sem_getvalue/1-1.c"
+          ],
+          "suite_exit": 77,
+          "builds": {
+            "linked": 1,
+            "compile-failed": 1
+          },
+          "executions": {
+            "upstream-skip": 2
+          },
+          "planned_builds": 2,
+          "receipt_sha256": "5634a6fb54c6f2582c8e1d63d32c96229bce1ef676fcac7adc9795b1490daebe",
+          "results_sha256": "3378e4857202fc0b8ae3892f44148be824656dee35fe45c16d4de5cfa37dffdd"
+        },
+        "isolation_sha256": "27da895b7e0f2c1a468c4c2101a0dbd5bcbb8eaa677c2596c56bc217250ed83e"
+      }
+    }
+  }
 }
