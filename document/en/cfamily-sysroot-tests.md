@@ -20,3 +20,22 @@ python3 -I -B /repo/src/qualification/cfamily/sysroot_suite.py \
 For third-party libraries, add `--suite external` and choose a second empty results directory. The fourteen programs use the same sixteen profiles. LZ4 exercises compression and decompression, cJSON runs three upstream Unity suites, uthash compares four upstream programs with their exact expected output, and fast_float runs four numeric parsing programs. The two SDK test clients exercise pugixml's XPath queries and tree mutation, and TinyXML-2's in-memory serialization and parsing. The manifest pins each project by commit and checks the Git blob of each vendored source, test and license. [Third-party inputs and programs](../../src/qualification/cfamily/external-libraries.json)
 
 The compiler-specific subtraction fixtures live under the qualification tree. They cover the two integer widths, C and C++, ordinary typed pointer differences, the explicit subtraction builtins and the feature-off diagnostics. [Clang CodeGen and Sema regression sources](../../src/qualification/cfamily/clang)
+
+## Wasmtime reference
+
+Run the pinned Wasmtime 42.0.1 C API adapter on one producer host's sysroot evidence at a time. The reference machine needs its own executable adapter and opcode decoder. Mount the matching SDK sources and the producer's results read-only. Keep `inputs.json`, `results.jsonl`, `summary.json` and the eight non-MTE profile directories, including compiler receipts, captures and memory owners. [Adapter build instructions](../../src/qualification/cfamily/wasmtime_reference/README.md)
+
+```sh
+python3 -I -B /repo/src/qualification/cfamily/wasmtime_reference/compare.py \
+  --suite sysroot --host /tools/qualification-host --decoder /tools/decode-memtag \
+  --compiler-sources /repo/src/compilers/cc --results /original/sysroot \
+  --work /work/sysroot-reference --jobs 2 --timeout 180
+```
+
+For a production replay, add `--qualification-receipt /original/evidence/sysroot-receipt.json` to verify the row and summary digests. Pass `--host-sha256` with the trusted adapter digest. The options `--vm`, `--vm-receipt` and `--vm-target` verify the producer VM against its binary, build receipt and reviewed commit/tree, including when its CPU differs from the reference machine.
+
+The full manifest schedules 2,464 source/profile pairs, including 1,232 non-MTE pairs. Open POSIX runs only with threads enabled. The driver also accepts a producer selection recorded by `sysroot_suite.py --case` or `--profile` and reports its own denominator. It verifies original qualification counts, source and guest digests, compiler receipts, fresh opcode counts, actual imports, shared-memory bounds, and the exact INT and AOT commands. A compatible threaded guest receives its original `env.memory` owner.
+
+Each `results.jsonl` row identifies the source, profile and original qualification. `match` requires a Wasmtime guest exit of zero, passing INT and AOT runs, and identical exit, stdout and stderr against each engine. The corresponding output directory contains raw captures and `host.log`. The summary counts real guest starts and terminations, case statuses by profile and family, and each unsupported import or grant.
+
+An exact upstream skip, the missing `sem_unlink` link dependency and the pinned upstream `lsearch` test with undersized input records each have a separate status. The full-width SDK port has its own row. Cases requiring `wasi.thread-spawn`, argument-vector calls or a granted realtime `poll_oneoff` retain their import and permission details. These exclusions have unavailable engine comparisons. Exit 0 means every selected non-MTE cell matched. Exit 77 means all applicable guests matched and the remaining rows have documented limitations. Exit 1 records a difference, an unexpected failure or an evidence error.

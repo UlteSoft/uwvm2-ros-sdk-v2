@@ -1,6 +1,8 @@
-# Wasmtime reference for the external C/C++ qualification suite
+# Wasmtime reference for the C/C++ qualification suites
 
 This opt-in host runs each original non-MTE Core module from the external suite on Wasmtime's Cranelift engine. Use the stock Wasmtime CLI results to assess stock WASIp1 compatibility. Use the adapter results to compare guest execution with the recorded UWVM interpreter and AOT runs under the suite's capability profile.
+
+The same adapter can replay production sysroot qualifications. [English sysroot instructions](../../../../document/en/cfamily-sysroot-tests.md#wasmtime-reference) · [中文 sysroot 使用说明](../../../../document/zh/cfamily-sysroot-tests.md#wasmtime-对照)
 
 ## Reproduce on x86_64 Linux
 
@@ -29,9 +31,9 @@ The driver checks the manifest SHA-256, the complete 14-program by eight-profile
 
 The private-memory profiles use the calling guest's public `memory` export. For shared memory, the host instantiates the recorded owner, obtains its `memory` export, and supplies that same Wasmtime shared memory handle as the guest's `env.memory` import. Every callback reads the current memory size after any guest growth. The 14 programs have no `wasi.thread-spawn` import. The adapter admits the observed Preview1 signatures, plus their SDK `_wasm64` forms with 64-bit pointers and sizes.
 
-The host implements `clock_time_get`, `environ_get`, `environ_sizes_get`, `fd_fdstat_get`, `fd_write`, `proc_exit`, and `sched_yield` under the recorded grants. The monotonic clock returns host nanoseconds and records each value. The guest environment and preopen list are empty. The corpus imports no argument functions. Standard input is at EOF and `fd_read` is denied. Output descriptors identify the regular capture files and report write and file-metadata rights when granted. The adapter checks the full iovec array, each payload, and the return buffer before publishing guest bytes. It uses 8-byte entries on wasm32 and 16-byte entries on wasm64.
+The host implements `clock_time_get`, `environ_get`, `environ_sizes_get`, `fd_fdstat_get`, `fd_write`, `proc_exit`, and `sched_yield` under the recorded grants. The monotonic clock returns host nanoseconds and records each value. The guest environment and preopen list are empty. The external corpus imports no argument functions. Standard input is at EOF and `fd_read` is denied. Output descriptors identify the regular capture files and report write and file-metadata rights when granted. The adapter checks the full iovec array, each payload, and the return buffer before publishing guest bytes. It uses 8-byte entries on wasm32 and 16-byte entries on wasm64.
 
-The suite denies `fd_close`, `fd_prestat_dir_name`, `fd_prestat_get`, `fd_read`, and `fd_seek`. These imports return Preview1 `ENOTCAPABLE` before accessing guest memory or a descriptor. Unknown imports, mismatched signatures, mismatched interface entries, and attempts to enable these five operations fail qualification setup.
+The external suite denies `fd_close`, `fd_prestat_dir_name`, `fd_prestat_get`, `fd_read`, and `fd_seek`. These imports return Preview1 `ENOTCAPABLE` before accessing guest memory or a descriptor. Unknown imports, mismatched signatures, mismatched interface entries, and attempts to enable these five operations fail qualification setup.
 
 ## Reading the evidence
 

@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Execute the non-MTE external C-family corpus under the Wasmtime qualification adapter."""
+"""Compare non-MTE C/C++ qualification guests with the Wasmtime C API adapter."""
 import argparse
 import itertools
 import json
 import platform
-import re
-import subprocess
 import sys
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
@@ -14,36 +12,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SUITE = HERE.parent
 sys.path.insert(0, str(SUITE))
-from sysroot_suite import SHARED_MEMORY_PAGES, Target, digest, runtime_args, validate_thread_budgets
+from sysroot_suite import SHARED_MEMORY_PAGES, Target, add_vm_identity_options, digest, validate_thread_budgets
+from wasmtime_reference.adapter import (WASMTIME_COMMIT, checked_hash, compare_engines, recorded_policy,
+                                        require, run_host, saved_engines)
 
 REFERENCE = "Wasmtime 42.0.1 C API with the external C-family qualification adapter"
-
-
-def require(condition, message):
-    if not condition:
-        raise ValueError(message)
-
-
-def checked_hash(path, expected):
-    actual = digest(path)
-    require(actual == expected, f"SHA-256 mismatch for {path}")
-    return actual
-
-
-def recorded_policy(row, target, case):
-    owner = row["memory_owner"]["argv"][-1] if target.threads else None
-    guest = row["compile"]["argv"][-1]
-    for engine in ("int", "aot"):
-        recorded = row["runs"][engine]["argv"]
-        expected = runtime_args(recorded[0], engine, target, row["imports"], owner, guest, case=case)
-        require(recorded == expected, f"recorded {engine} arguments differ from the suite profile")
-    options = []
-    for i, flag in enumerate(recorded):
-        if flag == "--wasip1-single-interface":
-            options.append(f"{recorded[i + 3]}={recorded[i + 2]}")
-        elif flag == "--wasip1-single-grant":
-            options.append("grant=" + recorded[i + 2])
-    return options
 
 
 def execute(args, row, target, case, out, original):
@@ -65,30 +38,7 @@ def execute(args, row, target, case, out, original):
         owner = original / "owner.wasm"
         owner_hash = checked_hash(owner, row["memory_owner"]["sha256"])
 
-    report = out / "host.log"
-    argv = [str(args.host), str(target.bits), "eh" if target.eh else "noeh",
-            str(guest), str(owner) if owner else "-", str(report), *recorded_policy(row, target, case)]
-    result = {"argv": argv, "owner_sha256": owner_hash}
-    with (out / "stdout").open("xb") as stdout, (out / "stderr").open("xb") as stderr:
-        try:
-            proc = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr,
-                                  timeout=args.timeout)
-            result["host_returncode"] = proc.returncode
-        except subprocess.TimeoutExpired:
-            result["timeout_seconds"] = args.timeout
-    lines = report.read_text(errors="replace").splitlines() if report.exists() else []
-    result["stdout_sha256"] = digest(out / "stdout")
-    result["stderr_sha256"] = digest(out / "stderr")
-    result["host_log_sha256"] = digest(report) if report.exists() else None
-    result["start_invoked"] = "invoke _start" in lines
-    end = re.fullmatch(r"end (returned|proc_exit) ([0-9]+)", lines[-1]) if lines else None
-    if result.get("host_returncode") == 0 and result["start_invoked"] and end:
-        result["termination"], result["guest_exit_code"] = end.group(1), int(end.group(2))
-    elif "timeout_seconds" in result:
-        result["termination"] = "timeout"
-    else:
-        result["termination"] = "execution-error" if result["start_invoked"] else "setup-or-instantiation-error"
-    return result
+    return {**run_host(args, target, guest, owner, recorded_policy(row, target, case), out), "owner_sha256": owner_hash}
 
 
 def compare_case(args, row, target, case):
@@ -101,24 +51,7 @@ def compare_case(args, row, target, case):
         require(case["family"] == row["family"], "recorded case family disagrees with manifest")
         out.mkdir(parents=True)
         result.update(execute(args, row, target, case, out, original))
-        guest_code = result.get("guest_exit_code")
-        comparisons = {}
-        for engine in ("int", "aot"):
-            saved = row["runs"][engine]
-            stdout_hash = digest(original / (engine + ".out"))
-            stderr_hash = digest(original / (engine + ".err"))
-            fields = {"returncode": saved.get("returncode"), "saved_suite_status": saved["status"],
-                      "stdout_sha256": stdout_hash, "stderr_sha256": stderr_hash}
-            if guest_code is None or fields["returncode"] is None:
-                fields["comparison"] = "unavailable"
-            else:
-                fields["exit_equal"] = fields["returncode"] == guest_code
-                fields["stdout_equal"] = stdout_hash == result["stdout_sha256"]
-                fields["stderr_equal"] = stderr_hash == result["stderr_sha256"]
-                agrees = fields["exit_equal"] and fields["stdout_equal"] and fields["stderr_equal"]
-                fields["comparison"] = "match" if agrees else "difference"
-            comparisons[engine] = fields
-        result["engines"] = comparisons
+        result["engines"] = compare_engines(saved_engines(row, original), result)
         if "expected_stdout" in case:
             answer = SUITE / "upstream" / case["family"] / case["expected_stdout"]
             result["upstream_stdout_sha256"] = digest(answer)
@@ -132,6 +65,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("host", "results", "work"):
         parser.add_argument("--" + name, type=lambda s: Path(s).resolve(), required=True)
+    parser.add_argument("--suite", choices=("external", "sysroot"), default="external")
+    parser.add_argument("--decoder", type=Path, help="native qualification decoder for sysroot replay")
+    parser.add_argument("--compiler-sources", type=Path,
+                        help="matching src/compilers/cc containing the Open POSIX inputs and policy/imports.py")
+    parser.add_argument("--qualification-receipt", type=Path, help="production sysroot-receipt.json")
+    parser.add_argument("--host-sha256", help="verify the adapter executable against a trusted build digest")
+    parser.add_argument("--vm", type=Path, help="original VM executable for checking the producer identity")
+    add_vm_identity_options(parser)
+    parser.set_defaults(vm_target=None)
     parser.add_argument("--jobs", type=int, default=2)
     parser.add_argument("--timeout", type=int, default=180)
     args = parser.parse_args()
@@ -139,9 +81,31 @@ def main():
         parser.error("use a separate adapter output directory")
     if args.jobs < 1 or args.timeout < 1:
         parser.error("jobs and timeout must be positive")
+    if args.suite == "sysroot" and args.decoder is None:
+        parser.error("--suite sysroot requires --decoder")
+    if args.suite == "external" and any((args.decoder, args.compiler_sources, args.qualification_receipt, args.vm)):
+        parser.error("--decoder, --compiler-sources, --qualification-receipt and --vm apply to --suite sysroot")
+    if (args.vm_receipt or args.vm_target) and not args.vm:
+        parser.error("--vm-target and --vm-receipt require --vm")
+    if args.vm and args.vm_target is None:
+        args.vm_target = SUITE.parents[2] / "document/qualification/runtime-qualification.json"
     args.work.mkdir(parents=True, exist_ok=True)
     if any(args.work.iterdir()):
         parser.error("choose an empty adapter output directory to preserve evidence")
+    if args.suite == "sysroot":
+        from wasmtime_reference.sysroot import EVIDENCE_ERRORS, compare_sysroot, write_json
+        args.compiler_sources = args.compiler_sources or SUITE.parents[1] / "compilers/cc"
+        try:
+            return compare_sysroot(args)
+        except EVIDENCE_ERRORS as exc:
+            error = {"suite": "sysroot", "complete": False, "passed": False, "exit_code": 1,
+                     "status": "evidence-error", "reason": str(exc)}
+            write_json(args.work / "summary.json", error)
+            print(json.dumps(error), file=sys.stderr)
+            return 1
+
+    if args.host_sha256:
+        checked_hash(args.host, args.host_sha256)
     manifest_file = SUITE / "external-libraries.json"
     manifest = json.loads(manifest_file.read_bytes())
     validate_thread_budgets(manifest["cases"])
@@ -157,9 +121,10 @@ def main():
     expected = set(itertools.product(profiles, cases))
     require(len(keys) == len(expected) and set(keys) == expected, "incomplete or duplicate non-MTE case/profile matrix")
     meta = {"reference": REFERENCE, "machine": platform.machine(),
-            "wasmtime_release_commit": "6844a83b530f86ad13a65175282fe2dbcd33cad1",
+            "wasmtime_release_commit": WASMTIME_COMMIT,
             "host_binary_sha256": digest(args.host), "host_source_sha256": digest(HERE / "host.cpp"),
-            "driver_sha256": digest(Path(__file__)), "suite_policy_sha256": digest(SUITE / "sysroot_suite.py"),
+            "driver_sha256": digest(Path(__file__)), "adapter_driver_sha256": digest(HERE / "adapter.py"),
+            "suite_policy_sha256": digest(SUITE / "sysroot_suite.py"),
             "original_results_sha256": digest(records), "original_inputs_sha256": digest(inputs_file),
             "original_runner_sha256": inputs["runner_sha256"], "manifest_sha256": inputs["manifest_sha256"],
             "planned_cases": len(rows), "guest_environment": [], "guest_preopens": [],
