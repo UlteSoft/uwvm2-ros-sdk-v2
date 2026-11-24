@@ -49,7 +49,43 @@
       "vm_executable_sha256": "ba81164f43300060e5efee04777313d895afe70bb8e6a85a49c5bf4a42ac632d"
     },
     "i686": {
-      "status": "pending"
+      "status": "completed-with-unavailable-dependency",
+      "cases": {
+        "executed": 112,
+        "dependency-unavailable": 16,
+        "eh-disabled-rejected": 32
+      },
+      "engines_by_language": {
+        "objc": {
+          "int": {
+            "pass": 72
+          },
+          "aot": {
+            "pass": 72
+          }
+        },
+        "objcpp": {
+          "int": {
+            "pass": 40
+          },
+          "aot": {
+            "pass": 40
+          }
+        }
+      },
+      "missing_dependency": "Foundation/Foundation.h",
+      "upstreams": [
+        "chromium",
+        "gcc",
+        "libobjc2",
+        "objectivecpp",
+        "objfw"
+      ],
+      "inputs_sha256": "3b4389ca9b3d55c4d6ed5f1288d8e18a845a33c1913c8a99be16e72fcaa781a7",
+      "results_sha256": "efe12579406c1907f5efd36ebbcb8b339ab68b6fb4ee719ab2ebd7f5fff5a062",
+      "isolation_sha256": "58a97ee49772f63212f9328e9116ca512a81fe396e2fba3b139914de3d74dee0",
+      "installation_receipt_sha256": "13f0a260e0ca29bb0e9365a6b5d98e2ed27d4b2e50dd71472722cee31c87df0c",
+      "vm_executable_sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f"
     },
     "aarch64": {
       "status": "pending"

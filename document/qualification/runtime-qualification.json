@@ -209,6 +209,104 @@
           "receipt_sha256": "520aa823b407c4690dd10b77899a4415e1f8b9cc315f8bb7bb1844169754449c"
         }
       }
+    },
+    "public_sdk_03a3904": {
+      "sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+      "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
+      "compile_flags": [
+        "-O0",
+        "-g"
+      ],
+      "engine": "aot",
+      "hosts": {
+        "x86_64": {
+          "reported": 192,
+          "outcomes": {
+            "pass": 64,
+            "restore-declined": 24,
+            "failed": 32,
+            "unsupported": 48,
+            "build-blocked": 24
+          },
+          "capabilities": {
+            "full-dump-restore": {
+              "pass": 8,
+              "restore-declined": 24,
+              "unsupported": 8,
+              "failed": 16,
+              "build-blocked": 8
+            },
+            "signed-hot-update": {
+              "pass": 24,
+              "failed": 8,
+              "unsupported": 24,
+              "build-blocked": 8
+            },
+            "source-debug": {
+              "pass": 32,
+              "unsupported": 16,
+              "failed": 8,
+              "build-blocked": 8
+            }
+          },
+          "limitations": {
+            "full-restore-declined-with-original-world-retained": 24,
+            "private-thread-source-debug-unavailable": 16,
+            "private-thread-full-dump-unavailable": 8,
+            "production-update-requires-single-owned-module": 24
+          },
+          "inputs_sha256": "fc3f4bfc92a621c54bfdc4dd51e979259eee8a0ef71a16e5c9277bc48f1e15c8",
+          "results_sha256": "17d09a6f97a0ed031f89172e6ef0cd2a438c76b4936662881aad75e86357a7cb"
+        },
+        "i686": {
+          "reported": 192,
+          "outcomes": {
+            "pass": 64,
+            "restore-declined": 24,
+            "failed": 32,
+            "unsupported": 48,
+            "build-blocked": 24
+          },
+          "capabilities": {
+            "full-dump-restore": {
+              "pass": 8,
+              "restore-declined": 24,
+              "unsupported": 8,
+              "failed": 16,
+              "build-blocked": 8
+            },
+            "signed-hot-update": {
+              "pass": 24,
+              "failed": 8,
+              "unsupported": 24,
+              "build-blocked": 8
+            },
+            "source-debug": {
+              "pass": 32,
+              "unsupported": 16,
+              "failed": 8,
+              "build-blocked": 8
+            }
+          },
+          "limitations": {
+            "full-restore-declined-with-original-world-retained": 24,
+            "private-thread-source-debug-unavailable": 16,
+            "private-thread-full-dump-unavailable": 8,
+            "production-update-requires-single-owned-module": 24
+          },
+          "inputs_sha256": "605fc528483d2e1ce32ccaea1055f718e09e5a86b6aec0822e34ff4cc5eec0a7",
+          "results_sha256": "59809721e0af01a299d4353c3dd946ad71f2bb4688b6b8ef81ba49fd1dd72f67"
+        },
+        "aarch64": {
+          "status": "pending"
+        },
+        "arm": {
+          "status": "pending"
+        },
+        "armhf": {
+          "status": "pending"
+        }
+      }
     }
   }
 }
