@@ -107,5 +107,75 @@
     },
     "verified_guest_archives": 16,
     "archives_receipt_sha256": "691cd3fb57605910c5bcf14233e31444e173da469d09a4af2885ecd46c34dafc"
+  },
+  "non_mte_candidate_reference": {
+    "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+    "driver_commit": "8cecd164edac7791142bca8efdd1ce772153b46f",
+    "scope": "Fresh native VM execution and Wasmtime replay from previously compiled guests. Compilation diagnostics are from the original public SDK run.",
+    "hosts": {
+      "x86_64": {
+        "status": "pass-with-compile-limitations",
+        "guest_sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+        "profile_count": 8,
+        "native_results": {
+          "dependency-unavailable": 8,
+          "eh-disabled-rejected": 16,
+          "executed": 56
+        },
+        "native_receipt_sha256": "b8484c7e3f526d7e641a8e31b82211b6d1d4da7f9900e4f018bfa1ead7abe332",
+        "native_rows_sha256": "b7f98cdae275246d1c038ac864c0e832cd78a15151e6bdae7e61e98360917a54",
+        "wasmtime_version": "42.0.1",
+        "wasmtime_started": 56,
+        "wasmtime_terminated": 56,
+        "comparison": {
+          "aot": {
+            "match": 56
+          },
+          "int": {
+            "match": 56
+          }
+        },
+        "outcomes": {
+          "dependency-unavailable": 8,
+          "eh-disabled-rejected": 16,
+          "match": 56
+        },
+        "reference_summary_sha256": "55532b2e19236ec25f1ba7daf417c2d6bec8aff3c6e262cce4d49ea389deb8ae",
+        "reference_results_sha256": "e9556fe35a430fcd21640a8c858a32764dd076fa99b45e906bfc823ae1baacfa",
+        "vm_sha256": "630707429a9e0d6af5fef29ffb51090812e346d310b7849f6ace1f435c8fda6b",
+        "historical_installation_note": "The retained ObjC selection manifest contains an altered SHA-256 for gamma.h. Substituting the verified header digest reproduces the historical manifest digest. This replay attests the guest and runtime outputs."
+      },
+      "i686": {
+        "status": "pass-with-compile-limitations",
+        "guest_sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+        "profile_count": 8,
+        "native_results": {
+          "dependency-unavailable": 8,
+          "eh-disabled-rejected": 16,
+          "executed": 56
+        },
+        "native_receipt_sha256": "c5f770d60c8aa8dc4f946171a06986e9df06da6259685e2f8323aa1479de8707",
+        "native_rows_sha256": "344d282a1e53e61e6303e0720c5475fc38d612e09cc1bab645e2e3b52e66928f",
+        "wasmtime_version": "42.0.1",
+        "wasmtime_started": 56,
+        "wasmtime_terminated": 56,
+        "comparison": {
+          "aot": {
+            "match": 56
+          },
+          "int": {
+            "match": 56
+          }
+        },
+        "outcomes": {
+          "dependency-unavailable": 8,
+          "eh-disabled-rejected": 16,
+          "match": 56
+        },
+        "reference_summary_sha256": "f896a7de6d6dcbf7d5ff0ecc1401ec60f5677d964013baf136fd0c3aa0a4b2f4",
+        "reference_results_sha256": "08e418bd5bbd29c3080a3857a29b06fa5cf784bc65959b005352bfc8cbfacf2a",
+        "vm_sha256": "ffe28677d641695740709ed5b4db213029f937a41733098421bc2ee05d5c013e"
+      }
+    }
   }
 }
