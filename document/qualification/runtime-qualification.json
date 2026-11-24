@@ -520,6 +520,154 @@
       "link_trace_sha256": "6330c12cebed296759ab8fa82e18a9436cf44c0fba36d305aee09300c5174584",
       "isolation_sha256": "6ccc1a5e4b9aea1183ad047a2ff0687f90c816d16db9deab3d499c0d07ea1600",
       "checksums_sha256": "a03393a7d3d1990b5e00e1a56d2db000fa5af5a77e382e2f895cbd8369ac0291"
+    },
+    "restore_5203": {
+      "vm_commit": "5203ed5f63b6bb9764252f95e6b1ef7dd42e35b7",
+      "vm_tree": "de9902c0e37d1e113352d86b00c49c59dd9dee4f",
+      "scope": "Per-host release checks on ordinary C-family programs under LLVM AOT. C/C++ use wasm32 no-EH with MTE. Objective-C/Objective-C++ use wasm32 no-EH without MTE.",
+      "hosts": {
+        "x86_64": {
+          "archive_receipt_sha256": "da003ba8880f188c018c96ebfad6e494a1ce9c1f8ee79c77d88ca76ef8cf74d1",
+          "relocation_passes": 6,
+          "restore_receipt_sha256": "9f94ed33acf80e7b9ff7264d9cb8cbf1344e882f080465f066cfa59ac00fef0b",
+          "c": {
+            "status": "pass",
+            "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "receipt_sha256": "dfa0b0735d1ca068e4b4ae4e9a40546b170b1934b91b8811a34eaa6026412a7a",
+            "restore_seconds": 0.075,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "cpp": {
+            "status": "pass",
+            "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "receipt_sha256": "2b999c5b30bba0d7310ed391edcbade1eef8766914483c41f07661d7cac0778b",
+            "restore_seconds": 0.152,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "objc": {
+            "status": "pass",
+            "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "receipt_sha256": "d1567e87c37abf4d3974b72946e1fff3956b99e3ffda50ac0264f9e2f32c4424",
+            "restore_seconds": 189.584,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "objcpp": {
+            "status": "pass",
+            "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "receipt_sha256": "724b13ebe40f59d5e0fbf5ff8f5cf1e93ddb6b8921c64255e43fb8033d4060d7",
+            "restore_seconds": 190.471,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "status": "passed"
+        },
+        "i686": {
+          "archive_receipt_sha256": "c88aa2882fa51df5ba56343b87acb7775efac64fbc9d0077650fbbab0db69b89",
+          "relocation_passes": 6,
+          "restore_receipt_sha256": "d627b0e04d892c8cf3d60b2ddf00bde730f95a799d1a23b127f2fcd41f6313d9",
+          "c": {
+            "status": "pass",
+            "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "receipt_sha256": "4624043f916709e63d9b1f16baf3daf3fdaa81b92d01cbfc9d066353414b7085",
+            "restore_seconds": 0.07,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "cpp": {
+            "status": "pass",
+            "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "receipt_sha256": "7dec018475e704957b28c0f1bb75bc7cc7bb30302203abaea5b046d63e3f65fb",
+            "restore_seconds": 0.124,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "objc": {
+            "status": "pass",
+            "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "receipt_sha256": "ea4f2b9664b167167dabe84091f7a3272af1094036c40b9105c07fff38b082a4",
+            "restore_seconds": 66.664,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "objcpp": {
+            "status": "pass",
+            "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "receipt_sha256": "0166faa3c7c13d6e3add4d6ccb8887c59616987405129d5e7a5da81b4266efd9",
+            "restore_seconds": 65.412,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "status": "passed"
+        },
+        "aarch64": {
+          "archive_receipt_sha256": "eb374dd3c962c18ca3fc45b544e75869828ca8581c510655ed4a28b38ac57e0c",
+          "relocation_passes": 6,
+          "c": {
+            "status": "pending"
+          },
+          "cpp": {
+            "status": "pending"
+          },
+          "objc": {
+            "status": "pass",
+            "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "receipt_sha256": "95b07488daf494ee4a88775c131c2fdc2a4a82ece2739706bc5a35e25ddcf7ec",
+            "restore_seconds": 590.702,
+            "guest_exit": 0,
+            "process_exit": 0
+          },
+          "objcpp": {
+            "status": "pending"
+          },
+          "status": "in-progress"
+        },
+        "arm": {
+          "archive_receipt_sha256": "dfba9ad5f723073342575c7466dd4a9f5b79bf3b1d0fd2bfe4136c50826f3cf8",
+          "relocation_passes": 6,
+          "c": {
+            "status": "pending"
+          },
+          "cpp": {
+            "status": "pending"
+          },
+          "objc": {
+            "status": "pending"
+          },
+          "objcpp": {
+            "status": "pending"
+          },
+          "status": "in-progress"
+        },
+        "armhf": {
+          "archive_receipt_sha256": "0fc1841184129cad2fb4fff98377b4b06602ec523883fe4cace271a964ec7902",
+          "relocation_passes": 6,
+          "c": {
+            "status": "pending"
+          },
+          "cpp": {
+            "status": "pending"
+          },
+          "objc": {
+            "status": "pending"
+          },
+          "objcpp": {
+            "status": "pending"
+          },
+          "status": "in-progress"
+        }
+      }
     }
   }
 }
