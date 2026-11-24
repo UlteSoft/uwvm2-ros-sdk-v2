@@ -34,6 +34,8 @@ Each program allocates real heap storage, calculates 64 unsigned vector lanes, f
 
 The independent Python model writes `expected.bin` with the seed, every lane, the unsigned sum and every byte of the 64-byte buffer after each memory operation. Both engines must emit exactly those bytes. The row records the first differing offset when a comparison fails.
 
+For `-mno-simd128` builds, both engines run with `--wasm-feature-disable-simd` and `--wasm-feature-disable-relaxed-simd`. For `-mno-bulk-memory-opt` builds, the VM keeps the full bulk-memory feature enabled. The decoder's instruction counts omit section-level dependencies such as the data count section and passive segments.
+
 The decoder walks actual operators in function bodies and constant expressions. It requires packed arithmetic in the vector kernel when enabled, scalar accesses on the fallback path, and the selected copy/fill behavior in the two memory kernels. It separately counts ordinary SIMD, relaxed SIMD, `memory.copy`, `memory.fill`, other bulk operations, threads, and MTE. `memory.init`, `data.drop` and atomics can be required by thread startup. A disabled SIMD or copy/fill instruction anywhere in the final module fails the cell. The check covers the allocator, language runtime, and linker-generated startup code. `result.json` identifies the offending functions. The shared memory owner used by threaded runs contains a memory definition and an export, with no code section.
 
 Each cell retains the executable, build receipt, decoder listing, exact command arguments, stdout and stderr from both engines, and its result. `summary.json` reports instruction and execution outcomes separately. A zero process exit requires all selected cells and both engines to pass.

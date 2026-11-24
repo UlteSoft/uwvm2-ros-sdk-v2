@@ -195,6 +195,9 @@ def run_cell(args, language, target, simd, bulk, seeds, expected, inspect, uleb)
             row["owner_sha256"] = digest(owner)
         for engine in ("int", "aot"):
             cmd = runtime_args(args.vm, engine, target, imports, owner, wasm)
+            if not simd:
+                run_option = cmd.index("--run")
+                cmd[run_option:run_option] = ["--wasm-feature-disable-simd", "--wasm-feature-disable-relaxed-simd"]
             run = capture(cmd, out, engine, args.run_timeout)
             observed = (out / (engine + ".out")).read_bytes()
             run["output_sha256"] = hashlib.sha256(observed).hexdigest()

@@ -34,6 +34,8 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
 
 独立的 Python 参考实现把种子、全部通道、无符号累加结果及每次操作后的完整 64 字节缓冲区写入 `expected.bin`。两引擎均须逐字节匹配。出现差异时记录首个不匹配字节的位置。
 
+对于以 `-mno-simd128` 编译的模块，两个引擎均以 `--wasm-feature-disable-simd` 和 `--wasm-feature-disable-relaxed-simd` 运行。对于以 `-mno-bulk-memory-opt` 编译的模块，VM 保持启用完整的 bulk-memory 特性。除了指令，数据计数段、被动段等结构也可能依赖该特性，现有解码器只统计指令。
+
 解码器从函数体及常量表达式逐条读取真实指令。向量实现须在指定内核中出现并行算术；标量路径须出现普通读写；两个内存内核须符合所选复制和填充设置。解码器分别统计 SIMD、relaxed SIMD、`memory.copy`、`memory.fill`、其他 bulk、线程和 MTE 指令。线程启动可能需要 `memory.init`、`data.drop` 和原子操作。最终模块在任意函数出现已关闭的 SIMD 或复制/填充指令都判该格失败，`result.json` 记录函数名与数量。检查覆盖分配器、语言运行时和链接器生成的启动函数。线程的内存提供模块只包含内存定义和导出，没有代码段。
 
 每格保留模块、构建收据、解码清单、完整命令参数、INT/AOT 的原始标准输出与错误输出。`summary.json` 分别给出各格判定和引擎执行统计。全部所选格及两种引擎通过时进程返回零。
