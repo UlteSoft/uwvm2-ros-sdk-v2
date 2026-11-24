@@ -129,6 +129,86 @@
           "restore_refusal": "error: snapshot-restore rejected phase=6 detail=11 preparation=6 state-error=12 applied=0 retained=1; original stopped world retained; inspect status before further management"
         }
       }
+    },
+    "native_owner_budget_fix": {
+      "status": "development-replay-passed",
+      "host": "linux-x86_64",
+      "sdk_commit_for_original_archives": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+      "previous_vm": "b27df7428f9f898e5931938e39cc656d547aed6c",
+      "vm_commit": "1929aff9ff8484327b7c1ed1d512266fc92d9d14",
+      "vm_tree": "9c740dc623337cb8fb6743044d121d92a9e4a858",
+      "profile": "wasm32-wasip1-noeh-nomte",
+      "check": "restore an original saved AOT process after mutation; confirm live memory, new stop and guest exit",
+      "results": {
+        "objc": {
+          "original_archive_sha256": "1abcd121117bd84cdfded1749f958841739274d13e995978d26e4077c1e329c7",
+          "captured_word": "c84f613a",
+          "changed_word": "7193b6ee",
+          "restored_word": "c84f613a",
+          "captured_at": {
+            "stop": 3,
+            "thread": 1,
+            "module": 0,
+            "function": 209,
+            "offset": 0,
+            "generation": 2
+          },
+          "changed_at": {
+            "stop": 4,
+            "thread": 1,
+            "module": 0,
+            "function": 209,
+            "offset": 0,
+            "generation": 2
+          },
+          "restored_at": {
+            "stop": 5,
+            "thread": 2,
+            "module": 0,
+            "function": 209,
+            "offset": 0,
+            "generation": 3
+          },
+          "restore_elapsed_seconds": 561.351,
+          "guest_exit": 0,
+          "process_exit": 0,
+          "receipt_sha256": "db7c68a0125dded16e0e4fa3c3c03f45e86710b55d9b4e7096a7bbea97d3d64e"
+        },
+        "objcpp": {
+          "original_archive_sha256": "c3d52ead120e6eb615151e0a3403b66b591d9e22e551593e970c3ca0784d7d5f",
+          "captured_word": "c84f613a",
+          "changed_word": "7193b6ee",
+          "restored_word": "c84f613a",
+          "captured_at": {
+            "stop": 3,
+            "thread": 1,
+            "module": 0,
+            "function": 210,
+            "offset": 0,
+            "generation": 2
+          },
+          "changed_at": {
+            "stop": 4,
+            "thread": 1,
+            "module": 0,
+            "function": 210,
+            "offset": 0,
+            "generation": 2
+          },
+          "restored_at": {
+            "stop": 5,
+            "thread": 2,
+            "module": 0,
+            "function": 210,
+            "offset": 0,
+            "generation": 3
+          },
+          "restore_elapsed_seconds": 548.857,
+          "guest_exit": 0,
+          "process_exit": 0,
+          "receipt_sha256": "520aa823b407c4690dd10b77899a4415e1f8b9cc315f8bb7bb1844169754449c"
+        }
+      }
     }
   }
 }
