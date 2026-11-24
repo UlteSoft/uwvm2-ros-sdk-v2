@@ -42,6 +42,18 @@ The decoder walks actual operators in function bodies and constant expressions. 
 
 Each cell retains the executable, build receipt, decoder listing, exact command arguments, stdout and stderr from both engines, and its result. `summary.json` reports instruction and execution outcomes separately. A zero process exit requires all selected cells and both engines to pass.
 
+## Compare the two settings on each engine
+
+```sh
+python3 src/qualification/cfamily/optional_isa_pairs.py --results /work/isa-matrix \
+  --decoder src/qualification/cfamily/decoder/target/release/decode-memtag \
+  --output /work/isa-pairs.json
+```
+
+The checker re-decodes each saved Wasm with the original decoder, verifies the fixture hashes, seed sequence and independent oracle, then compares the recorded exit code and both raw output streams. Each pair holds the language, guest profile and other switch fixed. A full matrix has 128 SIMD pairs and 128 copy/fill pairs **per engine**. The report records stream digests and identifies each differing pair. It counts threaded startup that requires bulk-memory separately from execution with bulk-memory disabled.
+
+`--results` accepts one suite work directory or the parent of individually recorded profile directories. For one profile, add `--profile wasm32-wasip1-noeh-nomte`. For archived public runs, select the matching producer sources with `--suite-dir`. Use `--qualification-receipt` and `--receipt-sha256` to verify the per-profile records against a trusted aggregate receipt. The report preserves the producer's VM identity and runtime feature policy, including the defaults used by early releases. Write it to a new path outside the source evidence.
+
 ## Compare a scalar guest in Wasmtime
 
 Build the Wasmtime C API reference host from its pinned release using the [reference host instructions](../../src/qualification/cfamily/wasmtime_reference/README.md). The following commands replay the wasm32 C guest with both optional instruction families disabled. Use the output directory from the preceding suite command. The stdout grant and imports match the saved INT and AOT invocations.

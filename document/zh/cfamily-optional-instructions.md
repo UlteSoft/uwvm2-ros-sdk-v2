@@ -42,6 +42,18 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
 
 每格保留模块、构建收据、解码清单、完整命令参数、INT/AOT 的原始标准输出与错误输出。`summary.json` 分别给出各格判定和引擎执行统计。全部所选格及两种引擎通过时进程返回零。
 
+## 在每个引擎上比较开关前后的结果
+
+```sh
+python3 src/qualification/cfamily/optional_isa_pairs.py --results /work/isa-matrix \
+  --decoder src/qualification/cfamily/decoder/target/release/decode-memtag \
+  --output /work/isa-pairs.json
+```
+
+检查器用原解码器重新解码每个 Wasm，核对用例源码摘要、种子序列和独立参考输出，然后逐项比较退出码及标准输出、标准错误的原始字节。每对用例使用同一语言、同一来宾配置，且另一组开关取值相同。完整矩阵在**每个引擎上**包含 128 对 SIMD 比较和 128 对复制/填充比较。报告保存两路输出的摘要，并列出产生差异的用例对。线程初始化需要保留 bulk-memory 的格子与完全关闭该 VM 特性的格子分别计数。
+
+`--results` 可指向一次套件运行的工作目录，或分别保存各来宾配置的父目录。只检查一个配置时，增加 `--profile wasm32-wasip1-noeh-nomte`。核对历史公开运行时，用 `--suite-dir` 指定当时版本的套件源码，同时传入 `--qualification-receipt` 和 `--receipt-sha256` 可用已知的汇总收据校验各配置记录。报告保留原运行的 VM 身份及特性策略，包括早期版本使用的默认设置。输出文件应位于原始记录目录之外，并使用新文件名。
+
 ## 在 Wasmtime 中对照标量产物
 
 按固定版本的[参考宿主构建说明](../../src/qualification/cfamily/wasmtime_reference/README.md)生成 Wasmtime C API 宿主。以下命令复用上一步生成的 wasm32 C 程序。此格同时关闭 SIMD 和 bulk 复制与填充，沿用 INT、AOT 的标准输出授权和导入，逐字节核对两个输出流及参考结果。
