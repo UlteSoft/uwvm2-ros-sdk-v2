@@ -33,6 +33,13 @@ def recorded_policy(row, target, case, vm_witness=None):
             options.append(f"{recorded[i + 3]}={recorded[i + 2]}")
         elif flag == "--wasip1-single-grant":
             options.append("grant=" + recorded[i + 2])
+    if "grant=args" in options:
+        # The suite leaves main's argv at its default: the exact --run tail.
+        # The replay may mount guest.wasm under a different absolute path.
+        require(recorded[-2:] == ["--run", guest] and guest.startswith("/")
+                and not {"--wasip1-single-force-args", "--wasip1-single-set-argv0"}.intersection(recorded),
+                "unsupported producer guest argument profile")
+        options.append("guest-argv0=" + recorded[-1])
     return options
 
 

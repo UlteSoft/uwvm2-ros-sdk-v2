@@ -36,6 +36,15 @@ For a production replay, add `--qualification-receipt /original/evidence/sysroot
 
 The full manifest schedules 2,464 source/profile pairs, including 1,232 non-MTE pairs. Open POSIX runs only with threads enabled. The driver also accepts a producer selection recorded by `sysroot_suite.py --case` or `--profile` and reports its own denominator. It verifies original qualification counts, source and guest digests, compiler receipts, fresh opcode counts, actual imports, shared-memory bounds, and the exact INT and AOT commands. A compatible threaded guest receives its original `env.memory` owner.
 
+When the producer grants `args`, the driver copies the absolute guest path following `--run` in both verified commands into `argv[0]`. This is the sole guest argument, including when the reference machine mounts the module at a different path. The row’s `wasip1_policy` records it as `guest-argv0`. The host supports `args_get` and `args_sizes_get` with 32-bit pointers and sizes, and their `_wasm64` forms with 64-bit pointers and sizes.
+
+To check the argument ABI on its own, mount `libwasmtime.so` from the checksum-verified Wasmtime 42.0.1 C API archive at `/tools/libwasmtime.so`. The checker uses `wasmtime_wat2wasm` to assemble its fixtures. At each pointer width it checks the argument bytes with permission granted, then checks denial with the grant absent and with the interfaces denied. All six host logs in the new output directory must end with `end returned 0`.
+
+```sh
+python3 -I -B /repo/src/qualification/cfamily/wasmtime_reference/check_args.py \
+  --wasmtime-lib /tools/libwasmtime.so --host /tools/qualification-host --work /work/args-check
+```
+
 Each `results.jsonl` row identifies the source, profile and original qualification. `match` requires a Wasmtime guest exit of zero, passing INT and AOT runs, and identical exit, stdout and stderr against each engine. The corresponding output directory contains raw captures and `host.log`. The summary counts real guest starts and terminations, case statuses by profile and family, and each unsupported import or grant.
 
-An exact upstream skip, the missing `sem_unlink` link dependency and the pinned upstream `lsearch` test with undersized input records each have a separate status. The full-width SDK port has its own row. Cases requiring `wasi.thread-spawn`, argument-vector calls or a granted realtime `poll_oneoff` retain their import and permission details. These exclusions have unavailable engine comparisons. Exit 0 means every selected non-MTE cell matched. Exit 77 means all applicable guests matched and the remaining rows have documented limitations. Exit 1 records a difference, an unexpected failure or an evidence error.
+An exact upstream skip, the missing `sem_unlink` link dependency and the pinned upstream `lsearch` test with undersized input records each have a separate status. The full-width SDK port has its own row. Cases importing `wasi.thread-spawn`, `clock_res_get` or `fd_pread`, or requiring a granted realtime `poll_oneoff`, retain their unsupported import and permission details. These exclusions have unavailable engine comparisons. Exit 0 means every selected non-MTE cell matched. Exit 77 means all applicable guests matched and the remaining rows have documented limitations. Exit 1 records a difference, an unexpected failure or an evidence error.

@@ -36,6 +36,15 @@ python3 -I -B /repo/src/qualification/cfamily/wasmtime_reference/compare.py \
 
 完整清单含 2,464 个源码与配置组合，其中 1,232 个关闭 MTE。Open POSIX 仅在开启线程的配置下运行。使用 `sysroot_suite.py --case` 或 `--profile` 产生的结果按原始选择单独统计。驱动核对资格计数、源码、guest 与编译收据，重新解码指令，检查实际导入、共享内存上下限及 INT、AOT 的完整命令行。适用的线程档加载原始 `env.memory` owner。
 
+原始命令授予 `args` 权限时，驱动从已核验的 INT 和 AOT 命令中读取 `--run` 后的 guest 绝对路径，作为唯一的参数 `argv[0]`。即使对照机上的挂载路径不同，guest 也会收到原始路径。每行的 `wasip1_policy` 以 `guest-argv0` 记录该值。`args_get` 和 `args_sizes_get` 使用 32 位指针和长度，对应的 `_wasm64` 接口使用 64 位指针和长度。
+
+单独验证参数 ABI 时，从已核验 SHA-256 的 Wasmtime 42.0.1 C API 发行包中取出 `libwasmtime.so`，挂载到 `/tools/libwasmtime.so`。脚本调用 `wasmtime_wat2wasm` 汇编测试模块，在每种指针宽度下检查授权时写入的参数字节，再分别核对未授予 `args` 和拒绝接口时的错误码。新输出目录中的六份宿主日志均应以 `end returned 0` 结尾。
+
+```sh
+python3 -I -B /repo/src/qualification/cfamily/wasmtime_reference/check_args.py \
+  --wasmtime-lib /tools/libwasmtime.so --host /tools/qualification-host --work /work/args-check
+```
+
 `results.jsonl` 每行给出源码、配置和原始资格结果。只有 Wasmtime 的 guest 正常退出且退出码为零，原 INT 和 AOT 均通过，并且三者的退出码、stdout 和 stderr 均一致，才记为 `match`。运行目录保留原始字节输出和 `host.log`。汇总报告记录实际 guest 启动与终止次数、各档和各库的状态，以及参考宿主缺少的每项导入或授权。
 
-上游明确输出跳过、链接缺少 `sem_unlink`、固定版本的上游 `lsearch` 使用过短输入记录，各有单独状态。SDK 的全宽记录移植用例独立记账。对于需要 `wasi.thread-spawn`、读取参数向量或获准通过 `poll_oneoff` 执行实时时钟等待的用例，记录实际导入和授权。这些项的双引擎对照状态为 `unavailable`。退出码 0 表示选中的无 MTE 项全部匹配。77 表示适用项全部匹配，其余项存在明确限制。1 表示存在观测差异、意外失败或验收证据错误。
+上游明确输出跳过、链接缺少 `sem_unlink`、固定版本的上游 `lsearch` 使用过短输入记录，各有单独状态。SDK 的全宽记录移植用例独立记账。对于导入 `wasi.thread-spawn`、`clock_res_get`、`fd_pread` 或获准通过 `poll_oneoff` 执行实时时钟等待的用例，记录参考宿主缺少的导入和授权。这些项的双引擎对照状态为 `unavailable`。退出码 0 表示选中的无 MTE 项全部匹配。77 表示适用项全部匹配，其余项存在明确限制。1 表示存在观测差异、意外失败或验收证据错误。

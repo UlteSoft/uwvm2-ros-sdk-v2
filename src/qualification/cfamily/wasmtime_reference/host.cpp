@@ -27,7 +27,7 @@ using std::string_view;
 
 enum Errno { success = 0, bad_fd = 8, fault = 21, invalid = 28, io = 29,
              overflow = 61, not_capable = 76 };
-enum class Operation { clock, environ, environ_sizes, fdstat, write, exit, yield, denied };
+enum class Operation { args, args_sizes, clock, environ, environ_sizes, fdstat, write, exit, yield, denied };
 
 struct Function {
     string_view name;
@@ -36,6 +36,8 @@ struct Function {
     string_view parameters;
 };
 constexpr Function functions[] = {
+    {"args_get", Operation::args, "pp"},
+    {"args_sizes_get", Operation::args_sizes, "pp"},
     {"clock_time_get", Operation::clock, "ilp"},
     {"environ_get", Operation::environ, "pp"},
     {"environ_sizes_get", Operation::environ_sizes, "pp"},
@@ -56,6 +58,7 @@ struct Host {
     FILE *report;
     std::set<string_view> grants;
     std::map<string_view, bool> interfaces;
+    string_view guest_argv0;
     wasmtime_sharedmemory_t *shared = nullptr;
     bool exited = false;
     uint32_t exit_code = 0;
@@ -158,11 +161,21 @@ static uint64_t integer(const wasmtime_val_t &arg) {
     return arg.kind == WASMTIME_I32 ? uint32_t(arg.of.i32) : uint64_t(arg.of.i64);
 }
 
+static Errno store_sizes(Memory memory, unsigned width, uint64_t count_ptr, uint64_t bytes_ptr,
+                         uint64_t count, uint64_t bytes) {
+    if (!memory.contains(count_ptr, width) || !memory.contains(bytes_ptr, width)) return fault;
+    if (count_ptr % width || bytes_ptr % width) return invalid;
+    memory.store(count_ptr, width, count);
+    memory.store(bytes_ptr, width, bytes);
+    return success;
+}
+
 static Errno hostcall(const Binding &binding, wasmtime_caller_t *caller,
                       const wasmtime_val_t *args) {
     auto &host = binding.host;
     if (!binding.allowed) return not_capable;
     const auto op = binding.function.operation;
+    if ((op == Operation::args || op == Operation::args_sizes) && !host.has("args")) return not_capable;
     if (op == Operation::yield) {
         if (!host.has("sched-yield")) return not_capable;
         return sched_yield() == 0 ? success : io;
@@ -171,6 +184,17 @@ static Errno hostcall(const Binding &binding, wasmtime_caller_t *caller,
     const auto a = integer(args[0]);
     const auto b = integer(args[1]);
     switch (op) {
+    case Operation::args:
+        if (!memory.data) return fault;
+        if (a % host.width) return invalid;
+        if (!memory.contains(a, host.width) || !memory.contains(b, host.guest_argv0.size() + 1)) return fault;
+        // The producer passes one argument. WASIp1 owns exactly one pointer slot.
+        memory.store(a, host.width, b);
+        std::memcpy(memory.data + b, host.guest_argv0.data(), host.guest_argv0.size());
+        memory.data[b + host.guest_argv0.size()] = 0;
+        return success;
+    case Operation::args_sizes:
+        return store_sizes(memory, host.width, a, b, 1, host.guest_argv0.size() + 1);
     case Operation::clock: {
         const auto result = integer(args[2]);
         if (!memory.contains(result, 8)) return fault;
@@ -188,11 +212,7 @@ static Errno hostcall(const Binding &binding, wasmtime_caller_t *caller,
         return memory.contains(a, 0) && memory.contains(b, 0) ? success : fault;
     case Operation::environ_sizes:
         if (!host.has("environ")) return not_capable;
-        if (!memory.contains(a, host.width) || !memory.contains(b, host.width)) return fault;
-        if (a % host.width || b % host.width) return invalid;
-        memory.store(a, host.width, 0);
-        memory.store(b, host.width, 0);
-        return success;
+        return store_sizes(memory, host.width, a, b, 0, 0);
     case Operation::fdstat:
         if (a <= 2 && (!host.writable(a) || !host.has("stdio.metadata"))) return not_capable;
         if (!memory.contains(b, 24)) return fault;
@@ -393,7 +413,7 @@ static void run(Host &host, bool eh, const char *guest, const char *owner) {
 
 int main(int argc, char **argv) {
     if (argc < 6) {
-        std::fputs("usage: host 32|64 eh|noeh GUEST OWNER|- REPORT [allow=IMPORT|deny=IMPORT|grant=NAME ...]\n", stderr);
+        std::fputs("usage: host 32|64 eh|noeh GUEST OWNER|- REPORT [allow=IMPORT|deny=IMPORT|grant=NAME|guest-argv0=PATH ...]\n", stderr);
         return 2;
     }
     auto *report = std::fopen(argv[5], "wx");
@@ -403,7 +423,7 @@ int main(int argc, char **argv) {
         string_view bits(argv[1]), eh(argv[2]);
         if ((bits != "32" && bits != "64") || (eh != "eh" && eh != "noeh"))
             throw std::runtime_error("invalid profile");
-        Host host{bits == "64" ? 8u : 4u, report, {}, {}};
+        Host host{bits == "64" ? 8u : 4u, report, {}, {}, {}};
         for (int i = 6; i < argc; ++i) {
             string_view option(argv[i]);
             auto pos = option.find('=');
@@ -411,14 +431,20 @@ int main(int argc, char **argv) {
             auto key = option.substr(0, pos), value = option.substr(pos + 1);
             if (key == "grant") {
                 static const std::set<string_view> supported{
-                    "environ", "monotonic-clock", "proc-exit", "sched-yield", "stderr.write", "stdio.metadata", "stdout.write"};
+                    "args", "environ", "monotonic-clock", "proc-exit", "sched-yield", "stderr.write", "stdio.metadata", "stdout.write"};
                 if (!supported.count(value) || !host.grants.insert(value).second)
                     throw std::runtime_error("unknown or duplicate grant");
+            } else if (key == "guest-argv0") {
+                if (!host.guest_argv0.empty() || value.empty() || value.front() != '/')
+                    throw std::runtime_error("expected one absolute producer guest path");
+                host.guest_argv0 = value;
             } else if ((key != "allow" && key != "deny") ||
                        !host.interfaces.emplace(value, key == "allow").second) {
                 throw std::runtime_error("unknown or duplicate interface option");
             }
         }
+        if (host.has("args") != !host.guest_argv0.empty())
+            throw std::runtime_error("the args grant and recorded guest-argv0 must be supplied together");
         std::fputs("wasmtime-c-api " WASMTIME_VERSION "\n", report);
         run(host, eh == "eh", argv[3], argv[4]);
     } catch (const std::exception &error) {

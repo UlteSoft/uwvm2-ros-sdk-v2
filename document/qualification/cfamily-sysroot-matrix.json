@@ -550,5 +550,140 @@
         ]
       }
     }
+  },
+  "wasmtime_argv_reference_subset": {
+    "scope": "Wasmtime 42.0.1 x86_64 reference replay of archived non-MTE sysroot tests using each original WASIp1 guest argv[0].",
+    "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "producer_vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+    "reference_host_sha256": "bc2bf09adb4ed875e3f887c9be63e1033440b35153f54169472d19cbe2257dd5",
+    "source_sha256": {
+      "adapter.py": "c6919c60e912629c89e4d881a909ce4d9c479e8ea18ba27ac948c55144895ea0",
+      "check_args.py": "2e6ad648dabeb36268d4839631caaab5f4ada809a388938aeeaae5afb5e97f75",
+      "host.cpp": "a40ae4568e9b101ffd31538d15136aed9ef9ba5273d96cadb1ef6ea85c302c1b",
+      "sysroot.py": "fa24567b6d2c730032ba1bca367870537521dbc8f9d2d8ca031275bec1ef38f1"
+    },
+    "reference_build_receipt_sha256": "d25661ddf6324ae895fabf4e7e732c78afd6e8cd8f388a92402aa470745abf58",
+    "argument_abi": {
+      "receipt_sha256": "cc24159419cbfbeaf68b5ecda728c99377f5df37fee13dcab4c03b621db90ef3",
+      "isolation_sha256": "0819074923d5577b088b58a45f5e573849f2dd23fdb3e66cda2599397bd98016",
+      "wasmtime_c_api_archive_sha256": "2097a47351918a446b26c7e65f487278f63bc947591b71897db547cd90c05082",
+      "wasmtime_library_sha256": "566e57cfeabafd6d44fab1b5e6660b4569a71aae4cff2e4d89563a424ee799f3",
+      "passing_cases": [
+        "wasm32-denied-allow",
+        "wasm32-denied-deny",
+        "wasm32-granted-allow",
+        "wasm64-denied-allow",
+        "wasm64-denied-deny",
+        "wasm64-granted-allow"
+      ]
+    },
+    "producer_hosts": {
+      "x86_64": {
+        "distinct_cells": 56,
+        "batches": [
+          {
+            "original_rows_sha256": "75c47293c91dc349fb937aa5451d63787dd83758e39ea88d5200d21a0eadd74d",
+            "starts": 40,
+            "terminations": 40,
+            "matches": {
+              "aot": {
+                "match": 40
+              },
+              "int": {
+                "match": 40
+              }
+            },
+            "per_family": {
+              "compiler-rt": {
+                "match": 16
+              },
+              "libc++": {
+                "match": 16
+              },
+              "libc-test": {
+                "match": 8
+              }
+            },
+            "rows_sha256": "e5fc6359cc4ac5ce57fc5fb319b038676ea99510feece0a1fc087c22a5d721fc",
+            "summary_sha256": "4632531bc45fdcfbaa99e535733d17af6f50f56eae2c30e83b86fc3cf65b180b",
+            "isolation_sha256": "20d644e264991e74647c440e12554a1e8b1bdf525d7c3e393a54539de9943309"
+          },
+          {
+            "original_rows_sha256": "86636d58b884c9e329c8cdab437522330d9929348d162d85683127f455f69c79",
+            "starts": 16,
+            "terminations": 16,
+            "matches": {
+              "aot": {
+                "match": 16
+              },
+              "int": {
+                "match": 16
+              }
+            },
+            "per_family": {
+              "libc++": {
+                "match": 16
+              }
+            },
+            "rows_sha256": "e13797db60cd342c16ea7d2a70ff1a4e35286070b91c3dc048a47d5f9011d293",
+            "summary_sha256": "3910f47252074eaf1bfca5d9e937fb2792a06b86f3ef62ff2638435954095f74",
+            "isolation_sha256": "ea24bd090e9cbbdb0d58121c54c3348c7de3c2f08f0fea23804d4de9d703f07b"
+          }
+        ]
+      },
+      "i686": {
+        "distinct_cells": 56,
+        "batches": [
+          {
+            "original_rows_sha256": "8c26a9ec269b5bd52263b3e12b772d1df2d2c97acd6db771f42e31513d885855",
+            "starts": 40,
+            "terminations": 40,
+            "matches": {
+              "aot": {
+                "match": 40
+              },
+              "int": {
+                "match": 40
+              }
+            },
+            "per_family": {
+              "compiler-rt": {
+                "match": 16
+              },
+              "libc++": {
+                "match": 16
+              },
+              "libc-test": {
+                "match": 8
+              }
+            },
+            "rows_sha256": "863960beca703e0345b7d8f531afe697aec2da02f78d6f955df0afcdb597cabb",
+            "summary_sha256": "f87faf8af4b90c3d110a6bf3a67b84704f92cdad37ad35f2de746155c0751312",
+            "isolation_sha256": "c8b1fe82a46716253fcde0b4883a3351fef69a6dfc9bfef1d84877981f900ea0"
+          },
+          {
+            "original_rows_sha256": "36fa3e8957ae157c59a1cfd749fff5c2eca83a1c407bbe4f2bb1281844c25f6d",
+            "starts": 16,
+            "terminations": 16,
+            "matches": {
+              "aot": {
+                "match": 16
+              },
+              "int": {
+                "match": 16
+              }
+            },
+            "per_family": {
+              "libc++": {
+                "match": 16
+              }
+            },
+            "rows_sha256": "7e904faafa99a54dfe4a4b1511731eca2712a2446a2738835556b2a2ec14941a",
+            "summary_sha256": "88f63cc24a593e491d13f282be9f7e68ffaa5b193acb7b4166e013c5557ae140",
+            "isolation_sha256": "ce95fa46485ee92af8fffacb96f95592104e1df9f152eed8f33a01ff6faef23d"
+          }
+        ]
+      }
+    }
   }
 }

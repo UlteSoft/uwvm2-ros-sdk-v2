@@ -256,11 +256,10 @@ def linked_evidence(args, row, case, target, saved_guest, original, out, result)
 
 
 def reference_limits(row, target, policy):
-    # host.cpp has no argument-vector, clock resolution, positioned read, or
-    # thread-spawn implementation. Its poll_oneoff callback implements deny only.
+    # host.cpp has no clock resolution, positioned read, or thread-spawn
+    # implementation. Its poll_oneoff callback implements deny only.
     pointer = f"i{target.bits}"
-    unavailable = {"args_get": [pointer, pointer], "args_sizes_get": [pointer, pointer],
-                   "clock_res_get": ["i32", pointer], "fd_pread": ["i32", pointer, pointer, "i64", pointer]}
+    unavailable = {"clock_res_get": ["i32", pointer], "fd_pread": ["i32", pointer, pointer, "i64", pointer]}
     imports, semantics = [], []
     for item in row["imports"]:
         module, name = item["module"], item["name"]
@@ -268,13 +267,15 @@ def reference_limits(row, target, policy):
             imports.append("wasi.thread-spawn")
         elif module == "wasi_snapshot_preview1":
             base = name.removesuffix("_wasm64")
-            if base in unavailable:
+            if base in ("args_get", "args_sizes_get"):
+                require(item["params"] == [pointer, pointer] and item["results"] == ["i32"], f"unexpected {name} signature")
+            elif base in unavailable:
                 require(item["params"] == unavailable[base] and item["results"] == ["i32"], f"unexpected {name} signature")
                 imports.append(module + "." + name)
             if base == "poll_oneoff" and "allow=" + name in policy:
                 require(item["params"] == [pointer] * 4 and item["results"] == ["i32"], f"unexpected {name} signature")
                 semantics.append("allow=" + name)
-    semantics.extend(option for option in policy if option in {"grant=args", "grant=monotonic-resolution", "grant=realtime-timer"})
+    semantics.extend(option for option in policy if option in {"grant=monotonic-resolution", "grant=realtime-timer"})
     return imports, semantics
 
 

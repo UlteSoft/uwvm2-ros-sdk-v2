@@ -31,9 +31,22 @@ The driver checks the manifest SHA-256, the complete 14-program by eight-profile
 
 The private-memory profiles use the calling guest's public `memory` export. For shared memory, the host instantiates the recorded owner, obtains its `memory` export, and supplies that same Wasmtime shared memory handle as the guest's `env.memory` import. Every callback reads the current memory size after any guest growth. The 14 programs have no `wasi.thread-spawn` import. The adapter admits the observed Preview1 signatures, plus their SDK `_wasm64` forms with 64-bit pointers and sizes.
 
-The host implements `clock_time_get`, `environ_get`, `environ_sizes_get`, `fd_fdstat_get`, `fd_write`, `proc_exit`, and `sched_yield` under the recorded grants. The monotonic clock returns host nanoseconds and records each value. The guest environment and preopen list are empty. The external corpus imports no argument functions. Standard input is at EOF and `fd_read` is denied. Output descriptors identify the regular capture files and report write and file-metadata rights when granted. The adapter checks the full iovec array, each payload, and the return buffer before publishing guest bytes. It uses 8-byte entries on wasm32 and 16-byte entries on wasm64.
+The sysroot suite runs `--run <guest.wasm>` with the producer's absolute output path. After verifying both engine commands, the driver passes that exact path to the host as `guest-argv0` when the profile grants `args`. `args_sizes_get` reports one argument and its byte count including the NUL. `args_get` writes one guest pointer and the terminated path. Both imports require their individual interface permission and the `args` grant. The external corpus imports no argument functions.
+
+The host also implements `clock_time_get`, `environ_get`, `environ_sizes_get`, `fd_fdstat_get`, `fd_write`, `proc_exit`, and `sched_yield` under the recorded grants. The monotonic clock returns host nanoseconds and records each value. The guest environment and preopen list are empty. Standard input is at EOF and `fd_read` is denied. Output descriptors identify the regular capture files and report write and file-metadata rights when granted. The adapter checks the full iovec array, each payload, and the return buffer before publishing guest bytes. It uses 8-byte entries on wasm32 and 16-byte entries on wasm64.
 
 The external suite denies `fd_close`, `fd_prestat_dir_name`, `fd_prestat_get`, `fd_read`, and `fd_seek`. These imports return Preview1 `ENOTCAPABLE` before accessing guest memory or a descriptor. Unknown imports, mismatched signatures, mismatched interface entries, and attempts to enable these five operations fail qualification setup.
+
+## Check the argument ABI
+
+Use the adapter built above and `libwasmtime.so` from the same checksum-verified C API archive. The checker calls `wasmtime_wat2wasm` to assemble private wasm32 and wasm64 guests. For each width, one run checks the UTF-8 path, its terminating NUL, the pointer table, adjacent bytes, bounds and alignment. Two runs check that each argument import returns `ENOTCAPABLE` when the `args` grant is absent or the interfaces are denied.
+
+```sh
+/usr/bin/python3 -I -B "$reference/check_args.py" --wasmtime-lib "$capi/lib/libwasmtime.so" \
+    --host /work/qualification-host --work /work/args-check
+```
+
+A successful run exits zero and leaves four WAT sources, four Wasm modules and six host logs in `--work`. Each log ends with `end returned 0`.
 
 ## Reading the evidence
 
