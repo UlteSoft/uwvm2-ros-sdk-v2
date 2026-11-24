@@ -897,13 +897,35 @@
         "aarch64": {
           "vm_sha256": "2cbe6a26e172ced6aa072f9b18ae189fca1fe3d28d5f15617a0b54210037d692",
           "archive_receipt_sha256": "36200910af9ac365f3dd32333f3e40ca0957d1d0b7eee0c8d6c39766ceeb33ef",
-          "status": "in-progress",
+          "status": "pass",
           "languages": {
             "c": {
-              "status": "pending"
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-mte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+              "result_sha256": "46c62eb976024a61851c98c475b66c7375e3e4dfa7149270d0e5874ec4511e82",
+              "snapshot_sha256": "4ccfde0beffaac6d07f766924372c39c9e0bf3f9f8424aa8b71bc66a103315f3",
+              "restore_seconds": 1.147,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
             },
             "cpp": {
-              "status": "pending"
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-mte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+              "result_sha256": "f29f1e8ac95cc27400df1c61ab9d56e9fdda8a341b80d8e4db90ef1f4f9ad8aa",
+              "snapshot_sha256": "e748508712adbce1c1c52d8cd557d1de7437c558108dc0c82edff0b6b448f978",
+              "restore_seconds": 1.71,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
             },
             "objc": {
               "status": "pass",
@@ -920,9 +942,21 @@
               "process_exit": 0
             },
             "objcpp": {
-              "status": "pending"
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+              "result_sha256": "3c1473a85bf06f0364364d1259c7ca1f9ec62ecaee715806fd92cc469cdce143",
+              "snapshot_sha256": "199be0e8101aaf315df01fccdd350c8eb6205c5115563861af88d216c73aad86",
+              "restore_seconds": 1014.343,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
             }
-          }
+          },
+          "restore_receipt_sha256": "bdb7b05b1d47e6eb676003066029cffbc4fe79ea3988bb39db9d7c4897f46d73"
         },
         "arm": {
           "vm_sha256": "34e5df53d8ce5339e468306de550ca642ee98661d1a5d687eb91fcc25bdb1264",
