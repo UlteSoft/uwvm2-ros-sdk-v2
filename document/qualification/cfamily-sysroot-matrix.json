@@ -346,5 +346,209 @@
         "isolation_sha256": "27da895b7e0f2c1a468c4c2101a0dbd5bcbb8eaa677c2596c56bc217250ed83e"
       }
     }
+  },
+  "candidate_vm_d552_reference_subset": {
+    "qualification": {
+      "commit": "2c61f3665b3aee435549e8371b0aff96074016f0",
+      "tree": "17106d33f58bfe70cbb990c261194da608a58445"
+    },
+    "summary_sha256": "46c457f0bcf278b871352cd7eff7cf698b48efbe80a503ee416638f6f053694a",
+    "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+    "scope": "Selected non-MTE C and C++ sysroot tests compiled by each installed x86 host frontend and compared with the recorded Wasmtime C API host",
+    "hosts": {
+      "i686": {
+        "bad_evidence": 0,
+        "cells": 56,
+        "difference": 0,
+        "native_engine_passes": 112,
+        "not_linked": 0,
+        "statuses": {
+          "match": 24,
+          "unsupported-import-and-grant": 32
+        },
+        "upstream_skip": 0,
+        "vm": {
+          "commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+          "receipt_sha256": "68612d29812d1c34209d5468ef0fbc68dbc521cef4b62cf2529d52ca50fce513",
+          "sha256": "ffe28677d641695740709ed5b4db213029f937a41733098421bc2ee05d5c013e",
+          "tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90"
+        },
+        "wasmtime_starts": 24,
+        "wasmtime_terminations": 24,
+        "runs": [
+          {
+            "source_cases": [
+              "upstream/libc-test/src/functional/qsort.c",
+              "upstream/llvm/compiler-rt/test/builtins/Unit/clzsi2_test.c",
+              "upstream/llvm/compiler-rt/test/builtins/Unit/muldi3_test.c",
+              "upstream/llvm/libcxx/test/std/algorithms/alg.modifying.operations/alg.rotate/rotate.pass.cpp",
+              "upstream/llvm/libcxx/test/std/algorithms/alg.sorting/alg.heap.operations/make.heap/make_heap.pass.cpp"
+            ],
+            "profiles": [
+              "wasm32-wasip1-eh-nomte",
+              "wasm32-wasip1-noeh-nomte",
+              "wasm32-wasip1-threads-eh-nomte",
+              "wasm32-wasip1-threads-noeh-nomte",
+              "wasm64-wasip1-eh-nomte",
+              "wasm64-wasip1-noeh-nomte",
+              "wasm64-wasip1-threads-eh-nomte",
+              "wasm64-wasip1-threads-noeh-nomte"
+            ],
+            "native_rows_sha256": "8c26a9ec269b5bd52263b3e12b772d1df2d2c97acd6db771f42e31513d885855",
+            "reference_rows_sha256": "fbe399fa891fe43845c115ee1d5d71c9384647b06fe2306c8aa7ee7819f76bd7",
+            "reference_summary_sha256": "6d1f0b9734bd502b9a4973ca3022987759849cb13c4c6c4d3256ac53c4dd54ec",
+            "reference_host_sha256": "fdccd44cb44ec2e5d8f7f98b7f4c43ac69901f0a1b40b9a9c391b9c74294f010",
+            "reference_statuses": {
+              "match": 24,
+              "unsupported-import-and-grant": 16
+            },
+            "comparisons": {
+              "aot": {
+                "match": 24,
+                "unavailable": 16
+              },
+              "int": {
+                "match": 24,
+                "unavailable": 16
+              }
+            }
+          },
+          {
+            "source_cases": [
+              "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.count/count.pass.cpp",
+              "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp"
+            ],
+            "profiles": [
+              "wasm32-wasip1-eh-nomte",
+              "wasm32-wasip1-noeh-nomte",
+              "wasm32-wasip1-threads-eh-nomte",
+              "wasm32-wasip1-threads-noeh-nomte",
+              "wasm64-wasip1-eh-nomte",
+              "wasm64-wasip1-noeh-nomte",
+              "wasm64-wasip1-threads-eh-nomte",
+              "wasm64-wasip1-threads-noeh-nomte"
+            ],
+            "native_rows_sha256": "36fa3e8957ae157c59a1cfd749fff5c2eca83a1c407bbe4f2bb1281844c25f6d",
+            "reference_rows_sha256": "c2b38127b0eb63940e42c545296577394e48d1d4ffed533b5850a2f05a0f1d1e",
+            "reference_summary_sha256": "46742eb7be2ceb364163d0b4047e4279b159a074360256cb68752681a5c69aa1",
+            "reference_host_sha256": "fdccd44cb44ec2e5d8f7f98b7f4c43ac69901f0a1b40b9a9c391b9c74294f010",
+            "reference_statuses": {
+              "unsupported-import-and-grant": 16
+            },
+            "comparisons": {
+              "aot": {
+                "unavailable": 16
+              },
+              "int": {
+                "unavailable": 16
+              }
+            }
+          }
+        ],
+        "isolation_sha256": [
+          "94cde3f25ee7e10d539f98b9731e73d0822b58050c78a12f7742fe97a7354b42",
+          "f66be5f0f0b2aa752bd0c1a7bdc0d071beb05b6bc5bb7480d9a18ddc80bdb254",
+          "521e5f8090ffb8fbe8908b7514ce77a4c23931ede61859eb1e5e7f16425abf08",
+          "df2d2a4e88627aeaac6ef6b6e945f2668dc0a291b9f855640b2faa7c93e6f600"
+        ]
+      },
+      "x86_64": {
+        "bad_evidence": 0,
+        "cells": 56,
+        "difference": 0,
+        "native_engine_passes": 112,
+        "not_linked": 0,
+        "statuses": {
+          "match": 24,
+          "unsupported-import-and-grant": 32
+        },
+        "upstream_skip": 0,
+        "vm": {
+          "commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+          "receipt_sha256": "62719af2aa8f08d861614d2c1001bd4cc8b71aad22fd305f4757c7baa3811323",
+          "sha256": "630707429a9e0d6af5fef29ffb51090812e346d310b7849f6ace1f435c8fda6b",
+          "tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90"
+        },
+        "wasmtime_starts": 24,
+        "wasmtime_terminations": 24,
+        "runs": [
+          {
+            "source_cases": [
+              "upstream/libc-test/src/functional/qsort.c",
+              "upstream/llvm/compiler-rt/test/builtins/Unit/clzsi2_test.c",
+              "upstream/llvm/compiler-rt/test/builtins/Unit/muldi3_test.c",
+              "upstream/llvm/libcxx/test/std/algorithms/alg.modifying.operations/alg.rotate/rotate.pass.cpp",
+              "upstream/llvm/libcxx/test/std/algorithms/alg.sorting/alg.heap.operations/make.heap/make_heap.pass.cpp"
+            ],
+            "profiles": [
+              "wasm32-wasip1-eh-nomte",
+              "wasm32-wasip1-noeh-nomte",
+              "wasm32-wasip1-threads-eh-nomte",
+              "wasm32-wasip1-threads-noeh-nomte",
+              "wasm64-wasip1-eh-nomte",
+              "wasm64-wasip1-noeh-nomte",
+              "wasm64-wasip1-threads-eh-nomte",
+              "wasm64-wasip1-threads-noeh-nomte"
+            ],
+            "native_rows_sha256": "75c47293c91dc349fb937aa5451d63787dd83758e39ea88d5200d21a0eadd74d",
+            "reference_rows_sha256": "b9094cff600b1b59a7d3aae78ea766cc50947765bb09b3b179e0ba0edad664c5",
+            "reference_summary_sha256": "47c992f349b8aab9f127d8df1d57e342072f58856065f5ebc1b664ddb82aed9d",
+            "reference_host_sha256": "fdccd44cb44ec2e5d8f7f98b7f4c43ac69901f0a1b40b9a9c391b9c74294f010",
+            "reference_statuses": {
+              "match": 24,
+              "unsupported-import-and-grant": 16
+            },
+            "comparisons": {
+              "aot": {
+                "match": 24,
+                "unavailable": 16
+              },
+              "int": {
+                "match": 24,
+                "unavailable": 16
+              }
+            }
+          },
+          {
+            "source_cases": [
+              "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.count/count.pass.cpp",
+              "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp"
+            ],
+            "profiles": [
+              "wasm32-wasip1-eh-nomte",
+              "wasm32-wasip1-noeh-nomte",
+              "wasm32-wasip1-threads-eh-nomte",
+              "wasm32-wasip1-threads-noeh-nomte",
+              "wasm64-wasip1-eh-nomte",
+              "wasm64-wasip1-noeh-nomte",
+              "wasm64-wasip1-threads-eh-nomte",
+              "wasm64-wasip1-threads-noeh-nomte"
+            ],
+            "native_rows_sha256": "86636d58b884c9e329c8cdab437522330d9929348d162d85683127f455f69c79",
+            "reference_rows_sha256": "f0d62fba1b330cfe45b2f454701531f9a5d7754e5d7ce9c79b45d6c6cbebcac5",
+            "reference_summary_sha256": "02f5691f7a42dff7a4408ebfb36fe3725cb3acc4c3baaf99944e9fd319b445a4",
+            "reference_host_sha256": "fdccd44cb44ec2e5d8f7f98b7f4c43ac69901f0a1b40b9a9c391b9c74294f010",
+            "reference_statuses": {
+              "unsupported-import-and-grant": 16
+            },
+            "comparisons": {
+              "aot": {
+                "unavailable": 16
+              },
+              "int": {
+                "unavailable": 16
+              }
+            }
+          }
+        ],
+        "isolation_sha256": [
+          "c605fa8c61025c029f81e3c52a0fefb2ee66b2d29c6070bdac926a1bdc85a8ad",
+          "fd5d6a1dbc719f2b40d358a51ff9c10a04eb4d85b7ba326471d891c061978255",
+          "7f5b66efd6d0355e7520859acce2a5d2f29471a86aa1240ecaecf5661e425e31",
+          "a4d78f3371ee864830c50dde4473099492479d3248ada1529aec34d85e9dd65d"
+        ]
+      }
+    }
   }
 }
