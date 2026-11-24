@@ -759,6 +759,232 @@
         "maps_sha256": "aa7bbc4e9bf10b7375e6b086bc6764f9447ed5a5e43da4a84f42cf3e7bfdd242",
         "receipt_sha256": "ac273244f2724e094d68566d52a504612f7d1a8117a450cfd1a55da92773e13d"
       }
+    },
+    "restore_d552": {
+      "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+      "vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+      "capability": "LLVM AOT full-dump-restore",
+      "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+      "hosts": {
+        "x86_64": {
+          "vm_sha256": "630707429a9e0d6af5fef29ffb51090812e346d310b7849f6ace1f435c8fda6b",
+          "archive_receipt_sha256": "7b7b5f6676e097b42cbd33c91826161d92d49c221b3b0d56fc627bc706a8ef47",
+          "status": "pass",
+          "languages": {
+            "c": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-mte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+              "result_sha256": "c69c355fe4056c51ecec0f3cb8dd378edfc1fda3c8ddb7ca833f83c1f2e00256",
+              "snapshot_sha256": "aacbda8f1acc8cd615cde26db6a4de41b6138e07f267cfdcc4f0dc54d397dcad",
+              "restore_seconds": 0.084,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "cpp": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-mte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+              "result_sha256": "bf6bad5456f4c43a0483d6d9d181daf4b9b7449b1cbe904f6223c35f32daf6cd",
+              "snapshot_sha256": "776e662bf889ec61b1555805c89ec1cdc37616ffc174fe3b7314d7104083cc8e",
+              "restore_seconds": 0.192,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "objc": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+              "result_sha256": "229e428cace03d860bcbfcfbcb51ce482e8859069a286229f3f4199d83e84f31",
+              "snapshot_sha256": "e571e95bb25c6d77d23385bed860f43dce855a908ae4e2c98b798997e0976be6",
+              "restore_seconds": 267.501,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "objcpp": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+              "result_sha256": "57638837578d5a0d9b49a135f52fe9d4d6ae27989bb6e37044c29bc62178c6f3",
+              "snapshot_sha256": "f1f7e1593bc470a11f3c74198958e830b9d04a3c6bc18b5683623d21028193c2",
+              "restore_seconds": 268.514,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            }
+          },
+          "restore_receipt_sha256": "f4958364f88264a5efe1b179dbb1060670a9428a475ed9ecb1909525ea70da5f"
+        },
+        "i686": {
+          "vm_sha256": "ffe28677d641695740709ed5b4db213029f937a41733098421bc2ee05d5c013e",
+          "archive_receipt_sha256": "dce0179b91c72b2b6bdbe9b2d01311e22548940bdc977e5a8df2108a116e94d6",
+          "status": "pass",
+          "languages": {
+            "c": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-mte",
+              "guest_compiler_host": "linux-i686",
+              "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+              "result_sha256": "dbf06c653ecf02b96a49e7d379f20f9ed63921123db238d0ab8ff21338691e94",
+              "snapshot_sha256": "b293cf8bd4afd9517c5e2d6bcac95ff6859efe73cb0ca5934f83b21464d6e1c6",
+              "restore_seconds": 0.142,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "cpp": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-mte",
+              "guest_compiler_host": "linux-i686",
+              "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+              "result_sha256": "cb0a1bb15e06843cb2a5a14c3dba9b29dcaf9beaf64d9964781af90fba105ddd",
+              "snapshot_sha256": "4dce0bcfe6992f5aaaa116d107d8404f537f66a60accb96ca53ee98eb386cabb",
+              "restore_seconds": 0.173,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "objc": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-i686",
+              "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+              "result_sha256": "11a7fbaa60964623a1e1f92a35c4470d625a7ffaa1c19aa60cab64c594e2008a",
+              "snapshot_sha256": "26793aa8e04f20a6747dc2bb690c072a7b33222994a0442fc913c47c9bcb2c57",
+              "restore_seconds": 101.54,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "objcpp": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-i686",
+              "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+              "result_sha256": "8a23ab8b8cd4e5344ae07ec097be902fee38ee2b6d215c76ea5a543849ff7047",
+              "snapshot_sha256": "7163a18f5d8fb9f35768ab891c54b640da4e59c5851fd7bb69d8614c8a69fd4b",
+              "restore_seconds": 103.129,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            }
+          },
+          "restore_receipt_sha256": "3f4ee6d1bda5399146d038dd6da3ddd66f09ff532f76872e327f1d3bb9b85c70"
+        },
+        "aarch64": {
+          "vm_sha256": "2cbe6a26e172ced6aa072f9b18ae189fca1fe3d28d5f15617a0b54210037d692",
+          "archive_receipt_sha256": "36200910af9ac365f3dd32333f3e40ca0957d1d0b7eee0c8d6c39766ceeb33ef",
+          "status": "in-progress",
+          "languages": {
+            "c": {
+              "status": "pending"
+            },
+            "cpp": {
+              "status": "pending"
+            },
+            "objc": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+              "result_sha256": "9a7e137954828f718348d8cd78656ae2845b6db235a2aaf2506d2993e928b728",
+              "snapshot_sha256": "d488f8700936c5d851802d724a409f8894d4b4b2a9c573a9706a5e938c8d36c9",
+              "restore_seconds": 910.256,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "objcpp": {
+              "status": "pending"
+            }
+          }
+        },
+        "arm": {
+          "vm_sha256": "34e5df53d8ce5339e468306de550ca642ee98661d1a5d687eb91fcc25bdb1264",
+          "archive_receipt_sha256": "aae97bd7d32b87475d10e8c8e876e54aba7bca49f2a05f9c08f26b3d4437ef98",
+          "status": "in-progress",
+          "languages": {
+            "c": {
+              "status": "pending"
+            },
+            "cpp": {
+              "status": "pending"
+            },
+            "objc": {
+              "status": "pending"
+            },
+            "objcpp": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+              "result_sha256": "b87ea75077465a5af3750d3f2ed51f334ad1cf3093dc5742eb7c7c638c826ab7",
+              "snapshot_sha256": "31f363780fcab3a9f987a94ed4818f88b099a4eadde94d12de504df9e8bfb853",
+              "restore_seconds": 1792.21,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            }
+          }
+        },
+        "armhf": {
+          "vm_sha256": "fb1b9c6d047a61905a432faba12981938d09316b8fd36900a2d8da9e5ddd3d0b",
+          "archive_receipt_sha256": "b70833721cdc330ad64319695e223702678583295bcf5a93a951c46f02bda0d5",
+          "status": "in-progress",
+          "languages": {
+            "c": {
+              "status": "pending"
+            },
+            "cpp": {
+              "status": "pending"
+            },
+            "objc": {
+              "status": "pass",
+              "profile": "wasm32-wasip1-noeh-nomte",
+              "guest_compiler_host": "linux-x86_64",
+              "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+              "result_sha256": "a83983f45438a690eed1e41560535dd63dbc38d7e71b96b8c5b69f6975c45639",
+              "snapshot_sha256": "7bec1985353c2cbeda62777514465d1f84e7fec3b6196ef458149cc5e177fe05",
+              "restore_seconds": 1744.566,
+              "saved_word": "c84f613a",
+              "changed_word": "7193b6ee",
+              "restored_word": "c84f613a",
+              "guest_exit": 0,
+              "process_exit": 0
+            },
+            "objcpp": {
+              "status": "pending"
+            }
+          }
+        }
+      }
     }
   }
 }
