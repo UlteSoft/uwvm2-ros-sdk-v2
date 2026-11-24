@@ -36,3 +36,20 @@ The independent Python model writes `expected.bin` with the seed, every lane, th
 The decoder walks actual operators in function bodies and constant expressions. It requires packed arithmetic in the vector kernel when enabled, scalar accesses on the fallback path, and the selected copy/fill behavior in the two memory kernels. It separately counts ordinary SIMD, relaxed SIMD, `memory.copy`, `memory.fill`, other bulk operations, threads, and MTE. `memory.init`, `data.drop` and atomics can be required by thread startup. A disabled SIMD or copy/fill instruction anywhere in the final module fails the cell. For example, heap support can pull in precompiled libc operations, and LLD can emit `memory.fill` in shared-memory BSS initialization. `result.json` identifies the offending functions. The shared memory owner used by threaded runs contains a memory definition and an export, with no code section.
 
 Each cell retains the executable, build receipt, decoder listing, exact command arguments, stdout and stderr from both engines, and its result. `summary.json` reports instruction and execution outcomes separately. A zero process exit requires all selected cells and both engines to pass.
+
+## Reproduce the public x86_64 run
+
+Run the following in an empty project directory inside the qualification namespace. The installer reports the installed directory for each selection. The public run used the 64 GiB parent and child cgroups, zero swap, an empty home, and a project-disk scratch directory. After installation the tests ran in a network namespace with only the loopback interface.
+
+```sh
+SDK_COMMIT=38023bff47eb545815bdc7e272fc24c44901686d
+mkdir -p .tmp/sdk-install
+export TMPDIR="$PWD/.tmp/sdk-install"
+curl -fL --retry 3 "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/$SDK_COMMIT/install.py" -o install.py
+for language in c cpp objc objcpp
+do
+  python3 -I -B install.py install --commit "$SDK_COMMIT" --language "$language" --platform generic --mode binary --prefix "$PWD/sdk" > "$language.install.json" || exit 1
+done
+```
+
+The qualification target is a Core Wasm module using WASIp1. A feature required by a language runtime is a prerequisite. For example, keep WasmGC enabled when a Java or C# backend requires it. Component Model, WASIp2, WASIp3 and ROS integration are outside this suite.
