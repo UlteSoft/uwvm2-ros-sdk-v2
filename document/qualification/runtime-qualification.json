@@ -41,6 +41,61 @@
       "full-dump-restore",
       "signed-hot-update"
     ],
-    "int_dbg": "Expected rejection with an explicit unsupported-mode diagnostic before guest execution."
+    "int_dbg": "Expected rejection with an explicit unsupported-mode diagnostic before guest execution.",
+    "measured_round": {
+      "runner_commit": "dd2802d7f155cd50d15bd4f3fd5486e6dfcbf4fa",
+      "sdk_install_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+      "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
+      "hosts": {
+        "x86_64": {
+          "outcomes_by_capability": {
+            "full-dump-restore": {
+              "restore-declined": 24,
+              "failed": 24,
+              "unsupported": 8,
+              "build-blocked": 8
+            },
+            "signed-hot-update": {
+              "pass": 24,
+              "failed": 8,
+              "unsupported": 24,
+              "build-blocked": 8
+            },
+            "source-debug": {
+              "pass": 32,
+              "unsupported": 16,
+              "failed": 8,
+              "build-blocked": 8
+            }
+          },
+          "isolated_environment_sha256": "14c23f6478c26d79a9383ade7ae4511d07d1e20c7f3b28838fa20608990b5576",
+          "results_sha256": "c33c75d627e60b8cf1c48c6647e90f8e5c30b37f989157dd695d4cc37a61aac2"
+        },
+        "i686": {
+          "outcomes_by_capability": {
+            "full-dump-restore": {
+              "restore-declined": 24,
+              "failed": 24,
+              "unsupported": 8,
+              "build-blocked": 8
+            },
+            "signed-hot-update": {
+              "pass": 24,
+              "failed": 8,
+              "unsupported": 24,
+              "build-blocked": 8
+            },
+            "source-debug": {
+              "pass": 32,
+              "unsupported": 16,
+              "failed": 8,
+              "build-blocked": 8
+            }
+          },
+          "isolated_environment_sha256": "b95da6fa323196133ad1a593e258c5e7246b7e177c4e5f377f6780b4ce396027",
+          "results_sha256": "ccd65d635475035af45b92f9a2f85d150b700e2ba8d61890a61252278f99de48"
+        }
+      }
+    }
   }
 }

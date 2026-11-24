@@ -123,6 +123,20 @@
           "pre-execution-uwvm-wasip1-memory64-import": 56
         },
         "summary_sha256": "346228ad57c6264ce6b9437bf6c522f48a8ea7522660d134c0e7710ae81c5839"
+      },
+      "wasip1_stdout_policy": {
+        "scope": "fd_write and fd_write_wasm64",
+        "stages": [
+          "hidden",
+          "deny",
+          "allow-without-grant",
+          "stdout-only"
+        ],
+        "comparisons": {
+          "pass": 512
+        },
+        "results_sha256": "f26f5d05a41f00a46bba57148afffdd56dc822ca230bdacae71da728581ed056",
+        "decision_checker_sha256": "4ac696314c25b6e05f1c6a29de18bd837c7542a2d6b917f9b195cd656d55d951"
       }
     },
     "aarch64": {
