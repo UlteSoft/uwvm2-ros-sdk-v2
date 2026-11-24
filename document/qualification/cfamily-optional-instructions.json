@@ -68,7 +68,45 @@
       }
     },
     "i686": {
-      "status": "pending"
+      "status": "pass",
+      "linked_modules": 256,
+      "int_pass": 256,
+      "aot_pass": 256,
+      "seed": 1678772231,
+      "output_bytes": 4160,
+      "output_sha256": "6ed1017e0074af828566653a41c43c480649649c083c3cc78c887387e562619b",
+      "vm_sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f",
+      "runner_sha256": "a91d2d93fb18243f039b6fb55af3f981937b7a4af2d13cd33cf78e099fc989b7",
+      "decoder_sha256": "8598c95bb186c765539e50f8c909d977c93254b6f6d86b8857290049526c104e",
+      "isolation_sha256": "47880d45efd83c4e2c7d51484724afacaa6a787b197cf34cae4846c08c83361c",
+      "installation_sha256": "13f0a260e0ca29bb0e9365a6b5d98e2ed27d4b2e50dd71472722cee31c87df0c",
+      "qualification_sha256": "c32c0df73176642acb94c5789ca6644efd3d2caaac63a7798ee374850f142e1e",
+      "profile_results_sha256": {
+        "wasm32-wasip1-eh-mte": "5e4d611852c7d598c99deee1a1c7e50f9262e3bffc031c35e9c0296255073168",
+        "wasm32-wasip1-eh-nomte": "b4a6db2dc63eb2802b31ffafdb8714baa38cbd4005b1ab9ca92b362070860fde",
+        "wasm32-wasip1-noeh-mte": "d6085aa54435b962a423110f56cc053aff42c6283142a04ce38722f253c2f23a",
+        "wasm32-wasip1-noeh-nomte": "5f918b521bdf36ee7929a4ade5c5323d8bb3c0569c5d6bc110dd051fc864e371",
+        "wasm32-wasip1-threads-eh-mte": "631202c38faedc04cfc709110a4d71752db44b937168953878c57809a1e8b75d",
+        "wasm32-wasip1-threads-eh-nomte": "928794e87eab929f5c1b32b9783e3dfdb11043e8ecd2a7f184d13fbe7be246e7",
+        "wasm32-wasip1-threads-noeh-mte": "f375ddca3a5cbf8017232e1039e4fe36db7c497addaaaa7772f233ed40fd1c1b",
+        "wasm32-wasip1-threads-noeh-nomte": "0dda21f9a29a1a014b1bf0ff8d8bb492e71fbfaa09c43bd9d90e7145e630cb7f",
+        "wasm64-wasip1-eh-mte": "bd3b995aab34d7978e42173378e8201eef4c6cb140b670d9f3a3ea860e68e226",
+        "wasm64-wasip1-eh-nomte": "2e8eb023f4b2973233690c512d8033c74972f35dc00bcad41c54755d8c7a5d9c",
+        "wasm64-wasip1-noeh-mte": "a96e30cb2848c7806b523825c7ca5a8a0e5b89970d1c4698e93f62eef842d280",
+        "wasm64-wasip1-noeh-nomte": "a7284d074a2b3a6df2c2ccbe1f98f54f39328d9f8d1d342f61a0bd8f0f3bf888",
+        "wasm64-wasip1-threads-eh-mte": "74c6ecc72bf4113a9cdffbafb6ec570327dc9bdfed42478de14fa49ff3cffbe8",
+        "wasm64-wasip1-threads-eh-nomte": "95c1eaf0dd55a946922a2f4fe2e3ceabe950cd0bc133368e86bc30d3122fb695",
+        "wasm64-wasip1-threads-noeh-mte": "13602537e935131055a67deffe7e8ad862ba328160216276a06d12bf093a7cd5",
+        "wasm64-wasip1-threads-noeh-nomte": "076aed5fc5d3d2c7751e6985f6d8b53ef478245ab957b53d224b56c0dfba521c"
+      },
+      "wasmtime": {
+        "version": "wasmtime 42.0.1 (6844a83b5 2026-02-25)",
+        "source_host": "i686",
+        "execution_host": "x86_64",
+        "interface": "C API",
+        "no_mte_matches": 128,
+        "results_sha256": "1139b69d82f4e0809762bfd2ceaf708e77e13d31d04ce33fdbd3724e7fb34b1f"
+      }
     },
     "aarch64": {
       "status": "pending"

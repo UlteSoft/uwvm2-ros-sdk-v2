@@ -38,6 +38,27 @@ The decoder walks actual operators in function bodies and constant expressions. 
 
 Each cell retains the executable, build receipt, decoder listing, exact command arguments, stdout and stderr from both engines, and its result. `summary.json` reports instruction and execution outcomes separately. A zero process exit requires all selected cells and both engines to pass.
 
+## Compare a scalar guest in Wasmtime
+
+Build the Wasmtime C API reference host from its pinned release using the [reference host instructions](../../src/qualification/cfamily/wasmtime_reference/README.md). The following commands replay the wasm32 C guest with both optional instruction families disabled. Use the output directory from the preceding suite command. The stdout grant and imports match the saved INT and AOT invocations.
+
+```sh
+set -eu
+cell=/work/isa-matrix/c/wasm32-wasip1-noeh-nomte/simd-0-bulk-0
+out=/work/wasmtime-scalar-c
+mkdir -p "$out"
+/work/qualification-host 32 noeh "$cell/guest.wasm" - "$out/host.log" \
+  allow=fd_write allow=proc_exit grant=proc-exit grant=stderr.write grant=stdout.write \
+  >"$out/stdout" 2>"$out/stderr"
+grep -qx 'end returned 0' "$out/host.log"
+cmp /work/isa-matrix/expected.bin "$out/stdout"
+for engine in int aot
+do
+  cmp "$cell/$engine.out" "$out/stdout"
+  cmp "$cell/$engine.err" "$out/stderr"
+done
+```
+
 ## Reproduce the public x86_64 run
 
 Run the following in an empty project directory inside the qualification namespace. The installer reports the installed directory for each selection. The public run used the 64 GiB parent and child cgroups, zero swap, an empty home, and a project-disk scratch directory. After installation the tests ran in a network namespace with only the loopback interface.

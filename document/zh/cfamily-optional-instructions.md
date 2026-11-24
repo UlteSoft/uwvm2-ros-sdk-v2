@@ -38,6 +38,27 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
 
 每格保留模块、构建收据、解码清单、完整命令参数、INT/AOT 的原始标准输出与错误输出。`summary.json` 分别给出各格判定和引擎执行统计。全部所选格及两种引擎通过时进程返回零。
 
+## 在 Wasmtime 中对照标量产物
+
+按固定版本的[参考宿主构建说明](../../src/qualification/cfamily/wasmtime_reference/README.md)生成 Wasmtime C API 宿主。以下命令复用上一步生成的 wasm32 C 程序。此格同时关闭 SIMD 和 bulk 复制与填充，沿用 INT、AOT 的标准输出授权和导入，逐字节核对两个输出流及参考结果。
+
+```sh
+set -eu
+cell=/work/isa-matrix/c/wasm32-wasip1-noeh-nomte/simd-0-bulk-0
+out=/work/wasmtime-scalar-c
+mkdir -p "$out"
+/work/qualification-host 32 noeh "$cell/guest.wasm" - "$out/host.log" \
+  allow=fd_write allow=proc_exit grant=proc-exit grant=stderr.write grant=stdout.write \
+  >"$out/stdout" 2>"$out/stderr"
+grep -qx 'end returned 0' "$out/host.log"
+cmp /work/isa-matrix/expected.bin "$out/stdout"
+for engine in int aot
+do
+  cmp "$cell/$engine.out" "$out/stdout"
+  cmp "$cell/$engine.err" "$out/stderr"
+done
+```
+
 ## 复现 x86_64 公开安装
 
 在验收 namespace 内的空项目目录执行以下命令。每个安装回执的 directory 字段给出该语言实际安装的位置。此次验收使用空 HOME，父、子 cgroup 各设 64 GiB 和零 swap，临时文件写入项目盘。安装结束后，测试在仅有回环接口的网络 namespace 中运行。
