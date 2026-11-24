@@ -20,7 +20,7 @@
 完整矩阵包含四种语言、指针位宽/MTE/线程/EH 的 16 档组合，以及 SIMD 和 bulk 的四组开关，共 256 个模块。u2ros INT 和 LLVM AOT 分别运行每个成功链接和解码的文件。遇到指令残留时仍保留两引擎的实际运行结果。VM 二进制与构建收据必须匹配指定的提交及源码树。
 
 ```sh
-cargo build --release --locked --offline --manifest-path src/qualification/cfamily/decoder/Cargo.toml
+(cd src/qualification/cfamily/decoder && cargo build --release --locked --offline)
 python3 src/qualification/cfamily/optional_isa_suite.py \
   --cc-sdk /sdk/c --cxx-sdk /sdk/cpp --objc-sdk /sdk/objc --objcpp-sdk /sdk/objcpp \
   --vm /opt/tools/bin/uwvm2-ros \
@@ -34,7 +34,9 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
 
 独立的 Python 参考实现把种子、全部通道、无符号累加结果及每次操作后的完整 64 字节缓冲区写入 `expected.bin`。两引擎均须逐字节匹配。出现差异时记录首个不匹配字节的位置。
 
-对于以 `-mno-simd128` 编译的模块，两个引擎均以 `--wasm-feature-disable-simd` 和 `--wasm-feature-disable-relaxed-simd` 运行。对于以 `-mno-bulk-memory-opt` 编译的模块，VM 保持启用完整的 bulk-memory 特性。除了指令，数据计数段、被动段等结构也可能依赖该特性，现有解码器只统计指令。
+以 `-mno-simd128` 编译时，两个引擎均以 `--wasm-feature-disable-simd` 和 `--wasm-feature-disable-relaxed-simd` 运行。以 `-mno-bulk-memory-opt` 编译时，如果最终模块没有其他 bulk-memory 依赖，两个引擎还会加上 `--wasm-feature-disable-bulk-memory`。每格 `result.json` 中的 `vm_bulk_memory` 字段记录 VM 的特性开关以及模块中各项依赖的出现次数。
+
+模块若包含数据计数段（即使计数为零）、被动数据段、显式指定内存索引的主动数据段（即使索引为零），或被动、声明式元素段，uwvm 均要求启用 bulk-memory。`memory.init`、`data.drop`、`table.init`、`elem.drop`、`table.copy` 和 `table.fill` 也依赖该特性。例如，线程用例保留 bulk-memory，用于从被动数据段初始化内存并释放该段。在本套件的 Core 3.0 配置下，主动元素段以及 `table.get`、`table.set`、`table.grow`、`table.size` 均可在关闭 bulk-memory 时使用。
 
 解码器从函数体及常量表达式逐条读取真实指令。向量实现须在指定内核中出现并行算术；标量路径须出现普通读写；两个内存内核须符合所选复制和填充设置。解码器分别统计 SIMD、relaxed SIMD、`memory.copy`、`memory.fill`、其他 bulk、线程和 MTE 指令。线程启动可能需要 `memory.init`、`data.drop` 和原子操作。最终模块在任意函数出现已关闭的 SIMD 或复制/填充指令都判该格失败，`result.json` 记录函数名与数量。检查覆盖分配器、语言运行时和链接器生成的启动函数。线程的内存提供模块只包含内存定义和导出，没有代码段。
 
@@ -76,6 +78,6 @@ do
 done
 ```
 
-x86_64 的 C 安装从空前缀直接执行公开根安装器，选择二进制模式。四语言矩阵复用了按同一公开提交校验的 Git 对象和预编译压缩包，其余选择在断网环境中执行该提交的第二阶段安装器。全部 256 个最终模块通过指令检查，两种 VM 引擎的输出都与参考字节一致。关闭 MTE 的 128 个模块也与 Wasmtime 42.0.1 C API 的结果一致。[各宿主验收记录](../qualification/cfamily-optional-instructions.json)。
+x86_64 的 C 安装从空前缀直接执行公开根安装器，选择二进制模式。四语言矩阵复用了按同一公开提交校验的 Git 对象和预编译压缩包，其余选择在断网环境中执行该提交的第二阶段安装器。最初的 `03a3904f` 验收在运行全部 256 个最终模块时均启用了 VM 的 bulk-memory 特性。全部模块通过指令检查，两种 VM 引擎的输出都与参考字节一致。关闭 MTE 的 128 个模块也与 Wasmtime 42.0.1 C API 的结果一致。[各宿主验收记录](../qualification/cfamily-optional-instructions.json)。
 
 本轮验收目标是使用 WASIp1 的 Core Wasm 模块。语言运行时必需的特性作为前置条件。例如，依赖 WasmGC 的 Java 或 C# 后端只在开启 WasmGC 时验收。Component Model、WASIp2、WASIp3 和 ROS 集成属于本轮范围之外。

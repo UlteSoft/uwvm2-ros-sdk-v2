@@ -78,11 +78,19 @@ def fields(line, keys):
     return values
 
 
-def decode_log(path):
+def decode_log(path, *, bulk_requirements=None):
     lines = path.read_text().splitlines()
     if not lines or not lines[0].startswith("MODULE "):
         raise ValueError("missing sequential module decode")
     counts = fields(lines[0], ISA_KEYS | PROFILE_KEYS)
+    if bulk_requirements is not None:
+        prefix = "UWVM_BULK_REQUIREMENTS "
+        if len(lines) < 2 or not lines[1].startswith(prefix):
+            raise ValueError("decoder missing bulk-memory requirements; rebuild the qualification decoder")
+        requirements = json.loads(lines[1][len(prefix):])
+        if not isinstance(requirements, dict) or any(type(count) is not int or count <= 0 for count in requirements.values()):
+            raise ValueError("invalid bulk-memory requirement counts")
+        bulk_requirements.update(requirements)
     functions = {}
     for line in lines[1:]:
         if not line.startswith("FUNCTION "):
@@ -98,6 +106,18 @@ def decode_log(path):
     if not functions:
         raise ValueError("no --functions output from decoder")
     return counts, functions
+
+
+def optional_runtime_args(vm, engine, target, imports, owner, wasm, *, simd, bulk_memory):
+    cmd = runtime_args(vm, engine, target, imports, owner, wasm)
+    flags = []
+    if not simd:
+        flags.extend(("--wasm-feature-disable-simd", "--wasm-feature-disable-relaxed-simd"))
+    if not bulk_memory:
+        flags.append("--wasm-feature-disable-bulk-memory")
+    run_option = cmd.index("--run")
+    cmd[run_option:run_option] = flags
+    return cmd
 
 
 def instruction_evidence(target, simd, bulk, counts, functions, widths):
@@ -186,7 +206,10 @@ def run_cell(args, language, target, simd, bulk, seeds, expected, inspect, uleb)
         row["decode"] = capture([args.decoder, "--functions", wasm], out, "decode", args.compile_timeout)
         if row["decode"].get("returncode") != 0:
             return finish("decode-failed")
-        counts, functions = decode_log(out / "decode.out")
+        requirements = {}
+        counts, functions = decode_log(out / "decode.out", bulk_requirements=requirements)
+        bulk_memory = bulk or bool(requirements)
+        row["vm_bulk_memory"] = {"enabled": bulk_memory, "requirements_beyond_copy_fill": requirements}
         widths = []
         imports = list(inspect(wasm.read_bytes(), memory_limits=target.threads, memory_types=widths))
         row["instruction_evidence"] = instruction_evidence(target, simd, bulk, counts, functions, widths)
@@ -194,10 +217,8 @@ def run_cell(args, language, target, simd, bulk, seeds, expected, inspect, uleb)
         if owner:
             row["owner_sha256"] = digest(owner)
         for engine in ("int", "aot"):
-            cmd = runtime_args(args.vm, engine, target, imports, owner, wasm)
-            if not simd:
-                run_option = cmd.index("--run")
-                cmd[run_option:run_option] = ["--wasm-feature-disable-simd", "--wasm-feature-disable-relaxed-simd"]
+            cmd = optional_runtime_args(args.vm, engine, target, imports, owner, wasm,
+                                        simd=simd, bulk_memory=bulk_memory)
             run = capture(cmd, out, engine, args.run_timeout)
             observed = (out / (engine + ".out")).read_bytes()
             run["output_sha256"] = hashlib.sha256(observed).hexdigest()

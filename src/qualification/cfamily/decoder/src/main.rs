@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::error::Error;
 use wasmparser::{
-    ConstExpr, DataKind, ElementItems, ElementKind, KnownCustom, Name, Operator, OperatorsReader,
-    Parser, Payload, TableInit, TypeRef, WasmFeatures,
+    BinaryReader, ConstExpr, DataKind, ElementItems, ElementKind, KnownCustom, Name, Operator,
+    OperatorsReader, Parser, Payload, TableInit, TypeRef, WasmFeatures,
 };
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
@@ -52,6 +52,7 @@ struct Counts {
     exports: BTreeMap<u32, String>,
     callees: BTreeMap<u32, BTreeSet<u32>>,
     other_bulk: BTreeMap<&'static str, u64>,
+    bulk_sections: BTreeMap<&'static str, u64>,
     memtag: BTreeMap<&'static str, u64>,
     threads: BTreeMap<&'static str, u64>,
     eh: BTreeMap<&'static str, u64>,
@@ -78,7 +79,9 @@ impl Counts {
                 ("relaxed_simd", _) => Some("relaxed_simd_total"),
                 ("bulk_memory", "MemoryCopy") => Some("memory_copy"),
                 ("bulk_memory", "MemoryFill") => Some("memory_fill"),
-                ("bulk_memory", _) => {
+                // uwvm also gates table.fill on bulk-memory. Its table.get/set/grow/size
+                // instructions and active elements have independent feature switches.
+                ("bulk_memory", _) | ("reference_types", "TableFill") => {
                     *self.other_bulk.entry(name).or_default() += 1;
                     Some("other_bulk")
                 }
@@ -131,6 +134,10 @@ impl Counts {
         self.decode(expression.get_operators_reader(), None)
     }
 
+    fn record_bulk_section(&mut self, kind: &'static str) {
+        *self.bulk_sections.entry(kind).or_default() += 1;
+    }
+
     fn add(&mut self, member: &Self) {
         self.bodies += member.bodies;
         self.operators += member.operators;
@@ -158,6 +165,10 @@ impl Counts {
     }
 
     fn functions(&self) {
+        // The copy/fill instruction counters are checked separately by the caller.
+        let mut requirements = self.other_bulk.clone();
+        requirements.extend(&self.bulk_sections);
+        println!("UWVM_BULK_REQUIREMENTS {requirements:?}");
         for (index, isa) in &self.function_isa {
             // The export stays identifiable even when LLVM omits debug names.
             let name = self.exports.get(index).or_else(|| self.names.get(index))
@@ -272,8 +283,10 @@ fn decode_module(bytes: &[u8]) -> Result<Counts> {
             Payload::ElementSection(elements) => {
                 for element in elements {
                     let element = element?;
-                    if let ElementKind::Active { offset_expr, .. } = element.kind {
-                        counts.decode_const(offset_expr)?;
+                    match element.kind {
+                        ElementKind::Active { offset_expr, .. } => counts.decode_const(offset_expr)?,
+                        ElementKind::Passive => counts.record_bulk_section("passive element segment"),
+                        ElementKind::Declared => counts.record_bulk_section("declarative element segment"),
                     }
                     if let ElementItems::Expressions(_, expressions) = element.items {
                         for expression in expressions {
@@ -282,10 +295,22 @@ fn decode_module(bytes: &[u8]) -> Result<Counts> {
                     }
                 }
             }
+            Payload::DataCountSection { .. } => counts.record_bulk_section("data count section"),
             Payload::DataSection(data) => {
                 for segment in data {
-                    if let DataKind::Active { offset_expr, .. } = segment?.kind {
-                        counts.decode_const(offset_expr)?;
+                    let segment = segment?;
+                    match segment.kind {
+                        DataKind::Passive => counts.record_bulk_section("passive data segment"),
+                        DataKind::Active { offset_expr, .. } => {
+                            // DataKind normalizes both encodings of memory zero. Read the
+                            // flag from the range wasmparser already bounded for this segment.
+                            let range = segment.range;
+                            let encoded = &bytes[range.start as usize..range.end as usize];
+                            if BinaryReader::new(encoded, range.start).read_var_u32()? == 2 {
+                                counts.record_bulk_section("explicit memory index in data segment");
+                            }
+                            counts.decode_const(offset_expr)?;
+                        }
                     }
                 }
             }

@@ -20,7 +20,7 @@ For example, compile an ordinary Wasm64 C++ application with scalar vector code 
 The suite builds 256 modules across four languages, sixteen combinations of pointer width, MTE, threads and EH, and the four SIMD/copy settings. Both u2ros INT and LLVM AOT execute every linked and decoded module, including modules that fail the instruction check. The runtime binary and its build receipt must match the selected VM pin.
 
 ```sh
-cargo build --release --locked --offline --manifest-path src/qualification/cfamily/decoder/Cargo.toml
+(cd src/qualification/cfamily/decoder && cargo build --release --locked --offline)
 python3 src/qualification/cfamily/optional_isa_suite.py \
   --cc-sdk /sdk/c --cxx-sdk /sdk/cpp --objc-sdk /sdk/objc --objcpp-sdk /sdk/objcpp \
   --vm /opt/tools/bin/uwvm2-ros \
@@ -34,7 +34,9 @@ Each program allocates real heap storage, calculates 64 unsigned vector lanes, f
 
 The independent Python model writes `expected.bin` with the seed, every lane, the unsigned sum and every byte of the 64-byte buffer after each memory operation. Both engines must emit exactly those bytes. The row records the first differing offset when a comparison fails.
 
-For `-mno-simd128` builds, both engines run with `--wasm-feature-disable-simd` and `--wasm-feature-disable-relaxed-simd`. For `-mno-bulk-memory-opt` builds, the VM keeps the full bulk-memory feature enabled. The decoder's instruction counts omit section-level dependencies such as the data count section and passive segments.
+For `-mno-simd128` builds, both engines run with `--wasm-feature-disable-simd` and `--wasm-feature-disable-relaxed-simd`. For `-mno-bulk-memory-opt` builds, both engines also use `--wasm-feature-disable-bulk-memory` whenever the final module has no independent bulk-memory requirement. The `vm_bulk_memory` field in each `result.json` records the VM setting and the count of each requirement found in that module.
+
+uwvm requires bulk-memory for a data count section (even with a count of zero), a passive data segment, an active data segment with an explicit memory index (even zero), or a passive or declarative element segment. The instructions `memory.init`, `data.drop`, `table.init`, `elem.drop`, `table.copy` and `table.fill` also require it. For example, the threaded fixtures retain bulk-memory to initialize and drop passive data. Active element segments and `table.get`, `table.set`, `table.grow` and `table.size` can run with bulk-memory disabled under the suite's Core 3.0 settings.
 
 The decoder walks actual operators in function bodies and constant expressions. It requires packed arithmetic in the vector kernel when enabled, scalar accesses on the fallback path, and the selected copy/fill behavior in the two memory kernels. It separately counts ordinary SIMD, relaxed SIMD, `memory.copy`, `memory.fill`, other bulk operations, threads, and MTE. `memory.init`, `data.drop` and atomics can be required by thread startup. A disabled SIMD or copy/fill instruction anywhere in the final module fails the cell. The check covers the allocator, language runtime, and linker-generated startup code. `result.json` identifies the offending functions. The shared memory owner used by threaded runs contains a memory definition and an export, with no code section.
 
@@ -76,6 +78,6 @@ do
 done
 ```
 
-The public x86_64 C run invoked the root installer in binary mode from an empty prefix. The full four-language comparison reused the Git objects and prebuilt archives verified against the same public commit. Each additional selection executed the published second-stage installer offline. All 256 linked modules passed the instruction checks and both VM engines matched the reference bytes. The 128 modules built with MTE disabled also matched in Wasmtime 42.0.1 through its C API. [Per-host receipts](../qualification/cfamily-optional-instructions.json).
+The public x86_64 C run invoked the root installer in binary mode from an empty prefix. The full four-language comparison reused the Git objects and prebuilt archives verified against the same public commit. Each additional selection executed the published second-stage installer offline. The original `03a3904f` run kept VM bulk-memory enabled for all 256 linked modules. All passed the instruction checks and both VM engines matched the reference bytes. The 128 modules built with MTE disabled also matched in Wasmtime 42.0.1 through its C API. [Per-host receipts](../qualification/cfamily-optional-instructions.json).
 
 The qualification target is a Core Wasm module using WASIp1. A feature required by a language runtime is a prerequisite. For example, keep WasmGC enabled when a Java or C# backend requires it. Component Model, WASIp2, WASIp3 and ROS integration are outside this suite.
