@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 #include "WebAssemblyStackTagging.h"
 #include "Utils/WasmAddressSpaces.h"
+#include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/BinaryFormat/Wasm.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
@@ -89,6 +90,82 @@ inline bool canCombineStore(const memtag::AllocaInfo &Info, AllocaInst *AI,
       return false;
   }
 
+  return true;
+}
+
+// All physical slots must have one lifetime spanning the executable body. Plan
+// the frame before adding any owner operations so that another slot's pending
+// lifetime cannot be mistaken for an unobservable entry or exit instruction.
+static bool hasFrameLifetimes(Function &F, const memtag::StackInfo &Info,
+                              DominatorTree &DT) {
+  if (!F.doesNotThrow() || F.hasPersonalityFn() ||
+      F.hasFnAttribute(Attribute::ReturnsTwice) || Info.RetVec.size() != 1)
+    return false;
+  auto *Ret = dyn_cast<ReturnInst>(Info.RetVec.front());
+  if (!Ret || Ret->getParent() == &F.getEntryBlock() ||
+      isa_and_nonnull<AllocaInst>(Ret->getReturnValue()))
+    return false;
+
+  SmallPtrSet<Instruction *, 8> Starts, Ends;
+  for (const auto &[AI, Slot] : Info.AllocasToInstrument) {
+    if (AI->getAddressSpace() != WebAssembly::WASM_ADDRESS_SPACE_DEFAULT ||
+        !canCombineStore(Slot, AI, &DT) ||
+        !Slot.LifetimeStart.front()->getParent()->isEntryBlock() ||
+        Slot.LifetimeEnd.front()->getParent() != Ret->getParent())
+      return false;
+    Starts.insert(Slot.LifetimeStart.front());
+    Ends.insert(Slot.LifetimeEnd.front());
+  }
+
+  // Before the last start, permit only static slots, the starts themselves
+  // and bounded initialization of a slot that already has its live tag.
+  for (Instruction &I : F.getEntryBlock()) {
+    if (Starts.erase(&I)) {
+      if (Starts.empty())
+        break;
+      continue;
+    }
+    if (auto *AI = dyn_cast<AllocaInst>(&I); AI && AI->isStaticAlloca())
+      continue;
+    auto *Store = dyn_cast<StoreInst>(&I);
+    if (!Store || !Store->isSimple())
+      return false;
+    auto *Dest = dyn_cast<AllocaInst>(Store->getPointerOperand());
+    auto *Init = dyn_cast<Constant>(Store->getValueOperand());
+    auto It = Info.AllocasToInstrument.find(Dest);
+    if (It == Info.AllocasToInstrument.end() ||
+        Starts.contains(It->second.LifetimeStart.front()) || !Init ||
+        !Init->isNullValue() || Init->getType() != Dest->getAllocatedType())
+      return false;
+  }
+
+  // No code can publish or observe a dead generation between an end and the
+  // frame exit. A value captured during the body retains its original tag.
+  auto At = Ret->getIterator();
+  while (!Ends.empty()) {
+    if (At == Ret->getParent()->begin() || !Ends.erase(&*--At))
+      return false;
+  }
+
+  for (BasicBlock &BB : F) {
+    if (!isa<BranchInst, SwitchInst, ReturnInst>(BB.getTerminator()))
+      return false;
+    for (Instruction &I : BB) {
+      auto *Call = dyn_cast<CallBase>(&I);
+      if (!Call)
+        continue;
+      if (Call->isInlineAsm() || Call->hasOperandBundles() ||
+          Call->hasFnAttr(Attribute::ReturnsTwice) || Call->doesNotReturn())
+        return false;
+      // Accept ordinary calls with all stack objects live. Intrinsics may
+      // expose non-local control, the stack pointer or explicit owner state.
+      if (auto *II = dyn_cast<IntrinsicInst>(Call);
+          II && !isa<LifetimeIntrinsic, MemIntrinsic>(II) &&
+          !II->hasFnAttr(Attribute::Speculatable) &&
+          II->getIntrinsicID() != Intrinsic::wasm_memtag_sub)
+        return false;
+    }
+  }
   return true;
 }
 
@@ -488,6 +565,14 @@ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
   Type *Int32Type = Type::getInt32Ty(Ctx);
   Type *IntPtrType = iswasm32 ? Int32Type : Type::getInt64Ty(Ctx);
   SmallVector<CallInst *, 4> Activations;
+  Module &M = *Fn.getParent();
+  auto *Sharing = M.getModuleFlag("wasm-feature-shared-mem");
+  auto *Prefix = mdconst::dyn_extract_or_null<ConstantInt>(Sharing);
+  const bool MayUsePrivateMemory =
+      Sharing ? Prefix && Prefix->equalsInt(wasm::WASM_FEATURE_PREFIX_DISALLOWED)
+              : PrivateMemory.getValue();
+  const bool FrameLifetimes =
+      MayUsePrivateMemory && hasFrameLifetimes(Fn, SInfo, DT);
 
   for (auto &I : AllocasToInstrument) {
     memtag::AllocaInfo &Info = I.second;
@@ -517,12 +602,13 @@ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
     }
     // A straight-line interval keeps claim and release on exactly the same
     // dynamic path, including repeated executions of that block in a loop.
-    if (canCombineStore(Info, AI, &DT) &&
-        Info.LifetimeStart.front()->getParent() == Info.LifetimeEnd.front()->getParent() &&
-        Info.LifetimeStart.front()->comesBefore(Info.LifetimeEnd.front())) {
+    if (FrameLifetimes ||
+        (canCombineStore(Info, AI, &DT) &&
+         Info.LifetimeStart.front()->getParent() == Info.LifetimeEnd.front()->getParent() &&
+         Info.LifetimeStart.front()->comesBefore(Info.LifetimeEnd.front()))) {
       auto *Start = Info.LifetimeStart.front();
       auto *End = Info.LifetimeEnd.front();
-      auto *Zero = FuseZeroInitialization
+      auto *Zero = !FrameLifetimes && FuseZeroInitialization
                        ? dyn_cast_or_null<MemSetInst>(Start->getNextNode()) : nullptr;
       auto *Bytes = Zero ? dyn_cast<ConstantInt>(Zero->getLength()) : nullptr;
       auto *Byte = Zero ? dyn_cast<ConstantInt>(Zero->getValue()) : nullptr;
@@ -558,11 +644,8 @@ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
       Marker->eraseFromParent();
   }
 
-  Module &M = *Fn.getParent();
-  auto *Sharing = mdconst::dyn_extract_or_null<ConstantInt>(
-      M.getModuleFlag("wasm-feature-shared-mem"));
-  if (PrivateMemory ||
-      (Sharing && Sharing->equalsInt(wasm::WASM_FEATURE_PREFIX_DISALLOWED))) {
+  bool UsedPrivateMemory = FrameLifetimes;
+  if (MayUsePrivateMemory) {
     for (CallInst *Activate : Activations) {
       // No instruction can observe the pending state, and the reserved pointer
       // has exactly one use. A claim checks and publishes the same extent.
@@ -577,11 +660,13 @@ bool WebAssemblyStackTagging::runOnFunction(Function &Fn) {
           &M, Intrinsic::wasm_memtag_claim, {IntPtrType}));
       Activate->replaceAllUsesWith(Reserve);
       Activate->eraseFromParent();
-      // Even another linker invocation must honor the private-memory proof.
-      M.setModuleFlag(Module::Error, "wasm-feature-shared-mem",
-                      wasm::WASM_FEATURE_PREFIX_DISALLOWED);
+      UsedPrivateMemory = true;
     }
   }
+  // Even another linker invocation must honor the private-memory proof.
+  if (UsedPrivateMemory)
+    M.setModuleFlag(Module::Error, "wasm-feature-shared-mem",
+                    wasm::WASM_FEATURE_PREFIX_DISALLOWED);
   return true;
 }
 
