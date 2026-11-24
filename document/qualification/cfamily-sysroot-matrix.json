@@ -9,7 +9,7 @@
   "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
   "candidate_corpus": {
     "case_manifest": "src/qualification/cfamily/cases.json",
-    "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699",
+    "case_manifest_sha256": "d9d95d97490c88acd590af9c092f5703f70eb5528b8b4db9da8dd12951b9d7ab",
     "runner": "src/qualification/cfamily/sysroot_suite.py",
     "runner_sha256": "c6220d89114e934833156572a903640688924f10544d0418474a698814425c50",
     "sources": {
@@ -22,7 +22,7 @@
     "planned_builds_per_host": 2464,
     "scope": "Run all 2464 case/profile combinations from this manifest on each host. Each linked row requires fresh INT and AOT outcomes tied to the same guest, the threaded memory owner where applicable, and the host VM receipt. Each original upstream case and each SDK-authored case has its own row.",
     "threaded_budgets": {
-      "find": "Four threaded MTE profiles use 536870912:4194304:1048576. On Linux x86_64 only, AOT appends ,relocations=N with the exact per-profile count in previous_find_elf_x86_64. All four keep the 1 MiB Guest stack and 16 MiB child storage. Execution on the pinned candidate is pending.",
+      "find": "Four threaded MTE profiles add measured ELF relocation counts to the LLVM AOT per-child budget on Linux x86_64 and i686. The default per-thread Guest native stack is 1 MiB and per-child storage is 16 MiB.",
       "aot_stack": "The 15 original native-stack refusals determine the per-profile AOT stack sizes in the manifest. Round the required bytes of proven native frames plus 8192 bytes of observed guard pages up to the next whole MiB. The original interpreter runs passed these rows with 1 MiB."
     }
   },
@@ -62,7 +62,8 @@
           "exit": 122,
           "runs": 16
         }
-      ]
+      ],
+      "case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699"
     },
     "i686": {
       "status": "pending"
@@ -203,7 +204,7 @@
       "libc-test": 36
     },
     "distinct_sources": 167,
-    "profile_dimensions": "wasm32/wasm64 × threads off/on × EH off/on × MTE off/on. Open POSIX uses the eight threaded profiles.",
+    "profile_dimensions": "wasm32/wasm64 \u00d7 threads off/on \u00d7 EH off/on \u00d7 MTE off/on. Open POSIX uses the eight threaded profiles.",
     "planned_builds_per_host": 2432
   },
   "original_hosts": {
@@ -411,5 +412,46 @@
     "The upstream Open POSIX sem_getvalue/1-1.c calls sem_open and sem_unlink. The threaded WASIp1 libc omits sem_unlink. The unnamed semaphore test has a separate result.",
     "In upstream libc-test search_lsearch.c, lsearch copies the declared 80 bytes from its key. The original program passes shorter string literals. Both engines report a memory tag mismatch with MTE enabled. The full-width record port has its own row.",
     "Every upstream skip and unresolved exit remains in its own engine count."
-  ]
+  ],
+  "find_replay_i686": {
+    "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+    "vm": {
+      "commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
+      "tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
+      "sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f",
+      "receipt_sha256": "a47cc33cc8cdfad7d98760177c3f8138a46d2d27878d975a2e22393f55b011b5"
+    },
+    "baseline_case_manifest_sha256": "5c0c6765b3bed5202cddf1719dd256684a600299322bfb0ea7f8ca04408bf699",
+    "summary_sha256": "da467664034e3736353f31ff2ae63002e95dd0b61dcb4cd5f22925e438ed1e50",
+    "cases": [
+      {
+        "profile": "wasm32-wasip1-threads-noeh-mte",
+        "guest_sha256": "ade474ae4f9d58bdb9ba40b717ddf574436ca68c6a3eaaa73f91904f37f1b63b",
+        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
+        "relocations": 148030,
+        "status": "pass"
+      },
+      {
+        "profile": "wasm32-wasip1-threads-eh-mte",
+        "guest_sha256": "65a157dac30684133cd29b33a419d65e7f37e84941f34348ee643177052d3f9a",
+        "owner_sha256": "43ef5b9bb81ab832cac7335010317e280c2c340ea40600d4db851122d5a1435d",
+        "relocations": 171193,
+        "status": "pass"
+      },
+      {
+        "profile": "wasm64-wasip1-threads-noeh-mte",
+        "guest_sha256": "dddaa123f373a2dfe72cbea30510af952dc18095b4a463995e568c5f74190097",
+        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
+        "relocations": 160323,
+        "status": "pass"
+      },
+      {
+        "profile": "wasm64-wasip1-threads-eh-mte",
+        "guest_sha256": "3a00798902ba7de8ff9a53276d35977385c33857b0678e68a11df16f2f6dfc50",
+        "owner_sha256": "c0f2784aa12c6262d7cac55d3a7da3fc1642d1956134b10a8dec83d712e8a391",
+        "relocations": 184218,
+        "status": "pass"
+      }
+    ]
+  }
 }
