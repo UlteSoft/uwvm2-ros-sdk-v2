@@ -21,6 +21,8 @@ For third-party libraries, add `--suite external` and choose a second empty resu
 
 The compiler-specific subtraction fixtures live under the qualification tree. They cover the two integer widths, C and C++, ordinary typed pointer differences, the explicit subtraction builtins and the feature-off diagnostics. [Clang CodeGen and Sema regression sources](../../src/qualification/cfamily/clang)
 
+The WasmMTE scalar suite exercises all four frontends with tag-matched accesses, single- and two-granule mismatches, and live and retired allocator-shadow observations. [Run the WasmMTE conformance tests](cfamily-memtag-tests.md)
+
 ## Wasmtime reference
 
 Run the pinned Wasmtime 42.0.1 C API adapter on one producer host's sysroot evidence at a time. The reference machine needs its own executable adapter and opcode decoder. Mount the matching SDK sources and the producer's results read-only. Keep `inputs.json`, `results.jsonl`, `summary.json` and the eight non-MTE profile directories, including compiler receipts, captures and memory owners. [Adapter build instructions](../../src/qualification/cfamily/wasmtime_reference/README.md)

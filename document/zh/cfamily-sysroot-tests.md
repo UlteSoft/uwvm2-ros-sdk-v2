@@ -21,6 +21,8 @@ python3 -I -B /repo/src/qualification/cfamily/sysroot_suite.py \
 
 Clang 指针减法另有编译回归，覆盖两种整数位宽、C 与 C++、普通类型化指针差、显式减法内建及关闭 MTE 后的诊断。[Clang CodeGen 与 Sema 回归源码](../../src/qualification/cfamily/clang)
 
+WasmMTE 标量测试覆盖四个前端，检查标签匹配、单粒度与跨双粒度标签不匹配，以及堆分配活动期间和释放后的影子标签。[运行 WasmMTE 一致性测试](cfamily-memtag-tests.md)
+
 ## Wasmtime 对照
 
 使用固定版本 Wasmtime 42.0.1 的 C API 适配器，每次读取一个构建宿主的 sysroot 验收结果。对照机使用可在本机执行的适配器和指令解码器，只读挂载同版 SDK 源码和原始结果。保留 `inputs.json`、`results.jsonl`、`summary.json` 及八个无 MTE 配置目录，含编译收据、原始输出与共享内存 owner。[适配器构建说明](../../src/qualification/cfamily/wasmtime_reference/README.md)
