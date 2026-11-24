@@ -9,6 +9,10 @@
 #include <string_view>
 #include <vector>
 
+#if defined(BENCH_EXECUTION_MATRIX)
+#include "guest.h"
+#endif
+
 #if defined(BENCH_PARSE)
 #include <fast_float/fast_float.h>
 #endif
@@ -97,7 +101,11 @@ constexpr std::string_view decimals[] = {
     "1e-24", "7.128274632e30", "993721e+12", "3.731389e-47",
 };
 constexpr std::size_t chunk_size = 16384;
+#if defined(BENCH_EXECUTION_MATRIX)
+constexpr std::size_t rounds = 16; // Fits the 128-page shared-memory owner at both guest widths.
+#else
 constexpr std::size_t rounds = 256;
+#endif
 
 [[gnu::noinline]] void parse_chunks(std::span<const std::string_view> inputs, std::span<double> outputs)
 {
@@ -135,7 +143,13 @@ void run()
 #endif
 }
 
-#if defined(__wasi__)
+#if defined(BENCH_EXECUTION_MATRIX)
+int main()
+{
+    bench_report_mode();
+    run();
+}
+#elif defined(__wasi__)
 extern "C" void _start() { run(); }
 #else
 int main() { run(); }
