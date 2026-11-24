@@ -1,0 +1,845 @@
+{
+  "schema": 1,
+  "date": "2026-11-24",
+  "vm_commit": "f3cfe4477ad08d30c59dd789c8801b1fc0c43752",
+  "parent_vm_commit": "d46186fca2dc60eebc71fdf4bf1c78ab32b9cb91",
+  "sdk_runner_commit": "f932ee1fad364fd8938b28b4b4781a1bdd01cb81",
+  "sdk_runner_sha256": "5c5dc77dc886f5fb1591230d8a2ab834784c07f1ec2511c57c061fb74b41d635",
+  "physical_cpu": "Intel(R) Core(TM) i9-14900HX",
+  "hosts": {
+    "x86_64": {
+      "elf_class": 64,
+      "elf_machine": 62,
+      "program_sha256": "caefe2f96853b872bf85a72ab8362059c543f85c50ceb0e2ce667f2add2ca9b7"
+    },
+    "i686": {
+      "elf_class": 32,
+      "elf_machine": 3,
+      "program_sha256": "f69a1314931683e10da05be9688c77c7496333af32004bc8632e56e5acca3e7f"
+    }
+  },
+  "isolation": {
+    "network": "private offline namespace",
+    "parent_and_child_memory_bytes": 68719476736,
+    "swap_bytes": 0,
+    "core_limit_bytes": 0,
+    "scratch": "project disk"
+  },
+  "installation": {
+    "wrc_binary_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "wrc_sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+    "public_installation_receipt_sha256": "268a9cb9e011c4b6578f83a0d8c25350ef5b7c0dee434fa013fefe7f87b3c0e6",
+    "vm_origin": "Frozen source builds of the promoted VM commit. Public five-host binary installation has its own qualification."
+  },
+  "ratios": "Matched-pair elapsed time with synchronous software tag checking divided by the same tagged module with runtime checking disabled. Arrays give inclusive Q1, median, Q3. The linear workload also records a separately compiled ordinary module.",
+  "linear": {
+    "cpu": 8,
+    "repeats": 5,
+    "matrix_sha256": "29b0b34990c3b38ef8f4bf8a031592ebf9219f44b0d6b351916da357cb9673c6",
+    "independent_audit_sha256": "5d99278065e533a53b69442d7f2c898fd3478ca5e2f27ef753c446b26d288519",
+    "raw_summary_sha256": {
+      "x86_64": "c797830cbfa901b7c310bc20d3cdfb5253da1c98324eb8a1272c0338c625875b",
+      "i686": "d1d81e9154fdf11bff3ff7b4df4c8d436f7261424083d344829da4228dc68c27"
+    },
+    "fixtures": {
+      "build_receipt_sha256": "b6111437674da156ec66975eac16b86056abb7381670fc304e99086b49d4fdde",
+      "checksums_sha256": "7f25ff66779dc15c0d4af9f94937239a9687e26020f39e4248cb426be4a6c7ac",
+      "module_sha256": {
+        "linear-32-ordinary.wasm": "f5fcd56979cc5a72cf0a5269d444d963e9e45920b0f63b0d366d1d0443a8a8ec",
+        "linear-32-tagged.wasm": "649e0be66f4e0d7a6ff6b16ba27da7c4d0bbb350f62771d2843fc1b46f1cd6c8",
+        "linear-64-ordinary.wasm": "197fce19d78dd6a4a57ce810ac750452934c4a5156a37570187707e2a4c20664",
+        "linear-64-tagged.wasm": "a707e6cded985d2c4c14d0ae083bfc9dcb844129f4b5c62a41fc76412ac684dd"
+      }
+    },
+    "measurements": [
+      {
+        "host": "x86_64",
+        "engine": "int",
+        "wasm_bits": 32,
+        "iterations": 16777216,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            1.9116375671230048,
+            1.9446383275084502,
+            1.9916766834537982
+          ],
+          "software_over_disabled": [
+            1.7148239769904061,
+            1.7859988290775752,
+            1.7955694773093809
+          ]
+        }
+      },
+      {
+        "host": "x86_64",
+        "engine": "int",
+        "wasm_bits": 64,
+        "iterations": 8388608,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            1.7985658907225697,
+            1.8996730230334786,
+            1.9316787586876432
+          ],
+          "software_over_disabled": [
+            1.68372243587608,
+            1.7447991590488625,
+            1.7454748402907632
+          ]
+        }
+      },
+      {
+        "host": "x86_64",
+        "engine": "aot",
+        "wasm_bits": 32,
+        "iterations": 134217728,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            1.2577626774596926,
+            1.2891021984496422,
+            1.295930355817334
+          ],
+          "software_over_disabled": [
+            1.2708194904216303,
+            1.2858696312280289,
+            1.3171567050478745
+          ]
+        }
+      },
+      {
+        "host": "x86_64",
+        "engine": "aot",
+        "wasm_bits": 64,
+        "iterations": 134217728,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            1.4513402161304785,
+            1.4880518893701227,
+            1.602559602935873
+          ],
+          "software_over_disabled": [
+            1.4707296511134569,
+            1.5000037167945341,
+            1.5680694975822644
+          ]
+        }
+      },
+      {
+        "host": "i686",
+        "engine": "int",
+        "wasm_bits": 32,
+        "iterations": 4194304,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            3.266921721278438,
+            3.3056546012459185,
+            3.330393428316032
+          ],
+          "software_over_disabled": [
+            2.865724392122671,
+            2.8840755379807326,
+            2.9456737961214325
+          ]
+        }
+      },
+      {
+        "host": "i686",
+        "engine": "int",
+        "wasm_bits": 64,
+        "iterations": 4194304,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            2.9682912668507537,
+            2.991833434877087,
+            3.0086662986023986
+          ],
+          "software_over_disabled": [
+            2.57714501893562,
+            2.6773849132212875,
+            2.742169935568856
+          ]
+        }
+      },
+      {
+        "host": "i686",
+        "engine": "aot",
+        "wasm_bits": 32,
+        "iterations": 134217728,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            1.091876792619029,
+            1.118144923365152,
+            1.1207760502591277
+          ],
+          "software_over_disabled": [
+            1.0861672809210488,
+            1.095068672289909,
+            1.1211870314525736
+          ]
+        }
+      },
+      {
+        "host": "i686",
+        "engine": "aot",
+        "wasm_bits": 64,
+        "iterations": 134217728,
+        "paired_ratios": {
+          "software_over_ordinary": [
+            1.1095480764855787,
+            1.1098480735278549,
+            1.1499968233956788
+          ],
+          "software_over_disabled": [
+            1.1036917711373813,
+            1.1115972667512108,
+            1.145369076289902
+          ]
+        }
+      }
+    ]
+  },
+  "cjson": {
+    "upstream": {
+      "repository": "https://github.com/DaveGamble/cJSON",
+      "tag": "v1.7.18",
+      "commit": "acc76239bee01d8e9c858ae2cab296704e52d916",
+      "local_path": "src/qualification/cfamily/upstream/cjson",
+      "files": {
+        "cJSON.c": {
+          "git_blob": "61483d903c6e77c2e66446532947bad555433de3",
+          "sha256": "75c51de8fa40ac9d7a99319c6330719bd692eb81c0a869265f3d4c682533f9b9"
+        },
+        "cJSON.h": {
+          "git_blob": "88cf0bcfa274fb686a989ba77f3b16d1aa78be67",
+          "sha256": "0578cc29132912edbc88f83207a8fc76e5db3db0605497e909a9384ef3cc474b"
+        },
+        "LICENSE": {
+          "git_blob": "78deb0406d713ab9730e3c2447be1abdbd70b9a2",
+          "sha256": "a36dda207c36db5818729c54e7ad4e8b0c6fba847491ba64f372c1a2037b6d5c"
+        }
+      },
+      "manifest_sha256": "a9a689324f9a462a6d91941d43832604bcca6fa14ae17ce3bb8184f6a79f8ad7"
+    },
+    "fixture": {
+      "source_sha256": "fe95dd595b45cd59a4680ad8ae31ac883f26488f8fae5f1cb54c400f833c391e",
+      "payloads_sha256": "e84bd0acafc2a7b6dd150252ed3959f4d81f38fafaf8636b56fdef71a85494dd",
+      "header_sha256": "287b7805dcb57e4a18b9eb8fda53f9b00163131cacf48202a21b7679a5432b95",
+      "payload_lengths_bytes": [
+        150,
+        155,
+        146,
+        150
+      ]
+    },
+    "modules": {
+      "32": {
+        "file": "cjson-32-tagged.wasm",
+        "bytes": 313149,
+        "sha256": "7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1",
+        "sdk_build_receipt_sha256": "d566fdadc80f4d1ff8d9a071a434885f1d7eee775f71fce7c1c5d86f4c85de78",
+        "argv": [
+          "/sdk/bin/wrc",
+          "--target",
+          "wasm32",
+          "--core",
+          "3.0",
+          "--std",
+          "c17",
+          "-O3",
+          "--reactor",
+          "--export",
+          "_start",
+          "--no-threads",
+          "--no-eh",
+          "--mte",
+          "--build-receipt",
+          "-I",
+          "/upstream",
+          "-I",
+          "/work/fixtures",
+          "/experiment/library.c",
+          "/upstream/cJSON.c",
+          "-o",
+          "/work/fixtures/cjson-32-tagged.wasm"
+        ]
+      },
+      "64": {
+        "file": "cjson-64-tagged.wasm",
+        "bytes": 378591,
+        "sha256": "ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967",
+        "sdk_build_receipt_sha256": "4991568d5b32215e4159aab428c06c29b24bd76eb596092f3a6162aca847facd",
+        "argv": [
+          "/sdk/bin/wrc",
+          "--target",
+          "wasm64",
+          "--core",
+          "3.0",
+          "--std",
+          "c17",
+          "-O3",
+          "--reactor",
+          "--export",
+          "_start",
+          "--no-threads",
+          "--no-eh",
+          "--mte",
+          "--build-receipt",
+          "-I",
+          "/upstream",
+          "-I",
+          "/work/fixtures",
+          "/experiment/library.c",
+          "/upstream/cJSON.c",
+          "-o",
+          "/work/fixtures/cjson-64-tagged.wasm"
+        ]
+      }
+    },
+    "source_files": [
+      "src/qualification/cfamily/mte_performance_sources/cjson/library.c",
+      "src/qualification/cfamily/mte_performance_sources/cjson/payloads.h"
+    ],
+    "description": "Rotate four fixed JSON documents with parsing, field lookups, checksum and deletion. Guest monotonic timing excludes process startup. Host wall timing includes fresh balanced-policy LLVM compilation with persistent cache disabled.",
+    "build_receipt_sha256": "f708a41e363f5066ca7fd052717e51baad8ecc259ef87ff60c5ac448b35fb375",
+    "audit_sha256": "e42b52bcb19dd7f9aa7b1dfff859a8fb839d39460cc953f075cae4903be6cc11",
+    "measurements": [
+      {
+        "host": "x86_64",
+        "engine": "int",
+        "wasm_bits": 32,
+        "repeats": 6,
+        "documents": {
+          "long": 512,
+          "short": 128,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1754508357,
+          "short": 4209352869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          2.2934353802648135,
+          2.3965204049395235,
+          2.465322072856621
+        ],
+        "long_process_ratio": [
+          2.0556810426523917,
+          2.1077237737604193,
+          2.1887280561946394
+        ],
+        "zero_document_process_ratio": [
+          0.8057021062667296,
+          1.1044715794429079,
+          1.515883074733075
+        ]
+      },
+      {
+        "host": "x86_64",
+        "engine": "int",
+        "wasm_bits": 64,
+        "repeats": 6,
+        "documents": {
+          "long": 512,
+          "short": 128,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1754508357,
+          "short": 4209352869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          2.199683416013057,
+          2.326759075339032,
+          2.4885912910006636
+        ],
+        "long_process_ratio": [
+          2.0790563089071004,
+          2.2190594047189602,
+          2.2841476237554876
+        ],
+        "zero_document_process_ratio": [
+          0.9718900694742866,
+          1.0059302545677689,
+          1.9837795676821426
+        ]
+      },
+      {
+        "host": "x86_64",
+        "engine": "aot",
+        "wasm_bits": 32,
+        "repeats": 6,
+        "documents": {
+          "long": 4096,
+          "short": 1024,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1216479685,
+          "short": 2953948869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          27.005512328995113,
+          27.46859974351367,
+          28.261137950267436
+        ],
+        "long_process_ratio": [
+          5.065168320178678,
+          5.343247333999701,
+          5.780613283821808
+        ],
+        "zero_document_process_ratio": [
+          2.2461997524705613,
+          4.929069479376096,
+          12.681337229431879
+        ]
+      },
+      {
+        "host": "x86_64",
+        "engine": "aot",
+        "wasm_bits": 64,
+        "repeats": 6,
+        "documents": {
+          "long": 4096,
+          "short": 1024,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1216479685,
+          "short": 2953948869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          16.436394677175265,
+          17.174207381678507,
+          17.71862460385519
+        ],
+        "long_process_ratio": [
+          2.1102921379549486,
+          2.1355080567615126,
+          2.166496544248815
+        ],
+        "zero_document_process_ratio": [
+          1.9978179354808232,
+          2.0342249435742525,
+          2.077474538105882
+        ]
+      },
+      {
+        "host": "i686",
+        "engine": "int",
+        "wasm_bits": 32,
+        "repeats": 6,
+        "documents": {
+          "long": 512,
+          "short": 128,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1754508357,
+          "short": 4209352869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          2.7994500212738496,
+          2.8095840515874135,
+          2.822445329919959
+        ],
+        "long_process_ratio": [
+          2.488468366666287,
+          2.5129659056961127,
+          2.5320739027114234
+        ],
+        "zero_document_process_ratio": [
+          1.0067472288936392,
+          1.1025011598888286,
+          1.1205182503721236
+        ]
+      },
+      {
+        "host": "i686",
+        "engine": "int",
+        "wasm_bits": 64,
+        "repeats": 6,
+        "documents": {
+          "long": 512,
+          "short": 128,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1754508357,
+          "short": 4209352869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          2.748352592258791,
+          2.770839985887734,
+          2.783961485759426
+        ],
+        "long_process_ratio": [
+          2.4794742276853774,
+          2.4879726645876117,
+          2.500857084108946
+        ],
+        "zero_document_process_ratio": [
+          0.9014178004594172,
+          0.9877214551612634,
+          1.0799972563120295
+        ]
+      },
+      {
+        "host": "i686",
+        "engine": "aot",
+        "wasm_bits": 32,
+        "repeats": 6,
+        "documents": {
+          "long": 2048,
+          "short": 512,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 579800005,
+          "short": 1754508357,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          17.16517196636987,
+          19.06727164112857,
+          20.25625350857038
+        ],
+        "long_process_ratio": [
+          1.9973511734493863,
+          2.0255288899554946,
+          2.140023171932942
+        ],
+        "zero_document_process_ratio": [
+          1.9052733551878431,
+          2.0109366885567486,
+          2.134911021484445
+        ]
+      },
+      {
+        "host": "i686",
+        "engine": "aot",
+        "wasm_bits": 64,
+        "repeats": 6,
+        "documents": {
+          "long": 2048,
+          "short": 512,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 579800005,
+          "short": 1754508357,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          16.963829284753153,
+          17.65104812300139,
+          18.306408739388388
+        ],
+        "long_process_ratio": [
+          2.175423545208182,
+          2.315838065218406,
+          2.3856249313438145
+        ],
+        "zero_document_process_ratio": [
+          2.050829074719764,
+          2.0918653419168294,
+          2.131867897634507
+        ]
+      }
+    ],
+    "hardware_hotspots": {
+      "sha256": "4f34a01265eb65d20832d9281862e6cd8d676f543746f934404cd76d6e1a83c0",
+      "vtune": "Intel(R) VTune(TM) Profiler 2026.4.0 (build 632893) Command Line Tool",
+      "host": "x86_64",
+      "engine": "aot",
+      "wasm_bits": 32,
+      "workload": "cJSON",
+      "event": "CPU_CLK_UNHALTED.DISTRIBUTED",
+      "window": "Trim 25 ms from both ends of the intersection of the named JIT IP window and guest interval inferred from the validated kernel duration and observed process finish",
+      "profiles": {
+        "software": {
+          "iterations": 131072,
+          "checksum": 2199264709,
+          "tag": 14,
+          "full_cycle_samples": 7392,
+          "full_named_llvm_samples_lower_bound": 1764,
+          "lost_records": [],
+          "sample_count": 4795,
+          "window_fraction": 0.9888874554537409,
+          "group_samples": {
+            "vm_elf": 3804,
+            "guest_jit_rx": 550,
+            "native_library": 298,
+            "linux_kernel": 143
+          },
+          "top_symbols": [
+            {
+              "name": "uwvm2::extension::memtag::operation_result<unsigned int> uwvm2::extension::memtag::transition_allocation<unsigned int, false>(uwvm2::extension::memtag::managed_allocations&, bool, uwvm2::extension::memtag::opcode, std::__1::span<unsigned int const, 18446744073709551615ul>, std::__1::span<std::byte, 18446744073709551615ul>, uwvm2::extension::memtag::shadow_view<unsigned int, false>, unsigned short, bool&)",
+              "samples": 612,
+              "start": "0x1fb8150"
+            },
+            {
+              "name": "bool uwvm2::extension::memtag::visit_allocation_neighbors<uwvm2::extension::memtag::operation_result<unsigned int> uwvm2::extension::memtag::transition_allocation<unsigned int, false>(uwvm2::extension::memtag::managed_allocations&, bool, uwvm2::extension::memtag::opcode, std::__1::span<unsigned int const, 18446744073709551615ul>, std::__1::span<std::byte, 18446744073709551615ul>, uwvm2::extension::memtag::shadow_view<unsigned int, false>, unsigned short, bool&)::'lambda'(unsigned long)>(unsigned long, unsigned long, unsigned long, unsigned int&&)",
+              "samples": 502,
+              "start": "0x1fb8940"
+            },
+            {
+              "name": "uwvm2::extension::memtag::managed_allocations::balance(uwvm2::extension::memtag::managed_allocations::node*)",
+              "samples": 384,
+              "start": "0x1a55c50"
+            },
+            {
+              "name": "void uwvm2::extension::memtag::managed_allocations::visit<uwvm2::extension::memtag::operation_result<unsigned int> uwvm2::extension::memtag::transition_allocation<unsigned int, false>(uwvm2::extension::memtag::managed_allocations&, bool, uwvm2::extension::memtag::opcode, std::__1::span<unsigned int const, 18446744073709551615ul>, std::__1::span<std::byte, 18446744073709551615ul>, uwvm2::extension::memtag::shadow_view<unsigned int, false>, unsigned short, bool&)::'lambda'(uwvm2::extension::memtag::allocation_extent const&)>(uwvm2::extension::memtag::managed_allocations::node const*, unsigned long, unsigned long, unsigned int&)",
+              "samples": 231,
+              "start": "0x1fb9020"
+            },
+            {
+              "name": "uwvm2::extension::memtag::managed_allocations::erase(uwvm2::extension::memtag::managed_allocations::node*, unsigned long)",
+              "samples": 209,
+              "start": "0x1a578d0"
+            },
+            {
+              "name": "uwvm2::extension::memtag::allocation_neighborhood::select(unsigned short, unsigned char&) const",
+              "samples": 193,
+              "start": "0x1a55450"
+            }
+          ]
+        },
+        "disabled": {
+          "iterations": 2097152,
+          "checksum": 2696191429,
+          "tag": 0,
+          "full_cycle_samples": 3994,
+          "full_named_llvm_samples_lower_bound": 424,
+          "lost_records": [],
+          "sample_count": 3236,
+          "window_fraction": 0.9682897956774162,
+          "group_samples": {
+            "guest_jit_rx": 3177,
+            "linux_kernel": 59
+          },
+          "top_symbols": [
+            {
+              "name": "dlfree",
+              "samples": 411,
+              "start": "0x7f7c278f65c0"
+            },
+            {
+              "name": "__floatscan",
+              "samples": 395,
+              "start": "0x7f7c278eafb0"
+            },
+            {
+              "name": "parse_value",
+              "samples": 362,
+              "start": "0x7f7c278e89e0"
+            },
+            {
+              "name": "parse_string",
+              "samples": 285,
+              "start": "0x7f7c278e95a0"
+            },
+            {
+              "name": "dlmalloc_common_internal",
+              "samples": 251,
+              "start": "0x7f7c278f3a90"
+            },
+            {
+              "name": "__multf3",
+              "samples": 219,
+              "start": "0x7f7c278eef80"
+            }
+          ]
+        },
+        "software-zero": {
+          "iterations": 0,
+          "checksum": 2166136261,
+          "tag": 7,
+          "full_cycle_samples": 3005,
+          "full_named_llvm_samples_lower_bound": 2045,
+          "lost_records": []
+        },
+        "disabled-zero": {
+          "iterations": 0,
+          "checksum": 2166136261,
+          "tag": 0,
+          "full_cycle_samples": 629,
+          "full_named_llvm_samples_lower_bound": 429,
+          "lost_records": []
+        }
+      }
+    },
+    "audit": {
+      "status": 0,
+      "errors": 0,
+      "cells": 8,
+      "paired_repeats": 48,
+      "timed_samples": 288,
+      "calibration_samples": 8,
+      "smoke_samples": 32,
+      "native_reference_samples": 6,
+      "vm_exit_status_counts": {
+        "0": 328
+      }
+    },
+    "cpu": 6,
+    "raw_samples": {
+      "x86_64-smoke": {
+        "path": "x86_64-smoke/writable/samples.jsonl",
+        "sha256": "88760b973289415a2a0a5247881755ad175f98404653f185f059241977fd7b93"
+      },
+      "x86_64-measure": {
+        "path": "x86_64-measure/writable/samples.jsonl",
+        "sha256": "3c4ae861ef88c728079e645120a08f919e8d1213246b225aa95178efceb9c96b"
+      },
+      "i686-smoke": {
+        "path": "i686-smoke/writable/samples.jsonl",
+        "sha256": "22075f7e2ec6e7ebbdf51c62e69061e024d24c43d2f1b1701fd79995d48a791d"
+      },
+      "i686-measure": {
+        "path": "i686-measure/writable/samples.jsonl",
+        "sha256": "3d35226f2c21dbf137b8ac010c39ba8f0439fad54eafd17b0082f4b802b0d2d5"
+      }
+    }
+  },
+  "i686_change": {
+    "base": "d46186fca2dc60eebc71fdf4bf1c78ab32b9cb91",
+    "candidate": "f3cfe4477ad08d30c59dd789c8801b1fc0c43752",
+    "linear_ab_sha256": "af1e6c64800ee95b3183b2d5962da95b7ac09a56472bed3ec72afcb1d65ad8cf",
+    "linear_pairs": 1008,
+    "linear_int_software_ab": [
+      {
+        "host": "i686",
+        "cpu": 29,
+        "wasm_bits": 32,
+        "iterations": 2097152,
+        "pairs": 16,
+        "candidate_faster_pairs": 16,
+        "guest_time_change_pct": -15.895623459061758,
+        "median_interval_pct": [
+          -20.249370452763316,
+          -12.591972465530699
+        ],
+        "interval_coverage": 0.978729248046875
+      },
+      {
+        "host": "i686",
+        "cpu": 29,
+        "wasm_bits": 64,
+        "iterations": 2097152,
+        "pairs": 16,
+        "candidate_faster_pairs": 16,
+        "guest_time_change_pct": -13.785190808233438,
+        "median_interval_pct": [
+          -15.808360351723428,
+          -10.414203546874678
+        ],
+        "interval_coverage": 0.978729248046875
+      },
+      {
+        "host": "i686",
+        "cpu": 10,
+        "wasm_bits": 32,
+        "iterations": 2097152,
+        "pairs": 16,
+        "candidate_faster_pairs": 16,
+        "guest_time_change_pct": -16.03598971178265,
+        "median_interval_pct": [
+          -17.999670084394047,
+          -14.71209050674811
+        ],
+        "interval_coverage": 0.978729248046875
+      },
+      {
+        "host": "i686",
+        "cpu": 10,
+        "wasm_bits": 64,
+        "iterations": 2097152,
+        "pairs": 16,
+        "candidate_faster_pairs": 16,
+        "guest_time_change_pct": -15.750737523319362,
+        "median_interval_pct": [
+          -16.98510955367717,
+          -14.82725393617692
+        ],
+        "interval_coverage": 0.978729248046875
+      }
+    ],
+    "control_intervals_including_zero": 32,
+    "selection_checks": {
+      "positive_release": 104,
+      "compiled_unit_runs": 8,
+      "error_contract": 32
+    },
+    "cjson_ab_audit_sha256": "4369173e969f57b728b74e90c6807e90b96d0490f44c07c8893132ceb383138d",
+    "cjson_candidate_over_parent": [
+      {
+        "host": "i686",
+        "engine": "int",
+        "wasm_bits": 32,
+        "repeats": 12,
+        "documents": {
+          "long": 512,
+          "short": 128,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1754508357,
+          "short": 4209352869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          0.9336634438049455,
+          0.9381864025411636,
+          0.9428371687689518
+        ],
+        "long_process_ratio": [
+          0.9325669595862116,
+          0.9355387176807755,
+          0.9401954075689066
+        ],
+        "zero_document_process_ratio": [
+          0.8807701181213237,
+          0.9433731808147139,
+          0.9585987430332279
+        ]
+      },
+      {
+        "host": "i686",
+        "engine": "int",
+        "wasm_bits": 64,
+        "repeats": 12,
+        "documents": {
+          "long": 512,
+          "short": 128,
+          "startup": 0
+        },
+        "checksums": {
+          "long": 1754508357,
+          "short": 4209352869,
+          "startup": 2166136261
+        },
+        "long_guest_ratio": [
+          0.9451967595231326,
+          0.9555518681034524,
+          0.9592377427430528
+        ],
+        "long_process_ratio": [
+          0.9418678477951251,
+          0.9481781257067319,
+          0.9699133356371523
+        ],
+        "zero_document_process_ratio": [
+          0.8980160406595383,
+          0.941821472922854,
+          0.9660015819313377
+        ]
+      }
+    ]
+  }
+}
