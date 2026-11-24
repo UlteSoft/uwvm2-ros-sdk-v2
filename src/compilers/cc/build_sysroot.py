@@ -8,6 +8,7 @@ import shutil
 import subprocess
 
 from compiler import digest
+from guest_profile import RUNTIME_ISA_FLAGS
 from herbceptions_sysroot import TOOLS, definitions as domain_definitions, install_domains, verify_exception_bridge
 
 HERE = Path(__file__).resolve().parent
@@ -60,7 +61,7 @@ def build(args, toolchain, work, source_sha256, provenance, prof):
               "producer_allocation_policy": "managed-neighborhood", "producer_mte_codegen": capability,
               "targets": [], "commands": []}
     record["recipes_sha256"] = {name: digest(HERE / name)
-                                for name in ("build_sysroot.py", "herbceptions_sysroot.py", "policy/guest_profile.py")}
+                                for name in ("build_sysroot.py", "herbceptions_sysroot.py", "policy/guest_profile.py", "policy/scalar_memory.c")}
     identity = {"tools": host_hashes, "profile": prof.to_dict(), "sources_sha256": source_sha256,
                 "recipes": record["recipes_sha256"]}
     build_identity = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
@@ -104,7 +105,8 @@ def build(args, toolchain, work, source_sha256, provenance, prof):
     flags += " -ffile-prefix-map=" + str(llvm) + "=/usr/src/" + release_name
     flags += " -ffile-prefix-map=" + str(runtimes) + "=/usr/src/" + release_name
     flags += " -ffile-prefix-map=" + str(target_libc) + "=/usr/src/wasi-libc-sdk34"
-    flags += " " + " ".join(feature_flags)
+    flags += " " + " ".join([*feature_flags, *RUNTIME_ISA_FLAGS])
+    flags += " -ffile-prefix-map=" + str(HERE / "policy") + "=/usr/src/wros-runtime"
     flags += " -D__WROS_NO_HOST_DIAGNOSTICS"
     flags += " -fsanitize=memtag" if prof.mte else " -fno-sanitize=memtag"
     common_target = {"CMAKE_SYSTEM_NAME": "WASI", "CMAKE_SYSTEM_PROCESSOR": f"wasm{prof.address_bits}",
@@ -132,7 +134,8 @@ def build(args, toolchain, work, source_sha256, provenance, prof):
     c_prefix = work / "libc" / target
     component("libc-" + target, target_libc, c_prefix,
               {**common_target, "TARGET_TRIPLE": target, "CMAKE_C_FLAGS": flags,
-               "CMAKE_ASM_FLAGS": flags, "BUILTINS_LIB": str(lookup), "BUILD_SHARED": "OFF",
+               "CMAKE_ASM_FLAGS": flags, "BUILTINS_LIB": str(lookup),
+               "WROS_SCALAR_MEMORY_SOURCE": str(HERE / "policy/scalar_memory.c"), "SIMD": "OFF", "BUILD_SHARED": "OFF",
                "SETJMP": "OFF", "BINDINGS_TARGET": "OFF", "BUILD_TESTS": "OFF",
                "ENABLE_MEMTAG": "ON" if prof.mte else "OFF", "MEMTAG_NOVERBOSE": "ON",
                "USE_WASM_COMPONENT_LD": "OFF", "WASI_SDK_VERSION": "uwvm-stable-sdk34-" + ("mte" if prof.mte else "nomte")})
@@ -190,7 +193,7 @@ def build(args, toolchain, work, source_sha256, provenance, prof):
              for base in (prefix, resource) for p in base.rglob("*") if p.is_file()}
     record["targets"].append({"triple": target, "profile": profile, "threads": threads,
                               "guest_profile": prof.to_dict(),
-                              "feature_flags": feature_flags,
+                              "feature_flags": feature_flags, "runtime_isa_flags": list(RUNTIME_ISA_FLAGS),
                               "sysroot": str(prefix.relative_to(work)), "resource": str(resource.relative_to(work)),
                               "builtins_sha256": digest(lookup), "files": files, "qualified": False, **domain})
     record["status"] = "built-awaiting-qualification"

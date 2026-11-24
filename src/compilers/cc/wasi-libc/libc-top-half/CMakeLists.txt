@@ -535,7 +535,11 @@ sysroot_lib(c-printscan-no-floating-point libc-printscan-no-floating-point.a)
 #
 # TODO: apply -mbulk-memory globally, once
 # https://github.com/llvm/llvm-project/issues/52618 is resolved
-add_internal_object_library(bulk-memory ${MUSL_BULK_MEMORY_SOURCES})
+if(WROS_SCALAR_MEMORY_SOURCE)
+  add_internal_object_library(bulk-memory "${WROS_SCALAR_MEMORY_SOURCE}")
+else()
+  add_internal_object_library(bulk-memory ${MUSL_BULK_MEMORY_SOURCES})
+endif()
 
 foreach(obj bulk-memory-shared bulk-memory-static)
   target_compile_definitions(${obj} PRIVATE -DBULK_MEMORY_THRESHOLD=${BULK_MEMORY_THRESHOLD})

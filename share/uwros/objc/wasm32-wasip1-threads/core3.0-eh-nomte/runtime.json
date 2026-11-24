@@ -1,5 +1,5 @@
 {
-  "compiler_sha256": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04",
+  "compiler_sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
   "compiler_source_sha256": "9b1555b66e088b0231d22ebf74b664a5ea1898b8a0dd09f8f46091b6eed4fc31",
   "files": {
     "include/sysroot/objc/Availability.h": "be633a26832062b5d9eb4c2ee37b4dd60190ac068a40686df02b03d8cedb0a0c",
@@ -25,8 +25,8 @@
     "include/sysroot/objc/runtime.h": "832518dd2041592fac85468c928d1a80eeb4ccf2d82d1cbf0afeddfaa6a518f1",
     "include/sysroot/objc/slot.h": "0ec3ea994411076d762510ddb3a62f6daf293e4fe92b5b803b20b50846fc8dae",
     "include/sysroot/objc/toydispatch.h": "3bc440c1686a0b3a5e8ed8205b40ac7f2a6cc6e5d2dab8c8e02817f8f9b258a8",
-    "lib/wasm32-wasip1-threads/core3.0-eh-nomte/libobjc.a": "9d2f121ef6008494aec375f6ebd35a0005c7e439d0f3d415fb20591fd6fb6f40",
-    "lib/wasm32-wasip1-threads/core3.0-eh-nomte/libuwrosobjc.a": "ea062bef7d8070584214d92c13ea89e4c5dc5ac296c4fc3d60854b8543a15ee0"
+    "lib/wasm32-wasip1-threads/core3.0-eh-nomte/libobjc.a": "60adef280ba9a16cece378aa41c9ee9fbe83809c28add0c7afed2bcc1de2b392",
+    "lib/wasm32-wasip1-threads/core3.0-eh-nomte/libuwrosobjc.a": "494edc531afac1ed60381ac3ac980420381be5fe10ee07ecb47ab87fc2f032a0"
   },
   "format": "uwros-gnustep-guest-v2",
   "profile": {
@@ -43,5 +43,5 @@
     "wasm_version": "3.0"
   },
   "runtime_source_sha256": "07b59f5fe96a31ab2a2607dfded44e6477572f1bbc1a7ca5356d89304e763878",
-  "sysroot_sha256": "dceb11a67ee5a34b18f7a8bf89b42ce24ff67ad16aefb29e0f6f177837345ad4"
+  "sysroot_sha256": "3751ca569ac64dbb66eaebf7cc518012e5c13eed2c8aef0b678dccdd815eeaa8"
 }

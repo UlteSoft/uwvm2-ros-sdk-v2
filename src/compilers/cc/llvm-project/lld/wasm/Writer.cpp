@@ -26,6 +26,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/BinaryFormat/Wasm.h"
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileOutputBuffer.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/Parallel.h"
@@ -42,6 +43,12 @@ using namespace llvm;
 using namespace llvm::wasm;
 
 namespace lld::wasm {
+// The SDK provides this non-allocating function before the shared-memory
+// start function runs. A distinct symbol prevents user memset interposition.
+static cl::opt<bool> scalarBss(
+    "wasm-scalar-bss", cl::Hidden, cl::init(false),
+    cl::desc("Use the checked SDK scalar zeroing routine for passive BSS"));
+
 static constexpr int stackAlignment = 16;
 static constexpr int heapAlignment = 16;
 
@@ -1608,11 +1615,27 @@ void Writer::createInitMemoryFunction() {
             writeUleb128(os, 0, "linear memory index");
           }
           if (s->isBss) {
-            writeI32Const(os, 0, "fill value");
-            writePtrConst(os, size, is64, "memory region size");
-            writeU8(os, WASM_OPCODE_MISC_PREFIX, "bulk-memory prefix");
-            writeUleb128(os, WASM_OPCODE_MEMORY_FILL, "memory.fill");
-            writeU8(os, 0, "memory index immediate");
+            if (scalarBss) {
+              auto *zero = dyn_cast_or_null<DefinedFunction>(
+                  symtab->find("__wros_scalar_zero_bss"));
+              const auto ptr = is64 ? ValType::I64 : ValType::I32;
+              WasmSignature signature{{}, {ptr, ptr}};
+              if (!zero || !zero->isLive() || !zero->signature ||
+                  *zero->signature != signature) {
+                error("scalar BSS needs a live __wros_scalar_zero_bss "
+                      "definition with the target pointer ABI");
+                return;
+              }
+              writePtrConst(os, size, is64, "memory region size");
+              writeU8(os, WASM_OPCODE_CALL, "call");
+              writeUleb128(os, zero->getFunctionIndex(), "zero BSS");
+            } else {
+              writeI32Const(os, 0, "fill value");
+              writePtrConst(os, size, is64, "memory region size");
+              writeU8(os, WASM_OPCODE_MISC_PREFIX, "bulk-memory prefix");
+              writeUleb128(os, WASM_OPCODE_MEMORY_FILL, "memory.fill");
+              writeU8(os, 0, "memory index immediate");
+            }
           } else {
             writeI32Const(os, begin, "source segment offset");
             writeI32Const(os, size, "memory region size");

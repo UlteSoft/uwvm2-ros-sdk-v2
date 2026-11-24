@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 
 
+# Shared libraries must be linkable with either independent ISA switch.
+RUNTIME_ISA_FLAGS = ("-mno-relaxed-simd", "-mno-simd128", "-mllvm", "-wasm-disable-bulk-memory-opt")
+
+
 @dataclass(frozen=True)
 class Profile:
     address_bits: int = 32

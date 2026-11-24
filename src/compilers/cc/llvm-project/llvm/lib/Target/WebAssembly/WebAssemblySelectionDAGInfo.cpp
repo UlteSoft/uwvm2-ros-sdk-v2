@@ -13,11 +13,18 @@
 
 #include "WebAssemblySelectionDAGInfo.h"
 #include "WebAssemblyTargetMachine.h"
+#include "llvm/Support/CommandLine.h"
 
 #define GET_SDNODE_DESC
 #include "WebAssemblyGenSDNodeInfo.inc"
 
 using namespace llvm;
+
+// The WASIp1 thread ABI needs bulk-memory for TLS and passive segments even
+// when the consumer requires copies and fills to use scalar libcalls.
+static cl::opt<bool> DisableBulkMemoryOpt(
+    "wasm-disable-bulk-memory-opt", cl::Hidden, cl::init(false),
+    cl::desc("Do not select memory.copy or memory.fill for memory intrinsics"));
 
 #define DEBUG_TYPE "wasm-selectiondag-info"
 
@@ -44,7 +51,7 @@ SDValue WebAssemblySelectionDAGInfo::EmitTargetCodeForMemcpy(
     bool AlwaysInline, MachinePointerInfo DstPtrInfo,
     MachinePointerInfo SrcPtrInfo) const {
   auto &ST = DAG.getMachineFunction().getSubtarget<WebAssemblySubtarget>();
-  if (!ST.hasBulkMemoryOpt())
+  if (DisableBulkMemoryOpt || !ST.hasBulkMemoryOpt())
     return SDValue();
 
   SDValue MemIdx = DAG.getConstant(0, DL, MVT::i32);
@@ -72,7 +79,7 @@ SDValue WebAssemblySelectionDAGInfo::EmitTargetCodeForMemset(
     SDValue Size, Align Alignment, bool IsVolatile, bool AlwaysInline,
     MachinePointerInfo DstPtrInfo) const {
   auto &ST = DAG.getMachineFunction().getSubtarget<WebAssemblySubtarget>();
-  if (!ST.hasBulkMemoryOpt())
+  if (DisableBulkMemoryOpt || !ST.hasBulkMemoryOpt())
     return SDValue();
 
   SDValue MemIdx = DAG.getConstant(0, DL, MVT::i32);

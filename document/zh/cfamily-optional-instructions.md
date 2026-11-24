@@ -3,8 +3,9 @@
 安装后的 `wrc`、`wrcc`、`wroc` 和 `wrocxx` 接受两组独立开关。Core 3.0 默认同时启用两组。同一组多次指定时，最后一个开关生效。
 
 - `-msimd128` 启用 SIMD128。`-mno-simd128` 同时关闭当前翻译单元的普通 SIMD 和 relaxed SIMD，允许编译器用标量指令实现本可向量化的运算。
-- `-mbulk-memory-opt` 允许 LLVM 生成 `memory.copy` 和 `memory.fill`。`-mno-bulk-memory-opt` 为普通 `memcpy`、`memmove` 和 `memset` 选择标量实现。最终链接时驱动加入用字节读写实现的 guest 弱定义，应用自己的强定义优先。
-- 非线程目标关闭复制优化时也关闭 LLVM 隐含此优化的完整 bulk-memory 目标特性。WASIp1 线程目标依赖完整特性初始化 TLS 和共享内存。驱动为线程保留该特性，并关闭 Clang 对上述三个内存函数的内建识别。显式 intrinsic、编译器产生的聚合复制、已编译的库及链接器生成的启动代码均可能带入可选指令。指针宽度、MTE、EH 由各自配置选择。
+- `-mbulk-memory-opt` 允许 LLVM 生成 `memory.copy` 和 `memory.fill`。指定 `-mno-bulk-memory-opt` 后，LLVM 将内存 intrinsic（包括聚合对象复制）降为标量读写或 libc 调用。十六种来宾配置的 WASIp1 运行库、编译器内建库和 GNUstep 归档均按标量基线构建。
+- 随 SDK 发行的 libc 提供 `memcpy`、`memmove` 和 `memset` 的弱定义。写入前先检查完整线性内存范围。启用 MTE 时还用带原标签的指针逐粒度检查。 `memmove` 根据去标签后的地址选择搬移方向。应用的强定义优先生效。
+- 线程 ABI 保留 `memory.init`、`data.drop` 与 TLS 所需的完整 bulk-memory 特性。关闭复制与填充指令后，LLD 在初始化线程原有的临界区内调用隐藏的标量 libc 函数清零被动 BSS，待内存映像就绪后再唤醒等待线程。
 - 四个前端的 `--build-receipt` 都会将应用设置及实际传入 Clang 的覆盖参数写入 `optional_isa`。单独编译的对象会记录显式关闭的指令族。常规链接可以继续使用旧对象，关闭指令族的链接要求应用对象也按该限制编译。严格内存认证对应其原有代码生成设置。
 
 例如，使用标量向量运算和原生 bulk 复制编译 Wasm64 C++ 应用。
@@ -33,7 +34,7 @@ python3 src/qualification/cfamily/optional_isa_suite.py \
 
 独立的 Python 参考实现把种子、全部通道、无符号累加结果及每次操作后的完整 64 字节缓冲区写入 `expected.bin`。两引擎均须逐字节匹配。出现差异时记录首个不匹配字节的位置。
 
-解码器从函数体及常量表达式逐条读取真实指令。向量实现须在指定内核中出现并行算术；标量路径须出现普通读写；两个内存内核须符合所选复制和填充设置。解码器分别统计 SIMD、relaxed SIMD、`memory.copy`、`memory.fill`、其他 bulk、线程和 MTE 指令。线程启动可能需要 `memory.init`、`data.drop` 和原子操作。最终模块在任意函数出现已关闭的 SIMD 或复制/填充指令都判该格失败，`result.json` 记录函数名与数量。堆管理可能带入预编译 libc 的指令，LLD 也可能为共享内存的 BSS 初始化生成 `memory.fill`。线程的内存提供模块只包含内存定义和导出，没有代码段。
+解码器从函数体及常量表达式逐条读取真实指令。向量实现须在指定内核中出现并行算术；标量路径须出现普通读写；两个内存内核须符合所选复制和填充设置。解码器分别统计 SIMD、relaxed SIMD、`memory.copy`、`memory.fill`、其他 bulk、线程和 MTE 指令。线程启动可能需要 `memory.init`、`data.drop` 和原子操作。最终模块在任意函数出现已关闭的 SIMD 或复制/填充指令都判该格失败，`result.json` 记录函数名与数量。检查覆盖分配器、语言运行时和链接器生成的启动函数。线程的内存提供模块只包含内存定义和导出，没有代码段。
 
 每格保留模块、构建收据、解码清单、完整命令参数、INT/AOT 的原始标准输出与错误输出。`summary.json` 分别给出各格判定和引擎执行统计。全部所选格及两种引擎通过时进程返回零。
 

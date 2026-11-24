@@ -1,19 +1,20 @@
 {
-  "build_identity": "83b6bf1be17fd864f3e967a275cb94df4c5479d9780ef5cfc3a25288e5144b8b",
-  "compiler_sha256": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04",
-  "compiler_version": "clang version 23.1.5\nTarget: wasm32-unknown-wasip1\nThread model: posix\nInstalledDir: /work/build/host/bin\nBuild config: +assertions",
+  "build_identity": "0ba7cea19128c1266b3285cd099a4ba78518347d2ac121df5db1762f5e0709a7",
+  "compiler_sha256": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+  "compiler_version": "clang version 23.1.5\nTarget: wasm32-unknown-wasip1\nThread model: posix\nInstalledDir: /out/producer/bin\nBuild config: +assertions",
   "herbceptions_runtime": true,
   "mte": false,
   "producer": "herbceptions",
   "producer_allocation_policy": "managed-neighborhood",
   "producer_mte_codegen": {
-    "64": "ebc181a49bbc87d7f62a55ce5e2bf1604f1ee27fdb106feff0333e2953fd7be8"
+    "64": "3b221baef042ef844bc11cd089147b1de5434f0805ec89154fd2ce91f08f099e"
   },
   "qualified": false,
   "recipes_sha256": {
-    "build_sysroot.py": "ce8690cefbdac8e002f3d14c91b6f333100ebf686562c9ddb5cad58cc6b86b07",
+    "build_sysroot.py": "a77ace7c9d0f7584865d15f4c142db671a04d050e8b4e83577b8f0bf72de01b6",
     "herbceptions_sysroot.py": "8ec785213ea6e685350f8f4c08f86d25788186450ae361ec0fdb96a9f37d4736",
-    "policy/guest_profile.py": "65c6927360cf63fbd9bfaea0ef7de2198efbf01efe87028c07611ad525df5692"
+    "policy/guest_profile.py": "ba86c2fb1926b35ef4a7289cae9953fae7fa51249661a8cc534604423d6706ca",
+    "policy/scalar_memory.c": "130152051343a9808ee9bda6aa02cf85f3b5fb61908eac60204b192d45f4d44f"
   },
   "schema": "uwvm-memtag-sysroot-build-v1",
   "sources": {
@@ -42,11 +43,11 @@
       "url": "https://github.com/WebAssembly/wasi-libc.git"
     }
   },
-  "sources_sha256": "b4f24470b015a69f8a304d3c06c160cd4a48eb336eb786f100a88a7800585859",
+  "sources_sha256": "b706711dd7bc1f3e179d87fdd588a601d092ffe1ae648d20fced4b9231f5c2e9",
   "status": "built-awaiting-qualification",
   "targets": [
     {
-      "builtins_sha256": "763e147e14b88b72c479d305e2ada9fc2557330a5ff56f1b6166570ca52cf976",
+      "builtins_sha256": "ecacf38a29ec46411dba0c2f9c3f93f8a3a48417ba52c9eb5b1fa37724ec3186",
       "feature_flags": [
         "-mcpu=mvp",
         "-mbulk-memory",
@@ -359,7 +360,7 @@
         "output/clang/23/include/zos_wrappers/string.h": "13a4c52ba6ba573814769c35cad705e0f70b57bdff3a93883d8f79e144150eaa",
         "output/clang/23/include/zos_wrappers/time.h": "b6317562340353d762e174b0c2b05e7d885a4b77ac5c4e3501870213e7a091e2",
         "output/clang/23/include/zos_wrappers/variant.h": "485608148018b1697e6273a82c7d7b385abc66cc766845d4327d36d49191e1ed",
-        "output/clang/23/lib/wasm64-unknown-wasip1/libclang_rt.builtins.a": "763e147e14b88b72c479d305e2ada9fc2557330a5ff56f1b6166570ca52cf976",
+        "output/clang/23/lib/wasm64-unknown-wasip1/libclang_rt.builtins.a": "ecacf38a29ec46411dba0c2f9c3f93f8a3a48417ba52c9eb5b1fa37724ec3186",
         "output/eh/wasm64-wasip1/include/__libunwind_config.h": "0bb004911d967d5cc2d87d07f81e03668d1cf42c6b9347a95285d9e18f82954c",
         "output/eh/wasm64-wasip1/include/c++/v1/__algorithm/adjacent_find.h": "f5fc344590f11611d4555137273987b18b60a578819f69879a10256392128ef9",
         "output/eh/wasm64-wasip1/include/c++/v1/__algorithm/all_of.h": "79bd607301565a2f33417522b1665c27b007ea70da6fbc005b85de34b6ca96f5",
@@ -2274,28 +2275,28 @@
         "output/eh/wasm64-wasip1/include/wasm64-wasip1/wasi/wasip3.h": "029c8de14d8d23ff7fec96c3e29e72091227d11a2d5144af73b55a5fe6b4af9f",
         "output/eh/wasm64-wasip1/include/wasm64-wasip1/wchar.h": "214bffff576c41bc3599530dce0bec937106c38c73b7ae5dacee1dc90b1b6fd1",
         "output/eh/wasm64-wasip1/include/wasm64-wasip1/wctype.h": "cfb9a3d564aad013b7bb8d326fd9b01263c87ff73fb69c823e7695b4989fc2e9",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/crt1-command.o": "d46f958f9287618de15dfa39e3822713edd682f8e7b665b0bd25862610f74687",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/crt1-reactor.o": "2f756c17a0c1d988964c0de745bcf6f9d6c1c93046626c084d3b33fa692c98ce",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/crt1.o": "d46f958f9287618de15dfa39e3822713edd682f8e7b665b0bd25862610f74687",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc++.a": "c48bfc67aa903e482b79b4f3891ae2b99838b4e17fdb24d1dc1db61dab4ee1a6",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc++abi.a": "2b7e6a45819da7896f47de907206a0ee32d6040b7acc0237cc129ce306aead18",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc++experimental.a": "7f125e32f78d24a150c340f1b918403f11e14352479e5f9e170fb26c815acd9c",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-long-double.a": "f9b89eb25f55f9f6c4f398b6bab0468819012254fc364a604749f8634798f578",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-no-floating-point.a": "d946f3684f013db3eb97dfbb80b7f9060c2dbf74e5609f328e2b86a4642d5269",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc.a": "774322a8c0268c771faf6619748165bd07accf906d7d11257526e807912d64f7",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/crt1-command.o": "0d96e7bcdda3801780eb37a89eec1052ab12634d370a098382c529dea773e6c9",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/crt1-reactor.o": "33e09013fc5f7e49b437ebab19f13feac79860468149d678037b0310dbea619d",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/crt1.o": "0d96e7bcdda3801780eb37a89eec1052ab12634d370a098382c529dea773e6c9",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc++.a": "584557738d4c537ba4036241ee212b38b8a76acb9225f3ee8268fa203efe4787",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc++abi.a": "71f39eb54f71d74fd84cb49c4b45c4a48a45b06da4a4e6cdad3c33c79af7c717",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc++experimental.a": "9b2edd024b1db1f3635cebd46e52ad87e1750565f6aca856d816a8db866796d1",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-long-double.a": "8cfd1f5cf535460a05e7e74906d2b95bbb63caa6845e6d76da5346b9f0c52d0c",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-no-floating-point.a": "855ec0eea00acc1ac8de0711f3faebe5e62f2a5c1e0b5c6b2639c3f1e3588e86",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libc.a": "5790d3854e6577a4fcc84fabde7f8f8e17ce59e9e47e3c70e614bc88c2f71e2f",
         "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libcrypt.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libdl.a": "9939fb9a19460dc6c3416c3421355699018f6c81807cfb39f86b0667528370a0",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libherbceptions.a": "25ef5e46a4ae87fc607ca5fb9d4ad31dbc75be8a2fcc340cb36c4083f0b8adf5",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libdl.a": "823674848411d9181bddcfa5bdea9c5f3b1f8d5dc4c6417794a6525cd495cc1f",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libherbceptions.a": "0a87b8a0f3c655e974f281aafd6d9c3d806f76d347bcd527f9ecc84e89da0564",
         "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libm.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
         "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libpthread.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
         "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libresolv.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
         "output/eh/wasm64-wasip1/lib/wasm64-wasip1/librt.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libunwind.a": "07fe3cbb4939709a8f17daeee1abaa944fa0db04450728f89d1b5a4298453d08",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libunwind.a": "2b8be475f8e96afbc9620b00543eeaecd9f02a9a2cc2916000ffa5be54be0757",
         "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libutil.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-getpid.a": "0adce048d399f2efe67456bb710459351e61d210d750c29c648aae24ca97e76b",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-mman.a": "4e85b81e87d7371dd75612b9ed28409435cd988687e69e937651c88cd60d5fab",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-process-clocks.a": "2376c0444f8981c8ea87e7e6affb141db2c038139e1887a48b045b933cde4940",
-        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-signal.a": "057bc7225c303fdc90143dbb2168780bb8b27f16f90a86627b2b7bfe68fa365b",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-getpid.a": "97ffdb59fe94bbb3ced92c5a589ad682ff6a6a9ae2f3b6cfba2ddcb7a5820ee0",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-mman.a": "de89b6a2f4aa5500a0a3e7393f646d40b2c3ecb5627ff30f1d749132ae86801c",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-process-clocks.a": "b7196fa2d7563e1f68e249b2977d6f6d066713e76375b496b9d3cbcd738aa2f2",
+        "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libwasi-emulated-signal.a": "c364d22a6dc564b25df4ddf50f091b68d22fa1121c40624207397fb43c6ad08e",
         "output/eh/wasm64-wasip1/lib/wasm64-wasip1/libxnet.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5"
       },
       "guest_profile": {
@@ -2311,7 +2312,7 @@
       },
       "herbceptions": {
         "archive": "lib/wasm64-wasip1/libherbceptions.a",
-        "archive_sha256": "25ef5e46a4ae87fc607ca5fb9d4ad31dbc75be8a2fcc340cb36c4083f0b8adf5",
+        "archive_sha256": "0a87b8a0f3c655e974f281aafd6d9c3d806f76d347bcd527f9ecc84e89da0564",
         "domains": [
           "cmath",
           "http",
@@ -2327,7 +2328,7 @@
             "__cxa_error_domain_itanium_exception_ptr": 1
           },
           "enabled": true,
-          "sha256": "2b7e6a45819da7896f47de907206a0ee32d6040b7acc0237cc129ce306aead18"
+          "sha256": "71f39eb54f71d74fd84cb49c4b45c4a48a45b06da4a4e6cdad3c33c79af7c717"
         },
         "members": [
           "posix.cpp.obj",
@@ -2346,19 +2347,25 @@
       "profile": "eh",
       "qualified": false,
       "resource": "output/clang/23",
+      "runtime_isa_flags": [
+        "-mno-relaxed-simd",
+        "-mno-simd128",
+        "-mllvm",
+        "-wasm-disable-bulk-memory-opt"
+      ],
       "sysroot": "output/eh/wasm64-wasip1",
       "threads": false,
       "triple": "wasm64-wasip1"
     }
   ],
   "tool_sha256": {
-    "clang": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04",
-    "clang++": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04",
+    "clang": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+    "clang++": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
     "llvm-ar": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
     "llvm-config": "45f80e0dbd4c858b49585caae9c546f1e1447cc1231946459761bfc0c2022223",
     "llvm-nm": "2cda42e5ea480601d60944c18ec0175e48b43a72ff8a35c6e77f0a11ae7c0115",
     "llvm-ranlib": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
-    "wasm-ld": "3c65e1fbb9d285ec198287f47d9d5a68b23d1ca053bb95c861b2422a06c04124"
+    "wasm-ld": "f09d059d08c524dde7219bfd1cefa646586895974dcc4336c5a47375fca6215b"
   },
   "wasm_version": "3.0"
 }

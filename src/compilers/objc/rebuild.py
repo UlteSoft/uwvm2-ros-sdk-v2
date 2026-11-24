@@ -15,6 +15,7 @@ CC = HERE.parent / "cc"
 RUNTIME = HERE.parents[1] / "runtimes/objc"
 sys.path[:0] = [str(HERE / "driver"), str(CC / "policy")]
 from compiler import compiler_environment, digest, make_command
+from guest_profile import RUNTIME_ISA_FLAGS
 from portable_cc import DIRECTORY, libraries, prepare, target_profile
 from runtime import ARCHIVES, PUBLIC_INCLUDE, header_hashes, objc_flags, receipt, receipt_path, runtime_lock, runtime_root
 
@@ -108,7 +109,7 @@ def build_runtime(sdk, work, profile, jobs, cmake):
         "CMAKE_DISABLE_FIND_PACKAGE_tsl-robin-map": "ON",
     }
     for kind, command in [("C", cc), ("CXX", cxx), ("ASM", cc), ("OBJC", cc), ("OBJCXX", cxx)]:
-        args = [*command[1:-1], "-ffunction-sections", "-fdata-sections"]
+        args = [*command[1:-1], *RUNTIME_ISA_FLAGS, "-ffunction-sections", "-fdata-sections"]
         if kind in {"OBJC", "OBJCXX"}:
             args.extend(objc_flags(profile))
         configs["CMAKE_" + kind + "_COMPILER"] = command[0]
@@ -126,7 +127,7 @@ def build_runtime(sdk, work, profile, jobs, cmake):
     includes = [sdk / PUBLIC_INCLUDE, sdk / "include/u2rosv2/universal/objc", sdk / "include/u2rosv2/universal/c"]
     for unit in sorted((RUNTIME / "bindings").glob("*.m")):
         obj = work / (unit.stem + ".o")
-        subprocess.run([*cc, *objc_flags(profile), "-O3", "-ffunction-sections", "-fdata-sections",
+        subprocess.run([*cc, *RUNTIME_ISA_FLAGS, *objc_flags(profile), "-O3", "-ffunction-sections", "-fdata-sections",
                         *["-I" + str(directory) for directory in includes], unit, "-o", obj],
                        check=True, env=env)
         objects.append(obj)

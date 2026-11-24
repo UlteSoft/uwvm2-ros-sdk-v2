@@ -218,9 +218,8 @@ def main(language, compile_native):
             if record["compiler_sha256"] != record["sysroot_producer_sha256"]:
                 admission["sysroot_producer_sha256"] = record["sysroot_producer_sha256"]
             inputs = artifacts.stage_inputs(sources, Path(td), profile.to_dict(), record["compiler_sha256"], record["closure_sha256"], a.toolchain, qualification.object_releases(admission), disabled=disabled)
-            if "bulk_memory_opt" in disabled and not a.compile_only:
-                job = lambda argv: compile_native(list(map(str, argv)), record["compiler_sha256"])
-                inputs.append(optional_isa.scalar_runtime(command[0], job, profile, Path(td)))
+            if not a.compile_only:
+                command.extend(optional_isa.link_flags(disabled, profile, record))
             command += [*map(str, inputs), "-o",str(staged)]
             if not a.compile_only:
                 if "herbceptions_archive" in record:

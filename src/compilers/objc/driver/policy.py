@@ -136,8 +136,7 @@ def main(language, descriptor, arguments):
             compile_native(channel, [*command, "-x", dialect, "-c", source, "-o", obj])
             inputs[index] = obj
         if not args.compile_only:
-            if "bulk_memory_opt" in disabled:
-                inputs.append(optional_isa.scalar_runtime(common[0], lambda argv: compile_native(channel, argv), profile, work))
+            link_flags.extend(optional_isa.link_flags(disabled, profile, record))
             command = [*common, *link_flags, *inputs, runtime / "libuwrosobjc.a",
                        runtime / "libobjc.a", *library_flags]
             if profile.exceptions == "eh":

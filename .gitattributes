@@ -1,17 +1,17 @@
 # List each reviewed, source-modified WROS artifact explicitly.
 # LLVM and Clang with the WROS WebAssembly backend
-/bin/packages/linux-aarch64/wrcc/clang-2909279d99205028da28.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-aarch64/wrcc/clang-31d73ab518ffc7db70d7.tar.xz filter=lfs diff=lfs merge=lfs -text
 /bin/packages/linux-aarch64/wrcc/llvm-ar-b5072341daab01dadf2a.tar.xz filter=lfs diff=lfs merge=lfs -text
-/bin/packages/linux-aarch64/wrcc/wasm-ld-86a746b3711f0b6b3283.tar.xz filter=lfs diff=lfs merge=lfs -text
-/bin/packages/linux-arm/wrcc/clang-f970e8aae25bf9fa7d5d.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-aarch64/wrcc/wasm-ld-537596735e8195b067b0.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-arm/wrcc/clang-32e4ae23149f1b1b6d05.tar.xz filter=lfs diff=lfs merge=lfs -text
 /bin/packages/linux-arm/wrcc/llvm-ar-48bf8d55bdd83f5ca68a.tar.xz filter=lfs diff=lfs merge=lfs -text
-/bin/packages/linux-arm/wrcc/wasm-ld-9f9110d030eaba14bc87.tar.xz filter=lfs diff=lfs merge=lfs -text
-/bin/packages/linux-armhf/wrcc/clang-eee1b7f6b8bf7a300334.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-arm/wrcc/wasm-ld-2ce5c4d6f13baf22cda5.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-armhf/wrcc/clang-0049bdef67655102110e.tar.xz filter=lfs diff=lfs merge=lfs -text
 /bin/packages/linux-armhf/wrcc/llvm-ar-c2ba726df66ae71ed318.tar.xz filter=lfs diff=lfs merge=lfs -text
-/bin/packages/linux-armhf/wrcc/wasm-ld-2535d911401ad57f169e.tar.xz filter=lfs diff=lfs merge=lfs -text
-/bin/packages/linux-i686/wrcc/clang-7634292384725a006c5d.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-armhf/wrcc/wasm-ld-3efe1a53d92de522d061.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-i686/wrcc/clang-19c80fb2a61e5701f866.tar.xz filter=lfs diff=lfs merge=lfs -text
 /bin/packages/linux-i686/wrcc/llvm-ar-ad07a0e93b581fd92a13.tar.xz filter=lfs diff=lfs merge=lfs -text
-/bin/packages/linux-i686/wrcc/wasm-ld-a8b6712fc459f181fb37.tar.xz filter=lfs diff=lfs merge=lfs -text
+/bin/packages/linux-i686/wrcc/wasm-ld-4c9b0199b9c78caab1bb.tar.xz filter=lfs diff=lfs merge=lfs -text
 /bin/packages/linux-x86_64/wrcc/clang.tar.xz filter=lfs diff=lfs merge=lfs -text
 /bin/packages/linux-x86_64/wrcc/llvm-ar.tar.xz filter=lfs diff=lfs merge=lfs -text
 /bin/packages/linux-x86_64/wrcc/wasm-ld.tar.xz filter=lfs diff=lfs merge=lfs -text

@@ -186,7 +186,8 @@ def make_command(toolchain, receipts, profile, language, arguments, verify=False
     closure = hashlib.sha256(json.dumps(target, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     record = dict(closure_sha256=closure, profile=profile.to_dict(), receipt=str(filename),
                   compiler_sha256=compiler_sha256, sysroot_producer_sha256=value["compiler_sha256"],
-                  qualified=bool(target.get("qualified", False)), authority_grants=[])
+                  qualified=bool(target.get("qualified", False)), authority_grants=[],
+                  runtime_isa_flags=target.get("runtime_isa_flags"))
     if herbceptions:
         record["herbceptions_archive"] = str(herb_archive)
     return command, record

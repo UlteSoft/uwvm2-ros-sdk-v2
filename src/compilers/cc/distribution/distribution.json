@@ -7,105 +7,105 @@
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "c119469f92ea3b27c50894f8571bbcbf0c3dd5e7320cee7e0a2611692009600c"
+      "sysroots_sha256": "a02f45a37371d6aca5a0a8a32eaa81da499864ad991ece9ffb6ed8daa7921e90"
     },
     "wasm32-wasip1-threads": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "c95d7ee6fe63499d597d259334d19ea66a6d7bd393b4573e22cba13c54094b5d"
+      "sysroots_sha256": "e581ad3d08bfbdb9dd3f7dea440da4893156724f58255b3363fa271ef789af1e"
     },
     "wasm32-wasip1-threads/core3.0-eh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "1759550f18f5b0a75dd827e729cbb65a965a0efee71dc544352e310f04e11af8"
+      "sysroots_sha256": "a3c25de8e726a02088d389f54be1eaf24f7d368f0ee567d2137502defa20251e"
     },
     "wasm32-wasip1-threads/core3.0-noeh-mte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "00525d741d6cb9fe241bbf53fb23decca89c0bed7d339303b0ad87e25b947544"
+      "sysroots_sha256": "928af4be25970dcb0420d15f0ebe101a6a2ac8aca30b3777a5581f289d23d5d0"
     },
     "wasm32-wasip1-threads/core3.0-noeh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "398ad0cecf61b749a36c34dbed6388a87009313a8e5d2c1907c4438d0f52aa8c"
+      "sysroots_sha256": "0bc8df37032107e1274a201ddb858d4da705b7e092ba2add42c25b6bb48440fd"
     },
     "wasm32-wasip1/core3.0-eh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "54ba72e4d4191439a076a074c1302e3b20c08c118068f3675ef6a37e40ade60c"
+      "sysroots_sha256": "304d84d713db467ef8849420e111692f66f245ea1260affa385dc10a93407c12"
     },
     "wasm32-wasip1/core3.0-noeh-mte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "9240a111cefd2ed81541d4b62f3173b0c0daa82c64d4ee24a759bbbaaf533abe"
+      "sysroots_sha256": "02ad621514d3b28ed462bb1b0e4bd82d23067dfc79df5213891909fdda7825ce"
     },
     "wasm32-wasip1/core3.0-noeh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "54990ead9e3d09d341447f01491f7ba8b2b0fcae73ca6ffaf7d523856c271202"
+      "sysroots_sha256": "cccd9912206b153a993c4d938d08db025ef8bc0cbc3dad74f762f7a8ad600095"
     },
     "wasm64-wasip1": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "d44c5476ebce7fe9126506d14287fe91f2ba2fc02da37920d04e1bc9adfc2dbf"
+      "sysroots_sha256": "5784d3ce1587188bbb122cfd6fea35ab6b8a74abc1e32086c06805d58e9f4175"
     },
     "wasm64-wasip1-threads": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "503b72282d3430006ee4700ee3cc12c3f03194cb4f18c1dd3e56452aacd4e95d"
+      "sysroots_sha256": "a4b8fbc383edd197cef6f111c79bda066b6d5815ee7b1ac84baf6166d0d7b63e"
     },
     "wasm64-wasip1-threads/core3.0-eh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "c421d14f458fae5283b94dd591470e1e8e09de2c05a68641703561157d842999"
+      "sysroots_sha256": "328fe72bf7e8301af1cf1a57c56079296e3bd48ea967a4eeee4b51ac2c27c68f"
     },
     "wasm64-wasip1-threads/core3.0-noeh-mte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "ea7f9b1346fb5617f8a81b158a50bd127887769bd6818d3a4657f42a26799369"
+      "sysroots_sha256": "4d1049a71b90117e569192475a944ac559de8e78f4ed7bad58bfc8cfc7e7af8f"
     },
     "wasm64-wasip1-threads/core3.0-noeh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "a3dd763ec92f9dec73f5690dd4378ff204d7a70dace29e70d5ca6dd74d835da8"
+      "sysroots_sha256": "782eb8ac9a0239e8aa5a27379bd7a66c3b03482be9d39342d4ed38deaf847cbb"
     },
     "wasm64-wasip1/core3.0-eh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "f8b9879d82cbe6930f41edecf4f2cbe6fd3ee1d33552833cfac9514e1910cd51"
+      "sysroots_sha256": "6891db3a6610ecae03f5d653b082fea0b4a226c20b6a8efcc8c58b85a86c59d6"
     },
     "wasm64-wasip1/core3.0-noeh-mte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "a3a7270aad0e45306ab063013504e1988fd57812a26be79c65d24cb69a65cdd9"
+      "sysroots_sha256": "d0faf408aaab9dde4e60a0355b284bf90c56ea5cec5ac122cf05714118ffe911"
     },
     "wasm64-wasip1/core3.0-noeh-nomte": {
       "archive": "clang-resource-headers.tar.xz",
       "archive_sha256": "74840555ea8f63a71380bd62b9433585c30c7d3e97f2ab90ded554c88a6a96ac",
       "public_headers": "include/sysroot",
-      "sysroots_sha256": "8318e019e0474dcb5c9a2b129b4f5f6cf02a20febf5428da4ed7d28d569b0e63"
+      "sysroots_sha256": "58e674fbd5c18e7bea21db36f5a01b94295f769489021e5dcc3014dc4bb747b8"
     }
   },
   "llvm_revision": "392dfff97d29b59d77e5cac6d4b6ef2585fe7117",
   "programs": {
-    "clang": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04",
-    "clang++": "5d307cadbe4ab17b1b1edbe8b437d50b1d54aac3c32c06817cd3f8a0b11faf04",
+    "clang": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
+    "clang++": "80a991bcb16e7c74a44f8c2bfbd043243f847a66fd1d06911237661f08f2304c",
     "llvm-ar": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
-    "wasm-ld": "3c65e1fbb9d285ec198287f47d9d5a68b23d1ca053bb95c861b2422a06c04124"
+    "wasm-ld": "f09d059d08c524dde7219bfd1cefa646586895974dcc4336c5a47375fca6215b"
   },
   "sysroot_layout": "wasi-multiarch-v1"
 }
