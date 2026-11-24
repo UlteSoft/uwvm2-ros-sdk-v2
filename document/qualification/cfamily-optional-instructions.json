@@ -242,5 +242,58 @@
         "status": "pending"
       }
     }
+  },
+  "vm_bulk_memory_qualification": {
+    "harness_commit": "ae64a9236cb181b27eb7a46ba13c9be66c6242d1",
+    "vm_commit": "5203ed5f63b6bb9764252f95e6b1ef7dd42e35b7",
+    "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+    "scope": "Final-module decoder determines whether the VM can disable the entire bulk-memory feature. A threaded module may still need data-count, passive data, memory.init and data.drop when copy/fill generation is disabled.",
+    "decoder_build_receipt_sha256": "57a74788254bece32dc7f299adf8e06803de7dcd4fcb560fc531fe6adac6b426",
+    "hosts": {
+      "x86_64": {
+        "bulk_off_aot_passed": 64,
+        "bulk_off_cells_passed": 64,
+        "bulk_off_int_passed": 64,
+        "cells": 128,
+        "decoder_build_sha256": "57a74788254bece32dc7f299adf8e06803de7dcd4fcb560fc531fe6adac6b426",
+        "decoder_receipt_sha256": "f52b0a9a040f4642c08eaab1526373e001ee5a2bda0ec1b64a6accbee0a29b46",
+        "decoder_sha256": "57cc30a82bbe34ad7313d85524bb37212d8e556da96a8c6f6f150c5a16bd7aea",
+        "executions": 256,
+        "isolation_sha256": "ec76c47b5e8d6948bfdaab011d2f7665ae7f541d41367c064969668921cd1296",
+        "passed": true,
+        "results_sha256": "797844bf5b631cab24d19f258c010e2e9745074543c74b2992b8dd3429b1774d",
+        "runner_sha256": "e93a5ebdb6f3e20059fd0fc9c170f3aac51ca5d1925008d34ba760808d9db0b2",
+        "threaded_aot_passed": 64,
+        "threaded_cells_passed": 64,
+        "threaded_int_passed": 64,
+        "vm_sha256": "6b6d203cf065ff8679fdfd38b1f4345d52d033a4dcd23ea1e684ae5f1f87c3b2",
+        "wasmtime": "wasmtime 42.0.1 (6844a83b5 2026-02-25)",
+        "wasmtime_aot_passed": 64,
+        "wasmtime_int_passed": 64,
+        "summary_sha256": "058966e1813f2938aaa75d146e3cfb7486135f5491daab594f6ca615541dd1ab"
+      },
+      "i686": {
+        "bulk_off_aot_passed": 64,
+        "bulk_off_cells_passed": 64,
+        "bulk_off_int_passed": 64,
+        "cells": 128,
+        "decoder_build_sha256": "57a74788254bece32dc7f299adf8e06803de7dcd4fcb560fc531fe6adac6b426",
+        "decoder_receipt_sha256": "e1a40b8110213afb0112ea6a96f6dbc91e7eccb2c76cad2a4a41eb3dc364f808",
+        "decoder_sha256": "94307633fbe892638d5a65bd5c8b5451082e33900159d3e55c1d5a9c207c9b11",
+        "executions": 256,
+        "isolation_sha256": "299f76a70eba6e50ac82a734bbfe0a8a12b69f2aefcf481b8b91bec542efad5b",
+        "passed": true,
+        "results_sha256": "324ea30b38c3498ad5e5c5555e595bd67a55370a9d0d2a7475ed6aed3a05f493",
+        "runner_sha256": "e93a5ebdb6f3e20059fd0fc9c170f3aac51ca5d1925008d34ba760808d9db0b2",
+        "threaded_aot_passed": 64,
+        "threaded_cells_passed": 64,
+        "threaded_int_passed": 64,
+        "vm_sha256": "aee7584fbf76d97f92758bc30809d0d1a5ea45b3f3c500cfc9d471028696d33b",
+        "wasmtime": "wasmtime 42.0.1 (6844a83b5 2026-02-25)",
+        "wasmtime_aot_passed": 64,
+        "wasmtime_int_passed": 64,
+        "summary_sha256": "6ce5ad374b4ac3dd5c6dfbe7a1a325fd259e2c173b5dd5447b773e5298265467"
+      }
+    }
   }
 }

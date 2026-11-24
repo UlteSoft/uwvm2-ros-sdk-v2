@@ -613,11 +613,24 @@
         "aarch64": {
           "archive_receipt_sha256": "eb374dd3c962c18ca3fc45b544e75869828ca8581c510655ed4a28b38ac57e0c",
           "relocation_passes": 6,
+          "restore_receipt_sha256": "65d8254f0966ecf26dac85a288a63d134b1e5038cc2313adec20347226c1388d",
           "c": {
-            "status": "pending"
+            "status": "pass",
+            "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "receipt_sha256": "c6f17ddcfbbcde5c7314fba86aaee32058f4aad18ef95dbb2f50aa62736b1ef0",
+            "restore_seconds": 0.464,
+            "guest_exit": 0,
+            "process_exit": 0
           },
           "cpp": {
-            "status": "pending"
+            "status": "pass",
+            "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "receipt_sha256": "ca370eab067f05be9e156280285e8aa36f9715fd83632bb32b8d5d4de7e306f9",
+            "restore_seconds": 0.858,
+            "guest_exit": 0,
+            "process_exit": 0
           },
           "objc": {
             "status": "pass",
@@ -629,9 +642,15 @@
             "process_exit": 0
           },
           "objcpp": {
-            "status": "pending"
+            "status": "pass",
+            "guest_sha256": "9f36098914409354d594399c44a09109f80c437ace3d7b8302a3a41d8166f630",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "receipt_sha256": "12330002b58f7dc93f57038ff017240c049f0ddd2ae794512337b37f11bc4414",
+            "restore_seconds": 575.29,
+            "guest_exit": 0,
+            "process_exit": 0
           },
-          "status": "in-progress"
+          "status": "passed"
         },
         "arm": {
           "archive_receipt_sha256": "dfba9ad5f723073342575c7466dd4a9f5b79bf3b1d0fd2bfe4136c50826f3cf8",
@@ -660,14 +679,20 @@
             "status": "pending"
           },
           "objc": {
-            "status": "pending"
+            "status": "failed",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+            "receipt_sha256": "5df232d1b929e58042063045fa379f13863d48bb642f1eb35ddbc6aa3f069167",
+            "diagnostic": "LLVM reported allocation failure during restore and the VM exited on SIGABRT. Host QEMU cgroup OOM counters were zero.",
+            "stderr_sha256": "94daf203951b23a8019df1fb95205a86ec979f33f4abe51856cfbb8dcd12d462"
           },
           "objcpp": {
             "status": "pending"
           },
-          "status": "in-progress"
+          "status": "blocked-restore"
         }
-      }
+      },
+      "status": "blocked-qualification-failed"
     }
   }
 }
