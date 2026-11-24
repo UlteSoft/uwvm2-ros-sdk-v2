@@ -202,7 +202,35 @@
         "wasmtime_reference_summary_sha256": "5544a95c86fd6b12b0f21870cc635fc488dfbe59a237b48d2b1da9e75647b041"
       },
       "i686": {
-        "status": "pending"
+        "status": "pass",
+        "summary_sha256": "dcb88f758aed051d51ad7a7015eb6387e65cc3f904f9a6dbe8619b35f35dc560",
+        "aot_passed": 256,
+        "aot_scalar_passed": 128,
+        "aot_vector_passed": 128,
+        "aot_wasmtime_passed": 128,
+        "cells": 256,
+        "cells_passed": 256,
+        "decoder_passed": 256,
+        "decoder_sha256": "8598c95bb186c765539e50f8c909d977c93254b6f6d86b8857290049526c104e",
+        "executions": 512,
+        "harness_sha256": {
+          "imports.py": "454ad620152a4065e48ddf99ceea1f77f4313872d0c6408ee2220221f5b42ffa",
+          "optional_isa_suite.py": "38eb6a91ac8d07aa50f0ce39d7af7966306d88c38f7773b794ac59829be3b0ba",
+          "sysroot_suite.py": "3925bb034354f29ecccb29b13e78d133ff83753a0d7ddf77e36b74fb173b583b"
+        },
+        "int_passed": 256,
+        "int_scalar_passed": 128,
+        "int_vector_passed": 128,
+        "int_wasmtime_passed": 128,
+        "isolation_sha256": "c53bcc114516cf1aee227e83839b861f32ba95c59b8587272d1749f3a467f859",
+        "reference_qualification_sha256": "c32c0df73176642acb94c5789ca6644efd3d2caaac63a7798ee374850f142e1e",
+        "results_sha256": "ada963db1c588655067991e8e2a519da8a4bc8d247211f84f047c8a50c652c26",
+        "runner_sha256": "3f69a605a1e482839aae78af936e83b316a93b2a4c60e979e73931dfd55acd84",
+        "vm_archive_receipt_sha256": "c88aa2882fa51df5ba56343b87acb7775efac64fbc9d0077650fbbab0db69b89",
+        "vm_sha256": "aee7584fbf76d97f92758bc30809d0d1a5ea45b3f3c500cfc9d471028696d33b",
+        "wasmtime_reference_cells": 128,
+        "wasmtime_reference_results_sha256": "1139b69d82f4e0809762bfd2ceaf708e77e13d31d04ce33fdbd3724e7fb34b1f",
+        "wasmtime_reference_summary_sha256": "85bccbcfb05f3f1da937553632e1a5dd4c18e9b699158164e92ce8676ca283fc"
       },
       "aarch64": {
         "status": "pending"
