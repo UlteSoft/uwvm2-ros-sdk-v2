@@ -55,17 +55,29 @@ def variable(vm, at, symbol):
     return int(values[0])
 
 
-def normal_exit(vm, timeout):
+def normal_exit(vm, row, timeout):
     reply = vm.request("continue")
-    need(not reply.startswith("error:"), reply)
     deadline = time.monotonic() + timeout
-    while True:
-        status = vm.request("status")
-        if status.strip() == "guest exited: 0":
-            return 0
-        need(not re.search(r"guest exited:|stopped: (?:fault|breakpoint)", status) and time.monotonic() < deadline,
-             f"guest did not resume to its checked exit: {status}")
-        time.sleep(.02)
+    # A management continue can itself observe the terminal state. Otherwise
+    # wait on the same admitted VM. A normal exit closes the control socket.
+    while reply == "running\n" or reply == "wait timed out; no complete stop established; VM is running\nrunning\n":
+        remaining = deadline - time.monotonic()
+        need(remaining > 0, "guest did not reach its checked exit before the deadline")
+        try:
+            reply = vm.request("wait")
+        except (BrokenPipeError, ConnectionResetError, AssertionError) as exc:
+            # The pinned transport reports recv EOF as this exact assertion.
+            # Like the VM's secure_server.finished_guest_reply, only the real
+            # child wait can settle a terminal status after an acknowledged resume.
+            if isinstance(exc, AssertionError) and str(exc) != "VM closed its management channel":
+                raise
+            row["process_exit"] = vm.process.wait(timeout=max(0, deadline - time.monotonic()))
+            need(row["process_exit"] == 0, f"debugged VM exit {row['process_exit']} after its control channel closed")
+            row["exit_observation"] = "child-wait-after-acknowledged-continue"
+            return row["process_exit"]
+    need(reply == "guest exited: 0\n", f"guest did not resume to its checked exit: {reply}")
+    row["exit_observation"] = "debugger-terminal-reply"
+    return 0
 
 
 THREAD_REFUSAL = "error: operation unavailable on the private thread execution driver\n"
@@ -85,11 +97,12 @@ def debug_probe(vm, row, build, target, timeout):
     need(bp, f"source breakpoint refused: {point}")
     vm.request("continue")
     at = source_position(vm, stopped(vm, timeout, reason="stopped: breakpoint"), source)
-    need(at["line"] == first and at["module"] == module and at["function"] == build["source_entry_index"],
+    need(at["line"] == first and at["module"] == module and at["function"] == build["source_function_index"],
          f"wrong source breakpoint: {at}")
     row["breakpoint"] = {**at, "expression": "local", "value": variable(vm, at, "local")}
     need(row["breakpoint"]["value"] == 40, f"wrong stopped scalar: {row['breakpoint']}")
-    vm.request(f"delete {bp[1]}")
+    removed = vm.request(f"delete {bp[1]}")
+    need(removed == "breakpoint deleted\n", removed)
     row["source_steps"] = []
     for _ in range(12):
         reply = vm.request(f"step source {at['thread']} over")
@@ -103,7 +116,7 @@ def debug_probe(vm, row, build, target, timeout):
     need(at["line"] == last, f"step never reached {source}:{last}")
     row["after_step_value"] = variable(vm, at, "local")
     need(row["after_step_value"] == 42, "source step did not execute the addition")
-    row["guest_exit"] = normal_exit(vm, timeout)
+    row["guest_exit"] = normal_exit(vm, row, timeout)
 
 
 def memory_word(vm, module):
@@ -114,15 +127,17 @@ def memory_word(vm, module):
     return bytes.fromhex(match[1]).hex()
 
 
-def write_word(vm, at, word):
+def write_word(vm, at, word, timeout):
     cmd = (f"set wasm memory {at['module']} 0 {at['thread']} 64 bytes {word} if-stop {at['stop']}")
     reply = vm.request(cmd)
     match = re.fullmatch(r"wasm-stop ([1-9][0-9]*)\nWasm mutation v=3 status=available applied=1 reason=none "
                          rf"runtime=[1-9][0-9]* module={at['module']} target=memory index=0 element=64 "
                          r"bytes=4 address-bytes=[48]\n", reply)
     need(match is not None and int(match[1]) > at["stop"], f"guest mutation not acknowledged: {reply}")
-    need(memory_word(vm, at["module"]) == word, "guest read-back differs from the acknowledged write")
-    return {**at, "stop": int(match[1])}
+    current = stopped(vm, timeout, newer=at["stop"])
+    need(current == {**at, "stop": int(match[1])}, f"write moved the paused guest: {current}")
+    need(memory_word(vm, current["module"]) == word, "guest read-back differs from the acknowledged write")
+    return current
 
 
 def dump_probe(vm, row, build, target, timeout, folder, snapshot):
@@ -131,6 +146,7 @@ def dump_probe(vm, row, build, target, timeout, folder, snapshot):
     need(policy == "dump-policy max=full effective=full\n", policy)
     archive = folder / "full.uwsnap"
     module = build["module"]
+    breakpoint = None
     if target.threads and "threaded-profile " in initial:
         match = re.search(r"^stop-id ([1-9][0-9]*)$", initial, re.M)
         need(match, f"private thread stop was unavailable: {initial}")
@@ -141,8 +157,11 @@ def dump_probe(vm, row, build, target, timeout, folder, snapshot):
         need(reply.startswith("wasm-dump saved"), reply)
         at = stopped(vm, timeout)
     else:
-        point = vm.request(f"tbreak bw {module} {build['entry_index']} 0")
-        need(re.search(r"\bbreakpoint [1-9][0-9]*\b", point), point)
+        # The VM rechecks a pending breakpoint when a memory mutation issues
+        # a new stop ID. A permanent point keeps both read-backs parked.
+        point = vm.request(f"bw {module} {build['entry_index']} 0")
+        breakpoint = re.fullmatch(r"breakpoint ([1-9][0-9]*) registered at executable Wasm expression byte offset\n", point)
+        need(breakpoint, point)
         vm.request("continue")
         at = stopped(vm, timeout, reason="stopped: breakpoint")
     need((at["module"], at["function"], at["offset"]) == (module, build["entry_index"], 0), at)
@@ -150,7 +169,7 @@ def dump_probe(vm, row, build, target, timeout, folder, snapshot):
     # writes retire stop IDs. Each next operation uses the acknowledged ID.
     row["original_word"] = memory_word(vm, module)
     row["captured_word"] = "c84f613a"
-    at = write_word(vm, at, row["captured_word"])
+    at = write_word(vm, at, row["captured_word"], timeout)
     row["captured_at"] = at.copy()
     need(vm.request(f"dump wasm full {at['stop']} {archive}").startswith("wasm-dump saved"), "full dump refused")
     raw = archive.read_bytes()
@@ -162,7 +181,7 @@ def dump_probe(vm, row, build, target, timeout, folder, snapshot):
                       "disclosure": image.disclosure, "platform": image.platform,
                       "record_kinds": [r.kind for r in image.records]}
     row["changed_word"] = "7193b6ee"
-    changed = write_word(vm, at, row["changed_word"])
+    changed = write_word(vm, at, row["changed_word"], timeout)
     row["changed_at"] = changed.copy()
     reply = vm.request(f"dump restore current {changed['stop']} {archive}")
     deadline = time.monotonic() + timeout
@@ -183,7 +202,10 @@ def dump_probe(vm, row, build, target, timeout, folder, snapshot):
     row["restored_at"] = fresh
     row["restored_word"] = memory_word(vm, module)
     need(row["restored_word"] == row["captured_word"], "restored memory differs from the captured state")
-    row["guest_exit"] = normal_exit(vm, timeout)
+    if breakpoint:
+        removed = vm.request(f"delete {breakpoint[1]}")
+        need(removed == "breakpoint deleted\n", removed)
+    row["guest_exit"] = normal_exit(vm, row, timeout)
 
 
 def update_probe(args, row, build, command, folder, protocol):

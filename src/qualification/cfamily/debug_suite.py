@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise installed C/C++ DWARF debugging, full restore and signed updates on a receipt-bound Linux VM."""
+"""Exercise four installed C-family frontends with live DWARF debugging, full restore and signed updates."""
 import argparse
 import hashlib
 import importlib.util
@@ -16,6 +16,7 @@ import uuid
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
+from typing import NamedTuple
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -31,7 +32,22 @@ SUPPORT = {
 }
 CAPABILITIES = ("source-debug", "full-dump-restore", "signed-hot-update")
 PROFILES = [Target(*v) for v in itertools.product((32, 64), (False, True), (False, True), (False, True))]
-LANGUAGES = ("c", "cpp")
+
+
+class Frontend(NamedTuple):
+    sdk_option: str
+    driver: str
+    extension: str
+    standard: str
+    source_function: str
+
+
+LANGUAGES = {
+    "c": Frontend("cc", "wrc", "c", "c17", "_start"),
+    "cpp": Frontend("cxx", "wrcc", "cpp", "c++20", "_start"),
+    "objc": Frontend("objc", "wroc", "m", "c17", "_c_QualificationReading__adjust_"),
+    "objcpp": Frontend("objcpp", "wrocxx", "mm", "c++20", "_c_QualificationReading__adjust_"),
+}
 ENGINES = ("int", "aot")
 
 
@@ -57,7 +73,7 @@ def support_modules(root):
 def installed_sdk(prefix, language):
     selection = prefix / "selection.json"
     record = json.loads(selection.read_bytes())
-    frontend = "bin/" + ("wrc" if language == "c" else "wrcc")
+    frontend = "bin/" + LANGUAGES[language].driver
     actual = digest(prefix / frontend)
     live.need(record["language"] == language and re.fullmatch(r"[0-9a-f]{40}", record["commit"])
               and record["files"][frontend]["sha256"] == actual, f"installed {language} selection mismatch")
@@ -65,14 +81,12 @@ def installed_sdk(prefix, language):
             "selection_sha256": digest(selection), "frontend_sha256": actual}
 
 
-def inspect_wasm(path, api, target):
+def inspect_wasm(path, api, profile, source_function):
     from artifacts import sections
-    from guest_profile import Profile
     data = path.read_bytes()
     widths = []
     imports = list(api.inspect(data, memory_limits=True, memory_types=widths))
-    live.need(widths == [target.bits], f"wrong Wasm memory width: {widths}")
-    profile = Profile(target.bits, "3.0", target.threads, target.mte, "eh" if target.eh else "noeh")
+    live.need(widths == [profile.address_bits], f"wrong Wasm memory width: {widths}")
     metadata = {}
     exports = {}
     function_names = {}
@@ -111,48 +125,81 @@ def inspect_wasm(path, api, target):
     # wasm-ld may export a .command_export wrapper. Its business-call index
     # includes imports. Signed function scopes select the changed local body.
     source_entry, = [i for i, spelling in function_names.items() if spelling == "_start"]
+    source_index, = [i for i, spelling in function_names.items() if spelling == source_function]
     source_value, = [i for i, spelling in function_names.items() if spelling == "value"]
     local_index = source_value - imported_functions
     live.need(0 <= local_index < len(bodies) and exports["value"][1] >= imported_functions,
               "expected local business implementation and approved export")
     return ({"wasm": str(path), "sha256": digest(path), "dwarf": metadata, "imports": imports,
              "profile": profile.to_dict(), "entry_index": exports["_start"][1], "source_entry_index": source_entry,
+             "source_function": source_function, "source_function_index": source_index,
              "value_index": exports["value"][1], "value_implementation_index": source_value,
              "value_local_index": local_index}, structure, bodies)
 
 
 def build_pair(args, target, language, out, api):
-    src = HERE / "debug_fixtures" / ("probe." + language)
-    frontend = (args.cc_sdk / "bin/wrc") if language == "c" else (args.cxx_sdk / "bin/wrcc")
-    base = [frontend, "--target", f"wasm{target.bits}", "--core", "3.0", "--std", "c17" if language == "c" else "c++20",
-            "-O0", "-g", "--reactor", "--export", "_start", "--export", "value", "--build-receipt",
+    from artifacts import check_object, read_bounded
+    from guest_profile import Profile
+    sdk = args.sdks[language]
+    config = LANGUAGES[language]
+    src = HERE / "debug_fixtures" / ("probe." + config.extension)
+    frontend = sdk / "bin" / config.driver
+    profile = Profile(target.bits, "3.0", target.threads, target.mte, "eh" if target.eh else "noeh")
+    base = [frontend, "--target", f"wasm{target.bits}", "--core", "3.0", "--std", config.standard, "-O0", "-g",
             "--mte" if target.mte else "--no-mte", "--eh" if target.eh else "--no-eh",
             "--threads" if target.threads else "--no-threads"]
+    link = ["--reactor", "--export", "_start", "--export", "value"]
     if target.threads:
-        base += ["--shared-memory-pages", str(SHARED_MEMORY_PAGES), "-D", "SDK_SHARED=1", "--export", "wasi_thread_start"]
+        base += ["-D", "SDK_SHARED=1"]
+        link += ["--shared-memory-pages", str(SHARED_MEMORY_PAGES), "--export", "wasi_thread_start"]
     build = {"profile": target.name, "language": language, "source": str(src), "source_sha256": digest(src),
              "frontend_sha256": digest(frontend), "generations": [], "compile": [], "module": 1 if target.threads else 0}
     structure = []
     bodies = []
     try:
+        objc = language in ("objc", "objcpp")
+        if objc:
+            # wroc/wrocxx authenticate each sealed input object against the
+            # active compiler and GNUstep closure before linking it.
+            runtime_path = sdk / "share/uwros/objc" / profile.triple / profile.flavor / "runtime.json"
+            runtime_hash = digest(runtime_path)
+            runtime = json.loads(runtime_path.read_bytes())
+            live.need(runtime["format"] == "uwros-gnustep-guest-v2" and runtime["profile"] == profile.to_dict(),
+                      f"installed GNUstep runtime profile mismatch: {runtime_path}")
+            build["runtime_receipt"] = {"path": str(runtime_path), "sha256": runtime_hash}
         for n, value in enumerate((17, 29), 1):
             path = out / f"generation-{n}.wasm"
-            result = capture([*base, "-D", f"SDK_GENERATION={value}", src, "-o", path], out, f"compile-{n}", args.compile_timeout)
+            compile_args = [*base, "-D", f"SDK_GENERATION={value}"]
+            if objc:
+                obj = path.with_suffix(".o")
+                command = [*compile_args, "-c", src, "-o", obj]
+            else:
+                command = [*compile_args, *link, "--build-receipt", src, "-o", path]
+            result = capture(command, out, f"compile-{n}", args.compile_timeout)
             build["compile"].append(result)
             live.need(result.get("returncode") == 0, f"generation {n} compilation failed: {result}")
-            image, layout, functions = inspect_wasm(path, api, target)
+            if objc:
+                note = check_object(read_bounded(obj), profile.to_dict(), build["frontend_sha256"], runtime_hash)
+                result = capture([*base, *link, obj, "-o", path], out, f"link-{n}", args.compile_timeout)
+                build.setdefault("link", []).append(result)
+                live.need(result.get("returncode") == 0, f"generation {n} link failed: {result}")
+            image, layout, functions = inspect_wasm(path, api, profile, config.source_function)
             structure.append(layout)
             bodies.append(functions)
-            receipt_path = path.with_suffix(".wasm.wros-build.json")
-            receipt = json.loads(receipt_path.read_bytes())
-            live.need((receipt["artifact_sha256"], receipt["profile"], receipt["language"], receipt["settings"]) ==
-                      (image["sha256"], image["profile"], language, {"optimization": "0", "debug": True}),
-                      f"frontend receipt differs from requested profile or bytes: {receipt_path}")
-            image.update(receipt_sha256=digest(receipt_path), compiler_sha256=receipt["compiler_sha256"],
-                         sysroot_sha256=receipt["sysroot_sha256"])
+            if objc:
+                image.update(object=str(obj), sealed_object_sha256=digest(obj), object_note=note,
+                             compiler_sha256=note["compiler_sha256"], sysroot_sha256=runtime["sysroot_sha256"])
+            else:
+                receipt_path = path.with_suffix(".wasm.wros-build.json")
+                receipt = json.loads(receipt_path.read_bytes())
+                live.need((receipt["artifact_sha256"], receipt["profile"], receipt["language"], receipt["settings"]) ==
+                          (image["sha256"], image["profile"], language, {"optimization": "0", "debug": True}),
+                          f"frontend receipt differs from requested profile or bytes: {receipt_path}")
+                image.update(receipt_sha256=digest(receipt_path), compiler_sha256=receipt["compiler_sha256"],
+                             sysroot_sha256=receipt["sysroot_sha256"])
             build["generations"].append(image)
         one, two = build["generations"]
-        for key in ("imports", "entry_index", "source_entry_index", "value_index", "value_implementation_index",
+        for key in ("imports", "entry_index", "source_entry_index", "source_function_index", "value_index", "value_implementation_index",
                     "value_local_index", "compiler_sha256", "sysroot_sha256"):
             live.need(one[key] == two[key], f"generations disagree on {key}")
             build[key] = one[key]
@@ -183,7 +230,7 @@ def build_pair(args, target, language, out, api):
 
 def classify_launch_failure(row, target, log):
     # A closed socket, a signal or QEMU failure alone says nothing about an engine capability.
-    if row.get("process_exit") != 126:
+    if row.get("process_exit") != 126 or "debugger_status_reply" in row:
         return None
     clean = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", log)
     patterns = []
@@ -237,15 +284,12 @@ def run_cell(args, target, language, engine, capability, build, out, support):
             row["channel"] = "direct-parent/AF_UNIX/SOCK_SEQPACKET/SO_PASSCRED"
             vm.channel.settimeout(args.run_timeout)
             if row["expected"] == "reject-int-debug":
-                reply = vm.request("status")
-                raise ValueError(f"ordinary debugger admitted an explicitly selected interpreter: {reply}")
+                row["debugger_status_reply"] = vm.request("status")
+                raise ValueError(f"ordinary debugger admitted an explicitly selected interpreter: {row['debugger_status_reply']}")
             if capability == "source-debug":
                 live.debug_probe(vm, row, build, target, args.run_timeout)
             else:
                 live.dump_probe(vm, row, build, target, args.run_timeout, folder, snapshot)
-            if vm.process.poll() is None:
-                reply = vm.request("quit")
-                live.need("detached" in reply, reply)
             row["process_exit"] = vm.process.wait(timeout=args.run_timeout)
             live.need(row["process_exit"] == 0, f"debugged VM exit {row['process_exit']}")
         row.update(status="pass", positive=True)
@@ -260,8 +304,9 @@ def run_cell(args, target, language, engine, capability, build, out, support):
             # Compute the real pre-cleanup exit on a closed channel. Upstream's close
             # retires only this pidfd and may kill a still-attached debug server.
             if row["status"] == "failed":
+                exit_timeout = args.run_timeout if row["expected"] == "reject-int-debug" else .5
                 try:
-                    row["process_exit"] = vm.process.wait(timeout=.5)
+                    row["process_exit"] = vm.process.wait(timeout=exit_timeout)
                 except subprocess.TimeoutExpired:
                     pass
             row["commands"] = [item for i, item in enumerate(vm.commands)
@@ -302,8 +347,10 @@ def isolation_receipt():
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    for name in ("cc-sdk", "cxx-sdk", "vm", "vm-support", "work"):
+    for name in ("vm", "vm-support", "work"):
         p.add_argument("--" + name, required=True, type=lambda path: Path(path).resolve())
+    for config in LANGUAGES.values():
+        p.add_argument(f"--{config.sdk_option}-sdk", type=lambda path: Path(path).resolve())
     add_vm_identity_options(p)
     p.add_argument("--wrwat", type=lambda path: Path(path).resolve(), help="installed WAT frontend, required with threads")
     p.add_argument("--profile", action="append", choices=[t.name for t in PROFILES])
@@ -317,9 +364,16 @@ def main():
     p.add_argument("--compile-timeout", type=int, default=180)
     args = p.parse_args()
     targets = [t for t in PROFILES if not args.profile or t.name in args.profile]
-    args.engines = list(dict.fromkeys(args.engine or ENGINES))
+    args.engines = list(dict.fromkeys(args.engine or ["aot"]))
     languages = list(dict.fromkeys(args.language or LANGUAGES))
     args.capabilities = list(dict.fromkeys(args.capability or CAPABILITIES))
+    if ("int" in args.engines and any(c != "signed-hot-update" for c in args.capabilities)
+            and (len(targets), len(languages), len(args.capabilities)) != (1, 1, 1)):
+        p.error("an INT debugger rejection probe requires one --profile, one --language and one --capability")
+    args.sdks = {lang: getattr(args, LANGUAGES[lang].sdk_option + "_sdk") for lang in languages}
+    for lang, sdk in args.sdks.items():
+        if sdk is None:
+            p.error(f"--{LANGUAGES[lang].sdk_option}-sdk is required for {lang}")
     if any(t.threads for t in targets) and not args.wrwat:
         p.error("thread profiles require --wrwat")
     if min(args.jobs, args.run_timeout, args.compile_timeout) < 1:
@@ -343,9 +397,9 @@ def main():
     for name in ("TMPDIR", "TEMP", "TMP"):
         os.environ[name] = str(temp)
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
-    sys.path.insert(0, str(args.cc_sdk / "install"))
+    sys.path.insert(0, str(args.sdks[languages[0]] / "install"))
     import imports
-    args.selections = {lang: installed_sdk(args.cc_sdk if lang == "c" else args.cxx_sdk, lang) for lang in languages}
+    args.selections = {lang: installed_sdk(sdk, lang) for lang, sdk in args.sdks.items()}
     support = support_modules(args.vm_support)
     planned = len(targets) * len(languages) * len(args.engines) * len(args.capabilities)
     metadata = {"schema": "wros-cfamily-debug-v1", "round": args.round_id,
@@ -355,7 +409,8 @@ def main():
                 "profiles": [t.name for t in targets], "languages": languages, "engines": args.engines,
                 "capabilities": args.capabilities, "planned": planned,
                 "suite_sha256": {f.name: digest(f) for f in (Path(__file__), HERE / "debug_live.py", HERE / "sysroot_suite.py")},
-                "producer_frontends": {str(path): digest(path) for path in (args.cc_sdk / "bin/wrc", args.cxx_sdk / "bin/wrcc")},
+                "producer_frontends": {str(args.sdks[lang] / "bin" / LANGUAGES[lang].driver): selection["frontend_sha256"]
+                                       for lang, selection in args.selections.items()},
                 "wrwat_sha256": digest(args.wrwat) if args.wrwat else None}
     saved(args.work / "inputs.json", metadata)
     counts, limits = Counter(), Counter()
@@ -369,13 +424,14 @@ def main():
                     limits[row["limitation"]] += 1
                 print(row["host"], row["profile"], row["language"], row["engine"], row["capability"], row["status"], flush=True)
     complete = sum(counts.values()) == planned and not (counts["failed"] or counts["build-blocked"])
+    passed = counts["pass"] + counts["expected-rejection"] == planned
     summary = {"round": args.round_id, "ended_utc": datetime.now(timezone.utc).isoformat(),
                "planned": planned, "reported": sum(counts.values()), "positive": counts["pass"],
-               "expected_rejections_passed": counts["expected-rejection"], "measurements_complete": complete,
+               "expected_rejections_passed": counts["expected-rejection"], "measurements_complete": complete, "passed": passed,
                "outcomes": dict(counts), "limitations": dict(limits), "inputs_sha256": digest(args.work / "inputs.json"),
                "results_sha256": digest(args.work / "results.jsonl")}
     saved(args.work / "summary.json", summary)
-    return 0 if complete and not counts["restore-declined"] else 1
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":
