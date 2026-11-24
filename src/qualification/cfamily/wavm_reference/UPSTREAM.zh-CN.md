@@ -24,7 +24,7 @@ WAT 输出补丁修正 `Lib/WASTPrint/Print.cpp` 生成的根关键字 `module`�
 
 此配置下，软件检查覆盖标量访问、批量访问和宿主缓冲区访问所触及的全部标签粒度单元。关闭检查时，所有权指令返回输入指针，claimz 仍检查字节边界并清零。该参考配置拒绝共享和导入的内存、WASI 线程创建、硬件 MTE、客户提供的预编译目标文件以及宿主页面解除映射。运行范围为 64 位宿主上的单线程客户实例。参考实现使用 WAVM 自身的异常处理和宿主分配机制。WROS 专用分配器配额、可重放的熵源、异步报告和迁移超出本次比较范围。
 
-SDK 的 cJSON 验证程序含有全部五种分配指令编码，每个模块都声明了 15 条版本 2 的静态描述符。wasm32 程序的 SHA-256 为 `7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1`，wasm64 程序的 SHA-256 为 `ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967`。这些哈希标识输入文件。客户程序使用的其他核心指令（包括尾调用）还需要引擎单独支持。
+SDK 的 cJSON 验证程序含有全部五种分配指令编码，每个模块都声明了 15 条版本 2 的静态描述符。wasm32 程序的 SHA-256 为 `7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1`，wasm64 程序的 SHA-256 为 `ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967`。这些哈希标识输入文件。第五、六层补丁实现了这些原始客户程序使用的直接尾调用，并修正了带标签 LZ4 负载的 SIMD 通道检查。[原生 ABI、访存宽度和源码哈希](RETURN-CALL.zh-CN.md)
 
 ## 复现构建
 
@@ -36,19 +36,22 @@ git -C WAVM checkout --detach cd7107792bf69ffe62d245ab9479ec5421f13c75
 git -C WAVM apply "$WAVM_REFERENCE_DIR/wros-memtag-wire.patch" "$WAVM_REFERENCE_DIR/llvm23-api.patch"
 git -C WAVM apply "$WAVM_REFERENCE_DIR/wat-module-keyword.patch"
 git -C WAVM apply "$WAVM_REFERENCE_DIR/wros-private-ownership.patch"
+git -C WAVM apply "$WAVM_REFERENCE_DIR/core-return-call.patch"
+git -C WAVM apply "$WAVM_REFERENCE_DIR/tailcc-simd-lanes.patch"
+(cd WAVM && sha256sum -c "$WAVM_REFERENCE_DIR/PATCHED-SOURCES.sha256")
 cmake -S WAVM -B wavm-build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCMAKE_C_COMPILER="$LLVM_ROOT/bin/clang" -DCMAKE_CXX_COMPILER="$LLVM_ROOT/bin/clang++" \
   -DLLVM_DIR="$LLVM_ROOT/lib/cmake/llvm" -DCMAKE_CXX_FLAGS=-stdlib=libc++ \
   -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++ -DCMAKE_SHARED_LINKER_FLAGS=-stdlib=libc++ \
   '-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O3 -g -DNDEBUG' '-DCMAKE_C_FLAGS_RELWITHDEBINFO=-O3 -g -DNDEBUG' \
-  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWAVM_ENABLE_FUZZ_TARGETS=OFF
+  -DLINKER_HAS_WL___GDB_INDEX:INTERNAL=0 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWAVM_ENABLE_FUZZ_TARGETS=OFF
 cmake --build wavm-build --target wavm --parallel 6
 sha256sum wavm-build/bin/wavm wavm-build/libWAVM.so.0.0.0
 ```
 
-仅验证二进制编码时可省去应用所有权补丁的一行。对于 cJSON，将 `GUEST` 设为 wasm32 或 wasm64 客户程序路径。两个命令使用相同的迭代次数。原始模块还要求引擎支持其使用的全部核心指令。
+仅验证二进制编码时应用前三层补丁，并使用上文各层的哈希进行校验。构建完整参考程序后，将 `GUEST` 设为原始 wasm32 或 wasm64 cJSON 模块路径。两个命令使用相同的迭代次数。
 
 ```sh
-wavm-build/bin/wavm run --nocache --enable wros-ownership --enable memtag-soft-debug "$GUEST" 100
-wavm-build/bin/wavm run --nocache --enable wros-ownership "$GUEST" 100
+wavm-build/bin/wavm run --nocache --enable return-call --enable wros-ownership --enable memtag-soft-debug "$GUEST" 100
+wavm-build/bin/wavm run --nocache --enable return-call --enable wros-ownership "$GUEST" 100
 ```

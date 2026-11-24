@@ -1,0 +1,436 @@
+diff --git a/Include/WAVM/IR/FeatureSpec.h b/Include/WAVM/IR/FeatureSpec.h
+index f08a5e631cdc6fa400232ef83a0ff545e1e896b0..6b1cdfc6864eee48fca09842c3376a3bd9672b02 100644
+--- a/Include/WAVM/IR/FeatureSpec.h
++++ b/Include/WAVM/IR/FeatureSpec.h
+@@ -25,6 +25,7 @@
+ // command-line.
+ #define WAVM_ENUM_PROPOSED_FEATURES(V)                                                             \
+ 	V(threads, "threads", "Shared memories, atomic instructions, and WASI threads")                \
++	V(returnCall, "return-call", "Direct WebAssembly tail calls")                                  \
+ 	V(extendedNameSection, "extended-name-section", "Extended name section")                       \
+ 	V(multipleMemories, "multi-memory", "Multiple memories")                                       \
+ 	V(memory64, "memory64", "Memories with 64-bit addresses")
+diff --git a/Include/WAVM/IR/IR.h b/Include/WAVM/IR/IR.h
+index e6fe29ed3163cf96f4943c54f727e8a41ea9d328..1b5c87bf1b5f77135cecee3f26b1f0135c5b43ed 100644
+--- a/Include/WAVM/IR/IR.h
++++ b/Include/WAVM/IR/IR.h
+@@ -13,6 +13,9 @@ namespace WAVM { namespace IR {
+ 	inline constexpr Uptr numBytesTaggedPerPage = numBytesPerPage / 16u;
+ 	inline constexpr Uptr numBytesTaggedPerPageLog2 = 12;
+ 	inline constexpr Uptr maxReturnValues = 16;
++	// x86-64 tailcc uses a callee-pop RET imm16. A Wasm argument takes at most 16 stack
++	// bytes, including alignment. Reserve another 16 bytes for the final ABI alignment.
++	inline constexpr Uptr maxReturnCallParams = (UINT16_MAX - 16) / 16;
+ 	inline constexpr U64 maxMemory64WASMBytes =
+ #if (defined(WAVM_ENABLE_TSAN) && WAVM_ENABLE_TSAN) || defined(__ANDROID__)
+ 		// 1TB just could not run in many environments. Even on windows.
+diff --git a/Include/WAVM/IR/OperatorTable.h b/Include/WAVM/IR/OperatorTable.h
+index 33d8317d4f2c4b84c192bb4870e6067ef66e27ca..10116ec071ccf10054ab9dae79d26e888c50a982 100644
+--- a/Include/WAVM/IR/OperatorTable.h
++++ b/Include/WAVM/IR/OperatorTable.h
+@@ -22,6 +22,7 @@
+ 	visitOp(0x000f, return_            , "return"                           , NoImm                     , POLYMORPHIC               , mvp                    )   \
+ 	visitOp(0x0010, call               , "call"                             , FunctionImm               , POLYMORPHIC               , mvp                    )   \
+ 	visitOp(0x0011, call_indirect      , "call_indirect"                    , CallIndirectImm           , POLYMORPHIC               , mvp                    )   \
++	visitOp(0x0012, return_call        , "return_call"                      , FunctionImm               , POLYMORPHIC               , returnCall             )   \
+ /* Stack manipulation                                                                                                                                         */ \
+ 	visitOp(0x001a, drop               , "drop"                             , NoImm                     , POLYMORPHIC               , mvp                    )   \
+ /* Variables                                                                                                                                                  */ \
+diff --git a/Include/WAVM/LLVMJIT/LLVMJIT.h b/Include/WAVM/LLVMJIT/LLVMJIT.h
+index 3744986ac499b16b5f3c60f92c0f2c1f9c751929..fe27b4ee22adfac00341a8b37e67bb14bb4b8cde 100644
+--- a/Include/WAVM/LLVMJIT/LLVMJIT.h
++++ b/Include/WAVM/LLVMJIT/LLVMJIT.h
+@@ -37,6 +37,7 @@ namespace WAVM { namespace LLVMJIT {
+ 		valid,
+ 		invalidTargetSpec,
+ 		unsupportedArchitecture,
++		unsupportedReturnCallTarget,
+ 		x86CPUDoesNotSupportSSE41,
+ 		wavmDoesNotSupportSIMDOnArch,
+ 		memory64Requires64bitTarget,
+diff --git a/Lib/IR/Validate.cpp b/Lib/IR/Validate.cpp
+index cb586e52d2d03a8f4f0dcbbc1856ccc0ab8d0b18..258ef61a7b647a478de3962a0f4eea2ec622488e 100644
+--- a/Lib/IR/Validate.cpp
++++ b/Lib/IR/Validate.cpp
+@@ -658,6 +658,29 @@ struct FunctionValidationContext
+ 		popAndValidateTypeTuple("call arguments", calleeType.params());
+ 		pushOperandTuple(calleeType.results());
+ 	}
++	void return_call(FunctionImm imm)
++	{
++		VALIDATE_FEATURE("return_call", returnCall);
++		const FunctionType calleeType = validateFunctionIndex(module_, imm.functionIndex);
++		if(calleeType.callingConvention() != CallingConvention::wasm)
++		{
++			throw ValidationException("return_call requires a WebAssembly function");
++		}
++		if(functionType.params().size() > maxReturnCallParams
++		   || calleeType.params().size() > maxReturnCallParams)
++		{
++			throw ValidationException("return_call exceeds the native limit of "
++									  + std::to_string(maxReturnCallParams) + " parameters");
++		}
++		if(!isSubtype(calleeType.results(), functionType.results()))
++		{
++			throw ValidationException("return_call result type mismatch: expected "
++									  + asString(functionType.results()) + ", got "
++									  + asString(calleeType.results()));
++		}
++		popAndValidateTypeTuple("return_call arguments", calleeType.params());
++		enterUnreachable();
++	}
+ 	void call_indirect(CallIndirectImm imm)
+ 	{
+ 		VALIDATE_INDEX(imm.tableIndex, module_.tables.size());
+diff --git a/Lib/LLVMJIT/EmitContext.h b/Lib/LLVMJIT/EmitContext.h
+index eda31a6a56d850c37e852edf3ad66fea888d5d4d..c7cf63ab46be581d513a8766edcb6ba66cad338e 100644
+--- a/Lib/LLVMJIT/EmitContext.h
++++ b/Lib/LLVMJIT/EmitContext.h
+@@ -243,7 +243,7 @@ namespace WAVM { namespace LLVMJIT {
+ 														   intrinsicName,
+ 														   llvmModule);
+ 				intrinsicFunction->setCallingConv(
+-					asLLVMCallingConv(intrinsicType.callingConvention()));
++					asLLVMCallingConv(llvmContext, intrinsicType));
+ 			}
+ 
+ 			return emitCallOrInvoke(
+@@ -309,7 +309,7 @@ namespace WAVM { namespace LLVMJIT {
+ 			if(!unwindToBlock)
+ 			{
+ 				auto call = irBuilder.CreateCall(llvmCalleeType, callee, callArgs);
+-				call->setCallingConv(asLLVMCallingConv(callingConvention));
++				call->setCallingConv(asLLVMCallingConv(llvmContext, calleeType));
+ 				returnValue = call;
+ 			}
+ 			else
+@@ -322,7 +322,7 @@ namespace WAVM { namespace LLVMJIT {
+ #else
+ 				auto invoke = irBuilder.CreateInvoke(callee, returnBlock, unwindToBlock, callArgs);
+ #endif
+-				invoke->setCallingConv(asLLVMCallingConv(callingConvention));
++				invoke->setCallingConv(asLLVMCallingConv(llvmContext, calleeType));
+ 				irBuilder.SetInsertPoint(returnBlock);
+ 				returnValue = invoke;
+ 			}
+diff --git a/Lib/LLVMJIT/EmitCore.cpp b/Lib/LLVMJIT/EmitCore.cpp
+index 9d8f6d88f0cbdf973cf082b19d2da8b3c431f6d1..8ce75c46ca678fbaa1c405c62b5237985d2e1c84 100644
+--- a/Lib/LLVMJIT/EmitCore.cpp
++++ b/Lib/LLVMJIT/EmitCore.cpp
+@@ -324,33 +324,47 @@ void EmitFunctionContext::unreachable(NoImm)
+ // Call operators
+ //
+ 
+-void EmitFunctionContext::call(FunctionImm imm)
++void EmitFunctionContext::call(FunctionImm imm) { emitDirectCall(imm, false); }
++
++void EmitFunctionContext::return_call(FunctionImm imm) { emitDirectCall(imm, true); }
++
++void EmitFunctionContext::emitDirectCall(FunctionImm imm, bool isReturnCall)
+ {
+ 	WAVM_ASSERT(imm.functionIndex < moduleContext.functions.size());
+ 	WAVM_ASSERT(imm.functionIndex < irModule.functions.size());
+ 
+-	llvm::Value* callee = moduleContext.functions[imm.functionIndex];
++	llvm::Function* callee = moduleContext.functions[imm.functionIndex];
+ 	FunctionType calleeType = irModule.types[irModule.functions.getType(imm.functionIndex).index];
+ 
+-	// Pop the call arguments from the operand stack.
++	// Leave room for the implicit context argument of a Wasm tail call.
+ 	const Uptr numArguments = calleeType.params().size();
+-	auto llvmArgs = (llvm::Value**)alloca(sizeof(llvm::Value*) * numArguments);
+-	popMultiple(llvmArgs, numArguments);
+-
+-	// Coerce the arguments to their canonical type.
+-	for(Uptr argIndex = 0; argIndex < numArguments; ++argIndex)
++	llvm::SmallVector<llvm::Value*, 8> args(numArguments + 1);
++	popMultiple(args.data() + 1, numArguments);
++	for(Uptr index = 1; index < args.size(); ++index)
+ 	{
+-		llvmArgs[argIndex] = coerceToCanonicalType(llvmArgs[argIndex]);
++		args[index] = coerceToCanonicalType(args[index]);
+ 	}
+ 
+-	// Call the function.
+-	ValueVector results = emitCallOrInvoke(callee,
+-										   llvm::ArrayRef<llvm::Value*>(llvmArgs, numArguments),
+-										   calleeType,
+-										   getInnermostUnwindToBlock());
+-
+-	// Push the results on the operand stack.
+-	for(llvm::Value* result : results) { push(result); }
++	if(isReturnCall)
++	{
++		args[0] = wavmCreateLoad(irBuilder, llvmContext.i8PtrType, contextPointerVariable);
++		WAVM_ASSERT(callee->getCallingConv() == function->getCallingConv());
++		auto call = irBuilder.CreateCall(callee->getFunctionType(), callee, args);
++		call->setCallingConv(callee->getCallingConv());
++		call->setTailCallKind(llvm::CallInst::TCK_MustTail);
++		// The caller's handlers are gone when the callee starts. Forward its entire ABI result,
++		// including the current context and any results it placed in that context.
++		irBuilder.CreateRet(call);
++		enterUnreachable();
++	}
++	else
++	{
++		auto results = emitCallOrInvoke(callee,
++										llvm::ArrayRef<llvm::Value*>(args).drop_front(),
++										calleeType,
++										getInnermostUnwindToBlock());
++		for(llvm::Value* result : results) { push(result); }
++	}
+ }
+ void EmitFunctionContext::call_indirect(CallIndirectImm imm)
+ {
+diff --git a/Lib/LLVMJIT/EmitFunctionContext.h b/Lib/LLVMJIT/EmitFunctionContext.h
+index 7da98a26bcea1207150dab908ce39b503137ebfc..7f1b9e410cbf83f65d1f5a242ec9de70eec5e899 100644
+--- a/Lib/LLVMJIT/EmitFunctionContext.h
++++ b/Lib/LLVMJIT/EmitFunctionContext.h
+@@ -212,6 +212,7 @@ namespace WAVM { namespace LLVMJIT {
+ 		// This is called after unconditional control flow to indicate that operators following it
+ 		// are unreachable until the control stack is popped.
+ 		void enterUnreachable();
++		void emitDirectCall(IR::FunctionImm imm, bool isReturnCall);
+ 
+ 		llvm::Value* identity(llvm::Value* value, llvm::Type* type) { return value; }
+ 
+diff --git a/Lib/LLVMJIT/EmitModule.cpp b/Lib/LLVMJIT/EmitModule.cpp
+index 3627570f8357de4b221c4e7fd85c20329ce7ad5b..f5012dde4110124cc4f954bdcace47d0a3295499 100644
+--- a/Lib/LLVMJIT/EmitModule.cpp
++++ b/Lib/LLVMJIT/EmitModule.cpp
+@@ -198,8 +198,8 @@ void LLVMJIT::emitModule(const IR::Module& irModule,
+ 	}
+ 
+ 	// Create a LLVM external global that will point to the Instance.
+-	llvm::Constant* biasedInstanceIdAsPointer
+-		= createImportedConstant(outLLVMModule, "biasedInstanceId");
++	llvm::Constant* biasedInstanceIdAsPointer = createImportedConstant(
++		outLLVMModule, getBiasedInstanceIdSymbol(llvmContext.wasmCallingConv));
+ 	llvm::Constant* biasedInstanceId
+ 		= llvm::ConstantExpr::getPtrToInt(biasedInstanceIdAsPointer, moduleContext.iptrType);
+ 	moduleContext.instanceId
+@@ -228,7 +228,7 @@ void LLVMJIT::emitModule(const IR::Module& irModule,
+ 				? getExternalName("functionDef", functionIndex - irModule.functions.imports.size())
+ 				: getExternalName("functionImport", functionIndex),
+ 			&outLLVMModule);
+-		function->setCallingConv(asLLVMCallingConv(functionType.callingConvention()));
++		function->setCallingConv(asLLVMCallingConv(llvmContext, functionType));
+ 		moduleContext.functions[functionIndex] = function;
+ 	}
+ 
+diff --git a/Lib/LLVMJIT/LLVMCompile.cpp b/Lib/LLVMJIT/LLVMCompile.cpp
+index 7e5f703dd9b360605964bb2b9525993a48626cef..2aa9e63d18c1ac4df591c6859ab4ca1ada0755bb 100644
+--- a/Lib/LLVMJIT/LLVMCompile.cpp
++++ b/Lib/LLVMJIT/LLVMCompile.cpp
+@@ -191,6 +191,8 @@ static std::unique_ptr<llvm::TargetMachine> getAndValidateTargetMachine(
+ 		Errors::fatalf("Invalid target spec (triple=%s, cpu=%s).\n",
+ 					   targetSpec.triple.c_str(),
+ 					   targetSpec.cpu.c_str());
++	case TargetValidationResult::unsupportedReturnCallTarget:
++		Errors::fatal("Direct return_call requires LLVM 23 and x86-64 Linux with 64-bit pointers.");
+ 	case TargetValidationResult::unsupportedArchitecture:
+ 		Errors::fatalf("Unsupported target architecture (triple=%s, cpu=%s)",
+ 					   targetSpec.triple.c_str(),
+@@ -220,7 +222,7 @@ std::vector<U8> LLVMJIT::compileModule(const IR::Module& irModule, const TargetS
+ 		= getAndValidateTargetMachine(irModule.featureSpec, targetSpec);
+ 
+ 	// Emit LLVM IR for the module.
+-	LLVMContext llvmContext;
++	LLVMContext llvmContext(targetMachine->getTargetTriple());
+ 	llvm::Module llvmModule("", llvmContext);
+ 	emitModule(irModule, llvmContext, llvmModule, targetMachine.get());
+ 
+@@ -236,7 +238,7 @@ std::string LLVMJIT::emitLLVMIR(const IR::Module& irModule,
+ 		= getAndValidateTargetMachine(irModule.featureSpec, targetSpec);
+ 
+ 	// Emit LLVM IR for the module.
+-	LLVMContext llvmContext;
++	LLVMContext llvmContext(targetMachine->getTargetTriple());
+ 	llvm::Module llvmModule("", llvmContext);
+ 	emitModule(irModule, llvmContext, llvmModule, targetMachine.get());
+ 
+diff --git a/Lib/LLVMJIT/LLVMJIT.cpp b/Lib/LLVMJIT/LLVMJIT.cpp
+index f1588cf290bb2d711da3706f408efdc7c66e5c9c..11006df18171dc1e06cab079da95ed65b83da0f3 100644
+--- a/Lib/LLVMJIT/LLVMJIT.cpp
++++ b/Lib/LLVMJIT/LLVMJIT.cpp
+@@ -284,7 +284,20 @@ static void globalInitLLVMOnce()
+ 	WAVM_ASSERT(isLLVMInitialized);
+ }
+ 
+-LLVMContext::LLVMContext()
++// Choose the Wasm ABI by target so separately compiled modules, intrinsic wrappers and invoke
++// thunks agree even when their Wasm feature flags differ.
++llvm::CallingConv::ID LLVMJIT::getWasmCallingConv([[maybe_unused]] const llvm::Triple& target)
++{
++#if LLVM_VERSION_MAJOR == 23
++	if(target.getArch() == llvm::Triple::x86_64 && target.isOSLinux() && !target.isX32())
++	{
++		return llvm::CallingConv::Tail;
++	}
++#endif
++	return llvm::CallingConv::Fast;
++}
++
++LLVMContext::LLVMContext(const llvm::Triple& target) : wasmCallingConv(getWasmCallingConv(target))
+ {
+ 	globalInitLLVMOnce();
+ 
+@@ -425,6 +438,11 @@ TargetValidationResult LLVMJIT::validateTargetMachine(
+ 	const std::unique_ptr<llvm::TargetMachine>& targetMachine,
+ 	const FeatureSpec& featureSpec)
+ {
++	if(featureSpec.returnCall
++	   && getWasmCallingConv(targetMachine->getTargetTriple()) == llvm::CallingConv::Fast)
++	{
++		return TargetValidationResult::unsupportedReturnCallTarget;
++	}
+ 	const llvm::Triple::ArchType targetArch = targetMachine->getTargetTriple().getArch();
+ 	if(targetArch == llvm::Triple::x86_64)
+ 	{
+@@ -498,4 +516,4 @@ TargetValidationResult LLVMJIT::validateTargetWithFeatureSpecUpdate(const Target
+ }
+ 
+ Version LLVMJIT::getVersion()
+-{ return Version{LLVM_VERSION_MAJOR, LLVM_VERSION_MINOR, LLVM_VERSION_PATCH, 5}; }
++{ return Version{LLVM_VERSION_MAJOR, LLVM_VERSION_MINOR, LLVM_VERSION_PATCH, 6}; }
+diff --git a/Lib/LLVMJIT/LLVMJITPrivate.h b/Lib/LLVMJIT/LLVMJITPrivate.h
+index f019b3a161b08a3b86c06dcc94757e98c59f6ab9..9654739d6e213d59339e685a37c348b64789606e 100644
+--- a/Lib/LLVMJIT/LLVMJITPrivate.h
++++ b/Lib/LLVMJIT/LLVMJITPrivate.h
+@@ -63,6 +63,16 @@ namespace WAVM { namespace LLVMJIT {
+ 	typedef llvm::SmallVector<llvm::Value*, 1> ValueVector;
+ 	typedef llvm::SmallVector<llvm::PHINode*, 1> PHIVector;
+ 
++	llvm::CallingConv::ID getWasmCallingConv(const llvm::Triple& target);
++
++	// Every guest function prefix references this symbol. Versioning it prevents a loader from
++	// binding native objects built with the other stack cleanup convention.
++	inline const char* getBiasedInstanceIdSymbol(llvm::CallingConv::ID wasmCallingConv)
++	{
++		return wasmCallingConv == llvm::CallingConv::Fast ? "biasedInstanceId"
++														  : "biasedInstanceId.tailcc.v1";
++	}
++
+ 	struct LLVMContext : llvm::LLVMContext
+ 	{
+ 		llvm::Type* i8Type;
+@@ -111,7 +121,8 @@ namespace WAVM { namespace LLVMJIT {
+ 		// Maps a type ID to the corresponding LLVM type.
+ 		llvm::Type* valueTypes[IR::numValueTypes];
+ 
+-		LLVMContext();
++		const llvm::CallingConv::ID wasmCallingConv;
++		explicit LLVMContext(const llvm::Triple& target);
+ 	};
+ 
+ 	// Overloaded functions that compile a literal value to a LLVM constant of the right type.
+@@ -263,11 +274,15 @@ namespace WAVM { namespace LLVMJIT {
+ 			llvmReturnType, llvm::ArrayRef<llvm::Type*>(llvmArgTypes, numParameters), false);
+ 	}
+ 
+-	inline llvm::CallingConv::ID asLLVMCallingConv(IR::CallingConvention callingConvention)
++	inline llvm::CallingConv::ID asLLVMCallingConv(const LLVMContext& llvmContext,
++												  IR::FunctionType functionType)
+ 	{
+-		switch(callingConvention)
++		switch(functionType.callingConvention())
+ 		{
+-		case IR::CallingConvention::wasm: return llvm::CallingConv::Fast;
++		case IR::CallingConvention::wasm:
++			return functionType.params().size() <= IR::maxReturnCallParams
++					   ? llvmContext.wasmCallingConv
++					   : llvm::CallingConv::Fast;
+ 
+ 		case IR::CallingConvention::intrinsic:
+ 		case IR::CallingConvention::intrinsicWithContextSwitch:
+diff --git a/Lib/LLVMJIT/LLVMModule.cpp b/Lib/LLVMJIT/LLVMModule.cpp
+index f6106675ab1f6057cfa1ec7b19ea4fd3d1c14c62..b42a33dca3ed8e751c54857aac24710a1a66e68f 100644
+--- a/Lib/LLVMJIT/LLVMModule.cpp
++++ b/Lib/LLVMJIT/LLVMModule.cpp
+@@ -896,7 +896,9 @@ std::shared_ptr<LLVMJIT::Module> LLVMJIT::loadModule(
+ 
+ 	// Bind the instance symbol to point to the Instance.
+ 	WAVM_ASSERT(instance.id != UINTPTR_MAX);
+-	importedSymbolMap.addOrFail("biasedInstanceId", instance.id + 1);
++	const llvm::Triple hostTriple(getHostTargetSpec().triple);
++	importedSymbolMap.addOrFail(getBiasedInstanceIdSymbol(getWasmCallingConv(hostTriple)),
++								instance.id + 1);
+ 
+ 	// Bind the tableReferenceBias symbol to the tableReferenceBias.
+ 	importedSymbolMap.addOrFail("tableReferenceBias", tableReferenceBias);
+diff --git a/Lib/LLVMJIT/Thunk.cpp b/Lib/LLVMJIT/Thunk.cpp
+index 99362bae2cad7439a2903833470933fc2972788c..1fe54cdff16a0949f50b083474f469bfaebfb375 100644
+--- a/Lib/LLVMJIT/Thunk.cpp
++++ b/Lib/LLVMJIT/Thunk.cpp
+@@ -94,9 +94,10 @@ InvokeThunkPointer LLVMJIT::getInvokeThunkWithMemtagged(FunctionType functionTyp
+ 		= new FunctionMutableData("thnk!C to WASM thunk!" + asString(functionType));
+ 
+ 	// Create a LLVM module and a LLVM function for the thunk.
+-	LLVMContext llvmContext;
+-	llvm::Module llvmModule("", llvmContext);
+ 	std::unique_ptr<llvm::TargetMachine> targetMachine = getTargetMachine(getHostTargetSpec());
++	LLVMContext llvmContext(targetMachine->getTargetTriple());
++	llvm::Module llvmModule("", llvmContext);
++	llvmModule.setTargetTriple(targetMachine->getTargetTriple());
+ 	llvmModule.setDataLayout(targetMachine->createDataLayout());
+ 	auto llvmFunctionType = llvm::FunctionType::get(llvmContext.i8PtrType,
+ 													{llvmContext.i8PtrType,
+diff --git a/Lib/WASM/WASMSerialization.cpp b/Lib/WASM/WASMSerialization.cpp
+index 42f45d340d625d4129fa8b0376ceb755e5b2f837..16525b4ff7a64595099ff8a6400860e5364b673b 100644
+--- a/Lib/WASM/WASMSerialization.cpp
++++ b/Lib/WASM/WASMSerialization.cpp
+@@ -1215,6 +1215,8 @@ static void serializeFunctionBody(InputStream& sectionStream,
+ 	}
+ 			WAVM_ENUM_NONOVERLOADED_OPERATORS(VISIT_OPCODE)
+ #undef VISIT_OPCODE
++		case 0x13: throw FatalSerializationException("return_call_indirect is unsupported");
++		case 0x15: throw FatalSerializationException("return_call_ref is unsupported");
+ 		// Explicitly handle both select opcodes here:
+ 		case 0x1b: {
+ 			SelectImm imm{ValueType::any};
+diff --git a/Lib/WASTPrint/Print.cpp b/Lib/WASTPrint/Print.cpp
+index 27f0c196c2c91abdc6cd1241813e71e6a7424113..8efe18bf50fd4c1f8cd88d8de70db255e8704bb9 100644
+--- a/Lib/WASTPrint/Print.cpp
++++ b/Lib/WASTPrint/Print.cpp
+@@ -558,6 +558,11 @@ struct FunctionPrintContext
+ 	{
+ 		string += "\ncall " + moduleContext.names.functions[imm.functionIndex].name;
+ 	}
++	void return_call(FunctionImm imm)
++	{
++		string += "\nreturn_call";
++		printImm(imm);
++	}
+ 	void call_indirect(CallIndirectImm imm)
+ 	{
+ 		string += "\ncall_indirect " + moduleContext.names.tables[imm.tableIndex];
+diff --git a/Programs/wavm/wavm-compile.cpp b/Programs/wavm/wavm-compile.cpp
+index 3a6f0cd62ae10e783841c5ca49212213c3f4b1f2..339441d770a6606f45f8dc8c055f9585c30a80fd 100644
+--- a/Programs/wavm/wavm-compile.cpp
++++ b/Programs/wavm/wavm-compile.cpp
+@@ -218,6 +218,10 @@ int execCompileCommand(int argc, char** argv)
+ 					targetSpec.triple.c_str(),
+ 					targetSpec.cpu.c_str());
+ 		return EXIT_FAILURE;
++	case LLVMJIT::TargetValidationResult::unsupportedReturnCallTarget:
++		Log::printf(Log::error,
++					"Direct return_call requires LLVM 23 and x86-64 Linux with 64-bit pointers.\n");
++		return EXIT_FAILURE;
+ 	case LLVMJIT::TargetValidationResult::unsupportedArchitecture:
+ 		Log::printf(Log::error, "WAVM doesn't support the target architecture.\n");
+ 		return EXIT_FAILURE;
+diff --git a/Programs/wavm/wavm-run.cpp b/Programs/wavm/wavm-run.cpp
+index f2e215da7934914754f7b5c9d380d7e8acd128ee..081ffdc91adfd78eb4ea973b4b14c82704ed87bd 100644
+--- a/Programs/wavm/wavm-run.cpp
++++ b/Programs/wavm/wavm-run.cpp
+@@ -405,6 +405,10 @@ struct State
+ 		{
+ 		case LLVMJIT::TargetValidationResult::valid: break;
+ 
++		case LLVMJIT::TargetValidationResult::unsupportedReturnCallTarget:
++			Log::printf(Log::error,
++						"Direct return_call requires LLVM 23 and x86-64 Linux with 64-bit pointers.\n");
++			return false;
+ 		case LLVMJIT::TargetValidationResult::unsupportedArchitecture:
+ 			Log::printf(Log::error, "Host architecture is not supported by WAVM.");
+ 			return false;

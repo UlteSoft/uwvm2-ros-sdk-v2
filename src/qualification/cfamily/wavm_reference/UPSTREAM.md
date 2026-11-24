@@ -24,11 +24,11 @@ Enable `wros-ownership` for modules using this layer. A locally defined private 
 
 WAVM's software checks cover every granule touched by a scalar, bulk or host-buffer access in this profile. The identity configuration returns the input pointer from ownership instructions and preserves the bounds-checked byte clearing required by claimz. The profile rejects shared and imported memory, WASI thread spawning, hardware MTE, guest-supplied precompiled objects and host page unmapping. The reference runs one guest thread per instance on a 64-bit host. It uses the WAVM exception and host allocation mechanisms. WROS-specific allocator quotas, replayable entropy, asynchronous reporting and migrations are outside this comparison.
 
-The SDK cJSON qualification guests contain all five allocation instruction encodings and 15 version-2 static descriptors per module. The wasm32 guest SHA-256 is `7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1`. The wasm64 guest SHA-256 is `ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967`. These identities describe input artifacts. Additional core instructions, including tail calls where present, need independent engine support.
+The SDK cJSON qualification guests contain all five allocation instruction encodings and 15 version-2 static descriptors per module. The wasm32 guest SHA-256 is `7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1`. The wasm64 guest SHA-256 is `ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967`. These identities describe input artifacts. The fifth and sixth layers implement the direct tail calls used by the original guests and correct SIMD lane checks on the tagged LZ4 workload. [Native ABI, access widths and source hashes](RETURN-CALL.md)
 
 ## Rebuild
 
-From a writable build directory, set `WAVM_REFERENCE_DIR` to this directory in the SDK and `LLVM_ROOT` to a Clang/LLVM install prefix with libc++. The x86-64 Linux host toolchain reports Clang and LLVM `23.0.0git` from LLVM revision `4c4c1db7c69a6fda6cfa6bc6066bb09a433edc89`. The same prefix provides the compiler, CMake package and libc++. This pin identifies the WAVM host toolchain. The WROS SDK records its guest compiler separately. [LLVM source revision](https://github.com/llvm/llvm-project/tree/4c4c1db7c69a6fda6cfa6bc6066bb09a433edc89)
+From a writable build directory, set `WAVM_REFERENCE_DIR` to the absolute path of this directory in the SDK and `LLVM_ROOT` to a Clang/LLVM install prefix with libc++. The x86-64 Linux host toolchain reports Clang and LLVM `23.0.0git` from LLVM revision `4c4c1db7c69a6fda6cfa6bc6066bb09a433edc89`. The same prefix provides the compiler, CMake package and libc++. This pin identifies the WAVM host toolchain. The WROS SDK records its guest compiler separately. [LLVM source revision](https://github.com/llvm/llvm-project/tree/4c4c1db7c69a6fda6cfa6bc6066bb09a433edc89)
 
 ```sh
 git clone --branch mt-2 https://github.com/trcrsired/WAVM.git WAVM
@@ -36,19 +36,22 @@ git -C WAVM checkout --detach cd7107792bf69ffe62d245ab9479ec5421f13c75
 git -C WAVM apply "$WAVM_REFERENCE_DIR/wros-memtag-wire.patch" "$WAVM_REFERENCE_DIR/llvm23-api.patch"
 git -C WAVM apply "$WAVM_REFERENCE_DIR/wat-module-keyword.patch"
 git -C WAVM apply "$WAVM_REFERENCE_DIR/wros-private-ownership.patch"
+git -C WAVM apply "$WAVM_REFERENCE_DIR/core-return-call.patch"
+git -C WAVM apply "$WAVM_REFERENCE_DIR/tailcc-simd-lanes.patch"
+(cd WAVM && sha256sum -c "$WAVM_REFERENCE_DIR/PATCHED-SOURCES.sha256")
 cmake -S WAVM -B wavm-build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCMAKE_C_COMPILER="$LLVM_ROOT/bin/clang" -DCMAKE_CXX_COMPILER="$LLVM_ROOT/bin/clang++" \
   -DLLVM_DIR="$LLVM_ROOT/lib/cmake/llvm" -DCMAKE_CXX_FLAGS=-stdlib=libc++ \
   -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++ -DCMAKE_SHARED_LINKER_FLAGS=-stdlib=libc++ \
   '-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O3 -g -DNDEBUG' '-DCMAKE_C_FLAGS_RELWITHDEBINFO=-O3 -g -DNDEBUG' \
-  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWAVM_ENABLE_FUZZ_TARGETS=OFF
+  -DLINKER_HAS_WL___GDB_INDEX:INTERNAL=0 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWAVM_ENABLE_FUZZ_TARGETS=OFF
 cmake --build wavm-build --target wavm --parallel 6
 sha256sum wavm-build/bin/wavm wavm-build/libWAVM.so.0.0.0
 ```
 
-To select the source layers for wire-format qualification alone, omit the ownership patch line. For the cJSON workload, set `GUEST` to the wasm32 or wasm64 artifact. Both commands pass the same iteration count. Running these commands on the original guests also requires support for every core opcode they use.
+For wire-format qualification alone, apply the first three patches and use the individual hashes above. For the complete build, set `GUEST` to the original wasm32 or wasm64 cJSON artifact. Both commands pass the same iteration count.
 
 ```sh
-wavm-build/bin/wavm run --nocache --enable wros-ownership --enable memtag-soft-debug "$GUEST" 100
-wavm-build/bin/wavm run --nocache --enable wros-ownership "$GUEST" 100
+wavm-build/bin/wavm run --nocache --enable return-call --enable wros-ownership --enable memtag-soft-debug "$GUEST" 100
+wavm-build/bin/wavm run --nocache --enable return-call --enable wros-ownership "$GUEST" 100
 ```

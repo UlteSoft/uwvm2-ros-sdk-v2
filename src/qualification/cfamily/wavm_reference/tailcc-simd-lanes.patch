@@ -1,0 +1,147 @@
+diff --git a/Lib/LLVMJIT/EmitCore.cpp b/Lib/LLVMJIT/EmitCore.cpp
+index 8ce75c46ca678fbaa1c405c62b5237985d2e1c84..13f2f7edda6e5f8dbbf91778bc9816ecf9510b27 100644
+--- a/Lib/LLVMJIT/EmitCore.cpp
++++ b/Lib/LLVMJIT/EmitCore.cpp
+@@ -348,9 +348,13 @@ void EmitFunctionContext::emitDirectCall(FunctionImm imm, bool isReturnCall)
+ 	if(isReturnCall)
+ 	{
+ 		args[0] = wavmCreateLoad(irBuilder, llvmContext.i8PtrType, contextPointerVariable);
+-		WAVM_ASSERT(callee->getCallingConv() == function->getCallingConv());
++		WAVM_ERROR_UNLESS(llvmContext.wasmCallingConv != llvm::CallingConv::Fast
++						  && function->getCallingConv() == llvmContext.wasmCallingConv
++						  && callee->getCallingConv() == llvmContext.wasmCallingConv);
+ 		auto call = irBuilder.CreateCall(callee->getFunctionType(), callee, args);
+ 		call->setCallingConv(callee->getCallingConv());
++		// Keep the return in tail position through WAVM's scalar passes. LLVMCompile
++		// selects the pinned x86 backend's stack-moving tailcc path before emission.
+ 		call->setTailCallKind(llvm::CallInst::TCK_MustTail);
+ 		// The caller's handlers are gone when the callee starts. Forward its entire ABI result,
+ 		// including the current context and any results it placed in that context.
+diff --git a/Lib/LLVMJIT/EmitMem.cpp b/Lib/LLVMJIT/EmitMem.cpp
+index 18c7b1d0789eccc397763414b8c4ade198bf0ac4..2b8c86fb8a0cc50c32397a093409a658678523e7 100644
+--- a/Lib/LLVMJIT/EmitMem.cpp
++++ b/Lib/LLVMJIT/EmitMem.cpp
+@@ -2100,10 +2100,10 @@ static void emitStoreLane(EmitFunctionContext& functionContext,
+ 
+ #define EMIT_LOAD_LANE_OP(name, llvmVectorType, naturalAlignmentLog2, numLanes)                    \
+ 	void EmitFunctionContext::name(LoadOrStoreLaneImm<naturalAlignmentLog2, numLanes> imm)         \
+-	{ emitLoadLane(*this, llvmVectorType, imm, imm.laneIndex, U64(1) << naturalAlignmentLog2); }
++	{ emitLoadLane(*this, llvmVectorType, imm, imm.laneIndex, naturalAlignmentLog2); }
+ #define EMIT_STORE_LANE_OP(name, llvmVectorType, naturalAlignmentLog2, numLanes)                   \
+ 	void EmitFunctionContext::name(LoadOrStoreLaneImm<naturalAlignmentLog2, numLanes> imm)         \
+-	{ emitStoreLane(*this, llvmVectorType, imm, imm.laneIndex, U64(1) << naturalAlignmentLog2); }
++	{ emitStoreLane(*this, llvmVectorType, imm, imm.laneIndex, naturalAlignmentLog2); }
+ EMIT_LOAD_LANE_OP(v128_load8_lane, llvmContext.i8x16Type, 0, 16)
+ EMIT_LOAD_LANE_OP(v128_load16_lane, llvmContext.i16x8Type, 1, 8)
+ EMIT_LOAD_LANE_OP(v128_load32_lane, llvmContext.i32x4Type, 2, 4)
+diff --git a/Lib/LLVMJIT/LLVMCompile.cpp b/Lib/LLVMJIT/LLVMCompile.cpp
+index 2aa9e63d18c1ac4df591c6859ab4ca1ada0755bb..89cb63be7cf3914fd6bba425d3e5e0b091049102 100644
+--- a/Lib/LLVMJIT/LLVMCompile.cpp
++++ b/Lib/LLVMJIT/LLVMCompile.cpp
+@@ -26,6 +26,7 @@ PUSH_DISABLE_WARNINGS_FOR_LLVM_HEADERS
+ #include <llvm/ADT/ilist_iterator.h>
+ #include <llvm/CodeGen/TargetSubtargetInfo.h>
+ #include <llvm/ExecutionEngine/ExecutionEngine.h>
++#include <llvm/IR/InstIterator.h>
+ #include <llvm/IR/LegacyPassManager.h>
+ #include <llvm/IR/Module.h>
+ #include <llvm/IR/Verifier.h>
+@@ -129,6 +130,30 @@ static void optimizeLLVMModule(llvm::Module& llvmModule, bool shouldLogMetrics)
+ 	}
+ }
+ 
++static void lowerX86ReturnCalls([[maybe_unused]] llvm::Module& llvmModule)
++{
++#if LLVM_VERSION_MAJOR == 23
++	for(auto& function : llvmModule)
++	{
++		if(function.getCallingConv() != llvm::CallingConv::Tail) { continue; }
++		for(auto& inst : llvm::instructions(function))
++		{
++			auto* call = llvm::dyn_cast<llvm::CallInst>(&inst);
++			if(!call || !call->isMustTailCall()) { continue; }
++
++			// LLVM 23's x86 backend treats musttail as a sibling call with stack
++			// arguments already in place. A tail-marked tailcc call in this position
++			// guarantees the jump and moves the arguments and return address as needed.
++			auto* ret = llvm::dyn_cast_or_null<llvm::ReturnInst>(call->getNextNode());
++			WAVM_ERROR_UNLESS(ret && ret->getReturnValue() == call);
++			WAVM_ERROR_UNLESS(call->getCallingConv() == llvm::CallingConv::Tail
++							  && !call->getFunctionType()->isVarArg() && !function.isVarArg());
++			call->setTailCallKind(llvm::CallInst::TCK_Tail);
++		}
++	}
++#endif
++}
++
+ std::vector<U8> LLVMJIT::compileLLVMModule(LLVMContext& llvmContext,
+ 										   llvm::Module&& llvmModule,
+ 										   bool shouldLogMetrics,
+@@ -148,6 +173,7 @@ std::vector<U8> LLVMJIT::compileLLVMModule(LLVMContext& llvmContext,
+ 
+ 	// Optimize the module;
+ 	optimizeLLVMModule(llvmModule, shouldLogMetrics);
++	lowerX86ReturnCalls(llvmModule);
+ 
+ 	// Generate machine code for the module.
+ 	Timing::Timer machineCodeTimer;
+@@ -244,6 +270,7 @@ std::string LLVMJIT::emitLLVMIR(const IR::Module& irModule,
+ 
+ 	// Optimize the LLVM IR.
+ 	if(optimize) { optimizeLLVMModule(llvmModule, true); }
++	lowerX86ReturnCalls(llvmModule);
+ 
+ 	// Print the LLVM IR.
+ 	return printModule(llvmModule);
+diff --git a/Lib/LLVMJIT/LLVMJIT.cpp b/Lib/LLVMJIT/LLVMJIT.cpp
+index 11006df18171dc1e06cab079da95ed65b83da0f3..15f2980723f7f94928f4c22158a467a3bddde182 100644
+--- a/Lib/LLVMJIT/LLVMJIT.cpp
++++ b/Lib/LLVMJIT/LLVMJIT.cpp
+@@ -289,7 +289,8 @@ static void globalInitLLVMOnce()
+ llvm::CallingConv::ID LLVMJIT::getWasmCallingConv([[maybe_unused]] const llvm::Triple& target)
+ {
+ #if LLVM_VERSION_MAJOR == 23
+-	if(target.getArch() == llvm::Triple::x86_64 && target.isOSLinux() && !target.isX32())
++	if(target.getArch() == llvm::Triple::x86_64 && target.isOSLinux()
++	   && target.isOSBinFormatELF() && !target.isX32())
+ 	{
+ 		return llvm::CallingConv::Tail;
+ 	}
+@@ -411,6 +412,11 @@ std::unique_ptr<llvm::TargetMachine> LLVMJIT::getTargetMachine(
+ 	}
+ #endif
+ 	llvm::EngineBuilder engineBuilder;
++	if(getWasmCallingConv(triple) != llvm::CallingConv::Fast)
++	{
++		// The x86-64 tail-call guarantee covers external Wasm entries with static relocation.
++		engineBuilder.setRelocationModel(llvm::Reloc::Static);
++	}
+ 	::std::string errormessage;
+ 	engineBuilder.setErrorStr(::std::addressof(errormessage));
+ #if LLVM_VERSION_MAJOR >= 13
+@@ -516,4 +522,4 @@ TargetValidationResult LLVMJIT::validateTargetWithFeatureSpecUpdate(const Target
+ }
+ 
+ Version LLVMJIT::getVersion()
+-{ return Version{LLVM_VERSION_MAJOR, LLVM_VERSION_MINOR, LLVM_VERSION_PATCH, 6}; }
++{ return Version{LLVM_VERSION_MAJOR, LLVM_VERSION_MINOR, LLVM_VERSION_PATCH, 7}; }
+diff --git a/Lib/LLVMJIT/LLVMJITPrivate.h b/Lib/LLVMJIT/LLVMJITPrivate.h
+index 9654739d6e213d59339e685a37c348b64789606e..7ee32abf0974b38923cbfa6e6ba369deeb7a242a 100644
+--- a/Lib/LLVMJIT/LLVMJITPrivate.h
++++ b/Lib/LLVMJIT/LLVMJITPrivate.h
+@@ -65,12 +65,12 @@ namespace WAVM { namespace LLVMJIT {
+ 
+ 	llvm::CallingConv::ID getWasmCallingConv(const llvm::Triple& target);
+ 
+-	// Every guest function prefix references this symbol. Versioning it prevents a loader from
+-	// binding native objects built with the other stack cleanup convention.
++	// Every guest function prefix references this symbol. Version it with the Wasm ABI
++	// and the x86 tail-call lowering used by precompiled objects.
+ 	inline const char* getBiasedInstanceIdSymbol(llvm::CallingConv::ID wasmCallingConv)
+ 	{
+ 		return wasmCallingConv == llvm::CallingConv::Fast ? "biasedInstanceId"
+-														  : "biasedInstanceId.tailcc.v1";
++													  : "biasedInstanceId.tailcc.v2";
+ 	}
+ 
+ 	struct LLVMContext : llvm::LLVMContext
