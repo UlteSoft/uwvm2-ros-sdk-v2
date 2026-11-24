@@ -18,9 +18,11 @@ import isolated
 from sysroot_suite import digest, vm_elf_host
 
 SOURCES = HERE / "mte_performance_sources"
+SYSTEM_PYTHON = "/usr/bin/python3"
 WORK = Path("/work")
 VM = "/inputs/uwvm2-ros"
 PROGRAMS = Path("/inputs/programs")
+I686_LIBATOMIC = Path("/inputs/i686-lib/libatomic.so.1")
 TRACER = "/inputs/strace"
 PUBLISHED = Path("/qualification/mte-performance.json")
 CELLS = tuple(itertools.product(("int", "aot"), (32, 64)))
@@ -95,13 +97,13 @@ def vm_command(bits, engine, mode, count):
     return [*argv, "--run", str(PROGRAMS / f"linear-{bits}-{kind}.wasm"), str(count)]
 
 
-def sample(bits, engine, mode, count, known, *, trace=False):
+def sample(bits, engine, mode, count, known, *, trace=False, env=None):
     argv = vm_command(bits, engine, mode, count)
     if trace:
         tracefile = WORK / f"{engine}-{bits}.strace"
         argv = [TRACER, "-f", "-qq", "-e", "trace=prctl,mmap,mprotect", "-o", str(tracefile), *argv]
     start = time.monotonic_ns()
-    proc = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=120)
+    proc = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=120, env=env)
     elapsed = time.monotonic_ns() - start
     match = RESULT.fullmatch(proc.stdout)
     if proc.returncode or not match:
@@ -129,7 +131,7 @@ def quartiles(values):
     return statistics.quantiles(values, n=4, method="inclusive")
 
 
-def measure_cell(args, index, engine, bits, known):
+def measure_cell(args, index, engine, bits, known, env):
     modes = ("ordinary", "disabled", "software") + (("hardware",) if args.hardware else ())
     report = {"engine": engine, "wasm_bits": bits}
     if args.hardware:
@@ -137,7 +139,7 @@ def measure_cell(args, index, engine, bits, known):
     length = args.iterations
     if length is None:
         probe = 1 << (17 if args.emulated or engine == "int" else 21)
-        calibration = sample(bits, engine, "software", probe, known)
+        calibration = sample(bits, engine, "software", probe, known, env=env)
         desired = probe * 320_000_000 // calibration["guest_ns"]
         length = min(MAX_ITERATIONS, 1 << max(14, desired.bit_length() - 1))
         report["calibration"] = {"iterations": probe, **calibration}
@@ -152,7 +154,7 @@ def measure_cell(args, index, engine, bits, known):
         pair = {mode: {} for mode in modes}
         for label, count in sizes[shift:] + sizes[:shift]:
             for mode in order:
-                pair[mode][label] = sample(bits, engine, mode, count, known)
+                pair[mode][label] = sample(bits, engine, mode, count, known, env=env)
         pairs.append(pair)
     ratios = {f"{mode}_over_{base}": quartiles([p[mode]["long"]["guest_ns"] / p[base]["long"]["guest_ns"]
                                                for p in pairs])
@@ -170,24 +172,27 @@ def measure_cell(args, index, engine, bits, known):
 
 def run(args, isolation):
     known_path = PROGRAMS / "checksums.json"
+    checksums_sha = digest(known_path)
     receipt = json.loads((PROGRAMS / "build-receipt.json").read_bytes())
     published = json.loads(PUBLISHED.read_bytes())
     if digest(SOURCES / "linear-clock.c") != receipt["source_sha256"]:
         raise ValueError("kernel source differs from the build receipt")
     if "checksums_sha256" in receipt:
-        if (digest(known_path) != receipt["checksums_sha256"]
+        if (checksums_sha != receipt["checksums_sha256"]
                 or digest(SOURCES / "reference.c") != receipt["reference_source_sha256"]):
             raise ValueError("native checksum table or reference source differs from the build receipt")
     elif (digest(PROGRAMS / "build-receipt.json") != published["build_receipt_sha256"]
-          or digest(known_path) != "7f25ff66779dc15c0d4af9f94937239a9687e26020f39e4248cb426be4a6c7ac"):
+          or checksums_sha != "7f25ff66779dc15c0d4af9f94937239a9687e26020f39e4248cb426be4a6c7ac"):
         raise ValueError("unrecognized original build receipt or independent native checksum table")
     known = json.loads(known_path.read_bytes())
     cells = [(i, engine, bits) for i, (engine, bits) in enumerate(CELLS)
              if (not args.width or bits in args.width) and (not args.engine or engine in args.engine)]
-    for bits in {bits for _, _, bits in cells}:
+    modules = {}
+    for bits in sorted({bits for _, _, bits in cells}):
         for kind in ("ordinary", "tagged"):
             module = PROGRAMS / f"linear-{bits}-{kind}.wasm"
-            if digest(module) != receipt["modules"][module.name]["sha256"]:
+            modules[module.name] = digest(module)
+            if modules[module.name] != receipt["modules"][module.name]["sha256"]:
                 raise ValueError(f"program digest mismatch for {module.name}")
     host = vm_elf_host(VM)
     if not host:
@@ -202,11 +207,87 @@ def run(args, isolation):
               "matches_published_modules": all(receipt["modules"][name]["sha256"] == expected["sha256"]
                                                for name, expected in published["modules"].items()
                                                if name in receipt["modules"]),
-              "build_receipt_sha256": digest(PROGRAMS / "build-receipt.json"),
+              "build_receipt_sha256": digest(PROGRAMS / "build-receipt.json"), "checksums_sha256": checksums_sha,
+              "module_sha256": modules,
               "repeats": args.repeats, "isolation": isolation, "measurements": []}
+    env = None
+    if args.phase == "x86-matrix" and host == "linux-i686" and args.i686_libatomic:
+        if vm_elf_host(I686_LIBATOMIC) != host:
+            raise ValueError("expected an i386 libatomic.so.1")
+        report["i686_libatomic_sha256"] = digest(I686_LIBATOMIC)
+        env = {**os.environ, "LD_LIBRARY_PATH": str(I686_LIBATOMIC.parent)}
     for index, engine, bits in cells:
-        report["measurements"].append(measure_cell(args, index, engine, bits, known))
+        report["measurements"].append(measure_cell(args, index, engine, bits, known, env))
     save(WORK / "summary.json", report)
+
+
+def launch(args, work, inputs):
+    cfamily = Path("/checkout/src/qualification/cfamily")
+    entry = cfamily / "mte_performance.py"
+    readonly = [(Path(__file__).resolve(), entry),
+                (HERE / "sysroot_suite.py", cfamily / "sysroot_suite.py"),
+                (HERE.parent / "isolated.py", cfamily.parent / "isolated.py"),
+                (SOURCES, cfamily / SOURCES.name), *inputs]
+    for source, dest in readonly:
+        source.resolve(strict=True)
+    work.mkdir(parents=True, mode=0o700)
+    namespace = argparse.Namespace(network="offline", vm=None, rust=None, xmake=None, xmake_data=None,
+                                  command=[SYSTEM_PYTHON, "-I", "-B", str(entry),
+                                           "--inside", *sys.argv[sys.argv.index(args.phase):]])
+    return isolated.sandbox(namespace, work, readonly=readonly, strict_offline=True)
+
+
+def x86_matrix(args, work, inputs):
+    uname = os.uname()
+    if (uname.sysname, uname.machine) != ("Linux", "x86_64"):
+        raise ValueError("x86-matrix requires native x86_64 Linux with i686 execution support")
+    vms = (("x86_64", args.vm_x86_64), ("i686", args.vm_i686))
+    for abi, vm in vms:
+        if vm_elf_host(vm) != "linux-" + abi or not os.access(vm, os.X_OK):
+            raise ValueError(f"--vm-{abi} requires an executable Linux {abi} ELF")
+    if args.i686_libatomic and vm_elf_host(args.i686_libatomic) != "linux-i686":
+        raise ValueError("--i686-libatomic requires an i386 libatomic.so.1 ELF")
+    for source, _ in inputs:
+        if not source.is_file():
+            raise ValueError(f"missing input file: {source}")
+    allowed = os.sched_getaffinity(0)
+    cpu = min(allowed) if args.cpu is None else args.cpu
+    if cpu not in allowed:
+        raise ValueError(f"CPU {cpu} is outside the permitted affinity")
+    os.sched_setaffinity(0, {cpu})
+    work.mkdir(parents=True, mode=0o700)
+    cpuinfo = Path("/proc/cpuinfo").read_text().split("\n\n")
+    selected = next((block for block in cpuinfo if re.match(rf"processor\s*:\s*{cpu}\n", block)), "")
+    model = re.search(r"^model name\s*:\s*(.+)$", selected, re.M)
+    matrix = {"host_machine": uname.machine, "kernel": uname.release, "cpu": cpu,
+              "cpu_model": model[1] if model else None, "repeats": args.repeats, "hosts": {}}
+    for abi, vm in vms:
+        print(f"Measuring {abi} on CPU {cpu}", flush=True)
+        mounts = [*inputs, (vm, Path(VM))]
+        if abi == "i686" and args.i686_libatomic:
+            mounts.append((args.i686_libatomic, I686_LIBATOMIC))
+        status = launch(args, work / abi, mounts)
+        if status:
+            return status
+        path = work / abi / "summary.json"
+        raw = json.loads(path.read_bytes())
+        cells = raw["measurements"]
+        if (raw["host"] != "linux-" + abi or raw["cpu"] != cpu
+                or tuple((m["engine"], m["wasm_bits"]) for m in cells) != CELLS):
+            raise ValueError(f"unexpected host, CPU or cells in {path}")
+        fixtures = {key: raw[key] for key in ("build_receipt_sha256", "checksums_sha256", "module_sha256")}
+        if matrix.setdefault("fixtures", fixtures) != fixtures:
+            raise ValueError("the two ABIs measured different fixtures")
+        host = {"vm_sha256": raw["vm_sha256"], "matches_published_vm": raw["matches_published_vm"],
+                "summary": str(path.relative_to(work)), "summary_sha256": digest(path),
+                "measurements": [{k: m[k] for k in ("engine", "wasm_bits", "iterations", "paired_ratios")} for m in cells]}
+        if "i686_libatomic_sha256" in raw:
+            host["i686_libatomic_sha256"] = raw["i686_libatomic_sha256"]
+        matrix["hosts"][abi] = host
+    pending = work / "matrix.json.tmp"
+    save(pending, matrix)
+    pending.replace(work / "matrix.json")
+    return 0
 
 
 def main():
@@ -215,24 +296,35 @@ def main():
     parser.add_argument("--inside", action="store_true", help=argparse.SUPPRESS)
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--work", type=Path, required=True, help="new directory below the SDK checkout's .tmp")
-    common.add_argument("--width", choices=(32, 64), type=int, action="append", help="repeatable, default both")
     phases = parser.add_subparsers(dest="phase", required=True)
     compiler = phases.add_parser("build", parents=[common])
     compiler.add_argument("--cc-sdk", type=Path, required=True, help="installed C prefix containing bin/wrc")
     runner = phases.add_parser("run", parents=[common])
-    runner.add_argument("--programs", type=Path, required=True, help="fixtures directory made by build")
     runner.add_argument("--vm", type=Path, required=True)
     runner.add_argument("--engine", choices=("int", "aot"), action="append", help="repeatable, default both")
-    runner.add_argument("--iterations", type=int, help="fixed power of two, 16384 through 134217728")
-    runner.add_argument("--repeats", type=int, default=5)
-    runner.add_argument("--cpu", type=int, help="logical CPU, default first allowed CPU")
     runner.add_argument("--emulated", action="store_true", help="use the system-QEMU calibration length")
     runner.add_argument("--hardware", action="store_true", help="add explicit AArch64 synchronous hardware MTE")
     runner.add_argument("--strace", type=Path, default=Path("/usr/bin/strace"), help="tracer for --hardware")
+    matrix = phases.add_parser("x86-matrix", parents=[common], help="measure x86_64 and i686 software MTE on one CPU")
+    matrix.add_argument("--vm-x86_64", type=Path, required=True)
+    matrix.add_argument("--vm-i686", type=Path, required=True)
+    matrix.add_argument("--i686-libatomic", type=Path, help="local i386 libatomic.so.1 for the i686 VM")
+    matrix.set_defaults(width=None, engine=None, hardware=False, emulated=False)
+    for phase in (compiler, runner):
+        phase.add_argument("--width", choices=(32, 64), type=int, action="append", help="repeatable, default both")
+    for phase in (runner, matrix):
+        phase.add_argument("--programs", type=Path, required=True, help="fixtures directory made by build")
+        phase.add_argument("--iterations", type=int, help="fixed power of two, 16384 through 134217728")
+        phase.add_argument("--repeats", type=int, default=5)
+        phase.add_argument("--cpu", type=int, help="logical CPU, default first allowed CPU")
     args = parser.parse_args()
-    if args.phase == "run" and (args.repeats < 2 or args.iterations is not None and (
+    if args.phase != "build" and (args.repeats < 2 or args.iterations is not None and (
             not 16384 <= args.iterations <= MAX_ITERATIONS or args.iterations & (args.iterations - 1))):
         parser.error("use at least two repeats and a power-of-two length from 16384 through 134217728")
+    if not (args.scope or args.inside):
+        return isolated.scope([SYSTEM_PYTHON, "-I", "-B", str(Path(__file__).resolve()), "--scope", *sys.argv[1:]])
+    if sys.version_info < (3, 11):
+        parser.error(f"qualification requires Python 3.11 or newer (running {sys.version.split()[0]})")
     if args.inside:
         isolation = isolated.verify_offline_namespace()
         if args.phase == "build":
@@ -240,8 +332,6 @@ def main():
         else:
             run(args, isolation)
         return 0
-    if not args.scope:
-        return isolated.scope([sys.executable, "-I", "-B", str(Path(__file__).resolve()), "--scope", *sys.argv[1:]])
 
     # Only the launcher crosses the sandbox boundary. Compiler/VM arguments use mounted paths.
     isolated.cgroup_info()
@@ -252,26 +342,18 @@ def main():
     nearest = next(p for p in (work, *work.parents) if p.exists())
     if nearest.stat().st_dev != project.stat().st_dev:
         parser.error("--work must reside on the checkout's project filesystem")
-    cfamily = Path("/checkout/src/qualification/cfamily")
-    entry = cfamily / "mte_performance.py"
-    readonly = [(Path(__file__).resolve(), entry),
-                (HERE / "sysroot_suite.py", cfamily / "sysroot_suite.py"),
-                (HERE.parent / "isolated.py", cfamily.parent / "isolated.py"),
-                (SOURCES, cfamily / SOURCES.name)]
     if args.phase == "build":
-        readonly += [(args.cc_sdk, Path("/sdk")), (SOURCES, WORK / "tools")]
-    else:
-        readonly += [(args.vm, Path(VM)), (args.programs, PROGRAMS),
-                     (project / "document/qualification/cfamily-mte-performance.json", PUBLISHED)]
-        if args.hardware:
-            readonly.append((args.strace, Path(TRACER)))
-    for source, dest in readonly:
-        source.resolve(strict=True)
-    work.mkdir(parents=True, mode=0o700)
-    namespace = argparse.Namespace(network="offline", vm=None, rust=None, xmake=None, xmake_data=None,
-                                  command=["/usr/bin/python3", "-I", "-B", str(entry),
-                                           "--inside", *sys.argv[sys.argv.index(args.phase):]])
-    return isolated.sandbox(namespace, work, readonly=readonly, strict_offline=True)
+        return launch(args, work, [(args.cc_sdk, Path("/sdk")), (SOURCES, WORK / "tools")])
+    inputs = [(project / "document/qualification/cfamily-mte-performance.json", PUBLISHED)]
+    if args.phase == "x86-matrix":
+        names = ["build-receipt.json", "checksums.json", *(f"linear-{bits}-{kind}.wasm"
+                 for bits, kind in itertools.product((32, 64), ("ordinary", "tagged")))]
+        inputs.extend((args.programs / name, PROGRAMS / name) for name in names)
+        return x86_matrix(args, work, inputs)
+    inputs += [(args.vm, Path(VM)), (args.programs, PROGRAMS)]
+    if args.hardware:
+        inputs.append((args.strace, Path(TRACER)))
+    return launch(args, work, inputs)
 
 
 if __name__ == "__main__":

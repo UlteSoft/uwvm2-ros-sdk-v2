@@ -2,16 +2,26 @@
 
 用二进制安装的 C SDK 一次编译四个 Wasm 模块，再将同一套产物交给各宿主 ABI 的 VM。公开记录中的 x86_64 和 i686 在 x86 硬件上运行，AArch64、ARM EABI 和 ARM 硬浮点在系统级 QEMU TCG 中运行。记录给出了 VM 与编译器版本、模块摘要、各配置的迭代次数及配对计时。[五宿主实测记录](../qualification/cfamily-mte-performance.json) · [内核与原生参考程序](../../src/qualification/cfamily/mte_performance_sources) · [English](../en/cfamily-mte-performance.md)
 
-在当前 SDK 源码目录运行以下命令，传入 C 的安装前缀和对应宿主的 VM 可执行文件。每条命令都会在项目盘上新建工作目录。Linux 环境需要 Python 3.11 或更新版本、支持用户命名空间的 Bubblewrap、systemd 用户作用域和 cgroup v2。编译阶段还需要本机的 `/usr/bin/gcc`。验收使用的父级 `wrosvendor.slice` 应配置为 `MemoryMax=64G`、`MemorySwapMax=0`、`memory.oom.group=0`。启动器创建相同内存与交换空间上限、启用整组 OOM 终止的子作用域，核对两级限制、私有命名空间、只读临时目录和项目盘上的可写目录后再开始编译或计时。[隔离启动器](../../src/qualification/isolated.py)
+在当前 SDK 源码目录运行以下命令，传入 C 的安装前缀和对应宿主的 VM 可执行文件。每条命令都会在项目盘上新建工作目录。Linux 环境需要 `/usr/bin/python3`（Python 3.11 或更新版本）、支持用户命名空间的 Bubblewrap、systemd 用户作用域和 cgroup v2。编译阶段还需要本机的 `/usr/bin/gcc`。验收使用的父级 `wrosvendor.slice` 应配置为 `MemoryMax=64G`、`MemorySwapMax=0`、`memory.oom.group=0`。启动器创建相同内存与交换空间上限、启用整组 OOM 终止的子作用域，核对两级限制、私有命名空间、只读临时目录和项目盘上的可写目录后再开始编译或计时。[隔离启动器](../../src/qualification/isolated.py)
 
 ```sh
 runner=src/qualification/cfamily/mte_performance.py
-python3 -I -B "$runner" build --cc-sdk /path/to/installed/c --work .tmp/mte-build
-python3 -I -B "$runner" run --programs .tmp/mte-build/fixtures \
+/usr/bin/python3 -I -B "$runner" build --cc-sdk /path/to/installed/c --work .tmp/mte-build
+/usr/bin/python3 -I -B "$runner" run --programs .tmp/mte-build/fixtures \
   --vm /path/to/uwvm2-ros --work .tmp/mte-run
 ```
 
 在其他宿主上复测时复制整个 `fixtures` 目录。运行公开记录所用的 i686 VM，需要系统提供 32 位 ELF 加载器 `/lib/ld-linux.so.2`，并在系统库路径中提供 `libatomic.so.1` 等 32 位共享库。可使用原生 i386 系统，也可使用支持 32 位程序且具备这些库的 x86_64 系统。Debian 的 `libc6:i386` 和 `libatomic1:i386` 分别提供加载器和 libatomic。
+
+在支持 i686 原生执行的 x86_64 Linux 宿主上，一条命令即可测量两种 VM ABI。程序先核对 ELF 位宽和机器类型，再将 x86_64、i686 依次绑定到同一逻辑 CPU，在各自的离线命名空间中运行。两次测量共用前面编译的四个模块，每个 VM 都用 INT 和 AOT 运行两种来宾位宽。
+
+```sh
+/usr/bin/python3 -I -B "$runner" x86-matrix --programs .tmp/mte-build/fixtures \
+  --vm-x86_64 /path/to/x86_64/uwvm2-ros --vm-i686 /path/to/i686/uwvm2-ros \
+  --work .tmp/mte-x86
+```
+
+若宿主缺少 i386 版 `libatomic.so.1`，可追加 `--i686-libatomic /path/to/extracted/libatomic.so.1`，使用本地从 Debian `libatomic1:i386` 软件包解出的库。程序将该文件只读挂载到 i686 命名空间，并为 i686 VM 进程设置库搜索路径。`--cpu`、`--repeats` 和 `--iterations` 同时作用于两种 ABI。八种配置全部成功后，`.tmp/mte-x86/matrix.json` 会记录 CPU、内核、VM 与各输入文件的哈希，以及每种配置的两组配对耗时比。原始样本分别保存在 `x86_64/summary.json` 与 `i686/summary.json`，总表给出两个文件的路径和 SHA-256。
 
 追加 `--width 32 --engine int --iterations 8388608` 可选取公开记录中的 x86_64、wasm32、INT 配置。默认覆盖两个位宽和两个引擎，按五轮配对采样，绑定当前允许的第一个 CPU。可用 `--cpu N` 指定其他 CPU。自动标定以软件标签检查耗时 320 ms 为目标，选取 2 的幂次迭代次数。系统级 QEMU 来宾可用 `--emulated` 启用较短的标定探针。在支持 MTE 的 AArch64 Linux 上加 `--hardware`，即可同时测量同步硬件与软件标签检查。独立于计时的探针用 `strace` 核实 VM 成功设置了带标签的内存映射和同步标签控制，可用 `--strace /path/to/strace` 指定跟踪程序。每个配置的跟踪文件与 `summary.json` 保存在同一目录，摘要中的 `hardware_probe` 记录文件名和 SHA-256。
 

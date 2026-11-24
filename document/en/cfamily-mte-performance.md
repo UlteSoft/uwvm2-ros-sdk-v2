@@ -2,16 +2,26 @@
 
 Build the four guest modules once with an installed C binary SDK. Run the same bundle with a VM for each host ABI. The published run used x86_64 and i686 on x86 hardware, and AArch64, ARM EABI and ARM hard-float under system QEMU TCG. The receipt gives the VM and compiler revisions, module hashes, iteration count for each cell and its paired timings. [Five-host measurements](../qualification/cfamily-mte-performance.json) · [Kernel and native reference](../../src/qualification/cfamily/mte_performance_sources) · [简体中文](../zh/cfamily-mte-performance.md)
 
-From this SDK checkout, supply the installed C prefix and the VM executable. Each command creates a new directory on the checkout volume. Linux requires Python 3.11+, Bubblewrap with user namespaces, systemd user scopes and cgroup v2. The build phase also needs native GCC at `/usr/bin/gcc`. The qualification parent slice `wrosvendor.slice` must have `MemoryMax=64G`, `MemorySwapMax=0` and `memory.oom.group=0`. The launcher creates a child scope with the same memory and swap limits and group OOM killing, then verifies the limits, private namespaces, read-only temporary mounts and project scratch before starting either workload. [Shared isolation launcher](../../src/qualification/isolated.py)
+From this SDK checkout, supply the installed C prefix and the VM executable. Each command creates a new directory on the checkout volume. Linux requires Python 3.11+ at `/usr/bin/python3`, Bubblewrap with user namespaces, systemd user scopes and cgroup v2. The build phase also needs native GCC at `/usr/bin/gcc`. The qualification parent slice `wrosvendor.slice` must have `MemoryMax=64G`, `MemorySwapMax=0` and `memory.oom.group=0`. The launcher creates a child scope with the same memory and swap limits and group OOM killing, then verifies the limits, private namespaces, read-only temporary mounts and project scratch before starting either workload. [Shared isolation launcher](../../src/qualification/isolated.py)
 
 ```sh
 runner=src/qualification/cfamily/mte_performance.py
-python3 -I -B "$runner" build --cc-sdk /path/to/installed/c --work .tmp/mte-build
-python3 -I -B "$runner" run --programs .tmp/mte-build/fixtures \
+/usr/bin/python3 -I -B "$runner" build --cc-sdk /path/to/installed/c --work .tmp/mte-build
+/usr/bin/python3 -I -B "$runner" run --programs .tmp/mte-build/fixtures \
   --vm /path/to/uwvm2-ros --work .tmp/mte-run
 ```
 
 Copy the whole `fixtures` directory to measure another host. The published i686 VM requires the 32-bit ELF loader `/lib/ld-linux.so.2` and 32-bit shared libraries, including `libatomic.so.1`, in the system library paths. Use a native i386 system or an x86_64 system with 32-bit execution support and those libraries (on Debian, `libc6:i386` and `libatomic1:i386` supply the loader and libatomic).
+
+On an x86_64 Linux host with native i686 execution support, one command measures both VM ABIs. It verifies the ELF class and machine, then runs x86_64 followed by i686 in separate offline namespaces on the same logical CPU. Each VM runs INT and AOT at both guest widths using the four modules from the build above.
+
+```sh
+/usr/bin/python3 -I -B "$runner" x86-matrix --programs .tmp/mte-build/fixtures \
+  --vm-x86_64 /path/to/x86_64/uwvm2-ros --vm-i686 /path/to/i686/uwvm2-ros \
+  --work .tmp/mte-x86
+```
+
+If the host lacks the i386 `libatomic.so.1`, append `--i686-libatomic /path/to/extracted/libatomic.so.1` to use a local copy from Debian’s `libatomic1:i386` package. The runner mounts that file read-only in the i686 namespace and sets the library search path on the i686 VM process. `--cpu`, `--repeats` and `--iterations` apply to both ABIs. Once all eight cells succeed, `.tmp/mte-x86/matrix.json` records the CPU, kernel, VM and fixture hashes, and both paired ratios per cell. It gives paths and SHA-256 hashes for `x86_64/summary.json` and `i686/summary.json`, which contain the individual samples.
 
 For one published x86_64 cell, add `--width 32 --engine int --iterations 8388608`. By default both widths and engines run five repeats, pinned to the first permitted CPU. Use `--cpu N` to choose another. Automatic calibration targets 320 ms of software checking and selects a power of two. Add `--emulated` inside a system-QEMU guest to use its shorter calibration probe. On an MTE-capable AArch64 Linux system add `--hardware` to time the synchronous hardware backend alongside software checking. An untimed control must show both a tagged mapping and successful synchronous tag control on the VM under `strace`. Supply `--strace /path/to/strace` for a separately installed tracer. Each control saves its trace beside `summary.json`. The cell’s `hardware_probe` records the filename and SHA-256.
 
