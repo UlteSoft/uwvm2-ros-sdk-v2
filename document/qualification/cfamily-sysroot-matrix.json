@@ -245,6 +245,21 @@
           "receipt_sha256": "5f12b646bf7759fb8ee0abae5f2c4284fff2635172316c3dad81d25c26260a3d",
           "results_sha256": "b5f4034d5ccfebcc1bbab243905daa523d855ce49ad13b666083cd249c6b5454"
         },
+        "find-extra": {
+          "sources": [
+            "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp"
+          ],
+          "suite_exit": 0,
+          "builds": {
+            "linked": 3
+          },
+          "executions": {
+            "pass": 6
+          },
+          "planned_builds": 3,
+          "receipt_sha256": "4073dcafac50784054897f36cf7fc4feaf00d8ae5949bd1fb8e40f0d888d54db",
+          "results_sha256": "150f0b789145f312d16b9544edabd80cd426c9894e1ce994785d3e126cc968c5"
+        },
         "limitations": {
           "sources": [
             "upstream/llvm/compiler-rt/test/builtins/Unit/floatuntisf_test.c",
@@ -295,6 +310,21 @@
           "planned_builds": 1,
           "receipt_sha256": "64b6df50c9ec4bf600740cc0538c62c50e761f2460123f3924fbb7a2eb60cd7e",
           "results_sha256": "a6f733ddc6ea532931b3f3f8b04e46a412b209344632bbc0beda9e26325a9201"
+        },
+        "find-extra": {
+          "sources": [
+            "upstream/llvm/libcxx/test/std/algorithms/alg.nonmodifying/alg.find/find.pass.cpp"
+          ],
+          "suite_exit": 0,
+          "builds": {
+            "linked": 3
+          },
+          "executions": {
+            "pass": 6
+          },
+          "planned_builds": 3,
+          "receipt_sha256": "629486bbbd505f3c391323b7df71a57183aba0bdbf191946139d2fb6ce8ccd38",
+          "results_sha256": "d34b76aca856e8e8754faa008ccc1c5845802e3b79b3bb6aa681412e356c3e8e"
         },
         "limitations": {
           "sources": [

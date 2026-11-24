@@ -452,6 +452,13 @@
             }
           }
         }
+      },
+      "followup": {
+        "vm_commit": "5203ed5f63b6bb9764252f95e6b1ef7dd42e35b7",
+        "vm_tree": "de9902c0e37d1e113352d86b00c49c59dd9dee4f",
+        "status": "five-host-requalification-in-progress",
+        "cause": "The debugger created the native wait deadline before it read the archive. On AArch64, synchronous LLVM preparation consumed that deadline before publication began.",
+        "change": "Each native phase starts its bounded wait at submission. An expired wait before publication preserves the pending operation for a subsequent restore continue request."
       }
     }
   }
