@@ -17,7 +17,7 @@ python3 -I -B install.py plan --commit "$revision" --platform generic --language
 python3 -I -B install.py install --commit "$revision" --platform generic --language c --prefix "$PWD/sdk"
 ```
 
-The installer obtains the VM for all five Linux ABIs from the [official prerelease](https://github.com/UlteSoft/uwvm2-ros/releases/tag/wros-vm-b27df7428f9f). To build from source, use the separate `rebuild` command. `plan --mode source` previews its inputs. [Host tools](document/en/host-tools.md) · [Source rebuild instructions](document/en/install-xmake.md#rebuild-a-compiler-from-source)
+The installer obtains the VM for all five Linux ABIs from the [official prerelease](https://github.com/UlteSoft/uwvm2-ros/releases/tag/wros-vm-d5524f35c565). To build from source, use the separate `rebuild` command. `plan --mode source` previews its inputs. [Host tools](document/en/host-tools.md) · [Source rebuild instructions](document/en/install-xmake.md#rebuild-a-compiler-from-source)
 
 ## Binary distribution
 

@@ -1,27 +1,15 @@
 {
   "status": "requalification-in-progress",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros",
-  "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
-  "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
-  "candidate_release_status": "five-host-binaries-published",
+  "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+  "vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+  "candidate_release_status": "five-host-binaries-published-awaiting-sdk-matrix",
   "candidate_sysroot_plan": "cfamily-sysroot-matrix.json",
   "current_runtime_records": [
     "cfamily-open-library-matrix.json",
     "cfamily-sysroot-matrix.json",
     "objc-library-matrix.json"
   ],
-  "published_environment": {
-    "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
-    "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
-    "vm_release_tag": "wros-vm-b27df7428f9f",
-    "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
-    "sdk_host_tool_lock": "src/host-tools/releases.json",
-    "runtime_records": [
-      "cfamily-open-library-matrix.json",
-      "cfamily-sysroot-matrix.json",
-      "objc-library-matrix.json"
-    ]
-  },
   "policy": "Current runtime qualification requires fresh INT and LLVM AOT receipts bound to the candidate commit, tree and host executable. Earlier engine counts belong to their recorded VM environment. Installation, compilation and instruction inspection have separate evidence.",
   "language_management_plan": {
     "runner": "src/qualification/cfamily/debug_suite.py",
@@ -1096,5 +1084,24 @@
         }
       }
     }
+  },
+  "prior_published_environment": {
+    "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
+    "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
+    "vm_release_tag": "wros-vm-b27df7428f9f",
+    "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
+    "sdk_host_tool_lock": "src/host-tools/releases.json",
+    "runtime_records": [
+      "cfamily-open-library-matrix.json",
+      "cfamily-sysroot-matrix.json",
+      "objc-library-matrix.json"
+    ]
+  },
+  "published_environment": {
+    "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+    "vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+    "vm_release_tag": "wros-vm-d5524f35c565",
+    "sdk_host_tool_lock": "src/host-tools/releases.json",
+    "status": "awaiting-public-sdk-matrix"
   }
 }

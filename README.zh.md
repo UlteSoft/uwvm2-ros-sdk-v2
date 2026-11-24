@@ -17,7 +17,7 @@ python3 -I -B install.py plan --commit "$revision" --platform generic --language
 python3 -I -B install.py install --commit "$revision" --platform generic --language c --prefix "$PWD/sdk"
 ```
 
-五种 Linux ABI 的 VM 均由安装器从固定的[官方预发行版](https://github.com/UlteSoft/uwvm2-ros/releases/tag/wros-vm-b27df7428f9f)下载。需要从源码构建时，使用独立命令 `rebuild`，可先用 `plan --mode source` 查看重建输入。[宿主工具](document/zh/host-tools.md) · [源码重建说明](document/zh/install-xmake.md#从源码重建编译器)
+五种 Linux ABI 的 VM 均由安装器从固定的[官方预发行版](https://github.com/UlteSoft/uwvm2-ros/releases/tag/wros-vm-d5524f35c565)下载。需要从源码构建时，使用独立命令 `rebuild`，可先用 `plan --mode source` 查看重建输入。[宿主工具](document/zh/host-tools.md) · [源码重建说明](document/zh/install-xmake.md#从源码重建编译器)
 
 ## 二进制发行规则
 
