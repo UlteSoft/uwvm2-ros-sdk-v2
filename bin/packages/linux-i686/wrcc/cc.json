@@ -2,14 +2,14 @@
   "host": "linux-i686",
   "packages": {
     "clang": {
-      "bytes": 118807756,
-      "compressed_bytes": 30462720,
-      "compressed_sha256": "21fc195a121242834a846b8c85cba872821be37ab5fda28507acbc0692ec9b57",
+      "bytes": 118813324,
+      "compressed_bytes": 30465112,
+      "compressed_sha256": "a5c7a3cb98cf7ed2966c98686432b0273ce48e026dbe8e6584913ab25261d48b",
       "format": "tar.xz",
       "host": "linux-i686",
       "member": "clang",
-      "path": "bin/packages/linux-i686/wrcc/clang-21fc195a121242834a84.tar.xz",
-      "sha256": "87700064f1086d3341429c9a689f4a252be5e5aa0dc3f5e820170043af940c52"
+      "path": "bin/packages/linux-i686/wrcc/clang-a5c7a3cb98cf7ed2966c.tar.xz",
+      "sha256": "fca3d8180d3798d752380cc666d42412b57eb8b7953ca2388851c8dd10e614e4"
     },
     "llvm-ar": {
       "bytes": 8921260,

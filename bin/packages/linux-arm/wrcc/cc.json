@@ -2,14 +2,14 @@
   "host": "linux-arm",
   "packages": {
     "clang": {
-      "bytes": 85709508,
-      "compressed_bytes": 22888816,
-      "compressed_sha256": "745894e4be7cfadace45eb8811c8a7c17ed88a65fb9926067e7004e912a6f0bb",
+      "bytes": 85714548,
+      "compressed_bytes": 22880748,
+      "compressed_sha256": "b19ea7302650967dd88246882c3b1d67d2bf4c9bb21caf1dd44b26533e2608a5",
       "format": "tar.xz",
       "host": "linux-arm",
       "member": "clang",
-      "path": "bin/packages/linux-arm/wrcc/clang-745894e4be7cfadace45.tar.xz",
-      "sha256": "a64729dec2b9bdf2cb7906d1c91a9996b97f8971fe33692ab83151f33be93f99"
+      "path": "bin/packages/linux-arm/wrcc/clang-b19ea7302650967dd882.tar.xz",
+      "sha256": "8aeeaf350a99110f729ffb2c0b1887b058daab6d3e8cd449bdf68c3ef1acda02"
     },
     "llvm-ar": {
       "bytes": 6867732,

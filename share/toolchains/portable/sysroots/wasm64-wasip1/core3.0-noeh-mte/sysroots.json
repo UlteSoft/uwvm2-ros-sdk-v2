@@ -1,6 +1,6 @@
 {
-  "build_identity": "1b42b9780e97d8baff95b72a8f4eaad4372d9c33ce797cc87920ec440c647f3d",
-  "compiler_sha256": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
+  "build_identity": "84515844878fa26574a696216a4bedf2fef1c49002ae835689c0dba8eaaa4c51",
+  "compiler_sha256": "2974c4cf12d71dae8adf08585f866ed2c7dadbbf34f2e4e4192a820744a6ecd8",
   "compiler_version": "clang version 23.1.5\nTarget: wasm32-unknown-wasip1\nThread model: posix\nInstalledDir: /out/producer/bin\nBuild config: +assertions",
   "herbceptions_runtime": true,
   "mte": true,
@@ -43,7 +43,7 @@
       "url": "https://github.com/WebAssembly/wasi-libc.git"
     }
   },
-  "sources_sha256": "c145907400869181db6e540a8f5bac23aa68d6dc728b83ecf4acc9a21a67a3b6",
+  "sources_sha256": "1359d14b49caf598937eeb6cbeb1e7f7033589a0f88fa5976087ebefb45209bb",
   "status": "built-awaiting-qualification",
   "targets": [
     {
@@ -2271,12 +2271,12 @@
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/crt1-command.o": "0379a10cd149c1e002427d8a56614035fe7e2fd5fe5afaf4995870edbf0ddb3b",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/crt1-reactor.o": "969cb34681847d188f19f5867a711095329e8dfef9c29917a1e4530614ca3fd8",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/crt1.o": "0379a10cd149c1e002427d8a56614035fe7e2fd5fe5afaf4995870edbf0ddb3b",
-        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc++.a": "11b6ce97db41690e4a8d46a3e3a977658c9c696e4c73f5954fbfe38eff5f641e",
+        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc++.a": "053161f883b6fe346a2920500247b49f1fa8be6c0392a74a2d8aa4ac21a1fd60",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc++abi.a": "78d4bedbf8de6dc497578a7f87e95f75398e5708d77c9317ca544c917f51fb72",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc++experimental.a": "9155ca10a476afe5ff78911926b12c505615a5fac543b7ec1ad22ef4ea95fc29",
-        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-long-double.a": "2e6713c0a61f0b7bca798fa9700e44caa596f6ce123920af11fcb91f48a58010",
-        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-no-floating-point.a": "3dd48d78673794218733d5f6ead76e3d652bf501e9c909252f3fe5b9809d5ffe",
-        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc.a": "a85bb73337aba21f388d5e60c2ef4dd26f258ccf157e069798275d1d4781dda8",
+        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-long-double.a": "ca599c872e46d1f8d18dadd46c65779ed8f136cd94aae78d4202153b4e6bee10",
+        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc-printscan-no-floating-point.a": "27e9e70515b932842314ffc6d5bc36220efaaaf79ca541e1281d53856ed307cc",
+        "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libc.a": "cd3f5e33e0b457b1567e46aa5052d8a8e2d7531bb84a7d99ad883a08469e142f",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libcrypt.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libdl.a": "7b01a3743769e1653d4024c2a835f94e5b35b6a0309d39c28ec48725ee91cfca",
         "output/noeh/wasm64-wasip1/lib/wasm64-wasip1/libherbceptions.a": "f8262e0afe547bcb2597de24a7967f26b90d1650f526a7b78ad4d0261d313a83",
@@ -2354,8 +2354,8 @@
     }
   ],
   "tool_sha256": {
-    "clang": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
-    "clang++": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
+    "clang": "2974c4cf12d71dae8adf08585f866ed2c7dadbbf34f2e4e4192a820744a6ecd8",
+    "clang++": "2974c4cf12d71dae8adf08585f866ed2c7dadbbf34f2e4e4192a820744a6ecd8",
     "llvm-ar": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
     "llvm-config": "45f80e0dbd4c858b49585caae9c546f1e1447cc1231946459761bfc0c2022223",
     "llvm-nm": "2cda42e5ea480601d60944c18ec0175e48b43a72ff8a35c6e77f0a11ae7c0115",

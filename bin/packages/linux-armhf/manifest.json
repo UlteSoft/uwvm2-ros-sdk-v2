@@ -18,18 +18,18 @@
       ]
     },
     "clang": {
-      "bytes": 84527600,
-      "compressed_bytes": 23043096,
-      "compressed_sha256": "001e596aeb24a93cdc94d500c5cbdee476dd56d9fd057f66bc7e32f7ab45935b",
+      "bytes": 84532272,
+      "compressed_bytes": 23049928,
+      "compressed_sha256": "c979438a6bf940569968e81eacde163df6733b34c0c38d326ba2f86f3908d9bf",
       "format": "tar.xz",
       "host": "linux-armhf",
       "member": "clang",
-      "path": "bin/packages/linux-armhf/wrcc/clang-001e596aeb24a93cdc94.tar.xz",
+      "path": "bin/packages/linux-armhf/wrcc/clang-c979438a6bf940569968.tar.xz",
       "required_hwcap": [
         "vfp",
         "vfpv3"
       ],
-      "sha256": "9746e30576212ccae70fa19d5212b86505631ff4e8fce0a3e091e1207a013a7d"
+      "sha256": "d622f38624a5b4ba497219d6f9f97045a29b43efb74aff5cab8e9eb7e1d19c0b"
     },
     "llvm-ar": {
       "bytes": 6464120,

@@ -1,6 +1,6 @@
 {
-  "build_identity": "7032e28b9e0db6a1ac10c1742d5205db3f379ddb2ef0c1f3e3f24d3cf3d5b7fd",
-  "compiler_sha256": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
+  "build_identity": "d076bac5c14af01a632fe16b9cb4d24dfd6d963e1c387b742e711d349dfd6db7",
+  "compiler_sha256": "2974c4cf12d71dae8adf08585f866ed2c7dadbbf34f2e4e4192a820744a6ecd8",
   "compiler_version": "clang version 23.1.5\nTarget: wasm32-unknown-wasip1\nThread model: posix\nInstalledDir: /out/producer/bin\nBuild config: +assertions",
   "herbceptions_runtime": true,
   "mte": true,
@@ -43,7 +43,7 @@
       "url": "https://github.com/WebAssembly/wasi-libc.git"
     }
   },
-  "sources_sha256": "c145907400869181db6e540a8f5bac23aa68d6dc728b83ecf4acc9a21a67a3b6",
+  "sources_sha256": "1359d14b49caf598937eeb6cbeb1e7f7033589a0f88fa5976087ebefb45209bb",
   "status": "built-awaiting-qualification",
   "targets": [
     {
@@ -2273,12 +2273,12 @@
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/crt1-command.o": "7bd96677b66af0e22490b6aa173d623c232d30b406000c7f6ba7370afceda95b",
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/crt1-reactor.o": "11db007b4c804f528fde87a68a29fee5d7050f8816fa3a45c52cb0ceb0a18758",
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/crt1.o": "7bd96677b66af0e22490b6aa173d623c232d30b406000c7f6ba7370afceda95b",
-        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc++.a": "69224b78213a44a5131a0c70689849fb4b0bca3be5fa8983200e797e0cab28fa",
+        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc++.a": "2222c2c337ca6ec79ce825fbcd9540624621432b94040fd4026a0edf073cd4cd",
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc++abi.a": "7b5a35793caa747d9cdab83ef936a331a1c3dc33718d4cd02a43599166357e66",
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc++experimental.a": "918087bbd7517d0e4e085d74c0d95062c58e0e0c586a9db8e39a6aba3507eba2",
-        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc-printscan-long-double.a": "7df4a98555610fddfbb7da90e81ea9d1e7282873d11a094853175907c908e273",
-        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc-printscan-no-floating-point.a": "af2b5e9cbb8d8c991ed1a35453ea4238faed0e47879c32b8a2af82e6ebd8938c",
-        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc.a": "411976b0719ee667775f44cab9e022a44d91339076127bfc3e6e76f006cb34cc",
+        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc-printscan-long-double.a": "dfc83b6d6e91f45d091b352eeddb5f4e258606747ffc445ef4b3fa3771b90fd0",
+        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc-printscan-no-floating-point.a": "77de3b341f4f519c4c6f5aa1e0398c76fefc58dd670b225e9a01db7121e93cd4",
+        "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libc.a": "b6513c39ea9f8c7b9f7e34bb5c21bf9f6a73bf552dbb722060b1089af06657de",
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libcrypt.a": "f0a17a43c74d2fe5474fa2fd29c8f14799e777d7d75a2cc4d11c20a6e7b161c5",
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libdl.a": "5fef3da1498e54b607775185ee2d23f2f503e3c1f66c61f3f63562464ed690f3",
         "output/noeh/wasm32-wasip1-threads/lib/wasm32-wasip1-threads/libherbceptions.a": "e5518a9728b2949933af74dffaa20d7310e6e8f7a0296193d4a082206face425",
@@ -2357,8 +2357,8 @@
     }
   ],
   "tool_sha256": {
-    "clang": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
-    "clang++": "7c5fc3ff254535bd3afffbb49cd342bd380f345fc4269e0690bc8425b2597249",
+    "clang": "2974c4cf12d71dae8adf08585f866ed2c7dadbbf34f2e4e4192a820744a6ecd8",
+    "clang++": "2974c4cf12d71dae8adf08585f866ed2c7dadbbf34f2e4e4192a820744a6ecd8",
     "llvm-ar": "3ac3b52a37acd5c7933dff6380dc0acec016644ca0d3709c13ec991e05a52dd0",
     "llvm-config": "45f80e0dbd4c858b49585caae9c546f1e1447cc1231946459761bfc0c2022223",
     "llvm-nm": "2cda42e5ea480601d60944c18ec0175e48b43a72ff8a35c6e77f0a11ae7c0115",
