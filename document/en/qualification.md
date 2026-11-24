@@ -4,12 +4,20 @@
 
 Each entry identifies the revision that produced the result. Tests used Linux x86-64, a clean home and cache, a mount namespace and nested cgroups with a 64 GiB aggregate limit and zero swap. Guest execution and the independent offline rebuilds used a separate network namespace. The development checkouts, host temporary directory and shared-memory directory were unavailable for writes.
 
+## C-family execution comparisons
+
+The release matrix covers C, C++, Objective-C and Objective-C++ on Linux x86_64, i686, aarch64, arm soft-float and arm hard-float. Each MTE setting has sixteen cases per language and host, formed by crossing the wasm32/wasm64 ABI, EH, threads and scalar/SIMD. This gives 320 untagged and 320 tagged cases before counting individual open-source workloads. This section defines the acceptance criteria. Historical results below identify the revision and subset actually measured.
+
+For each case, build outside a GitHub-installed binary SDK. Record the selected sysroot, frontend arguments, Wasm digest, decoded features, input and expected result. Execute that same binary in WROS INT and LLVM AOT. Compare the untagged binary with Wasmtime and the tagged binary with the WROS wire-format port of WAVM mt-2. Record each runner's host architecture and engine. A missing backend, unsupported import or unavailable ownership operation leaves the corresponding comparison open. Report a replay on another architecture separately from native or same-system-QEMU timings.
+
+Use the same inputs and check observable results before accepting execution timings. Warm each engine, alternate sample order on the same CPU, and measure the workload with a monotonic clock inside the guest. Report the median of paired ratios and sample spread. Compilation, instantiation, startup and output formatting fall outside the timed interval. For software MTE, also compare checking enabled and disabled on the identical tagged binary. The target for this last ratio is at most 1.5. Track optional bulk-memory and SIMD fallback checks and other instruction combinations alongside the release profiles.
+
 ## Language debugging, dump restore and live update
 
-C and C++ qualification includes each of the five Linux host ABIs and all sixteen guest profiles. Each language uses its installed SDK frontend to build a program with debug information and a second version with an observable change. The receipt identifies the SDK commit, VM commit and tree, host executable, guest hashes, profile and requested engine.
+The C, C++, Objective-C and Objective-C++ debugging matrix covers the five Linux host ABIs and the sixteen base ABI, EH, threads and MTE profiles. Each language uses its installed SDK frontend to build a program with `-O0 -g` and a second version with an observable change. The receipt identifies the SDK commit, VM commit and tree, host executable, guest hashes, profile and requested engine.
 
 - Requesting INT with DBG must exit with an explicit unsupported-mode error. Count this as an expected rejection. The source breakpoint, step and inspection checks run on LLVM AOT.
-- For source debugging, hit a breakpoint on an executable C or C++ line, inspect a source value, and step to a second mapped line.
+- For source debugging, hit a breakpoint on an executable line in the selected language, inspect a source value, and step to a second mapped line.
 - For dump restore, capture a full snapshot at a cooperative stop, advance or change observable state, restore the snapshot, and verify the recovered state and subsequent execution.
 - For live update, run both versions in the same VM process under the production signed update coordinator. Record the result of calling the same export before and after commit, together with the published epoch.
 
