@@ -1,23 +1,34 @@
 {
-  "schema": 3,
+  "schema": 4,
   "status": "requalification-in-progress",
-  "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
-  "sdk_tree": "8e68a5f85cd05489f6b71d92a10e7823d841e165",
+  "sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+  "sdk_tree": "352221288b627c9f3f7fdc98114578da48e5f617",
   "vm_commit": "b27df7428f9f898e5931938e39cc656d547aed6c",
   "vm_tree": "688ed165947ea8ecca282ee7bfb6993616c95a47",
   "vm_release_tag": "wros-vm-b27df7428f9f",
+  "case_manifest": "src/qualification/cfamily/external-libraries.json",
+  "language": "C/C++",
+  "case_manifest_sha256": "a9a689324f9a462a6d91941d43832604bcca6fa14ae17ce3bb8184f6a79f8ad7",
+  "previous_report": "https://github.com/UlteSoft/uwvm2-ros-sdk-v2/blob/b6514cb64118a4b9b7a5f5ba72871adb4550c6b1/document/qualification/cfamily-open-library-matrix.json",
   "isolation": {
     "parent_and_child_memory_bytes": 68719476736,
     "parent_and_child_swap_bytes": 0,
     "offline_guest_execution": true
   },
-  "language": "C/C++",
-  "case_manifest": "src/qualification/cfamily/external-libraries.json",
-  "case_manifest_sha256": "a9a689324f9a462a6d91941d43832604bcca6fa14ae17ce3bb8184f6a79f8ad7",
   "hosts": {
     "x86_64": {
+      "status": "pass",
       "rows": 224,
       "profiles": 16,
+      "source_programs": 14,
+      "upstream_libraries": [
+        "cjson",
+        "fast_float",
+        "lz4",
+        "pugixml",
+        "tinyxml2",
+        "uthash"
+      ],
       "builds": {
         "linked": 224
       },
@@ -29,26 +40,204 @@
           "pass": 224
         }
       },
+      "inputs_sha256": "d57180abc04031a8ef56f95b89a65f68f86ed3d26cbe0ae022a57975f8a556c8",
+      "results_sha256": "50fafeef65dc55a0cd413490d5309fdaa5a2a486d76e439d60aaccf2bbe1bbbb",
       "vm_executable_sha256": "ba81164f43300060e5efee04777313d895afe70bb8e6a85a49c5bf4a42ac632d",
       "vm_receipt_sha256": "a37638b092576dec86c3ca79bea1e45f225d7539dd867833e97174244cc2baf1",
-      "inputs_sha256": "1a5f26ed203f37fb13f84f6c30c8e9b67869b64963763a7bec9bb023d1b8a4d8",
-      "results_sha256": "93ca60d9a8257a5005544f767d6271f5a021806daab45577dbb9b0874680a273",
-      "status": "pass",
-      "source_programs": 14,
-      "upstream_libraries": [
-        "cjson",
-        "fast_float",
-        "lz4",
-        "pugixml",
-        "tinyxml2",
-        "uthash"
-      ],
-      "xmake_project_receipt_sha256": "e07774b8c135288fe62045010f30d995e52669c56926c175d98a9c7e9fd61bf5",
-      "isolation_receipt_sha256": "8e40faf2530cde9428f8741a81eed01e3f6b0d2f2afb5c7a8d9c2f331d0d6bd3",
+      "installation_receipt_sha256": "268a9cb9e011c4b6578f83a0d8c25350ef5b7c0dee434fa013fefe7f87b3c0e6",
+      "isolation_receipt_sha256": "d81231f3c1f8d57f0a5ff66e8e6f5852f926f108c4907cca19658bf09d827ad9",
+      "repair": {
+        "original_input_sha256": "d57180abc04031a8ef56f95b89a65f68f86ed3d26cbe0ae022a57975f8a556c8",
+        "original_rows_sha256": "74e6c1b0c7dbc94649dbcb535015028af1bab6de13e771ff2376351cd77b26d8",
+        "clients": {
+          "clients/pugixml.cpp": {
+            "sha256": "5d4b4066d5826fb038b74a6b050b408cda320a70e451e65a450c2e95960b5e97"
+          },
+          "clients/tinyxml2.cpp": {
+            "sha256": "24ebedcec7d6c389527d28f8204a8a5a48ebacce96bce39e060ce3d706e32060"
+          }
+        },
+        "replayed": 32,
+        "original_rows_reused": 192,
+        "result_sha256": "50fafeef65dc55a0cd413490d5309fdaa5a2a486d76e439d60aaccf2bbe1bbbb"
+      },
+      "external_xmake_wasip1": {
+        "summary_sha256": "1c51f41e1851b8e290e5285c4f2a5513fd88dc06e04956eaf0c09476f72663b1",
+        "passed": 4,
+        "examples": {
+          "c": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-c.wasm": {
+                "sha256": "3505c8cdee793c31bd57d182e0c787ab48e23b0b65e391dfb8f4f72645ad00ca",
+                "bytes": 19162,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          },
+          "cpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-cpp.wasm": {
+                "sha256": "8a18fe80b3d29fc746e87fffdab66dd70830549b36d68024655c35f308684088",
+                "bytes": 19194,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          },
+          "objc": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-objc.wasm": {
+                "sha256": "7a99fd81910090b717f9bd8df7fa3e171046b68774d88e8ba7609f46453df510",
+                "bytes": 411963,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          },
+          "objcpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-objcpp.wasm": {
+                "sha256": "9e6ad48019eff1a673cbdd40e0d7cc9fe1cbebe90685c8b254ac8adfbdf7b7d0",
+                "bytes": 411963,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          }
+        }
+      },
+      "installed_sdk_examples": {
+        "summary_sha256": "9dbc8fb400ea780918f95f99a94fa1a7282ec6befeabb7bb99732ba216346a1d",
+        "passed": 3,
+        "examples": {
+          "c": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/scene-abi.wasm": {
+                "sha256": "20705f7d250afbb72d2fe6c9f8e34fdfabfc3f1a1507c90a2fa460335d4d61b2",
+                "bytes": 19042
+              }
+            }
+          },
+          "cpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/scene-abi.wasm": {
+                "sha256": "0051022286197ddb54dae93067aae654dfc8d6efadee63326f4f40edc06de097",
+                "bytes": 19103
+              }
+            }
+          },
+          "objc": {
+            "status": "failed",
+            "build_exit": 0,
+            "test_exit": 255,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/objc-abi.wasm": {
+                "sha256": "4cac98c75b6733d51871744857d304f7d93db1a1c39100432ed6ef77d4268fa8",
+                "bytes": 437604
+              }
+            }
+          },
+          "objcpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/objcpp-abi.wasm": {
+                "sha256": "5600ba5e5b16a7d8c5a01f119c1ed38afe7c219e32e903491ee19cc408580dee",
+                "bytes": 437768
+              }
+            }
+          }
+        }
+      },
       "wasmtime": {
+        "guest_build_host": "x86_64",
+        "reference_host": "x86_64",
         "release_commit": "6844a83b530f86ad13a65175282fe2dbcd33cad1",
-        "execution_host": "x86_64",
-        "c_api": {
+        "stock_cli": {
+          "pass": 56,
+          "pre-execution-uwvm-wasip1-memory64-import": 56
+        },
+        "c_api_comparisons": {
           "int": {
             "match": 112
           },
@@ -56,30 +245,23 @@
             "match": 112
           }
         },
-        "unmodified_cli": {
-          "pass": 56,
-          "pre-execution-uwvm-wasip1-memory64-import": 56
-        },
-        "summary_sha256": "f354b48ba2b0d44dd5d4f05b5cd585e6d214c6dac0cda4864e77443a6165793e"
-      },
-      "wasip1_stdout_policy": {
-        "scope": "fd_write and fd_write_wasm64",
-        "stages": [
-          "hidden",
-          "deny",
-          "allow-without-grant",
-          "stdout-only"
-        ],
-        "comparisons": {
-          "pass": 512
-        },
-        "results_sha256": "7456d2371aa8719d5c231bf7db94714c531b4a28909ad6ab2bb0743508a1b435",
-        "decision_checker_sha256": "4ac696314c25b6e05f1c6a29de18bd837c7542a2d6b917f9b195cd656d55d951"
+        "summary_sha256": "4351239307a2bd13b600c777deb3702e6e9935a098490916166f90ffe29cc1d1",
+        "c_api_rows_sha256": "5ace87a07b8204cc5d07d26e0df9736059885d9549ec0085d5ebd44d981d46b8"
       }
     },
     "i686": {
+      "status": "pass",
       "rows": 224,
       "profiles": 16,
+      "source_programs": 14,
+      "upstream_libraries": [
+        "cjson",
+        "fast_float",
+        "lz4",
+        "pugixml",
+        "tinyxml2",
+        "uthash"
+      ],
       "builds": {
         "linked": 224
       },
@@ -91,26 +273,204 @@
           "pass": 224
         }
       },
+      "inputs_sha256": "ba3b85a63113ef75a4fd824dcae432a1dffa0413fa29823de87a5ed103a4f5b5",
+      "results_sha256": "1a369da61265f499de936b86d3cc12ac9e7d573dbfb03b1a7c6c4eb9459b2884",
       "vm_executable_sha256": "b293e3a24cb38a7e22d7d6258a7c2de1cbc50ca7655b5498b65a3bb4dc55659f",
       "vm_receipt_sha256": "a47cc33cc8cdfad7d98760177c3f8138a46d2d27878d975a2e22393f55b011b5",
-      "inputs_sha256": "462440a1a11dbfc4114643ba469dc7cb6511d65497b7d19f15b626c148182a88",
-      "results_sha256": "ff73670c90a945192a57875ff0247218ce850e687f9d7dfd534cce549840d91c",
-      "status": "pass",
-      "source_programs": 14,
-      "upstream_libraries": [
-        "cjson",
-        "fast_float",
-        "lz4",
-        "pugixml",
-        "tinyxml2",
-        "uthash"
-      ],
-      "xmake_project_receipt_sha256": "59203260f9c1022424190ff0bf077c20cebd03074a07c8fe1561e2bb3e55908f",
-      "isolation_receipt_sha256": "e70ffd746b4fd123f32b9cf124172b4533dc3849dc7a5d503a8953c308ee3de6",
+      "installation_receipt_sha256": "13f0a260e0ca29bb0e9365a6b5d98e2ed27d4b2e50dd71472722cee31c87df0c",
+      "isolation_receipt_sha256": "58a97ee49772f63212f9328e9116ca512a81fe396e2fba3b139914de3d74dee0",
+      "repair": {
+        "original_input_sha256": "ba3b85a63113ef75a4fd824dcae432a1dffa0413fa29823de87a5ed103a4f5b5",
+        "original_rows_sha256": "715ebf002523b70a6219e99103b89ed18e4f62b649da38116df39ea75cdfcd5a",
+        "clients": {
+          "clients/pugixml.cpp": {
+            "sha256": "5d4b4066d5826fb038b74a6b050b408cda320a70e451e65a450c2e95960b5e97"
+          },
+          "clients/tinyxml2.cpp": {
+            "sha256": "24ebedcec7d6c389527d28f8204a8a5a48ebacce96bce39e060ce3d706e32060"
+          }
+        },
+        "replayed": 32,
+        "original_rows_reused": 192,
+        "result_sha256": "1a369da61265f499de936b86d3cc12ac9e7d573dbfb03b1a7c6c4eb9459b2884"
+      },
+      "external_xmake_wasip1": {
+        "summary_sha256": "91180c133e99f36c131e11cabe348fed7061c9c4336ed91cb581a3b533d981ba",
+        "passed": 4,
+        "examples": {
+          "c": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-c.wasm": {
+                "sha256": "d927174dfe47bde7d4bdbb5c2e9d2c399d9c2aa4a9f918037e39fe49f3651e53",
+                "bytes": 19173,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          },
+          "cpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-cpp.wasm": {
+                "sha256": "b484bc343324c26eca87ac666b22621fccd02f0bb777b101901836e1f406ee95",
+                "bytes": 19205,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          },
+          "objc": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-objc.wasm": {
+                "sha256": "7a99fd81910090b717f9bd8df7fa3e171046b68774d88e8ba7609f46453df510",
+                "bytes": 411963,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          },
+          "objcpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/wasip1-clock-objcpp.wasm": {
+                "sha256": "9e6ad48019eff1a673cbdd40e0d7cc9fe1cbebe90685c8b254ac8adfbdf7b7d0",
+                "bytes": 411963,
+                "imports": [
+                  {
+                    "module": "wasi_snapshot_preview1",
+                    "name": "clock_time_get",
+                    "kind": 0,
+                    "params": [
+                      "i32",
+                      "i64",
+                      "i32"
+                    ],
+                    "results": [
+                      "i32"
+                    ]
+                  }
+                ]
+              }
+            },
+            "imports_wasip1_only": true,
+            "runtime_wasip1_only": true
+          }
+        }
+      },
+      "installed_sdk_examples": {
+        "summary_sha256": "f8a94bc621effb02a07cfcb7e3531262e8fae8e121bb593cf64881c031921ab1",
+        "passed": 3,
+        "examples": {
+          "c": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/scene-abi.wasm": {
+                "sha256": "b8c690439449fab702bacb6df7998f3279c2d4f8c229672841020f79eaa03ae1",
+                "bytes": 19064
+              }
+            }
+          },
+          "cpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/scene-abi.wasm": {
+                "sha256": "45e867c3f4dfbac0a88f74524e5a7edda9ddb778e69da91a1aac5ab153254e40",
+                "bytes": 19125
+              }
+            }
+          },
+          "objc": {
+            "status": "failed",
+            "build_exit": 0,
+            "test_exit": 255,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/objc-abi.wasm": {
+                "sha256": "4cac98c75b6733d51871744857d304f7d93db1a1c39100432ed6ef77d4268fa8",
+                "bytes": 437604
+              }
+            }
+          },
+          "objcpp": {
+            "status": "pass",
+            "build_exit": 0,
+            "test_exit": 0,
+            "wasm": {
+              "build/wasm-wasip1/wasm32/release/objcpp-abi.wasm": {
+                "sha256": "5600ba5e5b16a7d8c5a01f119c1ed38afe7c219e32e903491ee19cc408580dee",
+                "bytes": 437768
+              }
+            }
+          }
+        }
+      },
       "wasmtime": {
+        "guest_build_host": "i686",
+        "reference_host": "x86_64",
         "release_commit": "6844a83b530f86ad13a65175282fe2dbcd33cad1",
-        "execution_host": "x86_64",
-        "c_api": {
+        "stock_cli": {
+          "pass": 56,
+          "pre-execution-uwvm-wasip1-memory64-import": 56
+        },
+        "c_api_comparisons": {
           "int": {
             "match": 112
           },
@@ -118,51 +478,12 @@
             "match": 112
           }
         },
-        "unmodified_cli": {
-          "pass": 56,
-          "pre-execution-uwvm-wasip1-memory64-import": 56
-        },
-        "summary_sha256": "346228ad57c6264ce6b9437bf6c522f48a8ea7522660d134c0e7710ae81c5839"
-      },
-      "wasip1_stdout_policy": {
-        "scope": "fd_write and fd_write_wasm64",
-        "stages": [
-          "hidden",
-          "deny",
-          "allow-without-grant",
-          "stdout-only"
-        ],
-        "comparisons": {
-          "pass": 512
-        },
-        "results_sha256": "f26f5d05a41f00a46bba57148afffdd56dc822ca230bdacae71da728581ed056",
-        "decision_checker_sha256": "4ac696314c25b6e05f1c6a29de18bd837c7542a2d6b917f9b195cd656d55d951"
+        "summary_sha256": "7a1dfe89534a28235027eb3603249ce9fe88e3e1211b5b5839e668f2673cff81",
+        "c_api_rows_sha256": "118aefe96915e2ec225c107e1eaddcd92289e0c12039fb3d04156ca087d16db4"
       }
     },
     "aarch64": {
-      "status": "superseded-after-installation",
-      "sdk_commit": "6ab27ce01764c8d707382b6b044f9ce892dafef1",
-      "first_attempt": {
-        "status": "installation-failed",
-        "stage": "binary C installation",
-        "diagnostic": "installed native executable differs: clang",
-        "console_sha256": "89efa9043cac165463656330ebd70bd1125768a498dd51e542abed677cb76a16"
-      },
-      "second_attempt": {
-        "qualified_selections": [
-          "c",
-          "cpp",
-          "wat"
-        ],
-        "mode": "public second-stage binary installation",
-        "installation_sha256": "7a8b0377f8948d02682b79f5248997c7285f9bc998ebf658a4b8312746a4c5b5",
-        "selection_sha256": {
-          "c": "0e7848a7e99d9c417d8da9de87c66cf44f16b57b77640e7c206621e17922ca04",
-          "cpp": "592dd7666b347d4e04b458d19f9e55008ece06d25e32024b6fa74324972337e6",
-          "wat": "63aae44d06c0a57927239854270f36d1893702a594a23bc828e70e64de99e0a9"
-        }
-      },
-      "external_matrix": "Interrupted for a fresh run on 03a3904ff4d7354d7458bcff7338639a37d9292f"
+      "status": "pending"
     },
     "arm": {
       "status": "pending"
