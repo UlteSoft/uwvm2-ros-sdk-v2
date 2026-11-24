@@ -328,5 +328,16 @@
     "linux-aarch64",
     "linux-arm",
     "linux-armhf"
-  ]
+  ],
+  "wasmtime_reference": {
+    "revision": "6844a83b530f86ad13a65175282fe2dbcd33cad1",
+    "adapter_sha256": "fdccd44cb44ec2e5d8f7f98b7f4c43ac69901f0a1b40b9a9c391b9c74294f010",
+    "cases": {
+      "pass": 32
+    },
+    "guest_stdout_bytes_per_case": 4160,
+    "guest_stdout_sha256": "6ed1017e0074af828566653a41c43c480649649c083c3cc78c887387e562619b",
+    "results_sha256": "1050887934f81f4c0e2e198c917feeeea1bfd8f97a88a41059198bd479b40aa7",
+    "evidence_sha256": "a6f45a70de90dec4637b3662b1aec168a272ddf0f4bfc1856435a312b27bf987"
+  }
 }
