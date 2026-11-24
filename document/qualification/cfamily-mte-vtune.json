@@ -1,0 +1,1142 @@
+{
+  "vm_commit": "d46186fca2dc60eebc71fdf4bf1c78ab32b9cb91",
+  "sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+  "cpu": "Intel Core i9-14900HX",
+  "collector": "Intel VTune Profiler 2026.4.0 build 632893, hardware event-based sampling",
+  "cpu_mask": [
+    6,
+    16
+  ],
+  "pinned_target_cpu": 6,
+  "attribution": "Filter raw VTune perf records by the measured child PID on CPU 6. Distributed unhalted-cycle sample shares describe locations within a run. AOT native instruction addresses are mapped to MCJIT-registered symbol ranges. Guest wall time and branch-level cost require separate measurements.",
+  "hosts": {
+    "i686": {
+      "binary_sha256": "9a8e95faf488e8e597a588634edbe820a5a0384bfd0df71cf6d487899501b45e",
+      "raw_attribution_sha256": "3095b557bedb0fb407a31fe093a9cd53e204be2764a30084393146a0b8b5f0cd",
+      "hardware_hotspots": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "iterations": 67108864,
+          "checksum": 3768494458,
+          "guest_ns": 4077595908,
+          "pid_cpu6_distributed_cycle_samples": 4315,
+          "groups": {
+            "vm_elf": 4250,
+            "linux_kernel": 65
+          },
+          "covered_seconds": 4.0762,
+          "tag_handlers_in_top_symbols": {
+            "with_access_policy": 1278,
+            "with_guest_access": 638,
+            "uwvmint_memtag_dispatch": 284
+          },
+          "vm_event_stream_manifest_sha256": "cedb968e212bf76e85c430899ca8ffae5ea365432a548652bf1593696cb58474"
+        },
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "disabled",
+          "iterations": 67108864,
+          "checksum": 3768494458,
+          "guest_ns": 1264530652,
+          "pid_cpu6_distributed_cycle_samples": 1246,
+          "groups": {
+            "native_library": 2,
+            "vm_elf": 1226,
+            "linux_kernel": 18
+          },
+          "covered_seconds": 1.2668,
+          "vm_event_stream_manifest_sha256": "a53fdce8b9685663b4137931a5fe237f35cf01e860e3a99c1b0b43cb6fc44778"
+        },
+        {
+          "engine": "int",
+          "width": 64,
+          "mode": "software",
+          "iterations": 67108864,
+          "checksum": 3768494458,
+          "guest_ns": 4521123952,
+          "pid_cpu6_distributed_cycle_samples": 4304,
+          "groups": {
+            "linux_kernel": 66,
+            "native_library": 1,
+            "vm_elf": 4237
+          },
+          "covered_seconds": 4.5227,
+          "tag_handlers_in_top_symbols": {
+            "with_access_policy": 1337,
+            "with_guest_access": 528,
+            "uwvmint_memtag_dispatch": 254
+          },
+          "vm_event_stream_manifest_sha256": "f32068ba6be3d9c8f11833a5d840d6f70bb4c4449ae9f908c63af476b8f5b822"
+        },
+        {
+          "engine": "int",
+          "width": 64,
+          "mode": "disabled",
+          "iterations": 67108864,
+          "checksum": 3768494458,
+          "guest_ns": 1511772938,
+          "pid_cpu6_distributed_cycle_samples": 1488,
+          "groups": {
+            "vm_elf": 1458,
+            "linux_kernel": 29,
+            "native_library": 1
+          },
+          "covered_seconds": 1.5117,
+          "vm_event_stream_manifest_sha256": "bb06741e9ab9f8f482ae8d20acc1f2ed803f1e861651d628fe4191b4627f3678"
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "software",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 2861122594,
+          "pid_cpu6_distributed_cycle_samples": 3070,
+          "groups": {
+            "linux_kernel": 59,
+            "vm_elf": 189,
+            "native_library": 16,
+            "guest_jit_rx": 2806
+          },
+          "covered_seconds": 3.0631,
+          "wasm_kernel_samples": 2806,
+          "wasm_kernel_percent": 91.401,
+          "vm_event_stream_manifest_sha256": "eafb86bdc642656dfcdd71d3ea9438935ef081be75da89c34b432baa76cb3006"
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "disabled",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 2264893204,
+          "pid_cpu6_distributed_cycle_samples": 2606,
+          "groups": {
+            "native_library": 8,
+            "vm_elf": 88,
+            "linux_kernel": 32,
+            "guest_jit_rx": 2478
+          },
+          "covered_seconds": 2.3535,
+          "wasm_kernel_samples": 2478,
+          "wasm_kernel_percent": 95.088,
+          "vm_event_stream_manifest_sha256": "8ac281942acfdde9731eddec79a72a6e78c14e3c8e0ed02585033abf8b1ede77"
+        },
+        {
+          "engine": "aot",
+          "width": 64,
+          "mode": "software",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 2835849505,
+          "pid_cpu6_distributed_cycle_samples": 3098,
+          "groups": {
+            "linux_kernel": 49,
+            "vm_elf": 217,
+            "native_library": 17,
+            "guest_jit_rx": 2815
+          },
+          "covered_seconds": 3.0553,
+          "wasm_kernel_samples": 2815,
+          "wasm_kernel_percent": 90.865,
+          "vm_event_stream_manifest_sha256": "493cc98751872448ad70140d7cff7fe9a7050ff3cc6b5818e175a3adff3ae076"
+        },
+        {
+          "engine": "aot",
+          "width": 64,
+          "mode": "disabled",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 2366834856,
+          "pid_cpu6_distributed_cycle_samples": 2556,
+          "groups": {
+            "linux_kernel": 23,
+            "vm_elf": 88,
+            "native_library": 11,
+            "guest_jit_rx": 2434
+          },
+          "covered_seconds": 2.4619,
+          "wasm_kernel_samples": 2434,
+          "wasm_kernel_percent": 95.227,
+          "vm_event_stream_manifest_sha256": "94b3d35e1329f7d651d264d4d1c2d6ac7c3da431a7cf1d50ca2e4051402a1eff"
+        }
+      ],
+      "profile_build": {
+        "vm_sha256": "c062f245dee409646f1e12f07ecddb110ef11e6300477a19f671f0f5ef9991ab",
+        "object_sha256": "37e0976e135590754d482715d25ab2f9151d98e6d4682c33669f4ef51e51ac4c",
+        "translation_unit": "src/uwvm2/runtime/lib/uwvm_runtime.default.cpp",
+        "optimization": "-O3",
+        "symbols": "DWARF 4 (-cc1 -debug-info-kind=constructor)",
+        "compile_link_commands_sha256": "2997a50b4c26fe4e1460e5b1182cdafce5e000fd47b63f6ea1d5bacc0b0f5a59",
+        "raw_attribution_sha256": "fc2854eec1d2dfd20953c1cfecae3a497a774a357721795316d02ced813a98a7",
+        "cases": [
+          {
+            "engine": "int",
+            "width": 32,
+            "mode": "software",
+            "checksum": 3768494458,
+            "pid_cpu6_distributed_cycle_samples": 4294,
+            "annotated_pcs_sha256": "ddabbf37cad1dccbc7a135b2893a761f7d1b3146fb5bd02a7e2e41b0d8adf650",
+            "selected_sampled_pcs": [
+              {
+                "pc": "0x2943f4c",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 131,
+                "assembly": "e8 8f 0c 00 00       \tcall   2944be0 <_ZN5uwvm27runtime6memtag17with_guest_accessITkNSt3__117unsigned_integralEjLb0ENS_6object6memory6linear13mmap_memory_tEZNS0_8compiler8uwvm_int7optable14memtag_details6scalarITkNS3_17unsigned_integralEjLb0EiLj4ELb0ELb0EEEvRKS7_RPSt4byteyEUlNS3_4spanISF_Lj4294967295EEEE_EEDaRKT1_T_yyOT2_>",
+                "samples": 42
+              },
+              {
+                "pc": "0x2a09a33",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 292,
+                "assembly": "56                   \tpush   esi",
+                "samples": 38
+              },
+              {
+                "pc": "0x2a09a75",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 300,
+                "assembly": "5f                   \tpop    edi",
+                "samples": 36
+              },
+              {
+                "pc": "0x297064a",
+                "source": "src/uwvm2/runtime/memtag/bridge.h",
+                "line": 252,
+                "assembly": "c2 04 00             \tret    0x4",
+                "samples": 32
+              },
+              {
+                "pc": "0x2a09a54",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 297,
+                "assembly": "ff 71 10             \tpush   DWORD PTR [ecx+0x10]",
+                "samples": 27
+              },
+              {
+                "pc": "0x2944c20",
+                "source": "src/uwvm2/extension/memtag/execution_policy.h",
+                "line": 32,
+                "assembly": "80 e2 fe             \tand    dl,0xfe",
+                "samples": 23
+              },
+              {
+                "pc": "0x294501d",
+                "source": "src/uwvm2/extension/memtag/shadow.h",
+                "line": 108,
+                "assembly": "0f 83 90 00 00 00    \tjae    29450b3 <_ZZZN5uwvm27runtime6memtag18with_access_policyITkNSt3__117unsigned_integralEjLb0ELb0ELb0ELb0ENS_6object6memory6linear13mmap_memory_tEZNS0_8compiler8uwvm_int7optable14memtag_details6scalarITkNS3_17unsigned_integralEjLb0EiLj4ELb0ELb0EEEvRKS7_RPSt4byteyEUlNS3_4spanISF_Lj4294967295EEEE_EENS_9extension6memtag13access_resultERKT4_T_yyOT5_PKSF_ENKUlSJ_E_clESJ_ENKUlvE_clEv+0x253>",
+                "samples": 21
+              }
+            ]
+          },
+          {
+            "engine": "int",
+            "width": 32,
+            "mode": "disabled",
+            "checksum": 3768494458,
+            "pid_cpu6_distributed_cycle_samples": 1253
+          },
+          {
+            "engine": "int",
+            "width": 64,
+            "mode": "software",
+            "checksum": 3768494458,
+            "pid_cpu6_distributed_cycle_samples": 4060,
+            "annotated_pcs_sha256": "5841463d93a14fc00ec384bcd3b793a8dc8d39cbabd4d3c23daf69825305ed6b",
+            "selected_sampled_pcs": [
+              {
+                "pc": "0x2943321",
+                "source": "src/uwvm2/runtime/memtag/bridge.h",
+                "line": 269,
+                "assembly": "c2 04 00             \tret    0x4",
+                "samples": 40
+              },
+              {
+                "pc": "0x2a09a54",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 297,
+                "assembly": "ff 71 10             \tpush   DWORD PTR [ecx+0x10]",
+                "samples": 40
+              },
+              {
+                "pc": "0x2a09a39",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 292,
+                "assembly": "e8 00 00 00 00       \tcall   2a09a3e <_ZN5uwvm27runtime8compiler8uwvm_int7optable23uwvmint_memtag_dispatchIXtlNS3_35uwvm_interpreter_translate_option_tELb1ELj4294967295ELj4294967295ELj4294967295ELj4294967295ELj4294967295ELj4294967295ELj4294967295ELj4294967295ELj4294967295ELj4294967295EEETpTkNS3_23uwvm_int_stack_top_typeEJPKSt4bytePS6_S9_EQdtT_12is_tail_callEEvDpT0_+0xe>",
+                "samples": 34
+              },
+              {
+                "pc": "0x2a09a75",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 300,
+                "assembly": "5f                   \tpop    edi",
+                "samples": 33
+              },
+              {
+                "pc": "0x296ef8f",
+                "source": "src/uwvm2/runtime/memtag/bridge.h",
+                "line": 252,
+                "assembly": "c2 04 00             \tret    0x4",
+                "samples": 30
+              }
+            ]
+          },
+          {
+            "engine": "int",
+            "width": 64,
+            "mode": "disabled",
+            "checksum": 3768494458,
+            "pid_cpu6_distributed_cycle_samples": 1515
+          },
+          {
+            "engine": "aot",
+            "width": 32,
+            "mode": "software",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 3072
+          },
+          {
+            "engine": "aot",
+            "width": 32,
+            "mode": "disabled",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 2611
+          },
+          {
+            "engine": "aot",
+            "width": 64,
+            "mode": "software",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 3123
+          },
+          {
+            "engine": "aot",
+            "width": 64,
+            "mode": "disabled",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 2661
+          }
+        ]
+      },
+      "uarch-exploration": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "checksum": 3768494458,
+          "summary_sha256": "5c34866cd7f42c5245d263b5fc676e50a4337b85d029b0d080684d06f54f4d5e",
+          "Retiring (% Pipeline Slots)": 70.5,
+          "Front-End Bound (% Pipeline Slots)": 1.8,
+          "Bad Speculation (% Pipeline Slots)": 4.6,
+          "Back-End Bound (% Pipeline Slots)": 23.0,
+          "Core Bound (% Pipeline Slots)": 16.7,
+          "Memory Bound (% Pipeline Slots)": 6.3
+        },
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 3768494458,
+          "summary_sha256": "b7c29f552056a6c3603f3e3672e76978b8212774e8daa943ee83da7ba3dc78e1",
+          "Retiring (% Pipeline Slots)": 72.4,
+          "Front-End Bound (% Pipeline Slots)": 1.9,
+          "Bad Speculation (% Pipeline Slots)": 4.3,
+          "Back-End Bound (% Pipeline Slots)": 21.4,
+          "Core Bound (% Pipeline Slots)": 7.9,
+          "Memory Bound (% Pipeline Slots)": 13.6
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "software",
+          "checksum": 2913193206,
+          "summary_sha256": "83649db14cdc26596b73b24aa75c1d60e6e9d2ad80da0a5f0c475258a3849d51",
+          "Retiring (% Pipeline Slots)": 91.7,
+          "Front-End Bound (% Pipeline Slots)": 3.8,
+          "Bad Speculation (% Pipeline Slots)": 3.3,
+          "Back-End Bound (% Pipeline Slots)": 1.2,
+          "Core Bound (% Pipeline Slots)": 0.9,
+          "Memory Bound (% Pipeline Slots)": 0.3
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 2913193206,
+          "summary_sha256": "738fe2e545fed2dde0005afcab72bd9ff39ef943cc3400690e4ced9a884bfe4a",
+          "Retiring (% Pipeline Slots)": 53.5,
+          "Front-End Bound (% Pipeline Slots)": 5.0,
+          "Bad Speculation (% Pipeline Slots)": 0.0,
+          "Back-End Bound (% Pipeline Slots)": 43.8,
+          "Core Bound (% Pipeline Slots)": 42.7,
+          "Memory Bound (% Pipeline Slots)": 1.2
+        }
+      ],
+      "memory-access": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "checksum": 3768494458,
+          "summary_sha256": "ed8c37fe8357836243499f4aa146f18fc9f42b1dc6d785d3e767caf5582f78ef",
+          "DRAM Bound (% Clockticks)": 0.2
+        },
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 3768494458,
+          "summary_sha256": "42024766ed70a0e1d024f6e9a055c925c8a7eecfde9452ba66dec7bcbd90ac29",
+          "DRAM Bound (% Clockticks)": 0.5
+        }
+      ],
+      "cold_aot_controls": [
+        {
+          "width": 32,
+          "mode": "software",
+          "checksum": 324508639,
+          "guest_ns": 4016,
+          "process_ns": 217205936
+        },
+        {
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 324508639,
+          "guest_ns": 2471,
+          "process_ns": 115574125
+        },
+        {
+          "width": 64,
+          "mode": "software",
+          "checksum": 324508639,
+          "guest_ns": 10488,
+          "process_ns": 466858349
+        },
+        {
+          "width": 64,
+          "mode": "disabled",
+          "checksum": 324508639,
+          "guest_ns": 2900,
+          "process_ns": 116183972
+        }
+      ],
+      "direct_user_pmu": [
+        {
+          "width": 32,
+          "engine": "int",
+          "mode": "software",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 4080951576,
+          "cpu_core/instructions/u": 16413701815,
+          "raw_sha256": "1447c6b7e56fb4944f888e1bb004fe6a84191600eb5336306f3485fd48483299"
+        },
+        {
+          "width": 32,
+          "engine": "int",
+          "mode": "disabled",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 1185978176,
+          "cpu_core/instructions/u": 5256366102,
+          "raw_sha256": "636817c16ce31e86173e7a300367682e146992c6e907b8e6626998f2cfd06f7d"
+        },
+        {
+          "width": 64,
+          "engine": "int",
+          "mode": "software",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 4165055417,
+          "cpu_core/instructions/u": 17621767200,
+          "raw_sha256": "f8465814fde020ffd16fdccf1662190e7b83c381f281128bd74d8c2a0487e848"
+        },
+        {
+          "width": 64,
+          "engine": "int",
+          "mode": "disabled",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 1326956675,
+          "cpu_core/instructions/u": 5910710647,
+          "raw_sha256": "1b169b8fe8c5c1db8b354497a08f65c5f29b88f0557b975556103072812432ce"
+        },
+        {
+          "width": 32,
+          "engine": "aot",
+          "mode": "software",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 3559067510,
+          "cpu_core/instructions/u": 18208312501,
+          "raw_sha256": "3d30e6ac99e2ef19d96b8e2cbddcdd1792a888b9d2eef7bb4a43423634fd430b"
+        },
+        {
+          "width": 32,
+          "engine": "aot",
+          "mode": "disabled",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 2814672796,
+          "cpu_core/instructions/u": 7874672820,
+          "raw_sha256": "e1d5040fd7dad4b085fa9f42acae9d229129808995cd1b8d7c1c6820e11f3732"
+        },
+        {
+          "width": 64,
+          "engine": "aot",
+          "mode": "software",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 3665407689,
+          "cpu_core/instructions/u": 17550881983,
+          "raw_sha256": "cb8d5f53fb19a51e9780daffa77d481c8602454616edc5cf8cf8586f9520c40c"
+        },
+        {
+          "width": 64,
+          "engine": "aot",
+          "mode": "disabled",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 2838463610,
+          "cpu_core/instructions/u": 7907205217,
+          "raw_sha256": "d3eab559d939501e0849396509697a0bf2e4ba91f5fb3d0f50fc3dfecfa60d55"
+        }
+      ],
+      "syscall_controls": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "observed_calls": 194,
+          "total_syscall_seconds": 0.000283,
+          "raw_sha256": "da67f813b3098e6c5e35648700baf46c7214b00d029da2bfd5f0c7c0531bb439"
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "software",
+          "observed_calls": 275,
+          "total_syscall_seconds": 0.000416,
+          "raw_sha256": "09ecc1b7ec4e1c91f24a3b2b4594654c4079ee2da8ef107692a3299c61f147bc"
+        }
+      ]
+    },
+    "x86_64": {
+      "binary_sha256": "1bb7a97f0937af4ffefaa845d3ac8b6549c9e5c6d7606d75fbf9d6eaadaadb7c",
+      "raw_attribution_sha256": "0e3d1ce76fd661dfb59912f021a159e8ac29a9a9891a17e6ff8a11c40f64309b",
+      "hardware_hotspots": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "iterations": 134217728,
+          "checksum": 3033707387,
+          "guest_ns": 2371775083,
+          "pid_cpu6_distributed_cycle_samples": 2456,
+          "groups": {
+            "linux_kernel": 37,
+            "native_library": 1,
+            "vm_elf": 2418
+          },
+          "covered_seconds": 2.3763,
+          "tag_handlers_in_top_symbols": {
+            "uwvmint_memtag_scalar_cached": 1274
+          },
+          "vm_event_stream_manifest_sha256": "94584356ceaa91428cd1ef49bb6925d48b2f227bcbab05926f32ac76983991b5"
+        },
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "disabled",
+          "iterations": 134217728,
+          "checksum": 3033707387,
+          "guest_ns": 1411165110,
+          "pid_cpu6_distributed_cycle_samples": 1369,
+          "groups": {
+            "linux_kernel": 17,
+            "native_library": 1,
+            "vm_elf": 1351
+          },
+          "covered_seconds": 1.4142,
+          "vm_event_stream_manifest_sha256": "a12740b873f315fe1a84e365ba5a08be7166015284d5fcdc26604936cbce506a"
+        },
+        {
+          "engine": "int",
+          "width": 64,
+          "mode": "software",
+          "iterations": 134217728,
+          "checksum": 3033707387,
+          "guest_ns": 2347871682,
+          "pid_cpu6_distributed_cycle_samples": 2570,
+          "groups": {
+            "linux_kernel": 33,
+            "vm_elf": 2537
+          },
+          "covered_seconds": 2.3522,
+          "tag_handlers_in_top_symbols": {
+            "uwvmint_memtag_scalar_cached": 1255
+          },
+          "vm_event_stream_manifest_sha256": "02330d5988c309c6e2e0cb272b57601dbda09ffac469d83cbbaf6583699a7368"
+        },
+        {
+          "engine": "int",
+          "width": 64,
+          "mode": "disabled",
+          "iterations": 134217728,
+          "checksum": 3033707387,
+          "guest_ns": 1495260908,
+          "pid_cpu6_distributed_cycle_samples": 1508,
+          "groups": {
+            "linux_kernel": 21,
+            "vm_elf": 1487
+          },
+          "covered_seconds": 1.4963,
+          "vm_event_stream_manifest_sha256": "afa849fb3a799865107da637427fa4fc731448ec1177c7dff6293f0a0c2b1ea1"
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "software",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 1317329352,
+          "pid_cpu6_distributed_cycle_samples": 1634,
+          "groups": {
+            "linux_kernel": 39,
+            "vm_elf": 141,
+            "native_library": 12,
+            "guest_jit_rx": 1442
+          },
+          "covered_seconds": 1.4629,
+          "wasm_kernel_samples": 1442,
+          "wasm_kernel_percent": 88.25,
+          "vm_event_stream_manifest_sha256": "26ce2e662d87f292ba836946b17af6a5ae9822a3e3e083d726099fc667ed28e7"
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "disabled",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 1048506880,
+          "pid_cpu6_distributed_cycle_samples": 1206,
+          "groups": {
+            "native_library": 6,
+            "linux_kernel": 16,
+            "vm_elf": 39,
+            "guest_jit_rx": 1145
+          },
+          "covered_seconds": 1.0893,
+          "wasm_kernel_samples": 1145,
+          "wasm_kernel_percent": 94.942,
+          "vm_event_stream_manifest_sha256": "9e673bb19767ed0dd46f02c55b904d71b7e5fa248027203d5ab8872c58f57bc2"
+        },
+        {
+          "engine": "aot",
+          "width": 64,
+          "mode": "software",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 1642951407,
+          "pid_cpu6_distributed_cycle_samples": 1893,
+          "groups": {
+            "native_library": 15,
+            "vm_elf": 142,
+            "linux_kernel": 34,
+            "guest_jit_rx": 1702
+          },
+          "covered_seconds": 1.7841,
+          "wasm_kernel_samples": 1702,
+          "wasm_kernel_percent": 89.91,
+          "vm_event_stream_manifest_sha256": "eb5b81c6c8f87568c12f60aa160c99a08a2c20b31f124b90219a427a41b8b0ce"
+        },
+        {
+          "engine": "aot",
+          "width": 64,
+          "mode": "disabled",
+          "iterations": 2147483648,
+          "checksum": 2913193206,
+          "guest_ns": 1137960576,
+          "pid_cpu6_distributed_cycle_samples": 1224,
+          "groups": {
+            "linux_kernel": 33,
+            "vm_elf": 65,
+            "native_library": 5,
+            "guest_jit_rx": 1121
+          },
+          "covered_seconds": 1.2096,
+          "wasm_kernel_samples": 1121,
+          "wasm_kernel_percent": 91.585,
+          "vm_event_stream_manifest_sha256": "fe9d374320d62c297d863c99b993e6a931ce49d4f9c84196053eb672ea633431"
+        }
+      ],
+      "profile_build": {
+        "vm_sha256": "7fa4df1e192085a9ec3f60a55446ecfc5022e0720f7adf098ebee8b9c376c6b1",
+        "object_sha256": "34971b8f76ad62d61733036588d68b41d2613b66942890fd13f2731d3423087f",
+        "translation_unit": "src/uwvm2/runtime/lib/uwvm_runtime.default.cpp",
+        "optimization": "-O3",
+        "symbols": "DWARF 4 (-gline-tables-only)",
+        "compile_link_commands_sha256": "9723d67fbd8180b8cb8db77c1a0d4e62768a07083e7bb23ec0fad6fe3fbaa68c",
+        "raw_attribution_sha256": "e4cf6bc1cf35a3375e42a8fc75e4aa06a087c98d240f23e522b80dde869569b6",
+        "cases": [
+          {
+            "engine": "int",
+            "width": 32,
+            "mode": "software",
+            "checksum": 3033707387,
+            "pid_cpu6_distributed_cycle_samples": 2232,
+            "annotated_pcs_sha256": "96d7939c5f3a1bf68c1dda6dcd94241989e293c6cddd2ffdfadecd29521d20eb",
+            "selected_sampled_pcs": [
+              {
+                "pc": "0x1e0c0a0",
+                "source": "src/uwvm2/extension/memtag/shadow.h",
+                "line": 207,
+                "assembly": "47 0f b6 34 2c       \tmovzx  r14d,BYTE PTR [r12+r13*1]",
+                "samples": 44
+              },
+              {
+                "pc": "0x1e92155",
+                "source": "src/uwvm2/extension/memtag/storage.h",
+                "line": 77,
+                "assembly": "48 83 f8 01          \tcmp    rax,0x1",
+                "samples": 41
+              },
+              {
+                "pc": "0x1e92217",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 280,
+                "assembly": "ff e0                \tjmp    rax",
+                "samples": 40
+              },
+              {
+                "pc": "0x1e9210c",
+                "source": "src/uwvm2/runtime/memtag/bridge.h",
+                "line": 134,
+                "assembly": "4c 8b 5f 08          \tmov    r11,QWORD PTR [rdi+0x8]",
+                "samples": 36
+              },
+              {
+                "pc": "0x1e9217f",
+                "source": "src/uwvm2/extension/memtag/shadow.h",
+                "line": 100,
+                "assembly": "48 29 d8             \tsub    rax,rbx",
+                "samples": 34
+              }
+            ]
+          },
+          {
+            "engine": "int",
+            "width": 32,
+            "mode": "disabled",
+            "checksum": 3033707387,
+            "pid_cpu6_distributed_cycle_samples": 1395
+          },
+          {
+            "engine": "int",
+            "width": 64,
+            "mode": "software",
+            "checksum": 3033707387,
+            "pid_cpu6_distributed_cycle_samples": 2310,
+            "annotated_pcs_sha256": "330c01c56641b1fd18f2af406bc532006062679e398c794d9c6eb84d7bfc27ad",
+            "selected_sampled_pcs": [
+              {
+                "pc": "0x1e08427",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 280,
+                "assembly": "ff e0                \tjmp    rax",
+                "samples": 43
+              },
+              {
+                "pc": "0x1e083a9",
+                "source": "src/uwvm2/extension/memtag/shadow.h",
+                "line": 103,
+                "assembly": "49 83 fc 04          \tcmp    r12,0x4",
+                "samples": 40
+              },
+              {
+                "pc": "0x1e082ce",
+                "source": "src/uwvm2/runtime/compiler/uwvm_int/optable/memtag.h",
+                "line": 276,
+                "assembly": "49 89 fa             \tmov    r10,rdi",
+                "samples": 39
+              },
+              {
+                "pc": "0x1e8ec5f",
+                "source": "src/uwvm2/extension/memtag/shadow.h",
+                "line": 0,
+                "assembly": "90                   \tnop",
+                "samples": 36
+              },
+              {
+                "pc": "0x1e8eb8c",
+                "source": "src/uwvm2/runtime/memtag/bridge.h",
+                "line": 134,
+                "assembly": "4c 8b 5f 08          \tmov    r11,QWORD PTR [rdi+0x8]",
+                "samples": 36
+              }
+            ]
+          },
+          {
+            "engine": "int",
+            "width": 64,
+            "mode": "disabled",
+            "checksum": 3033707387,
+            "pid_cpu6_distributed_cycle_samples": 1526
+          },
+          {
+            "engine": "aot",
+            "width": 32,
+            "mode": "software",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 1619
+          },
+          {
+            "engine": "aot",
+            "width": 32,
+            "mode": "disabled",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 1201
+          },
+          {
+            "engine": "aot",
+            "width": 64,
+            "mode": "software",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 1890
+          },
+          {
+            "engine": "aot",
+            "width": 64,
+            "mode": "disabled",
+            "checksum": 2913193206,
+            "pid_cpu6_distributed_cycle_samples": 1219
+          }
+        ]
+      },
+      "uarch-exploration": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "checksum": 3033707387,
+          "summary_sha256": "9f496ed23ad61c18a52ffda59dd6232c5a2ec5acadc64cf66d27785751393778",
+          "Retiring (% Pipeline Slots)": 71.2,
+          "Front-End Bound (% Pipeline Slots)": 22.9,
+          "Bad Speculation (% Pipeline Slots)": 5.1,
+          "Back-End Bound (% Pipeline Slots)": 0.8,
+          "Core Bound (% Pipeline Slots)": 0.8,
+          "Memory Bound (% Pipeline Slots)": 0.0
+        },
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 3033707387,
+          "summary_sha256": "5e9021a6e63376d52e6079e626554c8b4733812932bc6fb96dfbb090d5c3e332",
+          "Retiring (% Pipeline Slots)": 63.8,
+          "Front-End Bound (% Pipeline Slots)": 28.6,
+          "Bad Speculation (% Pipeline Slots)": 6.9,
+          "Back-End Bound (% Pipeline Slots)": 0.7,
+          "Core Bound (% Pipeline Slots)": 0.7,
+          "Memory Bound (% Pipeline Slots)": 0.0
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "software",
+          "checksum": 2913193206,
+          "summary_sha256": "c5cf480d16a55fceb24fd8ccc9a175f026c3d9c3733dab5f384fdb223f925139",
+          "Retiring (% Pipeline Slots)": 87.2,
+          "Front-End Bound (% Pipeline Slots)": 4.8,
+          "Bad Speculation (% Pipeline Slots)": 6.1,
+          "Back-End Bound (% Pipeline Slots)": 1.8,
+          "Core Bound (% Pipeline Slots)": 1.8,
+          "Memory Bound (% Pipeline Slots)": 0.0
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 2913193206,
+          "summary_sha256": "5ae0a622aebe39cc1fff930bbaf46c1a67f68a452cce220946e8588cf0ca697b",
+          "Retiring (% Pipeline Slots)": 88.5,
+          "Front-End Bound (% Pipeline Slots)": 5.3,
+          "Bad Speculation (% Pipeline Slots)": 0.0,
+          "Back-End Bound (% Pipeline Slots)": 14.5,
+          "Core Bound (% Pipeline Slots)": 14.5,
+          "Memory Bound (% Pipeline Slots)": 0.0
+        }
+      ],
+      "memory-access": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "checksum": 3033707387,
+          "summary_sha256": "3827eade5004853611ba41a11ea4e6a51dcce34c176ccf89ccb5c36980e7e55f",
+          "DRAM Bound (% Clockticks)": 0.4
+        },
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 3033707387,
+          "summary_sha256": "c53d648c7371ce78a1f4ef556259017251006cfb0a8a90d69aaf4a4a8ae1ecb0",
+          "DRAM Bound (% Clockticks)": 0.0
+        }
+      ],
+      "cold_aot_controls": [
+        {
+          "width": 32,
+          "mode": "software",
+          "checksum": 324508639,
+          "guest_ns": 6560,
+          "process_ns": 216008941
+        },
+        {
+          "width": 32,
+          "mode": "disabled",
+          "checksum": 324508639,
+          "guest_ns": 4471,
+          "process_ns": 65274027
+        },
+        {
+          "width": 64,
+          "mode": "software",
+          "checksum": 324508639,
+          "guest_ns": 4526,
+          "process_ns": 166023468
+        },
+        {
+          "width": 64,
+          "mode": "disabled",
+          "checksum": 324508639,
+          "guest_ns": 5680,
+          "process_ns": 115845146
+        }
+      ],
+      "direct_user_pmu": [
+        {
+          "width": 32,
+          "engine": "int",
+          "mode": "software",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 1353615427,
+          "cpu_core/instructions/u": 5289337885,
+          "raw_sha256": "c51f4ebcefe36f357ddde1346112aa256da5342cfeacabf41802f815378167da"
+        },
+        {
+          "width": 32,
+          "engine": "int",
+          "mode": "disabled",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 763348620,
+          "cpu_core/instructions/u": 2671850371,
+          "raw_sha256": "f3ab21a10719efcb95e9a28c0a2c720d65709a6ea60adc62a49e61965982b5ee"
+        },
+        {
+          "width": 64,
+          "engine": "int",
+          "mode": "software",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 1438744472,
+          "cpu_core/instructions/u": 5423613672,
+          "raw_sha256": "51e84f6bccc1890fcd9b133fe642a320a7e28c7c4ca041d348aa5b23c1661083"
+        },
+        {
+          "width": 64,
+          "engine": "int",
+          "mode": "disabled",
+          "iterations": 16777216,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 835547543,
+          "cpu_core/instructions/u": 2873219810,
+          "raw_sha256": "86c2fa8de6246e709653094f252e3858eb74ca54671b1ddfe6bc8a6522d9ce25"
+        },
+        {
+          "width": 32,
+          "engine": "aot",
+          "mode": "software",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 2618321468,
+          "cpu_core/instructions/u": 9914003630,
+          "raw_sha256": "0ea40ca73c8626d28ddc58714352a0e12f22152097bc4ea887380919e7dbd7f6"
+        },
+        {
+          "width": 32,
+          "engine": "aot",
+          "mode": "disabled",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 1414141238,
+          "cpu_core/instructions/u": 5870304853,
+          "raw_sha256": "74d70b796404b868cad8ae1c2807f842f85fe71e8f2349b4c4bd4f5f5c8a95e4"
+        },
+        {
+          "width": 64,
+          "engine": "aot",
+          "mode": "software",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 2218241360,
+          "cpu_core/instructions/u": 10969706937,
+          "raw_sha256": "17159f0ecd58e7212ec2a6c1ecbcc98f862275b13f81f1a8e8b1b03577dc2955"
+        },
+        {
+          "width": 64,
+          "engine": "aot",
+          "mode": "disabled",
+          "iterations": 536870912,
+          "running_percent": 100,
+          "cpu_core/cycles/u": 1351019299,
+          "cpu_core/instructions/u": 6074683391,
+          "raw_sha256": "64d83dbd2dc2684e36bbb3c4e5cfec009f0b9feb69b977c536b953ee34fd2577"
+        }
+      ],
+      "syscall_controls": [
+        {
+          "engine": "int",
+          "width": 32,
+          "mode": "software",
+          "observed_calls": 210,
+          "total_syscall_seconds": 0.000864,
+          "raw_sha256": "db4358ce6c3e2f29d7a17896307dd97be4293a9fb329bf65fb675a77afb7826f"
+        },
+        {
+          "engine": "aot",
+          "width": 32,
+          "mode": "software",
+          "observed_calls": 305,
+          "total_syscall_seconds": 0.000583,
+          "raw_sha256": "a43cb711051ba0a120b5cd1429ba7bdd1ec3e872a673ab9c6bf8d12a0543c3d5"
+        }
+      ]
+    }
+  },
+  "qualification_replay": {
+    "i686": {
+      "runner_sha256": "1bf38a0702ea4b9809c0c5aaef2f992d7b6296b9d2ba873f576c3a85df07e15f",
+      "receipt_sha256": "2c965a8f671283fcc795063c43ddd0389a389a12db8b1e94ef4d07e27e0e7e48",
+      "cells": 4,
+      "executions": 72,
+      "host_runtime": "cached Debian i386 libatomic mounted read-only with existing 32-bit libraries"
+    },
+    "x86_64": {
+      "runner_sha256": "1bf38a0702ea4b9809c0c5aaef2f992d7b6296b9d2ba873f576c3a85df07e15f",
+      "receipt_sha256": "fd2e412f5a7b81d4ec15d95b2ff97d539752800e04f4d2cfa9cf97df96ebe219",
+      "cells": 4,
+      "executions": 72,
+      "host_runtime": "native x86_64"
+    }
+  },
+  "scan_candidate": {
+    "i686": {
+      "vm_pairs": 336,
+      "cpu": 29,
+      "software": [
+        {
+          "engine": "int",
+          "wasm_bits": 32,
+          "median_guest_time_change_percent": -3.12,
+          "sign_interval_percent": [
+            -5.312,
+            0.419
+          ]
+        },
+        {
+          "engine": "int",
+          "wasm_bits": 64,
+          "median_guest_time_change_percent": 3.536,
+          "sign_interval_percent": [
+            -1.689,
+            8.051
+          ]
+        },
+        {
+          "engine": "aot",
+          "wasm_bits": 32,
+          "median_guest_time_change_percent": 0.87,
+          "sign_interval_percent": [
+            -0.702,
+            2.781
+          ]
+        },
+        {
+          "engine": "aot",
+          "wasm_bits": 64,
+          "median_guest_time_change_percent": -1.762,
+          "sign_interval_percent": [
+            -3.617,
+            0.655
+          ]
+        }
+      ]
+    },
+    "x86_64": {
+      "vm_pairs": 336,
+      "cpu": 12,
+      "software": [
+        {
+          "engine": "int",
+          "wasm_bits": 32,
+          "median_guest_time_change_percent": 0.932,
+          "sign_interval_percent": [
+            -2.486,
+            3.656
+          ]
+        },
+        {
+          "engine": "int",
+          "wasm_bits": 64,
+          "median_guest_time_change_percent": -0.964,
+          "sign_interval_percent": [
+            -3.807,
+            2.351
+          ]
+        },
+        {
+          "engine": "aot",
+          "wasm_bits": 32,
+          "median_guest_time_change_percent": -0.188,
+          "sign_interval_percent": [
+            -2.642,
+            5.184
+          ]
+        },
+        {
+          "engine": "aot",
+          "wasm_bits": 64,
+          "median_guest_time_change_percent": -0.964,
+          "sign_interval_percent": [
+            -3.685,
+            1.633
+          ]
+        }
+      ]
+    },
+    "local_candidate": "5cafd78f1897b8071153cffa1a8cf9676a6d4172",
+    "disposition": "Unmerged. All eight software-check median intervals included zero. Control and quarter-length comparisons also varied.",
+    "interval": "Exact, distribution-free 97.87% sign interval for each 16-pair median, interpreted separately.",
+    "audit_sha256": "69c37723f023c2c527663c780dddba10bb6e1e19d9508e5da26b8ddb382458b7"
+  },
+  "limitations": [
+    "The 4 KiB scalar kernel fits in cache. ARM platform timings are a separate QEMU campaign.",
+    "Hardware REF_TSC sampling covered only a fraction of some runs. PID/CPU-filtered distributed-cycle and retired-instruction samples cover the loop; slot fractions and event sampling have different denominators.",
+    "Driverless collection supplied no memory-object or data-cacheline attribution. System-wide uncore bandwidth was shared with unrelated processes.",
+    "Compilation with debug line information affected code layout. Source addresses are qualified against their own profiling executable."
+  ],
+  "schema": 1,
+  "independent_study_sha256": "735f9e9d5776d71bf78009846e8415cb62c9d27dca3dd10411296ad0b6bab468",
+  "verified_counts": {
+    "vtune_profiles": 52,
+    "direct_perf_stat": 16,
+    "strace_controls": 4
+  }
+}
