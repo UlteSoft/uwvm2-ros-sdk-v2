@@ -1042,6 +1042,59 @@
           }
         }
       }
+    },
+    "signed_update_d552_mte_start": {
+      "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+      "vm_sha256": "630707429a9e0d6af5fef29ffb51090812e346d310b7849f6ace1f435c8fda6b",
+      "guest_sdk_commit": "03a3904ff4d7354d7458bcff7338639a37d9292f",
+      "qualification_commit": "c6b43090b68e1d4a9a5c2ef93d11c52baa4c8d35",
+      "host": "linux-x86_64",
+      "profile": "wasm32-wasip1-noeh-mte",
+      "observed_cases": 2,
+      "positive": 1,
+      "receipt_sha256": "59438fa0ba3556a9e36b7389f569b7f6110cbc6b42b8094eb4109a7a2719bf9d",
+      "isolation_sha256": "122a90625467a0b616e66f8f67296de452379cfdff2069e3a049c9e3fbcee38f",
+      "cases": {
+        "objc": {
+          "status": "unsupported",
+          "positive": false,
+          "process_exit": 126,
+          "launch_start_section": {
+            "function_index": 2,
+            "name": "__wasm_memtag_init_globals"
+          },
+          "first_reply_bytes": 0,
+          "limitation": "production-update-requires-no-start-section",
+          "business_values": null,
+          "epochs_by_operation": {},
+          "result_sha256": "b368e4c8312c6ed5c3fddf28fe1f5c6e49f9104ca03af5b69133ad551f91e7cf",
+          "transport_sha256": "5d40eaab01243ec748299fa4859101af6123ecc8a706050fa0a4dc7613bb9b1e"
+        },
+        "c": {
+          "status": "pass",
+          "positive": true,
+          "process_exit": 0,
+          "launch_start_section": null,
+          "first_reply_bytes": 304,
+          "limitation": null,
+          "business_values": [
+            17,
+            29
+          ],
+          "epochs_by_operation": {
+            "call-after": 2,
+            "call-before": 1,
+            "ready": 1,
+            "signed-commit": 2,
+            "signed-launch": 1,
+            "signed-prepare": 1,
+            "status": 0,
+            "stop": 2
+          },
+          "result_sha256": "0f226fec763d38db3ab96ef19d091fe3391e2017f01fee229fee34e7f64f03a7",
+          "transport_sha256": "c1276b2ddcf0ef6b908a389a625a0113de5f139da8da7f201f1ddbe874562b6d"
+        }
+      }
     }
   }
 }
