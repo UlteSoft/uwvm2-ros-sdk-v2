@@ -96,5 +96,16 @@
     "armhf": {
       "status": "pending"
     }
+  },
+  "selector_fix_public_installation": {
+    "sdk_commit": "c6e0c5ab0d24d766268ef7dce98f86849e32a652",
+    "sdk_tree": "6893315704e133ec2460d823acd88b9caff44ec0",
+    "host": "linux-x86_64",
+    "root_cli_installations": {
+      "objc": "cd4814f678179ad5cb1cda7d00795d9ecf7d1a438448c7ef3551291faa97f5ba",
+      "objcpp": "2f904356148ad03dac8c30f323ae3ad4b13cbb6c4d993bc22d0f4f3fd03f78b7"
+    },
+    "verified_guest_archives": 16,
+    "archives_receipt_sha256": "691cd3fb57605910c5bcf14233e31444e173da469d09a4af2885ecd46c34dafc"
   }
 }

@@ -247,6 +247,20 @@
         },
         "summary_sha256": "4351239307a2bd13b600c777deb3702e6e9935a098490916166f90ffe29cc1d1",
         "c_api_rows_sha256": "5ace87a07b8204cc5d07d26e0df9736059885d9549ec0085d5ebd44d981d46b8"
+      },
+      "wasip1_stdout_policy": {
+        "cases": 512,
+        "statuses": {
+          "pass": 512
+        },
+        "stages": [
+          "allow-without-grant",
+          "deny",
+          "hidden",
+          "stdout-only"
+        ],
+        "summary_sha256": "3f7c99d1eabcc679b1719f6a3bd4be835c3f9f80acaccdddbb0844b4928d66cf",
+        "results_sha256": "10e0d404477e29143da21437cda3d26e67cb6b171167fdcf6a106e19e2b20085"
       }
     },
     "i686": {
