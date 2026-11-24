@@ -1,0 +1,71 @@
+diff --git a/Lib/LLVMJIT/LLVMJIT.cpp b/Lib/LLVMJIT/LLVMJIT.cpp
+index 3654bf2f1d80c124ab348ccf599bc9c2f92632a1..45700400a2783d4bf76f797b6df5d985c29746d7 100644
+--- a/Lib/LLVMJIT/LLVMJIT.cpp
++++ b/Lib/LLVMJIT/LLVMJIT.cpp
+@@ -1,6 +1,7 @@
+ #include "WAVM/LLVMJIT/LLVMJIT.h"
+ #include <unwind.h>
+ #include <cstdio>
++#include <type_traits>
+ #include <utility>
+ #include "LLVMJITPrivate.h"
+ #include "WAVM/IR/FeatureSpec.h"
+@@ -364,6 +365,22 @@ TargetSpec LLVMJIT::getHostTargetSpec()
+ 	return result;
+ }
+ 
++#if LLVM_VERSION_MAJOR >= 13
++template<typename Mode> static constexpr auto jitDwarfUnwind(int) -> decltype(Mode::DwarfOnly)
++{ return Mode::DwarfOnly; }
++
++template<typename Mode> static constexpr Mode jitDwarfUnwind(...)
++{ return Mode::Always; }
++#endif
++
++template<typename Subtarget>
++static bool subtargetHasFeature(const Subtarget& subtarget, llvm::StringRef feature)
++{
++	if constexpr(std::is_pointer<Subtarget>::value)
++	{ return subtarget && subtarget->checkFeatures(feature); }
++	else { return subtarget.checkFeatures(feature); }
++}
++
+ std::unique_ptr<llvm::TargetMachine> LLVMJIT::getTargetMachine(
+ 	[[maybe_unused]] const TargetSpec& targetSpec)
+ {
+@@ -391,7 +408,7 @@ std::unique_ptr<llvm::TargetMachine> LLVMJIT::getTargetMachine(
+ 		// unwind through JIT'd frames. Force the emission of DWARF eh_frame FDEs
+ 		// that can be registered with the unwinder.
+ 		llvm::TargetOptions targetOptions;
+-		targetOptions.MCOptions.EmitDwarfUnwind = llvm::EmitDwarfUnwindType::DwarfOnly;
++		targetOptions.MCOptions.EmitDwarfUnwind = jitDwarfUnwind<llvm::EmitDwarfUnwindType>(0);
+ 		engineBuilder.setTargetOptions(targetOptions);
+ 	}
+ #endif
+@@ -412,7 +429,7 @@ TargetValidationResult LLVMJIT::validateTargetMachine(
+ 	if(targetArch == llvm::Triple::x86_64)
+ 	{
+ 		// If the SIMD feature is enabled, then require the SSE4.1 CPU feature.
+-		if(featureSpec.simd && !targetMachine->getMCSubtargetInfo().checkFeatures("+sse4.1"))
++		if(featureSpec.simd && !subtargetHasFeature(targetMachine->getMCSubtargetInfo(), "+sse4.1"))
+ 		{
+ 			return TargetValidationResult::x86CPUDoesNotSupportSSE41;
+ 		}
+@@ -421,7 +438,7 @@ TargetValidationResult LLVMJIT::validateTargetMachine(
+ 	}
+ 	else if(targetArch == llvm::Triple::aarch64)
+ 	{
+-		if(featureSpec.simd && !targetMachine->getMCSubtargetInfo().checkFeatures("+neon"))
++		if(featureSpec.simd && !subtargetHasFeature(targetMachine->getMCSubtargetInfo(), "+neon"))
+ 		{
+ 			return TargetValidationResult::wavmDoesNotSupportSIMDOnArch;
+ 		}
+@@ -457,7 +474,7 @@ TargetValidationResult LLVMJIT::validateTargetWithFeatureSpecUpdate(const Target
+ 			featureSpec.memory64 = true;
+ 			featureSpec.table64 = true;
+ 			if(targetMachine->getTargetTriple().getArch() == ::llvm::Triple::aarch64
+-			   && targetMachine->getMCSubtargetInfo().checkFeatures("+mte"))
++			   && subtargetHasFeature(targetMachine->getMCSubtargetInfo(), "+mte"))
+ 			{
+ 				memtagMteSupported = true;
+ 			}

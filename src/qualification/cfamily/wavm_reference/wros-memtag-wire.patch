@@ -1,0 +1,126 @@
+diff --git a/Lib/WASM/WASMSerialization.cpp b/Lib/WASM/WASMSerialization.cpp
+index af95f642108d7b150949c3646144ae52e0fc30f1..c870cdb5922064d18dc576240474b40a94ec2291 100644
+--- a/Lib/WASM/WASMSerialization.cpp
++++ b/Lib/WASM/WASMSerialization.cpp
+@@ -31,6 +31,40 @@ static void throwIfNotValidUTF8(const std::string& string)
+ 	}
+ }
+ 
++static constexpr U8 wrosPrefix = 0xff;
++static constexpr U32 wrosVersion = 1;
++static constexpr U32 wrosLinearDomain = 1;
++
++static bool isMt2MemtagOperation(U32 operation)
++{
++	return (operation >= 0x20 && operation <= 0x2f) || (operation >= 0x36 && operation <= 0x38);
++}
++
++static bool isMt2MemtagOpcode(Opcode opcode)
++{
++	return (U16(opcode) >> 8) == 0xfc && isMt2MemtagOperation(U16(opcode) & 0xff);
++}
++
++static Opcode decodeWROSMemtagOpcode(U32 word)
++{
++	if((word >> 24) != wrosVersion) { throw FatalSerializationException("unknown WROS version"); }
++	if(((word >> 16) & 0xff) != wrosLinearDomain)
++	{
++		throw FatalSerializationException("unknown WROS domain");
++	}
++	const U32 operation = word & 0xffff;
++	if(isMt2MemtagOperation(operation)) { return Opcode(0xfc00 | operation); }
++	if(operation == 0x33) { throw FatalSerializationException("reserved WROS memtag.add"); }
++	if(operation >= 0x40 && operation <= 0x44)
++	{
++		static const char* const names[] = {
++			"memtag.claim", "memtag.claimz", "memtag.reserve", "memtag.activate", "memtag.release"};
++		throw FatalSerializationException(std::string(names[operation - 0x40])
++										  + " requires WROS allocation ownership");
++	}
++	throw FatalSerializationException("unknown WROS memtag operation " + std::to_string(operation));
++}
++
+ WAVM_FORCEINLINE void serializeOpcode(InputStream& stream, Opcode& opcode)
+ {
+ 	U8 opcodeU8;
+@@ -40,6 +74,13 @@ WAVM_FORCEINLINE void serializeOpcode(InputStream& stream, Opcode& opcode)
+ 	{
+ 		U32 opcodeVarUInt;
+ 		serializeVarUInt32(stream, opcodeVarUInt);
++		// WAVM's interleaved SIMD instructions already occupy FF 00 through FF 17.
++		if(opcodeU8 == wrosPrefix && opcodeVarUInt > 0x17)
++		{
++			opcode = decodeWROSMemtagOpcode(opcodeVarUInt);
++			return;
++		}
++		if(opcodeVarUInt > 0xff) { throw FatalSerializationException("unknown extended opcode"); }
+ 		opcode = Opcode((U32(opcodeU8) << 8) | opcodeVarUInt);
+ 	}
+ }
+@@ -54,6 +95,11 @@ WAVM_FORCEINLINE void serializeOpcode(OutputStream& stream, Opcode opcode)
+ 	{
+ 		U8 opcodePrefix = U8(U16(opcode) >> 8);
+ 		U32 opcodeVarUInt = U32(opcode) & 0xff;
++		if(isMt2MemtagOpcode(opcode))
++		{
++			opcodePrefix = wrosPrefix;
++			opcodeVarUInt |= (wrosVersion << 24) | (wrosLinearDomain << 16);
++		}
+ 		serializeNativeValue(stream, opcodePrefix);
+ 		serializeVarUInt32(stream, opcodeVarUInt);
+ 	}
+@@ -791,12 +837,14 @@ void serializeMemoryIndex(Stream& stream, Uptr& memoryIndex, const FeatureSpec&
+ 	}
+ }
+ template<typename Stream>
+-void serialize(Stream& stream,
+-			   MemoryImm& imm,
+-			   const FunctionDef&,
+-			   const ModuleSerializationState& state)
++void serializeOpImm(Stream& stream,
++					MemoryImm& imm,
++					const FunctionDef&,
++					const ModuleSerializationState& state,
++					Opcode opcode)
+ {
+-	serializeMemoryIndex(stream, imm.memoryIndex, state.module_.featureSpec);
++	if(isMt2MemtagOpcode(opcode)) { serializeVarUInt32(stream, imm.memoryIndex); }
++	else { serializeMemoryIndex(stream, imm.memoryIndex, state.module_.featureSpec); }
+ }
+ template<typename Stream>
+ void serialize(Stream& stream,
+@@ -1022,6 +1070,16 @@ template<typename Stream> void serialize(Stream& stream, LocalSet& localSet)
+ 	serialize(stream, localSet.type);
+ }
+ 
++template<typename Stream, typename Imm>
++auto serializeOpImm(Stream& stream,
++					Imm& imm,
++					FunctionDef& functionDef,
++					const ModuleSerializationState& state,
++					Opcode) -> decltype(serialize(stream, imm, functionDef, state))
++{
++	serialize(stream, imm, functionDef, state);
++}
++
+ struct OperatorSerializerStream
+ {
+ 	typedef void Result;
+@@ -1038,7 +1096,7 @@ struct OperatorSerializerStream
+ 	{                                                                                              \
+ 		Opcode opcode = Opcode::name;                                                              \
+ 		serializeOpcode(byteStream, opcode);                                                       \
+-		serialize(byteStream, imm, functionDef, moduleState);                                      \
++		serializeOpImm(byteStream, imm, functionDef, moduleState, opcode);                          \
+ 	}
+ 	WAVM_ENUM_NONOVERLOADED_OPERATORS(VISIT_OPCODE)
+ #undef VISIT_OPCODE
+@@ -1152,7 +1210,7 @@ static void serializeFunctionBody(InputStream& sectionStream,
+ #define VISIT_OPCODE(_, name, nameString, Imm, ...)                                                \
+ 	case Uptr(Opcode::name): {                                                                     \
+ 		Imm imm;                                                                                   \
+-		serialize(bodyStream, imm, functionDef, moduleState);                                      \
++		serializeOpImm(bodyStream, imm, functionDef, moduleState, opcode);                          \
+ 		codeValidationStream.name(imm);                                                            \
+ 		irEncoderStream.name(imm);                                                                 \
+ 		break;                                                                                     \

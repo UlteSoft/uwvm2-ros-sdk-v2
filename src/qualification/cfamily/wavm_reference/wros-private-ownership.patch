@@ -1,0 +1,804 @@
+diff --git a/Include/WAVM/IR/FeatureSpec.h b/Include/WAVM/IR/FeatureSpec.h
+index 48266e1fe5b4ab47a1ae28921f343123e94232e6..f08a5e631cdc6fa400232ef83a0ff545e1e896b0 100644
+--- a/Include/WAVM/IR/FeatureSpec.h
++++ b/Include/WAVM/IR/FeatureSpec.h
+@@ -53,6 +53,7 @@
+ 	V(memtagMteSyncIrg,                                                                                                                  \
+ 	  "memtag-sync-irg",                                                                                                                 \
+ 	  "Memory Tagging Sync with random instruction (may deplete entropy) (Hardware MTE in sync mode or fall back to memtag-soft)")       \
++	V(wrosOwnership, "wros-ownership", "WROS private linear-memory allocation ownership") \
+ 	V(memtag, "memtag-soft", "Memory Tagging (Software Emulation)")                                                                      \
+ 	V(memtagFull,                                                                                                                        \
+ 	  "memtag-soft-debug",                                                                                                               \
+diff --git a/Include/WAVM/IR/OperatorTable.h b/Include/WAVM/IR/OperatorTable.h
+index f43379ecd1c3d2b695ee56999ff720e304de7fdf..33d8317d4f2c4b84c192bb4870e6067ef66e27ca 100644
+--- a/Include/WAVM/IR/OperatorTable.h
++++ b/Include/WAVM/IR/OperatorTable.h
+@@ -216,7 +216,12 @@
+ 	visitOp(0xfc2f, memtag_randomstorez       , "memtag.randomstorez"       , MemoryImm                           , memtag_1r2a            , mvp                    )   \
+ 	visitOp(0xfc36, memtag_hint               , "memtag.hint"               , MemoryImm                           , memtag_1r3a            , mvp                    )   \
+ 	visitOp(0xfc37, memtag_hintstore          , "memtag.hintstore"          , MemoryImm                           , memtag_1r4a            , mvp                    )   \
+-	visitOp(0xfc38, memtag_hintstorez         , "memtag.hintstorez"         , MemoryImm                           , memtag_1r4a            , mvp                    )
++	visitOp(0xfc38, memtag_hintstorez         , "memtag.hintstorez"         , MemoryImm                           , memtag_1r4a            , mvp                    )   \
++	visitOp(0xfc40, memtag_claim     , "memtag.claim", MemoryImm, memtag_1r2a, wrosOwnership)   \
++	visitOp(0xfc41, memtag_claimz    , "memtag.claimz", MemoryImm, memtag_1r2a, wrosOwnership)   \
++	visitOp(0xfc42, memtag_reserve   , "memtag.reserve", MemoryImm, memtag_1r2a, wrosOwnership)   \
++	visitOp(0xfc43, memtag_activate  , "memtag.activate", MemoryImm, memtag_1r2a, wrosOwnership)   \
++	visitOp(0xfc44, memtag_release   , "memtag.release", MemoryImm, memtag_1r2a, wrosOwnership)
+ 
+ 
+ #define WAVM_ENUM_NONCONTROL_NONPARAMETRIC_OPERATORS(visitOp)                                                                                                            \
+diff --git a/Lib/IR/FeatureSpec.cpp b/Lib/IR/FeatureSpec.cpp
+index d8ae95d14b3f6ad2735723a83cf79ff01baad84c..ebb98471388dd883f60f46b867d6f0e1d7ff784f 100644
+--- a/Lib/IR/FeatureSpec.cpp
++++ b/Lib/IR/FeatureSpec.cpp
+@@ -22,6 +22,9 @@ void FeatureSpec::setFeatureLevel(FeatureLevel featureLevel)
+ 	default: WAVM_UNREACHABLE();
+ 	}
+ 
++	// The ownership profile is an explicit execution policy, even at the WAVM feature level.
++	wrosOwnership = false;
++
+ #undef SET_FEATURE
+ #undef UNSET_FEATURE
+ }
+diff --git a/Lib/IR/Validate.cpp b/Lib/IR/Validate.cpp
+index 9753dbaf1bfc25c9ed8dee03d69589df221e2c9a..cb586e52d2d03a8f4f0dcbbc1856ccc0ab8d0b18 100644
+--- a/Lib/IR/Validate.cpp
++++ b/Lib/IR/Validate.cpp
+@@ -122,6 +122,8 @@ static void validate(const Module& module_, TableType type)
+ 
+ static void validate(const Module& module_, MemoryType type)
+ {
++	if(module_.featureSpec.wrosOwnership && type.isShared)
++	{ throw ValidationException("WROS ownership requires private memory"); }
+ 	validate(type.size,
+ 			 type.indexType == IndexType::i32 ? IR::maxMemory32Pages : IR::maxMemory64Pages);
+ 	if(type.isShared)
+@@ -1023,10 +1025,16 @@ void IR::validateImports(ModuleValidationState& state)
+ 	{
+ 		const Import<IndexedFunctionType>& functionImport
+ 			= module_.functions.imports[functionIndex];
++		if(module_.featureSpec.wrosOwnership && functionImport.exportName == "thread-spawn"
++		   && (functionImport.moduleName == "wasi" || functionImport.moduleName == "wasi_unstable"
++			   || functionImport.moduleName == "wasi_snapshot_preview1"))
++		{ throw ValidationException("WROS ownership does not support WASI threads"); }
+ 		validateFunctionType(module_, functionImport.type);
+ 		state.declaredExternRefs.add(KindAndIndex{ExternKind::function, functionIndex});
+ 	}
+ 	for(auto& tableImport : module_.tables.imports) { validate(module_, tableImport.type); }
++	if(module_.featureSpec.wrosOwnership && !module_.memories.imports.empty())
++	{ throw ValidationException("WROS ownership requires locally defined memory"); }
+ 	for(auto& memoryImport : module_.memories.imports) { validate(module_, memoryImport.type); }
+ 	for(auto& globalImport : module_.globals.imports)
+ 	{
+diff --git a/Lib/LLVMJIT/EmitMem.cpp b/Lib/LLVMJIT/EmitMem.cpp
+index e9d2b593ad1c34f139c575abff8e0cb340822c16..18c7b1d0789eccc397763414b8c4ade198bf0ac4 100644
+--- a/Lib/LLVMJIT/EmitMem.cpp
++++ b/Lib/LLVMJIT/EmitMem.cpp
+@@ -374,6 +374,52 @@ static llvm::Value* getOffsetAndBoundedAddress(EmitFunctionContext& functionCont
+ 	numBytes = irBuilder.CreateZExt(numBytes, address->getType());
+ 	WAVM_ASSERT(numBytes->getType() == address->getType());
+ 
++	if(functionContext.moduleContext.irModule.featureSpec.wrosOwnership && memtagBasePointerVariable)
++	{
++		auto& module = functionContext.moduleContext;
++		auto& types = functionContext.llvmContext;
++		auto* base = irBuilder.CreateZExtOrTrunc(address, module.iptrType);
++		auto* count = irBuilder.CreateZExtOrTrunc(numBytes, module.iptrType);
++		auto* size = getMemoryNumBytes(functionContext, memoryIndex);
++		auto* displacement = emitLiteralIptr(offset, module.iptrType);
++		auto* effective = irBuilder.CreateAdd(base, displacement);
++		auto* invalid = irBuilder.CreateOr(irBuilder.CreateICmpULT(effective, base),
++			irBuilder.CreateOr(irBuilder.CreateICmpUGT(effective, size),
++							   irBuilder.CreateICmpUGT(count, irBuilder.CreateSub(size, effective))));
++		auto* id = getMemoryIdFromOffset(irBuilder, module.memoryOffsets[memoryIndex]);
++		functionContext.emitConditionalTrapIntrinsic(invalid, "memoryOutOfBoundsTrap",
++			FunctionType({}, {module.iptrValueType, module.iptrValueType, module.iptrValueType,
++							  module.iptrValueType}, CallingConvention::intrinsic),
++			{effective, count, size, id});
++		if(!istagging)
++		{
++			auto* tag = irBuilder.CreateZExtOrTrunc(taggedval, types.i8Type);
++			if(knownNumBytes && knownNumBytes <= 16)
++			{
++				auto* shadow = wavmCreateLoad(irBuilder, types.i8PtrType, memtagBasePointerVariable);
++				auto mismatched = [&](llvm::Value* byte) {
++					auto* ptr = irBuilder.CreateGEP(types.i8Type, shadow, irBuilder.CreateLShr(byte, 4));
++					return irBuilder.CreateICmpNE(tag, irBuilder.CreateLoad(types.i8Type, ptr));
++				};
++				auto* mismatch = mismatched(effective);
++				if(knownNumBytes > 1)
++				{
++					auto* last = irBuilder.CreateAdd(effective, emitLiteralIptr(knownNumBytes - 1, module.iptrType));
++					mismatch = irBuilder.CreateOr(mismatch, mismatched(last));
++				}
++				createmtgconditionaltrap(functionContext, mismatch);
++			}
++			else
++			{
++				functionContext.emitRuntimeIntrinsic("wros.checkSpan",
++					FunctionType({}, {ValueType::i64, ValueType::i64, ValueType::i32,
++									  module.iptrValueType}, CallingConvention::intrinsic),
++					{effective, count, irBuilder.CreateZExt(tag, types.i32Type), id});
++			}
++		}
++		return effective;
++	}
++
+ 	if(memoryType.indexType == IndexType::i32)
+ 	{
+ 		// zext a 32-bit address and number of bytes to the target machine pointer width.
+@@ -990,6 +1036,18 @@ static void memtag_zero_memory(EmitFunctionContext& functionContext,
+ 							   ::llvm::Value* untaggedmemaddress,
+ 							   ::llvm::Value* taggedbytes)
+ {
++	if(functionContext.moduleContext.irModule.featureSpec.wrosOwnership && !isMemTaggedEnabled(functionContext))
++	{
++		auto& module = functionContext.moduleContext;
++		auto& types = functionContext.llvmContext;
++		functionContext.emitRuntimeIntrinsic("wros.clearDisabled",
++			FunctionType({}, {ValueType::i64, ValueType::i64, module.iptrValueType},
++						 CallingConvention::intrinsic),
++			{functionContext.zext(untaggedmemaddress, types.i64Type),
++			 functionContext.zext(taggedbytes, types.i64Type),
++			 getMemoryIdFromOffset(functionContext.irBuilder, module.memoryOffsets[memoryIndex])});
++		return;
++	}
+ 	auto realaddr = functionContext.coerceAddressToPointer(
+ 		untaggedmemaddress, functionContext.llvmContext.i8Type, memoryIndex);
+ 	llvm::IRBuilder<>& irBuilder = functionContext.irBuilder;
+@@ -1061,6 +1119,19 @@ static inline ::llvm::Value* StoreTagIntoMemAndZeroing(EmitFunctionContext& func
+ 										  functionContext.llvmContext.i8Type);
+ 		}
+ 		if(!addressisuntagged) { address = irBuilder.CreateAnd(address, mask); }
++		if(functionContext.moduleContext.irModule.featureSpec.wrosOwnership)
++		{
++			auto& module = functionContext.moduleContext;
++			auto& types = functionContext.llvmContext;
++			functionContext.emitRuntimeIntrinsic("wros.rawTagWrite",
++				FunctionType({}, {ValueType::i64, ValueType::i64, ValueType::i32, ValueType::i32,
++								  module.iptrValueType}, CallingConvention::intrinsic),
++				{functionContext.zext(address, types.i64Type),
++				 functionContext.zext(taggedbytes, types.i64Type),
++				 irBuilder.CreateZExtOrTrunc(color, types.i32Type), emitLiteral(types, U32(zeroing)),
++				 getMemoryIdFromOffset(irBuilder, module.memoryOffsets[memoryIndex])});
++			return address;
++		}
+ 	}
+ 	if(isarmmte)
+ 	{
+@@ -1159,6 +1230,39 @@ static inline ::llvm::Value* StoreZTagIntoMem(EmitFunctionContext& functionConte
+ 		functionContext, memoryIndex, address, taggedbytes, color, true, addressisuntagged);
+ }
+ 
++static void emitWROSTransition(EmitFunctionContext& context, MemoryImm imm, Opcode op)
++{
++	auto* length = context.pop();
++	auto* input = context.pop();
++	if(!isMemTaggedEnabled(context))
++	{
++		// Disabled WROS ownership returns its input. claimz must also clear the proved range.
++		if(op == Opcode::memtag_claimz) { memtag_zero_memory(context, imm.memoryIndex, input, length); }
++		context.push(input);
++		return;
++	}
++	auto& module = context.moduleContext;
++	auto result = context.emitRuntimeIntrinsic("wros.transition",
++		FunctionType(TypeTuple(ValueType::i64),
++					 {ValueType::i64, ValueType::i64, ValueType::i32, module.iptrValueType},
++					 CallingConvention::intrinsic),
++		{context.zext(input, context.llvmContext.i64Type),
++		 context.zext(length, context.llvmContext.i64Type), emitLiteral(context.llvmContext, U32(op)),
++		 getMemoryIdFromOffset(context.irBuilder, module.memoryOffsets[imm.memoryIndex])});
++	context.push(context.irBuilder.CreateZExtOrTrunc(result[0], input->getType()));
++}
++
++void EmitFunctionContext::memtag_claim(MemoryImm imm)
++{ emitWROSTransition(*this, imm, Opcode::memtag_claim); }
++void EmitFunctionContext::memtag_claimz(MemoryImm imm)
++{ emitWROSTransition(*this, imm, Opcode::memtag_claimz); }
++void EmitFunctionContext::memtag_reserve(MemoryImm imm)
++{ emitWROSTransition(*this, imm, Opcode::memtag_reserve); }
++void EmitFunctionContext::memtag_activate(MemoryImm imm)
++{ emitWROSTransition(*this, imm, Opcode::memtag_activate); }
++void EmitFunctionContext::memtag_release(MemoryImm imm)
++{ emitWROSTransition(*this, imm, Opcode::memtag_release); }
++
+ void EmitFunctionContext::memtag_status(MemoryImm imm)
+ {
+ 	MemoryType const& memoryType = this->moduleContext.irModule.memories.getType(imm.memoryIndex);
+@@ -1303,6 +1407,8 @@ static ::llvm::Value* memtag_random_store_tag_common(EmitFunctionContext& functi
+ 			memaddress = TagMemPointer(functionContext, memoryIndex, memaddress, color, true);
+ 		}
+ 	}
++	else if(zeroing && functionContext.moduleContext.irModule.featureSpec.wrosOwnership)
++	{ memtag_zero_memory(functionContext, memoryIndex, memaddress, taggedbytes); }
+ 	return memaddress;
+ }
+ 
+@@ -1485,6 +1591,8 @@ void EmitFunctionContext::memtag_untagstorez(MemoryImm imm)
+ 						 taggedbytes,
+ 						 llvm::ConstantInt::get(this->llvmContext.i8Type, 0));
+ 	}
++	else if(moduleContext.irModule.featureSpec.wrosOwnership)
++	{ memtag_zero_memory(*this, imm.memoryIndex, memaddress, taggedbytes); }
+ 	push(memaddress);
+ }
+ 
+@@ -1805,6 +1913,13 @@ void EmitFunctionContext::memtag_load(MemoryImm imm)
+ 		}
+ 		else
+ 		{
++			if(moduleContext.irModule.featureSpec.wrosOwnership)
++			{
++				memaddress = getOffsetAndBoundedAddress(*this, imm.memoryIndex, memaddress, 1, 0,
++													  BoundsCheckOp::trapOnOutOfBounds, nullptr, true);
++				memaddress = coerceIptrToIndex(moduleContext.irModule.memories.getType(imm.memoryIndex).indexType,
++											  memaddress);
++			}
+ 			auto realaddr = ComputeMemTagIndex(*this, imm.memoryIndex, memaddress, true);
+ 			llvm::IRBuilder<>& irBuilder = this->irBuilder;
+ 
+diff --git a/Lib/LLVMJIT/LLVMJIT.cpp b/Lib/LLVMJIT/LLVMJIT.cpp
+index 45700400a2783d4bf76f797b6df5d985c29746d7..f1588cf290bb2d711da3706f408efdc7c66e5c9c 100644
+--- a/Lib/LLVMJIT/LLVMJIT.cpp
++++ b/Lib/LLVMJIT/LLVMJIT.cpp
+@@ -466,6 +466,10 @@ TargetValidationResult LLVMJIT::validateTargetWithFeatureSpecUpdate(const Target
+ 																	IR::FeatureSpec& featureSpec)
+ {
+ 	std::unique_ptr<llvm::TargetMachine> targetMachine = getTargetMachine(targetSpec);
++	if(featureSpec.wrosOwnership
++	   && (featureSpec.memtagMte || featureSpec.memtagMteSync
++		   || featureSpec.memtagMteIrg || featureSpec.memtagMteSyncIrg))
++	{ return TargetValidationResult::invalidTargetSpec; }
+ 	bool memtagMteSupported{};
+ 	if(targetMachine)
+ 	{
+diff --git a/Lib/Runtime/CMakeLists.txt b/Lib/Runtime/CMakeLists.txt
+index 3dd8d952cd9d45a9b70ceebbfc443b93efce8075..1516975b7f6261b996eaf030493817bb7efa1266 100644
+--- a/Lib/Runtime/CMakeLists.txt
++++ b/Lib/Runtime/CMakeLists.txt
+@@ -15,7 +15,8 @@ set(Sources
+ 	Runtime.cpp
+ 	RuntimePrivate.h
+ 	Table.cpp
+-	WAVMIntrinsics.cpp)
++	WAVMIntrinsics.cpp
++	WROSOwnership.cpp)
+ set(PublicHeaders
+ 	${WAVM_INCLUDE_DIR}/Runtime/Intrinsics.h
+ 	${WAVM_INCLUDE_DIR}/Runtime/Linker.h
+diff --git a/Lib/Runtime/Instance.cpp b/Lib/Runtime/Instance.cpp
+index 06a43b60b7b3e0d64c16d983379c64c04db179c0..0449ff7c4ba4ae7d9195dd08b67188efde0159a4 100644
+--- a/Lib/Runtime/Instance.cpp
++++ b/Lib/Runtime/Instance.cpp
+@@ -54,16 +54,12 @@ static Value evaluateInitializer(const std::vector<Global*>& moduleGlobals,
+ 
+ static Uptr getIndexValue(const Value& value, IndexType indexType)
+ {
+-#if 0
+ 	switch(indexType)
+ 	{
+ 	case IndexType::i32: WAVM_ASSERT(value.type == ValueType::i32); return value.u32;
+ 	case IndexType::i64: WAVM_ASSERT(value.type == ValueType::i64); return value.u64;
+ 	default: WAVM_UNREACHABLE();
+ 	};
+-#else
+-	return value.u32;
+-#endif
+ }
+ 
+ static bool readULEB128(Serialization::MemoryInputStream& stream, U64& value)
+@@ -142,6 +138,10 @@ Instance* Runtime::instantiateModule(Compartment* compartment,
+ 									 std::string&& moduleDebugName,
+ 									 ResourceQuotaRefParam resourceQuota)
+ {
++	const auto& features = module_->ir.featureSpec;
++	if(features.wrosOwnership && (features.threads || features.memtagMte || features.memtagMteSync
++								 || features.memtagMteIrg || features.memtagMteSyncIrg))
++	{ throwException(ExceptionTypes::invalidMemoryTagAccess); }
+ 	// Check the types of the Instance's imports, and build per-kind import arrays.
+ 	std::vector<FunctionImportBinding> functionImports;
+ 	std::vector<Table*> tableImports;
+@@ -178,6 +178,8 @@ Instance* Runtime::instantiateModule(Compartment* compartment,
+ 		}
+ 		case ExternKind::memory: {
+ 			Memory* memory = asMemory(importObject);
++			if(memory->wrosOwnership || module_->ir.featureSpec.wrosOwnership)
++			{ throwException(ExceptionTypes::invalidMemoryTagAccess); }
+ 			WAVM_ERROR_UNLESS(
+ 				isSubtype(getMemoryType(memory), module_->ir.memories.getType(kindIndex.index)));
+ 			memoryImports.push_back(memory);
+@@ -292,6 +294,12 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
+ 			compartment->instances.removeOrFail(id);
+ 			throwException(ExceptionTypes::outOfMemory);
+ 		}
++		if(module_->ir.featureSpec.wrosOwnership)
++		{
++			memory->wrosOwnership = true;
++			// mt-2 colors the null granule. WROS starts with every granule untagged.
++			if(memory->baseAddressTags && memory->numPages.load()) { memory->baseAddressTags[0] = 0; }
++		}
+ 		memories.push_back(memory);
+ 	}
+ 
+@@ -528,7 +536,8 @@ Instance* Runtime::instantiateModuleInternal(Compartment* compartment,
+ 	}
+ 
+ 	// Tag the module's globals now that their initial contents are in place.
+-	initializeMemtagGlobals(instance, module_->ir);
++	initializeWROSGlobals(instance->memories, module_->ir);
++	if(!module_->ir.featureSpec.wrosOwnership) { initializeMemtagGlobals(instance, module_->ir); }
+ 
+ 	// Copy the module's elem segments into their designated table instances.
+ 	for(Uptr segmentIndex = 0; segmentIndex < module_->ir.elemSegments.size(); ++segmentIndex)
+diff --git a/Lib/Runtime/Memory.cpp b/Lib/Runtime/Memory.cpp
+index d2ad266dc0f24296d833ee56a90cffebdd2b4416..19409dda942bb4b25067237a00e7021a4a99d2f7 100644
+--- a/Lib/Runtime/Memory.cpp
++++ b/Lib/Runtime/Memory.cpp
+@@ -145,6 +145,9 @@ Memory* Runtime::cloneMemory(Memory* memory, Compartment* newCompartment)
+ 
+ 	// Copy the memory contents to the new memory.
+ 	memcpy(newMemory->baseAddress, memory->baseAddress, memoryType.size.min * IR::numBytesPerPage);
++	newMemory->wrosOwnership = memory->wrosOwnership;
++	try { newMemory->wrosExtents = memory->wrosExtents; }
++	catch(const std::bad_alloc&) { delete newMemory; return nullptr; }
+ 	if(ismemtagged)
+ 	{
+ 		memcpy(newMemory->baseAddressTags,
+@@ -471,7 +474,7 @@ GrowResult Runtime::growMemory(Memory* memory, Uptr numPagesToGrow, Uptr* outOld
+ 			// deliberately unmasked, so mask the byte to this memory's tag width before using it as
+ 			// a tag.
+ 			auto& randombuffer{memory->compartment->memtagRandomBuffer};
+-			if(randombuffer.Base)
++			if(!memory->wrosOwnership && randombuffer.Base)
+ 			{
+ 				if(randombuffer.Base != randombuffer.End)
+ 				{
+@@ -522,6 +525,7 @@ GrowResult Runtime::growMemory(Memory* memory, Uptr numPagesToGrow, Uptr* outOld
+ 
+ void Runtime::unmapMemoryPages(Memory* memory, Uptr pageIndex, Uptr numPages)
+ {
++	if(memory->wrosOwnership) { throwException(ExceptionTypes::invalidMemoryTagAccess); }
+ 	WAVM_ASSERT(pageIndex + numPages > pageIndex);
+ 	WAVM_ASSERT((pageIndex + numPages) * IR::numBytesPerPage <= memory->numReservedBytes);
+ 	auto wasmlog2 = getPlatformPagesPerWebAssemblyPageLog2();
+@@ -584,6 +588,23 @@ static U8* getValidatedMemoryOffsetRangeImpl(Memory* memory,
+ 	// address is only de-tagged here; enforcing the guest's software tags on host accesses would
+ 	// spuriously trap on buffers that the guest never itself accesses with the passed tag (e.g. a
+ 	// syscall output buffer whose trailing granule holds a stale/dead tag from an earlier frame).
++	if(memory->wrosOwnership && memory->baseAddressTags)
++	{
++		Platform::RWMutex::ShareableLock lock(memory->resizingMutex);
++		const bool narrow = memory->indexType == IR::IndexType::i32;
++		const U8 tag = U8(address >> (narrow ? IR::memtag32constants::shifter : IR::memtag64constants::shifter));
++		const Uptr offset = address & (narrow ? IR::memtag32constants::mask : IR::memtag64constants::mask);
++		const Uptr bytes = memory->numPages.load(std::memory_order_acquire) * IR::numBytesPerPage;
++		if(offset > bytes || numBytes > bytes - offset)
++		{ throwException(ExceptionTypes::outOfBoundsMemoryAccess, {asObject(memory), U64(std::max(offset, bytes))}); }
++		if(numBytes)
++		{
++			const Uptr last = (offset + numBytes - 1) / 16;
++			for(Uptr g = offset / 16; g <= last; ++g)
++			{ if(memory->baseAddressTags[g] != tag) { throwException(ExceptionTypes::invalidMemoryTagAccess); } }
++		}
++		return memoryBase + offset;
++	}
+ 	auto baseaddrestags = memory->baseAddressTags;
+ 	if(baseaddrestags)
+ 	{
+diff --git a/Lib/Runtime/Module.cpp b/Lib/Runtime/Module.cpp
+index 2f4f567cf0fffcc514bbac9a723d5ec9eb575b1e..8594e849c1535335e705a391b68e8b3605071f54 100644
+--- a/Lib/Runtime/Module.cpp
++++ b/Lib/Runtime/Module.cpp
+@@ -36,7 +36,7 @@ ModuleRef Runtime::compileModule(const IR::Module& irModule)
+ 	std::shared_ptr<ObjectCacheInterface> objectCache = getGlobalObjectCache();
+ 
+ 	std::vector<U8> objectCode;
+-	if(!objectCache)
++	if(!objectCache || irModule.featureSpec.wrosOwnership)
+ 	{
+ 		// If there's no global object cache, just compile the module.
+ 		objectCode = LLVMJIT::compileModule(irModule, LLVMJIT::getHostTargetSpec());
+@@ -72,7 +72,7 @@ bool Runtime::loadBinaryModule(const U8* wasmBytes,
+ 	std::shared_ptr<ObjectCacheInterface> objectCache = getGlobalObjectCache();
+ 
+ 	std::vector<U8> objectCode;
+-	if(!objectCache)
++	if(!objectCache || irModule.featureSpec.wrosOwnership)
+ 	{
+ 		// If there's no global object cache, just compile the module.
+ 		objectCode = LLVMJIT::compileModule(irModule, LLVMJIT::getHostTargetSpec());
+@@ -92,6 +92,7 @@ bool Runtime::loadBinaryModule(const U8* wasmBytes,
+ ModuleRef Runtime::loadPrecompiledModule(const IR::Module& irModule,
+ 										 const std::vector<U8>& objectCode)
+ {
++	if(irModule.featureSpec.wrosOwnership) { throwException(ExceptionTypes::invalidMemoryTagAccess); }
+ 	return std::make_shared<Module>(IR::Module(irModule), std::vector<U8>(objectCode));
+ }
+ 
+diff --git a/Lib/Runtime/RuntimePrivate.h b/Lib/Runtime/RuntimePrivate.h
+index 613585eaeee02abbc83cf6644f9b3868db462121..edd54fe31785960083ec431d4782f73b56f3ab25 100644
+--- a/Lib/Runtime/RuntimePrivate.h
++++ b/Lib/Runtime/RuntimePrivate.h
+@@ -2,6 +2,7 @@
+ 
+ #include <atomic>
+ #include <functional>
++#include <map>
+ #include <memory>
+ #include "WAVM/IR/Memtag.h"
+ #include "WAVM/IR/Module.h"
+@@ -91,6 +92,15 @@ namespace WAVM { namespace Runtime {
+ 	// in software memtag modes, and stores allocation tags in hardware MTE modes.
+ 	void setMemoryTag(Memory* memory, Uptr address, Uptr numBytes, U8 tag);
+ 
++	struct WROSExtent
++	{
++		Uptr lastGranule;
++		U8 tag;
++		bool active;
++		bool permanent;
++	};
++	void initializeWROSGlobals(const std::vector<Memory*>& memories, const IR::Module& module_);
++
+ 	// An instance of a WebAssembly Memory.
+ 	struct Memory : GCObject
+ 	{
+@@ -102,6 +112,9 @@ namespace WAVM { namespace Runtime {
+ 
+ 		U8* baseAddress = nullptr;
+ 		U8* baseAddressTags = nullptr;
++		bool wrosOwnership = false;
++		// Keyed by the first granule, protected by resizingMutex.
++		std::map<Uptr, WROSExtent> wrosExtents;
+ 		Uptr numReservedBytes = 0;
+ 
+ 		mutable Platform::RWMutex resizingMutex;
+diff --git a/Lib/Runtime/WROSOwnership.cpp b/Lib/Runtime/WROSOwnership.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..d4df81f703924bb04e588cecb7c5053871abd16b
+--- /dev/null
++++ b/Lib/Runtime/WROSOwnership.cpp
+@@ -0,0 +1,277 @@
++#include <algorithm>
++#include <array>
++#include <cstring>
++#include <new>
++#include "RuntimePrivate.h"
++#include "WAVM/IR/IR.h"
++#include "WAVM/IR/Operators.h"
++#include "WAVM/Inline/LEB128.h"
++#include "WAVM/Platform/Random.h"
++
++using namespace WAVM;
++using namespace WAVM::IR;
++using namespace WAVM::Runtime;
++
++namespace {
++using Counts = std::array<Uptr, 256>;
++using Directory = std::map<Uptr, WROSExtent>;
++constexpr Uptr granuleBytes = 16;
++constexpr Uptr reach = 1 + 64 / granuleBytes;
++
++[[noreturn]] void invalidTag() { throwException(ExceptionTypes::invalidMemoryTagAccess); }
++
++Uptr memorySize(const Memory& memory)
++{ return memory.numPages.load(std::memory_order_acquire) * IR::numBytesPerPage; }
++
++void checkRange(Memory& memory, Uptr address, Uptr length)
++{
++	const Uptr size = memorySize(memory);
++	if(address > size || length > size - address)
++	{ throwException(ExceptionTypes::outOfBoundsMemoryAccess, {&memory, U64(std::max(address, size))}); }
++}
++
++template<typename Visit>
++void visitDirectory(const Directory& directory, Uptr first, Uptr last, Visit visit)
++{
++	const Uptr low = first > reach ? first - reach : 0;
++	const Uptr high = last + reach;
++	auto entry = directory.lower_bound(low);
++	if(entry != directory.begin()) { --entry; }
++	for(; entry != directory.end() && entry->first <= high; ++entry)
++	{
++		if(entry->second.lastGranule >= low) { visit(entry->first, entry->second); }
++	}
++}
++
++void checkShadow(const Memory& memory, Uptr first, Uptr last, U8 expected)
++{
++	for(Uptr i = first; i <= last; ++i)
++	{ if(memory.baseAddressTags[i] != expected) { invalidTag(); } }
++}
++
++void fillShadow(Memory& memory, Uptr first, Uptr last, U8 tag)
++{ std::memset(memory.baseAddressTags + first, tag, last - first + 1); }
++
++U16 randomWord()
++{
++	// Refill from the OS instead of cycling through a fixed compartment-wide table.
++	static thread_local std::array<U16, 256> buffer;
++	static thread_local Uptr cursor = buffer.size();
++	if(cursor == buffer.size())
++	{
++		Platform::getCryptographicRNG(reinterpret_cast<U8*>(buffer.data()), sizeof(buffer));
++		cursor = 0;
++	}
++	return buffer[cursor++];
++}
++
++U8 chooseTag(const Memory& memory, const Directory& directory, Uptr first, Uptr last,
++			 const Counts* staticCounts)
++{
++	std::array<bool, 256> excluded{};
++	excluded[0] = true;
++	visitDirectory(directory, first, last, [&](Uptr start, const WROSExtent& extent) {
++		if(start <= last && extent.lastGranule >= first) { invalidTag(); }
++		excluded[extent.tag] = true;
++	});
++	const Uptr granules = memorySize(memory) / granuleBytes;
++	for(Uptr i = 1; i <= reach; ++i)
++	{
++		if(i <= first) { excluded[memory.baseAddressTags[first - i]] = true; }
++		if(i < granules - last) { excluded[memory.baseAddressTags[last + i]] = true; }
++	}
++
++	const unsigned maxTag = memory.indexType == IndexType::i32 ? 15 : 255;
++	std::array<U8, 255> legal;
++	unsigned numLegal = 0;
++	Uptr leastUsed = UINTPTR_MAX;
++	for(unsigned color = 1; color <= maxTag; ++color)
++	{
++		if(excluded[color]) { continue; }
++		const Uptr used = staticCounts ? (*staticCounts)[color] : 0;
++		if(used < leastUsed) { leastUsed = used; numLegal = 0; }
++		if(used == leastUsed) { legal[numLegal++] = U8(color); }
++	}
++	if(!numLegal) { invalidTag(); }
++	const unsigned attempts = staticCounts ? 8 : 16;
++	for(unsigned i = 0; i < attempts; ++i)
++	{
++		const U32 product = U32(randomWord()) * numLegal;
++		if((product & 0xffff) >= 65536u % numLegal) { return legal[product >> 16]; }
++	}
++	invalidTag();
++}
++
++void addExtent(Directory& directory, Uptr first, WROSExtent extent)
++{
++	try { if(!directory.emplace(first, extent).second) { invalidTag(); } }
++	catch(const std::bad_alloc&) { throwException(ExceptionTypes::outOfMemory); }
++}
++
++U64 transition(Memory& memory, Opcode op, U64 input, Uptr length)
++{
++	if(!memory.wrosOwnership || memory.isShared) { invalidTag(); }
++	if(!memory.baseAddressTags || LLVMJIT::is_memtagstatus_armmte(memory.memtagstatus)) { invalidTag(); }
++	const bool narrow = memory.indexType == IndexType::i32;
++	const unsigned shift = narrow ? memtag32constants::shifter : memtag64constants::shifter;
++	const Uptr address = input & (narrow ? memtag32constants::mask : memtag64constants::mask);
++	const U8 tag = U8(input >> shift);
++	checkRange(memory, address, length);
++	if(!length || (address % granuleBytes) || (length % granuleBytes)) { invalidTag(); }
++	const Uptr first = address / granuleBytes;
++	const Uptr last = (address + length - 1) / granuleBytes;
++	auto& directory = memory.wrosExtents;
++	if(op == Opcode::memtag_activate || op == Opcode::memtag_release)
++	{
++		auto found = directory.find(first);
++		if(found == directory.end()) { invalidTag(); }
++		WROSExtent& extent = found->second;
++		if(extent.lastGranule != last || extent.permanent || extent.tag != tag) { invalidTag(); }
++		checkShadow(memory, first, last, extent.active ? tag : 0);
++		if(op == Opcode::memtag_activate)
++		{
++			if(extent.active) { invalidTag(); }
++			fillShadow(memory, first, last, tag);
++			extent.active = true;
++			return input;
++		}
++		if(extent.active) { fillShadow(memory, first, last, 0); }
++		directory.erase(found);
++		return address;
++	}
++
++	if(tag || (op != Opcode::memtag_claim && op != Opcode::memtag_claimz && op != Opcode::memtag_reserve))
++	{ invalidTag(); }
++	checkShadow(memory, first, last, 0);
++	const U8 selected = chooseTag(memory, directory, first, last, nullptr);
++	const bool active = op != Opcode::memtag_reserve;
++	addExtent(directory, first, {last, selected, active, false});
++	if(active)
++	{
++		fillShadow(memory, first, last, selected);
++		if(op == Opcode::memtag_claimz) { std::memset(memory.baseAddress + address, 0, length); }
++	}
++	return address | (U64(selected) << shift);
++}
++
++struct StaticRange { U32 memoryIndex; Uptr first, last; };
++}
++
++WAVM_DEFINE_INTRINSIC_FUNCTION(wavmIntrinsicsMemory, "wros.transition", U64, wros_transition,
++							   U64 input, U64 length, U32 opcode, Uptr memoryId)
++{
++	Memory* memory = getMemoryFromRuntimeData(contextRuntimeData, memoryId);
++	Platform::RWMutex::ExclusiveLock lock(memory->resizingMutex);
++	return transition(*memory, Opcode(opcode), input, length);
++}
++
++WAVM_DEFINE_INTRINSIC_FUNCTION(wavmIntrinsicsMemory, "wros.clearDisabled", void, wros_clear_disabled,
++							   U64 address, U64 length, Uptr memoryId)
++{
++	Memory* memory = getMemoryFromRuntimeData(contextRuntimeData, memoryId);
++	Platform::RWMutex::ShareableLock lock(memory->resizingMutex);
++	if(!memory->wrosOwnership || memory->baseAddressTags || memory->isShared) { invalidTag(); }
++	checkRange(*memory, address, length);
++	if(length) { std::memset(memory->baseAddress + address, 0, length); }
++}
++
++WAVM_DEFINE_INTRINSIC_FUNCTION(wavmIntrinsicsMemory, "wros.checkSpan", void, wros_check_span,
++							   U64 address, U64 length, U32 tag, Uptr memoryId)
++{
++	Memory* memory = getMemoryFromRuntimeData(contextRuntimeData, memoryId);
++	Platform::RWMutex::ShareableLock lock(memory->resizingMutex);
++	if(!memory->wrosOwnership || !memory->baseAddressTags) { invalidTag(); }
++	checkRange(*memory, address, length);
++	if(length) { checkShadow(*memory, address / granuleBytes, (address + length - 1) / granuleBytes, U8(tag)); }
++}
++
++WAVM_DEFINE_INTRINSIC_FUNCTION(wavmIntrinsicsMemory, "wros.rawTagWrite", void, wros_raw_tag_write,
++							   U64 address, U64 length, U32 color, U32 zero, Uptr memoryId)
++{
++	Memory* memory = getMemoryFromRuntimeData(contextRuntimeData, memoryId);
++	Platform::RWMutex::ExclusiveLock lock(memory->resizingMutex);
++	if(!memory->wrosOwnership || memory->isShared || !memory->baseAddressTags) { invalidTag(); }
++	checkRange(*memory, address, length);
++	if(!length) { return; }
++	Uptr first = address / granuleBytes, last = (address + length - 1) / granuleBytes;
++	visitDirectory(memory->wrosExtents, first, last, [&](Uptr start, const WROSExtent& extent) {
++		if((start <= last && extent.lastGranule >= first) || extent.tag == color) { invalidTag(); }
++	});
++	fillShadow(*memory, first, last, U8(color));
++	if(zero) { std::memset(memory->baseAddress + address, 0, length); }
++}
++
++void Runtime::initializeWROSGlobals(const std::vector<Memory*>& memories, const IR::Module& module_)
++{
++	const CustomSection* manifest = nullptr;
++	for(const auto& section : module_.customSections)
++	{
++		if(section.name == "memtag.globals" && module_.featureSpec.wrosOwnership) { invalidTag(); }
++		if(section.name == "uwvm.memtag.linear.globals")
++		{
++			if(manifest || !module_.featureSpec.wrosOwnership) { invalidTag(); }
++			manifest = &section;
++		}
++	}
++	if(!manifest) { return; }
++	std::vector<StaticRange> ranges;
++	try
++	{
++		Serialization::MemoryInputStream in(manifest->data.data(), manifest->data.size());
++		U64 version, count;
++		Serialization::serializeVarUInt64(in, version);
++		Serialization::serializeVarUInt64(in, count);
++		if(version != 2 || count > in.capacity() / 3) { invalidTag(); }
++		ranges.reserve(count);
++		for(U64 i = 0; i < count; ++i)
++		{
++			U32 index;
++			U64 begin, bytes;
++			Serialization::serializeVarUInt32(in, index);
++			Serialization::serializeVarUInt64(in, begin);
++			Serialization::serializeVarUInt64(in, bytes);
++			if(index >= memories.size() || !memories[index]->wrosOwnership) { invalidTag(); }
++			checkRange(*memories[index], begin, bytes);
++			if(bytes) { ranges.push_back({index, begin / granuleBytes, (begin + bytes - 1) / granuleBytes}); }
++		}
++		if(in.capacity()) { invalidTag(); }
++	}
++	catch(const Serialization::FatalSerializationException&) { invalidTag(); }
++	catch(const std::bad_alloc&) { throwException(ExceptionTypes::outOfMemory); }
++
++	std::sort(ranges.begin(), ranges.end(), [](const StaticRange& a, const StaticRange& b) {
++		return a.memoryIndex < b.memoryIndex || (a.memoryIndex == b.memoryIndex && a.first < b.first);
++	});
++	for(Uptr i = 1; i < ranges.size(); ++i)
++	{
++		if(ranges[i - 1].memoryIndex == ranges[i].memoryIndex && ranges[i - 1].last >= ranges[i].first)
++		{ invalidTag(); }
++	}
++	// These owners are newly created and cannot be imported. Stage every allocation before
++	// publishing any tags. A late failure discards the staged directories.
++	try
++	{
++		std::vector<Directory> staged(memories.size());
++		Counts counts{};
++		U32 previous = UINT32_MAX;
++		for(const auto& row : ranges)
++		{
++			auto& memory = *memories[row.memoryIndex];
++			if(memory.memtagstatus == LLVMJIT::memtagStatus::none) { continue; }
++			if(!memory.baseAddressTags) { invalidTag(); }
++			if(previous != row.memoryIndex) { counts.fill(0); previous = row.memoryIndex; }
++			auto& directory = staged[row.memoryIndex];
++			const U8 tag = chooseTag(memory, directory, row.first, row.last, &counts);
++			addExtent(directory, row.first, {row.last, tag, true, true});
++			++counts[tag];
++		}
++		for(Uptr index = 0; index < staged.size(); ++index)
++		{
++			auto& memory = *memories[index];
++			memory.wrosExtents.swap(staged[index]);
++			for(const auto& item : memory.wrosExtents)
++			{ fillShadow(memory, item.first, item.second.lastGranule, item.second.tag); }
++		}
++	}
++	catch(const std::bad_alloc&) { throwException(ExceptionTypes::outOfMemory); }
++}
+diff --git a/Lib/WASM/WASMSerialization.cpp b/Lib/WASM/WASMSerialization.cpp
+index c870cdb5922064d18dc576240474b40a94ec2291..42f45d340d625d4129fa8b0376ceb755e5b2f837 100644
+--- a/Lib/WASM/WASMSerialization.cpp
++++ b/Lib/WASM/WASMSerialization.cpp
+@@ -40,9 +40,12 @@ static bool isMt2MemtagOperation(U32 operation)
+ 	return (operation >= 0x20 && operation <= 0x2f) || (operation >= 0x36 && operation <= 0x38);
+ }
+ 
+-static bool isMt2MemtagOpcode(Opcode opcode)
++static bool isOwnershipOperation(U32 operation) { return operation >= 0x40 && operation <= 0x44; }
++
++static bool isWROSMemtagOpcode(Opcode opcode)
+ {
+-	return (U16(opcode) >> 8) == 0xfc && isMt2MemtagOperation(U16(opcode) & 0xff);
++	const U32 op = U16(opcode) & 0xff;
++	return (U16(opcode) >> 8) == 0xfc && (isMt2MemtagOperation(op) || isOwnershipOperation(op));
+ }
+ 
+ static Opcode decodeWROSMemtagOpcode(U32 word)
+@@ -53,15 +56,8 @@ static Opcode decodeWROSMemtagOpcode(U32 word)
+ 		throw FatalSerializationException("unknown WROS domain");
+ 	}
+ 	const U32 operation = word & 0xffff;
+-	if(isMt2MemtagOperation(operation)) { return Opcode(0xfc00 | operation); }
++	if(isMt2MemtagOperation(operation) || isOwnershipOperation(operation)) { return Opcode(0xfc00 | operation); }
+ 	if(operation == 0x33) { throw FatalSerializationException("reserved WROS memtag.add"); }
+-	if(operation >= 0x40 && operation <= 0x44)
+-	{
+-		static const char* const names[] = {
+-			"memtag.claim", "memtag.claimz", "memtag.reserve", "memtag.activate", "memtag.release"};
+-		throw FatalSerializationException(std::string(names[operation - 0x40])
+-										  + " requires WROS allocation ownership");
+-	}
+ 	throw FatalSerializationException("unknown WROS memtag operation " + std::to_string(operation));
+ }
+ 
+@@ -80,6 +76,8 @@ WAVM_FORCEINLINE void serializeOpcode(InputStream& stream, Opcode& opcode)
+ 			opcode = decodeWROSMemtagOpcode(opcodeVarUInt);
+ 			return;
+ 		}
++		if(opcodeU8 == 0xfc && isOwnershipOperation(opcodeVarUInt))
++		{ throw FatalSerializationException("WROS ownership opcode requires the WROS namespace"); }
+ 		if(opcodeVarUInt > 0xff) { throw FatalSerializationException("unknown extended opcode"); }
+ 		opcode = Opcode((U32(opcodeU8) << 8) | opcodeVarUInt);
+ 	}
+@@ -95,7 +93,7 @@ WAVM_FORCEINLINE void serializeOpcode(OutputStream& stream, Opcode opcode)
+ 	{
+ 		U8 opcodePrefix = U8(U16(opcode) >> 8);
+ 		U32 opcodeVarUInt = U32(opcode) & 0xff;
+-		if(isMt2MemtagOpcode(opcode))
++		if(isWROSMemtagOpcode(opcode))
+ 		{
+ 			opcodePrefix = wrosPrefix;
+ 			opcodeVarUInt |= (wrosVersion << 24) | (wrosLinearDomain << 16);
+@@ -843,7 +841,7 @@ void serializeOpImm(Stream& stream,
+ 					const ModuleSerializationState& state,
+ 					Opcode opcode)
+ {
+-	if(isMt2MemtagOpcode(opcode)) { serializeVarUInt32(stream, imm.memoryIndex); }
++	if(isWROSMemtagOpcode(opcode)) { serializeVarUInt32(stream, imm.memoryIndex); }
+ 	else { serializeMemoryIndex(stream, imm.memoryIndex, state.module_.featureSpec); }
+ }
+ template<typename Stream>

@@ -1,0 +1,427 @@
+{
+  "upstream": "https://github.com/trcrsired/WAVM",
+  "ref": "mt-2",
+  "commit": "cd7107792bf69ffe62d245ab9479ec5421f13c75",
+  "wasm_source": "SDK Clang, freestanding C with -mno-tail-call -nostdlib. Same SHA per address width on both engines.",
+  "wros_vm_commit": "eeab6e7da6de83ae0bbf8fc49fb93398386af302",
+  "build_flags": [
+    "-O3",
+    "-g",
+    "-DNDEBUG",
+    "-DLINKER_HAS_WL___GDB_INDEX:INTERNAL=0"
+  ],
+  "patch_sha256": {
+    "wros-memtag-wire.patch": "ea30bc3d7681946984c9ccd89aa8ecacb3e3ad9353a0885d43c127e062fe7ca6",
+    "llvm23-api.patch": "c8ac238e1f650ea8b4d9c09bf2625b5ca974ca5593360b6f51fd3433249e2714",
+    "wat-module-keyword.patch": "e4a6d3018b44de06e2fe1b840cbdb7705a06f2964a10d6009b23c612e5d88117"
+  },
+  "isolation": {
+    "parent": "wrosvendor.slice",
+    "leaf_and_parent_memory_bytes": 68719476736,
+    "leaf_and_parent_swap_bytes": 0,
+    "rlimit_core": 0,
+    "writable_tmp": "project scratch",
+    "network": "isolated"
+  },
+  "wire": {
+    "wavm_sha256": "c1be795c327dd59af03430f336d0cff254eb7aa1cb84e4566c9b286cfe60881e",
+    "libwavm_sha256": "3ada4e2a9c7254a997219832b3aa3e89c0a68bc526479596e580b4531abc9620",
+    "shared_operations": [
+      "status",
+      "extract",
+      "insert",
+      "tagbits",
+      "startbit",
+      "copy",
+      "sub",
+      "load",
+      "untag",
+      "untagstore",
+      "untagstorez",
+      "store",
+      "storez",
+      "random",
+      "randomstore",
+      "randomstorez",
+      "hint",
+      "hintstore",
+      "hintstorez"
+    ]
+  },
+  "wire_cases": [
+    {
+      "case": "wasm32-index0",
+      "operations": 19,
+      "wat_sha256": "90086deb9b9e36ebf5b1eb798b04237ba217ba0950e0a321a5edd7b7891b945c",
+      "wasm_sha256": "1acf50a4b259914284b58c175ab8b7b292d49ff7ccdf926a1f15909b3179b443"
+    },
+    {
+      "case": "wasm32-index0-packed",
+      "operations": 19,
+      "input_sha256": "3bc8dd81cbe3bf854358e70af31355cb3be5f7addfb6ffd8f61e4530105f8bcc",
+      "wat_sha256": "434f518d3c8a162682c86a069a2fa1005c67406fadc3cf25d42d60cae6633cec",
+      "wasm_sha256": "3bc8dd81cbe3bf854358e70af31355cb3be5f7addfb6ffd8f61e4530105f8bcc"
+    },
+    {
+      "case": "wasm32-index0-packed-padded",
+      "operations": 19,
+      "input_sha256": "1b964374f0e110fbfeb503be8af1d36b778d5206e54d77feee6ca295259b30f1",
+      "wat_sha256": "434f518d3c8a162682c86a069a2fa1005c67406fadc3cf25d42d60cae6633cec",
+      "wasm_sha256": "3bc8dd81cbe3bf854358e70af31355cb3be5f7addfb6ffd8f61e4530105f8bcc"
+    },
+    {
+      "case": "wasm32-index0-legacy",
+      "operations": 19,
+      "input_sha256": "2e22bbc564776a01ea8813fed923e45541858f31d8e2afb1fd81c77cf31daec8",
+      "wat_sha256": "434f518d3c8a162682c86a069a2fa1005c67406fadc3cf25d42d60cae6633cec",
+      "wasm_sha256": "3bc8dd81cbe3bf854358e70af31355cb3be5f7addfb6ffd8f61e4530105f8bcc"
+    },
+    {
+      "case": "wasm32-index0-legacy-padded",
+      "operations": 19,
+      "input_sha256": "d19612c2a43b967e0e0805131bfb6ac8daa989e35f4b40c01654150a19536b8f",
+      "wat_sha256": "434f518d3c8a162682c86a069a2fa1005c67406fadc3cf25d42d60cae6633cec",
+      "wasm_sha256": "3bc8dd81cbe3bf854358e70af31355cb3be5f7addfb6ffd8f61e4530105f8bcc"
+    },
+    {
+      "case": "wasm32-index129",
+      "operations": 19,
+      "wat_sha256": "d5e991c6b290ebeaff7bd344523c344e005a361b74e29e64259c3b6e65c83be3",
+      "wasm_sha256": "5aba45baa8dfb926495d8a9e9e38ee957e359c520dbbd10c31b993ba9d845adf"
+    },
+    {
+      "case": "wasm32-index129-packed",
+      "operations": 19,
+      "input_sha256": "a8deb32a36264d4d0e2691763a6e8110322bdf8b664363e2b63417e47434f5e2",
+      "wat_sha256": "65fcd513ef30a1cda20610f9db0dbdd75b5fcc3581374b89a9af96102c4499e6",
+      "wasm_sha256": "a8deb32a36264d4d0e2691763a6e8110322bdf8b664363e2b63417e47434f5e2"
+    },
+    {
+      "case": "wasm32-index129-packed-padded",
+      "operations": 19,
+      "input_sha256": "8350b41ae5bf6490b8b537a089d92acebb347ac5e8a2a6912dfc004ed206ca70",
+      "wat_sha256": "65fcd513ef30a1cda20610f9db0dbdd75b5fcc3581374b89a9af96102c4499e6",
+      "wasm_sha256": "a8deb32a36264d4d0e2691763a6e8110322bdf8b664363e2b63417e47434f5e2"
+    },
+    {
+      "case": "wasm32-index129-legacy",
+      "operations": 19,
+      "input_sha256": "eaf3aff908c96a2c6b92e074b1eaa661a86e002aa8d6f052570eb04cc107e01a",
+      "wat_sha256": "65fcd513ef30a1cda20610f9db0dbdd75b5fcc3581374b89a9af96102c4499e6",
+      "wasm_sha256": "a8deb32a36264d4d0e2691763a6e8110322bdf8b664363e2b63417e47434f5e2"
+    },
+    {
+      "case": "wasm32-index129-legacy-padded",
+      "operations": 19,
+      "input_sha256": "d7e7e0416e843c7c8f9347454bf31c82aa9b3d60b53b89a6794d204da08f0eae",
+      "wat_sha256": "65fcd513ef30a1cda20610f9db0dbdd75b5fcc3581374b89a9af96102c4499e6",
+      "wasm_sha256": "a8deb32a36264d4d0e2691763a6e8110322bdf8b664363e2b63417e47434f5e2"
+    },
+    {
+      "case": "wasm64-index0",
+      "operations": 19,
+      "wat_sha256": "14227edca51de2e53e9eaca59138d37f86af636f84e2abf5584566ff603edc16",
+      "wasm_sha256": "215911ba3f549576ababc026e0f90e1cad3ed1384000caa7e9127bbef4576a3f"
+    },
+    {
+      "case": "wasm64-index0-packed",
+      "operations": 19,
+      "input_sha256": "9c6fd135558cc5d62da88c559da9fbcbbe586efb00663002e8b56ebddaa096e6",
+      "wat_sha256": "d05488d3b96cfc3ff772e26ce8007064862becb1c121acdb1502053e51510510",
+      "wasm_sha256": "9c6fd135558cc5d62da88c559da9fbcbbe586efb00663002e8b56ebddaa096e6"
+    },
+    {
+      "case": "wasm64-index0-packed-padded",
+      "operations": 19,
+      "input_sha256": "d55a8b7c5c1e34f4c73af6d3c238989a70dd3b8d31411284862428b557948e08",
+      "wat_sha256": "d05488d3b96cfc3ff772e26ce8007064862becb1c121acdb1502053e51510510",
+      "wasm_sha256": "9c6fd135558cc5d62da88c559da9fbcbbe586efb00663002e8b56ebddaa096e6"
+    },
+    {
+      "case": "wasm64-index0-legacy",
+      "operations": 19,
+      "input_sha256": "efe71143f1a0bffa9db3bae9fd42b0940c51bd73ff1baf41c71df7437c558b9f",
+      "wat_sha256": "d05488d3b96cfc3ff772e26ce8007064862becb1c121acdb1502053e51510510",
+      "wasm_sha256": "9c6fd135558cc5d62da88c559da9fbcbbe586efb00663002e8b56ebddaa096e6"
+    },
+    {
+      "case": "wasm64-index0-legacy-padded",
+      "operations": 19,
+      "input_sha256": "f566ccbb67be84464ba43dcef9c87e3ab2edea772f34fbd109d0edf9e944da8b",
+      "wat_sha256": "d05488d3b96cfc3ff772e26ce8007064862becb1c121acdb1502053e51510510",
+      "wasm_sha256": "9c6fd135558cc5d62da88c559da9fbcbbe586efb00663002e8b56ebddaa096e6"
+    },
+    {
+      "case": "wasm64-index129",
+      "operations": 19,
+      "wat_sha256": "14ccb7166b90aa6d32754a7d39a6a3b2e95cee12f6da2fb09cf42860792a2e7c",
+      "wasm_sha256": "7b2a9c603fc97e599182131607268cb3e4557dfc0ce48619a96a1a91a7372194"
+    },
+    {
+      "case": "wasm64-index129-packed",
+      "operations": 19,
+      "input_sha256": "f00cccea0f402cd9884f7e013532a3026f77c767e1566561ea47e5d5ecb53e4b",
+      "wat_sha256": "d0a8d9ef6005ce57cfe40a15f566e25a1b760eb0be06cec21fa2c798b35a4848",
+      "wasm_sha256": "f00cccea0f402cd9884f7e013532a3026f77c767e1566561ea47e5d5ecb53e4b"
+    },
+    {
+      "case": "wasm64-index129-packed-padded",
+      "operations": 19,
+      "input_sha256": "9e83e986b941f687adfb0abba6f236aa288993297386f2d12eb972bc6d4015a3",
+      "wat_sha256": "d0a8d9ef6005ce57cfe40a15f566e25a1b760eb0be06cec21fa2c798b35a4848",
+      "wasm_sha256": "f00cccea0f402cd9884f7e013532a3026f77c767e1566561ea47e5d5ecb53e4b"
+    },
+    {
+      "case": "wasm64-index129-legacy",
+      "operations": 19,
+      "input_sha256": "c413ecc902cd14990ea44d159ce867a3cc9ee87d3bde54b2c0732c0f1da91ee8",
+      "wat_sha256": "d0a8d9ef6005ce57cfe40a15f566e25a1b760eb0be06cec21fa2c798b35a4848",
+      "wasm_sha256": "f00cccea0f402cd9884f7e013532a3026f77c767e1566561ea47e5d5ecb53e4b"
+    },
+    {
+      "case": "wasm64-index129-legacy-padded",
+      "operations": 19,
+      "input_sha256": "ffcaa0fb800fb9a4a5e5727686f042563f629529f5415f962e334dfec21234f0",
+      "wat_sha256": "d0a8d9ef6005ce57cfe40a15f566e25a1b760eb0be06cec21fa2c798b35a4848",
+      "wasm_sha256": "f00cccea0f402cd9884f7e013532a3026f77c767e1566561ea47e5d5ecb53e4b"
+    }
+  ],
+  "execution": {
+    "cpu": {
+      "affinity": [
+        23
+      ],
+      "model": "Intel(R) Core(TM) i9-14900HX",
+      "thread_siblings": "23",
+      "governor": "powersave"
+    },
+    "timed_iterations": 16777216,
+    "repetitions": 11,
+    "timing_boundary": "Guest monotonic clock around the checksum update loop after tag setup",
+    "warmup_rounds": 2,
+    "order_seed": 4720,
+    "summary": [
+      {
+        "engine": "wavm",
+        "address_bits": 32,
+        "mode": "disabled",
+        "n": 11,
+        "median_ns": 45340746,
+        "min_ns": 45233293,
+        "max_ns": 47159326,
+        "ns_per_iteration": 2.7025190591812134
+      },
+      {
+        "engine": "wavm",
+        "address_bits": 32,
+        "mode": "software",
+        "n": 11,
+        "median_ns": 43024054,
+        "min_ns": 42898589,
+        "max_ns": 44612275,
+        "ns_per_iteration": 2.564433455467224
+      },
+      {
+        "engine": "wavm",
+        "address_bits": 64,
+        "mode": "disabled",
+        "n": 11,
+        "median_ns": 43268310,
+        "min_ns": 43172732,
+        "max_ns": 45918556,
+        "ns_per_iteration": 2.578992247581482
+      },
+      {
+        "engine": "wavm",
+        "address_bits": 64,
+        "mode": "software",
+        "n": 11,
+        "median_ns": 47960037,
+        "min_ns": 47901879,
+        "max_ns": 50074945,
+        "ns_per_iteration": 2.858640968799591
+      },
+      {
+        "engine": "wros",
+        "address_bits": 32,
+        "mode": "disabled",
+        "n": 11,
+        "median_ns": 45333041,
+        "min_ns": 45255157,
+        "max_ns": 46835520,
+        "ns_per_iteration": 2.702059805393219
+      },
+      {
+        "engine": "wros",
+        "address_bits": 32,
+        "mode": "software",
+        "n": 11,
+        "median_ns": 44555300,
+        "min_ns": 44367009,
+        "max_ns": 44855600,
+        "ns_per_iteration": 2.655702829360962
+      },
+      {
+        "engine": "wros",
+        "address_bits": 64,
+        "mode": "disabled",
+        "n": 11,
+        "median_ns": 41945895,
+        "min_ns": 41848000,
+        "max_ns": 45165075,
+        "ns_per_iteration": 2.5001701712608337
+      },
+      {
+        "engine": "wros",
+        "address_bits": 64,
+        "mode": "software",
+        "n": 11,
+        "median_ns": 48554897,
+        "min_ns": 48446271,
+        "max_ns": 49503945,
+        "ns_per_iteration": 2.89409738779068
+      }
+    ],
+    "timed_checksum": "0x0d79439b"
+  },
+  "guest_and_runner_sha256": {
+    "wavm": "c1be795c327dd59af03430f336d0cff254eb7aa1cb84e4566c9b286cfe60881e",
+    "libWAVM.so.0.0.0": "3ada4e2a9c7254a997219832b3aa3e89c0a68bc526479596e580b4531abc9620",
+    "uwvm2-ros": "62e7d2af5e45ffc41cc265d6fbe3fef424b9c6ec0ed17288f8935ca8fd59c4ce",
+    "common-kernel.c": "c85c3447dc7c35d6548016c0441e0bd635442d43eefbc0ddc60b8445de2e344d",
+    "common-32.wasm": "abdc5fa9074f2fcd0c356fdbdd55d1010a206a0a348cc39988e3c667b2c5a88a",
+    "common-64.wasm": "0567c1388de8b5015c7cf776eb03ee4205e140f56d11f2406f66a4ba40def94e",
+    "common-freestanding-32.wasm": "bd6358ce203f4fbd57f33814a35808a0f64599f6c50eaa622d1fce3668fb75c8",
+    "common-freestanding-64.wasm": "bb75d32ff2eb6b32956fd9a5a5c946ac95da06e2c0677649b87facbfcc345d97",
+    "cjson-32-tagged.wasm": "7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1",
+    "cjson-64-tagged.wasm": "ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967"
+  },
+  "positive_checksum_runs": 60,
+  "unavailable_with_these_patches": [
+    {
+      "status": 1,
+      "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+      "variant": "default",
+      "address_bits": 32
+    },
+    {
+      "status": 1,
+      "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+      "variant": "default",
+      "address_bits": 32
+    },
+    {
+      "status": 1,
+      "stderr": "Error loading WebAssembly binary file: Module was malformed: memtag.reserve requires WROS allocation ownership",
+      "variant": "cjson",
+      "address_bits": 32
+    },
+    {
+      "status": 1,
+      "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+      "variant": "default",
+      "address_bits": 64
+    },
+    {
+      "status": 1,
+      "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+      "variant": "default",
+      "address_bits": 64
+    },
+    {
+      "status": 1,
+      "stderr": "Error loading WebAssembly binary file: Module was malformed: memtag.reserve requires WROS allocation ownership",
+      "variant": "cjson",
+      "address_bits": 64
+    }
+  ],
+  "evidence_sha256": {
+    "execution": "2c8c102754e29fb957af16c3557f1dc5e82e73954ff56b8125f39b5fa8ea863a",
+    "wire": "48c201ecb81b9177bc81acb71a916c193ebd2e66a59c0c9d4195524042a1cdb0",
+    "paired_samples": "48faf3cec72b17e98bfd68caa5c51e64b1c627020b8c15bba2c3fb0d80a11e87"
+  },
+  "with_private_ownership": {
+    "patch_sha256": "e49757fef93d47ed43542ad9b8c264712019cc4382bec8888fa2886b8f815609",
+    "wavm_sha256": "a70cefc166936b42f3bac25d955b2d56661b67235a1ee8700c29bdc29496668a",
+    "libwavm_sha256": "1aed62a705603284a0ba84e7f8d4b3e1b3e0cca0de771d6631d3335b07d8e687",
+    "wire_cases": [
+      {
+        "address_bits": 32,
+        "input_sha256": "c6c31dea5c9e24bd6b5134d83faa898c651f84df7cda8395af0e59013aec5fdd",
+        "wat_sha256": "65a573059cb285329d4a81cf9371d227c8e0e924199a28cd05e27a4c93bde89b",
+        "wasm_sha256": "c6c31dea5c9e24bd6b5134d83faa898c651f84df7cda8395af0e59013aec5fdd"
+      },
+      {
+        "address_bits": 64,
+        "input_sha256": "c23ad1e244b29b3ce6b139a0632fdbed161de9cc025e4aecf52c1435b40f8c2f",
+        "wat_sha256": "3993bec3fcc36da900a55d7caff5e4cac5d3945803886cb48ff8605da979e824",
+        "wasm_sha256": "c23ad1e244b29b3ce6b139a0632fdbed161de9cc025e4aecf52c1435b40f8c2f"
+      }
+    ],
+    "guest_coverage": "claim, claimz, reserve, activate, release on private wasm32 and wasm64 memories",
+    "passing_ownership_executions": 40,
+    "repeats_per_engine_mode_width": 5,
+    "original_cjson": [
+      {
+        "status": 1,
+        "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+        "engine": "wavm",
+        "mode": "disabled",
+        "address_bits": 32
+      },
+      {
+        "status": 0,
+        "stderr": "",
+        "checksum": 3949456654,
+        "engine": "wros",
+        "mode": "disabled",
+        "address_bits": 32
+      },
+      {
+        "status": 1,
+        "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+        "engine": "wavm",
+        "mode": "software",
+        "address_bits": 32
+      },
+      {
+        "status": 0,
+        "stderr": "",
+        "checksum": 3949456654,
+        "engine": "wros",
+        "mode": "software",
+        "address_bits": 32
+      },
+      {
+        "status": 1,
+        "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+        "engine": "wavm",
+        "mode": "disabled",
+        "address_bits": 64
+      },
+      {
+        "status": 0,
+        "stderr": "",
+        "checksum": 3949456654,
+        "engine": "wros",
+        "mode": "disabled",
+        "address_bits": 64
+      },
+      {
+        "status": 1,
+        "stderr": "Error loading WebAssembly binary file: Module was malformed: unknown opcode (18)",
+        "engine": "wavm",
+        "mode": "software",
+        "address_bits": 64
+      },
+      {
+        "status": 0,
+        "stderr": "",
+        "checksum": 3949456654,
+        "engine": "wros",
+        "mode": "software",
+        "address_bits": 64
+      }
+    ]
+  }
+}

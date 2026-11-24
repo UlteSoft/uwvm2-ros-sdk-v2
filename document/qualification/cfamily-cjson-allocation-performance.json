@@ -1,0 +1,465 @@
+{
+  "guest": "cJSON 1.7.18, AOT, same tagged binary with software checks enabled or disabled. Timed inside guest after startup.",
+  "candidate": "d1a44a22c0b054df6c9df0c6898a719330f48978",
+  "execution_overhead_target": 1.5,
+  "hosts": [
+    {
+      "host": "x86_64",
+      "vms": {
+        "f3cfe44": {
+          "elf_class": 2,
+          "elf_machine": 62,
+          "sha256": "caefe2f96853b872bf85a72ab8362059c543f85c50ceb0e2ce667f2add2ca9b7",
+          "elf_build_id": "4517e2f464d61123162e8c2a198b8b16233d15fd",
+          "commit": "f3cfe4477ad08d30c59dd789c8801b1fc0c43752",
+          "tree": "3a9a3554ed0839cf0fd7f8f28cdd7e633493e27b"
+        },
+        "eeab6e7": {
+          "elf_class": 2,
+          "elf_machine": 62,
+          "sha256": "62e7d2af5e45ffc41cc265d6fbe3fef424b9c6ec0ed17288f8935ca8fd59c4ce",
+          "elf_build_id": "823e60f3e2e2fc9da4e5505bf82a11a78a2d3c97",
+          "commit": "eeab6e7da6de83ae0bbf8fc49fb93398386af302",
+          "tree": "9ec5d63a8cdc7bae536b09d8d6f8563f010222e9"
+        },
+        "d1a44a2": {
+          "elf_class": 2,
+          "elf_machine": 62,
+          "sha256": "81c01e162299916da78d108260eb7201ea563586c6e8048af58bcdf1e806f460",
+          "elf_build_id": "9d1796547646b41df46c603e760c14838236138d",
+          "commit": "d1a44a22c0b054df6c9df0c6898a719330f48978",
+          "tree": "160a5fcb1d533aa4909afe615248c36eaa41c24d"
+        }
+      },
+      "guest_build_sha256": "f708a41e363f5066ca7fd052717e51baad8ecc259ef87ff60c5ac448b35fb375",
+      "samples_sha256": "3d2cf590cb6f848b6a538779352c5fa2db816bba965c11db528607ef7cf5dfaf",
+      "summary_sha256": "25c91de8bfe2c119e48410266e07399b385e27df89c50cdd00fa395aa190b3fd",
+      "isolation_sha256": "c494e36288121a5031cfe2c7a7c0547cb50146a1a4c96fc2427e830a3b0c2066",
+      "cases": [
+        {
+          "bits": 32,
+          "wasm_sha256": "7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1",
+          "iterations": {
+            "long": 16384,
+            "short": 4096,
+            "startup": 0
+          },
+          "checksums": {
+            "long": 56348101,
+            "short": 1216479685,
+            "startup": 2166136261
+          },
+          "pairs_per_length": 6,
+          "long_guest_ns": {
+            "f3cfe44/disabled": {
+              "min": 17221894,
+              "q1": 17733951.75,
+              "median": 17988996.5,
+              "q3": 18145348.0,
+              "max": 18611273,
+              "n": 6
+            },
+            "f3cfe44/software": {
+              "min": 463294750,
+              "q1": 467699167.75,
+              "median": 473948158.0,
+              "q3": 478508423.5,
+              "max": 483306052,
+              "n": 6
+            },
+            "eeab6e7/disabled": {
+              "min": 17626137,
+              "q1": 17720883.5,
+              "median": 17982355.0,
+              "q3": 18128072.25,
+              "max": 18179359,
+              "n": 6
+            },
+            "eeab6e7/software": {
+              "min": 460726931,
+              "q1": 472027096.25,
+              "median": 473628184.0,
+              "q3": 475259645.25,
+              "max": 492325711,
+              "n": 6
+            },
+            "d1a44a2/disabled": {
+              "min": 17305542,
+              "q1": 17827009.0,
+              "median": 17889777.0,
+              "q3": 17970263.0,
+              "max": 18665035,
+              "n": 6
+            },
+            "d1a44a2/software": {
+              "min": 268668105,
+              "q1": 273017891.75,
+              "median": 273994225.0,
+              "q3": 276269976.0,
+              "max": 281400053,
+              "n": 6
+            }
+          },
+          "paired_long_software_over_disabled": {
+            "f3cfe44": {
+              "min": 25.311241471768213,
+              "q1": 25.750702287042788,
+              "median": 26.73565171849466,
+              "q3": 26.993483895013235,
+              "max": 27.091914629134287,
+              "n": 6
+            },
+            "eeab6e7": {
+              "min": 25.754452109832656,
+              "q1": 26.11423953656243,
+              "median": 26.49110772678435,
+              "q3": 26.84979800988991,
+              "max": 27.1319639617278,
+              "n": 6
+            },
+            "d1a44a2": {
+              "min": 14.722407056831129,
+              "q1": 15.199373319698687,
+              "median": 15.388584000027508,
+              "q3": 15.537131340225823,
+              "max": 15.735469088280718,
+              "n": 6
+            }
+          },
+          "target_met": false,
+          "vtune_summary_sha256": "2455322d670c99d07bc33dbda0b3af76293ccbc9329f18b649151af2e0182d7e",
+          "vtune_cycle_samples": {
+            "software": 3051,
+            "disabled": 3035
+          }
+        },
+        {
+          "bits": 64,
+          "wasm_sha256": "ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967",
+          "iterations": {
+            "long": 16384,
+            "short": 4096,
+            "startup": 0
+          },
+          "checksums": {
+            "long": 56348101,
+            "short": 1216479685,
+            "startup": 2166136261
+          },
+          "pairs_per_length": 6,
+          "long_guest_ns": {
+            "f3cfe44/disabled": {
+              "min": 29416505,
+              "q1": 30070441.5,
+              "median": 30293772.0,
+              "q3": 30552183.75,
+              "max": 31161393,
+              "n": 6
+            },
+            "f3cfe44/software": {
+              "min": 482724095,
+              "q1": 487251662.5,
+              "median": 491453420.5,
+              "q3": 496809010.0,
+              "max": 517240667,
+              "n": 6
+            },
+            "eeab6e7/disabled": {
+              "min": 29526565,
+              "q1": 29814640.25,
+              "median": 30260680.5,
+              "q3": 30814046.5,
+              "max": 34846754,
+              "n": 6
+            },
+            "eeab6e7/software": {
+              "min": 474932066,
+              "q1": 484083692.5,
+              "median": 491062381.0,
+              "q3": 518526544.0,
+              "max": 527739112,
+              "n": 6
+            },
+            "d1a44a2/disabled": {
+              "min": 29570221,
+              "q1": 29686461.25,
+              "median": 30028757.5,
+              "q3": 30365618.5,
+              "max": 31251535,
+              "n": 6
+            },
+            "d1a44a2/software": {
+              "min": 342191362,
+              "q1": 342628962.75,
+              "median": 344897838.0,
+              "q3": 347971082.25,
+              "max": 361941204,
+              "n": 6
+            }
+          },
+          "paired_long_software_over_disabled": {
+            "f3cfe44": {
+              "min": 16.081480007985736,
+              "q1": 16.20408133851855,
+              "median": 16.331921992956026,
+              "q3": 16.39904193197734,
+              "max": 16.59876588315548,
+              "n": 6
+            },
+            "eeab6e7": {
+              "min": 15.081813473932177,
+              "q1": 15.87307893885357,
+              "median": 16.178399368683074,
+              "q3": 16.545626407753296,
+              "max": 17.090874385877644,
+              "n": 6
+            },
+            "d1a44a2": {
+              "min": 10.957159096345187,
+              "q1": 11.523938112314934,
+              "median": 11.574796750425142,
+              "q3": 11.622535241521502,
+              "max": 11.904622954210145,
+              "n": 6
+            }
+          },
+          "target_met": false,
+          "vtune_summary_sha256": "00395d8dd06c2503580eb9ecf0ca27d76a85bcac15255a428395b084ce2672da",
+          "vtune_cycle_samples": {
+            "software": 3967,
+            "disabled": 5482
+          }
+        }
+      ]
+    },
+    {
+      "host": "i686",
+      "vms": {
+        "f3cfe44": {
+          "elf_class": 1,
+          "elf_machine": 3,
+          "sha256": "f69a1314931683e10da05be9688c77c7496333af32004bc8632e56e5acca3e7f",
+          "elf_build_id": "e4927e77f233aaa8fa2dbe7c91424ae9aba85f23",
+          "commit": "f3cfe4477ad08d30c59dd789c8801b1fc0c43752",
+          "tree": "3a9a3554ed0839cf0fd7f8f28cdd7e633493e27b"
+        },
+        "eeab6e7": {
+          "elf_class": 1,
+          "elf_machine": 3,
+          "sha256": "18ab0ef311ecd43b3d7e285e18cd1c1097f70d82730dfda4589f9293b3c624fc",
+          "elf_build_id": "868ebf48239675a896439110afc12fb32fd04d95",
+          "commit": "eeab6e7da6de83ae0bbf8fc49fb93398386af302",
+          "tree": "9ec5d63a8cdc7bae536b09d8d6f8563f010222e9"
+        },
+        "d1a44a2": {
+          "elf_class": 1,
+          "elf_machine": 3,
+          "sha256": "000cee0b6f23cff82e00985aa70c7f3c91783fb0f3b2afa9324cd5e8c471ebd5",
+          "elf_build_id": "6e8ee8102388acca6438eeb89156ae1e697323ae",
+          "commit": "d1a44a22c0b054df6c9df0c6898a719330f48978",
+          "tree": "160a5fcb1d533aa4909afe615248c36eaa41c24d"
+        }
+      },
+      "guest_build_sha256": "f708a41e363f5066ca7fd052717e51baad8ecc259ef87ff60c5ac448b35fb375",
+      "samples_sha256": "8003c69d031a4e4d1d90b17ddcfaeb748e8cbe5964a987838f9061a92df904cf",
+      "summary_sha256": "9cb1462e97a42cf800a8fb0c1d0ae253bd19f3b2b6a278d791675e82574702d4",
+      "isolation_sha256": "091538ec6a14baabd9f9e7dcb9d5e557c713af7012daf96117de944623f93fe0",
+      "cases": [
+        {
+          "bits": 32,
+          "wasm_sha256": "7f68b9c7ab1b93d6403786af17c1c48e3be1bc681c71de755d76b326457eefc1",
+          "iterations": {
+            "long": 8192,
+            "short": 2048,
+            "startup": 0
+          },
+          "checksums": {
+            "long": 3451663813,
+            "short": 579800005,
+            "startup": 2166136261
+          },
+          "pairs_per_length": 6,
+          "long_guest_ns": {
+            "f3cfe44/disabled": {
+              "min": 16666083,
+              "q1": 17099510.75,
+              "median": 17554531.0,
+              "q3": 18217444.5,
+              "max": 18421307,
+              "n": 6
+            },
+            "f3cfe44/software": {
+              "min": 342600362,
+              "q1": 349390617.25,
+              "median": 352132650.5,
+              "q3": 363735283.5,
+              "max": 370482998,
+              "n": 6
+            },
+            "eeab6e7/disabled": {
+              "min": 16728388,
+              "q1": 16966099.75,
+              "median": 17508119.5,
+              "q3": 18083340.25,
+              "max": 19972550,
+              "n": 6
+            },
+            "eeab6e7/software": {
+              "min": 335111937,
+              "q1": 340964911.25,
+              "median": 352089563.0,
+              "q3": 360184119.5,
+              "max": 392266462,
+              "n": 6
+            },
+            "d1a44a2/disabled": {
+              "min": 17249783,
+              "q1": 17873980.5,
+              "median": 18033548.0,
+              "q3": 18494215.0,
+              "max": 18941835,
+              "n": 6
+            },
+            "d1a44a2/software": {
+              "min": 216542253,
+              "q1": 219880962.5,
+              "median": 227273912.0,
+              "q3": 238886743.25,
+              "max": 251248584,
+              "n": 6
+            }
+          },
+          "paired_long_software_over_disabled": {
+            "f3cfe44": {
+              "min": 19.456436456318908,
+              "q1": 20.06466503124128,
+              "median": 20.09195361671069,
+              "q3": 20.402780740232366,
+              "max": 21.10948889430108,
+              "n": 6
+            },
+            "eeab6e7": {
+              "min": 17.560797594698723,
+              "q1": 19.58064146797457,
+              "median": 19.947573002692693,
+              "q3": 20.172492008967154,
+              "max": 23.0625581426933,
+              "n": 6
+            },
+            "d1a44a2": {
+              "min": 12.06977582157753,
+              "q1": 12.208102931771926,
+              "median": 12.704180034957979,
+              "q3": 13.189885444139577,
+              "max": 13.41024776949368,
+              "n": 6
+            }
+          },
+          "target_met": false,
+          "vtune_summary_sha256": "54756100f955564048954158e1cdd1be3f1851b12570cda6be2c779bff658fb5",
+          "vtune_cycle_samples": {
+            "software": 4951,
+            "disabled": 5897
+          }
+        },
+        {
+          "bits": 64,
+          "wasm_sha256": "ab824190f3513714178bc097d35de271a7e2c1cbba9e5df3bf79956999396967",
+          "iterations": {
+            "long": 8192,
+            "short": 2048,
+            "startup": 0
+          },
+          "checksums": {
+            "long": 3451663813,
+            "short": 579800005,
+            "startup": 2166136261
+          },
+          "pairs_per_length": 6,
+          "long_guest_ns": {
+            "f3cfe44/disabled": {
+              "min": 22727781,
+              "q1": 23417591.0,
+              "median": 25906451.5,
+              "q3": 28666432.5,
+              "max": 29699608,
+              "n": 6
+            },
+            "f3cfe44/software": {
+              "min": 405135526,
+              "q1": 424153036.0,
+              "median": 457697472.0,
+              "q3": 512981287.25,
+              "max": 539033410,
+              "n": 6
+            },
+            "eeab6e7/disabled": {
+              "min": 23642736,
+              "q1": 23745383.5,
+              "median": 26495469.5,
+              "q3": 30658809.0,
+              "max": 50531252,
+              "n": 6
+            },
+            "eeab6e7/software": {
+              "min": 416252089,
+              "q1": 427066867.5,
+              "median": 467791752.5,
+              "q3": 536214912.25,
+              "max": 873295859,
+              "n": 6
+            },
+            "d1a44a2/disabled": {
+              "min": 22671782,
+              "q1": 23508796.75,
+              "median": 25970939.0,
+              "q3": 29996929.5,
+              "max": 48169938,
+              "n": 6
+            },
+            "d1a44a2/software": {
+              "min": 285092130,
+              "q1": 290871335.0,
+              "median": 300193610.0,
+              "q3": 339290020.25,
+              "max": 369184695,
+              "n": 6
+            }
+          },
+          "paired_long_software_over_disabled": {
+            "f3cfe44": {
+              "min": 17.498442002364254,
+              "q1": 17.721261969992142,
+              "median": 17.923909296666782,
+              "q3": 18.1176979848863,
+              "max": 18.380621276006394,
+              "n": 6
+            },
+            "eeab6e7": {
+              "min": 17.282292134776316,
+              "q1": 17.403888055054075,
+              "median": 17.535559189381843,
+              "q3": 17.897224899583797,
+              "max": 18.041123540016688,
+              "n": 6
+            },
+            "d1a44a2": {
+              "min": 6.312105010390505,
+              "q1": 12.090457306859257,
+              "median": 12.314393031786189,
+              "q3": 12.466909073380206,
+              "max": 12.749355520443872,
+              "n": 6
+            }
+          },
+          "target_met": false,
+          "vtune_summary_sha256": "97eccd9e69ae02a5d92d8656e111f170811448e9cbfc292aa26eb82d1092cb6b",
+          "vtune_cycle_samples": {
+            "software": 6397,
+            "disabled": 8354
+          }
+        }
+      ]
+    }
+  ]
+}

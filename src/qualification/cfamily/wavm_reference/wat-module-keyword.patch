@@ -1,0 +1,13 @@
+diff --git a/Lib/WASTPrint/Print.cpp b/Lib/WASTPrint/Print.cpp
+index 0aa5a9d1be97c3617e62b21c582b86062eeb5de1..27f0c196c2c91abdc6cd1241813e71e6a7424113 100644
+--- a/Lib/WASTPrint/Print.cpp
++++ b/Lib/WASTPrint/Print.cpp
+@@ -854,7 +854,7 @@ void printImport(std::string& string,
+ 
+ void ModulePrintContext::printModule()
+ {
+-	ScopedTagPrinter moduleTag(string, "module_");
++	ScopedTagPrinter moduleTag(string, "module");
+ 
+ 	// Print the custom sections that precede all known sections.
+ 	printCustomSectionsAfterKnownSection(OrderedSectionID::moduleBeginning);

@@ -14,6 +14,10 @@
 
 在 x86_64 上，VM 候选 `d1a44a22` 与 Wasmtime 42.0.1 运行相同的无 MTE C++20 模块，EH 和 threads 均关闭。每项交替取得十对样本。以 WROS AOT 耗时除以 Wasmtime 耗时，libc++ 排序在 wasm32 和 wasm64 上的中位数分别为 0.979、1.026，fast_float v8.0.2 分别为 0.967、0.943。wasm32 使用 Wasmtime 官方 CLI，wasm64 用其 C API 适配 SDK 的 WASIp1 导入。记录含原始配对耗时、同源码原生 ELF 对照和校验和。[C++ 执行耗时](../qualification/cfamily-cpp-wasmtime-execution.json)
 
+从源码重建的 WAVM mt-2 在 20 项编码检查中识别了 19 条共有标签指令。每种地址宽度下，两台引擎执行相同的独立 Clang 客体，共通过 60 项校验和检查，测量了 88 个执行循环。默认 SDK 链接产物还使用了参考端缺少的 `return_call`，原始带标签 cJSON 则需要 `memtag.reserve`。加入第四份补丁后，五条私有内存所有权指令在两种地址宽度、两个引擎和两种运行模式下通过了 40 项正向执行。此时 WAVM 能解析 cJSON 的所有权指令，随后停在 `return_call`。[编码和执行记录](../qualification/cfamily-wavm-wire.json) · [参考源码和构建方法](../../src/qualification/cfamily/wavm_reference/UPSTREAM.zh-CN.md)
+
+VM `d1a44a22` 的首轮分配记录优化缩短了两个 x86 宿主上带标签 cJSON 的执行时间。以同一份客体关闭运行时检查为基准，x86_64 上 wasm32/64 的中位耗时比分别为 15.39 和 11.57，i686 上分别为 12.70 和 12.31。四格均超出 1.5 倍目标。[cJSON 配对执行记录](../qualification/cfamily-cjson-allocation-performance.json)
+
 ## 语言调试、dump 还原和热更新
 
 C、C++、Objective-C、Objective-C++ 的调试验收覆盖五种 Linux 宿主 ABI 和按 ABI、EH、threads、MTE 划分的十六档基础配置。每种语言都用安装所得的 SDK 编译器用 `-O0 -g` 生成带调试信息的程序，再编译一个能观察到行为变化的版本。收据记录 SDK 提交、VM 提交及源码树、宿主可执行文件摘要、guest 摘要、配置和请求的引擎。
