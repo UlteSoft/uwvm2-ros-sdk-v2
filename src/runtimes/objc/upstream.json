@@ -109,7 +109,7 @@
     },
     {
       "path": "libobjc2/selector_table.cc",
-      "sha256": "0c3a06e0fb73656d71afd54b2c5977249fe408c319668c7998630d1dddbf4950"
+      "sha256": "404f17a64adc2ce0f2029339942d228c6dd5c7bd0d8fc781ac93afe3bf8cfe07"
     },
     {
       "path": "libobjc2/sendmsg2.c",

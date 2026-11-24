@@ -25,7 +25,7 @@
     "include/sysroot/objc/runtime.h": "832518dd2041592fac85468c928d1a80eeb4ccf2d82d1cbf0afeddfaa6a518f1",
     "include/sysroot/objc/slot.h": "0ec3ea994411076d762510ddb3a62f6daf293e4fe92b5b803b20b50846fc8dae",
     "include/sysroot/objc/toydispatch.h": "3bc440c1686a0b3a5e8ed8205b40ac7f2a6cc6e5d2dab8c8e02817f8f9b258a8",
-    "lib/wasm64-wasip1/core3.0-noeh-nomte/libobjc.a": "7f2d447ab2ad6a57c7208e4711215dfde1db0c94763af28acf41c15d98b66520",
+    "lib/wasm64-wasip1/core3.0-noeh-nomte/libobjc.a": "e8bc06d62d0d55d5fbcef48549f70612de219474878684fb94ff0c2fd07ce2c1",
     "lib/wasm64-wasip1/core3.0-noeh-nomte/libuwrosobjc.a": "f73616edb51deef3c423e86ddba717725bc53bbeb43dd87d6bcc35424ab414dd"
   },
   "format": "uwros-gnustep-guest-v2",
@@ -40,6 +40,6 @@
     "triple": "wasm64-wasip1",
     "wasm_version": "3.0"
   },
-  "runtime_source_sha256": "07b59f5fe96a31ab2a2607dfded44e6477572f1bbc1a7ca5356d89304e763878",
+  "runtime_source_sha256": "82f80998dffc293b833e7f2c9172ba5e9c65ebb1c548a7c1737834379df6096b",
   "sysroot_sha256": "6341bf08a8e742dc90901c4553bc15d327338e5e0b78b215d325cdf1fe4c26d1"
 }

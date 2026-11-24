@@ -96,6 +96,11 @@ struct TypeList : public std::forward_list<const char*>
  */
 std::vector<TypeList> *selector_list;
 
+// The GNUstep ABI stores a name pointer and a dispatch index in the same word.
+// Both can have the same value in Wasm linear memory. Track the selector
+// records whose name has been replaced, including aliases emitted by Clang.
+tsl::robin_set<SEL> *registered_selectors;
+
 /**
  * Lock protecting the selector table.
  */
@@ -119,39 +124,22 @@ inline TypeList *selLookup(uint32_t idx)
 	return selLookup_locked(idx);
 }
 
-BOOL isSelRegistered(SEL sel)
-{
-	if (sel->index < selector_list->size())
-	{
-		return YES;
-	}
-	return NO;
-}
-
 /// Gets the name of a registered selector.
 const char *sel_getNameRegistered(SEL sel)
 {
-	const char *name = sel->name;
 	return selLookup_locked(sel->index)->name();
 }
 
 /**
- * Gets the name of a selector that might not have been registered.  This
- * should be used only on legacy-ABI compatibility code paths.
+ * Gets the name of a selector in either ABI state under the selector lock.
  */
 const char *sel_getNameNonUnique(SEL sel)
 {
-	const char *name = sel->name;
-	if (isSelRegistered(sel))
+	if (registered_selectors->count(sel))
 	{
-		auto* list = selLookup_locked(sel->index);
-		name = (list == nullptr) ? nullptr : list->name();
+		return sel_getNameRegistered(sel);
 	}
-	if (nullptr == name)
-	{
-		name = "";
-	}
-	return name;
+	return sel->name ? sel->name : "";
 }
 
 /**
@@ -317,7 +305,7 @@ struct SelectorHash
 
 	size_t operator()(objc_selector *sel) const
 	{
-		return hash(sel_getNameNonUnique(sel), sel_getType_np(sel));
+		return hash(sel_getNameRegistered(sel), sel_getType_np(sel));
 	}
 
 	size_t operator()(const UnregisteredSelector &sel) const
@@ -364,6 +352,7 @@ extern "C" void objc_resize_dtables(uint32_t);
 extern "C" PRIVATE void init_selector_tables()
 {
 	selector_list = new std::vector<TypeList>(1<<16);
+	registered_selectors = new tsl::robin_set<SEL>();
 	selector_table = new SelectorTable(1024);
 	selector_table_lock.init();
 }
@@ -386,6 +375,7 @@ static inline void add_selector_to_table(SEL aSel)
 	selector_list->push_back({aSel->name});
 	// Set the selector's name to the uid.
 	aSel->index = selector_list->size() - 1;
+	registered_selectors->insert(aSel);
 	// Store the selector in the set.
 	selector_table->insert(aSel);
 }
@@ -417,7 +407,7 @@ static inline void register_selector_locked(SEL aSel)
 	else
 	{
 		// Make sure we only store one copy of the name
-		aSel->name = sel_getNameNonUnique(untyped);
+		aSel->name = sel_getNameRegistered(untyped);
 	}
 	add_selector_to_table(aSel);
 
@@ -434,7 +424,8 @@ static inline void register_selector_locked(SEL aSel)
  */
 extern "C" PRIVATE SEL objc_register_selector(SEL aSel)
 {
-	if (isSelRegistered(aSel))
+	LockGuard g{selector_table_lock};
+	if (registered_selectors->count(aSel))
 	{
 		return aSel;
 	}
@@ -444,11 +435,11 @@ extern "C" PRIVATE SEL objc_register_selector(SEL aSel)
 	SelectorEqual eq;
 	if (nullptr != registered && eq(unregistered, registered))
 	{
-		aSel->name = registered->name;
+		aSel->index = registered->index;
+		registered_selectors->insert(aSel);
 		return registered;
 	}
 	assert(!(aSel->types && (strstr(aSel->types, "@\"") != nullptr)));
-	LockGuard g{selector_table_lock};
 	register_selector_locked(aSel);
 	return aSel;
 }
@@ -459,13 +450,8 @@ extern "C" PRIVATE SEL objc_register_selector(SEL aSel)
 SEL objc_register_selector_copy(UnregisteredSelector &aSel, BOOL copyArgs)
 {
 	// If an identical selector is already registered, return it.
-	SEL copy = selector_lookup(aSel.name, aSel.types);
-	if ((nullptr != copy) && selector_identical(aSel, copy))
-	{
-		return copy;
-	}
 	LockGuard g{selector_table_lock};
-	copy = selector_lookup(aSel.name, aSel.types);
+	SEL copy = selector_lookup(aSel.name, aSel.types);
 	if (nullptr != copy && selector_identical(aSel, copy))
 	{
 		return copy;
@@ -518,8 +504,8 @@ extern "C"
 const char *sel_getName(SEL sel)
 {
 	if (nullptr == sel) { return "<null selector>"; }
-	auto list = selLookup(sel->index);
-	return  (list == nullptr) ? "" : list->front();
+	LockGuard g{selector_table_lock};
+	return sel_getNameNonUnique(sel);
 }
 
 SEL sel_getUid(const char *selName)
@@ -529,15 +515,9 @@ SEL sel_getUid(const char *selName)
 
 BOOL sel_isEqual(SEL sel1, SEL sel2)
 {
-	if ((0 == sel1) || (0 == sel2))
-	{
-		return sel1 == sel2;
-	}
-	if (sel1->name == sel2->name)
-	{
-		return YES;
-	}
-	// Otherwise, do a slow compare
+	if (sel1 == sel2) { return YES; }
+	if (sel1 == nullptr || sel2 == nullptr) { return NO; }
+	LockGuard g{selector_table_lock};
 	return string_compare(sel_getNameNonUnique(sel1), sel_getNameNonUnique(sel2)) TDD(&&
 			(sel1->types == nullptr || sel2->types == nullptr ||
 		selector_types_equivalent(sel_getType_np(sel1), sel_getType_np(sel2))));
@@ -710,6 +690,7 @@ SEL sel_get_uid(const char *name)
 
 const char *sel_get_name(SEL selector)
 {
+	LockGuard g{selector_table_lock};
 	return sel_getNameNonUnique(selector);
 }
 
