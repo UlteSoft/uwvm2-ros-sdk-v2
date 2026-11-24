@@ -434,5 +434,137 @@
     "isolation_sha256": "891436584123c2fd9ed98c0a0672872ad2ebc8d68de8d45c708034126ae48fab",
     "execution_summary_sha256": "31707e2d819d1fe56b03970c98d85020b3713ca9ecad910da577ab96c5155273",
     "results_sha256": "e9dd51602161edbce59c95556e69fa7de463cea90ca2e2b90813d7a1884ec376"
+  },
+  "public_external_c_d910": {
+    "sdk_commit": "d910c0e2e0339248419f13f4ee42de1e131990f9",
+    "sdk_tree": "253db40eae14446f88dbdf04d4b08831cf16cbe4",
+    "vm_origin": {
+      "host": "linux-x86_64",
+      "repository": "https://github.com/UlteSoft/uwvm2-ros",
+      "commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+      "installed_as": "bin/uwvm2-ros",
+      "tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+      "tag": "wros-vm-d5524f35c565",
+      "asset": "uwvm2-ros-linux-x86_64.tar.xz",
+      "format": "tar.xz",
+      "member": "uwvm2-ros",
+      "compressed_bytes": 30462896,
+      "compressed_sha256": "2213f7b38e92b29cd6c641ddadc3a7d8581440cb24af191dd6b58ec75e35fb1e",
+      "bytes": 130905672,
+      "sha256": "630707429a9e0d6af5fef29ffb51090812e346d310b7849f6ace1f435c8fda6b",
+      "provider": "github-release",
+      "url": "https://github.com/UlteSoft/uwvm2-ros/releases/download/wros-vm-d5524f35c565/uwvm2-ros-linux-x86_64.tar.xz",
+      "path": "bin/uwvm2-ros"
+    },
+    "host": "linux-x86_64",
+    "source_directory": "src/examples/wasi/c/optional-isa",
+    "source_sha256": {
+      "main.c": "161ffc9a6b8d605608e1d12ee3e20bd32d503f21b60779df4fa63fb10c928656",
+      "operations.c": "b91f5ab44b9efdc5049e0929b5161cd88670240da51cefe632add089d1485d2a",
+      "xmake.lua": "11110bc93474bc7e4c1f04a3cd1ff17e1c515a4cb8d39ac48ac60ecfe5c61c6a"
+    },
+    "profile": "wasm32-wasip1-noeh-nomte",
+    "threads": false,
+    "scope": "External two-translation-unit C17 project",
+    "installation": {
+      "bootstrap": "https://raw.githubusercontent.com/UlteSoft/uwvm2-ros-sdk-v2/d910c0e2e0339248419f13f4ee42de1e131990f9/install.py",
+      "bootstrap_sha256": "06db1abb2ee52af3b826947a9ec6331a75c66065ac2fb9cd6c7bbcf67fec7c30",
+      "archive_cache_entries_verified": 47,
+      "empty_home": true,
+      "empty_xdg_cache": true,
+      "build_tools_executed": 0,
+      "receipt_sha256": "a1b69466ce8249709b3bff0010311dfa05dcc9258ad9a6c8d68acfa3e092f080"
+    },
+    "xmake": {
+      "wasm_sha256": "b6490571da3f3130f89104b49cdb984459dfaeaf9fcdd37cbec2177b067ac6c8",
+      "engines": [
+        "int",
+        "aot"
+      ],
+      "imports": [
+        "wasi_snapshot_preview1.clock_time_get"
+      ],
+      "status": "pass"
+    },
+    "variants": {
+      "simd-1-bulk-1": {
+        "sha256": "2441f89067d88866f85b46b5cfed39c325f11a60de01581e7f28caa2ce4b1df6",
+        "build_receipt_sha256": "61f46bf84f2ec9c8e30e9f0fbfeb0be7c243147985fc6a3ba2678271ca4ea937",
+        "packed_i32_arithmetic": true,
+        "memory.copy": true,
+        "memory.fill": true,
+        "runs": {
+          "int": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          },
+          "aot": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          }
+        }
+      },
+      "simd-0-bulk-1": {
+        "sha256": "81f08d689f49c44d76889ff569837cf29826806000d534afaa91ab9717aa7ace",
+        "build_receipt_sha256": "275cc39985dfb0908faa136f5fa221f6d3417b9c286b744961c9c2e709f339e3",
+        "packed_i32_arithmetic": false,
+        "memory.copy": true,
+        "memory.fill": true,
+        "runs": {
+          "int": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          },
+          "aot": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          }
+        }
+      },
+      "simd-1-bulk-0": {
+        "sha256": "a3566153d2c557affec9b6890d9fce12231dda8796df32f6c577a415c510040c",
+        "build_receipt_sha256": "706d6fdc2c5874493a956daadd0a98fbe5730d049a7d9c846ce1a7d4b84f4284",
+        "packed_i32_arithmetic": true,
+        "memory.copy": false,
+        "memory.fill": false,
+        "runs": {
+          "int": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          },
+          "aot": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          }
+        }
+      },
+      "simd-0-bulk-0": {
+        "sha256": "6e078d4aa89b22ce19dd8e08ef9eee70d71a8245bbe401edee2efa201623126d",
+        "build_receipt_sha256": "daf643f2a7dc76e4d35822564d564e5ba0933e8bbca4f8258d2d7df3cf7e0402",
+        "packed_i32_arithmetic": false,
+        "memory.copy": false,
+        "memory.fill": false,
+        "runs": {
+          "int": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          },
+          "aot": {
+            "status": "pass",
+            "stdout_sha256": "e1dd46d92a327291b9acfb6fd57997c1fb3d7b4e09c0592354f90f6528afe58e",
+            "stdout_bytes": 64
+          }
+        }
+      }
+    },
+    "isolation_sha256": "432796d4c3ce391f97b35af2c54f1295cd764ad349c29aae1e1494ff065cc4f8",
+    "summary_sha256": "1072838657bd9cffac809b6e270b4c429eecb2b23d9b575cf163da1d340bfce0"
   }
 }
