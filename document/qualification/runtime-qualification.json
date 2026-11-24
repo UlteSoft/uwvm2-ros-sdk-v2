@@ -656,13 +656,37 @@
           "archive_receipt_sha256": "dfba9ad5f723073342575c7466dd4a9f5b79bf3b1d0fd2bfe4136c50826f3cf8",
           "relocation_passes": 6,
           "c": {
-            "status": "pending"
+            "status": "pass",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+            "receipt_sha256": "09b6374b936cceb837fd1f3cc9d01ce98a26a698d992ca62150627d0a210457a",
+            "guest_compiler_host": "x86_64",
+            "snapshot_sha256": "54e4b8522d1159f88d3aa59694e0591f2d23e59f51a137c79dd6434a6c364494",
+            "restore_elapsed_seconds": 1.18,
+            "guest_exit": 0,
+            "process_exit": 0
           },
           "cpp": {
-            "status": "pending"
+            "status": "pass",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+            "receipt_sha256": "33114d39701fd814e2e941129569b986116eafe7240c218241631196cf34a906",
+            "guest_compiler_host": "x86_64",
+            "snapshot_sha256": "5e7556e8192f59a312813196628acb7273e7406ce7f8dc068363d8ef6f83aacd",
+            "restore_elapsed_seconds": 1.713,
+            "guest_exit": 0,
+            "process_exit": 0
           },
           "objc": {
-            "status": "pending"
+            "status": "pass",
+            "profile": "wasm32-wasip1-noeh-nomte",
+            "guest_sha256": "b9496d50a299db9cd3bffc6704731aa05bf30b43115e6ec182714c0420db8024",
+            "receipt_sha256": "e0a103915d0107ccc8c9c22e83e6740a4f2fd4df62c547915c174b868281f757",
+            "guest_compiler_host": "x86_64",
+            "snapshot_sha256": "adc549057440f34869e8f4e1308f4b25d4afba26c630c3c4ac514b88276c9289",
+            "restore_elapsed_seconds": 1308.205,
+            "guest_exit": 0,
+            "process_exit": 0
           },
           "objcpp": {
             "status": "pending"
@@ -673,10 +697,26 @@
           "archive_receipt_sha256": "0fc1841184129cad2fb4fff98377b4b06602ec523883fe4cace271a964ec7902",
           "relocation_passes": 6,
           "c": {
-            "status": "pending"
+            "status": "pass",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "guest_sha256": "416b65cce20e08afb6864b1bf05fb760ca000aead9db15980a769a3891b0c757",
+            "receipt_sha256": "315d89e7fcfe1c7c938b99c2de5739ab0780270a89ce69146afea0e03b9835af",
+            "guest_compiler_host": "x86_64",
+            "snapshot_sha256": "92939c619828818f4966823135c5fd4dc2201d67d801222404206d9275d53444",
+            "restore_elapsed_seconds": 1.036,
+            "guest_exit": 0,
+            "process_exit": 0
           },
           "cpp": {
-            "status": "pending"
+            "status": "pass",
+            "profile": "wasm32-wasip1-noeh-mte",
+            "guest_sha256": "382fb3ed505d9720f4451fd15ce6b3d55fc4d2154ce56721a51c66cf00bd485a",
+            "receipt_sha256": "5363e26f5860b9a9ccd5b61501565e0c196a92f7a63bafed7ecfea8403f3ff7d",
+            "guest_compiler_host": "x86_64",
+            "snapshot_sha256": "d9cd8c1f0406c8f80b621d185c787c324178c7d31773778dca5e70862fbb352c",
+            "restore_elapsed_seconds": 1.713,
+            "guest_exit": 0,
+            "process_exit": 0
           },
           "objc": {
             "status": "failed",
