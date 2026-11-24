@@ -460,6 +460,34 @@
         "cause": "The debugger created the native wait deadline before it read the archive. On AArch64, synchronous LLVM preparation consumed that deadline before publication began.",
         "change": "Each native phase starts its bounded wait at submission. An expired wait before publication preserves the pending operation for a subsequent restore continue request."
       }
+    },
+    "threaded_objc_fixture_build": {
+      "host": "linux-x86_64",
+      "sdk_install_commit": "c6e0c5ab0d24d766268ef7dce98f86849e32a652",
+      "fixture_commit": "0b931bbd0cca4fcbcc14c152c738e727450d2f87",
+      "status": "compile-and-link-pass",
+      "languages": [
+        "objc",
+        "objcpp"
+      ],
+      "profiles_per_language": 8,
+      "linked_generations": 32,
+      "debug_flags": [
+        "-O0",
+        "-g"
+      ],
+      "checked": [
+        "DWARF sections",
+        "WASI thread spawn import and start export function signatures",
+        "ABI width, shared memory, EH and MTE",
+        "matched frontend, CRT, libobjc, pthread and builtins",
+        "byte-identical relink with build receipt"
+      ],
+      "execution": "pending-new-vm",
+      "results_sha256": "ca4017a93e903acf664358ec6d6424c211f61c4be9fa68f3eec0990b7d17bab6",
+      "link_trace_sha256": "6330c12cebed296759ab8fa82e18a9436cf44c0fba36d305aee09300c5174584",
+      "isolation_sha256": "6ccc1a5e4b9aea1183ad047a2ff0687f90c816d16db9deab3d499c0d07ea1600",
+      "checksums_sha256": "a03393a7d3d1990b5e00e1a56d2db000fa5af5a77e382e2f895cbd8369ac0291"
     }
   }
 }
