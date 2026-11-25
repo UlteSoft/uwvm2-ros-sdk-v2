@@ -14,57 +14,57 @@
       }
     },
     "uwvm2-ros": {
-      "commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+      "commit": "2f99ad98847c54b362c77d21e65e92ba453e335b",
       "hosts": {
-        "linux-x86_64": {
-          "tag": "wros-vm-d5524f35c565",
-          "asset": "uwvm2-ros-linux-x86_64.tar.xz",
-          "format": "tar.xz",
-          "member": "uwvm2-ros",
-          "compressed_bytes": 30462896,
-          "compressed_sha256": "2213f7b38e92b29cd6c641ddadc3a7d8581440cb24af191dd6b58ec75e35fb1e",
-          "bytes": 130905672,
-          "sha256": "630707429a9e0d6af5fef29ffb51090812e346d310b7849f6ace1f435c8fda6b"
-        },
-        "linux-i686": {
-          "tag": "wros-vm-d5524f35c565",
-          "asset": "uwvm2-ros-linux-i686.tar.xz",
-          "format": "tar.xz",
-          "member": "uwvm2-ros",
-          "compressed_bytes": 34408600,
-          "compressed_sha256": "107c3101091160adbea749eac0eebc34e9a54bd48164bcce05ea7b672294ed23",
-          "bytes": 141203060,
-          "sha256": "ffe28677d641695740709ed5b4db213029f937a41733098421bc2ee05d5c013e"
-        },
         "linux-aarch64": {
-          "tag": "wros-vm-d5524f35c565",
+          "tag": "wros-vm-2f99ad98847c",
           "asset": "uwvm2-ros-linux-aarch64.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 28458536,
-          "compressed_sha256": "4303cfd59ff46ebec79295226ac6bef9c2610730b3e21d64657e14f6f3f249d1",
-          "bytes": 132088544,
-          "sha256": "2cbe6a26e172ced6aa072f9b18ae189fca1fe3d28d5f15617a0b54210037d692"
+          "compressed_bytes": 28478276,
+          "compressed_sha256": "3662729d6ec52dfb1e419e5c728e3a8468434c810a591fd580d4ecc7dfb14e4b",
+          "bytes": 131298104,
+          "sha256": "7dcf949e0e0522059435efd1efeb50a5e293a7683e4ecc56c889a8502b0ff099"
         },
         "linux-arm": {
-          "tag": "wros-vm-d5524f35c565",
+          "tag": "wros-vm-2f99ad98847c",
           "asset": "uwvm2-ros-linux-arm.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 27375012,
-          "compressed_sha256": "13c3795cdf41a5f40261e1582d67f7c7870b288d13d77a9e184aaf90a5f37e9f",
-          "bytes": 111747876,
-          "sha256": "34e5df53d8ce5339e468306de550ca642ee98661d1a5d687eb91fcc25bdb1264"
+          "compressed_bytes": 27352148,
+          "compressed_sha256": "ce86084268cda279606dad49ce4dca24388510eeb8a5eee94b745d809ed0275b",
+          "bytes": 110428932,
+          "sha256": "1c61c7dc0338fc0da7e5c982fb0e46a111af310802411ac7e2c0038e69c6d0cc"
         },
         "linux-armhf": {
-          "tag": "wros-vm-d5524f35c565",
+          "tag": "wros-vm-2f99ad98847c",
           "asset": "uwvm2-ros-linux-armhf.tar.xz",
           "format": "tar.xz",
           "member": "uwvm2-ros",
-          "compressed_bytes": 27610896,
-          "compressed_sha256": "b2a65abb07936aa4f66e57a674c50d37dc8525a4af46d39d25643186dc806770",
-          "bytes": 111610040,
-          "sha256": "fb1b9c6d047a61905a432faba12981938d09316b8fd36900a2d8da9e5ddd3d0b"
+          "compressed_bytes": 27593268,
+          "compressed_sha256": "dec33ec7b1a6b7e07791c0797331c326eb51a13316a549a31e0ccd385e421982",
+          "bytes": 110282420,
+          "sha256": "9f91e86c8c39751a8101143588b3e02fa3796f5298f465a125e125941d53705c"
+        },
+        "linux-i686": {
+          "tag": "wros-vm-2f99ad98847c",
+          "asset": "uwvm2-ros-linux-i686.tar.xz",
+          "format": "tar.xz",
+          "member": "uwvm2-ros",
+          "compressed_bytes": 34382812,
+          "compressed_sha256": "2be3e60f9a977096d504e2a76bbf99cc8ddc59310dcdbe85453c60e335593721",
+          "bytes": 139660140,
+          "sha256": "9669e0432abdcc38cb65311d9c8318bf9f2bff527e3e8ab76f3bf260d074a32e"
+        },
+        "linux-x86_64": {
+          "tag": "wros-vm-2f99ad98847c",
+          "asset": "uwvm2-ros-linux-x86_64.tar.xz",
+          "format": "tar.xz",
+          "member": "uwvm2-ros",
+          "compressed_bytes": 30463872,
+          "compressed_sha256": "5bec8efa95a830b5c290fcf9a5ce9dd6564e3c4783968b7e9bd7afeeac036e3f",
+          "bytes": 129729104,
+          "sha256": "1b9c0b605c5e5d46a82c35cc5d73e329705710c12ca37faa0234f13c857c1831"
         }
       }
     }

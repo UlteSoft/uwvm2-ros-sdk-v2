@@ -1,8 +1,8 @@
 {
   "status": "requalification-in-progress",
   "vm_repository": "https://github.com/UlteSoft/uwvm2-ros",
-  "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
-  "vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+  "vm_commit": "2f99ad98847c54b362c77d21e65e92ba453e335b",
+  "vm_tree": "43113a82f05dde94d66bd651ae6278aa53c9349e",
   "candidate_release_status": "five-host-binaries-published-awaiting-sdk-matrix",
   "candidate_sysroot_plan": "cfamily-sysroot-matrix.json",
   "current_runtime_records": [
@@ -1166,10 +1166,20 @@
     ]
   },
   "published_environment": {
-    "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
-    "vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
-    "vm_release_tag": "wros-vm-d5524f35c565",
+    "vm_commit": "2f99ad98847c54b362c77d21e65e92ba453e335b",
+    "vm_tree": "43113a82f05dde94d66bd651ae6278aa53c9349e",
+    "vm_release_tag": "wros-vm-2f99ad98847c",
     "sdk_host_tool_lock": "src/host-tools/releases.json",
-    "status": "awaiting-public-sdk-matrix"
+    "status": "awaiting-public-sdk-matrix",
+    "five_host_packaging_sha256": "325a136c2b94328036a544b3d4cbf89a158a3a844f10fd1d13ee294905ecc655"
+  },
+  "published_environment_history": {
+    "d5524f35c565c60e4c2d92d9328afc8314c5803f": {
+      "vm_commit": "d5524f35c565c60e4c2d92d9328afc8314c5803f",
+      "vm_tree": "8c6874ee06970cf350af0f1f3a08af74a4276c90",
+      "vm_release_tag": "wros-vm-d5524f35c565",
+      "sdk_host_tool_lock": "src/host-tools/releases.json",
+      "status": "awaiting-public-sdk-matrix"
+    }
   }
 }
