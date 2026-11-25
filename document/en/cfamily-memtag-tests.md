@@ -31,3 +31,22 @@ The default schedule covers a zero difference, every individual tag bit and the 
 Before the tested access the guest emits the case number, requested tag difference, untagged byte address, logical tag, first allocation tag and last allocation tag as six little-endian 64-bit integers. Returning from the access emits a four-byte completion value before verification and cleanup. Each mismatch must use the same untagged address as its matching control on that engine. It must exit 122 with the memory-protection diagnostic for the linked scalar function, memory 0, the recorded pointer and the offending granule’s address and tag. The result records the instruction offset when the VM supplies it.
 
 `inputs.json` identifies the inputs and selected workload. Each row in `results.jsonl` has the compiler receipt and guest digests, whole-module instruction counts, the exact decoded `i32.load` and `i32.store` in the access functions, and each invocation’s phase, command and outcome. Raw captures are under the row’s `directory` and `log_prefix`. `summary.json` counts builds, executions and passing observations by phase. Exit 0 requires every selected build and execution to pass.
+
+## Independently linked C modules sharing one memory
+
+The shared-memory ABI suite builds two C reactors with separate installed `wrc` invocations. Each imports the same bounded `env.memory`. The test reserves the last page beyond both linkers’ minimum memory sizes. It places the public byte, pointer slot and per-module payloads in separate 16-byte-aligned granules. The C functions have no stack objects or static data to coordinate between linkers. A standard Wasm adapter calls the exported functions with the native `i32` or `i64` pointer carrier. [C fixture, adapter and runner](../../src/qualification/cfamily/shared_memory_abi)
+
+- In `raw-offset`, each module independently forms the agreed address of the tag-zero public byte. Both write a distinct value and the other reads it.
+- In `pointer-call` and `pointer-slot`, both modules produce pointers. The receiver checks reads and writes through the transferred pointer. Its C pointer addition returns the interior address with the original tag bits. The adapter checks all bits in both directions.
+- In `zero-fill`, the receiver seeds the payload and its two adjacent bytes. The producer prepares 16 bytes and the receiver checks every byte and both guards. With runtime checking disabled, the MTE binary returns the raw pointer and `memtag.storez` still clears the payload.
+- In `zero-pointer` and `zero-allocation`, a compiler-enabled producer sets a nonzero allocation tag or constructs a nonzero-tagged pointer to the public byte. With checking enabled, both an ordinary read and an ordinary write require exit 122 and the exact pointer, granule and differing tags. With checking disabled, each operation must complete and the peer must observe the expected data.
+
+Run from the SDK checkout with the installed C SDK, including its expanded threaded no-EH sysroots, the VM executable and WABT’s `wat2wasm`. The following command selects one mixed pair in the existing offline qualification harness.
+
+```sh
+python3 -I -B src/qualification/cfamily/shared_memory_abi/run.py --isolate \
+  --cc-sdk /sdk/c --vm /opt/tools/bin/uwvm2-ros --work .tmp/shared-abi-int32 \
+  --width 32 --pair mte-plain --engine int
+```
+
+Omit the three selection flags for all four compiler pairs, both widths, both engines and both runtime policies. The full schedule has eight C artifacts and 192 VM processes. Each process executes one case in a fresh instance. `--policy on|off` and `--case` narrow the run further. The isolated run saves each compiler receipt, binary, VM command and log under the work directory’s `results/`. Its `results.jsonl` records every expectation and outcome.
