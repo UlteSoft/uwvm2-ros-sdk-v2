@@ -85,7 +85,7 @@ def capability(args, name, target, imports):
 
 
 def wros_args(args, name, target, simd, imports, owner, guest):
-    engine = "int" if name == "int" else "aot"
+    engine = "int" if name in ("int", "int-disabled") else "aot"
     argv = runtime_args(args.vm, engine, target, imports, owner, guest, thread_stack_mib=8, thread_storage_mib=64)
     if engine == "aot":
         argv[argv.index("--runtime-llvm-jit-policy") + 1] = "balanced"
@@ -94,7 +94,7 @@ def wros_args(args, name, target, simd, imports, owner, guest):
         flags += ["--wasm-feature-disable-simd", "--wasm-feature-disable-relaxed-simd"]
     if target.mte:
         pos = argv.index("--runtime-memtag-mode")
-        if name == "aot-disabled":
+        if name in ("int-disabled", "aot-disabled"):
             argv[pos:pos + 2] = ["--runtime-disable-memtag"]
         else:
             flags += ["--runtime-memtag-backend", "software", "--runtime-memtag-action", "crash"]
@@ -146,7 +146,7 @@ def limitation(name, stderr):
 
 def observation(args, row, name, target, simd, guest, owner, directory):
     directory.mkdir(parents=True)
-    receipt = {"directory": str(directory.relative_to(args.work)), "engine": name}
+    receipt = {"directory": str(directory.relative_to(args.work)), "engine": name, "wasm_sha256": row["wasm_sha256"]}
     try:
         require(digest(guest) == row["wasm_sha256"] and (not owner or digest(owner) == row["owner_sha256"]),
                 "guest or shared owner changed between executions")
@@ -182,7 +182,8 @@ def observation(args, row, name, target, simd, guest, owner, directory):
         match = re.fullmatch(pattern, stdout.read_bytes())
         require(match is not None, "guest stdout differs from the independent oracle or timing protocol")
         tag, ns = map(int, match.groups())
-        require((tag != 0) == (target.mte and name != "aot-disabled"), "guest tag witness differs from runtime mode")
+        require((tag != 0) == (target.mte and name not in ("int-disabled", "aot-disabled")),
+                "guest tag witness differs from runtime mode")
         if name == "wasmtime-host":
             clocks = re.findall(r"^clock_monotonic_ns (\d+)$", detail, re.M)
             require(any(int(end) - int(start) == ns for start, end in zip(clocks, clocks[1:])),

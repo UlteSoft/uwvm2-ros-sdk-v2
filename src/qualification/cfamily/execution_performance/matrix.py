@@ -2,6 +2,7 @@
 """Build production SDK workloads and compare paired, in-guest execution times on one Linux host."""
 import argparse
 from collections import Counter
+from dataclasses import replace
 import itertools
 import json
 import os
@@ -65,36 +66,81 @@ def pair(args, row, target, simd, guest, owner, out, reference):
     if (reference == "wavm" and not args.references[reference]["static"]
             and "library" not in args.references[reference]):
         return {"status": "unavailable", "reason": "dynamic WAVM runtime library could not be identified"}
+    def observe(name, directory):
+        return observation(args, row, name, target, simd, guest, owner, directory)
+
+    result = timed_pairs(args, out / ("aot-vs-" + reference), ("aot", reference), "aot_over_reference", observe)
+    if reference == "aot-disabled" and result["status"] == "measured":
+        result["within_1_5_target"] = result["aot_over_reference"]["median"] <= 1.5
+    return result
+
+
+def timed_pairs(args, out, sides, metric, observe):
     samples, ratios = [], []
-    sides = ("aot", reference)
     for index in range(args.samples):
         order = sides if index % 2 == 0 else sides[::-1]
         sample = {"order": order, "runs": {}}
         samples.append(sample)
         for name in order:
-            directory = out / ("aot-vs-" + reference) / f"pair-{index + 1:02d}" / name
-            run = sample["runs"][name] = observation(args, row, name, target, simd, guest, owner, directory)
+            directory = out / f"pair-{index + 1:02d}" / name
+            run = sample["runs"][name] = observe(name, directory)
             if run["status"] != "pass":
                 return {"status": run["status"], "reason": f"{name}: " + run["reason"], "samples": samples}
             if name == "wasmtime-host" and not run["native_backend_verified"]:
                 return {"status": "failed", "reason": "C API native backend changed after warmup", "samples": samples}
         ns = sample["runs"]
-        sample["aot_over_reference"] = ns["aot"]["guest_ns"] / ns[reference]["guest_ns"]
-        ratios.append(sample["aot_over_reference"])
-    result = {"status": "measured", "samples": samples, "aot_over_reference": spread(ratios),
-              "guest_nanoseconds": {name: spread([s["runs"][name]["guest_ns"] for s in samples]) for name in sides}}
-    if reference == "aot-disabled":
-        result["within_1_5_target"] = statistics.median(ratios) <= 1.5
+        sample[metric] = ns[sides[0]]["guest_ns"] / ns[sides[1]]["guest_ns"]
+        ratios.append(sample[metric])
+    return {"status": "measured", "samples": samples, metric: spread(ratios),
+            "guest_nanoseconds": {name: spread([s["runs"][name]["guest_ns"] for s in samples]) for name in sides}}
+
+
+def disabled_parity(args, engine, tagged, ordinary, simd, out):
+    sides = ("tagged-disabled", "no-mte")
+    def observe(side, directory):
+        row, target, guest, owner = tagged if side == sides[0] else ordinary
+        name = engine + "-disabled" if target.mte else engine
+        return observation(args, row, name, target, simd, guest, owner, directory)
+
+    warmup = {side: observe(side, out / "correctness" / side) for side in sides}
+    for result in warmup.values():
+        if result["status"] != "pass":
+            return {"status": result["status"], "reason": result["reason"], "warmup": warmup}
+    if args.correctness_only or args.environment == "user-qemu":
+        return {"status": "unavailable", "reason": "correctness-only execution", "warmup": warmup}
+    metric = "tagged_disabled_over_no_mte"
+    result = timed_pairs(args, out, sides, metric, observe)
+    result["warmup"] = warmup
+    if result["status"] == "measured":
+        result["within_1_5_target"] = result[metric]["median"] <= 1.5
     return result
+
+
+def workload_artifact(args, row, target, simd, inspect, uleb):
+    language = row["language"]
+    key = (row["host"], language, target, simd)
+    if key not in args.artifacts:
+        out = args.work / language / target.name / ("simd-on" if simd else "simd-off")
+        out.mkdir(parents=True, exist_ok=True)
+        build_record = {"language": language}
+        try:
+            guest, owner = build(args, build_record, out, target, simd, inspect, uleb)
+        finally:
+            row.update(build_record)
+        args.artifacts[key] = build_record, guest, owner
+    build_record, guest, owner = args.artifacts[key]
+    row.update(build_record)
+    return row, target, guest, owner
 
 
 def run_cell(args, host, language, target, simd, inspect, uleb):
     row = cell_key(host, language, target, simd)
     out = args.work / language / target.name / ("simd-on" if simd else "simd-off")
-    out.mkdir(parents=True)
+    out.mkdir(parents=True, exist_ok=True)
     row.update(directory=str(out.relative_to(args.work)), expected=expected(language), correctness={}, comparisons={})
     try:
-        guest, owner = build(args, row, out, target, simd, inspect, uleb)
+        tagged = workload_artifact(args, row, target, simd, inspect, uleb)
+        _, _, guest, owner = tagged
         external = ("wavm",) if target.mte else ("wasmtime-host", "wasmtime-cli")
         others = (*external, "aot-disabled") if target.mte else external
         for name in ("int", "aot", *others):
@@ -103,13 +149,22 @@ def run_cell(args, host, language, target, simd, inspect, uleb):
                 observation(args, row, name, target, simd, guest, owner, out / "correctness" / name))
         for name in others:
             row["comparisons"][name] = pair(args, row, target, simd, guest, owner, out, name)
+        if target.mte:
+            control = replace(target, mte=False)
+            record = row["no_mte_control"] = cell_key(host, language, control, simd)
+            record["expected"] = row["expected"]
+            ordinary = workload_artifact(args, record, control, simd, inspect, uleb)
+            for engine in ("int", "aot"):
+                name = engine + "-disabled-vs-no-mte"
+                row["comparisons"][name] = disabled_parity(args, engine, tagged, ordinary, simd, out / name)
         checks, comparisons = row["correctness"], row["comparisons"]
         if any(result["status"] == "failed" for result in (*checks.values(), *comparisons.values())):
             row["status"] = "failed"
         elif any(result.get("within_1_5_target") is False for result in comparisons.values()):
             row["status"] = "mte-target-exceeded"
         elif (any(comparisons[name]["status"] == "measured" for name in external) and
-              (not target.mte or comparisons["aot-disabled"]["status"] == "measured")):
+              (not target.mte or all(comparisons[n]["status"] == "measured" for n in
+                                     ("aot-disabled", "int-disabled-vs-no-mte", "aot-disabled-vs-no-mte")))):
             row["status"] = "measured"
         else:
             row["status"] = "comparison-open"
@@ -159,6 +214,7 @@ def run(args, entries):
     os.sched_setaffinity(0, {cpu})
     langs = sorted({entry[1] for entry in entries})
     args.sdk_receipts = {lang: sdk_identity(args.sdks[lang], lang) for lang in langs}
+    args.artifacts = {}
     reader = args.sdks[langs[0]] / "install"
     sys.path.insert(0, str(reader))
     from imports import inspect
